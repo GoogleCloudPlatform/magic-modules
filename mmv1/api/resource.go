@@ -42,8 +42,13 @@ type Resource struct {
 	//
 	//	references:
 	//  	guides:
+<<<<<<< HEAD
     //			'Guide name': 'official_documentation_url'
   	//		api: 'rest_api_reference_url/version'
+=======
+	//			'Guide name': 'official_documentation_url'
+	//		api: 'rest_api_reference_url/version'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	//
 	References resource.ReferenceLinks
 
@@ -190,7 +195,11 @@ type Resource struct {
 	//
 	//	import_format:
 	//		- example_import_one
+<<<<<<< HEAD
     //		- example_import_two
+=======
+	//		- example_import_two
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	//
 	ImportFormat []string `yaml:"import_format"`
 
@@ -760,7 +769,11 @@ func getLabelsFieldNote(title string) string {
 }
 
 func (r Resource) StateMigrationFile() string {
+<<<<<<< HEAD
 	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+=======
+	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 }
 
 // ====================
@@ -1618,9 +1631,19 @@ func (r Resource) TestExamples() []resource.Examples {
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
+<<<<<<< HEAD
 	vp := r.MinVersion
 	if exampleVersion != "" {
 		vp = exampleVersion
+=======
+	var vp string
+	if exampleVersion != "" {
+		vp = exampleVersion
+	} else if r.MinVersion == "" {
+		vp = r.ProductMetadata.lowestVersion().Name
+	} else {
+		vp = r.MinVersion
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	return vp != "" && vp != "ga"
 }

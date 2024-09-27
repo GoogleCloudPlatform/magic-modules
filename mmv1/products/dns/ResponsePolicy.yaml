@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
+=======
+---
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 name: 'ResponsePolicy'
 kind: 'dns#responsePolicy'
 description: |
   A Response Policy is a collection of selectors that apply to queries
   made against one or more Virtual Private Cloud networks.
+<<<<<<< HEAD
 base_url: 'projects/{{project}}/responsePolicies'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
 update_verb: :PATCH
@@ -25,6 +34,22 @@ identity:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'dns_response_policy_basic'
+=======
+docs:
+base_url: 'projects/{{project}}/responsePolicies'
+self_link: 'projects/{{project}}/responsePolicies/{{response_policy_name}}'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - responsePolicyName
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/response_policy_detach_network_gke.tmpl'
+examples:
+  - name: 'dns_response_policy_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example-response-policy'
     vars:
       response_policy_name: 'example-response-policy'
@@ -33,6 +58,7 @@ examples:
       cluster_1_name: 'cluster-1'
       deletion_protection: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       deletion_protection: 'false'
     oics_vars_overrides:
       deletion_protection: 'false'
@@ -65,10 +91,42 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'networkUrl'
           required: true
+=======
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+parameters:
+properties:
+  - name: 'responsePolicyName'
+    type: String
+    description:
+      The user assigned name for this Response Policy, such as
+      `myresponsepolicy`.
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      The description of the response policy, such as `My new response policy`.
+    required: false
+    default_value: "Managed by Terraform"
+  - name: 'networks'
+    type: Array
+    description:
+      'The list of network names specifying networks to which this policy is
+      applied.'
+    send_empty_value: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'networkUrl'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             The fully qualified URL of the VPC network to bind to.
             This should be formatted like
             `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+<<<<<<< HEAD
           custom_expand: templates/terraform/custom_expand/network_full_url.erb
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - !ruby/object:Api::Type::Array
@@ -79,6 +137,20 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'gkeClusterName'
+=======
+          required: true
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          custom_expand: 'templates/terraform/custom_expand/network_full_url.tmpl'
+  - name: 'gkeClusters'
+    type: Array
+    description:
+      'The list of Google Kubernetes Engine clusters that can see this zone.'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'gkeClusterName'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             The resource name of the cluster to bind this ManagedZone to.
             This should be specified in the format like

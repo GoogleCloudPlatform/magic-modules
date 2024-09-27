@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2019 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Product
 name: VertexAI
 display_name: Vertex AI
@@ -25,3 +30,29 @@ versions:
     cai_base_url: https://aiplatform.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+=======
+# Warning: This is a temporary file, and should not be edited directly
+---
+<<<<<<<< HEAD:mmv1/products/secretmanagerregional/go_product.yaml
+name: 'SecretManagerRegional'
+legacy_name: 'secret_manager'
+display_name: 'Secret Manager'
+versions:
+  - name: 'ga'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://secretmanager.{{location}}.rep.googleapis.com/v1/'
+========
+name: 'VertexAI'
+display_name: 'Vertex AI'
+versions:
+  - name: 'ga'
+    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1/'
+    cai_base_url: 'https://aiplatform.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://{{region}}-aiplatform.googleapis.com/v1beta1/'
+    cai_base_url: 'https://aiplatform.googleapis.com/v1beta1/'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/vertexai/product.yaml
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

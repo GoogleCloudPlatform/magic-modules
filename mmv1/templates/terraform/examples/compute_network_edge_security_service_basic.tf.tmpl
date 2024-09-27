@@ -1,0 +1,7 @@
+resource "google_compute_network_edge_security_service" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta  
+
+  name         = "{{index $.Vars "resource_name"}}"
+  region       = "us-east1"
+  description  = "My basic resource"
+}

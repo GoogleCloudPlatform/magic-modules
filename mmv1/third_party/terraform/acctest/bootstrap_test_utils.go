@@ -1176,7 +1176,18 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 	if err != nil {
 		t.Fatalf("Error getting storage pool %s: %s", storagePoolName, err)
 	}
+<<<<<<< HEAD
 	return storagePool.SelfLink
+=======
+
+	storagePoolResourceName, err := tpgresource.GetRelativePath(storagePool.SelfLink)
+
+	if err != nil {
+		t.Fatal("Failed to extract Storage Pool resource name from URL.")
+	}
+
+	return storagePoolResourceName
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 }
 
 func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {

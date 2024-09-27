@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'ProcessorDefaultVersion'
 immutable: true
@@ -39,12 +44,46 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 parameters:
   - !ruby/object:Api::Type::String
     name: 'processor'
+=======
+---
+name: 'ProcessorDefaultVersion'
+description: |
+  The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
+docs:
+base_url: '{{processor}}'
+self_link: '{{processor}}'
+create_url: '{{processor}}:setDefaultProcessorVersion'
+exclude_delete: true
+immutable: true
+import_format:
+  - '{{%processor}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - processor
+custom_code:
+  pre_create: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/document_ai_processor_default_version_interpolate_location.go.tmpl'
+examples:
+  - name: 'documentai_default_version'
+    primary_resource_id: 'processor'
+    vars:
+      processor_name: 'test-processor'
+parameters:
+  - name: 'processor'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The processor to set the version on.
     required: true
     immutable: true
     ignore_read: true
 properties:
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'version'
     api_name: 'defaultProcessorVersion'
@@ -55,3 +94,14 @@ properties:
     immutable: true
 
     diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+=======
+  - name: 'version'
+    type: String
+    description: |
+      The version to set. Using `stable` or `rc` will cause the API to return the latest version in that release channel.
+      Apply `lifecycle.ignore_changes` to the `version` field to suppress this diff.
+    api_name: defaultProcessorVersion
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

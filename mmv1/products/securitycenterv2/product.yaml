@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Product
 name: SecurityCenterV2
 display_name: Security Command Center (SCC)v2 API
@@ -21,3 +22,14 @@ versions:
     base_url: https://securitycenter.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+=======
+---
+name: 'SecurityCenterV2'
+legacy_name: 'scc_v2'
+display_name: 'Security Command Center (SCC)v2 API'
+versions:
+  - name: 'ga'
+    base_url: 'https://securitycenter.googleapis.com/v2/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Queue'
 base_url: projects/{{project}}/locations/{{location}}/queues
@@ -39,10 +44,46 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_tasks_queue_advanced'
     primary_resource_id: 'advanced_configuration'
+=======
+---
+name: 'Queue'
+description: |
+  A named resource to which messages are sent by publishers.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/queues'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/queues/{{name}}'
+    - '{{name}}'
+custom_code:
+  constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.tmpl'
+examples:
+  - name: 'queue_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-tasks-queue-test%s", context["random_suffix"])'
+    vars:
+      name: 'cloud-tasks-queue-test'
+  - name: 'cloud_tasks_queue_advanced'
+    primary_resource_id: 'advanced_configuration'
+    vars:
+      name: 'instance-name'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     ignore_read_extra:
       - 'app_engine_routing_override.0.service'
       - 'app_engine_routing_override.0.version'
       - 'app_engine_routing_override.0.instance'
+<<<<<<< HEAD
     vars:
       name: 'instance-name'
   - !ruby/object:Provider::Terraform::Examples
@@ -52,10 +93,18 @@ examples:
       name: 'cloud-tasks-queue-http-target-oidc'
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloud_tasks_queue_http_target_oauth'
+=======
+  - name: 'cloud_tasks_queue_http_target_oidc'
+    primary_resource_id: 'http_target_oidc'
+    vars:
+      name: 'cloud-tasks-queue-http-target-oidc'
+  - name: 'cloud_tasks_queue_http_target_oauth'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'http_target_oauth'
     vars:
       name: 'cloud-tasks-queue-http-target-oauth'
 parameters:
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'location'
     required: true
@@ -78,28 +127,71 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'service'
+=======
+  - name: 'location'
+    type: String
+    description: The location of the queue
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: The queue name.
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/qualify_queue_name.go.tmpl'
+  - name: 'appEngineRoutingOverride'
+    type: NestedObject
+    description: |
+      Overrides for task-level appEngineRouting. These settings apply only
+      to App Engine tasks in this queue
+    custom_flatten: 'templates/terraform/custom_flatten/cloudtasks_queue_appenginerouting.go.tmpl'
+    properties:
+      - name: 'service'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           App service.
 
           By default, the task is sent to the service which is the default service when the task is attempted.
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'version'
+=======
+      - name: 'version'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           App version.
 
           By default, the task is sent to the version which is the default version when the task is attempted.
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'instance'
+=======
+      - name: 'instance'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           App instance.
 
           By default, the task is sent to an instance which is available when the task is attempted.
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'host'
         output: true
         description: The host that the task is sent to.
   - !ruby/object:Api::Type::NestedObject
     name: 'rateLimits'
+=======
+      - name: 'host'
+        type: String
+        description: The host that the task is sent to.
+        output: true
+  - name: 'rateLimits'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Rate limits for task dispatches.
 
@@ -112,24 +204,39 @@ properties:
         smooth sudden large traffic spikes.
     default_from_api: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Double
         name: 'maxDispatchesPerSecond'
+=======
+      - name: 'maxDispatchesPerSecond'
+        type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The maximum rate at which tasks are dispatched from this queue.
 
           If unspecified when the queue is created, Cloud Tasks will pick the default.
         default_from_api: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Integer
         name: 'maxConcurrentDispatches'
+=======
+      - name: 'maxConcurrentDispatches'
+        type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The maximum number of concurrent tasks that Cloud Tasks allows to
           be dispatched for this queue. After this threshold has been
           reached, Cloud Tasks stops dispatching tasks until the number of
           concurrent requests decreases.
         default_from_api: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Integer
         name: 'maxBurstSize'
         output: true
+=======
+      - name: 'maxBurstSize'
+        type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The max burst size.
 
@@ -137,6 +244,7 @@ properties:
           in the queue and the rate is high. This field allows the queue to have a high
           rate so processing starts shortly after a task is enqueued, but still limits
           resource usage when many tasks are enqueued in a short period of time.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'retryConfig'
     description: Settings that determine the retry behavior.
@@ -144,6 +252,16 @@ properties:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'maxAttempts'
+=======
+        output: true
+  - name: 'retryConfig'
+    type: NestedObject
+    description: Settings that determine the retry behavior.
+    default_from_api: true
+    properties:
+      - name: 'maxAttempts'
+        type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Number of attempts per task.
 
@@ -156,8 +274,13 @@ properties:
 
           -1 indicates unlimited attempts.
         default_from_api: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'maxRetryDuration'
+=======
+      - name: 'maxRetryDuration'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           If positive, maxRetryDuration specifies the time limit for
           retrying a failed task, measured from when the task was first
@@ -168,24 +291,39 @@ properties:
           If zero, then the task age is unlimited.
         default_from_api: true
         diff_suppress_func: 'suppressOmittedMaxDuration'
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'minBackoff'
+=======
+      - name: 'minBackoff'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A task will be scheduled for retry between minBackoff and
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
         default_from_api: true
         diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'maxBackoff'
+=======
+      - name: 'maxBackoff'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A task will be scheduled for retry between minBackoff and
           maxBackoff duration after it fails, if the queue's RetryConfig
           specifies that the task should be retried.
         default_from_api: true
         diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Integer
         name: 'maxDoublings'
+=======
+      - name: 'maxDoublings'
+        type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The time between retries will double maxDoublings times.
 
@@ -193,6 +331,7 @@ properties:
           then increases linearly, and finally retries retries at intervals of maxBackoff
           up to maxAttempts times.
         default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'stackdriverLoggingConfig'
     description: |
@@ -201,21 +340,41 @@ properties:
       - !ruby/object:Api::Type::Double
         name: 'samplingRatio'
         required: true
+=======
+  - name: 'stackdriverLoggingConfig'
+    type: NestedObject
+    description: |
+      Configuration options for writing logs to Stackdriver Logging.
+    properties:
+      - name: 'samplingRatio'
+        type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Specifies the fraction of operations to write to Stackdriver Logging.
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'httpTarget'
     description: Modifies HTTP target for HTTP tasks.
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'httpMethod'
+=======
+        required: true
+  - name: 'httpTarget'
+    type: NestedObject
+    description: Modifies HTTP target for HTTP tasks.
+    properties:
+      - name: 'httpMethod'
+        type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The HTTP method to use for the request.
 
           When specified, it overrides HttpRequest for the task.
           Note that if the value is set to GET the body of the task will be ignored at execution time.
+<<<<<<< HEAD
         values:
           - HTTP_METHOD_UNSPECIFIED
           - POST
@@ -228,23 +387,51 @@ properties:
         default_from_api: true
       - !ruby/object:Api::Type::NestedObject
         name: 'uriOverride'
+=======
+        default_from_api: true
+        enum_values:
+          - 'HTTP_METHOD_UNSPECIFIED'
+          - 'POST'
+          - 'GET'
+          - 'HEAD'
+          - 'PUT'
+          - 'DELETE'
+          - 'PATCH'
+          - 'OPTIONS'
+      - name: 'uriOverride'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           URI override.
 
           When specified, overrides the execution URI for all the tasks in the queue.
         properties:
+<<<<<<< HEAD
           - !ruby/object:Api::Type::Enum
             name: 'scheme'
+=======
+          - name: 'scheme'
+            type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Scheme override.
 
               When specified, the task URI scheme is replaced by the provided value (HTTP or HTTPS).
+<<<<<<< HEAD
             values:
               - 'HTTP'
               - 'HTTPS'
             default_from_api: true
           - !ruby/object:Api::Type::String
             name: 'host'
+=======
+            default_from_api: true
+            enum_values:
+              - 'HTTP'
+              - 'HTTPS'
+          - name: 'host'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Host override.
 
@@ -252,8 +439,13 @@ properties:
               For example, if the task URL is "https://www.google.com", and host value
               is set to "example.net", the overridden URI will be changed to "https://example.net".
               Host value cannot be an empty string (INVALID_ARGUMENT).
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: 'port'
+=======
+          - name: 'port'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Port override.
 
@@ -261,41 +453,73 @@ properties:
               For instance, for a URI http://www.google.com/foo and port=123, the overridden URI becomes http://www.google.com:123/foo.
               Note that the port value must be a positive integer.
               Setting the port to 0 (Zero) clears the URI port.
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: 'pathOverride'
+=======
+          - name: 'pathOverride'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               URI path.
 
               When specified, replaces the existing path of the task URL.
               Setting the path value to an empty string clears the URI path segment.
             properties:
+<<<<<<< HEAD
               - !ruby/object:Api::Type::String
                 name: 'path'
                 description: The URI path (e.g., /users/1234). Default is an empty string.
                 default_from_api: true
           - !ruby/object:Api::Type::NestedObject
             name: 'queryOverride'
+=======
+              - name: 'path'
+                type: String
+                description: The URI path (e.g., /users/1234). Default is an empty string.
+                default_from_api: true
+          - name: 'queryOverride'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               URI query.
 
               When specified, replaces the query part of the task URI. Setting the query value to an empty string clears the URI query segment.
             properties:
+<<<<<<< HEAD
               - !ruby/object:Api::Type::String
                 name: 'queryParams'
                 description: The query parameters (e.g., qparam1=123&qparam2=456). Default is an empty string.
                 default_from_api: true
           - !ruby/object:Api::Type::Enum
             name: 'uriOverrideEnforceMode'
+=======
+              - name: 'queryParams'
+                type: String
+                description: The query parameters (e.g., qparam1=123&qparam2=456). Default is an empty string.
+                default_from_api: true
+          - name: 'uriOverrideEnforceMode'
+            type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               URI Override Enforce Mode
 
               When specified, determines the Target UriOverride mode. If not specified, it defaults to ALWAYS.
+<<<<<<< HEAD
             values:
               - ALWAYS
               - IF_NOT_EXISTS
             default_from_api: true
       - !ruby/object:Api::Type::Array
         name: 'headerOverrides'
+=======
+            default_from_api: true
+            enum_values:
+              - 'ALWAYS'
+              - 'IF_NOT_EXISTS'
+      - name: 'headerOverrides'
+        type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           HTTP target headers.
 
@@ -308,14 +532,23 @@ properties:
           Headers which can have multiple values (according to RFC2616) can be specified using comma-separated values.
 
           The size of the headers must be less than 80KB. Queue-level headers to override headers of all the tasks in the queue.
+<<<<<<< HEAD
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::NestedObject
               name: 'header'
+=======
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'header'
+              type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 Header embodying a key and a value.
               required: true
               properties:
+<<<<<<< HEAD
                 - !ruby/object:Api::Type::String
                   name: 'key'
                   required: true
@@ -326,46 +559,87 @@ properties:
                   description: The Value of the header.
       - !ruby/object:Api::Type::NestedObject
         name: 'oauthToken'
+=======
+                - name: 'key'
+                  type: String
+                  description: The Key of the header.
+                  required: true
+                - name: 'value'
+                  type: String
+                  description: The Value of the header.
+                  required: true
+      - name: 'oauthToken'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           If specified, an OAuth token is generated and attached as the Authorization header in the HTTP request.
 
           This type of authorization should generally be used only when calling Google APIs hosted on *.googleapis.com.
           Note that both the service account email and the scope MUST be specified when using the queue-level authorization override.
         conflicts:
+<<<<<<< HEAD
           - 'oidcToken'
         properties:
           - !ruby/object:Api::Type::String
             name: 'serviceAccountEmail'
+=======
+          - oidcToken
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Service account email to be used for generating OAuth token.
               The service account must be within the same project as the queue.
               The caller must have iam.serviceAccounts.actAs permission for the service account.
             required: true
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: 'scope'
+=======
+          - name: 'scope'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               OAuth scope to be used for generating OAuth access token.
               If not specified, "https://www.googleapis.com/auth/cloud-platform" will be used.
             default_from_api: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::NestedObject
         name: 'oidcToken'
+=======
+      - name: 'oidcToken'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           If specified, an OIDC token is generated and attached as an Authorization header in the HTTP request.
 
           This type of authorization can be used for many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token yourself.
           Note that both the service account email and the audience MUST be specified when using the queue-level authorization override.
         conflicts:
+<<<<<<< HEAD
           - 'oauthToken'
         properties:
           - !ruby/object:Api::Type::String
             name: 'serviceAccountEmail'
+=======
+          - oauthToken
+        properties:
+          - name: 'serviceAccountEmail'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Service account email to be used for generating OIDC token.
               The service account must be within the same project as the queue.
               The caller must have iam.serviceAccounts.actAs permission for the service account.
             required: true
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: 'audience'
+=======
+          - name: 'audience'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Audience to be used when generating OIDC token. If not specified, the URI specified in target will be used.
             default_from_api: true

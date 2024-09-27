@@ -170,7 +170,11 @@ func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	}
 
 	if e.ConfigPath == "" {
+<<<<<<< HEAD
 		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+=======
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	e.SetHCLText()
 
@@ -286,7 +290,11 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
+<<<<<<< HEAD
 		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+=======
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",

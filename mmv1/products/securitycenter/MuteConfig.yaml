@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'MuteConfig'
 base_url: '{{parent}}/muteConfigs'
@@ -18,20 +23,49 @@ self_link: '{{name}}'
 create_url: '{{parent}}/muteConfigs?muteConfigId={{mute_config_id}}'
 update_verb: :PATCH
 update_mask: true
+=======
+---
+name: 'MuteConfig'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,
   and create filters to automatically silence existing and future
   findings based on criteria you specify.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs'
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_mute_config'
+=======
+references:
+  guides:
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.muteConfigs'
+docs:
+base_url: '{{parent}}/muteConfigs'
+self_link: '{{name}}'
+create_url: '{{parent}}/muteConfigs?muteConfigId={{mute_config_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_import: 'templates/terraform/custom_import/scc_mute_config.go.tmpl'
+# Skipping sweeper since this is a child resource
+exclude_sweeper: true
+examples:
+  - name: 'scc_mute_config'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       mute_config_id: 'my-config'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
 # Skipping sweeper since this is a child resource
 skip_sweeper: true
@@ -51,24 +85,55 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+=======
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'muteConfigId'
+    type: String
+    description: |
+      Unique identifier provided by the client within the parent scope.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Resource name of the new mute configs's parent. Its format is
       "organizations/[organization_id]", "folders/[folder_id]", or
       "projects/[project_id]".
+<<<<<<< HEAD
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     output: true
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the mute config. Its format is
       organizations/{organization}/muteConfigs/{configId},
       folders/{folder}/muteConfigs/{configId},
       or projects/{project}/muteConfigs/{configId}
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'description'
     description: A description of the mute config.
   - !ruby/object:Api::Type::String
     name: 'filter'
+=======
+    output: true
+  - name: 'description'
+    type: String
+    description: A description of the mute config.
+  - name: 'filter'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       An expression that defines the filter to apply across create/update
       events of findings. While creating a filter string, be mindful of
@@ -76,21 +141,36 @@ properties:
       If a filter contains project = X but is created under the
       project = Y scope, it might not match any findings.
     required: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'createTime'
+=======
+  - name: 'createTime'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The time at which the mute config was created. This field is set by
       the server and will be ignored if provided on config creation.
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'updateTime'
+=======
+  - name: 'updateTime'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Output only. The most recent time at which the mute config was
       updated. This field is set by the server and will be ignored if
       provided on config creation or update.
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'mostRecentEditor'
+=======
+  - name: 'mostRecentEditor'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Email address of the user who last edited the mute config. This
       field is set by the server and will be ignored if provided on

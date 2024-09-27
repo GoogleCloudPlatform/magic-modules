@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: ConsumerQuotaOverride
 min_version: beta
@@ -30,10 +35,15 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
     - overrides
 identity:
   - name
+=======
+---
+name: 'ConsumerQuotaOverride'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A consumer override is applied to the consumer on its own authority to limit its own quota usage.
   Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,
   producer overrides, or the default limit of the service.
+<<<<<<< HEAD
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     path: 'name'
@@ -54,11 +64,60 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'consumer_quota_override'
+=======
+min_version: 'beta'
+references:
+  guides:
+    'Managing Service Quota': 'https://cloud.google.com/service-usage/docs/manage-quota '
+    'REST API documentation': 'https://cloud.google.com/service-usage/docs/reference/rest/v1beta1/services.consumerQuotaMetrics.limits.consumerOverrides'
+docs:
+id_format: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}'
+base_url: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides'
+self_link: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/'
+create_url: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}'
+update_url: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}'
+update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}?force={{force}}'
+import_format:
+  - 'services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}'
+  - 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - name
+nested_query:
+  keys:
+    - overrides
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/consumer_quota_override.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'consumer_quota_override'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'override'
     min_version: 'beta'
     vars:
       project_id: 'quota'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'consumer_quota_override_zero_value'
@@ -71,19 +130,30 @@ examples:
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_consumer_quota_override'
+=======
+      org_id: 'ORG_ID'
+  - name: 'consumer_quota_override_zero_value'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'override'
     min_version: 'beta'
     vars:
       project_id: 'quota'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
   - !ruby/object:Provider::Terraform::Examples
     name: 'consumer_quota_override_custom_dimension'
+=======
+      org_id: 'ORG_ID'
+    exclude_docs: true
+  - name: 'region_consumer_quota_override'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'override'
     min_version: 'beta'
     vars:
       project_id: 'quota'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
 id_format: 'projects/{{project}}/services/{{service}}/consumerQuotaMetrics/{{metric}}/limits/{{limit}}/consumerOverrides/{{name}}'
 import_format:
@@ -128,11 +198,56 @@ parameters:
     required: true
     url_param_only: true
     immutable: true
+=======
+      org_id: 'ORG_ID'
+  - name: 'consumer_quota_override_custom_dimension'
+    primary_resource_id: 'override'
+    min_version: 'beta'
+    vars:
+      project_id: 'quota'
+    test_env_vars:
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The server-generated name of the quota override.
+    min_version: 'beta'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'force'
+    type: Boolean
+    description: |
+      If the new quota would decrease the existing quota by more than 10%, the request is rejected.
+      If `force` is `true`, that safety check is ignored.
+    min_version: 'beta'
+    url_param_only: true
+    default_value: false
+  - name: 'service'
+    type: String
+    description: |
+      The service that the metrics belong to, e.g. `compute.googleapis.com`.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'metric'
+    type: String
+    description: |
+      The metric that should be limited, e.g. `compute.googleapis.com/cpus`.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'limit'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The limit on the metric, e.g. `/project/region`.
 
       ~> Make sure that `limit` is in a format that doesn't start with `1/` or contain curly braces.
       E.g. use `/project/user` instead of `1/{project}/{user}`.
+<<<<<<< HEAD
 properties:
   - !ruby/object:Api::Type::String
     name: 'overrideValue'
@@ -145,3 +260,23 @@ properties:
     immutable: true
     description: |
       If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
+=======
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'overrideValue'
+    type: String
+    description: |
+      The overriding quota limit value. Can be any nonnegative integer, or -1 (unlimited quota).
+    min_version: 'beta'
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/consumer_quote_override_override_value.go.tmpl'
+  - name: 'dimensions'
+    type: KeyValuePairs
+    description: |
+      If this map is nonempty, then this override applies only to specific values for dimensions defined in the limit unit.
+    min_version: 'beta'
+    immutable: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

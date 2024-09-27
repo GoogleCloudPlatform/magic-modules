@@ -1,0 +1,32 @@
+resource "google_certificate_manager_certificate" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "cert_name"}}"
+  description = "The default cert"
+  scope       = "EDGE_CACHE"
+  labels = {
+    env = "test"
+  }
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.instance.domain,
+      google_certificate_manager_dns_authorization.instance2.domain,
+      ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.instance.id,
+      google_certificate_manager_dns_authorization.instance2.id,
+      ]
+  }
+}
+
+
+resource "google_certificate_manager_dns_authorization" "instance" {
+  name        = "{{index $.Vars "dns_auth_name"}}"
+  description = "The default dnss"
+  domain      = "{{index $.Vars "dns_auth_subdomain"}}.hashicorptest.com"
+}
+
+resource "google_certificate_manager_dns_authorization" "instance2" {
+  name        = "{{index $.Vars "dns_auth_name2"}}"
+  description = "The default dnss"
+  domain      = "{{index $.Vars "dns_auth_subdomain2"}}.hashicorptest.com"
+}
+

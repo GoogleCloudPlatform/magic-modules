@@ -1,0 +1,7 @@
+resource "google_notebooks_environment" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "environment_name"}}"
+  location = "us-west1-a"  
+  container_image {
+    repository = "gcr.io/deeplearning-platform-release/base-cpu"
+  } 
+}

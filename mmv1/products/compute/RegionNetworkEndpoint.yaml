@@ -11,15 +11,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'RegionNetworkEndpoint'
 kind: 'compute#networkEndpoint'
 base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}'
+=======
+---
+name: 'RegionNetworkEndpoint'
+kind: 'compute#networkEndpoint'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A Region network endpoint represents a IP address/FQDN and port combination that is
   part of a specific network endpoint group (NEG).
 
   ~> **NOTE**: Network endpoints cannot be created outside of a network endpoint group.
+<<<<<<< HEAD
 immutable: true
 create_verb: :POST
 create_url: projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/attachNetworkEndpoints
@@ -35,10 +42,14 @@ nested_query: !ruby/object:Api::Resource::NestedQuery
   keys:
     - items
 references: !ruby/object:Api::Resource::ReferenceLinks
+=======
+references:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   guides:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
     'Internet NEGs Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/internet-neg-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionNetworkEndpointGroups'
+<<<<<<< HEAD
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -63,16 +74,68 @@ exclude_tgc: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_internet_ip_port'
+=======
+docs:
+id_format: '{{project}}/{{region}}/{{region_network_endpoint_group}}/{{ip_address}}/{{fqdn}}/{{port}}'
+base_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}'
+self_link: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/listNetworkEndpoints'
+create_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/attachNetworkEndpoints'
+read_verb: 'POST'
+delete_url: 'projects/{{project}}/regions/{{region}}/networkEndpointGroups/{{region_network_endpoint_group}}/detachNetworkEndpoints'
+delete_verb: 'POST'
+immutable: true
+mutex: 'networkEndpoint/{{project}}/{{region}}/{{region_network_endpoint_group}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+identity:
+  - ipAddress
+  - fqdn
+  - port
+nested_query:
+  keys:
+    - items
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_region_network_endpoint.go.tmpl'
+  decoder: 'templates/terraform/decoders/network_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_region_network_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/compute_region_network_endpoint.go.tmpl'
+exclude_tgc: true
+examples:
+  - name: 'region_network_endpoint_internet_ip_port'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'region-internet-ip-port-endpoint'
     vars:
       neg_name: 'ip-port-neg'
       network_name: 'network'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_internet_fqdn_port'
+=======
+  - name: 'region_network_endpoint_internet_fqdn_port'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'region-internet-fqdn-port-endpoint'
     vars:
       neg_name: 'fqdn-port-neg'
       network_name: 'network'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'region_network_endpoint_portmap'
     primary_resource_id: 'region_network_endpoint_portmap'
@@ -81,11 +144,16 @@ examples:
       # still exists, rather than during CheckDestroy (when read returns
       # nothing because the parent resource has then also been destroyed)
     skip_test: true
+=======
+  - name: 'region_network_endpoint_portmap'
+    primary_resource_id: 'region_network_endpoint_portmap'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       network_name: 'network'
       subnetwork_name: 'subnetwork'
       instance_name: 'instance'
       neg_name: 'portmap-neg'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: templates/terraform/pre_delete/compute_region_network_endpoint.go.erb
   custom_import: templates/terraform/custom_import/compute_region_network_endpoint.go.erb
@@ -123,19 +191,64 @@ properties:
       function: 'validation.IntAtLeast(1)'
   - !ruby/object:Api::Type::String
     name: 'ipAddress'
+=======
+      # Fine-grained resource need different autogenerated tests, as
+      # we need to check destroy during a test step where the parent resource
+      # still exists, rather than during CheckDestroy (when read returns
+      # nothing because the parent resource has then also been destroyed)
+    exclude_test: true
+parameters:
+  - name: 'region'
+    type: ResourceRef
+    description: |
+      Region where the containing network endpoint group is located.
+    url_param_only: true
+    required: false
+    ignore_read: true
+    default_from_api: true
+    resource: 'Region'
+    imports: 'name'
+  - name: 'regionNetworkEndpointGroup'
+    type: ResourceRef
+    description: |
+      The network endpoint group this endpoint is part of.
+    url_param_only: true
+    required: true
+    ignore_read: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    resource: 'RegionNetworkEndpointGroup'
+    imports: 'name'
+properties:
+  - name: 'port'
+    type: Integer
+    description: |
+      Port number of network endpoint.
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
+    validation:
+      function: 'validation.IntAtLeast(1)'
+  - name: 'ipAddress'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       IPv4 address external endpoint.
 
       This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'fqdn'
     at_least_one_of:
       - fqdn
       - ip_address
+=======
+  - name: 'fqdn'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Fully qualified domain name of network endpoint.
 
       This can only be specified when network_endpoint_type of the NEG is INTERNET_FQDN_PORT.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Integer
     name: 'clientDestinationPort'
     custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
@@ -148,3 +261,20 @@ properties:
     description: |
       The name for a specific VM instance that the IP address belongs to.
       This is required for network endpoints of type GCE_VM_IP_PORTMAP.
+=======
+    at_least_one_of:
+      - 'fqdn'
+      - 'ip_address'
+  - name: 'clientDestinationPort'
+    type: Integer
+    description: |
+      Client destination port for the `GCE_VM_IP_PORTMAP` NEG.
+    custom_flatten: 'templates/terraform/custom_flatten/float64_to_int.go.tmpl'
+  - name: 'instance'
+    type: ResourceRef
+    description: |
+      The name for a specific VM instance that the IP address belongs to.
+      This is required for network endpoints of type GCE_VM_IP_PORTMAP.
+    resource: 'Instance'
+    imports: 'name'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

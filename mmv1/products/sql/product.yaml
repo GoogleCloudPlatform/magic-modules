@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2017 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Product
 # 'BackupRun' is not idempotent and will not be covered.
 # | - !ruby/object:Api::Resource
@@ -48,5 +53,31 @@ async: !ruby/object:Api::OpAsync
       - 'RUNNING'
       - 'DONE'
   error: !ruby/object:Api::OpAsync::Error
+=======
+<<<<<<<< HEAD:mmv1/products/sql/go_product.yaml
+# Warning: This is a temporary file, and should not be edited directly
+========
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/sql/product.yaml
+---
+name: 'SQL'
+display_name: 'Cloud SQL'
+client_name: 'SqlAdmin'
+versions:
+  - name: 'ga'
+    base_url: 'https://sqladmin.googleapis.com/sql/v1beta4/'
+scopes:
+  - 'https://www.googleapis.com/auth/sqlservice.admin'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: 'projects/{{project}}/operations/{{op_id}}'
+    kind: 'sql#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     path: 'error/errors'
     message: 'message'

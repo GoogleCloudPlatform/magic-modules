@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the License);
+=======
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'ExternalAccessRule'
 base_url: '{{parent}}/externalAccessRules'
@@ -77,11 +83,79 @@ parameters:
     immutable: true
     required: true
     url_param_only: true
+=======
+---
+name: 'ExternalAccessRule'
+description: |
+  External access firewall rules for filtering incoming traffic destined to `ExternalAddress` resources.
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.networkPolicies.externalAccessRules'
+docs:
+id_format: '{{parent}}/externalAccessRules/{{name}}'
+base_url: '{{parent}}/externalAccessRules'
+self_link: '{{parent}}/externalAccessRules/{{name}}'
+create_url: '{{parent}}/externalAccessRules?externalAccessRuleId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/externalAccessRules/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
+exclude_sweeper: true
+examples:
+  - name: 'vmware_engine_external_access_rule_basic'
+    primary_resource_id: 'vmw-engine-external-access-rule'
+    vars:
+      name: 'sample-external-access-rule'
+      network_id: 'sample-nw'
+      network_policy_id: 'sample-np'
+    test_env_vars:
+      region: 'REGION'
+ # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    exclude_test: true
+  - name: 'vmware_engine_external_access_rule_full'
+    primary_resource_id: 'vmw-engine-external-access-rule'
+    vars:
+      name: 'sample-external-access-rule'
+      network_id: 'sample-nw'
+      network_policy_id: 'sample-np'
+      private_cloud_id: 'sample-pc'
+      management_cluster_id: 'sample-mgmt-cluster'
+      external_address_id: 'sample-ea'
+    test_env_vars:
+      region: 'REGION'
+ # update tests will take care of create and update. The test id dependent on PC creation, which is expensive and requires node reservation.
+    exclude_test: true
+parameters:
+  - name: 'parent'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The resource name of the network policy.
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-west1-a/networkPolicies/my-policy
 
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: "name"
     required: true
@@ -94,19 +168,42 @@ properties:
   - !ruby/object:Api::Type::Time
     name: 'createTime'
     output: true
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the external access rule.
+
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'createTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Creation time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Time
     name: 'updateTime'
     output: true
+=======
+    output: true
+  - name: 'updateTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Last updated time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'description'
     description: |
@@ -192,3 +289,91 @@ properties:
     output: true
     description: |
       System-generated unique identifier for the resource.
+=======
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      User-provided description for the external access rule.
+
+  - name: 'priority'
+    type: Integer
+    description: |
+      External access rule priority, which determines the external access rule to use when multiple rules apply.
+
+    required: true
+  - name: 'action'
+    type: Enum
+    description: |
+      The action that the external access rule performs.
+    required: true
+    enum_values:
+      - 'ALLOW'
+      - 'DENY'
+  - name: 'ipProtocol'
+    type: String
+    description: |
+      The IP protocol to which the external access rule applies.
+
+    required: true
+  - name: 'sourceIpRanges'
+    type: Array
+    description: |
+      If source ranges are specified, the external access rule applies only to
+      traffic that has a source IP address in these ranges.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ipAddress'
+          type: String
+          description: |
+            A single IP address.
+        - name: 'ipAddressRange'
+          type: String
+          description: |
+            An IP address range in the CIDR format.
+
+  - name: 'sourcePorts'
+    type: Array
+    description: |
+      A list of source ports to which the external access rule applies.
+    required: true
+    item_type:
+      type: String
+  - name: 'destinationIpRanges'
+    type: Array
+    description: |
+      If destination ranges are specified, the external access rule applies only to
+      traffic that has a destination IP address in these ranges.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ipAddressRange'
+          type: String
+          description: |
+            An IP address range in the CIDR format.
+        - name: 'externalAddress'
+          type: String
+          description: |
+            The name of an `ExternalAddress` resource.
+
+  - name: 'destinationPorts'
+    type: Array
+    description: |
+      A list of destination ports to which the external access rule applies.
+    required: true
+    item_type:
+      type: String
+  - name: 'state'
+    type: String
+    description: |
+      State of the Cluster.
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      System-generated unique identifier for the resource.
+    output: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

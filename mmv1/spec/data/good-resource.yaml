@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<<< HEAD:mmv1/spec/data/good-resource.yaml
 !ruby/object:Api::Resource
 name: 'MyResource'
 kind: 'myproduct#myresource'
@@ -19,3 +20,13 @@ properties:
   - !ruby/object:Api::Type::String
     name: 'name'
     description: 'an explanation whats this about'
+========
+---
+name: 'Apigee'
+display_name: 'Apigee'
+versions:
+  - name: 'ga'
+    base_url: 'https://apigee.googleapis.com/v1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/apigee/product.yaml

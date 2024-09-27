@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Network'
 kind: 'compute#network'
@@ -50,17 +55,68 @@ examples:
       network_name: 'vpc-network'
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_custom_mtu'
+=======
+---
+name: 'Network'
+kind: 'compute#network'
+description: |
+  Manages a VPC network or legacy network resource on GCP.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
+docs:
+base_url: 'projects/{{project}}/global/networks'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_network.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_network_delete_default_route.tmpl'
+examples:
+  - name: 'network_basic'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+  - name: 'network_custom_mtu'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'vpc_network'
     vars:
       network_name: 'vpc-network'
     test_env_vars:
+<<<<<<< HEAD
       project: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'network_custom_firewall_enforcement_order'
+=======
+      project: 'PROJECT_NAME'
+  - name: 'network_custom_firewall_enforcement_order'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'vpc_network'
     vars:
       network_name: 'vpc-network'
     test_env_vars:
+<<<<<<< HEAD
       project: :PROJECT_NAME
 virtual_fields:
   - !ruby/object:Api::Type::Boolean
@@ -77,10 +133,25 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 properties:
   - !ruby/object:Api::Type::String
     name: 'description'
+=======
+      project: 'PROJECT_NAME'
+virtual_fields:
+  - name: 'delete_default_routes_on_create'
+    description: |
+      If set to `true`, default routes (`0.0.0.0/0`) will be deleted
+      immediately after network creation. Defaults to `false`.
+    type: Boolean
+    default_value: false
+parameters:
+properties:
+  - name: 'description'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       An optional description of this resource. The resource must be
       recreated to modify this field.
     immutable: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'gateway_ipv4'
     # We override this here so that the name is more aesthetic
@@ -91,6 +162,18 @@ properties:
       is selected by GCP.
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+  - name: 'gateway_ipv4'
+    type: String
+    description: |
+      The gateway address for default routing out of the network. This value
+      is selected by GCP.
+    # We override this here so that the name is more aesthetic
+    api_name: gatewayIPv4
+    output: true
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -99,6 +182,7 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
+<<<<<<< HEAD
     immutable: true
     required: true
     validation: !ruby/object:Provider::Terraform::Validation
@@ -110,6 +194,19 @@ properties:
     output: true
   - !ruby/object:Api::Type::Boolean
     name: 'autoCreateSubnetworks'
+=======
+    required: true
+    immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
+  - name: 'numericId'
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    output: true
+  - name: 'autoCreateSubnetworks'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       When set to `true`, the network is created in "auto subnet mode" and
       it will create a subnet for each region automatically across the
@@ -118,6 +215,7 @@ properties:
       When set to `false`, the network is created in "custom subnet mode" so
       the user can explicitly connect subnetwork resources.
     immutable: true
+<<<<<<< HEAD
     default_value: true
     send_empty_value: true
     conflicts: []
@@ -125,21 +223,37 @@ properties:
     name: 'routingConfig'
     update_verb: :PATCH
     update_url: projects/{{project}}/global/networks/{{name}}
+=======
+    send_empty_value: true
+    default_value: true
+  - name: 'routingConfig'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The network-level routing configuration for this network. Used by Cloud
       Router to determine what type of network-wide routing behavior to
       enforce.
+<<<<<<< HEAD
     flatten_object: true
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'routingMode'
         required: false
+=======
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    flatten_object: true
+    properties:
+      - name: 'routingMode'
+        type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The network-wide routing mode to use. If set to `REGIONAL`, this
           network's cloud routers will only advertise routes with subnetworks
           of this network in the same region as the router. If set to `GLOBAL`,
           this network's cloud routers will advertise routes with all
           subnetworks of this network, across regions.
+<<<<<<< HEAD
         values:
           - :REGIONAL
           - :GLOBAL
@@ -148,6 +262,17 @@ properties:
         default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'mtu'
+=======
+        required: false
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+        enum_values:
+          - 'REGIONAL'
+          - 'GLOBAL'
+  - name: 'mtu'
+    type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Maximum Transmission Unit in bytes. The default value is 1460 bytes.
       The minimum value for this field is 1300 and the maximum value is 8896 bytes (jumbo frames).
@@ -156,14 +281,24 @@ properties:
       with varying MTUs.
     immutable: true
     default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Boolean
     name: 'enableUlaInternalIpv6'
+=======
+  - name: 'enableUlaInternalIpv6'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Enable ULA internal ipv6 on this network. Enabling this feature will assign
       a /48 from google defined ULA prefix fd20::/20.
     immutable: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'internalIpv6Range'
+=======
+  - name: 'internalIpv6Range'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       When enabling ula internal ipv6, caller optionally can specify the /48 range
       they want from the google defined ULA prefix fd20::/20. The input must be a
@@ -172,6 +307,7 @@ properties:
       If the field is not speficied, then a /48 range will be randomly allocated from fd20::/20 and returned via this field.
     immutable: true
     default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Enum
     name: 'networkFirewallPolicyEnforcementOrder'
     update_verb: :PATCH
@@ -182,3 +318,15 @@ properties:
       - :BEFORE_CLASSIC_FIREWALL
       - :AFTER_CLASSIC_FIREWALL
     default_value: :AFTER_CLASSIC_FIREWALL
+=======
+  - name: 'networkFirewallPolicyEnforcementOrder'
+    type: Enum
+    description: |
+      Set the order that Firewall Rules and Firewall Policies are evaluated.
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    default_value: "AFTER_CLASSIC_FIREWALL"
+    enum_values:
+      - 'BEFORE_CLASSIC_FIREWALL'
+      - 'AFTER_CLASSIC_FIREWALL'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

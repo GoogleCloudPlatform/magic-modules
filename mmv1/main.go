@@ -30,7 +30,11 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
+<<<<<<< HEAD
 var overrideDirectory = flag.String("override", "", "directory containing yaml overrides")
+=======
+var overrideDirectory = flag.String("overrides", "", "directory containing yaml overrides")
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
@@ -200,11 +204,19 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 	defer wg.Done()
 	productName := <-productChannel
 
+<<<<<<< HEAD
 	productYamlPath := path.Join(productName, "go_product.yaml")
 
 	var productOverridePath string
 	if overrideDirectory != "" {
 		productOverridePath = filepath.Join(overrideDirectory, productName, "go_product.yaml")
+=======
+	productYamlPath := path.Join(productName, "product.yaml")
+
+	var productOverridePath string
+	if overrideDirectory != "" {
+		productOverridePath = filepath.Join(overrideDirectory, productName, "product.yaml")
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 
 	_, baseProductErr := os.Stat(productYamlPath)
@@ -250,11 +262,14 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 			continue
 		}
 
+<<<<<<< HEAD
 		// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
 		if filepath.Base(resourceYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(resourceYamlPath), "go_") {
 			continue
 		}
 
+=======
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		if overrideDirectory != "" {
 			// skip if resource will be merged in the override loop
 			resourceOverridePath := filepath.Join(overrideDirectory, resourceYamlPath)
@@ -287,11 +302,14 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 				continue
 			}
 
+<<<<<<< HEAD
 			// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
 			if filepath.Base(overrideYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(overrideYamlPath), "go_") {
 				continue
 			}
 
+=======
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			resource := &api.Resource{}
 
 			baseResourcePath := filepath.Join(productName, filepath.Base(overrideYamlPath))

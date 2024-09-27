@@ -1,0 +1,20 @@
+resource "google_os_config_patch_deployment" "{{$.PrimaryResourceId}}" {
+  patch_deployment_id = "{{index $.Vars "patch_deployment_id"}}"
+
+  instance_filter {
+    all = true
+  }
+
+  recurring_schedule {
+    time_zone {
+      id = "America/New_York"
+    }
+
+    time_of_day {
+      hours = 0
+      minutes = 0
+      seconds = 0
+      nanos = 0
+    }
+  }
+}

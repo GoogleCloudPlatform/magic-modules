@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'AddonsConfig'
 self_link: 'organizations/{{org}}'
@@ -112,10 +117,111 @@ properties:
               enabled.
           - !ruby/object:Api::Type::String
             name: 'expiresAt'
+=======
+---
+name: 'AddonsConfig'
+description: |
+  Configures the add-ons for the Apigee organization. The existing add-on configuration will be fully replaced.
+references:
+  guides:
+    'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations#setaddons'
+docs:
+base_url: 'organizations'
+self_link: 'organizations/{{org}}'
+create_url: 'organizations/{{org}}:setAddons'
+update_url: 'organizations/{{org}}:setAddons'
+update_verb: 'POST'
+delete_url: 'organizations/{{org}}:setAddons'
+delete_verb: 'POST'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_addons.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
+examples:
+  - name: 'apigee_addons_basic'
+    exclude_test: true
+  - name: 'apigee_addons_full'
+    exclude_test: true
+  - name: 'apigee_addons_test'
+    primary_resource_id: 'apigee_org_addons'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+parameters:
+  - name: 'org'
+    type: String
+    description: |
+      Name of the Apigee organization.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'addonsConfig'
+    type: NestedObject
+    description: Addon configurations of the Apigee organization.
+    properties:
+      - name: 'advancedApiOpsConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is
+              enabled.
+      - name: 'integrationConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is
+              enabled.
+      - name: 'monetizationConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is
+              enabled.
+      - name: 'apiSecurityConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is
+              enabled.
+          - name: 'expiresAt'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description:
               Flag that specifies whether the Advanced API Ops add-on is
               enabled.
             output: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::NestedObject
         name: 'connectorsPlatformConfig'
         description: Configuration for the Monetization add-on.
@@ -127,6 +233,19 @@ properties:
               enabled.
           - !ruby/object:Api::Type::String
             name: 'expiresAt'
+=======
+      - name: 'connectorsPlatformConfig'
+        type: NestedObject
+        description: Configuration for the Monetization add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Advanced API Ops add-on is
+              enabled.
+          - name: 'expiresAt'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description:
               Flag that specifies whether the Advanced API Ops add-on is
               enabled.

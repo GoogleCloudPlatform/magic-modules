@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'CryptoKey'
 base_url: '{{key_ring}}/cryptoKeys'
@@ -18,6 +23,10 @@ create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCrea
 self_link: '{{key_ring}}/cryptoKeys/{{name}}'
 update_verb: :PATCH
 update_mask: true
+=======
+---
+name: 'CryptoKey'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A `CryptoKey` represents a logical key that can be used for cryptographic operations.
 
@@ -30,6 +39,7 @@ description: |
   For this reason, it is strongly recommended that you add
   [lifecycle](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle)
   hooks to the resource to prevent accidental destruction.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating a key': 'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
@@ -67,10 +77,59 @@ parameters:
     ignore_read: true
   - !ruby/object:Api::Type::Boolean
     name: 'skipInitialVersionCreation'
+=======
+references:
+  guides:
+    'Creating a key': 'https://cloud.google.com/kms/docs/creating-keys#create_a_key'
+  api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys'
+docs:
+id_format: '{{key_ring}}/cryptoKeys/{{name}}'
+base_url: '{{key_ring}}/cryptoKeys'
+self_link: '{{key_ring}}/cryptoKeys/{{name}}'
+create_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}&skipInitialVersionCreation={{skip_initial_version_creation}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{key_ring}}/cryptoKeys/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/kms_crypto_key.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/kms_crypto_key.go.tmpl'
+  decoder: 'templates/terraform/decoders/kms.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/kms_crypto_key.tmpl'
+  custom_import: 'templates/terraform/custom_import/kms_crypto_key.go.tmpl'
+schema_version: 1
+state_upgraders: true
+supports_indirect_user_project_override: true
+examples:
+  - name: 'kms_crypto_key_basic'
+    primary_resource_id: 'example-key'
+    exclude_test: true
+  - name: 'kms_crypto_key_asymmetric_sign'
+    primary_resource_id: 'example-asymmetric-sign-key'
+    exclude_test: true
+parameters:
+  - name: 'keyRing'
+    type: String
+    description: |
+      The KeyRing that this key belongs to.
+      Format: `'projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}'`.
+    url_param_only: true
+    required: true
+    immutable: true
+    ignore_read: true
+    diff_suppress_func: 'kmsCryptoKeyRingsEquivalent'
+  - name: 'skipInitialVersionCreation'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       If set to true, the request will create a CryptoKey without any CryptoKeyVersions.
       You must use the `google_kms_crypto_key_version` resource to create a new CryptoKeyVersion
       or `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
+<<<<<<< HEAD
     immutable: true
     url_param_only: true
 properties:
@@ -88,11 +147,31 @@ properties:
       Labels with user-defined metadata to apply to this resource.
   - !ruby/object:Api::Type::NestedObject
     name: 'primary'
+=======
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the CryptoKey.
+    url_param_only: true
+    required: true
+    immutable: true
+    ignore_read: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels with user-defined metadata to apply to this resource.
+  - name: 'primary'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A copy of the primary CryptoKeyVersion that will be used by cryptoKeys.encrypt when this CryptoKey is given in EncryptRequest.name.
       Keys with purpose ENCRYPT_DECRYPT may have a primary. For other keys, this field will be unset.
     output: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -105,20 +184,42 @@ properties:
         output: true
   - !ruby/object:Api::Type::String
     name: 'purpose'
+=======
+      - name: 'name'
+        type: String
+        description: |
+          The resource name for this CryptoKeyVersion.
+        output: true
+      - name: 'state'
+        type: String
+        description: |
+          The current state of the CryptoKeyVersion.
+        output: true
+  - name: 'purpose'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The immutable purpose of this CryptoKey. See the
       [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
       for possible inputs.
       Default value is "ENCRYPT_DECRYPT".
+<<<<<<< HEAD
     default_value: 'ENCRYPT_DECRYPT'
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'rotationPeriod'
+=======
+    immutable: true
+    default_value: "ENCRYPT_DECRYPT"
+  - name: 'rotationPeriod'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Every time this period passes, generate a new CryptoKeyVersion and set it as the primary.
       The first rotation will take place after the specified period. The rotation period has
       the format of a decimal number with up to 9 fractional digits, followed by the
       letter `s` (seconds). It must be greater than a day (ie, 86400).
+<<<<<<< HEAD
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.OrEmpty(validateKmsCryptoKeyRotationPeriod)'
     update_mask_fields:
@@ -126,18 +227,33 @@ properties:
       - 'nextRotationTime'
   - !ruby/object:Api::Type::NestedObject
     name: 'versionTemplate'
+=======
+    update_mask_fields:
+      - 'rotationPeriod'
+      - 'nextRotationTime'
+    validation:
+      function: 'verify.OrEmpty(validateKmsCryptoKeyRotationPeriod)'
+  - name: 'versionTemplate'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A template describing settings for new crypto key versions.
     default_from_api: true
     update_mask_fields:
       - 'versionTemplate.algorithm'
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'algorithm'
+=======
+      - name: 'algorithm'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The algorithm to use when creating a version based on this template.
           See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm) for possible inputs.
         required: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'protectionLevel'
         description: |
@@ -167,6 +283,36 @@ properties:
   - !ruby/object:Api::Type::NestedObject
     name: 'keyAccessJustificationsPolicy'
     min_version: beta
+=======
+      - name: 'protectionLevel'
+        type: String
+        description: |
+          The protection level to use when creating a version based on this template. Possible values include "SOFTWARE", "HSM", "EXTERNAL", "EXTERNAL_VPC". Defaults to "SOFTWARE".
+        immutable: true
+        default_value: "SOFTWARE"
+  - name: 'destroyScheduledDuration'
+    type: String
+    description: |
+      The period of time that versions of this key spend in the DESTROY_SCHEDULED state before transitioning to DESTROYED.
+      If not specified at creation time, the default duration is 30 days.
+    immutable: true
+    default_from_api: true
+  - name: 'importOnly'
+    type: Boolean
+    description: |
+      Whether this key may contain imported versions only.
+    immutable: true
+    default_from_api: true
+  - name: 'cryptoKeyBackend'
+    type: String
+    description: |
+      The resource name of the backend environment associated with all CryptoKeyVersions within this CryptoKey.
+      The resource name is in the format "projects/*/locations/*/ekmConnections/*" and only applies to "EXTERNAL_VPC" keys.
+    immutable: true
+    default_from_api: true
+  - name: 'keyAccessJustificationsPolicy'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The policy used for Key Access Justifications Policy Enforcement. If this
       field is present and this key is enrolled in Key Access Justifications
@@ -176,14 +322,28 @@ properties:
       https://cloud.google.com/assured-workloads/key-access-justifications/docs/justification-codes
       By default, this field is absent, and all justification codes are allowed.
       This field is currently in beta and is subject to change.
+<<<<<<< HEAD
+=======
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     default_from_api: true
     update_mask_fields:
       - 'keyAccessJustificationsPolicy'
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'allowedAccessReasons'
+=======
+      - name: 'allowedAccessReasons'
+        type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The list of allowed reasons for access to this CryptoKey. Zero allowed
           access reasons means all encrypt, decrypt, and sign operations for
           this CryptoKey will fail.
+<<<<<<< HEAD
+=======
+        item_type:
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

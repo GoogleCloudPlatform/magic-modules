@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'TargetInstance'
 kind: 'compute#targetInstance'
@@ -18,6 +23,11 @@ base_url: projects/{{project}}/zones/{{zone}}/targetInstances
 collection_url_key: 'items'
 has_self_link: true
 immutable: true
+=======
+---
+name: 'TargetInstance'
+kind: 'compute#targetInstance'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   Represents a TargetInstance resource which defines an endpoint instance
   that terminates traffic of certain protocols. In particular, they are used
@@ -25,6 +35,7 @@ description: |
   non-NAT'ed target instance. Each target instance contains a single
   virtual machine instance that receives and handles traffic from the
   corresponding forwarding rules.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Using Protocol Forwarding': 'https://cloud.google.com/compute/docs/protocol-forwarding'
@@ -50,10 +61,44 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'target_instance_basic'
+=======
+references:
+  guides:
+    'Using Protocol Forwarding': 'https://cloud.google.com/compute/docs/protocol-forwarding'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/targetInstances'
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/targetInstances'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
+examples:
+  - name: 'target_instance_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       target_name: 'target'
       instance_name: 'target-vm'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     min_version: beta
     name: 'target_instance_custom_network'
@@ -65,12 +110,24 @@ examples:
     min_version: beta
     name: 'target_instance_with_security_policy'
     primary_resource_id: 'default'
+=======
+  - name: 'target_instance_custom_network'
+    primary_resource_id: 'custom_network'
+    min_version: 'beta'
+    vars:
+      target_name: 'custom-network'
+      instance_name: 'custom-network-target-vm'
+  - name: 'target_instance_with_security_policy'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       network_name: 'custom-default-network'
       subnetname_name: 'custom-default-subnet'
       instance_name: 'target-vm'
       region_sec_policy: 'region-secpolicy'
       target_name: 'target-instance'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.erb'
 parameters:
@@ -78,15 +135,29 @@ parameters:
     name: 'zone'
     resource: 'Zone'
     imports: 'name'
+=======
+parameters:
+  - name: 'zone'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       URL of the zone where the target instance resides.
     required: false
     immutable: true
     default_from_api: true
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -96,16 +167,26 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'network'
+=======
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'network'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       'The URL of the network this target instance uses to forward traffic. If
       not specified, the traffic will be forwarded to the network that the
       default network interface belongs to.'
+<<<<<<< HEAD
     immutable: true
     min_version: beta
   - !ruby/object:Api::Type::String
@@ -115,6 +196,15 @@ properties:
     name: 'instance'
     resource: 'Instance'
     imports: 'selfLink'
+=======
+    min_version: 'beta'
+    immutable: true
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+  - name: 'instance'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The Compute instance VM handling traffic for this target instance.
       Accepts the instance self-link, relative path
@@ -125,13 +215,22 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'natPolicy'
+=======
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
+    resource: 'Instance'
+    imports: 'selfLink'
+  - name: 'natPolicy'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
     immutable: true
+<<<<<<< HEAD
     default_value: :NO_NAT
     values:
       - :NO_NAT
@@ -142,3 +241,15 @@ properties:
       The resource URL for the security policy associated with this target instance.
     update_url: projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy
     update_verb: :POST
+=======
+    default_value: "NO_NAT"
+    enum_values:
+      - 'NO_NAT'
+  - name: 'securityPolicy'
+    type: String
+    description: |
+      The resource URL for the security policy associated with this target instance.
+    min_version: 'beta'
+    update_url: 'projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy'
+    update_verb: 'POST'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

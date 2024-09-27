@@ -1,16 +1,48 @@
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/bigqueryreservation/product.yaml
 # Copyright 2020 Google Inc.
+========
+# Copyright 2022 Google LLC. All Rights Reserved.
+# 
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:tpgtools/api/clouddeploy/samples/canary_service_networking_delivery_pipeline.yaml
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+=======
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+<<<<<<< HEAD
+name: canary_service_networking_delivery_pipeline
+description: Creates a basic Cloud Deploy delivery pipeline
+type: delivery_pipeline
+versions:
+- beta
+resource: samples/basic.delivery_pipeline.json
+updates:
+- resource: samples/updatecanaryservicenetworking.delivery_pipeline.json
+variables:
+- name: project
+  type: project
+- name: region
+  type: region  
+- name: pipeline
+  type: resource_name
 
+<<<<<<<< HEAD:mmv1/products/bigqueryreservation/product.yaml
 --- !ruby/object:Api::Product
 name: BigqueryReservation
 display_name: BigQuery Reservation
@@ -24,3 +56,19 @@ versions:
     base_url: https://bigqueryreservation.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/bigquery
+========
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:tpgtools/api/clouddeploy/samples/canary_service_networking_delivery_pipeline.yaml
+=======
+
+---
+name: 'BigqueryReservation'
+legacy_name: 'bigquery'
+display_name: 'BigQuery Reservation'
+versions:
+  - name: 'beta'
+    base_url: 'https://bigqueryreservation.googleapis.com/v1/'
+  - name: 'ga'
+    base_url: 'https://bigqueryreservation.googleapis.com/v1/'
+scopes:
+  - 'https://www.googleapis.com/auth/bigquery'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

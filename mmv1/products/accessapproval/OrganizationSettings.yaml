@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: OrganizationSettings
 base_url: 'organizations/{{organization_id}}/accessApprovalSettings'
@@ -56,10 +61,63 @@ properties:
     output: true
   - !ruby/object:Api::Type::Array
     name: notificationEmails
+=======
+---
+name: 'OrganizationSettings'
+legacy_name: 'google_organization_access_approval_settings'
+description: |
+  Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
+references:
+  guides:
+  api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/organizations'
+docs:
+base_url: 'organizations/{{organization_id}}/accessApprovalSettings'
+self_link: 'organizations/{{organization_id}}/accessApprovalSettings'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'organizations/{{organization_id}}/accessApprovalSettings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/update_mask.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_organization_access_approval_settings.go.tmpl'
+examples:
+  - name: 'organization_access_approval_full'
+    primary_resource_id: 'organization_access_approval'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    exclude_test: true
+  - name: 'organization_access_approval_active_key_version'
+    primary_resource_id: 'organization_access_approval'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    exclude_test: true
+parameters:
+  - name: 'organization_id'
+    type: String
+    description: |
+      ID of the organization of the access approval settings.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the settings. Format is "organizations/{organization_id}/accessApprovalSettings"
+    output: true
+  - name: 'notificationEmails'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A list of email addresses to which notifications relating to approval requests should be sent.
       Notifications relating to a resource will be sent to all emails in the settings of ancestor
       resources of that resource. A maximum of 50 email addresses are allowed.
+<<<<<<< HEAD
     max_size: 50
     item_type: Api::Type::String
     is_set: true
@@ -67,6 +125,15 @@ properties:
   - !ruby/object:Api::Type::Array
     name: enrolledServices
     required: true
+=======
+    is_set: true
+    default_from_api: true
+    item_type:
+      type: String
+    max_size: 50
+  - name: 'enrolledServices'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A list of Google Cloud Services for which the given resource has Access Approval enrolled.
       Access requests for the resource given by name against any of these services contained here will be required
@@ -74,12 +141,22 @@ properties:
 
       A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
     is_set: true
+<<<<<<< HEAD
     set_hash_func: accessApprovalEnrolledServicesHash
     item_type: !ruby/object:Api::Type::NestedObject
       properties:
         - !ruby/object:Api::Type::String
           name: cloudProduct
           required: true
+=======
+    required: true
+    set_hash_func: accessApprovalEnrolledServicesHash
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'cloudProduct'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             The product for which Access Approval will be enrolled. Allowed values are listed (case-sensitive):
               all
@@ -92,6 +169,7 @@ properties:
               iam.googleapis.com
               pubsub.googleapis.com
               storage.googleapis.com
+<<<<<<< HEAD
         - !ruby/object:Api::Type::Enum
           name: enrollmentLevel
           description: |
@@ -117,7 +195,38 @@ properties:
   - !ruby/object:Api::Type::Boolean
     name: invalidKeyVersion
     output: true
+=======
+          required: true
+        - name: 'enrollmentLevel'
+          type: Enum
+          description: |
+            The enrollment level of the service.
+          default_value: "BLOCK_ALL"
+          enum_values:
+            - 'BLOCK_ALL'
+  - name: 'enrolledAncestor'
+    type: Boolean
+    description: |
+      This field will always be unset for the organization since organizations do not have ancestors.
+    output: true
+  - name: 'activeKeyVersion'
+    type: String
+    description: |
+      The asymmetric crypto key version to use for signing approval requests.
+      Empty active_key_version indicates that a Google-managed key should be used for signing.
+  - name: 'ancestorHasActiveKeyVersion'
+    type: Boolean
+    description: |
+      This field will always be unset for the organization since organizations do not have ancestors.
+    output: true
+  - name: 'invalidKeyVersion'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       If the field is true, that indicates that there is some configuration issue with the active_key_version
       configured on this Organization (e.g. it doesn't exist or the Access Approval service account doesn't have the
       correct permissions on it, etc.).
+<<<<<<< HEAD
+=======
+    output: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

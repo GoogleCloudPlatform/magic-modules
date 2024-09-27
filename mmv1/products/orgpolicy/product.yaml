@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2022 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Product
 name: OrgPolicy
 display_name: Organization Policy
@@ -23,3 +28,15 @@ versions:
     base_url: https://orgpolicy.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+=======
+---
+name: 'OrgPolicy'
+display_name: 'Organization Policy'
+versions:
+  - name: 'ga'
+    base_url: 'https://orgpolicy.googleapis.com/v2/'
+  - name: 'beta'
+    base_url: 'https://orgpolicy.googleapis.com/v2/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

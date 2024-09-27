@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Instance'
 kind: 'securesourcemanager#instance'
@@ -62,10 +67,64 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
+=======
+---
+name: 'Instance'
+kind: 'securesourcemanager#instance'
+description: 'Instances are deployed to an available Google Cloud region and are accessible via their web interface.'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/create-instance'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.instances'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+  - '{{instance_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/securesourcemanager.instanceManager'
+  admin_iam_role: 'roles/securesourcemanager.instanceOwner'
+  parent_resource_attribute: 'instance_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+    - '{{instance_id}}'
+custom_code:
+examples:
+  - name: 'secure_source_manager_instance_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       instance_id: 'my-instance'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -75,12 +134,21 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'secure_source_manager_instance_cmek'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       instance_id: 'my-instance'
       keyring_name: 'my-keyring'
       key_name: 'my-key'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -91,12 +159,21 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'secure_source_manager_instance_private'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -107,6 +184,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+    external_providers: ["time"]
+  - name: 'secure_source_manager_instance_private_psc_backend'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -121,6 +207,7 @@ examples:
       root_ca_id: 'root-ca'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -131,6 +218,15 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-instance%s\",
       context[\"random_suffix\"\
       ])"
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+    external_providers: ["time"]
+  - name: 'secure_source_manager_instance_private_psc_endpoint'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       network_id: 'my-network'
       subnet_id: 'my-subnet'
@@ -142,6 +238,7 @@ examples:
       root_ca_id: 'root-ca'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -194,10 +291,66 @@ properties:
       - :UNKNOWN
   - !ruby/object:Api::Type::NestedObject
     name: 'hostConfig'
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+    external_providers: ["time"]
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the Instance.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'instance_id'
+    type: String
+    description: |
+      The name for the Instance.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the Instance.
+    immutable: true
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the Instance was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the Instance was updated in UTC.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs.
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the Instance.
+    output: true
+    enum_values:
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
+      - 'PAUSED'
+      - 'UNKNOWN'
+  - name: 'hostConfig'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A list of hostnames for this instance.
     output: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'html'
         description: 'HTML hostname.'
@@ -230,22 +383,67 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::NestedObject
     name: 'privateConfig'
+=======
+      - name: 'html'
+        type: String
+        description: 'HTML hostname.'
+        output: true
+      - name: 'api'
+        type: String
+        description: 'API hostname.'
+        output: true
+      - name: 'gitHttp'
+        type: String
+        description: 'Git HTTP hostname.'
+        output: true
+      - name: 'gitSsh'
+        type: String
+        description: 'Git SSH hostname.'
+        output: true
+  - name: 'stateNote'
+    type: Enum
+    description: |
+      Provides information about the current instance state.
+    output: true
+    enum_values:
+      - 'STATE_NOTE_UNSPECIFIED'
+      - 'PAUSED_CMEK_UNAVAILABLE'
+      - 'INSTANCE_RESUMING'
+  - name: 'kmsKey'
+    type: String
+    description: |
+      Customer-managed encryption key name, in the format projects/*/locations/*/keyRings/*/cryptoKeys/*.
+    immutable: true
+  - name: 'privateConfig'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Private settings for private instance.
     immutable: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Boolean
         name: 'isPrivate'
+=======
+      - name: 'isPrivate'
+        type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           'Indicate if it's private instance.'
         required: true
         immutable: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'caPool'
+=======
+      - name: 'caPool'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
         required: true
         immutable: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'httpServiceAttachment'
         description: |
@@ -253,6 +451,15 @@ properties:
         output: true
       - !ruby/object:Api::Type::String
         name: 'sshServiceAttachment'
+=======
+      - name: 'httpServiceAttachment'
+        type: String
+        description: |
+          Service Attachment for HTTP, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
+        output: true
+      - name: 'sshServiceAttachment'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true

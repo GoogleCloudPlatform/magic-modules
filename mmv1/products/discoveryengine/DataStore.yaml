@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
+=======
+---
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 name: 'DataStore'
 description: |
   Data store is a collection of websites and documents used to find answers for
   end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
   Conversation).
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
@@ -90,14 +99,90 @@ parameters:
     name: 'createAdvancedSiteSearch'
     default_value: false
     url_param_only: true
+=======
+references:
+  guides:
+    'Create a search data store': 'https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores?dataStoreId={{data_store_id}}&createAdvancedSiteSearch={{create_advanced_site_search}}&skipDefaultSchemaCreation={{skip_default_schema_creation}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'discoveryengine_datastore_basic'
+    primary_resource_id: 'basic'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_document_processing_config'
+    primary_resource_id: 'document_processing_config'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_document_processing_config_ocr'
+    primary_resource_id: 'document_processing_config_ocr'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+    exclude_docs: true
+  - name: 'discoveryengine_datastore_document_processing_config_layout'
+    primary_resource_id: 'document_processing_config_layout'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+    exclude_docs: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'dataStoreId'
+    type: String
+    description: |
+      The unique id of the data store.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'createAdvancedSiteSearch'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       If true, an advanced data store for site search will be created. If the
       data store is not configured as site search (GENERIC vertical and
       PUBLIC_WEBSITE contentConfig), this flag will be ignored.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Boolean
     name: 'skipDefaultSchemaCreation'
     default_value: false
     url_param_only: true
+=======
+    url_param_only: true
+    default_value: false
+  - name: 'skipDefaultSchemaCreation'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A boolean flag indicating whether to skip the default schema creation for
       the data store. Only enable this flag if you are certain that the default
@@ -107,21 +192,35 @@ parameters:
       This flag cannot be specified if `data_store.starting_schema` is
       specified.
 
+<<<<<<< HEAD
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+    url_param_only: true
+    default_value: false
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The unique full resource name of the data store. Values are of the format
       `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}`.
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'displayName'
+=======
+  - name: 'displayName'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The display name of the data store. This field must be a UTF-8 encoded
       string with a length limit of 128 characters.
     required: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Enum
     name: 'industryVertical'
     description: |
@@ -178,10 +277,68 @@ properties:
 
       - !ruby/object:Api::Type::NestedObject
         name: 'chunkingConfig'
+=======
+  - name: 'industryVertical'
+    type: Enum
+    description: |
+      The industry vertical that the data store registers.
+    required: true
+    immutable: true
+    enum_values:
+      - 'GENERIC'
+      - 'MEDIA'
+      - 'HEALTHCARE_FHIR'
+  - name: 'solutionTypes'
+    type: Array
+    description: |
+      The solutions that the data store enrolls.
+    immutable: true
+    item_type:
+      type: Enum
+      description: |
+        The type of solution.
+      enum_values:
+        - 'SOLUTION_TYPE_RECOMMENDATION'
+        - 'SOLUTION_TYPE_SEARCH'
+        - 'SOLUTION_TYPE_CHAT'
+        - 'SOLUTION_TYPE_GENERATIVE_CHAT'
+  - name: 'defaultSchemaId'
+    type: String
+    description: |
+      The id of the default Schema associated with this data store.
+    output: true
+  - name: 'contentConfig'
+    type: Enum
+    description: |
+      The content config of the data store.
+    required: true
+    immutable: true
+    enum_values:
+      - 'NO_CONTENT'
+      - 'CONTENT_REQUIRED'
+      - 'PUBLIC_WEBSITE'
+  - name: 'documentProcessingConfig'
+    type: NestedObject
+    description: |
+      Configuration for Document understanding and enrichment.
+    required: false
+    immutable: true
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          The full resource name of the Document Processing Config. Format:
+          `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/documentProcessingConfig`.
+        required: false
+        output: true
+      - name: 'chunkingConfig'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Whether chunking mode is enabled.
         required: false
         properties:
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: 'layoutBasedChunkingConfig'
             allow_empty_object: true
@@ -199,18 +356,43 @@ properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'includeAncestorHeadings'
                 required: false
+=======
+          - name: 'layoutBasedChunkingConfig'
+            type: NestedObject
+            description: |
+              Configuration for the layout based chunking.
+            required: false
+            send_empty_value: true
+            allow_empty_object: true
+            properties:
+              - name: 'chunkSize'
+                type: Integer
+                description: |
+                  The token size limit for each chunk.
+                  Supported values: 100-500 (inclusive). Default value: 500.
+                required: false
+              - name: 'includeAncestorHeadings'
+                type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   Whether to include appending different levels of headings to chunks from the middle of the document to prevent context loss.
                   Default value: False.
 
+<<<<<<< HEAD
       - !ruby/object:Api::Type::NestedObject
         name: 'defaultParsingConfig'
+=======
+                required: false
+      - name: 'defaultParsingConfig'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Configurations for default Document parser. If not specified, this resource
           will be configured to use a default DigitalParsingConfig, and the default parsing
           config will be applied to all file types for Document parsing.
         required: false
         properties:
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: 'digitalParsingConfig'
             allow_empty_object: true
@@ -253,11 +435,57 @@ properties:
 
       - !ruby/object:Api::Type::Map
         name: 'parsingConfigOverrides'
+=======
+          - name: 'digitalParsingConfig'
+            type: NestedObject
+            description: |
+              Configurations applied to digital parser.
+            required: false
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - 'default_parsing_config.0.digital_parsing_config'
+              - 'default_parsing_config.0.ocr_parsing_config'
+              - 'default_parsing_config.0.layout_parsing_config'
+            properties:
+              []
+          - name: 'ocrParsingConfig'
+            type: NestedObject
+            description: |
+              Configurations applied to OCR parser. Currently it only applies to PDFs.
+            required: false
+            exactly_one_of:
+              - 'default_parsing_config.0.digital_parsing_config'
+              - 'default_parsing_config.0.ocr_parsing_config'
+              - 'default_parsing_config.0.layout_parsing_config'
+            properties:
+              - name: 'useNativeText'
+                type: Boolean
+                description: |
+                  If true, will use native text instead of OCR text on pages containing native text.
+                required: false
+          - name: 'layoutParsingConfig'
+            type: NestedObject
+            description: |
+              Configurations applied to layout parser.
+            required: false
+            send_empty_value: true
+            allow_empty_object: true
+            exactly_one_of:
+              - 'default_parsing_config.0.digital_parsing_config'
+              - 'default_parsing_config.0.ocr_parsing_config'
+              - 'default_parsing_config.0.layout_parsing_config'
+            properties:
+              []
+      - name: 'parsingConfigOverrides'
+        type: Map
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Map from file type to override the default parsing configuration based on the file type. Supported keys:
             * `pdf`: Override parsing config for PDF files, either digital parsing, ocr parsing or layout parsing is supported.
             * `html`: Override parsing config for HTML files, only digital parsing and or layout parsing are supported.
             * `docx`: Override parsing config for DOCX files, only digital parsing and or layout parsing are supported.
+<<<<<<< HEAD
         key_name: file_type
 
         value_type: !ruby/object:Api::Type::NestedObject
@@ -304,6 +532,56 @@ properties:
 
   - !ruby/object:Api::Type::Time
     name: "createTime"
+=======
+        key_name: 'file_type'
+        value_type:
+          name: parsingConfigOverrides
+          type: NestedObject
+          properties:
+            - name: 'digitalParsingConfig'
+              type: NestedObject
+              description: |
+                Configurations applied to digital parser.
+              required: false
+              send_empty_value: true
+              allow_empty_object: true
+              exactly_one_of:
+                - 'default_parsing_config.0.digital_parsing_config'
+                - 'default_parsing_config.0.ocr_parsing_config'
+                - 'default_parsing_config.0.layout_parsing_config'
+              properties:
+                []
+            - name: 'ocrParsingConfig'
+              type: NestedObject
+              description: |
+                Configurations applied to OCR parser. Currently it only applies to PDFs.
+              required: false
+              exactly_one_of:
+                - 'default_parsing_config.0.digital_parsing_config'
+                - 'default_parsing_config.0.ocr_parsing_config'
+                - 'default_parsing_config.0.layout_parsing_config'
+              properties:
+                - name: 'useNativeText'
+                  type: Boolean
+                  description: |
+                    If true, will use native text instead of OCR text on pages containing native text.
+                  required: false
+            - name: 'layoutParsingConfig'
+              type: NestedObject
+              description: |
+                Configurations applied to layout parser.
+              required: false
+              send_empty_value: true
+              allow_empty_object: true
+              exactly_one_of:
+                - 'default_parsing_config.0.digital_parsing_config'
+                - 'default_parsing_config.0.ocr_parsing_config'
+                - 'default_parsing_config.0.layout_parsing_config'
+              properties:
+                []
+  - name: 'createTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Timestamp when the DataStore was created.
     output: true

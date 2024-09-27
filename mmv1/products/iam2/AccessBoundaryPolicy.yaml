@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,14 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'AccessBoundaryPolicy'
 base_url: policies/{{parent}}/accessboundarypolicies
 create_url: policies/{{parent}}/accessboundarypolicies?policyId={{name}}
+=======
+---
+name: 'AccessBoundaryPolicy'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   Represents a collection of access boundary policies to apply to a given resource.
   **NOTE**: This is a private feature and users should contact GCP support
   if they would like to test it.
+<<<<<<< HEAD
 autogen_async: true
 # Skipping sweeper since this is a child resource
 skip_sweeper: true
@@ -28,6 +38,37 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_access_boundary_policy_basic'
     skip_test: true
+=======
+docs:
+id_format: '{{parent}}/{{name}}'
+base_url: 'policies/{{parent}}/accessboundarypolicies'
+create_url: 'policies/{{parent}}/accessboundarypolicies?policyId={{name}}'
+import_format:
+  - '{{parent}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+# Skipping sweeper since this is a child resource
+exclude_sweeper: true
+examples:
+  - name: 'iam_access_boundary_policy_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       policy_name: 'my-ab-policy'
@@ -35,6 +76,7 @@ examples:
       project_id: 'my-project'
       access_level_title: 'chromeos_no_lock'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
       billing_account: :BILLING_ACCT
 properties:
@@ -88,10 +130,71 @@ properties:
               item_type: Api::Type::String
             - !ruby/object:Api::Type::NestedObject
               name: 'availabilityCondition'
+=======
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
+    description: |
+      The attachment point is identified by its URL-encoded full resource name.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name of the rule.
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      The hash of the resource. Used internally during updates.
+    output: true
+  - name: 'rules'
+    type: Array
+    description: |
+      Rules to be applied.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            The description of the rule.
+        - name: 'accessBoundaryRule'
+          type: NestedObject
+          description: |
+            An access boundary rule in an IAM policy.
+          properties:
+            - name: 'availableResource'
+              type: String
+              description:
+                The full resource name of a Google Cloud resource entity.
+            - name: 'availablePermissions'
+              type: Array
+              description:
+                A list of permissions that may be allowed for use on the
+                specified resource.
+              item_type:
+                type: String
+            - name: 'availabilityCondition'
+              type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description:
                 The availability condition further constrains the access allowed
                 by the access boundary rule.
               properties:
+<<<<<<< HEAD
                 - !ruby/object:Api::Type::String
                   name: 'expression'
                   description: |
@@ -109,6 +212,25 @@ properties:
                     e.g. when hovered over it in a UI.
                 - !ruby/object:Api::Type::String
                   name: 'location'
+=======
+                - name: 'expression'
+                  type: String
+                  description: |
+                    Textual representation of an expression in Common Expression Language syntax.
+                  required: true
+                - name: 'title'
+                  type: String
+                  description: |
+                    Title for the expression, i.e. a short string describing its purpose.
+                    This can be used e.g. in UIs which allow to enter the expression.
+                - name: 'description'
+                  type: String
+                  description: |
+                    Description of the expression. This is a longer text which describes the expression,
+                    e.g. when hovered over it in a UI.
+                - name: 'location'
+                  type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                   description: |
                     String indicating the location of the expression for error reporting,
                     e.g. a file name and a position in the file.

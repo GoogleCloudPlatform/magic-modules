@@ -202,12 +202,21 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
 	resourceConverters := map[string]string{
+<<<<<<< HEAD
 		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/go/compute_instance_helpers.go.tmpl",
 		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
 		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/go/iam_kms_key_ring.go.tmpl",
 		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/go/iam_kms_crypto_key.go.tmpl",
 		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/go/metadata.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance.go":         "third_party/tgc/services/compute/compute_instance.go.tmpl",
+=======
+		"converters/google/resources/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"converters/google/resources/resource_converters.go":                       "third_party/tgc/resource_converters.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_key_ring.go":             "third_party/terraform/services/kms/iam_kms_key_ring.go.tmpl",
+		"converters/google/resources/services/kms/iam_kms_crypto_key.go":           "third_party/terraform/services/kms/iam_kms_crypto_key.go.tmpl",
+		"converters/google/resources/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"converters/google/resources/services/compute/compute_instance.go":         "third_party/tgc/compute_instance.go.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
@@ -296,12 +305,16 @@ func retrieveFullListOfTestTilesWithLocation() map[string]string {
 
 func retrieveTestSourceCodeWithLocation(suffix string) map[string]string {
 	var fileNames []string
+<<<<<<< HEAD
 	var path string
 	if suffix == ".tmpl" {
 		path = "third_party/tgc/tests/source/go"
 	} else {
 		path = "third_party/tgc/tests/source"
 	}
+=======
+	path := "third_party/tgc/tests/source"
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
@@ -325,8 +338,13 @@ func retrieveTestSourceCodeWithLocation(suffix string) map[string]string {
 }
 
 func retrieveListOfManuallyDefinedTests() []string {
+<<<<<<< HEAD
 	m1 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/go/cli_test.go.tmpl")
 	m2 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/go/read_test.go.tmpl")
+=======
+	m1 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/cli_test.go.tmpl")
+	m2 := retrieveListOfManuallyDefinedTestsFromFile("third_party/tgc/tests/source/read_test.go.tmpl")
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	return google.Concat(m1, m2)
 }
 

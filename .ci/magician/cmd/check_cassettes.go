@@ -64,7 +64,11 @@ var checkCassettesCmd = &cobra.Command{
 
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
+<<<<<<< HEAD
 		vt, err := vcr.NewTester(env, "vcr-check-cassettes", "ci-vcr-cassettes", rnr)
+=======
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "vcr-check-cassettes", rnr)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}

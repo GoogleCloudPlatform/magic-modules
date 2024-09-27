@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'ManagedSslCertificate'
 kind: 'compute#sslCertificate'
@@ -22,6 +27,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
 immutable: true
 has_self_link: true
+=======
+---
+name: 'ManagedSslCertificate'
+kind: 'compute#sslCertificate'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   An SslCertificate resource, used for HTTPS load balancing.  This resource
   represents a certificate for which the certificate secrets are created and
@@ -29,6 +39,7 @@ description: |
 
   For a resource where you provide the key, see the
   SSL Certificate resource.
+<<<<<<< HEAD
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -61,6 +72,13 @@ timeouts: !ruby/object:Api::Timeouts
     # on the provisioning process either succeeding or failing completely.
   delete_minutes: 30
 docs: !ruby/object:Provider::Terraform::Docs
+=======
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
+docs:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   warning: |
     This resource should be used with extreme caution!  Provisioning an SSL
     certificate is complex.  Ensure that you understand the lifecycle of a
@@ -74,11 +92,48 @@ docs: !ruby/object:Provider::Terraform::Docs
     certificates may entail some downtime while the certificate provisions.
 
     In conclusion: Be extremely cautious.
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/compute_managed_ssl_certificate.go.erb
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'managed_ssl_certificate_basic'
+=======
+base_url: 'projects/{{project}}/global/sslCertificates'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+    # Deletes can take 20-30 minutes to complete, since they depend
+    # on the provisioning process either succeeding or failing completely.
+  delete_minutes: 30
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      # Deletes can take 20-30 minutes to complete, since they depend
+      # on the provisioning process either succeeding or failing completely.
+      delete_minutes: 30
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+  constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'
+examples:
+  - name: 'managed_ssl_certificate_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       cert_name: 'test-cert'
@@ -88,12 +143,17 @@ examples:
       dns_zone_name: 'dnszone'
       forwarding_rule_name: 'forwarding-rule'
       http_health_check_name: 'http-health-check'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'managed_ssl_certificate_recreation'
+=======
+  - name: 'managed_ssl_certificate_recreation'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'cert'
     external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
+<<<<<<< HEAD
 properties:
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
@@ -109,6 +169,24 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+parameters:
+properties:
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+  - name: 'certificate_id'
+    type: Integer
+    description: 'The unique identifier for the resource.'
+    api_name: id
+    output: true
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -119,12 +197,18 @@ properties:
       character, which cannot be a dash.
 
       These are in the same namespace as the managed SSL certificates.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'managed'
+=======
+  - name: 'managed'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Properties relevant to a managed certificate.  These will be used if the
       certificate is managed (as indicated by a value of `MANAGED` in `type`).
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Array
         name: 'domains'
         description: |
@@ -150,6 +234,35 @@ properties:
     output: true
   - !ruby/object:Api::Type::Time
     name: 'expireTime'
+=======
+      - name: 'domains'
+        type: Array
+        description: |
+          Domains for which a managed SSL certificate will be valid.  Currently,
+          there can be up to 100 domains in this list.
+        required: true
+        diff_suppress_func: 'AbsoluteDomainSuppress'
+        item_type:
+          type: String
+        max_size: 100
+  - name: 'type'
+    type: Enum
+    description: |
+      Enum field whose value is always `MANAGED` - used to signal to the API
+      which type this is.
+    default_value: "MANAGED"
+    enum_values:
+      - 'MANAGED'
+  - name: 'subjectAlternativeNames'
+    type: Array
+    description: |
+      Domains associated with the certificate via Subject Alternative Name.
+    output: true
+    item_type:
+      type: String
+  - name: 'expireTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Expire time of the certificate in RFC3339 text format.
     output: true

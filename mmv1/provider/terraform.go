@@ -316,9 +316,15 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
 		"go.sum":                           "third_party/terraform/go.sum",
+<<<<<<< HEAD
 		"go.mod":                           "third_party/terraform/go/go.mod.tmpl",
 		".go-version":                      "third_party/terraform/.go-version",
 		"terraform-registry-manifest.json": "third_party/terraform/go/terraform-registry-manifest.json.tmpl",
+=======
+		"go.mod":                           "third_party/terraform/go.mod.tmpl",
+		".go-version":                      "third_party/terraform/.go-version",
+		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
@@ -333,7 +339,11 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 				return nil
 			}
 
+<<<<<<< HEAD
 			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+=======
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			target := fname
 			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
@@ -424,10 +434,17 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 	// Case 3: When compile a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
+<<<<<<< HEAD
 		"main.go":                       "third_party/terraform/go/main.go.tmpl",
 		".goreleaser.yml":               "third_party/terraform/go/.goreleaser.yml.tmpl",
 		".release/release-metadata.hcl": "third_party/terraform/go/release-metadata.hcl.tmpl",
 		".copywrite.hcl":                "third_party/terraform/go/.copywrite.hcl.tmpl",
+=======
+		"main.go":                       "third_party/terraform/main.go.tmpl",
+		".goreleaser.yml":               "third_party/terraform/.goreleaser.yml.tmpl",
+		".release/release-metadata.hcl": "third_party/terraform/release-metadata.hcl.tmpl",
+		".copywrite.hcl":                "third_party/terraform/.copywrite.hcl.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	maps.Copy(commonCompileFiles, singleFiles)
 
@@ -438,7 +455,11 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
+<<<<<<< HEAD
 			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+=======
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
 			if targetDir != "." {

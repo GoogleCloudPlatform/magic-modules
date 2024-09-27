@@ -335,6 +335,14 @@ func (t *Type) SetDefault(r *Resource) {
 		if t.Description == "" {
 			t.Description = fmt.Sprintf("A reference to %s resource", t.Resource)
 		}
+<<<<<<< HEAD
+=======
+	case t.IsA("Fingerprint"):
+		// Represents a fingerprint.  A fingerprint is an output-only
+		// field used for optimistic locking during updates.
+		// They are fetched from the GCP response.
+		t.Output = true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	default:
 	}
 
@@ -648,6 +656,7 @@ func (t *Type) GetDescription() string {
 }
 
 // TODO rewrite: validation
+<<<<<<< HEAD
 // Represents a fingerprint.  A fingerprint is an output-only
 // field used for optimistic locking during updates.
 // They are fetched from the GCP response.
@@ -659,6 +668,8 @@ func (t *Type) GetDescription() string {
 // end
 
 // TODO rewrite: validation
+=======
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 // class Array < Composite
 //     check :item_type, type: [::String, NestedObject, ResourceRef, Enum], required: true
 

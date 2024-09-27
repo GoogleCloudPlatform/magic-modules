@@ -1,0 +1,14 @@
+resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
+  name             = "{{index $.Vars "sqlserver_instance_backup_location"}}"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2019_STANDARD"
+  root_password = "INSERT-PASSWORD-HERE"
+  settings {
+    tier = "db-custom-2-7680"
+    backup_configuration {
+      enabled                        = true
+      location                       = "us-central1"
+    }
+  }
+  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+}

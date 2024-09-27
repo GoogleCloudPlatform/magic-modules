@@ -17,4 +17,15 @@ if !ok || v == nil {
   return res, nil
 }
 
+<<<<<<<< HEAD:mmv1/templates/terraform/decoders/unwrap_resource.go.erb
 return v.(map[string]interface{}), nil
+========
+!ruby/object:Api::Resource
+name: 'MyResource'
+kind: 'myproduct#myresource'
+description: 'foo'
+properties:
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: 'an explanation whats this about'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/spec/data/good-resource.yaml

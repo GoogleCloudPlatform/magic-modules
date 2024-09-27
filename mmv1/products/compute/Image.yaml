@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Image'
 kind: 'compute#image'
@@ -22,6 +27,11 @@ references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/images'
   api: 'https://cloud.google.com/compute/docs/reference/v1/images'
+=======
+---
+name: 'Image'
+kind: 'compute#image'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   Represents an Image resource.
 
@@ -39,6 +49,7 @@ description: |
   images are available only to your project. You can create a custom image
   from root persistent disks and other images. Then, use the custom image
   to create an instance.
+<<<<<<< HEAD
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     kind: 'compute#operation'
@@ -85,10 +96,65 @@ examples:
 properties:
   - !ruby/object:Api::Type::Integer
     name: 'archiveSizeBytes'
+=======
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/images'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/images'
+docs:
+base_url: 'projects/{{project}}/global/images'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+iam_policy:
+  allowed_iam_role: 'roles/compute.imageUser'
+  parent_resource_attribute: 'image'
+  iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
+examples:
+  - name: 'image_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-image%s", context["random_suffix"])'
+    vars:
+      image_name: 'example-image'
+  - name: 'image_guest_os'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-image'
+  - name: 'image_basic_storage_location'
+    primary_resource_id: 'example'
+    vars:
+      image_name: 'example-sl-image'
+      primary_resource_name: 'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
+parameters:
+properties:
+  - name: 'archiveSizeBytes'
+    type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Size of the image tar.gz archive stored in Google Cloud Storage (in
       bytes).
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Time
     name: 'creationTimestamp'
     description: 'Creation timestamp in RFC3339 text format.'
@@ -100,27 +166,54 @@ properties:
       you create the resource.
   - !ruby/object:Api::Type::Array
     name: 'storageLocations'
+=======
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource. Provide this property when
+      you create the resource.
+  - name: 'storageLocations'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Cloud Storage bucket storage location of the image
       (regional or multi-regional).
       Reference link: https://cloud.google.com/compute/docs/reference/rest/v1/images
+<<<<<<< HEAD
     item_type: Api::Type::String
     default_from_api: true
   - !ruby/object:Api::Type::Integer
     name: 'diskSizeGb'
+=======
+    default_from_api: true
+    item_type:
+      type: String
+  - name: 'diskSizeGb'
+    type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Size of the image when restored onto a persistent disk (in GB).
     # TODO(alexstephen): Build family support.
     # Families use a different API
     default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'family'
+=======
+  - name: 'family'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The name of the image family to which this image belongs. You can
       create disks by specifying an image family instead of a specific
       image name. The image family always returns its latest image that is
       not deprecated. The name of the image family must comply with
       RFC1035.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Array
     name: 'guestOsFeatures'
     description: |
@@ -150,6 +243,38 @@ properties:
             - :SEV_LIVE_MIGRATABLE_V2
   - !ruby/object:Api::Type::NestedObject
     name: 'imageEncryptionKey'
+=======
+  - name: 'guestOsFeatures'
+    type: Array
+    description: |
+      A list of features to enable on the guest operating system.
+      Applicable only for bootable images.
+    is_set: true
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'type'
+          type: Enum
+          description: |
+            The type of supported feature. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+          required: true
+          enum_values:
+            - 'MULTI_IP_SUBNET'
+            - 'SECURE_BOOT'
+            - 'SEV_CAPABLE'
+            - 'UEFI_COMPATIBLE'
+            - 'VIRTIO_SCSI_MULTIQUEUE'
+            - 'WINDOWS'
+            - 'GVNIC'
+            - 'SEV_LIVE_MIGRATABLE'
+            - 'SEV_SNP_CAPABLE'
+            - 'SUSPEND_RESUME_COMPATIBLE'
+            - 'TDX_CAPABLE'
+            - 'SEV_LIVE_MIGRATABLE_V2'
+  - name: 'imageEncryptionKey'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Encrypts the image using a customer-supplied encryption key.
 
@@ -157,6 +282,7 @@ properties:
       provide the same key if you use the image later (e.g. to create a
       disk from the image)
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'kmsKeySelfLink'
         api_name: 'kmsKeyName'
@@ -167,10 +293,23 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyServiceAccount'
+=======
+      - name: 'kmsKeySelfLink'
+        type: String
+        description: |
+          The self link of the encryption key that is stored in Google Cloud
+          KMS.
+        api_name: kmsKeyName
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+      - name: 'kmsKeyServiceAccount'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: Labels to apply to this Image.
@@ -195,6 +334,35 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Labels to apply to this Image.
+    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+    update_verb: 'POST'
+  - name: 'labelFingerprint'
+    type: Fingerprint
+    description: |
+      The fingerprint used for optimistic locking of this resource. Used
+      internally during updates.
+    output: true
+    update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+    update_verb: 'POST'
+    key_expander: ''
+  - name: 'licenses'
+    type: Array
+    description: Any applicable license URI.
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
+      name: 'license'
+      type: ResourceRef
+      description: 'An applicable license URI'
+      resource: 'License'
+      imports: 'selfLink'
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource; provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -204,6 +372,7 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
     required: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'rawDisk'
     description: The parameters of the raw disk image.
@@ -211,11 +380,21 @@ properties:
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'containerType'
+=======
+  - name: 'rawDisk'
+    type: NestedObject
+    description: The parameters of the raw disk image.
+    ignore_read: true
+    properties:
+      - name: 'containerType'
+        type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The format used to encode and transmit the block device, which
           should be TAR. This is just a container and transmission format
           and not a runtime format. Provided by the client when the disk
           image is created.
+<<<<<<< HEAD
         values:
           - :TAR
         default_value: :TAR
@@ -229,21 +408,49 @@ properties:
       - !ruby/object:Api::Type::String
         name: 'source'
         required: true
+=======
+        default_value: "TAR"
+        enum_values:
+          - 'TAR'
+      - name: 'sha1'
+        type: String
+        description: |
+          An optional SHA1 checksum of the disk image before unpackaging.
+          This is provided by the client when the disk image is created.
+        api_name: sha1Checksum
+      # TODO(alexstephen): Figure out cross-module ResourceRefs
+      - name: 'source'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The full Google Cloud Storage URL where disk storage is stored
           You must provide either this property or the sourceDisk property
           but not both.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceDisk'
+=======
+        required: true
+  - name: 'sourceDisk'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The source disk to create this image based on.
       You must provide either this property or the
       rawDisk.source property but not both to create an image.
+<<<<<<< HEAD
     resource: 'Disk'
     imports: 'selfLink'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceImage'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Disk'
+    imports: 'selfLink'
+  - name: 'sourceImage'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       URL of the source image used to create this image. In order to create an image, you must provide the full or partial
       URL of one of the following:
@@ -252,11 +459,19 @@ properties:
       * This property
       * The rawDisk.source URL
       * The sourceDisk URL
+<<<<<<< HEAD
     resource: 'Image'
     imports: 'selfLink'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::ResourceRef
     name: 'sourceSnapshot'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Image'
+    imports: 'selfLink'
+  - name: 'sourceSnapshot'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       URL of the source snapshot used to create this image.
 
@@ -267,7 +482,13 @@ properties:
       * The sourceImage URL
       * The rawDisk.source URL
       * The sourceDisk URL
+<<<<<<< HEAD
     resource: 'Snapshot'
     imports: 'selfLink'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 # State is not applicable for state convergence.
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Snapshot'
+    imports: 'selfLink'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

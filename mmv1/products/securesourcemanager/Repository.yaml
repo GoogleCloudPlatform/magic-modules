@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Repository'
 base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
@@ -51,11 +52,58 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
       context[\"random_suffix\"\
       ])"
+=======
+---
+name: 'Repository'
+description: 'Repositories store source code. It supports all Git SCM client commands and has built-in pull requests and issue tracking. Both HTTPS and SSH authentication are supported.'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+  - '{{repository_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/securesourcemanager.repoAdmin'
+  parent_resource_attribute: 'repository_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+    - '{{repository_id}}'
+custom_code:
+examples:
+  - name: 'secure_source_manager_repository_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -65,11 +113,20 @@ examples:
     primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
       context[\"random_suffix\"\
       ])"
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'secure_source_manager_repository_initial_config'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
       prevent_destroy: 'true'
     test_vars_overrides:
+<<<<<<< HEAD
       prevent_destroy: 'false'
     oics_vars_overrides:
       prevent_destroy: 'false'
@@ -98,10 +155,41 @@ properties:
       Description of the repository, which cannot exceed 500 characters.
   - !ruby/object:Api::Type::String
     name: 'instance'
+=======
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the Repository.
+    url_param_only: true
+    required: true
+  - name: 'repository_id'
+    type: String
+    description: |
+      The ID for the Repository.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name for the Repository.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Description of the repository, which cannot exceed 500 characters.
+  - name: 'instance'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The name of the instance in which the repository is hosted.
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'uid'
     description: |
@@ -119,10 +207,30 @@ properties:
     output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'uris'
+=======
+  - name: 'uid'
+    type: String
+    description: |
+      Unique identifier of the repository.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the repository was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the repository was updated in UTC.
+    output: true
+  - name: 'uris'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       URIs for the repository.
     output: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'html'
         description: |
@@ -140,10 +248,30 @@ properties:
         output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'initialConfig'
+=======
+      - name: 'html'
+        type: String
+        description: |
+          HTML is the URI for the user to view the repository in a browser.
+        output: true
+      - name: 'gitHttps'
+        type: String
+        description:
+          git_https is the git HTTPS URI for git operations.
+        output: true
+      - name: 'api'
+        type: String
+        description: |
+          API is the URI for API access.
+        output: true
+  - name: 'initialConfig'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Initial configurations for the repository.
     ignore_read: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'defaultBranch'
         description: |
@@ -161,6 +289,26 @@ properties:
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
       - !ruby/object:Api::Type::String
         name: 'readme'
+=======
+      - name: 'defaultBranch'
+        type: String
+        description: |
+          Default branch name of the repository.
+      - name: 'gitignores'
+        type: Array
+        description: |
+          List of gitignore template names user can choose from.
+          Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
+        item_type:
+          type: String
+      - name: 'license'
+        type: String
+        description: |
+          License template name user can choose from.
+          Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
+      - name: 'readme'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           README template name.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.

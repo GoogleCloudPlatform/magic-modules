@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'ForwardingRule'
 kind: 'compute#forwardingRule'
@@ -19,10 +24,16 @@ collection_url_key: 'items'
 has_self_link: true
 # Has a separate endpoint for labels
 skip_attribution_label: true
+=======
+---
+name: 'ForwardingRule'
+kind: 'compute#forwardingRule'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
   of target virtual machines to forward a packet to if it matches the given
   [IPAddress, IPProtocol, portRange] tuple.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
@@ -51,6 +62,48 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'internal_http_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'
+=======
+# Has a separate endpoint for labels
+exclude_attribution_label: true
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
+  api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRules'
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/forwardingRules'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+  constants: 'templates/terraform/constants/compute_forwarding_rule.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_forwarding_rule.go.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
+custom_diff:
+  - 'forwardingRuleCustomizeDiff'
+legacy_long_form_project: true
+examples:
+  - name: 'internal_http_lb_with_mig_backend'
+    primary_resource_id: 'google_compute_forwarding_rule'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       ilb_network_name: 'l7-ilb-network'
       proxy_subnet_name: 'l7-ilb-proxy-subnet'
@@ -65,6 +118,7 @@ examples:
       fw_allow_iap_hc_name: 'l7-ilb-fw-allow-iap-hc'
       fw_allow_ilb_to_backends_name: 'l7-ilb-fw-allow-ilb-to-backends'
       vm_test_name: 'l7-ilb-test-vm'
+<<<<<<< HEAD
     min_version: beta
     ignore_read_extra:
       - 'port_range'
@@ -72,6 +126,14 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'internal_tcp_udp_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'
+=======
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+  - name: 'internal_tcp_udp_lb_with_mig_backend'
+    primary_resource_id: 'google_compute_forwarding_rule'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       ilb_network_name: 'l4-ilb-network'
       backend_subnet_name: 'l4-ilb-subnet'
@@ -84,26 +146,42 @@ examples:
       fw_allow_ilb_to_backends_name: 'l4-ilb-fw-allow-ilb-to-backends'
       fw_allow_ilb_ssh_name: 'l4-ilb-fw-ssh'
       vm_test_name: 'l4-ilb-test-vm'
+<<<<<<< HEAD
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_externallb'
     primary_resource_id: 'default'
+=======
+  - name: 'forwarding_rule_externallb'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
+<<<<<<< HEAD
     min_version: beta
     ignore_read_extra:
       - 'port_range'
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_global_internallb'
+=======
+    ignore_read_extra:
+      - 'port_range'
+  - name: 'forwarding_rule_global_internallb'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_basic'
+=======
+  - name: 'forwarding_rule_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
@@ -111,16 +189,26 @@ examples:
     ignore_read_extra:
       - 'port_range'
       - 'target'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_l3_default'
     primary_resource_id: 'fwd_rule'
+=======
+  - name: 'forwarding_rule_l3_default'
+    primary_resource_id: 'fwd_rule'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       forwarding_rule_name: 'l3-forwarding-rule'
       service_name: 'service'
       health_check_name: 'health-check'
+<<<<<<< HEAD
     min_version: beta
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_internallb'
+=======
+  - name: 'forwarding_rule_internallb'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
@@ -129,10 +217,16 @@ examples:
     ignore_read_extra:
       - 'port_range'
       - 'target'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_http_lb'
     min_version: 'beta'
     primary_resource_id: 'default'
+=======
+  - name: 'forwarding_rule_http_lb'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
       region_target_http_proxy_name: 'website-proxy'
@@ -145,10 +239,16 @@ examples:
     ignore_read_extra:
       - 'port_range'
       - 'target'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_regional_http_xlb'
     min_version: 'beta'
     primary_resource_id: 'default'
+=======
+  - name: 'forwarding_rule_regional_http_xlb'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       forwarding_rule_name: 'website-forwarding-rule'
       region_target_http_proxy_name: 'website-proxy'
@@ -163,8 +263,12 @@ examples:
       - 'port_range'
       - 'target'
       - 'ip_address'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_vpc_psc'
+=======
+  - name: 'forwarding_rule_vpc_psc'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'psc-endpoint'
@@ -180,8 +284,12 @@ examples:
       - 'port_range'
       - 'target'
       - 'ip_address'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_vpc_psc_no_automate_dns'
+=======
+  - name: 'forwarding_rule_vpc_psc_no_automate_dns'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       forwarding_rule_name: 'psc-endpoint'
@@ -197,14 +305,19 @@ examples:
       - 'port_range'
       - 'target'
       - 'ip_address'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'forwarding_rule_regional_steering'
+=======
+  - name: 'forwarding_rule_regional_steering'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'steering'
     vars:
       forwarding_rule_name: 'steering-rule'
       ip_name: 'website-ip'
       backend_name: 'service-backend'
       external_forwarding_rule_name: 'external-forwarding-rule'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: "forwarding_rule_internallb_ipv6"
     primary_resource_id: "default"
@@ -234,12 +347,34 @@ parameters:
     name: 'region'
     resource: 'Region'
     imports: 'name'
+=======
+  - name: 'forwarding_rule_internallb_ipv6'
+    primary_resource_id: 'default'
+    vars:
+      forwarding_rule_name: 'ilb-ipv6-forwarding-rule'
+      backend_name: 'ilb-ipv6-backend'
+      network_name: 'net-ipv6'
+      subnet_name: 'subnet-internal-ipv6'
+    ignore_read_extra:
+      - 'port_range'
+      - 'target'
+virtual_fields:
+  - name: 'recreate_closed_psc'
+    description:
+      This is used in PSC consumer ForwardingRule to make terraform recreate the ForwardingRule when the status is closed
+    type: Boolean
+    default_value: false
+parameters:
+  - name: 'region'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A reference to the region where the regional forwarding rule resides.
 
       This field is not applicable to global forwarding rules.
     required: false
     default_from_api: true
+<<<<<<< HEAD
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
@@ -249,6 +384,19 @@ properties:
     output: true
   - !ruby/object:Api::Type::Boolean
     name: 'isMirroringCollector'
+=======
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
+properties:
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'isMirroringCollector'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Indicates whether or not this load balancer can be used as a collector for
       packet mirroring. To prevent mirroring loops, instances behind this
@@ -257,30 +405,54 @@ properties:
 
       This can only be set to true for load balancers that have their
       `loadBalancingScheme` set to `INTERNAL`.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Integer
     name: 'forwardingRuleId'
+=======
+  - name: 'forwardingRuleId'
+    type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The unique identifier number for the resource. This identifier is defined by the server.
     api_name: id
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'pscConnectionId'
     description: 'The PSC connection id of the PSC Forwarding Rule.'
     output: true
   - !ruby/object:Api::Type::String
     name: 'pscConnectionStatus'
+=======
+  - name: 'pscConnectionId'
+    type: String
+    description: 'The PSC connection id of the PSC Forwarding Rule.'
+    output: true
+  - name: 'pscConnectionStatus'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       'The PSC connection status of the PSC Forwarding Rule. Possible values:
       `STATUS_UNSPECIFIED`, `PENDING`, `ACCEPTED`, `REJECTED`, `CLOSED`'
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'description'
+=======
+  - name: 'description'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
   # This is a multi-resource resource reference (Address, GlobalAddress)
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'IPAddress'
+=======
+  - name: 'IPAddress'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       IP address for which this forwarding rule accepts traffic. When a client
       sends traffic to this IP address, the forwarding rule directs the traffic
@@ -321,9 +493,15 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
+<<<<<<< HEAD
     diff_suppress_func: InternalIpDiffSuppress
   - !ruby/object:Api::Type::Enum
     name: 'IPProtocol'
+=======
+    diff_suppress_func: 'InternalIpDiffSuppress'
+  - name: 'IPProtocol'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The IP protocol to which this rule applies.
 
@@ -339,6 +517,7 @@ properties:
       A Forwarding Rule with protocol L3_DEFAULT can attach with target instance or
       backend service with UNSPECIFIED protocol.
       A forwarding rule with "L3_DEFAULT" IPProtocal cannot be attached to a backend service with TCP or UDP.
+<<<<<<< HEAD
     values:
       - :TCP
       - :UDP
@@ -355,19 +534,44 @@ properties:
     name: 'backendService'
     resource: 'BackendService'
     imports: 'selfLink'
+=======
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+    enum_values:
+      - 'TCP'
+      - 'UDP'
+      - 'ESP'
+      - 'AH'
+      - 'SCTP'
+      - 'ICMP'
+      - 'L3_DEFAULT'
+  # This is a multi-resource resource reference (BackendService (global), RegionBackendService)
+  # We have custom expands that manage this.
+  - name: 'backendService'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Identifies the backend service to which the forwarding rule sends traffic.
 
       Required for Internal TCP/UDP Load Balancing and Network Load Balancing;
       must be omitted for all other load balancer types.
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   - !ruby/object:Api::Type::Enum
     name: 'loadBalancingScheme'
+=======
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
+    resource: 'BackendService'
+    imports: 'selfLink'
+  - name: 'loadBalancingScheme'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Specifies the forwarding rule type.
 
       For more information about forwarding rules, refer to
       [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
+<<<<<<< HEAD
     values:
       - :EXTERNAL
       - :EXTERNAL_MANAGED
@@ -376,6 +580,16 @@ properties:
     default_value: :EXTERNAL
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+    default_value: "EXTERNAL"
+    enum_values:
+      - 'EXTERNAL'
+      - 'EXTERNAL_MANAGED'
+      - 'INTERNAL'
+      - 'INTERNAL_MANAGED'
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource; provided by the client when the resource is created.
       The name must be 1-63 characters long, and comply with
@@ -391,10 +605,15 @@ properties:
       APIs, the forwarding rule name must be a 1-20 characters string with
       lowercase letters and numbers and must start with a letter.
     required: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::ResourceRef
     name: 'network'
     resource: 'Network'
     imports: 'selfLink'
+=======
+  - name: 'network'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This field is not used for external load balancing.
 
@@ -411,9 +630,17 @@ properties:
     # manifest input from a single value to a range of form NN-NN. The API
     # accepts a single value, e.g. '80', but the API stores and returns
     # '80-80'. This causes idempotency false positive.
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'portRange'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'selfLink'
+  - name: 'portRange'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
       Only packets addressed to ports in the specified range will be forwarded
@@ -439,11 +666,18 @@ properties:
       cannot have overlapping `portRange`s.
 
       @pattern: \d+(?:-\d+)?
+<<<<<<< HEAD
     diff_suppress_func: PortRangeDiffSuppress
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'ports'
     max_size: 5
+=======
+    default_from_api: true
+    diff_suppress_func: 'PortRangeDiffSuppress'
+  - name: 'ports'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
       Only packets addressed to ports in the specified range will be forwarded
@@ -468,12 +702,21 @@ properties:
 
       @pattern: \d+(?:-\d+)?
     is_set: true
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
     item_type: Api::Type::String
   - !ruby/object:Api::Type::ResourceRef
     name: 'subnetwork'
     resource: 'Subnetwork'
     imports: 'selfLink'
+=======
+    custom_expand: 'templates/terraform/custom_expand/set_to_list.tmpl'
+    item_type:
+      type: String
+    max_size: 5
+  - name: 'subnetwork'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This field identifies the subnetwork that the load balanced IP should
       belong to for this Forwarding Rule, used in internal load balancing and
@@ -486,9 +729,17 @@ properties:
     # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
     # TargetInstance)
     default_from_api: true
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
   - !ruby/object:Api::Type::String
     name: 'target'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
+  - name: 'target'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The URL of the target resource to receive the matched traffic.  For
       regional forwarding rules, this target must be in the same region as the
@@ -502,6 +753,7 @@ properties:
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
+<<<<<<< HEAD
     update_verb: :POST
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
@@ -515,6 +767,23 @@ properties:
     update_verb: :POST
   - !ruby/object:Api::Type::Boolean
     name: 'allowGlobalAccess'
+=======
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
+    update_verb: 'POST'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
+  - name: 'labelFingerprint'
+    type: Fingerprint
+    description: |
+      The fingerprint used for optimistic locking of this resource.  Used
+      internally during updates.
+    output: true
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: 'POST'
+    key_expander: ''
+  - name: 'allowGlobalAccess'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This field is used along with the `backend_service` field for
       internal load balancing or with the `target` field for internal
@@ -526,6 +795,7 @@ properties:
       Otherwise only allows access from clients in the same region as the
       internal load balancer.
     send_empty_value: true
+<<<<<<< HEAD
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
   - !ruby/object:Api::Type::KeyValueLabels
@@ -536,6 +806,18 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
   - !ruby/object:Api::Type::Boolean
     name: 'allPorts'
+=======
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}'
+    update_verb: 'PATCH'
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels to apply to this forwarding rule.  A list of key->value pairs.
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+    update_verb: 'POST'
+  - name: 'allPorts'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The `ports`, `portRange`, and `allPorts` fields are mutually exclusive.
       Only packets addressed to ports in the specified range will be forwarded
@@ -552,8 +834,13 @@ properties:
       first fragment) to be forwarded to the backends configured with this
       forwarding rule. The L3_DEFAULT protocol requires `allPorts` be set to
       true.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Enum
     name: 'networkTier'
+=======
+  - name: 'networkTier'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This signifies the networking tier used for configuring
       this load balancer and can only take the following values:
@@ -566,6 +853,7 @@ properties:
       If this field is not specified, it is assumed to be `PREMIUM`.
       If `IPAddress` is specified, this value must be equal to the
       networkTier of the Address.
+<<<<<<< HEAD
     values:
       - :PREMIUM
       - :STANDARD
@@ -573,10 +861,20 @@ properties:
     default_from_api: true
   - !ruby/object:Api::Type::Array
     name: 'serviceDirectoryRegistrations'
+=======
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'PREMIUM'
+      - 'STANDARD'
+  - name: 'serviceDirectoryRegistrations'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Service Directory resources to register this forwarding rule with.
 
       Currently, only supports a single Service Directory resource.
+<<<<<<< HEAD
     min_size: 0
     max_size: 1
     immutable: true
@@ -585,10 +883,20 @@ properties:
       properties:
         - !ruby/object:Api::Type::String
           name: 'namespace'
+=======
+    immutable: true
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'namespace'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             Service Directory namespace to register the forwarding rule under.
           immutable: true
           default_from_api: true
+<<<<<<< HEAD
         - !ruby/object:Api::Type::String
           name: 'service'
           description: |
@@ -596,6 +904,17 @@ properties:
           immutable: true
   - !ruby/object:Api::Type::String
     name: 'serviceLabel'
+=======
+        - name: 'service'
+          type: String
+          description: |
+            Service Directory service to register the forwarding rule under.
+          immutable: true
+    min_size: 0
+    max_size: 1
+  - name: 'serviceLabel'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       An optional prefix to the service name for this Forwarding Rule.
       If specified, will be the first label of the fully qualified service
@@ -609,17 +928,29 @@ properties:
       character, which cannot be a dash.
 
       This field is only used for INTERNAL load balancing.
+<<<<<<< HEAD
     validation: !ruby/object:Provider::Terraform::Validation
       function: 'verify.ValidateGCEName'
   - !ruby/object:Api::Type::String
     name: 'serviceName'
+=======
+    validation:
+      function: 'verify.ValidateGCEName'
+  - name: 'serviceName'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The internal fully qualified service name for this Forwarding Rule.
 
       This field is only used for INTERNAL load balancing.
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Array
     name: sourceIpRanges
+=======
+  - name: 'sourceIpRanges'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       If not empty, this Forwarding Rule will only forward the traffic when the
       source IP address matches one of the IP addresses or CIDR ranges set here.
@@ -628,9 +959,16 @@ properties:
       is EXTERNAL. Each sourceIpRange entry should be either an IP address (for
       example, 1.2.3.4) or a CIDR range (for example, 1.2.3.0/24).
     immutable: true
+<<<<<<< HEAD
     item_type: Api::Type::String
   - !ruby/object:Api::Type::String
     name: baseForwardingRule
+=======
+    item_type:
+      type: String
+  - name: 'baseForwardingRule'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       '[Output Only] The URL for the corresponding base Forwarding Rule. By base
       Forwarding Rule, we mean the Forwarding Rule that has the same IP address,
@@ -638,12 +976,18 @@ properties:
       sourceIPRanges specified. Always empty if the current Forwarding Rule does
       not have sourceIPRanges specified.'
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Boolean
     name: allowPscGlobalAccess
+=======
+  - name: 'allowPscGlobalAccess'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       This is used in PSC consumer ForwardingRule to control whether the PSC
       endpoint can be accessed from another region.
     send_empty_value: true
+<<<<<<< HEAD
     update_verb: :PATCH
     update_url: projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}
     update_id: 'allowPscGlobalAccess'
@@ -658,13 +1002,37 @@ properties:
     ignore_read: true
   - !ruby/object:Api::Type::Enum
     name: 'ipVersion'
+=======
+    update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'allowPscGlobalAccess'
+    fingerprint_name: 'fingerprint'
+  - name: 'noAutomateDnsZone'
+    type: Boolean
+    description:
+      This is used in PSC consumer ForwardingRule to control whether it should try to auto-generate a DNS zone or not.
+      Non-PSC forwarding rules do not use this field.
+    immutable: true
+    ignore_read: true
+    send_empty_value: true
+  - name: 'ipVersion'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The IP address version that will be used by this forwarding rule.
       Valid options are IPV4 and IPV6.
 
       If not set, the IPv4 address will be used by default.
+<<<<<<< HEAD
     values:
       - :IPV4
       - :IPV6
     immutable: true
     default_from_api: true
+=======
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'IPV4'
+      - 'IPV6'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

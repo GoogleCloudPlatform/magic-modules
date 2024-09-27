@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,11 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
+=======
+---
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 name: 'Schema'
 description: |
   A schema is a format that messages must follow,
   creating a contract between publisher and subscriber that Pub/Sub will enforce.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Creating and managing schemas': 'https://cloud.google.com/pubsub/docs/schemas'
@@ -44,20 +53,64 @@ examples:
       schema_name: 'example-schema'
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_schema_protobuf'
+=======
+references:
+  guides:
+    'Creating and managing schemas': 'https://cloud.google.com/pubsub/docs/schemas'
+  api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.schemas'
+docs:
+base_url: 'projects/{{project}}/schemas'
+create_url: 'projects/{{project}}/schemas?schemaId={{name}}'
+update_url: 'projects/{{project}}/schemas/{{name}}:commit'
+update_verb: 'POST'
+update_mask: false
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 10
+  actions: ['delete']
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'schema'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/pubsub_schema.tmpl'
+examples:
+  - name: 'pubsub_schema_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-schema%s", context["random_suffix"])'
+    vars:
+      schema_name: 'example-schema'
+  - name: 'pubsub_schema_protobuf'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       schema_name: 'example'
     test_env_vars:
+<<<<<<< HEAD
       project_name: :PROJECT_NAME
 parameters:
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+      project_name: 'PROJECT_NAME'
+parameters:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       The ID to use for the schema, which will become the final component of the
       schema's resource name.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+<<<<<<< HEAD
     custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
 custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -73,6 +126,21 @@ properties:
       - :AVRO
   - !ruby/object:Api::Type::String
     name: 'definition'
+=======
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+properties:
+  - name: 'type'
+    type: Enum
+    description: The type of the schema definition
+    default_value: "TYPE_UNSPECIFIED"
+    enum_values:
+      - 'TYPE_UNSPECIFIED'
+      - 'PROTOCOL_BUFFER'
+      - 'AVRO'
+  - name: 'definition'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The definition of the schema.
       This should contain a string representing the full definition of the schema

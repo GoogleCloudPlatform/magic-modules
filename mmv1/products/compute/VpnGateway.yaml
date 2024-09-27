@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'VpnGateway'
 kind: 'compute#targetVpnGateway'
@@ -48,6 +53,46 @@ docs: !ruby/object:Provider::Terraform::Docs
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'target_vpn_gateway_basic'
+=======
+---
+name: 'VpnGateway'
+kind: 'compute#targetVpnGateway'
+description: |
+  Represents a VPN gateway running in GCP. This virtual device is managed
+  by Google, but used only by you.
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways'
+docs:
+  warning: |
+    Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
+    see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
+base_url: 'projects/{{project}}/regions/{{region}}/targetVpnGateways'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+examples:
+  - name: 'target_vpn_gateway_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'target_gateway'
     vars:
       target_vpn_gateway_name: 'vpn-1'
@@ -59,14 +104,20 @@ examples:
       vpn_tunnel_name: 'tunnel1'
       route_name: 'route1'
 parameters:
+<<<<<<< HEAD
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
     imports: 'name'
+=======
+  - name: 'region'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The region this gateway should sit in.
     required: false
     default_from_api: true
+<<<<<<< HEAD
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
@@ -80,6 +131,23 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
+properties:
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'description'
+    type: String
+    description: 'An optional description of this resource.'
+    immutable: true
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -90,6 +158,7 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Integer
     name: 'gateway_id'
     api_name: 'id'
@@ -104,3 +173,19 @@ properties:
     required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     immutable: true
+=======
+  - name: 'gateway_id'
+    type: Integer
+    description: 'The unique identifier for the resource.'
+    api_name: id
+    output: true
+  - name: 'network'
+    type: ResourceRef
+    description: |
+      The network this VPN gateway is accepting traffic for.
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'selfLink'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

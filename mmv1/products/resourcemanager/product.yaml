@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/resourcemanager/product.yaml
 # Copyright 2017 Google Inc.
+========
+# Copyright 2024 Google Inc.
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/pubsublite/product.yaml
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/resourcemanager/product.yaml
 --- !ruby/object:Api::Product
 name: ResourceManager
 display_name: Resource Manager
@@ -21,3 +31,24 @@ versions:
 scopes:
   # All access is needed to create projects.
   - https://www.googleapis.com/auth/cloud-platform
+========
+---
+name: 'PubsubLite'
+display_name: 'Cloud Pub/Sub'
+versions:
+  - name: 'ga'
+    base_url: 'https://{{region}}-pubsublite.googleapis.com/v1/admin/'
+    cai_base_url: 'https://pubsublite.googleapis.com/v1/admin/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/pubsublite/product.yaml
+=======
+---
+name: 'ResourceManager'
+display_name: 'Resource Manager'
+versions:
+  - name: 'ga'
+    base_url: 'https://cloudresourcemanager.googleapis.com/v1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

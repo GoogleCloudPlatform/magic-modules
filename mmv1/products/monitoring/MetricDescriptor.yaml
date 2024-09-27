@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: MetricDescriptor
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -21,10 +26,15 @@ base_url: v3/projects/{{project}}/metricDescriptors
 self_link: 'v3/{{name}}'
 update_verb: :POST
 update_url: v3/projects/{{project}}/metricDescriptors
+=======
+---
+name: 'MetricDescriptor'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description:
   Defines a metric type and its schema. Once a metric descriptor is created,
   deleting or altering it stops data collection and makes the metric type's
   existing data unusable.
+<<<<<<< HEAD
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
   check_response_func_absence: transport_tpg.PollCheckForAbsence
@@ -36,16 +46,53 @@ error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_metric_descriptor_basic'
+=======
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/monitoring/custom-metrics/'
+  api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors'
+docs:
+id_format: '{{name}}'
+base_url: 'v3/projects/{{project}}/metricDescriptors'
+self_link: 'v3/{{name}}'
+update_url: 'v3/projects/{{project}}/metricDescriptors'
+update_verb: 'POST'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 20
+  actions: ['create', 'update', 'delete']
+custom_code:
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringConcurrentEditError'
+examples:
+  - name: 'monitoring_metric_descriptor_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'basic'
     vars:
       display_name: 'metric-descriptor'
       type: 'daily_sales'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_metric_descriptor_alert'
+=======
+  - name: 'monitoring_metric_descriptor_alert'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'with_alert'
     vars:
       display_name: 'metric-descriptor'
       type: 'daily_sales'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
 
@@ -58,6 +105,16 @@ properties:
     name: type
     immutable: true
     required: true
+=======
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: The resource name of the metric descriptor.
+    output: true
+  - name: 'type'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       The metric type, including its DNS name prefix. The type is not
       URL-encoded. All service defined metrics must be prefixed with the service
@@ -68,12 +125,20 @@ properties:
       for the relative_metric_name is 100. All user-defined metric types have
       the DNS name custom.googleapis.com, external.googleapis.com, or
       logging.googleapis.com/user/.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Array
     name: 'labels'
+=======
+    required: true
+    immutable: true
+  - name: 'labels'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       The set of labels that can be used to describe a specific instance of this
       metric type. In order to delete a label, the entire resource must be
       deleted, then created with the desired labels.
+<<<<<<< HEAD
     immutable: true
     is_set: true
     item_type: !ruby/object:Api::Type::NestedObject
@@ -81,11 +146,21 @@ properties:
         - !ruby/object:Api::Type::String
           name: key
           required: true
+=======
+    is_set: true
+    immutable: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description:
             The key for this label. The key must not exceed 100 characters. The
             first character of the key must be an upper- or lower-case letter,
             the remaining characters must be letters, digits or underscores, and
             the key must match the regular expression [a-zA-Z][a-zA-Z0-9_]*
+<<<<<<< HEAD
         - !ruby/object:Api::Type::Enum
           name: valueType
           description: The type of data that can be assigned to the label.
@@ -126,6 +201,48 @@ properties:
   - !ruby/object:Api::Type::String
     name: unit
     immutable: true
+=======
+          required: true
+        - name: 'valueType'
+          type: Enum
+          description: The type of data that can be assigned to the label.
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+          default_value: "STRING"
+          enum_values:
+            - 'STRING'
+            - 'BOOL'
+            - 'INT64'
+        - name: 'description'
+          type: String
+          description: A human-readable description for the label.
+  - name: 'metricKind'
+    type: Enum
+    description:
+      Whether the metric records instantaneous values, changes to a value, etc.
+      Some combinations of metricKind and valueType might not be supported.
+    required: true
+    immutable: true
+    enum_values:
+      - 'METRIC_KIND_UNSPECIFIED'
+      - 'GAUGE'
+      - 'DELTA'
+      - 'CUMULATIVE'
+  - name: 'valueType'
+    type: Enum
+    description:
+      Whether the measurement is an integer, a floating-point number, etc. Some
+      combinations of metricKind and valueType might not be supported.
+    required: true
+    immutable: true
+    enum_values:
+      - 'BOOL'
+      - 'INT64'
+      - 'DOUBLE'
+      - 'STRING'
+      - 'DISTRIBUTION'
+  - name: 'unit'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The units in which the metric value is reported. It is only applicable if the
       valueType is INT64, DOUBLE, or DISTRIBUTION. The unit defines the representation of
@@ -147,6 +264,7 @@ properties:
       The supported units are a subset of The Unified Code for Units of Measure standard.
       More info can be found in the API documentation
       (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors).
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: description
     immutable: true
@@ -170,22 +288,54 @@ properties:
         at_least_one_of:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
+=======
+    immutable: true
+  - name: 'description'
+    type: String
+    description:
+      A detailed description of the metric, which can be used in documentation.
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description:
+      A concise name for the metric, which can be displayed in user interfaces.
+      Use sentence case without an ending period, for example "Request count".
+    required: true
+    immutable: true
+  - name: 'metadata'
+    type: NestedObject
+    description: Metadata which can be used to guide usage of the metric.
+    ignore_read: true
+    properties:
+      - name: 'samplePeriod'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description:
           The sampling period of metric data points. For metrics which are
           written periodically, consecutive data points are stored at this time
           interval, excluding data loss due to errors. Metrics with a higher
           granularity have a smaller sampling period. In `[duration
           format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: ingestDelay
         at_least_one_of:
           - metadata.0.sample_period
           - metadata.0.ingest_delay
+=======
+        at_least_one_of:
+          - 'metadata.0.sample_period'
+          - 'metadata.0.ingest_delay'
+      - name: 'ingestDelay'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description:
           The delay of data points caused by ingestion. Data points older than
           this age are guaranteed to be ingested and available to be read,
           excluding data loss due to errors. In `[duration
           format](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf?&_ga=2.264881487.1507873253.1593446723-935052455.1591817775#google.protobuf.Duration)`.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Enum
     name: launchStage
     immutable: true
@@ -203,6 +353,27 @@ properties:
   - !ruby/object:Api::Type::Array
     name: monitoredResourceTypes
     output: true
+=======
+        at_least_one_of:
+          - 'metadata.0.sample_period'
+          - 'metadata.0.ingest_delay'
+  - name: 'launchStage'
+    type: Enum
+    description: The launch stage of the metric definition.
+    immutable: true
+    ignore_read: true
+    enum_values:
+      - 'LAUNCH_STAGE_UNSPECIFIED'
+      - 'UNIMPLEMENTED'
+      - 'PRELAUNCH'
+      - 'EARLY_ACCESS'
+      - 'ALPHA'
+      - 'BETA'
+      - 'GA'
+      - 'DEPRECATED'
+  - name: 'monitoredResourceTypes'
+    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       If present, then a time series, which is identified partially by a metric
       type and a MonitoredResourceDescriptor, that is associated with this
@@ -211,4 +382,10 @@ properties:
       intersection of this metric type and the monitored resource types in this
       list.
     is_set: true
+<<<<<<< HEAD
     item_type: Api::Type::String
+=======
+    output: true
+    item_type:
+      type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2018 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'EgressPolicy'
 create_url: '{{egress_policy_name}}'
@@ -53,6 +58,70 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'resource'
+=======
+---
+name: 'EgressPolicy'
+description: |
+  This resource has been deprecated, please refer to ServicePerimeterEgressPolicy.
+references:
+  guides:
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy'
+docs:
+id_format: '{{egress_policy_name}}/{{resource}}'
+base_url: ''
+self_link: '{{egress_policy_name}}'
+create_url: '{{egress_policy_name}}'
+create_verb: 'PATCH'
+update_mask: true
+delete_verb: 'PATCH'
+immutable: true
+import_format:
+  - '{{egress_policy_name}}/{{resource}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - resource
+nested_query:
+  keys:
+    - status
+    - resources
+  is_list_of_ids: true
+  modify_by_patch: true
+custom_code:
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
+exclude_tgc: true
+# Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
+exclude_sweeper: true
+parameters:
+  - name: 'egressPolicyName'
+    type: ResourceRef
+    description: |
+      The name of the Service Perimeter to add this resource to.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'ServicePerimeter'
+    imports: 'name'
+properties:
+  - name: 'resource'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A GCP resource that is inside of the service perimeter.
     required: true

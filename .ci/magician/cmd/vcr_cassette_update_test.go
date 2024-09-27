@@ -401,7 +401,11 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			ctlr := source.NewController("gopath", "hashicorp", "token", rnr)
 			vt, err := vcr.NewTester(map[string]string{
 				"SA_KEY": "sa_key",
+<<<<<<< HEAD
 			}, "", "ci-vcr-cassettes", rnr)
+=======
+			}, "ci-vcr-cassettes", "", rnr)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			if err != nil {
 				t.Fatalf("Failed to create new tester: %v", err)
 			}

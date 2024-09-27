@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+<<<<<<<< HEAD:mmv1/products/dialogflowcx/go_product.yaml
 name: 'DialogflowCX'
 display_name: 'Dialogflow CX'
 versions:
@@ -20,3 +21,14 @@ versions:
     base_url: 'https://{{location}}-dialogflow.googleapis.com/v3/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+========
+name: 'CloudIdentity'
+display_name: 'Cloud Identity'
+versions:
+  - name: 'ga'
+    base_url: 'https://cloudidentity.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://cloudidentity.googleapis.com/v1beta1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-identity'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/cloudidentity/product.yaml

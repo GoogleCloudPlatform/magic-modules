@@ -12,6 +12,7 @@
 # limitations under the License.
 
 ---
+<<<<<<< HEAD
 !ruby/object:Api::Resource
 name: "DebugToken"
 base_url: projects/{{project}}/apps/{{app_id}}/debugTokens
@@ -20,11 +21,15 @@ update_verb: :PATCH
 update_mask: true
 identity:
   - debugTokenId
+=======
+name: 'DebugToken'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A debug token is a secret used during the development or integration testing of
   an app. It essentially allows the development or integration testing to bypass
   app attestation while still allowing App Check to enforce protection on supported
   production Firebase services.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     "Official Documentation": "https://firebase.google.com/docs/app-check"
@@ -53,11 +58,51 @@ examples:
 parameters:
   - !ruby/object:Api::Type::String
     name: app_id
+=======
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.debugTokens'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/debugTokens'
+self_link: 'projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/debugTokens/{{debug_token_id}}'
+  - '{{project}}/{{app_id}}/{{debug_token_id}}'
+  - '{{app_id}}/{{debug_token_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - debugTokenId
+custom_code:
+examples:
+  - name: 'firebase_app_check_debug_token_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      display_name: 'Debug Token'
+      token: '00000000-AAAA-BBBB-CCCC-000000000000'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      # Don't add prefix. This string is a random UUID4
+      'token': '"5E728315-E121-467F-BCA1-1FE71130BB98"'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The ID of a
       [Web App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id),
       [Apple App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps#IosApp.FIELDS.app_id),
       or [Android App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.androidApps#AndroidApp.FIELDS.app_id)
+<<<<<<< HEAD
     required: true
     immutable: true
     url_param_only: true
@@ -76,6 +121,26 @@ properties:
     required: true
   - !ruby/object:Api::Type::String
     name: token
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'debugTokenId'
+    type: String
+    description: |
+      The last segment of the resource name of the debug token.
+    api_name: name
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      A human readable display name used to identify this debug token.
+    required: true
+  - name: 'token'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The secret token itself. Must be provided during creation, and must be a UUID4,
       case insensitive. You may use a method of your choice such as random/random_uuid
@@ -87,5 +152,10 @@ properties:
       For security reasons, this field will never be populated in any response.
     required: true
     immutable: true
+<<<<<<< HEAD
     sensitive: true
     ignore_read: true
+=======
+    ignore_read: true
+    sensitive: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

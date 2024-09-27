@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/bigquery/product.yaml
 # Copyright 2017 Google Inc.
+========
+# Copyright 2024 Google Inc.
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/redis/product.yaml
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/bigquery/product.yaml
 --- !ruby/object:Api::Product
 name: BigQuery
 display_name: BigQuery
@@ -24,3 +34,34 @@ versions:
     base_url: https://bigquery.googleapis.com/bigquery/v2/
 scopes:
   - https://www.googleapis.com/auth/bigquery
+========
+---
+name: 'Redis'
+display_name: 'Memorystore (Redis)'
+versions:
+  - name: 'ga'
+    base_url: 'https://redis.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://redis.googleapis.com/v1beta1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/redis/product.yaml
+=======
+---
+name: 'BigQuery'
+legacy_name: 'bigquery'
+display_name: 'BigQuery'
+versions:
+  - name: 'ga'
+    base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
+  - name: 'beta'
+    base_url: 'https://bigquery.googleapis.com/bigquery/v2/'
+scopes:
+  - 'https://www.googleapis.com/auth/bigquery'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

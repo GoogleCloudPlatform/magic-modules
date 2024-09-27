@@ -1,5 +1,9 @@
 # Copyright 2024 Google Inc.
+<<<<<<< HEAD
 # Licensed under the Apache License, Version 2.0 (the License);
+=======
+# Licensed under the Apache License, Version 2.0 (the "License");
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: RegionNetworkFirewallPolicyWithRules
 min_version: beta
@@ -41,6 +46,44 @@ async: !ruby/object:Api::OpAsync
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'compute_region_network_firewall_policy_with_rules_full'
+=======
+---
+name: 'RegionNetworkFirewallPolicyWithRules'
+description: "The Compute NetworkFirewallPolicy with rules resource"
+min_version: 'beta'
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  encoder: 'templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  decoder: 'templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  post_create: 'templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+legacy_long_form_project: true
+examples:
+  - name: 'compute_region_network_firewall_policy_with_rules_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'region-network-firewall-policy-with-rules'
     vars:
       policy_name: 'tf-region-fw-policy-with-rules'
@@ -48,6 +91,7 @@ examples:
       tag_key_name: 'tf-tag-key'
       tag_value_name: 'tf-tag-value'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.erb
@@ -69,6 +113,25 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: name
+=======
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of this resource.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'creationTimestamp'
+    type: String
+    description: Creation timestamp in RFC3339 text format.
+    min_version: 'beta'
+    output: true
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       User-provided name of the Network firewall policy.
       The name should be unique in the project in which the firewall policy is created.
@@ -76,6 +139,7 @@ properties:
       the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?
       which means the first character must be a lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot be a dash.
+<<<<<<< HEAD
     required: true
     immutable: true
   - !ruby/object:Api::Type::String
@@ -104,10 +168,48 @@ properties:
             and can be updated.
         - !ruby/object:Api::Type::Integer
           name: 'priority'
+=======
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'networkFirewallPolicyId'
+    type: String
+    description: The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    min_version: 'beta'
+    output: true
+  - name: 'description'
+    type: String
+    description: An optional description of this resource.
+    min_version: 'beta'
+  - name: 'rule'
+    type: Array
+    description: A list of firewall policy rules.
+    api_name: rules
+    min_version: 'beta'
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            A description of the rule.
+          min_version: 'beta'
+        - name: 'ruleName'
+          type: String
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+          min_version: 'beta'
+        - name: 'priority'
+          type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
+<<<<<<< HEAD
           required: true
         - !ruby/object:Api::Type::NestedObject
           name: 'match'
@@ -155,19 +257,90 @@ properties:
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
               name: 'srcRegionCodes'
+=======
+          min_version: 'beta'
+          required: true
+        - name: 'match'
+          type: NestedObject
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          min_version: 'beta'
+          required: true
+          properties:
+            - name: 'srcIpRanges'
+              type: Array
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destIpRanges'
+              type: Array
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcRegionCodes'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 Region codes whose IP addresses will be used to match for source
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of source region codes allowed is 5000.
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
               name: 'destRegionCodes'
+=======
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destRegionCodes'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 Region codes whose IP addresses will be used to match for destination
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of destination region codes allowed is 5000.
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
               name: 'srcThreatIntelligences'
@@ -190,16 +363,56 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::String
                     name: 'ipProtocol'
+=======
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'layer4Config'
+              type: Array
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              api_name: layer4Configs
+              min_version: 'beta'
+              required: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipProtocol'
+                    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       The IP protocol to which this rule applies. The protocol
                       type is required when creating a firewall rule.
                       This value can either be one of the following well
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
+<<<<<<< HEAD
                     required: true
                   - !ruby/object:Api::Type::Array
                     item_type: Api::Type::String
                     name: 'ports'
+=======
+                    min_version: 'beta'
+                    required: true
+                  - name: 'ports'
+                    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       An optional list of ports to which this rule applies. This field
                       is only applicable for UDP or TCP protocol. Each entry must be
@@ -207,15 +420,24 @@ properties:
                       applies to connections through any port.
                       Example inputs include: ["22"], ["80","443"], and
                       ["12345-12349"].
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               name: 'srcSecureTag'
               api_name: 'srcSecureTags'
+=======
+                    min_version: 'beta'
+                    item_type:
+                      type: String
+            - name: 'srcSecureTag'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 List of secure tag values, which should be matched at the source
                 of the traffic.
                 For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
+<<<<<<< HEAD
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -226,16 +448,41 @@ properties:
                   - !ruby/object:Api::Type::Enum
                     name: 'state'
                     output: true
+=======
+              api_name: srcSecureTags
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the secure tag, created with TagManager's TagValue API.
+                      @pattern tagValues/[0-9]+
+                    min_version: 'beta'
+                  - name: 'state'
+                    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
+<<<<<<< HEAD
                     values:
                       - :EFFECTIVE
                       - :INEFFECTIVE
         - !ruby/object:Api::Type::Array
           name: 'targetSecureTag'
           api_name: 'targetSecureTags'
+=======
+                    min_version: 'beta'
+                    output: true
+                    enum_values:
+                      - 'EFFECTIVE'
+                      - 'INEFFECTIVE'
+        - name: 'targetSecureTag'
+          type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             A list of secure tags that controls which instances the firewall rule
             applies to. If <code>targetSecureTag</code> are specified, then the
@@ -248,6 +495,7 @@ properties:
             <code>targetSecureTag</code> are specified, the firewall rule applies
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
+<<<<<<< HEAD
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::String
@@ -258,10 +506,26 @@ properties:
               - !ruby/object:Api::Type::Enum
                 name: 'state'
                 output: true
+=======
+          api_name: targetSecureTags
+          min_version: 'beta'
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name of the secure tag, created with TagManager's TagValue API.
+                  @pattern tagValues/[0-9]+
+                min_version: 'beta'
+              - name: 'state'
+                type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
+<<<<<<< HEAD
                 values:
                   - :EFFECTIVE
                   - :INEFFECTIVE
@@ -280,10 +544,35 @@ properties:
             - :EGRESS
         - !ruby/object:Api::Type::Boolean
           name: 'enableLogging'
+=======
+                min_version: 'beta'
+                output: true
+                enum_values:
+                  - 'EFFECTIVE'
+                  - 'INEFFECTIVE'
+        - name: 'action'
+          type: String
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+          min_version: 'beta'
+          required: true
+        - name: 'direction'
+          type: Enum
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          min_version: 'beta'
+          enum_values:
+            - 'INGRESS'
+            - 'EGRESS'
+        - name: 'enableLogging'
+          type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             Denotes whether to enable logging for a particular rule.
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
+<<<<<<< HEAD
           send_empty_value: true
         - !ruby/object:Api::Type::Array
           name: 'targetServiceAccounts'
@@ -293,11 +582,26 @@ properties:
           item_type: Api::Type::String
         - !ruby/object:Api::Type::String
           name: 'securityProfileGroup'
+=======
+          min_version: 'beta'
+          send_empty_value: true
+        - name: 'targetServiceAccounts'
+          type: Array
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          min_version: 'beta'
+          item_type:
+            type: String
+        - name: 'securityProfileGroup'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             A fully-qualified URL of a SecurityProfile resource instance.
             Example:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
+<<<<<<< HEAD
         - !ruby/object:Api::Type::Boolean
           name: 'tlsInspect'
           description: |
@@ -305,11 +609,23 @@ properties:
             It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
         - !ruby/object:Api::Type::Boolean
           name: 'disabled'
+=======
+          min_version: 'beta'
+        - name: 'tlsInspect'
+          type: Boolean
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+          min_version: 'beta'
+        - name: 'disabled'
+          type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             Denotes whether the firewall policy rule is disabled. When set to true,
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Array
     name: 'predefinedRules'
     description: A list of firewall policy pre-defined rules.
@@ -330,10 +646,37 @@ properties:
         - !ruby/object:Api::Type::Integer
           name: 'priority'
           output: true
+=======
+          min_version: 'beta'
+  - name: 'predefinedRules'
+    type: Array
+    description: A list of firewall policy pre-defined rules.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            A description of the rule.
+          min_version: 'beta'
+          output: true
+        - name: 'ruleName'
+          type: String
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+          min_version: 'beta'
+          output: true
+        - name: 'priority'
+          type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
+<<<<<<< HEAD
         - !ruby/object:Api::Type::NestedObject
           name: 'match'
           output: true
@@ -387,20 +730,98 @@ properties:
               item_type: Api::Type::String
               name: 'srcRegionCodes'
               output: true
+=======
+          min_version: 'beta'
+          output: true
+        - name: 'match'
+          type: NestedObject
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          min_version: 'beta'
+          output: true
+          properties:
+            - name: 'srcIpRanges'
+              type: Array
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destIpRanges'
+              type: Array
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcRegionCodes'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 Region codes whose IP addresses will be used to match for source
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of source region codes allowed is 5000.
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
               name: 'destRegionCodes'
               output: true
+=======
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destRegionCodes'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 Region codes whose IP addresses will be used to match for destination
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of destination region codes allowed is 5000.
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
               name: 'srcThreatIntelligences'
@@ -426,16 +847,59 @@ properties:
                   - !ruby/object:Api::Type::String
                     name: 'ipProtocol'
                     output: true
+=======
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'layer4Config'
+              type: Array
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              api_name: layer4Configs
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipProtocol'
+                    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       The IP protocol to which this rule applies. The protocol
                       type is required when creating a firewall rule.
                       This value can either be one of the following well
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
+<<<<<<< HEAD
                   - !ruby/object:Api::Type::Array
                     item_type: Api::Type::String
                     name: 'ports'
                     output: true
+=======
+                    min_version: 'beta'
+                    output: true
+                  - name: 'ports'
+                    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       An optional list of ports to which this rule applies. This field
                       is only applicable for UDP or TCP protocol. Each entry must be
@@ -443,16 +907,26 @@ properties:
                       applies to connections through any port.
                       Example inputs include: ["22"], ["80","443"], and
                       ["12345-12349"].
+<<<<<<< HEAD
             - !ruby/object:Api::Type::Array
               name: 'srcSecureTag'
               api_name: 'srcSecureTags'
               output: true
+=======
+                    min_version: 'beta'
+                    output: true
+                    item_type:
+                      type: String
+            - name: 'srcSecureTag'
+              type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
               description: |
                 List of secure tag values, which should be matched at the source
                 of the traffic.
                 For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
+<<<<<<< HEAD
               item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -464,10 +938,28 @@ properties:
                   - !ruby/object:Api::Type::Enum
                     name: 'state'
                     output: true
+=======
+              api_name: srcSecureTags
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the secure tag, created with TagManager's TagValue API.
+                      @pattern tagValues/[0-9]+
+                    min_version: 'beta'
+                    output: true
+                  - name: 'state'
+                    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
+<<<<<<< HEAD
                     values:
                       - :EFFECTIVE
                       - :INEFFECTIVE
@@ -475,6 +967,15 @@ properties:
           name: 'targetSecureTag'
           api_name: 'targetSecureTags'
           output: true
+=======
+                    min_version: 'beta'
+                    output: true
+                    enum_values:
+                      - 'EFFECTIVE'
+                      - 'INEFFECTIVE'
+        - name: 'targetSecureTag'
+          type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             A list of secure tags that controls which instances the firewall rule
             applies to. If <code>targetSecureTag</code> are specified, then the
@@ -487,6 +988,7 @@ properties:
             <code>targetSecureTag</code> are specified, the firewall rule applies
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
+<<<<<<< HEAD
           item_type: !ruby/object:Api::Type::NestedObject
             properties:
               - !ruby/object:Api::Type::String
@@ -498,10 +1000,28 @@ properties:
               - !ruby/object:Api::Type::Enum
                 name: 'state'
                 output: true
+=======
+          api_name: targetSecureTags
+          min_version: 'beta'
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name of the secure tag, created with TagManager's TagValue API.
+                  @pattern tagValues/[0-9]+
+                min_version: 'beta'
+                output: true
+              - name: 'state'
+                type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
+<<<<<<< HEAD
                 values:
                   - :EFFECTIVE
                   - :INEFFECTIVE
@@ -522,10 +1042,36 @@ properties:
         - !ruby/object:Api::Type::Boolean
           name: 'enableLogging'
           output: true
+=======
+                min_version: 'beta'
+                output: true
+                enum_values:
+                  - 'EFFECTIVE'
+                  - 'INEFFECTIVE'
+        - name: 'action'
+          type: String
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+          min_version: 'beta'
+          output: true
+        - name: 'direction'
+          type: Enum
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          min_version: 'beta'
+          output: true
+          enum_values:
+            - 'INGRESS'
+            - 'EGRESS'
+        - name: 'enableLogging'
+          type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             Denotes whether to enable logging for a particular rule.
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
+<<<<<<< HEAD
           send_empty_value: true
         - !ruby/object:Api::Type::Array
           name: 'targetServiceAccounts'
@@ -537,11 +1083,28 @@ properties:
         - !ruby/object:Api::Type::String
           name: 'securityProfileGroup'
           output: true
+=======
+          min_version: 'beta'
+          output: true
+          send_empty_value: true
+        - name: 'targetServiceAccounts'
+          type: Array
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          min_version: 'beta'
+          output: true
+          item_type:
+            type: String
+        - name: 'securityProfileGroup'
+          type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             A fully-qualified URL of a SecurityProfile resource instance.
             Example:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
+<<<<<<< HEAD
         - !ruby/object:Api::Type::Boolean
           name: 'tlsInspect'
           output: true
@@ -551,11 +1114,25 @@ properties:
         - !ruby/object:Api::Type::Boolean
           name: 'disabled'
           output: true
+=======
+          min_version: 'beta'
+          output: true
+        - name: 'tlsInspect'
+          type: Boolean
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+          min_version: 'beta'
+          output: true
+        - name: 'disabled'
+          type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
           description: |
             Denotes whether the firewall policy rule is disabled. When set to true,
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Fingerprint
     name: fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
@@ -571,4 +1148,27 @@ properties:
   - !ruby/object:Api::Type::Integer
     name: ruleTupleCount
     description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
+=======
+          min_version: 'beta'
+          output: true
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: Fingerprint of the resource. This field is used internally during updates of this resource.
+    min_version: 'beta'
+    output: true
+  - name: 'selfLink'
+    type: String
+    description: Server-defined URL for the resource.
+    min_version: 'beta'
+    output: true
+  - name: 'selfLinkWithId'
+    type: String
+    description: Server-defined URL for this resource with the resource id.
+    min_version: 'beta'
+    output: true
+  - name: 'ruleTupleCount'
+    type: Integer
+    description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
+    min_version: 'beta'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     output: true

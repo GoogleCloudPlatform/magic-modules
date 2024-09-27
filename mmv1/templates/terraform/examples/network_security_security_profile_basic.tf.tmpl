@@ -1,0 +1,10 @@
+resource "google_network_security_security_profile" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "resource_name"}}"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description = "my description"
+  type        = "THREAT_PREVENTION"
+
+  labels = {
+    foo = "bar"
+  }
+}

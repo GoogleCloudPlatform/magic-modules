@@ -504,9 +504,15 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
+<<<<<<< HEAD
 	tmpl, err := template.New("DIFF_COMMENT.md").Parse(diffComment)
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse DIFF_COMMENT.md: %s", err))
+=======
+	tmpl, err := template.New("DIFF_COMMENT.md.tmpl").Parse(diffComment)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse template DIFF_COMMENT.md.tmpl: %s", err)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	sb := new(strings.Builder)
 	err = tmpl.Execute(sb, data)

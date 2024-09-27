@@ -72,7 +72,11 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/expand_resource_ref.tmpl",
+<<<<<<< HEAD
 		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+=======
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
@@ -156,7 +160,11 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
+<<<<<<< HEAD
 		"templates/terraform/iam/go/iam_context.go.tmpl",
+=======
+		"templates/terraform/iam/iam_context.go.tmpl",
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }

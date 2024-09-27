@@ -120,7 +120,11 @@ var testTerraformVCRCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
+<<<<<<< HEAD
 		vt, err := vcr.NewTester(env, "ci-vcr-logs", "ci-vcr-cassettes", rnr)
+=======
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -180,7 +184,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 	fmt.Println("Running tests: Go files or test fixtures changed")
 
+<<<<<<< HEAD
 	if err := vt.FetchCassettes(provider.Beta, baseBranch, prNumber); err != nil {
+=======
+	if err := vt.FetchCassettes(provider.Beta, baseBranch, newBranch); err != nil {
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
@@ -196,10 +204,17 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
+<<<<<<< HEAD
 		PRNumber: prNumber,
 		BuildID:  buildID,
 		Mode:     vcr.Replaying,
 		Version:  provider.Beta,
+=======
+		Head:    newBranch,
+		BuildID: buildID,
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
@@ -261,12 +276,20 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			testState = "success"
 		}
 
+<<<<<<< HEAD
 		if err := vt.UploadCassettes(prNumber, provider.Beta); err != nil {
+=======
+		if err := vt.UploadCassettes(newBranch, provider.Beta); err != nil {
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
 		if err := vt.UploadLogs(vcr.UploadLogsOptions{
+<<<<<<< HEAD
 			PRNumber: prNumber,
+=======
+			Head:     newBranch,
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 			BuildID:  buildID,
 			Parallel: true,
 			Mode:     vcr.Recording,
@@ -295,10 +318,17 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			}
 
 			if err := vt.UploadLogs(vcr.UploadLogsOptions{
+<<<<<<< HEAD
 				PRNumber:       prNumber,
 				BuildID:        buildID,
 				Parallel:       true,
 				AfterRecording: true,
+=======
+				Head:           newBranch,
+				BuildID:        buildID,
+				AfterRecording: true,
+				Parallel:       true,
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 				Mode:           vcr.Replaying,
 				Version:        provider.Beta,
 			}); err != nil {
@@ -477,6 +507,10 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
 		"join": strings.Join,
 		"add":  func(i, j int) int { return i + j },
+<<<<<<< HEAD
+=======
+		"color": color,
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -491,6 +525,7 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 }
 
 func formatTestsAnalytics(data analytics) (string, error) {
+<<<<<<< HEAD
 	return formatComment("test_terraform_vcr_test_analytics.tmpl", testsAnalyticsTmplText, data)
 }
 
@@ -508,4 +543,23 @@ func formatWithoutReplayFailedTests(data withoutReplayFailedTests) (string, erro
 
 func formatRecordReplay(data recordReplay) (string, error) {
 	return formatComment("test_terraform_vcr_record_replay.tmpl", recordReplayTmplText, data)
+=======
+	return formatComment("test_analytics.tmpl", testsAnalyticsTmplText, data)
+}
+
+func formatNonExercisedTests(data nonExercisedTests) (string, error) {
+	return formatComment("non_exercised_tests.tmpl", nonExercisedTestsTmplText, data)
+}
+
+func formatWithReplayFailedTests(data withReplayFailedTests) (string, error) {
+	return formatComment("with_replay_failed_tests.tmpl", withReplayFailedTestsTmplText, data)
+}
+
+func formatWithoutReplayFailedTests(data withoutReplayFailedTests) (string, error) {
+	return formatComment("without_replay_failed_tests.tmpl", withoutReplayFailedTestsTmplText, data)
+}
+
+func formatRecordReplay(data recordReplay) (string, error) {
+	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 }

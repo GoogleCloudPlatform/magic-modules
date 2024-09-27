@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: Slo
 base_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives
@@ -19,6 +24,10 @@ self_link: 'v3/{{name}}'
 create_url: v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}
 update_verb: :PATCH
 update_mask: true
+=======
+---
+name: 'Slo'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A Service-Level Objective (SLO) describes the level of desired good
   service. It consists of a service-level indicator (SLI), a performance
@@ -27,11 +36,16 @@ description: |
   Typical SLOs might include "99% of requests in each rolling week have
   latency below 200 milliseconds" or "99.5% of requests in each calendar
   month return successfully."
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
+=======
+references:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   guides:
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services.serviceLevelObjectives'
+<<<<<<< HEAD
 id_format: '{{name}}'
 import_format: ['{{name}}']
 mutex: monitoring/project/{{project}}/service/{{service}}
@@ -51,28 +65,75 @@ examples:
       slo_id: 'consumed-api-slo'
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_good_bad_metric_filter'
+=======
+docs:
+id_format: '{{name}}'
+base_url: 'v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives'
+# name = projects/{{project}}/services/{{service}}/serviceLevelObjectives/{{slo_id}}
+self_link: 'v3/{{name}}'
+create_url: 'v3/projects/{{project}}/services/{{service}}/serviceLevelObjectives?serviceLevelObjectiveId={{slo_id}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'monitoring/project/{{project}}/service/{{service}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/monitoring_slo.go.tmpl'
+  encoder: 'templates/terraform/encoders/monitoring_slo.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+examples:
+  - name: 'monitoring_slo_appengine'
+    primary_resource_id: 'appeng_slo'
+    vars:
+      slo_id: 'ae-slo'
+  - name: 'monitoring_slo_request_based'
+    primary_resource_id: 'request_based_slo'
+    vars:
+      service_id: 'custom-srv-request-slos'
+      slo_id: 'consumed-api-slo'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'monitoring_slo_windows_based_good_bad_metric_filter'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'windows_based'
     vars:
       service_id: 'custom-srv-windows-slos'
       slo_id: 'good-bad-metric-filter'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_metric_mean'
+=======
+  - name: 'monitoring_slo_windows_based_metric_mean'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'windows_based'
     vars:
       service_id: 'custom-srv-windows-slos'
       slo_id: 'metric-mean-range'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_metric_sum'
+=======
+  - name: 'monitoring_slo_windows_based_metric_sum'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'windows_based'
     vars:
       service_id: 'custom-srv-windows-slos'
       slo_id: 'metric-sum-range'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'monitoring_slo_windows_based_ratio_threshold'
+=======
+  - name: 'monitoring_slo_windows_based_ratio_threshold'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'windows_based'
     vars:
       service_id: 'custom-srv-windows-slos'
       slo_id: 'ratio-threshold'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/monitoring_slo.go.erb
   custom_import: templates/terraform/custom_import/self_link_as_name.erb
@@ -99,10 +160,34 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
+=======
+parameters:
+  - name: 'service'
+    type: String
+    description: |
+      ID of the service to which this SLO belongs.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'sloId'
+    type: String
+    description: |
+      The id to use for this ServiceLevelObjective. If omitted, an id will be generated instead.
+    api_name: name
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    validation:
+      regex: '^[a-zA-Z0-9\-_:.]+$'
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The full resource name for this service. The syntax is:
       projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: displayName
     description: |
@@ -143,6 +228,48 @@ properties:
       - MONTH
   - !ruby/object:Api::Type::KeyValuePairs
     name: userLabels
+=======
+  - name: 'displayName'
+    type: String
+    description: |
+      Name used for UI elements listing this SLO.
+  - name: 'goal'
+    type: Double
+    description: |
+      The fraction of service that must be good in order for this objective
+      to be met. 0 < goal <= 0.999
+    required: true
+    validation:
+      function: 'validateMonitoringSloGoal'
+  - name: 'rollingPeriodDays'
+    type: Integer
+    description: |
+      A rolling time period, semantically "in the past X days".
+      Must be between 1 to 30 days, inclusive.
+    api_name: rollingPeriod
+    exactly_one_of:
+      - 'rolling_period_days'
+      - 'calendar_period'
+    custom_flatten: 'templates/terraform/custom_expand/days_to_duration_string.go.tmpl'
+    custom_expand: 'templates/terraform/custom_flatten/duration_string_to_days.go.tmpl'
+    validation:
+      function: 'validation.IntBetween(1, 30)'
+  - name: 'calendarPeriod'
+    type: Enum
+    description: |
+      A calendar period, semantically "since the start of the current
+      <calendarPeriod>".
+    exactly_one_of:
+      - 'rolling_period_days'
+      - 'calendar_period'
+    enum_values:
+      - 'DAY'
+      - 'WEEK'
+      - 'FORTNIGHT'
+      - 'MONTH'
+  - name: 'userLabels'
+    type: KeyValuePairs
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This field is intended to be used for organizing and identifying the AlertPolicy
       objects.The field can contain up to 64 entries. Each key and value is limited
@@ -150,20 +277,30 @@ properties:
       can contain only lowercase letters, numerals, underscores, and dashes. Keys
       must begin with a letter.
     send_empty_value: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: serviceLevelIndicator
+=======
+  - name: 'serviceLevelIndicator'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       serviceLevelIndicator (SLI) describes a good service.
       It is used to measure and calculate the quality of the Service's
       performance with respect to a single aspect of service quality.
     flatten_object: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::NestedObject
         name: basicSli
         exactly_one_of:
           - service_level_indicator.0.basic_sli
           - service_level_indicator.0.request_based_sli
           - service_level_indicator.0.windows_based_sli
+=======
+      - name: 'basicSli'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Basic Service-Level Indicator (SLI) on a well-known service type.
           Performance will be computed on the basis of pre-defined metrics.
@@ -173,9 +310,19 @@ properties:
 
           Exactly one of the following must be set:
           `basic_sli`, `request_based_sli`, `windows_based_sli`
+<<<<<<< HEAD
         properties:
           - !ruby/object:Api::Type::Array
             name: method
+=======
+        exactly_one_of:
+          - 'service_level_indicator.0.basic_sli'
+          - 'service_level_indicator.0.request_based_sli'
+          - 'service_level_indicator.0.windows_based_sli'
+        properties:
+          - name: 'method'
+            type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               An optional set of RPCs to which this SLI is relevant.
               Telemetry from other methods will not be used to calculate
@@ -184,9 +331,16 @@ properties:
               breaking down by method, setting this field will result in an
               error.
             is_set: true
+<<<<<<< HEAD
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: location
+=======
+            item_type:
+              type: String
+          - name: 'location'
+            type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               An optional set of locations to which this SLI is relevant.
               Telemetry from other locations will not be used to calculate
@@ -195,9 +349,16 @@ properties:
               that don't support breaking down by location, setting this
               field will result in an error.
             is_set: true
+<<<<<<< HEAD
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
             name: version
+=======
+            item_type:
+              type: String
+          - name: 'version'
+            type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               The set of API versions to which this SLI is relevant.
               Telemetry from other API versions will not be used to
@@ -206,6 +367,7 @@ properties:
               that don't support breaking down by version, setting this
               field will result in an error.
             is_set: true
+<<<<<<< HEAD
             item_type: Api::Type::String
           - !ruby/object:Api::Type::NestedObject
             name: latency
@@ -218,10 +380,25 @@ properties:
               - !ruby/object:Api::Type::String
                 required: true
                 name: threshold
+=======
+            item_type:
+              type: String
+          - name: 'latency'
+            type: NestedObject
+            description: |
+              Parameters for a latency threshold SLI.
+            exactly_one_of:
+              - 'service_level_indicator.0.basic_sli.0.latency'
+              - 'service_level_indicator.0.basic_sli.0.availability'
+            properties:
+              - name: 'threshold'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A duration string, e.g. 10s.
                   Good service is defined to be the count of requests made to
                   this service that return in no more than threshold.
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: availability
             description: |
@@ -245,6 +422,27 @@ properties:
           - service_level_indicator.0.basic_sli
           - service_level_indicator.0.request_based_sli
           - service_level_indicator.0.windows_based_sli
+=======
+                required: true
+          - name: 'availability'
+            type: NestedObject
+            description: |
+              Availability based SLI, dervied from count of requests made to this service that return successfully.
+            exactly_one_of:
+              - 'service_level_indicator.0.basic_sli.0.latency'
+              - 'service_level_indicator.0.basic_sli.0.availability'
+            custom_flatten: 'templates/terraform/custom_flatten/monitoring_slo_availability_sli.go.tmpl'
+            properties:
+              - name: 'enabled'
+                type: Boolean
+                description: |
+                  Whether an availability SLI is enabled or not. Must be set to true. Defaults to `true`.
+                validation:
+                  function: 'validateAvailabilitySli'
+                default_value: true
+      - name: 'requestBasedSli'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A request-based SLI defines a SLI for which atomic units of
           service are counted directly.
@@ -254,18 +452,32 @@ properties:
           performance with respect to a single aspect of service quality.
           Exactly one of the following must be set:
           `basic_sli`, `request_based_sli`, `windows_based_sli`
+<<<<<<< HEAD
+=======
+        api_name: requestBased
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         update_mask_fields:
           - 'serviceLevelIndicator.requestBased.goodTotalRatio.badServiceFilter'
           - 'serviceLevelIndicator.requestBased.goodTotalRatio.goodServiceFilter'
           - 'serviceLevelIndicator.requestBased.goodTotalRatio.totalServiceFilter'
           - 'serviceLevelIndicator.requestBased.distributionCut.range'
           - 'serviceLevelIndicator.requestBased.distributionCut.distributionFilter'
+<<<<<<< HEAD
         properties:
           - !ruby/object:Api::Type::NestedObject
             name: goodTotalRatio
             exactly_one_of:
               - service_level_indicator.0.request_based_sli.0.good_total_ratio
               - service_level_indicator.0.request_based_sli.0.distribution_cut
+=======
+        exactly_one_of:
+          - 'service_level_indicator.0.basic_sli'
+          - 'service_level_indicator.0.request_based_sli'
+          - 'service_level_indicator.0.windows_based_sli'
+        properties:
+          - name: 'goodTotalRatio'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               A means to compute a ratio of `good_service` to `total_service`.
               Defines computing this ratio with two TimeSeries [monitoring filters](https://cloud.google.com/monitoring/api/v3/filters)
@@ -274,6 +486,7 @@ properties:
               will be assumed.
 
               Exactly one of `distribution_cut` or `good_total_ratio` can be set.
+<<<<<<< HEAD
             properties:
               - !ruby/object:Api::Type::String
                 name: goodServiceFilter
@@ -281,6 +494,14 @@ properties:
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.request_based_sli.0.good_total_ratio'
+              - 'service_level_indicator.0.request_based_sli.0.distribution_cut'
+            properties:
+              - name: 'goodServiceFilter'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   quantifying good service provided.
@@ -289,12 +510,21 @@ properties:
 
                   Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
                   must be set (good + bad = total is assumed).
+<<<<<<< HEAD
               - !ruby/object:Api::Type::String
                 name: badServiceFilter
                 at_least_one_of:
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+=======
+                at_least_one_of:
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter'
+              - name: 'badServiceFilter'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   quantifying bad service provided, either demanded service that
@@ -306,12 +536,21 @@ properties:
 
                   Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
                   must be set (good + bad = total is assumed).
+<<<<<<< HEAD
               - !ruby/object:Api::Type::String
                 name: totalServiceFilter
                 at_least_one_of:
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter
                   - service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter
+=======
+                at_least_one_of:
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter'
+              - name: 'totalServiceFilter'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   quantifying total demanded service.
@@ -321,11 +560,20 @@ properties:
 
                   Exactly two of `good_service_filter`,`bad_service_filter`,`total_service_filter`
                   must be set (good + bad = total is assumed).
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: distributionCut
             exactly_one_of:
               - service_level_indicator.0.request_based_sli.0.good_total_ratio
               - service_level_indicator.0.request_based_sli.0.distribution_cut
+=======
+                at_least_one_of:
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.good_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.bad_service_filter'
+                  - 'service_level_indicator.0.request_based_sli.0.good_total_ratio.0.total_service_filter'
+          - name: 'distributionCut'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Used when good_service is defined by a count of values aggregated in a
               Distribution that fall into a good range. The total_service is the
@@ -334,25 +582,41 @@ properties:
               measuring good service and total service.
 
               Exactly one of `distribution_cut` or `good_total_ratio` can be set.
+<<<<<<< HEAD
             properties:
               - !ruby/object:Api::Type::String
                 name: distributionFilter
                 required: true
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.request_based_sli.0.good_total_ratio'
+              - 'service_level_indicator.0.request_based_sli.0.distribution_cut'
+            properties:
+              - name: 'distributionFilter'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   aggregating values to quantify the good service provided.
 
                   Must have ValueType = DISTRIBUTION and
                   MetricKind = DELTA or MetricKind = CUMULATIVE.
+<<<<<<< HEAD
               - !ruby/object:Api::Type::NestedObject
                 name: range
                 required: true
+=======
+                required: true
+              - name: 'range'
+                type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   Range of numerical values. The computed good_service
                   will be the count of values x in the Distribution such
                   that range.min <= x <= range.max. inclusive of min and
                   max. Open ranges can be defined by setting
                   just one of min or max.
+<<<<<<< HEAD
                 properties:
                   - !ruby/object:Api::Type::Double
                     name: min
@@ -377,6 +641,28 @@ properties:
           - service_level_indicator.0.basic_sli
           - service_level_indicator.0.request_based_sli
           - service_level_indicator.0.windows_based_sli
+=======
+                required: true
+                properties:
+                  - name: 'min'
+                    type: Double
+                    description: |
+                      Min value for the range (inclusive). If not given,
+                      will be set to 0
+                    at_least_one_of:
+                      - 'service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min'
+                      - 'service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max'
+                  - name: 'max'
+                    type: Double
+                    description: |
+                      max value for the range (inclusive). If not given,
+                      will be set to 0
+                    at_least_one_of:
+                      - 'service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.min'
+                      - 'service_level_indicator.0.request_based_sli.0.distribution_cut.0.range.0.max'
+      - name: 'windowsBasedSli'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A windows-based SLI defines the criteria for time windows.
           good_service is defined based off the count of these time windows
@@ -388,6 +674,10 @@ properties:
 
           Exactly one of the following must be set:
           `basic_sli`, `request_based_sli`, `windows_based_sli`
+<<<<<<< HEAD
+=======
+        api_name: windowsBased
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         update_mask_fields:
           - 'serviceLevelIndicator.windowsBased.windowPeriod'
           - 'serviceLevelIndicator.windowsBased.goodBadMetricFilter'
@@ -402,16 +692,29 @@ properties:
           - 'serviceLevelIndicator.windowsBased.metricMeanInRange.range'
           - 'serviceLevelIndicator.windowsBased.metricSumInRange.timeSeries'
           - 'serviceLevelIndicator.windowsBased.metricSumInRange.range'
+<<<<<<< HEAD
         properties:
           # NOTE: If adding properties to windowsBasedSli, remember to add to the
           # custom updateMask fields in property overrides.
           - !ruby/object:Api::Type::String
             name: windowPeriod
+=======
+        exactly_one_of:
+          - 'service_level_indicator.0.basic_sli'
+          - 'service_level_indicator.0.request_based_sli'
+          - 'service_level_indicator.0.windows_based_sli'
+        properties:
+          # NOTE: If adding properties to windowsBasedSli, remember to add to the
+          # custom updateMask fields in property overrides.
+          - name: 'windowPeriod'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Duration over which window quality is evaluated, given as a
               duration string "{X}s" representing X seconds. Must be an
               integer fraction of a day and at least 60s.
           # START window_criterion FIELDS
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: goodBadMetricFilter
             exactly_one_of:
@@ -419,12 +722,17 @@ properties:
               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
               - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
               - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+=======
+          - name: 'goodBadMetricFilter'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
               with ValueType = BOOL. The window is good if any true values
               appear in the window. One of `good_bad_metric_filter`,
               `good_total_ratio_threshold`, `metric_mean_in_range`,
               `metric_sum_in_range` must be set for `windows_based_sli`.
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: goodTotalRatioThreshold
             exactly_one_of:
@@ -432,11 +740,21 @@ properties:
               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
               - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
               - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter'
+              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range'
+          - name: 'goodTotalRatioThreshold'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Criterion that describes a window as good if its performance is
               high enough. One of `good_bad_metric_filter`,
               `good_total_ratio_threshold`, `metric_mean_in_range`,
               `metric_sum_in_range` must be set for `windows_based_sli`.
+<<<<<<< HEAD
             properties:
               - !ruby/object:Api::Type::Double
                 name: threshold
@@ -456,12 +774,36 @@ properties:
                     exactly_one_of:
                       - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio
                       - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter'
+              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range'
+            properties:
+              - name: 'threshold'
+                type: Double
+                description: |
+                  If window performance >= threshold, the window is counted
+                  as good.
+              - name: 'performance'
+                type: NestedObject
+                description: |
+                  Request-based SLI to evaluate to judge window quality.
+                exactly_one_of:
+                  - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance'
+                  - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance'
+                properties:
+                  - name: 'goodTotalRatio'
+                    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       A means to compute a ratio of `good_service` to `total_service`.
                       Defines computing this ratio with two TimeSeries [monitoring filters](https://cloud.google.com/monitoring/api/v3/filters)
                       Must specify exactly two of good, bad, and total service filters.
                       The relationship good_service + bad_service = total_service
                       will be assumed.
+<<<<<<< HEAD
                     properties:
                       - !ruby/object:Api::Type::String
                         name: goodServiceFilter
@@ -469,6 +811,14 @@ properties:
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+=======
+                    exactly_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio'
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut'
+                    properties:
+                      - name: 'goodServiceFilter'
+                        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                           quantifying good service provided. Exactly two of
@@ -477,12 +827,21 @@ properties:
 
                           Must have ValueType = DOUBLE or ValueType = INT64 and
                           must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+<<<<<<< HEAD
                       - !ruby/object:Api::Type::String
                         name: badServiceFilter
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+=======
+                        at_least_one_of:
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter'
+                      - name: 'badServiceFilter'
+                        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                           quantifying bad service provided, either demanded service that
@@ -493,12 +852,21 @@ properties:
 
                           Must have ValueType = DOUBLE or ValueType = INT64 and
                           must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+<<<<<<< HEAD
                       - !ruby/object:Api::Type::String
                         name: totalServiceFilter
                         at_least_one_of:
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter
                           - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter
+=======
+                        at_least_one_of:
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter'
+                      - name: 'totalServiceFilter'
+                        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                           quantifying total demanded service. Exactly two of
@@ -507,36 +875,61 @@ properties:
 
                           Must have ValueType = DOUBLE or ValueType = INT64 and
                           must have MetricKind = DELTA or MetricKind = CUMULATIVE.
+<<<<<<< HEAD
                   - !ruby/object:Api::Type::NestedObject
                     name: distributionCut
                     exactly_one_of:
                       - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio
                       - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut
+=======
+                        at_least_one_of:
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.good_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.bad_service_filter'
+                          - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio.0.total_service_filter'
+                  - name: 'distributionCut'
+                    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       Used when good_service is defined by a count of values aggregated in a
                       Distribution that fall into a good range. The total_service is the
                       total count of all values aggregated in the Distribution.
                       Defines a distribution TimeSeries filter and thresholds used for
                       measuring good service and total service.
+<<<<<<< HEAD
                     properties:
                       - !ruby/object:Api::Type::String
                         name: distributionFilter
                         required: true
+=======
+                    exactly_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.good_total_ratio'
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut'
+                    properties:
+                      - name: 'distributionFilter'
+                        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           A TimeSeries [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                           aggregating values to quantify the good service provided.
 
                           Must have ValueType = DISTRIBUTION and
                           MetricKind = DELTA or MetricKind = CUMULATIVE.
+<<<<<<< HEAD
                       - !ruby/object:Api::Type::NestedObject
                         name: range
                         required: true
+=======
+                        required: true
+                      - name: 'range'
+                        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           Range of numerical values. The computed good_service
                           will be the count of values x in the Distribution such
                           that range.min <= x <= range.max. inclusive of min and
                           max. Open ranges can be defined by setting
                           just one of min or max.
+<<<<<<< HEAD
                         properties:
                           - !ruby/object:Api::Type::Double
                             name: min
@@ -564,6 +957,36 @@ properties:
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: method
+=======
+                        required: true
+                        properties:
+                          - name: 'min'
+                            type: Double
+                            description: |
+                              Min value for the range (inclusive). If not given,
+                              will be set to 0
+                            at_least_one_of:
+                              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min'
+                              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max'
+                          - name: 'max'
+                            type: Double
+                            description: |
+                              max value for the range (inclusive). If not given,
+                              will be set to 0
+                            at_least_one_of:
+                              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.min'
+                              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance.0.distribution_cut.0.range.0.max'
+              - name: 'basicSliPerformance'
+                type: NestedObject
+                description: |
+                  Basic SLI to evaluate to judge window quality.
+                exactly_one_of:
+                  - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.performance'
+                  - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance'
+                properties:
+                  - name: 'method'
+                    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       An optional set of RPCs to which this SLI is relevant.
                       Telemetry from other methods will not be used to calculate
@@ -572,9 +995,16 @@ properties:
                       breaking down by method, setting this field will result in an
                       error.
                     is_set: true
+<<<<<<< HEAD
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::Array
                     name: location
+=======
+                    item_type:
+                      type: String
+                  - name: 'location'
+                    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       An optional set of locations to which this SLI is relevant.
                       Telemetry from other locations will not be used to calculate
@@ -583,9 +1013,16 @@ properties:
                       that don't support breaking down by location, setting this
                       field will result in an error.
                     is_set: true
+<<<<<<< HEAD
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::Array
                     name: version
+=======
+                    item_type:
+                      type: String
+                  - name: 'version'
+                    type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       The set of API versions to which this SLI is relevant.
                       Telemetry from other API versions will not be used to
@@ -594,6 +1031,7 @@ properties:
                       that don't support breaking down by version, setting this
                       field will result in an error.
                     is_set: true
+<<<<<<< HEAD
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::NestedObject
                     name: latency
@@ -606,10 +1044,25 @@ properties:
                       - !ruby/object:Api::Type::String
                         required: true
                         name: threshold
+=======
+                    item_type:
+                      type: String
+                  - name: 'latency'
+                    type: NestedObject
+                    description: |
+                      Parameters for a latency threshold SLI.
+                    exactly_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.latency'
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.availability'
+                    properties:
+                      - name: 'threshold'
+                        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                         description: |
                           A duration string, e.g. 10s.
                           Good service is defined to be the count of requests made to
                           this service that return in no more than threshold.
+<<<<<<< HEAD
                   - !ruby/object:Api::Type::NestedObject
                     name: availability
                     description: |
@@ -633,6 +1086,27 @@ properties:
               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
               - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
               - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+=======
+                        required: true
+                  - name: 'availability'
+                    type: NestedObject
+                    description: |
+                      Availability based SLI, dervied from count of requests made to this service that return successfully.
+                    exactly_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.latency'
+                      - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold.0.basic_sli_performance.0.availability'
+                    custom_flatten: 'templates/terraform/custom_flatten/monitoring_slo_availability_sli.go.tmpl'
+                    properties:
+                      - name: 'enabled'
+                        type: Boolean
+                        description: |
+                          Whether an availability SLI is enabled or not. Must be set to `true. Defaults to `true`.
+                        validation:
+                          function: 'validateAvailabilitySli'
+                        default_value: true
+          - name: 'metricMeanInRange'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Criterion that describes a window as good if the metric's value
               is in a good range, *averaged* across returned streams.
@@ -642,10 +1116,21 @@ properties:
               `metric_sum_in_range` must be set for `windows_based_sli`.
               Average value X of `time_series` should satisfy
               `range.min <= X <= range.max` for a good window.
+<<<<<<< HEAD
             properties:
               - !ruby/object:Api::Type::String
                 name: timeSeries
                 required: true
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter'
+              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range'
+            properties:
+              - name: 'timeSeries'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   specifying the TimeSeries to use for evaluating window
@@ -653,9 +1138,15 @@ properties:
                   ValueType = DOUBLE and MetricKind = GAUGE. Mean value `X`
                   should satisfy `range.min <= X <= range.max`
                   under good service.
+<<<<<<< HEAD
               - !ruby/object:Api::Type::NestedObject
                 name: range
                 required: true
+=======
+                required: true
+              - name: 'range'
+                type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   Range of numerical values. The computed good_service
                   will be the count of values x in the Distribution such
@@ -664,25 +1155,41 @@ properties:
                   just one of min or max. Mean value `X` of `time_series`
                   values should satisfy `range.min <= X <= range.max` for a
                   good service.
+<<<<<<< HEAD
                 properties:
                   - !ruby/object:Api::Type::Double
                     name: min
                     at_least_one_of:
                       - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
                       - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+=======
+                required: true
+                properties:
+                  - name: 'min'
+                    type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       Min value for the range (inclusive). If not given,
                       will be set to "-infinity", defining an open range
                       "< range.max"
+<<<<<<< HEAD
                   - !ruby/object:Api::Type::Double
                     name: max
                     at_least_one_of:
                       - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min
                       - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max
+=======
+                    at_least_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min'
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max'
+                  - name: 'max'
+                    type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       max value for the range (inclusive). If not given,
                       will be set to "infinity", defining an open range
                       ">= range.min"
+<<<<<<< HEAD
           - !ruby/object:Api::Type::NestedObject
             name: metricSumInRange
             exactly_one_of:
@@ -690,6 +1197,13 @@ properties:
               - service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold
               - service_level_indicator.0.windows_based_sli.0.metric_mean_in_range
               - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range
+=======
+                    at_least_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.min'
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range.0.range.0.max'
+          - name: 'metricSumInRange'
+            type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Criterion that describes a window as good if the metric's value
               is in a good range, *summed* across returned streams.
@@ -699,10 +1213,21 @@ properties:
               One of `good_bad_metric_filter`,
               `good_total_ratio_threshold`, `metric_mean_in_range`,
               `metric_sum_in_range` must be set for `windows_based_sli`.
+<<<<<<< HEAD
             properties:
               - !ruby/object:Api::Type::String
                 name: timeSeries
                 required: true
+=======
+            exactly_one_of:
+              - 'service_level_indicator.0.windows_based_sli.0.good_bad_metric_filter'
+              - 'service_level_indicator.0.windows_based_sli.0.good_total_ratio_threshold'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_mean_in_range'
+              - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range'
+            properties:
+              - name: 'timeSeries'
+                type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   A [monitoring filter](https://cloud.google.com/monitoring/api/v3/filters)
                   specifying the TimeSeries to use for evaluating window
@@ -712,9 +1237,15 @@ properties:
 
                   Summed value `X` should satisfy
                   `range.min <= X <= range.max` for a good window.
+<<<<<<< HEAD
               - !ruby/object:Api::Type::NestedObject
                 name: range
                 required: true
+=======
+                required: true
+              - name: 'range'
+                type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                 description: |
                   Range of numerical values. The computed good_service
                   will be the count of values x in the Distribution such
@@ -722,23 +1253,44 @@ properties:
                   max. Open ranges can be defined by setting
                   just one of min or max. Summed value `X` should satisfy
                   `range.min <= X <= range.max` for a good window.
+<<<<<<< HEAD
                 properties:
                   - !ruby/object:Api::Type::Double
                     name: min
                     at_least_one_of:
                       - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
                       - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max
+=======
+                required: true
+                properties:
+                  - name: 'min'
+                    type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       Min value for the range (inclusive). If not given,
                       will be set to "-infinity", defining an open range
                       "< range.max"
+<<<<<<< HEAD
                   - !ruby/object:Api::Type::Double
                     name: max
                     at_least_one_of:
                       - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min
                       - service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max
+=======
+                    at_least_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min'
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max'
+                  - name: 'max'
+                    type: Double
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                     description: |
                       max value for the range (inclusive). If not given,
                       will be set to "infinity", defining an open range
                       ">= range.min"
+<<<<<<< HEAD
         # END window_criterion FIELDS
+=======
+                    at_least_one_of:
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.min'
+                      - 'service_level_indicator.0.windows_based_sli.0.metric_sum_in_range.0.range.0.max'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

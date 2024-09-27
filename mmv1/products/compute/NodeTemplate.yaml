@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,15 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'NodeTemplate'
 kind: 'compute#nodeTemplate'
 base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
 has_self_link: true
+=======
+---
+name: 'NodeTemplate'
+kind: 'compute#nodeTemplate'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   Represents a NodeTemplate resource. Node templates specify properties
   for creating sole-tenant nodes, such as node type, vCPU and memory
   requirements, node affinity labels, and region.
+<<<<<<< HEAD
 immutable: true
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
@@ -57,10 +68,51 @@ examples:
       template_name: 'soletenant-with-licenses'
   - !ruby/object:Provider::Terraform::Examples
     name: 'node_template_accelerators'
+=======
+references:
+  guides:
+    'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates'
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/nodeTemplates'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
+examples:
+  - name: 'node_template_basic'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-tmpl'
+  - name: 'node_template_server_binding'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-licenses'
+  - name: 'node_template_accelerators'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'template'
     vars:
       template_name: 'soletenant-with-accelerators'
 parameters:
+<<<<<<< HEAD
   - !ruby/object:Api::Type::ResourceRef
     name: 'region'
     resource: 'Region'
@@ -90,13 +142,49 @@ properties:
       instance scheduling.
   - !ruby/object:Api::Type::String
     name: 'nodeType'
+=======
+  - name: 'region'
+    type: ResourceRef
+    description: |
+      Region where nodes using the node template will be created.
+      If it is not provided, the provider region is used.
+    required: false
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'selfLink'
+properties:
+  - name: 'creationTimestamp'
+    type: Time
+    description: 'Creation timestamp in RFC3339 text format.'
+    output: true
+  - name: 'description'
+    type: String
+    description: 'An optional textual description of the resource.'
+  - name: 'name'
+    type: String
+    description: 'Name of the resource.'
+  - name: 'nodeAffinityLabels'
+    type: KeyValuePairs
+    description: |
+      Labels to use for node affinity, which will be used in
+      instance scheduling.
+  - name: 'nodeType'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Node type to use for nodes group that are created from this template.
       Only one of nodeTypeFlexibility and nodeType can be specified.
     conflicts:
       - node_type_flexibility
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'nodeTypeFlexibility'
+=======
+  - name: 'nodeTypeFlexibility'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Flexible properties for the desired node type. Node groups that
       use this node template will create nodes of a type that matches
@@ -105,6 +193,7 @@ properties:
     conflicts:
       - node_type
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: cpus
         at_least_one_of:
@@ -126,14 +215,42 @@ properties:
         output: true
   - !ruby/object:Api::Type::NestedObject
     name: 'serverBinding'
+=======
+      - name: 'cpus'
+        type: String
+        description: |
+          Number of virtual CPUs to use.
+        at_least_one_of:
+          - 'node_type_flexibility.0.cpus'
+          - 'node_type_flexibility.0.memory'
+      - name: 'memory'
+        type: String
+        description: |
+          Physical memory available to the node, defined in MB.
+        at_least_one_of:
+          - 'node_type_flexibility.0.cpus'
+          - 'node_type_flexibility.0.memory'
+      - name: 'localSsd'
+        type: String
+        description: |
+          Use local SSD
+        output: true
+  - name: 'serverBinding'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The server binding policy for nodes using this template. Determines
       where the nodes should restart following a maintenance event.
     default_from_api: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Enum
         name: 'type'
         required: true
+=======
+      - name: 'type'
+        type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Type of server binding policy. If `RESTART_NODE_ON_ANY_SERVER`,
           nodes using this template will restart on any physical server
@@ -147,6 +264,7 @@ properties:
           such as physical sockets or cores, to avoid the need for
           additional licenses when maintenance occurs. However, VMs on such
           nodes will experience outages while maintenance is applied.
+<<<<<<< HEAD
         values:
           - :RESTART_NODE_ON_ANY_SERVER
           - :RESTART_NODE_ON_MINIMAL_SERVERS
@@ -175,3 +293,35 @@ properties:
       - :ENABLED
       - :NONE
     default_value: :NONE
+=======
+        required: true
+        enum_values:
+          - 'RESTART_NODE_ON_ANY_SERVER'
+          - 'RESTART_NODE_ON_MINIMAL_SERVERS'
+  - name: 'accelerators'
+    type: Array
+    description: |
+      List of the type and count of accelerator cards attached to the
+      node template
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'acceleratorCount'
+          type: Integer
+          description: |
+            The number of the guest accelerator cards exposed to this
+            node template.
+        - name: 'acceleratorType'
+          type: String
+          description: |
+            Full or partial URL of the accelerator type resource to expose
+            to this node template.
+  - name: 'cpuOvercommitType'
+    type: Enum
+    description: |
+      CPU overcommit.
+    default_value: "NONE"
+    enum_values:
+      - 'ENABLED'
+      - 'NONE'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

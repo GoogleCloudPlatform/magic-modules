@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'OrganizationNotificationConfig'
 base_url: organizations/{{organization}}/locations/{{location}}/notificationConfigs
@@ -18,6 +19,10 @@ self_link: '{{name}}'
 create_url: organizations/{{organization}}/locations/{{location}}/notificationConfigs?configId={{config_id}}
 update_verb: :PATCH
 update_mask: true
+=======
+---
+name: 'OrganizationNotificationConfig'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the
@@ -26,6 +31,7 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
@@ -33,11 +39,33 @@ references: !ruby/object:Api::Resource::ReferenceLinks
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'scc_v2_organization_notification_config_basic'
+=======
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.locations.notificationConfigs'
+docs:
+base_url: 'organizations/{{organization}}/locations/{{location}}/notificationConfigs'
+self_link: '{{name}}'
+create_url: 'organizations/{{organization}}/locations/{{location}}/notificationConfigs?configId={{config_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/scc_v2_source_self_link_as_name_set_organization.go.tmpl'
+examples:
+  - name: 'scc_v2_organization_notification_config_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'custom_organization_notification_config'
     vars:
       topic_name: 'my-topic'
       config_id: 'my-config'
     test_env_vars:
+<<<<<<< HEAD
       org_id: :ORG_ID
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   custom_import: templates/terraform/custom_import/scc_v2_source_self_link_as_name_set_organization.go.erb
@@ -104,6 +132,69 @@ properties:
         name: filter
         required: true
         send_empty_value: true
+=======
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'organization'
+    type: String
+    description: |
+      The organization whose Cloud Security Command Center the Notification
+      Config lives in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'configId'
+    type: String
+    description: |
+      This must be unique within the organization.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      location Id is provided by organization. If not provided, Use global as default.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of this notification config, in the format
+      `organizations/{{organization}}/notificationConfigs/{{config_id}}`.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      The description of the notification config (max of 1024 characters).
+    validation:
+      function: 'validation.StringLenBetween(0, 1024)'
+  - name: 'pubsubTopic'
+    type: String
+    description: |
+      The Pub/Sub topic to send notifications to. Its format is
+      "projects/[project_id]/topics/[topic]".
+    required: true
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      The service account that needs "pubsub.topics.publish" permission to
+      publish to the Pub/Sub topic.
+    output: true
+  - name: 'streamingConfig'
+    type: NestedObject
+    description: |
+      The config for triggering streaming-based notifications.
+    required: true
+    send_empty_value: true
+    allow_empty_object: true
+    update_mask_fields:
+      - 'streamingConfig.filter'
+    properties:
+      - name: 'filter'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Expression that defines the filter to apply across create/update
           events of assets or findings as specified by the event type. The
@@ -130,3 +221,8 @@ properties:
           See
           [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
           for information on how to write a filter.
+<<<<<<< HEAD
+=======
+        required: true
+        send_empty_value: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

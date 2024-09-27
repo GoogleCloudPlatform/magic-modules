@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Topic'
 description: |
@@ -31,12 +36,36 @@ docs: !ruby/object:Provider::Terraform::Docs
   note: |
     You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
     by using the `google_project_service_identity` resource.
+=======
+---
+name: 'Topic'
+description: |
+  A named resource to which messages are sent by publishers.
+references:
+  guides:
+    'Managing Topics': 'https://cloud.google.com/pubsub/docs/admin#managing_topics'
+  api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
+docs:
+  note: |
+    You can retrieve the email of the Google Managed Pub/Sub Service Account used for forwarding
+    by using the `google_project_service_identity` resource.
+base_url: 'projects/{{project}}/topics'
+create_verb: 'PUT'
+update_url: 'projects/{{project}}/topics/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   # PubSub resources don't have operations but are negatively cached
   # and eventually consistent.
   # Because some users check whether the PubSub resource exists prior
   # to applying a new resource, we need to add this PollAsync to GET the
   # resource until it exists and the negative cached result goes away.
   # Context: hashicorp/terraform-provider-google#4993
+<<<<<<< HEAD
 async: !ruby/object:Provider::Terraform::PollAsync
   check_response_func_existence: transport_tpg.PollCheckForExistence
   actions: ['create']
@@ -55,10 +84,38 @@ examples:
     name: 'pubsub_topic_cmek'
     primary_resource_id: 'example'
     skip_test: true
+=======
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: true
+  target_occurrences: 1
+  actions: ['create']
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'topic'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
+  encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.PubsubTopicProjectNotReady'
+examples:
+  - name: 'pubsub_topic_basic'
+    primary_resource_id: 'example'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_cmek'
+    primary_resource_id: 'example'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       topic_name: 'example-topic'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_topic_geo_restricted'
     primary_resource_id: 'example'
@@ -66,11 +123,20 @@ examples:
       topic_name: 'example-topic'
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_topic_schema_settings'
+=======
+    exclude_test: true
+  - name: 'pubsub_topic_geo_restricted'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_schema_settings'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
       schema_name: 'example'
     test_env_vars:
+<<<<<<< HEAD
       project_name: :PROJECT_NAME
   - !ruby/object:Provider::Terraform::Examples
     name: 'pubsub_topic_ingestion_kinesis'
@@ -91,26 +157,59 @@ properties:
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
   - !ruby/object:Api::Type::String
     name: 'kmsKeyName'
+=======
+      project_name: 'PROJECT_NAME'
+  - name: 'pubsub_topic_ingestion_kinesis'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: 'Name of the topic.'
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
+  - name: 'kmsKeyName'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The resource name of the Cloud KMS CryptoKey to be used to protect access
       to messages published on this topic. Your project's PubSub service account
       (`service-{{PROJECT_NUMBER}}@gcp-sa-pubsub.iam.gserviceaccount.com`) must have
       `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
       The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
+<<<<<<< HEAD
   - !ruby/object:Api::Type::KeyValueLabels
     name: 'labels'
     description: |
       A set of key/value label pairs to assign to this Topic.
   - !ruby/object:Api::Type::NestedObject
     name: 'messageStoragePolicy'
+=======
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      A set of key/value label pairs to assign to this Topic.
+  - name: 'messageStoragePolicy'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Policy constraining the set of Google Cloud Platform regions where
       messages published to the topic may be stored. If not present, then no
       constraints are in effect.
     default_from_api: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Array
         name: 'allowedPersistenceRegions'
+=======
+      - name: 'allowedPersistenceRegions'
+        type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A list of IDs of GCP regions where messages that are published to
           the topic may be persisted in storage. Messages published by
@@ -118,6 +217,7 @@ properties:
           of GCP altogether) will be routed for storage in one of the
           allowed regions. An empty list means that no regions are allowed,
           and is not a valid configuration.
+<<<<<<< HEAD
         item_type: Api::Type::String
         required: true
   - !ruby/object:Api::Type::NestedObject
@@ -127,12 +227,25 @@ properties:
     properties:
       - !ruby/object:Api::Type::String
         name: 'schema'
+=======
+        required: true
+        item_type:
+          type: String
+  - name: 'schemaSettings'
+    type: NestedObject
+    description: |
+      Settings for validating messages published against a schema.
+    properties:
+      - name: 'schema'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The name of the schema that messages published should be
           validated against. Format is projects/{project}/schemas/{schema}.
           The value of this field will be _deleted-schema_
           if the schema has been deleted.
         required: true
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Enum
         name: 'encoding'
         description: The encoding of messages validated against schema.
@@ -143,6 +256,18 @@ properties:
           - :BINARY
   - !ruby/object:Api::Type::String
     name: 'messageRetentionDuration'
+=======
+      - name: 'encoding'
+        type: Enum
+        description: The encoding of messages validated against schema.
+        default_value: "ENCODING_UNSPECIFIED"
+        enum_values:
+          - 'ENCODING_UNSPECIFIED'
+          - 'JSON'
+          - 'BINARY'
+  - name: 'messageRetentionDuration'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Indicates the minimum duration to retain a message after it is published
       to the topic. If this field is set, messages published to the topic in
@@ -152,6 +277,7 @@ properties:
       set, message retention is controlled by settings on individual subscriptions.
       The rotation period has the format of a decimal number, followed by the
       letter `s` (seconds). Cannot be more than 31 days or less than 10 minutes.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: 'ingestionDataSourceSettings'
     description: |
@@ -169,20 +295,49 @@ properties:
             required: true
           - !ruby/object:Api::Type::String
             name: 'consumerArn'
+=======
+  - name: 'ingestionDataSourceSettings'
+    type: NestedObject
+    description: |
+      Settings for ingestion from a data source into this topic.
+    properties:
+      - name: 'awsKinesis'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Amazon Kinesis Data Streams.
+        properties:
+          - name: 'streamArn'
+            type: String
+            description: |
+              The Kinesis stream ARN to ingest data from.
+            required: true
+          - name: 'consumerArn'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               The Kinesis consumer ARN to used for ingestion in
               Enhanced Fan-Out mode. The consumer must be already
               created and ready to be used.
             required: true
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: 'awsRoleArn'
+=======
+          - name: 'awsRoleArn'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               AWS role ARN to be used for Federated Identity authentication with
               Kinesis. Check the Pub/Sub docs for how to set up this role and the
               required permissions that need to be attached to it.
             required: true
+<<<<<<< HEAD
           - !ruby/object:Api::Type::String
             name: 'gcpServiceAccount'
+=======
+          - name: 'gcpServiceAccount'
+            type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               The GCP service account to be used for Federated Identity authentication
               with Kinesis (via a `AssumeRoleWithWebIdentity` call for the provided

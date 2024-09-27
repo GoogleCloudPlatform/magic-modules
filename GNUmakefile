@@ -9,9 +9,13 @@ ifeq ($(ENGINE),tpgtools)
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
 else ifneq ($(PRODUCT),)
+<<<<<<< HEAD
   mmv1_compile=-p products/$(PRODUCT)
 else
   mmv1_compile=-a
+=======
+  mmv1_compile=--product $(PRODUCT)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 endif
 
 # tpgtools setup
@@ -26,12 +30,20 @@ else
 endif
 
 ifneq ($(RESOURCE),)
+<<<<<<< HEAD
   mmv1_compile += -t $(RESOURCE)
+=======
+  mmv1_compile += --resource $(RESOURCE)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
+<<<<<<< HEAD
   mmv1_compile += -r $(OVERRIDES)
+=======
+  mmv1_compile += --overrides $(OVERRIDES)
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
@@ -62,12 +74,20 @@ terraform build provider:
 
 mmv1:
 	cd mmv1;\
+<<<<<<< HEAD
 		bundle; \
 		if [ "$(VERSION)" = "ga" ]; then \
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v ga --no-docs $(mmv1_compile); \
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
 		else \
 			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
+=======
+		if [ "$(VERSION)" = "ga" ]; then \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+		else \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 		fi
 
 tpgtools:
@@ -91,6 +111,7 @@ clean-tgc:
 
 tgc:
 	cd mmv1;\
+<<<<<<< HEAD
 		bundle;\
 		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
 		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
@@ -109,6 +130,18 @@ test:
 	cd mmv1; \
 		bundle; \
 		bundle exec rake test
+=======
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
+		go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+
+tf-oics:
+	cd mmv1;\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
+
+test:
+	cd mmv1; \
+		go test ./...
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 
 serialize:
 	cd tpgtools;\

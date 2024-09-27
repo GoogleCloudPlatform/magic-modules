@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/dialogflowcx/product.yaml
 # Copyright 2020 Google Inc.
+========
+# Copyright 2024 Google Inc.
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/servicedirectory/product.yaml
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:mmv1/products/dialogflowcx/product.yaml
 --- !ruby/object:Api::Product
 name: DialogflowCX
 display_name: Dialogflow CX
@@ -20,3 +30,23 @@ versions:
     base_url: https://{{location}}-dialogflow.googleapis.com/v3/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+========
+---
+name: 'ServiceDirectory'
+display_name: 'Service Directory'
+versions:
+  - name: 'beta'
+    base_url: 'https://servicedirectory.googleapis.com/v1beta1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/servicedirectory/product.yaml
+=======
+---
+name: 'DialogflowCX'
+display_name: 'Dialogflow CX'
+versions:
+  - name: 'ga'
+    base_url: 'https://{{location}}-dialogflow.googleapis.com/v3/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

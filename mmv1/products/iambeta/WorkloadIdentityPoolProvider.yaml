@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'WorkloadIdentityPoolProvider'
 base_url: projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers
@@ -31,58 +36,132 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_aws_basic'
+=======
+---
+name: 'WorkloadIdentityPoolProvider'
+description: A configuration for an external identity provider.
+references:
+  guides:
+    'Managing workload identity providers': 'https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers#managing_workload_identity_providers'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.workloadIdentityPools.providers'
+docs:
+base_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers'
+self_link: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
+create_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers?workloadIdentityPoolProviderId={{workload_identity_pool_provider_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/providers/{{workload_identity_pool_provider_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl'
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_provider.go.tmpl'
+examples:
+  - name: 'iam_workload_identity_pool_provider_aws_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_aws_full'
+=======
+  - name: 'iam_workload_identity_pool_provider_aws_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_oidc_basic'
+=======
+  - name: 'iam_workload_identity_pool_provider_oidc_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_oidc_full'
+=======
+  - name: 'iam_workload_identity_pool_provider_oidc_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_saml_basic'
+=======
+  - name: 'iam_workload_identity_pool_provider_saml_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_saml_full'
+=======
+  - name: 'iam_workload_identity_pool_provider_saml_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_oidc_upload_key'
+=======
+  - name: 'iam_workload_identity_pool_provider_oidc_upload_key'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_x509_basic'
+=======
+  - name: 'iam_workload_identity_pool_provider_x509_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'iam_workload_identity_pool_provider_x509_full'
+=======
+  - name: 'iam_workload_identity_pool_provider_x509_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   constants: templates/terraform/constants/iam_workload_identity_pool_provider.go.erb
   decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
@@ -90,19 +169,34 @@ custom_code: !ruby/object:Provider::Terraform::CustomCode
 properties:
   - !ruby/object:Api::Type::String
     name: 'workloadIdentityPoolId'
+=======
+parameters:
+properties:
+  - name: 'workloadIdentityPoolId'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The ID used for the pool, which is the final component of the pool resource name. This
       value should be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
       `gcp-` is reserved for use by Google, and may not be specified.
+<<<<<<< HEAD
     required: true
     immutable: true
     url_param_only: true
   - !ruby/object:Api::Type::String
     name: 'workloadIdentityPoolProviderId'
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'workloadIdentityPoolProviderId'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The ID for the provider, which becomes the final component of the resource name. This
       value must be 4-32 characters, and may contain the characters [a-z0-9-]. The prefix
       `gcp-` is reserved for use by Google, and may not be specified.
+<<<<<<< HEAD
     required: true
     immutable: true
     url_param_only: true
@@ -110,6 +204,15 @@ properties:
       function: 'ValidateWorkloadIdentityPoolProviderId'
   - !ruby/object:Api::Type::Enum
     name: 'state'
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      function: 'ValidateWorkloadIdentityPoolProviderId'
+  - name: 'state'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The state of the provider.
       * STATE_UNSPECIFIED: State unspecified.
@@ -119,6 +222,7 @@ properties:
         UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
         until it is permanently deleted.
     output: true
+<<<<<<< HEAD
     values:
       - :STATE_UNSPECIFIED
       - :ACTIVE
@@ -131,10 +235,25 @@ properties:
     description: A description for the provider. Cannot exceed 256 characters.
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'displayName'
+    type: String
+    description: A display name for the provider. Cannot exceed 32 characters.
+  - name: 'description'
+    type: String
+    description: A description for the provider. Cannot exceed 256 characters.
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The resource name of the provider as
       `projects/{project_number}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`.
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Boolean
     name: 'disabled'
     description: |
@@ -142,6 +261,15 @@ properties:
       However, existing tokens still grant access.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'attributeMapping'
+=======
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Whether the provider is disabled. You cannot use a disabled provider to exchange tokens.
+      However, existing tokens still grant access.
+  - name: 'attributeMapping'
+    type: KeyValuePairs
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Maps attributes from authentication credentials issued by an external identity provider
       to Google Cloud attributes, such as `subject` and `segment`.
@@ -203,8 +331,13 @@ properties:
           ```
           {"google.subject": "assertion.sub"}
           ```
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'attributeCondition'
+=======
+  - name: 'attributeCondition'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       [A Common Expression Language](https://opensource.google/projects/cel) expression, in
       plain text, to restrict what otherwise valid authentication credentials issued by the
@@ -225,12 +358,18 @@ properties:
       ```
       "'admins' in google.groups"
       ```
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: aws
+=======
+  - name: 'aws'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       An Amazon Web Services identity provider. Not compatible with the property
       oidc or saml.
     exactly_one_of:
+<<<<<<< HEAD
       - aws
       - oidc
       - saml
@@ -250,14 +389,41 @@ properties:
       - oidc
       - saml
       - x509
+=======
+      - 'aws'
+      - 'oidc'
+      - 'saml'
+      - 'x509'
+    properties:
+      - name: 'accountId'
+        type: String
+        description: The AWS account ID.
+        required: true
+  - name: 'oidc'
+    type: NestedObject
+    description:
+      An OpenId Connect 1.0 identity provider. Not compatible with the property
+      aws or saml.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     update_mask_fields:
       - 'oidc.allowed_audiences'
       - 'oidc.issuer_uri'
       - 'oidc.jwks_json'
+<<<<<<< HEAD
     properties:
       - !ruby/object:Api::Type::Array
         name: allowedAudiences
         item_type: Api::Type::String
+=======
+    exactly_one_of:
+      - 'aws'
+      - 'oidc'
+      - 'saml'
+      - 'x509'
+    properties:
+      - name: 'allowedAudiences'
+        type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Acceptable values for the `aud` field (audience) in the OIDC token. Token exchange
           requests are rejected if the token audience does not match one of the configured
@@ -271,12 +437,23 @@ properties:
           //iam.googleapis.com/projects/<project-number>/locations/<location>/workloadIdentityPools/<pool-id>/providers/<provider-id>
           https://iam.googleapis.com/projects/<project-number>/locations/<location>/workloadIdentityPools/<pool-id>/providers/<provider-id>
           ```
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: issuerUri
         description: The OIDC issuer URL.
         required: true
       - !ruby/object:Api::Type::String
         name: jwksJson
+=======
+        item_type:
+          type: String
+      - name: 'issuerUri'
+        type: String
+        description: The OIDC issuer URL.
+        required: true
+      - name: 'jwksJson'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           OIDC JWKs in JSON String format. For details on definition of a
           JWK, see https:tools.ietf.org/html/rfc7517. If not set, then we
@@ -302,12 +479,18 @@ properties:
           }
           ```
         required: false
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: saml
+=======
+  - name: 'saml'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description:
       An SAML 2.0 identity provider. Not compatible with the property
       oidc or aws.
     exactly_one_of:
+<<<<<<< HEAD
       - aws
       - oidc
       - saml
@@ -319,10 +502,24 @@ properties:
         required: true
   - !ruby/object:Api::Type::NestedObject
     name: x509
+=======
+      - 'aws'
+      - 'oidc'
+      - 'saml'
+      - 'x509'
+    properties:
+      - name: 'idpMetadataXml'
+        type: String
+        description: SAML Identity provider configuration metadata xml doc.
+        required: true
+  - name: 'x509'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       An X.509-type identity provider represents a CA. It is trusted to assert a
       client identity if the client has a certificate that chains up to this CA.
     exactly_one_of:
+<<<<<<< HEAD
       - aws
       - oidc
       - saml
@@ -330,6 +527,15 @@ properties:
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: trustStore
+=======
+      - 'aws'
+      - 'oidc'
+      - 'saml'
+      - 'x509'
+    properties:
+      - name: 'trustStore'
+        type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           A Trust store, use this trust store as a wrapper to config the trust
           anchor and optional intermediate cas to help build the trust chain for
@@ -338,13 +544,19 @@ properties:
           supported.
         required: true
         properties:
+<<<<<<< HEAD
           - !ruby/object:Api::Type::Array
             name: trustAnchors
+=======
+          - name: 'trustAnchors'
+            type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               List of Trust Anchors to be used while performing validation
               against a given TrustStore. The incoming end entity's certificate
               must be chained up to one of the trust anchors here.
             required: true
+<<<<<<< HEAD
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
@@ -354,14 +566,34 @@ properties:
                     ca certificate(either root or intermediate cert).
           - !ruby/object:Api::Type::Array
             name: intermediateCas
+=======
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pemCertificate'
+                  type: String
+                  description: |
+                    PEM certificate of the PKI used for validation. Must only contain one
+                    ca certificate(either root or intermediate cert).
+          - name: 'intermediateCas'
+            type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
             description: |
               Set of intermediate CA certificates used for building the trust chain to
               trust anchor.
               IMPORTANT: Intermediate CAs are only supported when configuring x509 federation.
+<<<<<<< HEAD
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: pemCertificate
+=======
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'pemCertificate'
+                  type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
                   description: |
                     PEM certificate of the PKI used for validation. Must only contain one
                     ca certificate(either root or intermediate cert).

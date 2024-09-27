@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Instance'
 base_url: projects/{{project}}/locations/{{region}}/instances
@@ -20,41 +25,92 @@ update_mask: true
 description: |
   A Google Cloud Looker instance.
 references: !ruby/object:Api::Resource::ReferenceLinks
+=======
+---
+name: 'Instance'
+description: |
+  A Google Cloud Looker instance.
+references:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   guides:
     'Create a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-create'
     'Configure a Looker (Google Cloud core) instance': 'https://cloud.google.com/looker/docs/looker-core-instance-setup'
   api: 'https://cloud.google.com/looker/docs/reference/rest/v1/projects.locations.instances'
+<<<<<<< HEAD
 timeouts: !ruby/object:Api::Timeouts
+=======
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
+create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   insert_minutes: 90
   update_minutes: 90
   delete_minutes: 90
 autogen_async: true
+<<<<<<< HEAD
 error_abort_predicates: ['transport_tpg.Is429QuotaError']
 skip_sweeper: true
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_basic'
+=======
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+exclude_sweeper: true
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'looker_instance_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_full'
+=======
+  - name: 'looker_instance_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_fips'
+=======
+  - name: 'looker_instance_fips'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance-fips'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_enterprise_full'
+=======
+  - name: 'looker_instance_enterprise_full'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       network_name: 'looker-network'
@@ -64,9 +120,14 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+<<<<<<< HEAD
     skip_test: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_enterprise_full_test'
+=======
+    exclude_test: true
+  - name: 'looker_instance_enterprise_full_test'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       network_name: 'looker-network'
@@ -77,26 +138,39 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
     test_vars_overrides:
+<<<<<<< HEAD
       address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
       kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
     skip_docs: true
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_custom_domain'
+=======
+      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "looker-vpc-network-3", acctest.AddressWithPrefixLength(8))'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "looker-vpc-network-3", acctest.ServiceNetworkWithPrefixLength(8))'
+    exclude_docs: true
+  - name: 'looker_instance_custom_domain'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
       custom_domain: 'my-custom-domain'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'looker_instance_psc'
+=======
+  - name: 'looker_instance_psc'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'looker-instance'
     vars:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
 parameters:
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'region'
     description: |
@@ -108,14 +182,32 @@ properties:
   # Admin Settings Object
   - !ruby/object:Api::Type::NestedObject
     name: adminSettings
+=======
+  - name: 'region'
+    type: String
+    description: |
+      The name of the Looker region of the instance.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  # Admin Settings Object
+  - name: 'adminSettings'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Looker instance Admin settings.
     update_mask_fields:
       - 'admin_settings.allowed_email_domains'
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Array
         name: 'allowedEmailDomains'
         item_type: Api::Type::String
+=======
+      - name: 'allowedEmailDomains'
+        type: Array
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Email domain allowlist for the instance.
 
@@ -123,28 +215,47 @@ properties:
           Updating this list will restart the instance. Updating the allowed email domains from terraform
           means the value provided will be considered as the entire list and not an amendment to the
           existing list of allowed email domains.
+<<<<<<< HEAD
   # Admin Settings Object - End
   - !ruby/object:Api::Type::String
     name: consumerNetwork
+=======
+        item_type:
+          type: String
+  # Admin Settings Object - End
+  - name: 'consumerNetwork'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Network name in the consumer project in the format of: projects/{project}/global/networks/{network}
       Note that the consumer network may be in a different GCP project than the consumer
       project that is hosting the Looker Instance.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::Time
     name: createTime
+=======
+  - name: 'createTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The time the instance was created in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
   # Deny Maintenance Period Object
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: denyMaintenancePeriod
+=======
+  - name: 'denyMaintenancePeriod'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Maintenance denial period for this instance.
 
       You must allow at least 14 days of maintenance availability
       between any two deny maintenance periods.
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::NestedObject
         name: 'startDate'
         required: true
@@ -235,10 +346,100 @@ properties:
   # Deny Maintenance Period Object - End
   - !ruby/object:Api::Type::String
     name: egressPublicIp
+=======
+      - name: 'startDate'
+        type: NestedObject
+        description: |
+          Required. Start date of the deny maintenance period
+        required: true
+        properties:
+          - name: 'year'
+            type: Integer
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation:
+              function: 'validation.IntBetween(0,10000)'
+          - name: 'month'
+            type: Integer
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation:
+              function: 'validation.IntBetween(0,13)'
+          - name: 'day'
+            type: Integer
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation:
+              function: 'validation.IntBetween(0,32)'
+      - name: 'endDate'
+        type: NestedObject
+        description: |
+          Required. Start date of the deny maintenance period
+        required: true
+        properties:
+          - name: 'year'
+            type: Integer
+            description: |
+              Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+              a year.
+            validation:
+              function: 'validation.IntBetween(0,10000)'
+          - name: 'month'
+            type: Integer
+            description: |
+              Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+              month and day.
+            validation:
+              function: 'validation.IntBetween(0,13)'
+          - name: 'day'
+            type: Integer
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+              to specify a year by itself or a year and month where the day isn't significant.
+            validation:
+              function: 'validation.IntBetween(0,32)'
+      - name: 'time'
+        type: NestedObject
+        description: |
+          Required. Start time of the window in UTC time.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  # Deny Maintenance Period Object - End
+  - name: 'egressPublicIp'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Public Egress IP (IPv4).
     output: true
   # Encryption Config Object
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: encryptionConfig
     default_from_api: true
@@ -291,6 +492,59 @@ properties:
   # Maintenance Window Object
   - !ruby/object:Api::Type::NestedObject
     name: maintenanceWindow
+=======
+  - name: 'encryptionConfig'
+    type: NestedObject
+    description: |
+      Looker instance encryption settings.
+    default_from_api: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |
+          Name of the customer managed encryption key (CMEK) in KMS.
+      - name: 'kmsKeyState'
+        type: Enum
+        description: |
+          Status of the customer managed encryption key (CMEK) in KMS.
+        output: true
+        enum_values:
+          - 'VALID'
+          - 'REVOKED'
+      - name: 'kmsKeyNameVersion'
+        type: String
+        description: |
+          Full name and version of the CMEK key currently in use to encrypt Looker data.
+        output: true
+  # Encryption Config  Object - End
+  - name: 'fipsEnabled'
+    type: Boolean
+    description: |
+      FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
+  - name: 'ingressPrivateIp'
+    type: String
+    description: |
+      Private Ingress IP (IPv4).
+    output: true
+  - name: 'ingressPublicIp'
+    type: String
+    description: |
+      Public Ingress IP (IPv4).
+    output: true
+  - name: 'lookerVersion'
+    type: String
+    description: |
+      The Looker version that the instance is using.
+    output: true
+  - name: 'lookerUri'
+    type: String
+    description: |
+      Looker instance URI which can be used to access the Looker Instance UI.
+    output: true
+  # Maintenance Window Object
+  - name: 'maintenanceWindow'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Maintenance window for an instance.
 
@@ -298,9 +552,14 @@ properties:
       your instance to be restarted during updates, which will temporarily
       disrupt service.
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Enum
         name: 'dayOfWeek'
         required: true
+=======
+      - name: 'dayOfWeek'
+        type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Required. Day of the week for this MaintenanceWindow (in UTC).
 
@@ -311,6 +570,7 @@ properties:
           - FRIDAY: Friday
           - SATURDAY: Saturday
           - SUNDAY: Sunday
+<<<<<<< HEAD
         values:
           - :MONDAY
           - :TUESDAY
@@ -379,6 +639,77 @@ properties:
   # Oauth Object - End
   - !ruby/object:Api::Type::Enum
     name: platformEdition
+=======
+        required: true
+        enum_values:
+          - 'MONDAY'
+          - 'TUESDAY'
+          - 'WEDNESDAY'
+          - 'THURSDAY'
+          - 'FRIDAY'
+          - 'SATURDAY'
+          - 'SUNDAY'
+      - name: 'startTime'
+        type: NestedObject
+        description: |
+          Required. Start time of the window in UTC time.
+        required: true
+        properties:
+          - name: 'hours'
+            type: Integer
+            description: |
+              Hours of day in 24 hour format. Should be from 0 to 23.
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
+            description: |
+              Minutes of hour of day. Must be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Seconds of minutes of the time. Must normally be from 0 to 59.
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+            validation:
+              function: 'validation.IntBetween(0,999999999)'
+  # Maintenance Window Object - End
+  - name: 'name'
+    type: String
+    description: |
+      The ID of the instance or a fully qualified identifier for the instance.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^[a-z][a-z0-9-]{0,61}[a-z0-9]$'
+  # Oauth Object
+  - name: 'oauthConfig'
+    type: NestedObject
+    description: |
+      Looker Instance OAuth login settings.
+    ignore_read: true
+    properties:
+      - name: 'clientId'
+        type: String
+        description: |
+          The client ID for the Oauth config.
+        required: true
+      - name: 'clientSecret'
+        type: String
+        description: |
+          The client secret for the Oauth config.
+        required: true
+  # Oauth Object - End
+  - name: 'platformEdition'
+    type: Enum
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Platform editions for a Looker instance. Each edition maps to a set of instance features, like its size. Must be one of these values:
       - LOOKER_CORE_TRIAL: trial instance (Currently Unavailable)
@@ -386,6 +717,7 @@ properties:
       - LOOKER_CORE_STANDARD_ANNUAL: subscription standard instance
       - LOOKER_CORE_ENTERPRISE_ANNUAL: subscription enterprise instance
       - LOOKER_CORE_EMBED_ANNUAL: subscription embed instance
+<<<<<<< HEAD
     values:
       - :LOOKER_CORE_TRIAL
       - :LOOKER_CORE_STANDARD
@@ -396,18 +728,36 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::Boolean
     name: privateIpEnabled
+=======
+    immutable: true
+    default_value: "LOOKER_CORE_TRIAL"
+    enum_values:
+      - 'LOOKER_CORE_TRIAL'
+      - 'LOOKER_CORE_STANDARD'
+      - 'LOOKER_CORE_STANDARD_ANNUAL'
+      - 'LOOKER_CORE_ENTERPRISE_ANNUAL'
+      - 'LOOKER_CORE_EMBED_ANNUAL'
+  - name: 'privateIpEnabled'
+    type: Boolean
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Whether private IP is enabled on the Looker instance.
     default_value: false
   # PscConfig Object
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: pscConfig
+=======
+  - name: 'pscConfig'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Information for Private Service Connect (PSC) setup for a Looker instance.
     update_mask_fields:
       - 'psc_config.allowed_vpcs'
       - 'psc_config.service_attachments'
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Array
         name: 'allowedVpcs'
         item_type: Api::Type::String
@@ -460,13 +810,74 @@ properties:
       private service access connection. User may or may not specify this in a request.
   - !ruby/object:Api::Type::Time
     name: updateTime
+=======
+      - name: 'allowedVpcs'
+        type: Array
+        description: |
+          List of VPCs that are allowed ingress into the Looker instance.
+        item_type:
+          type: String
+      - name: 'lookerServiceAttachmentUri'
+        type: String
+        description: |
+          URI of the Looker service attachment.
+        output: true
+      - name: 'serviceAttachments'
+        type: Array
+        description: |
+          List of egress service attachment configurations.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'connectionStatus'
+              type: Enum
+              description: |
+                Status of the service attachment connection.
+              output: true
+              enum_values:
+                - 'ACCEPTED'
+                - 'PENDING'
+                - 'REJECTED'
+                - 'NEEDS_ATTENTION'
+                - 'CLOSED'
+            - name: 'localFqdn'
+              type: String
+              description: |
+                Fully qualified domain name that will be used in the private DNS record created for the service attachment.
+            - name: 'targetServiceAttachmentUri'
+              type: String
+              description: |
+                URI of the service attachment to connect to.
+  # PscConfig Object - End
+  - name: 'pscEnabled'
+    type: Boolean
+    description: |
+      Whether Public Service Connect (PSC) is enabled on the Looker instance
+  - name: 'publicIpEnabled'
+    type: Boolean
+    description: |
+      Whether public IP is enabled on the Looker instance.
+    default_value: true
+  - name: 'reservedRange'
+    type: String
+    description: |
+      Name of a reserved IP address range within the consumer network, to be used for
+      private service access connection. User may or may not specify this in a request.
+  - name: 'updateTime'
+    type: Time
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The time the instance was updated in RFC3339 UTC "Zulu" format,
       accurate to nanoseconds.
     output: true
   # UserMetadata Object
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: userMetadata
+=======
+  - name: 'userMetadata'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Metadata about users for a Looker instance.
 
@@ -479,6 +890,7 @@ properties:
       With the Standard edition of Looker (Google Cloud core), you can provision up to 50
       total users, distributed across Viewer, Standard, and Developer.
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::Integer
         name: 'additionalViewerUserCount'
         description: |
@@ -489,10 +901,23 @@ properties:
           Number of additional Standard Users to allocate to the Looker Instance.
       - !ruby/object:Api::Type::Integer
         name: 'additionalDeveloperUserCount'
+=======
+      - name: 'additionalViewerUserCount'
+        type: Integer
+        description: |
+          Number of additional Viewer Users to allocate to the Looker Instance.
+      - name: 'additionalStandardUserCount'
+        type: Integer
+        description: |
+          Number of additional Standard Users to allocate to the Looker Instance.
+      - name: 'additionalDeveloperUserCount'
+        type: Integer
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           Number of additional Developer Users to allocate to the Looker Instance.
   # UserMetadata Object - End
   # CustomDomain Object
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: customDomain
     description: |
@@ -508,3 +933,19 @@ properties:
           Status of the custom domain.
         output: true
   # CustomDomain Object - End
+=======
+  - name: 'customDomain'
+    type: NestedObject
+    description: |
+      Custom domain settings for a Looker instance.
+    properties:
+      - name: 'domain'
+        type: String
+        description: |
+          Domain name
+      - name: 'state'
+        type: String
+        description: |
+          Status of the custom domain.
+        output: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

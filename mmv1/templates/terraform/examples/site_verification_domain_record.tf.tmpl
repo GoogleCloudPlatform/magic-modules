@@ -1,0 +1,23 @@
+data "google_site_verification_token" "token" {
+  type                = "INET_DOMAIN"
+  identifier          = "{{index $.Vars "domain"}}"
+  verification_method = "DNS_TXT"
+}
+
+resource "google_dns_record_set" "example" {
+  managed_zone = "{{index $.Vars "managed_zone"}}"
+  name         = "{{index $.Vars "dns_name"}}"
+  type         = "TXT"
+  rrdatas      = [data.google_site_verification_token.token.token]
+  ttl          = 86400
+}
+
+resource "google_site_verification_web_resource" "{{$.PrimaryResourceId}}" {
+  site {
+    type       = data.google_site_verification_token.token.type
+    identifier = data.google_site_verification_token.token.identifier
+  }
+  verification_method =  data.google_site_verification_token.token.verification_method
+
+  depends_on = [google_dns_record_set.example]
+}

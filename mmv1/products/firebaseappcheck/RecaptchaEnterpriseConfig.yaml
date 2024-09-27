@@ -12,6 +12,7 @@
 # limitations under the License.
 
 ---
+<<<<<<< HEAD
 !ruby/object:Api::Resource
 name: "RecaptchaEnterpriseConfig"
 base_url: projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig
@@ -67,14 +68,78 @@ properties:
     output: true
   - !ruby/object:Api::Type::String
     name: tokenTtl
+=======
+name: 'RecaptchaEnterpriseConfig'
+description: |
+  An app's reCAPTCHA Enterprise configuration object.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.recaptchaEnterpriseConfig'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig'
+self_link: 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig'
+create_url: 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig?updateMask=tokenTtl,siteKey'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+import_format:
+  - 'projects/{{project}}/apps/{{app_id}}/recaptchaEnterpriseConfig'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'firebase_app_check_recaptcha_enterprise_config_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      # Don't add random suffix
+      token_ttl: '7200s'
+      # A valid key, but is actually unusable
+      site_key: '6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'token_ttl': '"7200s"'
+      'site_key': '"6LdpMXIpAAAAANkwWQPgEdjEhal7ugkH9RK9ytuw"'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
+parameters:
+  - name: 'app_id'
+    type: String
+    description: |
+      The ID of an
+      [Web App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id).
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The relative resource name of the reCAPTCHA Enterprise configuration object
+    output: true
+  - name: 'tokenTtl'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Specifies the duration for which App Check tokens exchanged from reCAPTCHA Enterprise artifacts will be valid.
       If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.
 
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: siteKey
+=======
+  - name: 'siteKey'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The score-based site key created in reCAPTCHA Enterprise used to invoke reCAPTCHA and generate the reCAPTCHA tokens for your application.
 

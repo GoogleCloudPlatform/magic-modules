@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'BackendBucketSignedUrlKey'
 kind: 'compute#BackendBucketSignedUrlKey'
@@ -24,10 +29,52 @@ self_link: projects/{{project}}/global/backendBuckets/{{backend_bucket}}
 identity:
   - name
 nested_query: !ruby/object:Api::Resource::NestedQuery
+=======
+---
+name: 'BackendBucketSignedUrlKey'
+kind: 'compute#BackendBucketSignedUrlKey'
+description: |
+  A key for signing Cloud CDN signed URLs for BackendBuckets.
+references:
+  guides:
+    'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendBuckets'
+docs:
+base_url: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}'
+self_link: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}'
+create_url: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}/addSignedUrlKey'
+delete_url: 'projects/{{project}}/global/backendBuckets/{{backend_bucket}}/deleteSignedUrlKey?keyName={{name}}'
+delete_verb: 'POST'
+immutable: true
+mutex: 'signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/'
+exclude_import: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+identity:
+  - name
+nested_query:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   keys:
     - cdnPolicy
     - signedUrlKeyNames
   is_list_of_ids: true
+<<<<<<< HEAD
 description: |
   A key for signing Cloud CDN signed URLs for BackendBuckets.
 references: !ruby/object:Api::Resource::ReferenceLinks
@@ -59,22 +106,38 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'backend_bucket_signed_url_key'
     external_providers: ["random", "time"]
+=======
+  modify_by_patch: false
+custom_code:
+exclude_tgc: true
+examples:
+  - name: 'backend_bucket_signed_url_key'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'backend_key'
     vars:
       key_name: 'test-key'
       backend_name: 'test-signed-backend-bucket'
       bucket_name: 'test-storage-bucket'
+<<<<<<< HEAD
     skip_test: true
 parameters:
   - !ruby/object:Api::Type::ResourceRef
     name: 'backendBucket'
     resource: 'BackendBucket'
     imports: 'name'
+=======
+    external_providers: ["random", "time"]
+    exclude_test: true
+parameters:
+  - name: 'backendBucket'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The backend bucket this signed URL key belongs.
     required: true
     immutable: true
     ignore_read: true
+<<<<<<< HEAD
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   - !ruby/object:Api::Type::String
@@ -88,10 +151,32 @@ properties:
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   - !ruby/object:Api::Type::String
     name: 'keyValue'
+=======
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'BackendBucket'
+    imports: 'name'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the signed URL key.
+    api_name: keyName
+    required: true
+    immutable: true
+    validation:
+      regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+  - name: 'keyValue'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       128-bit key value used for signing the URL. The key value must be a
       valid RFC 4648 Section 5 base64url encoded string.
     required: true
     immutable: true
+<<<<<<< HEAD
     sensitive: true
     ignore_read: true
+=======
+    ignore_read: true
+    sensitive: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

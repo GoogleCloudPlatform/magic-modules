@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: GenericService
 base_url: v3/projects/{{project}}/services
@@ -18,17 +23,27 @@ create_url: v3/projects/{{project}}/services?serviceId={{service_id}}
 self_link: 'v3/projects/{{project}}/services/{{service_id}}'
 update_verb: :PATCH
 update_mask: true
+=======
+---
+name: 'GenericService'
+legacy_name: 'google_monitoring_service'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,
   designed to solve an individual concern. In Cloud Monitoring,
   a Service acts as the root resource under which operational aspects of
   the service are accessible
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
+=======
+references:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
   guides:
     'Service Monitoring': 'https://cloud.google.com/monitoring/service-monitoring'
     'Monitoring API Documentation': 'https://cloud.google.com/monitoring/api/v3/'
     'Service-orientation on Wikipedia': 'https://en.wikipedia.org/wiki/Service-orientation'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services'
+<<<<<<< HEAD
 legacy_name: 'google_monitoring_service'
 id_format: 'projects/{{project}}/services/{{service_id}}'
 import_format: ['projects/{{project}}/services/{{service_id}}']
@@ -52,16 +67,61 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: name
+=======
+docs:
+id_format: 'projects/{{project}}/services/{{service_id}}'
+base_url: 'v3/projects/{{project}}/services'
+self_link: 'v3/projects/{{project}}/services/{{service_id}}'
+create_url: 'v3/projects/{{project}}/services?serviceId={{service_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/services/{{service_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringConcurrentEditError'
+examples:
+  - name: 'monitoring_service_example'
+    primary_resource_id: 'my_service'
+    vars:
+      service_id: 'my-service'
+parameters:
+  - name: 'serviceId'
+    type: String
+    description: |
+      An optional service ID to use. If not given, the server will generate a
+      service ID.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The full resource name for this service. The syntax is:
       projects/[PROJECT_ID]/services/[SERVICE_ID].
     output: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: displayName
     description: |
       Name used for UI elements listing this Service.
   - !ruby/object:Api::Type::KeyValuePairs
     name: 'userLabels'
+=======
+  - name: 'displayName'
+    type: String
+    description: |
+      Name used for UI elements listing this Service.
+  - name: 'userLabels'
+    type: KeyValuePairs
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Labels which have been used to annotate the service. Label keys must start
       with a letter. Label keys and values may contain lowercase letters,
@@ -70,21 +130,36 @@ properties:
       label entries may be stored. For labels which do not have a semantic value,
       the empty string may be supplied for the label value.
     send_empty_value: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: telemetry
+=======
+  - name: 'telemetry'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Configuration for how to query telemetry on a Service.
     # Non custom service have non-editable telemetry
     output: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: resourceName
+=======
+      - name: 'resourceName'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           The full name of the resource that defines this service.
           Formatted as described in
           https://cloud.google.com/apis/design/resource_names.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::NestedObject
     name: basicService
+=======
+  - name: 'basicService'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       A well-known service type, defined by its service type and service labels.
       Valid values of service types and services labels are described at
@@ -92,6 +167,7 @@ properties:
     # BasicService info can be set on creation but is then immutable.
     immutable: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: serviceType
         description: |
@@ -103,3 +179,16 @@ properties:
         description: |
           Labels that specify the resource that emits the monitoring data
           which is used for SLO reporting of this `Service`.
+=======
+      - name: 'serviceType'
+        type: String
+        description: |
+          The type of service that this basic service defines, e.g.
+          APP_ENGINE service type
+      - name: 'serviceLabels'
+        type: KeyValuePairs
+        description: |
+          Labels that specify the resource that emits the monitoring data
+          which is used for SLO reporting of this `Service`.
+        immutable: true
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856

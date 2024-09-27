@@ -13,6 +13,7 @@
 
 # Warning: This is a temporary file, and should not be edited directly
 ---
+<<<<<<<< HEAD:mmv1/products/cloudrun/go_product.yaml
 name: 'CloudRun'
 display_name: 'Cloud Run'
 versions:
@@ -24,3 +25,24 @@ versions:
     cai_base_url: 'https://run.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+========
+name: 'ApiGateway'
+display_name: 'API Gateway'
+versions:
+  - name: 'beta'
+    base_url: 'https://apigateway.googleapis.com/v1beta/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+>>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856:mmv1/products/apigateway/product.yaml

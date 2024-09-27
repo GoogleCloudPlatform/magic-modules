@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'FolderSccBigQueryExport'
 base_url: folders/{{folder}}/locations/{{location}}/bigQueryExports
@@ -20,6 +21,10 @@ update_verb: :PATCH
 update_mask: true
 import_format:
   - 'folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+=======
+---
+name: 'FolderSccBigQueryExport'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
@@ -27,6 +32,7 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
+<<<<<<< HEAD
 references: !ruby/object:Api::Resource::ReferenceLinks
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
@@ -37,11 +43,34 @@ examples:
     primary_resource_id: 'custom_big_query_export_config'
     external_providers: ["random", "time"]
     skip_test: true
+=======
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-analyze-findings-in-big-query'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/folders.locations.bigQueryExports'
+docs:
+base_url: 'folders/{{folder}}/locations/{{location}}/bigQueryExports'
+self_link: 'folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+create_url: 'folders/{{folder}}/locations/{{location}}/bigQueryExports?bigQueryExportId={{big_query_export_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'scc_v2_folder_big_query_export_config_basic'
+    primary_resource_id: 'custom_big_query_export_config'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     vars:
       big_query_export_id: 'my-export'
       dataset: 'my-dataset'
       dataset_id: 'my_dataset_id'
       name: 'my-export'
+<<<<<<< HEAD
       folder_display_name: "folder-name"
     test_env_vars:
       org_id: :ORG_ID
@@ -61,10 +90,30 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
+=======
+      folder_display_name: 'folder-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
+    external_providers: ["random", "time"]
+    exclude_test: true
+parameters:
+  - name: 'folder'
+    type: String
+    description: |
+      The folder where Cloud Security Command Center Big Query Export
+      Config lives in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'bigQueryExportId'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       This must be unique within the organization.  It must consist of only lowercase letters,
       numbers, and hyphens, must start with a letter, must end with either a letter or a number,
       and must be 63 characters or less.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: location
     immutable: true
@@ -76,10 +125,26 @@ properties:
   - !ruby/object:Api::Type::String
     name: name
     output: true
+=======
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The BigQuery export configuration is stored in this location. If not provided, Use global as default.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The resource name of this export, in the format
       `folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`.
       This field is provided in responses, and is ignored when provided in create requests.
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: description
     description: |
@@ -88,24 +153,47 @@ properties:
       function: 'validation.StringLenBetween(0, 1024)'
   - !ruby/object:Api::Type::String
     name: dataset
+=======
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      The description of the notification config (max of 1024 characters).
+    validation:
+      function: 'validation.StringLenBetween(0, 1024)'
+  - name: 'dataset'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The dataset to write findings' updates to.
       Its format is "projects/[projectId]/datasets/[bigquery_dataset_id]".
       BigQuery Dataset unique ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_).
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: createTime
     output: true
+=======
+  - name: 'createTime'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The time at which the BigQuery export was created. This field is set by the server and will be ignored if provided on export on creation.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: updateTime
     output: true
+=======
+    output: true
+  - name: 'updateTime'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The most recent time at which the BigQuery export was updated. This field is set by the server and will be ignored if provided on export creation or update.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
       Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: mostRecentEditor
     output: true
@@ -119,6 +207,22 @@ properties:
       The service account that needs permission to create table and upload data to the BigQuery dataset.
   - !ruby/object:Api::Type::String
     name: filter
+=======
+    output: true
+  - name: 'mostRecentEditor'
+    type: String
+    description: |
+      Email address of the user who last edited the BigQuery export.
+      This field is set by the server and will be ignored if provided on export creation or update.
+    output: true
+  - name: 'principal'
+    type: String
+    description: |
+      The service account that needs permission to create table and upload data to the BigQuery dataset.
+    output: true
+  - name: 'filter'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       Expression that defines the filter to apply across create/update
       events of findings. The

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: Repository
 base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories
@@ -26,11 +31,40 @@ async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
 description: "A repository associated to a parent connection."
+=======
+---
+name: 'Repository'
+description: "A repository associated to a parent connection."
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/build/docs'
+  api: 'https://cloud.google.com/build/docs/api/reference/rest'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories?repositoryId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  encoder: 'templates/terraform/encoders/cloudbuildv2_repository.go.tmpl'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 exclude_tgc: true
 legacy_long_form_project: true
 examples:
 # These tests depend on secrets stored in a separate project, so we prefer not
 # to show them in the docs.
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'cloudbuildv2_repository_ghe'
     primary_resource_id: 'primary'
@@ -71,18 +105,61 @@ parameters:
     name: parent_connection
     resource: connection
     imports: name
+=======
+  - name: 'cloudbuildv2_repository_ghe'
+    primary_resource_id: 'primary'
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_github'
+    primary_resource_id: 'primary'
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_gle'
+    primary_resource_id: 'primary'
+    vars:
+      connection_name: 'connection'
+      repository_name: 'repository'
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_ghe_doc'
+    exclude_test: true
+  - name: 'cloudbuildv2_repository_github_doc'
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: The location for the resource
+    url_param_only: true
+    immutable: true
+ # EXTRACT_FROM_FIELD_IF_EMPTY
+    default_from_api: true
+  - name: 'parent_connection'
+    type: ResourceRef
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: The connection for the resource
     url_param_only: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+<<<<<<< HEAD
 properties:
   - !ruby/object:Api::Type::String
     name: name
+=======
+    resource: 'connection'
+    imports: 'name'
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: Name of the repository.
     required: true
     immutable: true
     ignore_read: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: remoteUri
     description: Required. Git Clone HTTPS URI.
@@ -102,5 +179,26 @@ properties:
     immutable: true
   - !ruby/object:Api::Type::String
     name: etag
+=======
+  - name: 'remoteUri'
+    type: String
+    description: Required. Git Clone HTTPS URI.
+    required: true
+    immutable: true
+  - name: 'createTime'
+    type: String
+    description: Output only. Server assigned timestamp for when the connection was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. Server assigned timestamp for when the connection was updated.
+    output: true
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: Allows clients to store small amounts of arbitrary data.
+    immutable: true
+  - name: 'etag'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
     output: true

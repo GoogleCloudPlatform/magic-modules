@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2020 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Product
 name: Notebooks
 display_name: Cloud AI Notebooks
@@ -42,5 +47,27 @@ async: !ruby/object:Api::OpAsync
       - true
       - false
   error: !ruby/object:Api::OpAsync::Error
+=======
+---
+name: 'Notebooks'
+display_name: 'Cloud AI Notebooks'
+versions:
+  - name: 'ga'
+    base_url: 'https://notebooks.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://notebooks.googleapis.com/v1/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     path: 'error'
     message: 'message'

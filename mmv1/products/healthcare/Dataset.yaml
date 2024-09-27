@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copyright 2023 Google Inc.
+=======
+# Copyright 2024 Google Inc.
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 --- !ruby/object:Api::Resource
 name: 'Dataset'
 kind: 'healthcare#dataset'
@@ -30,13 +35,47 @@ error_retry_predicates: ['transport_tpg.HealthcareDatasetNotInitialized']
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_dataset_basic'
+=======
+---
+name: 'Dataset'
+kind: 'healthcare#dataset'
+description: |
+  A Healthcare `Dataset` is a toplevel logical grouping of `dicomStores`, `fhirStores` and `hl7V2Stores`.
+references:
+  guides:
+    'Creating a dataset': 'https://cloud.google.com/healthcare/docs/how-tos/datasets'
+  api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.HealthcareDatasetNotInitialized'
+examples:
+  - name: 'healthcare_dataset_basic'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       location: 'us-central1'
       time_zone: 'America/New_York'
+<<<<<<< HEAD
   - !ruby/object:Provider::Terraform::Examples
     name: 'healthcare_dataset_cmek'
+=======
+  - name: 'healthcare_dataset_cmek'
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
@@ -44,6 +83,7 @@ examples:
       time_zone: 'America/New_York'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+<<<<<<< HEAD
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
 parameters:
@@ -57,18 +97,37 @@ parameters:
 properties:
   - !ruby/object:Api::Type::String
     name: 'name'
+=======
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the Dataset.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The resource name for the Dataset.
     required: true
     immutable: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'timeZone'
+=======
+  - name: 'timeZone'
+    type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     description: |
       The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
       "America/New_York" or empty, which defaults to UTC. This is used for parsing times in resources
       (e.g., HL7 messages) where no explicit timezone is specified.
     required: false
     default_from_api: true
+<<<<<<< HEAD
   - !ruby/object:Api::Type::String
     name: 'selfLink'
     description: |
@@ -77,12 +136,27 @@ properties:
     ignore_read: true
   - !ruby/object:Api::Type::NestedObject
     name: 'encryptionSpec'
+=======
+  - name: 'selfLink'
+    type: String
+    description: |
+      The fully qualified name of this dataset
+    ignore_read: true
+    output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
     required: false
     immutable: true
     default_from_api: true
     properties:
+<<<<<<< HEAD
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
+=======
+      - name: 'kmsKeyName'
+        type: String
+>>>>>>> 2fdda66097e2c96688e59f7c58c1f717c7785856
         description: |
           KMS encryption key that is used to secure this dataset and its sub-resources. The key used for
           encryption and the dataset must be in the same location. If empty, the default Google encryption
