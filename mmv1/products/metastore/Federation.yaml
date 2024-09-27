@@ -50,6 +50,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/federations/{{federation_id}}'
     - '{{federation_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/metastore_federation.go.tmpl'
 examples:
   - name: 'dataproc_metastore_federation_basic'
     primary_resource_id: 'default'
@@ -57,12 +58,22 @@ examples:
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'dataproc_metastore_federation_bigquery'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-fed%s", context["random_suffix"])'
     vars:
       federation_id: 'metastore-fed'
       service_id: 'metastore-service'
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the federation. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the federation will fail.
+    type: Boolean
+    default_value: false
 parameters:
   - name: 'federationId'
     type: String
