@@ -24,7 +24,6 @@ base_url: '{{env_id}}/references'
 self_link: '{{env_id}}/references/{{name}}'
 create_url: '{{env_id}}/references/'
 delete_url: '{{env_id}}/references/{{name}}'
-immutable: true
 import_format:
   - '{{env_id}}/references/{{name}}'
   - '{{env_id}}/{{name}}'
@@ -78,4 +77,3 @@ properties:
     description: |
       Required. The id of the resource to which this reference refers. Must be the id of a resource that exists in the parent environment and is of the given resourceType.
     required: true
-    immutable: true
