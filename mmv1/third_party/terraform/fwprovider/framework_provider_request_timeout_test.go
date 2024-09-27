@@ -1,4 +1,4 @@
-package provider_test
+package fwprovider_test
 
 import (
 	"regexp"
@@ -8,17 +8,17 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-// TestAccSdkProvider_request_timeout is a series of acc tests asserting how the SDK provider handles request_timeout arguments
-// It is SDK specific because the HCL used provisions SDK-implemented resources
-// It is a counterpart to TestAccFwProvider_request_timeout
-func TestAccSdkProvider_request_timeout(t *testing.T) {
+// TestAccFwProvider_request_timeout is a series of acc tests asserting how the PF provider handles request_timeout arguments
+// It is PF specific because the HCL used provisions PF-implemented resources
+// It is a counterpart to TestAccSdkProvider_request_timeout
+func TestAccFwProvider_request_timeout(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"request_timeout can be set in config in different formats, are normalized to full-length format": testAccSdkProvider_request_timeout_setInConfig,
+		"request_timeout can be set in config in different formats, are NOT normalized to full-length format": testAccFwProvider_request_timeout_setInConfig,
 		//no ENVs to test
 
 		// Schema-level validation
-		"when request_timeout is set to an empty string in the config the value fails validation, as it is not a duration": testAccSdkProvider_request_timeout_emptyStringValidation,
+		"when request_timeout is set to an empty string in the config the value fails validation, as it is not a duration": testAccFwProvider_request_timeout_emptyStringValidation,
 
 		// Usage
 		// We cannot test the impact of this field in an acc test
@@ -36,12 +36,15 @@ func TestAccSdkProvider_request_timeout(t *testing.T) {
 	}
 }
 
-func testAccSdkProvider_request_timeout_setInConfig(t *testing.T) {
+func testAccFwProvider_request_timeout_setInConfig(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	providerTimeout1 := "3m0s"
 	providerTimeout2 := "3m"
-	expectedValue := "3m0s"
+
+	// In the SDK version of the test expectedValue = "3m0s" only
+	expectedValue1 := "3m0s"
+	expectedValue2 := "3m"
 
 	context1 := map[string]interface{}{
 		"request_timeout": providerTimeout1,
@@ -55,22 +58,22 @@ func testAccSdkProvider_request_timeout_setInConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSdkProvider_request_timeout_inProviderBlock(context1),
+				Config: testAccFwProvider_request_timeout_inProviderBlock(context1),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "request_timeout", expectedValue),
+					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "request_timeout", expectedValue1),
 				),
 			},
 			{
-				Config: testAccSdkProvider_request_timeout_inProviderBlock(context2),
+				Config: testAccFwProvider_request_timeout_inProviderBlock(context2),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "request_timeout", expectedValue),
+					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "request_timeout", expectedValue2),
 				),
 			},
 		},
 	})
 }
 
-func testAccSdkProvider_request_timeout_emptyStringValidation(t *testing.T) {
+func testAccFwProvider_request_timeout_emptyStringValidation(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	context := map[string]interface{}{
@@ -82,21 +85,21 @@ func testAccSdkProvider_request_timeout_emptyStringValidation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccSdkProvider_request_timeout_inProviderBlock(context),
+				Config:      testAccFwProvider_request_timeout_inProviderBlock(context),
 				ExpectError: regexp.MustCompile("invalid duration"),
 			},
 		},
 	})
 }
 
-// testAccSdkProvider_request_timeout_inProviderBlock allows setting the request_timeout argument in a provider block.
-// This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
-func testAccSdkProvider_request_timeout_inProviderBlock(context map[string]interface{}) string {
+// testAccFwProvider_request_timeout_inProviderBlock allows setting the request_timeout argument in a provider block.
+// This function uses data.google_provider_config_plugin_framework because it is implemented with the PF
+func testAccFwProvider_request_timeout_inProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
 	request_timeout = "%{request_timeout}"
 }
 
-data "google_provider_config_sdk" "default" {}
+data "google_provider_config_plugin_framework" "default" {}
 `, context)
 }
