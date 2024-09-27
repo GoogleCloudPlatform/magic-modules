@@ -549,6 +549,23 @@ func ResourceStorageBucket() *schema.Resource {
 					},
 				},
 			},
+			"hierarchical_namespace": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: `The bucket's HNS support, which defines bucket can organize folders in logical file system structure`,
+				Elem : &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Set this enabled flag to true when folders with logical files structure. Default value is false.`,
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
