@@ -35,7 +35,7 @@ func resourceSourceRepoRepositoryPollRead(d *schema.ResourceData, meta interface
 			return nil, err
 		}
 
-		url, err := tpgresource.ReplaceVars(d, config, "{{SourceRepoBasePath}}projects/{{project}}/repos")
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{SourceRepoBasePath}}projects/{{project}}/repos"}}")
 		if err != nil {
 			return nil, err
 		}
