@@ -350,7 +350,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	return nil
 }
 
-var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (Test\w+)\(t \*testing.T\) {`)
+var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (TestAcc\w+)\(t \*testing.T\) {`)
 
 func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string) {
 	fmt.Println("Checking for new acceptance tests that were not run")
