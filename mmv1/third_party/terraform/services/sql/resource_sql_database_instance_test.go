@@ -19,6 +19,9 @@ import (
 // Fields that should be ignored in import tests because they aren't returned
 // from GCP (and thus can't be imported)
 var ignoredReplicaConfigurationFields = []string{
+	"deletion_protection",
+	"root_password",
+	"replica_configuration.0.cascadable_replica",
 	"replica_configuration.0.ca_certificate",
 	"replica_configuration.0.client_certificate",
 	"replica_configuration.0.client_key",
@@ -29,7 +32,7 @@ var ignoredReplicaConfigurationFields = []string{
 	"replica_configuration.0.ssl_cipher",
 	"replica_configuration.0.username",
 	"replica_configuration.0.verify_server_certificate",
-	"deletion_protection",
+	"replica_configuration.0.failover_target",
 }
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
@@ -2361,6 +2364,71 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 	})
 }
 
+// Switchover between primary and cascadable replica sunny case
+func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
+	t.Parallel()
+	primaryName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-sql-instance-replica" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName, replicaName),
+				// TODO: remove when API change is rolled out.
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				Config: googleSqlDatabaseInstance_switchover(primaryName, replicaName),
+				// TODO: remove when API change is rolled out.
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				RefreshState: true,
+				// TODO: remove when API change is rolled out.
+				ExpectNonEmptyPlan: true,
+				Check:              resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				ResourceName:      "google_sql_database_instance.original-replica",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// original-replica is no longer a replica, but replica_configuration is O + C and cannot be unset
+				ImportStateVerifyIgnore: []string{"replica_configuration", "deletion_protection", "root_password"},
+			},
+			{
+				// Delete replica first so PostTestDestroy doesn't fail when deleting instances which have replicas. We've already validated switchover behavior, the remaining steps are cleanup
+				Config: googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName),
+				// We delete replica, but haven't updated the master's replica_names
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Remove replica from primary's resource
+				Config: googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()
 
@@ -3021,6 +3089,118 @@ resource "google_sql_database_instance" "instance-failover" {
   }
 }
 `, instanceName, failoverName)
+}
+
+// Create SQL server primary with cascadable replica
+func testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+
+  root_password = "sqlserver1"
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-east1"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  master_instance_name = google_sql_database_instance.original-primary.name
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  replica_configuration {
+    cascadable_replica = true
+  }
+
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+`, primaryName, replicaName)
+}
+
+func googleSqlDatabaseInstance_switchover(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+  root_password = "sqlserver1"
+  instance_type = "READ_REPLICA_INSTANCE"
+  master_instance_name = "%s"
+  replica_configuration {
+    cascadable_replica = true
+  }
+  replica_names = []
+  settings {
+	tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-east1"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = [google_sql_database_instance.original-primary.name]
+  settings {
+	tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+`, primaryName, replicaName, replicaName)
+}
+
+// After a switchover, the original-primary is now the replica and must be removed first.
+func googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-east1"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = ["%s"]
+  settings {
+	tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+`, replicaName, primaryName)
+}
+
+// Update original-replica replica_names after deleting original-primary
+func googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-east1"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = []
+  settings {
+	tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, replicaName)
 }
 
 func testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName string, projectId string, orgId string, billingAccount string) string {
@@ -4248,7 +4428,58 @@ func checkPromoteReplicaConfigurations(resourceName string) func(*terraform.Stat
 		if ok && replicaConfiguration != "" {
 			return fmt.Errorf("Error in replica promotion. replica_configuration should not be present in %s state.", resourceName)
 		}
+		return nil
+	}
+}
 
+// Check that original-replica is now the primary
+func checkSwitchoverOriginalReplicaConfigurations(replicaResourceName string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		replicaResource, ok := s.RootModule().Resources[replicaResourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", replicaResourceName)
+		}
+		replicaResourceAttributes := replicaResource.Primary.Attributes
+
+		replicaInstanceType, ok := replicaResourceAttributes["instance_type"]
+		if !ok {
+			return fmt.Errorf("Instance type is not present in state for %s", replicaResourceName)
+		}
+		if replicaInstanceType != "CLOUD_SQL_INSTANCE" {
+			return fmt.Errorf("Error in switchover. Original replica instance_type is %s, it should be CLOUD_SQL_INSTANCE.", replicaInstanceType)
+		}
+
+		replicaMasterInstanceName, ok := replicaResourceAttributes["master_instance_name"]
+		if ok && replicaMasterInstanceName != "" {
+			return fmt.Errorf("Error in switchover. Master_instance_name should not be set on new primary")
+		}
+		return nil
+	}
+}
+
+// Check that original-primary is now a replica
+func checkSwitchoverOriginalPrimaryConfigurations(primaryResourceName string, replicaName string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		primaryResource, ok := s.RootModule().Resources[primaryResourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", primaryResourceName)
+		}
+		primaryResourceAttributes := primaryResource.Primary.Attributes
+		primaryInstanceType, ok := primaryResourceAttributes["instance_type"]
+		if !ok {
+			return fmt.Errorf("Instance type is not present in state for %s", primaryResourceName)
+		}
+		if primaryInstanceType != "READ_REPLICA_INSTANCE" {
+			return fmt.Errorf("Error in switchover. Original primary instance_type is %s, it should be READ_REPLICA_INSTANCE.", primaryInstanceType)
+		}
+
+		primaryMasterInstanceName, ok := primaryResourceAttributes["master_instance_name"]
+		if !ok {
+			return fmt.Errorf("Master instance name is not present in state for %s", primaryResourceName)
+		}
+		if ok && primaryMasterInstanceName != replicaName {
+			return fmt.Errorf("Error in switchover. Master_instance_name should be %s", replicaName)
+		}
 		return nil
 	}
 }
