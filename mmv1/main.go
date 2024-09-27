@@ -17,6 +17,7 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/provider"
 )
 
@@ -42,6 +43,8 @@ var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 
 var forceProvider = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
 
+var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
+
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
 
@@ -59,6 +62,12 @@ var templateTempFiles = flag.String("template-temp", "", "copy specific template
 func main() {
 
 	flag.Parse()
+
+	if *openapiGenerate {
+		parser := openapi_generate.NewOpenapiParser("openapi_generate/openapi", "products")
+		parser.Run()
+		return
+	}
 
 	if *yamlMode || *yamlTempMode {
 		CopyAllDescriptions(*yamlTempMode)
