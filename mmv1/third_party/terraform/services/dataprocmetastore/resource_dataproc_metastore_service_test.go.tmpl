@@ -106,6 +106,32 @@ func TestAccDataprocMetastoreService_PrivateServiceConnect(t *testing.T) {
 	})
 }
 
+func TestAccMetastoreService_tags(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "metastore-services-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "metastore-services-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMetastoreServiceTags(context, map[string]string{tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_dataproc_metastore_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
 func testAccDataprocMetastoreService_PrivateServiceConnect(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 // Use data source instead of creating a subnetwork due to a bug on API side.
@@ -166,4 +192,37 @@ resource "google_storage_bucket" "bucket" {
   location = "us-central1"
 }
 `, context)
+}
+
+func testAccMetastoreServiceTags(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+	resource "google_dataproc_metastore_service" "default" {
+          service_id = "metastore-srv"
+          location   = "us-central1"
+          port       = 9080
+          tier       = "DEVELOPER"
+
+          maintenance_window {
+            hour_of_day = 2
+            day_of_week = "SUNDAY"
+          }
+
+         hive_metastore_config {
+           version = "2.3.6"
+         }
+
+        labels = {
+          env = "test"
+        }
+
+	  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
