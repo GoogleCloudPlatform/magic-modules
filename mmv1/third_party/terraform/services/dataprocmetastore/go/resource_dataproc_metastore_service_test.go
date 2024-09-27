@@ -60,6 +60,15 @@ func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testin
                                 ImportStateVerify:       true,
                                 ImportStateVerifyIgnore: []string{"deletion_protection"},
                         },
+			{
+                                Config: testAccDataprocMetastoreService_updateLocation_deletionProtectionFalse(name, "us-central1", tier[0]),
+                        },
+                        {
+                                ResourceName:            "google_dataproc_metastore_service.my_metastore",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"deletion_protection"},
+                        },
                         {
                                 Config: testAccDataprocMetastoreService_updateLocation_deletionProtectionFalse(name, "us-central1", tier[0]),
                         },
