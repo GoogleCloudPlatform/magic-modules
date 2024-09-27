@@ -22,7 +22,7 @@ func TestAccSdkProvider_request_timeout(t *testing.T) {
 		"when request_timeout is set to an empty string in the config the value fails validation, as it is not a duration": testAccSdkProvider_request_timeout_emptyStringValidation,
 
 		// Usage
-		// We cannot test the impact of this field in an acc test
+		"short timeouts impact provisioning resources": testAccSdkProvider_request_timeout_usage,
 	}
 
 	for name, tc := range testCases {
@@ -107,6 +107,38 @@ func testAccSdkProvider_request_timeout_emptyStringValidation(t *testing.T) {
 	})
 }
 
+func testAccSdkProvider_request_timeout_usage(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
+
+	shortTimeout := "10ms" // short time that will result in an error
+	longTimeout := "120s"
+
+	context1 := map[string]interface{}{
+		"request_timeout": shortTimeout,
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+	context2 := map[string]interface{}{
+		"request_timeout": longTimeout,
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSdkProvider_request_timeout_provisionWithTimeout(context1),
+				// Effect of request_timeout value
+				ExpectError: regexp.MustCompile("context deadline exceeded"),
+			},
+			{
+				Config: testAccSdkProvider_request_timeout_provisionWithTimeout(context2),
+				// No error; everything is fine with an appropriate timeout value
+			},
+		},
+	})
+}
+
 // testAccSdkProvider_request_timeout_inProviderBlock allows setting the request_timeout argument in a provider block.
 // This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
 func testAccSdkProvider_request_timeout_inProviderBlock(context map[string]interface{}) string {
@@ -116,6 +148,23 @@ provider "google" {
 }
 
 data "google_provider_config_sdk" "default" {}
+`, context)
+}
+
+// testAccSdkProvider_request_timeout_provisionWithTimeout allows testing the effects of request_timeout on
+// provisioning a resource.
+func testAccSdkProvider_request_timeout_provisionWithTimeout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+provider "google" {
+	request_timeout = "%{request_timeout}"
+}
+
+data "google_provider_config_sdk" "default" {}
+
+resource "google_service_account" "default" {
+  account_id   = "tf-test-%{random_suffix}"
+  display_name = "AccTest Service Account"
+}
 `, context)
 }
 

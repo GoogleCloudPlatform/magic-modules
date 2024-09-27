@@ -22,7 +22,7 @@ func TestAccFwProvider_request_timeout(t *testing.T) {
 		"when request_timeout is set to an empty string in the config the value fails validation, as it is not a duration": testAccFwProvider_request_timeout_emptyStringValidation,
 
 		// Usage
-		// We cannot test the impact of this field in an acc test
+		// We cannot test the impact of this field in an acc test until more resources/data sources are implemented with the plugin-framework
 	}
 
 	for name, tc := range testCases {
