@@ -356,7 +356,7 @@ resource "google_pubsub_topic" "foo" {
   ingestion_data_source_settings {
     cloud_storage {
         bucket = "updated-test-bucket"
-        avro_format = {}
+        avro_format {}
         minimum_object_create_time = "2024-02-02T00:00:00Z"
         match_glob = "bar/**"
     }
