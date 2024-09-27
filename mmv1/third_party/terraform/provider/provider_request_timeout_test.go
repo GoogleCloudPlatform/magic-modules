@@ -14,6 +14,7 @@ import (
 func TestAccSdkProvider_request_timeout(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
+		"a default value of 0s is used when there are no user inputs (it is overridden downstream)":       testAccSdkProvider_request_timeout_providerDefault,
 		"request_timeout can be set in config in different formats, are normalized to full-length format": testAccSdkProvider_request_timeout_setInConfig,
 		//no ENVs to test
 
@@ -34,6 +35,23 @@ func TestAccSdkProvider_request_timeout(t *testing.T) {
 			tc(t)
 		})
 	}
+}
+
+func testAccSdkProvider_request_timeout_providerDefault(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSdkProvider_request_timeout_unset(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "request_timeout", "0s"),
+				),
+			},
+		},
+	})
 }
 
 func testAccSdkProvider_request_timeout_setInConfig(t *testing.T) {
@@ -99,4 +117,11 @@ provider "google" {
 
 data "google_provider_config_sdk" "default" {}
 `, context)
+}
+
+// testAccSdkProvider_request_timeout_inEnvsOnly allows testing when the request_timeout argument is not set
+func testAccSdkProvider_request_timeout_unset() string {
+	return `
+data "google_provider_config_sdk" "default" {}
+`
 }
