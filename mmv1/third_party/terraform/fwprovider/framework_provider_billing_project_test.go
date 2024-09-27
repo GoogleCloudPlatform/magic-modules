@@ -8,17 +8,17 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-// TestAccFwProvider_billing_project is a series of acc tests asserting how the SDK provider handles billing_project arguments
-// It is SDK specific because the HCL used provisions SDK-implemented resources
+// TestAccFwProvider_billing_project is a series of acc tests asserting how the PF provider handles billing_project arguments
+// It is PF specific because the HCL used provisions PF-implemented resources
 // It is a counterpart to TestAccSdkProvider_billing_project
 func TestAccFwProvider_billing_project(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"config takes precedence over environment variables":                                           testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables,
-		"when billing_project is unset in the config, environment variables are used in a given order": testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables, // GOOGLE_BILLING_PROJECT
+		"config takes precedence over environment variables":                                           testAccFwProvider_billing_project_configPrecedenceOverEnvironmentVariables,
+		"when billing_project is unset in the config, environment variables are used in a given order": testAccFwProvider_billing_project_precedenceOrderEnvironmentVariables, // GOOGLE_BILLING_PROJECT
 
 		// Schema-level validation
-		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_billing_project_emptyStringValidation,
+		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccFwProvider_billing_project_emptyStringValidation,
 
 		// Usage
 		//TODO
@@ -38,7 +38,7 @@ func TestAccFwProvider_billing_project(t *testing.T) {
 	}
 }
 
-func testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables(t *testing.T) {
+func testAccFwProvider_billing_project_configPrecedenceOverEnvironmentVariables(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	billingProject := "my-billing-project-id"
@@ -58,7 +58,7 @@ func testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables
 		Steps: []resource.TestStep{
 			{
 				// Apply-time error; bad value in config is used over of good values in ENVs
-				Config: testAccSdkProvider_billing_projectInProviderBlock(context),
+				Config: testAccFwProvider_billing_project_inProviderBlock(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project", providerBillingProject),
 				)},
@@ -66,7 +66,7 @@ func testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables
 	})
 }
 
-func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *testing.T) {
+func testAccFwProvider_billing_project_precedenceOrderEnvironmentVariables(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 	/*
 		These are all the ENVs for billing_project
@@ -90,7 +90,7 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 					t.Setenv("GOOGLE_BILLING_PROJECT", GOOGLE_BILLING_PROJECT) //used
 					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT)
 				},
-				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
+				Config: testAccFwProvider_billing_project_inEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project", GOOGLE_BILLING_PROJECT),
 				),
@@ -101,7 +101,7 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 					t.Setenv("GOOGLE_BILLING_PROJECT", "")
 					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT) // NOT used
 				},
-				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
+				Config: testAccFwProvider_billing_project_inEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckNoResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project"),
 				),
@@ -110,7 +110,7 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 	})
 }
 
-func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
+func testAccFwProvider_billing_project_emptyStringValidation(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	billingProject := "my-billing-project-id"
@@ -127,7 +127,7 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccSdkProvider_billing_projectInProviderBlock(context),
+				Config:      testAccFwProvider_billing_project_inProviderBlock(context),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("expected a non-empty string"),
 			},
@@ -135,9 +135,9 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 	})
 }
 
-// testAccSdkProvider_billing_projectInProviderBlock allows setting the billing_project argument in a provider block.
-// This function uses data.google_provider_config_plugin_framework because it is implemented with the SDKv2
-func testAccSdkProvider_billing_projectInProviderBlock(context map[string]interface{}) string {
+// testAccFwProvider_billing_project_inProviderBlock allows setting the billing_project argument in a provider block.
+// This function uses data.google_provider_config_plugin_framework because it is implemented with the plugin-framework
+func testAccFwProvider_billing_project_inProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
 	billing_project = "%{billing_project}"
@@ -147,9 +147,9 @@ data "google_provider_config_plugin_framework" "default" {}
 `, context)
 }
 
-// testAccSdkProvider_billing_projectInEnvsOnly allows testing when the billing_project argument
+// testAccFwProvider_billing_project_inEnvsOnly allows testing when the billing_project argument
 // is only supplied via ENVs
-func testAccSdkProvider_billing_projectInEnvsOnly(context map[string]interface{}) string {
+func testAccFwProvider_billing_project_inEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_provider_config_plugin_framework" "default" {}
 `, context)

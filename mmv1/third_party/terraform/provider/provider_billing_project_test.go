@@ -58,7 +58,7 @@ func testAccSdkProvider_billing_project_configPrecedenceOverEnvironmentVariables
 		Steps: []resource.TestStep{
 			{
 				// Apply-time error; bad value in config is used over of good values in ENVs
-				Config: testAccSdkProvider_billing_projectInProviderBlock(context),
+				Config: testAccSdkProvider_billing_project_inProviderBlock(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "billing_project", providerBillingProject),
 				)},
@@ -90,7 +90,7 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 					t.Setenv("GOOGLE_BILLING_PROJECT", GOOGLE_BILLING_PROJECT)         //used
 					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT) //used
 				},
-				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
+				Config: testAccSdkProvider_billing_project_inEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "billing_project", GOOGLE_BILLING_PROJECT),
 				),
@@ -101,7 +101,7 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 					t.Setenv("GOOGLE_BILLING_PROJECT", "")
 					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT) // NOT used
 				},
-				Config: testAccSdkProvider_billing_projectInEnvsOnly(context),
+				Config: testAccSdkProvider_billing_project_inEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "billing_project", ""),
 				),
@@ -127,7 +127,7 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccSdkProvider_billing_projectInProviderBlock(context),
+				Config:      testAccSdkProvider_billing_project_inProviderBlock(context),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("expected a non-empty string"),
 			},
@@ -135,9 +135,9 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 	})
 }
 
-// testAccSdkProvider_billing_projectInProviderBlock allows setting the billing_project argument in a provider block.
+// testAccSdkProvider_billing_project_inProviderBlock allows setting the billing_project argument in a provider block.
 // This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
-func testAccSdkProvider_billing_projectInProviderBlock(context map[string]interface{}) string {
+func testAccSdkProvider_billing_project_inProviderBlock(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
 	billing_project = "%{billing_project}"
@@ -147,9 +147,9 @@ data "google_provider_config_sdk" "default" {}
 `, context)
 }
 
-// testAccSdkProvider_billing_projectInEnvsOnly allows testing when the billing_project argument
+// testAccSdkProvider_billing_project_inEnvsOnly allows testing when the billing_project argument
 // is only supplied via ENVs
-func testAccSdkProvider_billing_projectInEnvsOnly(context map[string]interface{}) string {
+func testAccSdkProvider_billing_project_inEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_provider_config_sdk" "default" {}
 `, context)
