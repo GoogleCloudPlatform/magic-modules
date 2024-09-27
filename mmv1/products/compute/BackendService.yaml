@@ -1312,9 +1312,9 @@ properties:
         description: |
           Lifetime of the cookie.
         at_least_one_of:
-          - 'http_cookie.0.ttl'
-          - 'http_cookie.0.name'
-          - 'http_cookie.0.path'
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
         properties:
           - name: 'seconds'
             type: Integer
@@ -1334,17 +1334,17 @@ properties:
         description: |
           Name of the cookie.
         at_least_one_of:
-          - 'http_cookie.0.ttl'
-          - 'http_cookie.0.name'
-          - 'http_cookie.0.path'
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
       - name: 'path'
         type: String
         description: |
           Path to set for the cookie.
         at_least_one_of:
-          - 'http_cookie.0.ttl'
-          - 'http_cookie.0.name'
-          - 'http_cookie.0.path'
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
   - name: 'timeoutSec'
     type: Integer
     description: |
