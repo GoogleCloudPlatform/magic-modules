@@ -21,9 +21,9 @@ func TestAccFwProvider_billing_project(t *testing.T) {
 		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccFwProvider_billing_project_emptyStringValidation,
 
 		// Usage
-		//TODO
 		// 1) Usage alone
 		// 2) Usage in combination with user_project_override
+		// TODO : We need to wait for a non-Firebase resource to be migrated to the plugin-framework to enable writing this test
 	}
 
 	for name, tc := range testCases {
@@ -57,7 +57,6 @@ func testAccFwProvider_billing_project_configPrecedenceOverEnvironmentVariables(
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Apply-time error; bad value in config is used over of good values in ENVs
 				Config: testAccFwProvider_billing_project_inProviderBlock(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_provider_config_plugin_framework.default", "billing_project", providerBillingProject),
