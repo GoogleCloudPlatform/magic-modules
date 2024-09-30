@@ -27,6 +27,7 @@ resource "google_service_networking_connection" "private_service_connection" {
 resource "google_memcache_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   authorized_network = google_service_networking_connection.private_service_connection.network
+  deletion_protection = false
 
   labels = {
     env = "test"
