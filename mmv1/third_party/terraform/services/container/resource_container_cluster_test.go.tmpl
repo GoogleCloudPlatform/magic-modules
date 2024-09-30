@@ -1325,49 +1325,6 @@ func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:	testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, "us-central1-a", false),
-				ExpectError: regexp.MustCompile("master_ipv4_cidr_block must be set if enable_private_nodes is true"),
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock_withAutopilot(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:	testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, "us-central1", true),
-			},
-			{
-				ResourceName:      "google_container_cluster.with_private_cluster",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withPrivateClusterConfigGlobalAccessEnabledOnly(t *testing.T) {
 	t.Parallel()
 
@@ -8733,58 +8690,6 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
 `, datasetId, clusterName, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, location string, autopilotEnabled bool) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = google_compute_network.container_network.name
-  network                  = google_compute_network.container_network.name
-  ip_cidr_range            = "10.0.36.0/24"
-  region                   = "us-central1"
-  private_ip_google_access = true
-
-  secondary_ip_range {
-    range_name    = "pod"
-    ip_cidr_range = "10.0.0.0/19"
-  }
-
-  secondary_ip_range {
-    range_name    = "svc"
-    ip_cidr_range = "10.0.32.0/22"
-  }
-}
-
-resource "google_container_cluster" "with_private_cluster" {
-  name               = "%s"
-  location           = "%s"
-  initial_node_count = 1
-
-  networking_mode = "VPC_NATIVE"
-  network    = google_compute_network.container_network.name
-  subnetwork = google_compute_subnetwork.container_subnetwork.name
-
-  private_cluster_config {
-    enable_private_endpoint = true
-    enable_private_nodes    = true
-  }
-
-  enable_autopilot = %t
-
-  master_authorized_networks_config {}
-
-  ip_allocation_policy {
-    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
-    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
-  }
-  deletion_protection = false
-}
-`, containerNetName, clusterName, location, autopilotEnabled)
-}
-
 func testAccContainerCluster_withPrivateClusterConfig(containerNetName string, clusterName string, masterGlobalAccessEnabled bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -11842,4 +11747,418 @@ resource "google_container_cluster" "with_autopilot_gcp_filestore" {
   }
 }
 `, name)
+}
+
+func TestAccContainerCluster_migratePrivateNodes(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_migratePrivateNodesDeprecatedFormat(clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migratePrivateNodesNewFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migratePrivateNodesDeprecatedFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_migratePrivateNodesDeprecatedFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  private_cluster_config {
+    enable_private_nodes = true
+  }
+}`, name)
+}
+
+func testAccContainerCluster_migratePrivateNodesNewFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  network_config {
+    default_enable_private_nodes = true
+  }
+}`, name)
+}
+
+func TestAccContainerCluster_migratePrivateClusterConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_migratePrivateClusterConfigDeprecatedFormat(clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.global_access", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_endpoint", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.master_global_access_config.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migratePrivateClusterConfigNewFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.global_access", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_endpoint", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.master_global_access_config.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migratePrivateClusterConfigDeprecatedFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.global_access", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.enable_private_endpoint", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "private_cluster_config.0.master_global_access_config.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_migratePrivateClusterConfigDeprecatedFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  private_cluster_config {
+    enable_private_endpoint = true
+    master_global_access_config {
+      enabled = true
+    }
+  }
+  master_authorized_networks_config {
+    gcp_public_cidrs_access_enabled = false
+  }
+}`, name)
+}
+
+func testAccContainerCluster_migratePrivateClusterConfigNewFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  control_plane_endpoints_config {
+    ip_endpoints_config {
+      enabled = true
+      enable_public_endpoint = false
+      global_access = true
+      authorized_networks_config {
+        gcp_public_cidrs_access_enabled = false
+      }
+    }
+  }
+}`, name)
+}
+
+func TestAccContainerCluster_migrateAuthorizedNetworks(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_migrateAuthorizedNetworksDeprecatedFormat(clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "master_authorized_networks_config.0.cidr_blocks.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config.0.cidr_blocks.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migrateAuthorizedNetworksNewFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "master_authorized_networks_config.0.cidr_blocks.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config.0.cidr_blocks.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_migrateAuthorizedNetworksDeprecatedFormat(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "master_authorized_networks_config.0.cidr_blocks.#", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config.0.cidr_blocks.#", "1"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_migrateAuthorizedNetworksDeprecatedFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block = "10.0.0.0/8"
+      display_name = "cidr1"
+    }
+    private_endpoint_enforcement_enabled = true
+  }
+}`, name)
+}
+
+func testAccContainerCluster_migrateAuthorizedNetworksNewFormat(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  control_plane_endpoints_config {
+    ip_endpoints_config {
+      enabled = true
+      enable_public_endpoint = true
+      authorized_networks_config {
+        cidr_blocks {
+          cidr_block = "10.0.0.0/8"
+          display_name = "cidr1"
+        }
+        private_endpoint_enforcement_enabled = true
+      }
+    }
+  }
+}`, name)
+}
+
+func TestAccContainerCluster_withDnsEndpoint(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDnsEndpointDisabled(clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// The DNS endpoint should always be set, even if allow_external_traffic is false.
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config.#", "1"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.public_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDnsEndpointEnabledAndIpDisabled(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.public_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withDnsEndpointDisabled(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  control_plane_endpoints_config {
+      dns_endpoint_config {
+          allow_external_traffic = false
+      }
+    ip_endpoints_config {
+      enabled = true
+      enable_public_endpoint = false
+      authorized_networks_config {
+        cidr_blocks {
+          cidr_block = "10.0.0.0/8"
+          display_name = "cidr1"
+        }
+            private_endpoint_enforcement_enabled = true
+      }
+    }
+    }
+  network_config {
+    default_enable_private_nodes = true
+  }
+}`, name)
+}
+
+func testAccContainerCluster_withDnsEndpointEnabledAndIpDisabled(name string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  control_plane_endpoints_config {
+      dns_endpoint_config {
+          allow_external_traffic = true
+      }
+    ip_endpoints_config {
+      enabled = false
+      enable_public_endpoint = false
+      authorized_networks_config {
+        cidr_blocks {
+          cidr_block = "10.0.0.0/8"
+          display_name = "cidr1"
+        }
+            private_endpoint_enforcement_enabled = true
+      }
+    }
+    }
+  network_config {
+    default_enable_private_nodes = true
+  }
+}`, name)
 }
