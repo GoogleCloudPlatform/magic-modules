@@ -138,7 +138,7 @@ func testAccMemcacheInstanceTags(prefix string, name string, tags map[string]str
   name = "%s"
   region = "us-central1"
   node_config {
-    cpu_count      = 1
+    cpu_count      = 2
     memory_size_mb = 1024
   }
   node_count = 1
