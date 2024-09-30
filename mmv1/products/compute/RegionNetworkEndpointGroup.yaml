@@ -99,6 +99,7 @@ examples:
       network_name: 'network'
   - name: 'region_network_endpoint_group_portmap'
     primary_resource_id: 'region_network_endpoint_group_portmap'
+    min_version: 'beta'
     vars:
       network_name: 'network'
       subnetwork_name: 'subnetwork'
