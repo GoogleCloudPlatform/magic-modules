@@ -597,7 +597,7 @@ Create a `cascadable` replica in a different region from the primary (`cascadabl
 #### Updating the primary resource:
 1. Change `instance_type` from `CLOUD_SQL_INSTANCE` to `READ_REPLICA_INSTANCE`
 2. Set `master_instance_name` to the original replica (which will be primary after switchover)
-3. Set `replica_configuration` and set `cascadable-replica` to `true`
+3. Set `replica_configuration` and set `cascadable_replica` to `true`
 4. Remove original replica from `replica_names`
 
     ~> **NOTE**: Do **not** delete the replica_names field, even if it has no replicas remaining. Set replica_names = [ ] to indicate it having no replicas.

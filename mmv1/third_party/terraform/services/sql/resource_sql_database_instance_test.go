@@ -3196,7 +3196,7 @@ resource "google_sql_database_instance" "original-primary" {
   }
   replica_names = []
   settings {
-	tier              = "db-perf-optimized-N-2"
+    tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
   }
 }
@@ -3210,7 +3210,7 @@ resource "google_sql_database_instance" "original-replica" {
   instance_type = "CLOUD_SQL_INSTANCE"
   replica_names = [google_sql_database_instance.original-primary.name]
   settings {
-	tier              = "db-perf-optimized-N-2"
+    tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
   }
 }
@@ -3230,7 +3230,7 @@ resource "google_sql_database_instance" "original-replica" {
   instance_type = "CLOUD_SQL_INSTANCE"
   replica_names = ["%s"]
   settings {
-	tier              = "db-perf-optimized-N-2"
+    tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
   }
 }
@@ -3250,7 +3250,7 @@ resource "google_sql_database_instance" "original-replica" {
   instance_type = "CLOUD_SQL_INSTANCE"
   replica_names = []
   settings {
-	tier              = "db-perf-optimized-N-2"
+    tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
   }
 }
@@ -4505,7 +4505,7 @@ func checkSwitchoverOriginalReplicaConfigurations(replicaResourceName string) fu
 
 		replicaMasterInstanceName, ok := replicaResourceAttributes["master_instance_name"]
 		if ok && replicaMasterInstanceName != "" {
-			return fmt.Errorf("Error in switchover. Master_instance_name should not be set on new primary")
+			return fmt.Errorf("Error in switchover. master_instance_name should not be set on new primary")
 		}
 		return nil
 	}
