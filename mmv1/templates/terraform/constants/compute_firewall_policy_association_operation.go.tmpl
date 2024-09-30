@@ -1,0 +1,10 @@
+var opRes map[string]interface{}
+err = ComputeOrgOperationWaitTimeWithResponse(
+	config, res, &opRes, d.Get("firewall_policy").(string), "FirewallPolicyAssociation operation", userAgent,
+	d.Timeout(schema.TimeoutCreate))
+
+if err != nil {
+	// The resource didn't actually create
+	d.SetId("")
+	return fmt.Errorf("Error waiting for FirewallPolicyAssociation operation: %s", err)
+}
