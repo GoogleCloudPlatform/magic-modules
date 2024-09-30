@@ -317,7 +317,7 @@ func TestAccSpannerInstance_tags(t *testing.T) {
 	t.Parallel()
 
         org := envvar.GetTestOrgFromEnv(t)
-	display_name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
+	display_name := fmt.Sprintf("spanner-instances-%s", acctest.RandString(t, 10))
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "spanner-instances-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "spanner-instances-tagvalue", tagKey)
 
