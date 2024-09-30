@@ -900,12 +900,6 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("hierarchical_namespace") {
-		if v, ok := d.GetOk("hierarchical_namespace"); ok {
-			sb.HierarchicalNamespace = expandBucketHierachicalNamespace(v.([]interface{}))
-		}
-	}
-
 	res, err := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
 	if err != nil {
 		return err
