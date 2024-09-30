@@ -216,11 +216,12 @@ you see an unexpected diff unsetting your client cert, ensure you have the
 `container.clusters.getCredentials` permission.
 Structure is [documented below](#nested_master_auth).
 
-* `master_authorized_networks_config` - (Optional) The desired
+* `master_authorized_networks_config` - (Optional, DEPRECATED) The desired
     configuration options for master authorized networks. Omit the
     nested `cidr_blocks` attribute to disallow external access (except
     the cluster node IPs, which GKE automatically whitelists).
     Structure is [documented below](#nested_master_authorized_networks_config).
+    Please use `control_plane_endpoints_config.ip_endpoints_config.authorized_networks_config` instead.
 
 * `min_master_version` - (Optional) The minimum version of the master. GKE
     will auto-update the master to new versions, so this does not guarantee the
@@ -300,8 +301,14 @@ region are guaranteed to support the same version.
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
 
+* `control_plane_endpoints_config` - (Optional) Configuration for all of the cluster's control plane endpoints.
+    Structure is [documented below](#nested_control_plane_endpoints_config).
+
+* `network_config` - (Optional) Configuration for cluster networking.
+    Structure is [documented below](#nested_network_config).
+
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
-clusters with private nodes. Structure is [documented below](#nested_private_cluster_config).
+    clusters with private nodes. Structure is [documented below](#nested_private_cluster_config).
 
 * `cluster_telemetry` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for
    [ClusterTelemetry](https://cloud.google.com/monitoring/kubernetes-engine/installing#controlling_the_collection_of_application_logs) feature,
@@ -805,6 +812,9 @@ This block also contains several computed attributes, documented below.
 * `gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
     accessible via Google Compute Engine Public IPs.
 
+* `private_endpoint_enforcement_enabled` - (Optional) Whether master authorized
+     networks is enforced on private endpoint or not.
+
 The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `cidr_block` - (Optional) External network that can access Kubernetes master through HTTPS.
@@ -1159,17 +1169,52 @@ notification_config {
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
 
+<a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
+
+* `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+
+* `ip_endpoints_config` - (Optional) IP endpoints configuration.
+
+The `control_plane_endpoints_config.dns_endpoint_config` block supports:
+
+* `endpoint` - (Output) The cluster's DNS endpoint.
+
+* `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+
+The `control_plane_endpoints_config.ip_endpoints_config` block supports:
+
+* `enabled` - (Optional) Controls whether to allow direct IP access. When this is false, all other ip_endpoints_config values are ignored.
+
+* `enable_public_endpoint` - (Optional) Controls whether the control plane allows access through a public IP.
+
+* `global_access` - (Optional) Controls whether the control plane's private endpoint is accessible from sources in other regions.
+
+* `authorized_networks_config` - (Optional) Configuration of authorized networks. If enabled, restricts access to the control plane based on source IP.
+    Structure is [documented here](#nested_master_authorized_networks_config).
+
+* `public_endpoint` - (Output) The external IP address of this cluster's control plane. Only populated if enabled.
+
+* `private_endpoint` - (Output) The internal IP address of this cluster's control plane. Only populated if enabled.
+
+* `private_endpoint_subnetwork` - (Optional) Subnet to provision the master's private endpoint during cluster. Specified in projects/\*/regions/\*/subnetworks/\* format.
+
+<a name="nested_network_config"></a>The `network_config` block supports:
+
+* `default_enable_private_nodes` - (Optional) Controls whether by default nodes have private IP addresses only.
+
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
-* `enable_private_nodes` (Optional) - Enables the private cluster feature,
+* `enable_private_nodes` (Optional, DEPRECATED) - Enables the private cluster feature,
 creating a private endpoint on the cluster. In a private cluster, nodes only
 have RFC 1918 private addresses and communicate with the master's private
 endpoint via private networking.
+Use network_config.default_enable_private_nodes instead.
 
-* `enable_private_endpoint` (Optional) - When `true`, the cluster's private
+* `enable_private_endpoint` (Optional, DEPRECATED) - When `true`, the cluster's private
 endpoint is used as the cluster endpoint and access through the public endpoint
 is disabled. When `false`, either endpoint can be used. This field only applies
 to private clusters, when `enable_private_nodes` is `true`.
+Use control_plane_endpoints_config.ip_endpoints_config.enable_public_endpoint instead, and note the flipped semantics.
 
 * `master_ipv4_cidr_block` (Optional) - The IP range in CIDR notation to use for
 the hosted master network. This range will be used for assigning private IP
@@ -1179,19 +1224,21 @@ subnet. See [Private Cluster Limitations](https://cloud.google.com/kubernetes-en
 for more details. This field only applies to private clusters, when
 `enable_private_nodes` is `true`.
 
-* `private_endpoint_subnetwork` - (Optional) Subnetwork in cluster's network where master's endpoint will be provisioned.
+* `private_endpoint_subnetwork` - (Optional, DEPRECATED) Subnetwork in cluster's network where master's endpoint will be provisioned.
+Use control_plane_endpoints_config.ip_endpoints_config.private_endpoint_subnetwork instead.
 
-* `master_global_access_config` (Optional) - Controls cluster master global
+* `master_global_access_config` (Optional, DEPRECATED) - Controls cluster master global
 access settings. If unset, Terraform will no longer manage this field and will
 not modify the previously-set value. Structure is [documented below](#nested_master_global_access_config).
+Use control_plane_endpoints_config.ip_endpoints_config.global_access instead.
 
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
 * `peering_name` - The name of the peering between this cluster and the Google owned VPC.
 
-* `private_endpoint` - The internal IP address of this cluster's master endpoint.
+* `private_endpoint` - (Output) The internal IP address of this cluster's master endpoint.
 
-* `public_endpoint` - The external IP address of this cluster's master endpoint.
+* `public_endpoint` - (Output) The external IP address of this cluster's master endpoint.
 
 !> The Google provider is unable to validate certain configurations of
 `private_cluster_config` when `enable_private_nodes` is `false`. It's
