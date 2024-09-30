@@ -316,13 +316,8 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing
 func TestAccSpannerInstance_tags(t *testing.T) {
 	t.Parallel()
 
-<<<<<<< HEAD
         org := envvar.GetTestOrgFromEnv(t)
 	display_name := fmt.Sprintf("spanner-instances-%s", acctest.RandString(t, 10))
-=======
-	org := envvar.GetTestOrgFromEnv(t)
-	display_name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
->>>>>>> e2fe520af5fe1cc9c23b2e2aa636a754bbd6f556
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "spanner-instances-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "spanner-instances-tagvalue", tagKey)
 
@@ -506,7 +501,4 @@ resource "google_spanner_instance" "basic" {
 	l += fmt.Sprintf("}\n}")
 	return r + l
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> e2fe520af5fe1cc9c23b2e2aa636a754bbd6f556
