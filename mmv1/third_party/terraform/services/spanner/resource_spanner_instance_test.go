@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -312,6 +313,35 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing
 	})
 }
 
+func TestAccSpannerInstance_tags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	display_name := fmt.Sprintf("spanner-test-%s", acctest.RandString(t, 10))
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "spanner-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "spanner-instances-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstanceTags(display_name, map[string]string{org + "/" + tagKey: tagValue}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "name"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
 func testAccSpannerInstance_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
@@ -452,4 +482,22 @@ resource "google_spanner_instance" "basic" {
   }
 }
 `, name, name, maxNodes, minNodes, cupUtilizationPercent, storageUtilizationPercent)
+}
+
+func testAccSpannerInstanceTags(name string, tags map[string]string) string {
+
+	r := fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  config       = "regional-us-central1"
+  display_name = "%s"
+  num_nodes    = 2
+  tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
