@@ -157,6 +157,8 @@ The following arguments are supported:
 
 * `soft_delete_policy` -  (Optional, Computed) The bucket's soft delete policy, which defines the period of time that soft-deleted objects will be retained, and cannot be permanently deleted. If the block is not provided, Server side value will be kept which means removal of block won't generate any terraform change. Structure is [documented below](#nested_soft_delete_policy).
 
+* `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace).
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -268,6 +270,11 @@ The following arguments are supported:
 * `retention_duration_seconds` - (Optional, Default: 604800) The duration in seconds that soft-deleted objects in the bucket will be retained and cannot be permanently deleted. Default value is 604800. The value must be in between 604800(7 days) and 7776000(90 days). **Note**: To disable the soft delete policy on a bucket, This field must be set to 0.
 
 * `effective_time` - (Computed) Server-determined value that indicates the time from which the policy, or one with a greater retention, was effective. This value is in RFC 3339 format.
+
+<a name="nested_hierarchical_namespace"></a>The `hierarchical_namespace` block supports:
+
+* `enabled` - (Optional) The flag enables bucket folder management operations provide reliability and management capabilities, including creating, deleting, listing, and renaming folders. 
+
 
 ## Attributes Reference
 
