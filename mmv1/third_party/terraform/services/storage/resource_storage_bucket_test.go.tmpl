@@ -56,7 +56,7 @@ func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_basic_hns_data(bucketName, true, true),
+				Config: testAccStorageBucket_basic_hns_with_data(bucketName, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketPutItem(t, bucketName),
 				),
@@ -78,7 +78,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName, enabled)
 }
 
-func testAccStorageBucket_basic_hns_data(bucketName string, enabled bool, forceDestroy bool) string {
+func testAccStorageBucket_basic_hns_with_data(bucketName string, enabled bool, forceDestroy bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
