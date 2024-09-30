@@ -82,6 +82,9 @@ func testAccSecureSourceManagerBranchRule_secureSourceManagerBranchRuleWithField
 	return acctest.Nprintf(`
 resource "google_secure_source_manager_branch_rule" "default" {
     branch_rule_id = "tf-test-my-initial-branchrule%{random_suffix}"
+	repository_id = "tf-test-my-initial-repository%{random_suffix}"
+	location = "us-central1"
+    include_pattern = "test"
     minimum_approvals_count   = 1
     minimum_reviews_count     = 1
     require_linear_history    = false
