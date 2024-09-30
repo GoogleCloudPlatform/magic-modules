@@ -103,6 +103,20 @@ resource "google_storage_bucket" "auto-expire" {
 }
 ```
 
+## Example Usage - Enabling hierarchical namespace
+
+```hcl
+resource "google_storage_bucket" "auto-expire" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  hierarchical_namespace = {
+    enabled = true
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
