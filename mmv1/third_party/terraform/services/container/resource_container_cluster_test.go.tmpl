@@ -11873,3 +11873,103 @@ resource "google_container_cluster" "with_autopilot_gcp_filestore" {
 }
 `, name)
 }
+
+func TestAccContainerCluster_withDnsEndpoint(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+	name                = "%s"
+	location            = "us-central1-a"
+	initial_node_count  = 1
+	deletion_protection = false
+	control_plane_endpoints_config {
+    	dns_endpoint_config {
+      		allow_external_traffic = false
+    	}
+		ip_endpoints_config {
+			enabled = true
+			enable_public_endpoint = false
+			authorized_networks_config {
+				cidr_blocks {
+					cidr_block = "10.0.0.0/8"
+					display_name = "cidr1"
+				}
+        		private_endpoint_enforcement_enabled = true
+			}
+		}
+  	}
+	network_config {
+		default_enable_private_nodes = true
+	}
+}`, clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					// The DNS endpoint should always be set, even if allow_external_traffic is false.
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config.#", "1"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.public_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+	name                = "%s"
+	location            = "us-central1-a"
+	initial_node_count  = 1
+	deletion_protection = false
+	control_plane_endpoints_config {
+    	dns_endpoint_config {
+      		allow_external_traffic = true
+    	}
+		ip_endpoints_config {
+			enabled = false
+			enable_public_endpoint = false
+			authorized_networks_config {
+				cidr_blocks {
+					cidr_block = "10.0.0.0/8"
+					display_name = "cidr1"
+				}
+        		private_endpoint_enforcement_enabled = true
+			}
+		}
+  	}
+	network_config {
+		default_enable_private_nodes = true
+	}
+}`, clusterName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.endpoint"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_endpoints_config.0.ip_endpoints_config.0.public_endpoint", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_config.0.default_enable_private_nodes", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
