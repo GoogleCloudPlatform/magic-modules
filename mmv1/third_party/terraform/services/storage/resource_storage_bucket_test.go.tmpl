@@ -65,17 +65,17 @@ func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 	})
 }
 
-func testAccStorageBucket_basic_hns(bucketName string, enabled bool) string {
+func testAccStorageBucket_basic_hns(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
   uniform_bucket_level_access = true
   hierarchical_namespace {
-	enabled = %t
+	enabled = true
   }
 }
-`, bucketName, enabled)
+`, bucketName)
 }
 
 func testAccStorageBucket_basic_hns_with_data(bucketName string, enabled bool, forceDestroy bool) string {
