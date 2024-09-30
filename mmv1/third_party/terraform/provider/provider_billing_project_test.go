@@ -1,11 +1,13 @@
 package provider_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // TestAccSdkProvider_billing_project is a series of acc tests asserting how the SDK provider handles billing_project arguments
@@ -21,9 +23,9 @@ func TestAccSdkProvider_billing_project(t *testing.T) {
 		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_billing_project_emptyStringValidation,
 
 		// Usage
-		//TODO
-		// 1) Usage alone
-		// 2) Usage in combination with user_project_override
+		// 1) Usage of billing_account alone is insufficient
+		// 2) Usage in combination with user_project_override changes the project where quota is used
+		"using billing_account alone doesn't impact provisioning, but using together with user_project_override does": testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride,
 	}
 
 	for name, tc := range testCases {
@@ -135,6 +137,45 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 	})
 }
 
+func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
+
+	randomString := acctest.RandString(t, 10)
+	contextUserProjectOverrideFalse := map[string]interface{}{
+		"org_id":                envvar.GetTestOrgFromEnv(t),
+		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
+		"user_project_override": "true", // Used in combo with billing_account
+		"random_suffix":         randomString,
+	}
+
+	contextUserProjectOverrideTrue := map[string]interface{}{
+		"org_id":                envvar.GetTestOrgFromEnv(t),
+		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
+		"user_project_override": "true", // Used in combo with billing_account
+		"random_suffix":         randomString,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// With user_project_override=false the PubSub topic can be provisioned because quota is consumed
+				// from the project the Terraform identity is in, and that project has PubSub API enabled.
+				// The billing_project value isn't used, meaning the error doesn't happen, because user_project_override=false
+				Config: testAccSdkProvider_billing_project_useBillingProject_setup(contextUserProjectOverrideFalse),
+			},
+			{
+				// With user_project_override=true the PubSub topic CANNOT be provisioned because quota is consumed
+				// from the newly provisioned project, and that project does not have the PubSub API enabled.
+				// The billing_project is used, leading to the error occurring, because user_project_override=true
+				Config:      testAccSdkProvider_billing_project_useBillingProject_scenario(contextUserProjectOverrideTrue),
+				ExpectError: regexp.MustCompile(fmt.Sprintf("Error 403: Cloud Pub/Sub API has not been used in project tf-test-%s", randomString)),
+			},
+		},
+	})
+}
+
 // testAccSdkProvider_billing_project_inProviderBlock allows setting the billing_project argument in a provider block.
 // This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
 func testAccSdkProvider_billing_project_inProviderBlock(context map[string]interface{}) string {
@@ -152,5 +193,49 @@ data "google_provider_config_sdk" "default" {}
 func testAccSdkProvider_billing_project_inEnvsOnly(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_provider_config_sdk" "default" {}
+`, context)
+}
+
+func testAccSdkProvider_billing_project_useBillingProject_setup(context map[string]interface{}) string {
+	// Setup where there are 2 projects provisioned and each contain a service account to impersonate
+	return acctest.Nprintf(`
+provider "google" {}
+
+# Create a new project and enable service APIs in those projects
+resource "google_project" "project" {
+  provider = google
+  project_id      = "tf-test-%{random_suffix}-a"
+  name            = "tf-test-%{random_suffix}-a"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+`, context)
+}
+
+func testAccSdkProvider_billing_project_useBillingProject_scenario(context map[string]interface{}) string {
+
+	// SECOND APPLY
+	// This is needed as configuring the provider with impersonation fails if service APIs
+	// aren't enabled in the new project and/or the service account isn't made yet
+	return testAccSdkProvider_billing_project_useBillingProject_setup(context) + acctest.Nprintf(`
+# Set up the usage of
+#  - user_project_override
+#  - billing_project
+#  - impersonate_service_account
+provider "google" {
+  alias                 = "user_project_override"
+  user_project_override = %{user_project_override}
+  billing_project       = google_project.project.project_id
+  project               = google_project.project.project_id
+}
+
+# See if the impersonated SA can provision the PubSub resource in a way that uses
+# the newly provisioned project as the source of consumed quota
+resource "google_pubsub_topic" "example-resource-in" {
+  provider = google.user_project_override
+  project  = google_project.project.project_id
+  name     = "tf-test-%{random_suffix}"
+}
 `, context)
 }
