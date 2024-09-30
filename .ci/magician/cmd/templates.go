@@ -17,7 +17,7 @@ func color(color, text string) string {
 	case "green":
 		emoji = "🟢"
 	default:
-		emoji = ""
+		return text
 	}
-	return fmt.Sprintf("%s%s%s", emoji, text, emoji)
+	return fmt.Sprintf("%s %s", emoji, text)
 }

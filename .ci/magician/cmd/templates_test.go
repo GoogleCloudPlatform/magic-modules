@@ -15,19 +15,19 @@ func TestColor(t *testing.T) {
 			name:  "red",
 			color: "red",
 			text:  "Test text",
-			want:  "🔴Test text🔴",
+			want:  "🔴 Test text",
 		},
 		{
 			name:  "yellow",
 			color: "yellow",
 			text:  "Test text",
-			want:  "🟡Test text🟡",
+			want:  "🟡 Test text",
 		},
 		{
 			name: "green",
 			color: "green",
 			text: "Test text",
-			want: "🟢Test text🟢",
+			want: "🟢 Test text",
 		},
 		{
 			name: "unsupported color",
