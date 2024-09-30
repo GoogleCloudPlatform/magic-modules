@@ -10,12 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
---- !ruby/object:Api::Product
-name: SiteVerification
-display_name: Site Verification
+
+---
+name: 'SiteVerification'
+display_name: 'Site Verification'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://www.googleapis.com/siteVerification/v1/
+  - name: 'ga'
+    base_url: 'https://www.googleapis.com/siteVerification/v1/'
 scopes:
-  - https://www.googleapis.com/auth/siteverification
+  - 'https://www.googleapis.com/auth/siteverification'

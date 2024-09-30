@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,67 +12,71 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "Catalog"
+name: 'Catalog'
 description: |
   Catalogs are top-level containers for Databases and Tables.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Manage open source metadata with BigLake Metastore": "https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs"
-  api: "https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs"
-base_url: "projects/{{project}}/locations/{{location}}/catalogs"
-self_link: "projects/{{project}}/locations/{{location}}/catalogs/{{name}}"
+    'Manage open source metadata with BigLake Metastore': 'https://cloud.google.com/bigquery/docs/manage-open-source-metadata#create_catalogs'
+  api: 'https://cloud.google.com/bigquery/docs/reference/biglake/rest/v1/projects.locations.catalogs'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/catalogs'
+self_link: 'projects/{{project}}/locations/{{location}}/catalogs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/catalogs?catalogId={{name}}'
 immutable: true
-create_url: "projects/{{project}}/locations/{{location}}/catalogs?catalogId={{name}}"
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "bigquery_biglake_catalog"
-    primary_resource_id: "default"
+  - name: 'bigquery_biglake_catalog'
+    primary_resource_id: 'default'
     vars:
-      name: "my_catalog"
+      name: 'my_catalog'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "location"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The geographic location where the Catalog should reside.
-  - !ruby/object:Api::Type::String
-    name: "name"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The name of the Catalog. Format:
       projects/{project_id_or_number}/locations/{locationId}/catalogs/{catalogId}
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "createTime"
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       Output only. The creation time of the catalog. A timestamp in RFC3339 UTC
       "Zulu" format, with nanosecond resolution and up to nine fractional
       digits.
-  - !ruby/object:Api::Type::String
-    name: "updateTime"
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       Output only. The last modification time of the catalog. A timestamp in
       RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits.
-  - !ruby/object:Api::Type::String
-    name: "deleteTime"
     output: true
+  - name: 'deleteTime'
+    type: String
     description: |
       Output only. The deletion time of the catalog. Only set after the catalog
       is deleted. A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
       resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: "expireTime"
     output: true
+  - name: 'expireTime'
+    type: String
     description: |
       Output only. The time when this catalog is considered expired. Only set
       after the catalog is deleted. Only set after the catalog is deleted.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits.
+    output: true

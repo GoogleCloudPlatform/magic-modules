@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,63 +11,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Client'
-base_url: '{{brand}}/identityAwareProxyClients'
-self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
-immutable: true
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 
   ~> **Note:** Only internal org clients can be created via declarative tools. External clients must be
   manually created via the GCP console. This restriction is due to the existing APIs and not lack of support
   in this tool.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Setting up IAP Client': 'https://cloud.google.com/iap/docs/authentication-howto'
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.brands.identityAwareProxyClients'
+docs:
 id_format: '{{brand}}/identityAwareProxyClients/{{client_id}}'
-import_format: ['{{brand}}/identityAwareProxyClients/{{client_id}}']
-error_retry_predicates: ['transport_tpg.IapClient409Operation']
-skip_sweeper: true
+base_url: '{{brand}}/identityAwareProxyClients'
+self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
+immutable: true
+import_format:
+  - '{{brand}}/identityAwareProxyClients/{{client_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/iap_client.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/iap_client.go.tmpl'
+exclude_sweeper: true
+error_retry_predicates:
+
+  - 'transport_tpg.IapClient409Operation'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iap_client'
+  - name: 'iap_client'
     primary_resource_id: 'project_client'
     vars:
       project_id: 'my-project'
     test_env_vars:
-      org_id: :ORG_ID
-      org_domain: :ORG_DOMAIN
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/iap_client.go.erb
-  custom_import: templates/terraform/custom_import/iap_client.go.erb
+      org_id: 'ORG_ID'
+      org_domain: 'ORG_DOMAIN'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'clientId'
-    api_name: name
+  - name: 'clientId'
+    type: String
     description: |
       Output only. Unique identifier of the OAuth client.
+    api_name: name
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'brand'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'brand'
+    type: String
     description: |
       Identifier of the brand to which this client
       is attached to. The format is
       `projects/{project_number}/brands/{brand_id}`.
-    immutable: true
-    required: true
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'secret'
+  - name: 'secret'
+    type: String
     description: |
       Output only. Client secret of the OAuth client.
-    output: true
     sensitive: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       Human-friendly name given to the OAuth client.
     required: true

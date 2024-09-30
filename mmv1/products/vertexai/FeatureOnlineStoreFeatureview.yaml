@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,229 +11,226 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeatureOnlineStoreFeatureview
-base_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews
-create_url: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}
-self_link: projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeatureOnlineStoreFeatureview'
+description: |-
+  FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureOnlineStores.featureViews'
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews'
+self_link: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: |-
-  FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
-import_format:
-  [
-    'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}',
-  ]
-autogen_async: false
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featureonlinestore_featureview'
+  - name: 'vertex_ai_featureonlinestore_featureview'
     primary_resource_id: 'featureview'
     vars:
       name: 'example_feature_view'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
+  - name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
     primary_resource_id: 'featureview_featureregistry'
     vars:
       name: 'example_feature_view_feature_registry'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featureonlinestore_featureview_cross_project'
-    external_providers: ["time"]
+  - name: 'vertex_ai_featureonlinestore_featureview_cross_project'
     primary_resource_id: 'cross_project_featureview'
-    ignore_read_extra:
-      - feature_registry_source.0.project_number
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
     vars:
       name: 'example_cross_project_featureview'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
-    # currently failing
-    skip_vcr: true
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'feature_registry_source.0.project_number'
+    external_providers: ["time"]
+  - name: 'vertex_ai_featureonlinestore_featureview_with_vector_search'
     primary_resource_id: 'featureview_vector_search'
+    min_version: 'beta'
     vars:
       name: 'example_feature_view_vector_search'
-    min_version: beta
+    # currently failing
+    skip_vcr: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: featureOnlineStore
+  - name: 'featureOnlineStore'
+    type: String
     description:
       The name of the FeatureOnlineStore to use for the featureview.
     url_param_only: true
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'region'
+    immutable: true
+  - name: 'region'
+    type: String
     description: The region for the resource. It should be the same as the featureonlinestore region.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description:
       Name of the FeatureView. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
-    immutable: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+    immutable: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the featureOnlinestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp of when the featureOnlinestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this FeatureView.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'syncConfig'
+  - name: 'syncConfig'
+    type: NestedObject
     description: |
       Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'cron'
+      - name: 'cron'
+        type: String
         description: |
           Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
           To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
         default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'bigQuerySource'
+  - name: 'bigQuerySource'
+    type: NestedObject
     description: |
       Configures how data is supposed to be extracted from a BigQuery source to be loaded onto the FeatureOnlineStore.
     exactly_one_of:
-      - big_query_source
-      - feature_registry_source
+      - 'big_query_source'
+      - 'feature_registry_source'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'uri'
-        required: true
+      - name: 'uri'
+        type: String
         description: |
           The BigQuery view URI that will be materialized on each sync trigger based on FeatureView.SyncConfig.
-      - !ruby/object:Api::Type::Array
-        name: 'entityIdColumns'
         required: true
+      - name: 'entityIdColumns'
+        type: Array
         description: |
           Columns to construct entityId / row keys. Start by supporting 1 only.
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'featureRegistrySource'
+        required: true
+        item_type:
+          type: String
+  - name: 'featureRegistrySource'
+    type: NestedObject
+    description: |
+      Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
     conflicts:
       - vector_search_config
     exactly_one_of:
-      - big_query_source
-      - feature_registry_source
-    description: |
-      Configures the features from a Feature Registry source that need to be loaded onto the FeatureOnlineStore.
+      - 'big_query_source'
+      - 'feature_registry_source'
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'featureGroups'
-        required: true
+      - name: 'featureGroups'
+        type: Array
         description: |
           List of features that need to be synced to Online Store.
-        item_type: !ruby/object:Api::Type::NestedObject
+        required: true
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'featureGroupId'
-              required: true
+            - name: 'featureGroupId'
+              type: String
               description: |
                 Identifier of the feature group.
-            - !ruby/object:Api::Type::Array
-              name: featureIds
               required: true
+            - name: 'featureIds'
+              type: Array
               description: |
                 Identifiers of features under the feature group.
-              item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: 'projectNumber'
+              required: true
+              item_type:
+                type: String
+      - name: 'projectNumber'
+        type: String
         description: |
           The project number of the parent project of the feature Groups.
-        custom_flatten: templates/terraform/custom_flatten/vertex_ai_feature_view_ignore_project_number.go.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: 'vectorSearchConfig'
+        custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_feature_view_ignore_project_number.go.tmpl'
+  - name: 'vectorSearchConfig'
+    type: NestedObject
     description: |
       Configuration for vector search. It contains the required configurations to create an index from source data, so that approximate nearest neighbor (a.k.a ANN) algorithms search can be performed during online serving.
+    min_version: 'beta'
+    immutable: true
     conflicts:
       - feature_registry_source
-    immutable: true
-    min_version: beta
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'embeddingColumn'
-        required: true
+      - name: 'embeddingColumn'
+        type: String
         description: |
           Column of embedding. This column contains the source data to create index for vector search.
-      - !ruby/object:Api::Type::Array
-        name: 'filterColumns'
+        required: true
+      - name: 'filterColumns'
+        type: Array
         description: |
           Columns of features that are used to filter vector search results.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: 'crowdingColumn'
+        item_type:
+          type: String
+      - name: 'crowdingColumn'
+        type: String
         description: |
           Column of crowding. This column contains crowding attribute which is a constraint on a neighbor list produced by nearest neighbor search requiring that no more than some value k' of the k neighbors returned have the same value of crowdingAttribute.
-      - !ruby/object:Api::Type::Enum
-        name: distanceMeasureType
+      - name: 'distanceMeasureType'
+        type: Enum
         description: |
           The distance measure used in nearest neighbor search.
           For details on allowed values, see the [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.featureOnlineStores.featureViews#DistanceMeasureType).
-        values:
-          - :SQUARED_L2_DISTANCE
-          - :COSINE_DISTANCE
-          - :DOT_PRODUCT_DISTANCE
-      - !ruby/object:Api::Type::NestedObject
-        name: 'treeAhConfig'
-        exactly_one_of:
-          - treeAhConfig
-          - bruteForceConfig
+        enum_values:
+          - 'SQUARED_L2_DISTANCE'
+          - 'COSINE_DISTANCE'
+          - 'DOT_PRODUCT_DISTANCE'
+      - name: 'treeAhConfig'
+        type: NestedObject
         description: |
           Configuration options for the tree-AH algorithm (Shallow tree + Asymmetric Hashing). Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
+        exactly_one_of:
+          - 'treeAhConfig'
+          - 'bruteForceConfig'
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'leafNodeEmbeddingCount'
+          - name: 'leafNodeEmbeddingCount'
+            type: String
             description: |
               Number of embeddings on each leaf node. The default value is 1000 if not set.
             default_from_api: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'bruteForceConfig'
+      - name: 'bruteForceConfig'
+        type: NestedObject
         description: |
           Configuration options for using brute force search, which simply implements the standard linear search in the database for each query. It is primarily meant for benchmarking and to generate the ground truth for approximate search.
-        exactly_one_of:
-          - treeAhConfig
-          - bruteForceConfig
-        properties: []
         send_empty_value: true
         allow_empty_object: true
-      - !ruby/object:Api::Type::Integer
-        name: 'embeddingDimension'
+        exactly_one_of:
+          - 'treeAhConfig'
+          - 'bruteForceConfig'
+        properties:
+          []
+      - name: 'embeddingDimension'
+        type: Integer
         description: |
           The number of dimensions of the input embedding.

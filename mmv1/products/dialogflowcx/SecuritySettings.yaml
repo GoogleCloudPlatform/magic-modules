@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,29 +11,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SecuritySettings'
-base_url: 'projects/{{project}}/locations/{{location}}/securitySettings'
-update_verb: :PATCH
-update_mask: true
 description: |
   Represents the settings related to security issues, such as data redaction and data retention. It may take hours for updates on the settings to propagate to all the related components and take effect.
   Multiple security settings can be configured in each location. Each agent can specify the security settings to apply, and each setting can be applied to multiple agents in the same project and location.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.securitySettings'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/securitySettings'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'
+timeouts:
   insert_minutes: 40
   update_minutes: 40
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_security_settings_basic'
+  - name: 'dialogflowcx_security_settings_basic'
     primary_resource_id: 'basic_security_settings'
     vars:
       settings_name: 'dialogflowcx-security-settings'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_security_settings_full'
+  - name: 'dialogflowcx_security_settings_full'
     primary_resource_id: 'basic_security_settings'
     vars:
       inspect_name: 'dialogflowcx-inspect-template'
@@ -41,124 +46,121 @@ examples:
       settings_name: 'dialogflowcx-security-settings'
       bucket_name: 'dialogflowcx-bucket'
     test_env_vars:
-      project: :PROJECT_NAME
-id_format: 'projects/{{project}}/locations/{{location}}/securitySettings/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/securitySettings/{{name}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/sleep.go.erb
+      project: 'PROJECT_NAME'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the settings.
       Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'location'
+    type: String
     description: |
       The location these settings are located in. Settings can only be applied to an agent in the same location.
       See [Available Regions](https://cloud.google.com/dialogflow/cx/docs/concept/region#avail) for a list of supported locations.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       The human-readable name of the security settings, unique within the location.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'redactionStrategy'
+  - name: 'redactionStrategy'
+    type: Enum
     description: |
       Defines how we redact data. If not set, defaults to not redacting.
       * REDACT_WITH_SERVICE: Call redaction service to clean up the data to be persisted.
-    values:
-      - :REDACT_WITH_SERVICE
-  - !ruby/object:Api::Type::Enum
-    name: 'redactionScope'
+    enum_values:
+      - 'REDACT_WITH_SERVICE'
+  - name: 'redactionScope'
+    type: Enum
     description: |
       Defines what types of data to redact. If not set, defaults to not redacting any kind of data.
       * REDACT_DISK_STORAGE: On data to be written to disk or similar devices that are capable of holding data even if power is disconnected. This includes data that are temporarily saved on disk.
-    values:
-      - :REDACT_DISK_STORAGE
-  - !ruby/object:Api::Type::String
-    name: 'inspectTemplate'
+    enum_values:
+      - 'REDACT_DISK_STORAGE'
+  - name: 'inspectTemplate'
+    type: String
     description: |
       [DLP](https://cloud.google.com/dlp/docs) inspect template name. Use this template to define inspect base settings. If empty, we use the default DLP inspect config.
       Note: inspectTemplate must be located in the same region as the SecuritySettings.
       Format: projects/<Project ID>/locations/<Location ID>/inspectTemplates/<Template ID> OR organizations/<Organization ID>/locations/<Location ID>/inspectTemplates/<Template ID>
-  - !ruby/object:Api::Type::String
-    name: 'deidentifyTemplate'
+  - name: 'deidentifyTemplate'
+    type: String
     description: |
       [DLP](https://cloud.google.com/dlp/docs) deidentify template name. Use this template to define de-identification configuration for the content. If empty, Dialogflow replaces sensitive info with [redacted] text.
       Note: deidentifyTemplate must be located in the same region as the SecuritySettings.
       Format: projects/<Project ID>/locations/<Location ID>/deidentifyTemplates/<Template ID> OR organizations/<Organization ID>/locations/<Location ID>/deidentifyTemplates/<Template ID>
-  - !ruby/object:Api::Type::Array
-    name: 'purgeDataTypes'
+  - name: 'purgeDataTypes'
+    type: Array
     description: |
       List of types of data to remove when retention settings triggers purge.
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'purgeDataType'
+    item_type:
+      type: Enum
       description: |
         Type of data we purge after retention settings triggers purge.
         * DIALOGFLOW_HISTORY: Dialogflow history. This does not include Cloud logging, which is owned by the user - not Dialogflow.
-      values:
-        - :DIALOGFLOW_HISTORY
-  - !ruby/object:Api::Type::NestedObject
-    name: 'audioExportSettings'
+      enum_values:
+        - 'DIALOGFLOW_HISTORY'
+  - name: 'audioExportSettings'
+    type: NestedObject
     description: |
       Controls audio export settings for post-conversation analytics when ingesting audio to conversations.
       If retention_strategy is set to REMOVE_AFTER_CONVERSATION or gcs_bucket is empty, audio export is disabled.
       If audio export is enabled, audio is recorded and saved to gcs_bucket, subject to retention policy of gcs_bucket.
       This setting won't effect audio input for implicit sessions via [Sessions.DetectIntent](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.sessions/detectIntent#google.cloud.dialogflow.cx.v3.Sessions.DetectIntent).
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'gcsBucket'
+      - name: 'gcsBucket'
+        type: String
         description: |
           Cloud Storage bucket to export audio record to. Setting this field would grant the Storage Object Creator role to the Dialogflow Service Agent. API caller that tries to modify this field should have the permission of storage.buckets.setIamPolicy.
-      - !ruby/object:Api::Type::String
-        name: 'audioExportPattern'
+      - name: 'audioExportPattern'
+        type: String
         description: |
           Filename pattern for exported audio.
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableAudioRedaction'
+      - name: 'enableAudioRedaction'
+        type: Boolean
         description: |
           Enable audio redaction if it is true.
-      - !ruby/object:Api::Type::Enum
-        name: 'audioFormat'
+      - name: 'audioFormat'
+        type: Enum
         description: |
           File format for exported audio file. Currently only in telephony recordings.
           * MULAW: G.711 mu-law PCM with 8kHz sample rate.
           * MP3: MP3 file format.
           * OGG: OGG Vorbis.
-        values:
-          - :MULAW
-          - :MP3
-          - :OGG
-  - !ruby/object:Api::Type::NestedObject
-    name: 'insightsExportSettings'
+        enum_values:
+          - 'MULAW'
+          - 'MP3'
+          - 'OGG'
+  - name: 'insightsExportSettings'
+    type: NestedObject
     description: |
       Controls conversation exporting settings to Insights after conversation is completed.
       If retentionStrategy is set to REMOVE_AFTER_CONVERSATION, Insights export is disabled no matter what you configure here.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enableInsightsExport'
+      - name: 'enableInsightsExport'
+        type: Boolean
         description: |
           If enabled, we will automatically exports conversations to Insights and Insights runs its analyzers.
         required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'retentionWindowDays'
-    conflicts:
-      - retentionStrategy
+  - name: 'retentionWindowDays'
+    type: Integer
     description: |
       Retains the data for the specified number of days. User must set a value lower than Dialogflow's default 365d TTL (30 days for Agent Assist traffic), higher value will be ignored and use default. Setting a value higher than that has no effect. A missing value or setting to 0 also means we use default TTL.
       Only one of `retention_window_days` and `retention_strategy` may be set.
-  - !ruby/object:Api::Type::Enum
-    name: 'retentionStrategy'
     conflicts:
-      - retentionWindowDays
+      - retentionStrategy
+  - name: 'retentionStrategy'
+    type: Enum
     description: |
       Defines how long we retain persisted data that contains sensitive info. Only one of `retention_window_days` and `retention_strategy` may be set.
       * REMOVE_AFTER_CONVERSATION: Removes data when the conversation ends. If there is no conversation explicitly established, a default conversation ends when the corresponding Dialogflow session ends.
-    values:
-      - :REMOVE_AFTER_CONVERSATION
+    conflicts:
+      - retentionWindowDays
+    enum_values:
+      - 'REMOVE_AFTER_CONVERSATION'

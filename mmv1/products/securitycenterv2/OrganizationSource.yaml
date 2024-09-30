@@ -11,73 +11,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'OrganizationSource'
-base_url: organizations/{{organization}}/sources
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A Cloud Security Command Center's (Cloud SCC) finding source. A finding
   source is an entity or a mechanism that can produce a finding. A source is
   like a container of findings that come from the same scanner, logger,
   monitor, etc.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.sources'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+docs:
+base_url: 'organizations/{{organization}}/sources'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'source'
-  base_url: organizations/{{organization}}/sources/{{source}}
+  base_url: 'organizations/{{organization}}/sources/{{source}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    ['organizations/{{organization}}/sources/{{source}}', '{{source}}']
-skip_delete: true
+    - 'organizations/{{organization}}/sources/{{source}}'
+    - '{{source}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name:
-      'scc_source_basic'
-      # resource can't be destroyed, so checkdestroy fails unnecessarily
-    skip_test: true
+  - name: 'scc_source_basic'
     primary_resource_id: 'custom_source'
     vars:
       source_display_name: 'My Source'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.erb
-  post_create: templates/terraform/post_create/set_computed_name.erb
+      org_id: 'ORG_ID'
+      # resource can't be destroyed, so checkdestroy fails unnecessarily
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: organization
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'organization'
+    type: String
     description: |
       The organization whose Cloud Security Command Center the Source
       lives in.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of this source, in the format
       `organizations/{{organization}}/sources/{{source}}`.
-  - !ruby/object:Api::Type::String
-    name: description
+    output: true
+  - name: 'description'
+    type: String
     description: |
       The description of the source (max of 1024 characters).
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.StringLenBetween(0, 1024)'
-  - !ruby/object:Api::Type::String
-    name: displayName
-    required: true
+  - name: 'displayName'
+    type: String
     description: |
       The source’s display name. A source’s display name must be unique
       amongst its siblings, for example, two sources with the same parent
       can't share the same display name. The display name must start and end
       with a letter or digit, may contain letters, digits, spaces, hyphens,
       and underscores, and can be no longer than 32 characters.
-    validation: !ruby/object:Provider::Terraform::Validation
+    required: true
+    validation:
       regex: '[\p{L}\p{N}]({\p{L}\p{N}_- ]{0,30}[\p{L}\p{N}])?'

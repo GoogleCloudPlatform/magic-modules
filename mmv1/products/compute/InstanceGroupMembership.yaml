@@ -11,10 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'InstanceGroupMembership'
 kind: 'compute#instanceGroup'
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}'
 description: |
   Represents the Instance membership to the Instance Group.
 
@@ -26,81 +25,83 @@ description: |
   Instance is recreated, it's removed from Instance Group and it's needed to
   perform `apply` twice. To avoid situations like this, please use this resource
   with the lifecycle `replace_triggered_by` method, with the passed Instance's ID.
-immutable: true
-create_verb: :POST
-create_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/addInstances
-delete_verb: :POST
-delete_url: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances
-read_verb: :POST
-self_link: projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/listInstances
-identity:
-  - instance
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - items
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Add instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/addInstances'
     'Remove instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/removeInstances'
     'List instances': 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups/listInstances'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroups'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: '{{project}}/{{zone}}/{{instance_group}}/{{instance}}'
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}'
+self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/listInstances'
+create_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/addInstances'
+read_verb: 'POST'
+delete_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups/{{instance_group}}/removeInstances'
+delete_verb: 'POST'
+immutable: true
+mutex: 'instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-id_format: '{{project}}/{{zone}}/{{instance_group}}/{{instance}}'
-mutex: instanceGroups/{{project}}/zones/{{zone}}/{{instance_group}}
+identity:
+  - instance
+nested_query:
+  keys:
+    - items
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_instance_group_membership.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_instance_group_membership.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/compute_instance_group_membership.go.tmpl'
 exclude_tgc: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'instance_group_membership'
-    skip_test: true
+  - name: 'instance_group_membership'
     vars:
       network_name: 'network'
       instance_group_name: 'instance-group'
       instance_name: 'instance'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: templates/terraform/pre_delete/compute_instance_group_membership.go.erb
-  custom_import: templates/terraform/custom_import/compute_instance_group_membership.go.erb
-  encoder: templates/terraform/encoders/compute_instance_group_membership.go.erb
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: 'A reference to the zone where the instance group resides.'
     url_param_only: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'instanceGroup'
-    resource: 'InstanceGroup'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
     imports: 'name'
+  - name: 'instanceGroup'
+    type: ResourceRef
     description: |
       Represents an Instance Group resource name that the instance belongs to.
-    required: true
     url_param_only: true
+    required: true
     ignore_read: true
-    diff_suppress_func: tpgresource.CompareResourceNames
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    resource: 'InstanceGroup'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'instance'
+  - name: 'instance'
+    type: ResourceRef
     description: 'An instance being added to the InstanceGroup'
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'selfLink'
-    required: true
-    custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.erb'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'

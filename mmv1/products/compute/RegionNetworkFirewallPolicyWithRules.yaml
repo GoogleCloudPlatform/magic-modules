@@ -1,0 +1,677 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionNetworkFirewallPolicyWithRules'
+description: "The Compute NetworkFirewallPolicy with rules resource"
+min_version: 'beta'
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  encoder: 'templates/terraform/encoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  decoder: 'templates/terraform/decoders/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+  post_create: 'templates/terraform/post_create/resource_compute_region_network_firewall_policy_with_rules.go.tmpl'
+legacy_long_form_project: true
+examples:
+  - name: 'compute_region_network_firewall_policy_with_rules_full'
+    primary_resource_id: 'region-network-firewall-policy-with-rules'
+    vars:
+      policy_name: 'tf-region-fw-policy-with-rules'
+      address_group_name: 'tf-address-group'
+      tag_key_name: 'tf-tag-key'
+      tag_value_name: 'tf-tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of this resource.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'creationTimestamp'
+    type: String
+    description: Creation timestamp in RFC3339 text format.
+    min_version: 'beta'
+    output: true
+  - name: 'name'
+    type: String
+    description: |
+      User-provided name of the Network firewall policy.
+      The name should be unique in the project in which the firewall policy is created.
+      The name must be 1-63 characters long, and comply with RFC1035. Specifically,
+      the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?
+      which means the first character must be a lowercase letter, and all following characters must be a dash,
+      lowercase letter, or digit, except the last character, which cannot be a dash.
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'networkFirewallPolicyId'
+    type: String
+    description: The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    min_version: 'beta'
+    output: true
+  - name: 'description'
+    type: String
+    description: An optional description of this resource.
+    min_version: 'beta'
+  - name: 'rule'
+    type: Array
+    description: A list of firewall policy rules.
+    api_name: rules
+    min_version: 'beta'
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            A description of the rule.
+          min_version: 'beta'
+        - name: 'ruleName'
+          type: String
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+          min_version: 'beta'
+        - name: 'priority'
+          type: Integer
+          description: |
+            An integer indicating the priority of a rule in the list. The priority must be a value
+            between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+            highest priority and 2147483647 is the lowest priority.
+          min_version: 'beta'
+          required: true
+        - name: 'match'
+          type: NestedObject
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          min_version: 'beta'
+          required: true
+          properties:
+            - name: 'srcIpRanges'
+              type: Array
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destIpRanges'
+              type: Array
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcRegionCodes'
+              type: Array
+              description: |
+                Region codes whose IP addresses will be used to match for source
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of source region codes allowed is 5000.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destRegionCodes'
+              type: Array
+              description: |
+                Region codes whose IP addresses will be used to match for destination
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of destination region codes allowed is 5000.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'srcThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'destThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+              min_version: 'beta'
+              item_type:
+                type: String
+            - name: 'layer4Config'
+              type: Array
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              api_name: layer4Configs
+              min_version: 'beta'
+              required: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipProtocol'
+                    type: String
+                    description: |
+                      The IP protocol to which this rule applies. The protocol
+                      type is required when creating a firewall rule.
+                      This value can either be one of the following well
+                      known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                      or the IP protocol number.
+                    min_version: 'beta'
+                    required: true
+                  - name: 'ports'
+                    type: Array
+                    description: |
+                      An optional list of ports to which this rule applies. This field
+                      is only applicable for UDP or TCP protocol. Each entry must be
+                      either an integer or a range. If not specified, this rule
+                      applies to connections through any port.
+                      Example inputs include: ["22"], ["80","443"], and
+                      ["12345-12349"].
+                    min_version: 'beta'
+                    item_type:
+                      type: String
+            - name: 'srcSecureTag'
+              type: Array
+              description: |
+                List of secure tag values, which should be matched at the source
+                of the traffic.
+                For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
+                and there is no <code>srcIpRange</code>, this rule will be ignored.
+                Maximum number of source tag values allowed is 256.
+              api_name: srcSecureTags
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the secure tag, created with TagManager's TagValue API.
+                      @pattern tagValues/[0-9]+
+                    min_version: 'beta'
+                  - name: 'state'
+                    type: Enum
+                    description: |
+                      [Output Only] State of the secure tag, either `EFFECTIVE` or
+                      `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                      or its network is deleted.
+                    min_version: 'beta'
+                    output: true
+                    enum_values:
+                      - 'EFFECTIVE'
+                      - 'INEFFECTIVE'
+        - name: 'targetSecureTag'
+          type: Array
+          description: |
+            A list of secure tags that controls which instances the firewall rule
+            applies to. If <code>targetSecureTag</code> are specified, then the
+            firewall rule applies only to instances in the VPC network that have one
+            of those EFFECTIVE secure tags, if all the target_secure_tag are in
+            INEFFECTIVE state, then this rule will be ignored.
+            <code>targetSecureTag</code> may not be set at the same time as
+            <code>targetServiceAccounts</code>.
+            If neither <code>targetServiceAccounts</code> nor
+            <code>targetSecureTag</code> are specified, the firewall rule applies
+            to all instances on the specified network.
+            Maximum number of target label tags allowed is 256.
+          api_name: targetSecureTags
+          min_version: 'beta'
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name of the secure tag, created with TagManager's TagValue API.
+                  @pattern tagValues/[0-9]+
+                min_version: 'beta'
+              - name: 'state'
+                type: Enum
+                description: |
+                  [Output Only] State of the secure tag, either `EFFECTIVE` or
+                  `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                  or its network is deleted.
+                min_version: 'beta'
+                output: true
+                enum_values:
+                  - 'EFFECTIVE'
+                  - 'INEFFECTIVE'
+        - name: 'action'
+          type: String
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+          min_version: 'beta'
+          required: true
+        - name: 'direction'
+          type: Enum
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          min_version: 'beta'
+          enum_values:
+            - 'INGRESS'
+            - 'EGRESS'
+        - name: 'enableLogging'
+          type: Boolean
+          description: |
+            Denotes whether to enable logging for a particular rule.
+            If logging is enabled, logs will be exported to the
+            configured export destination in Stackdriver.
+          min_version: 'beta'
+          send_empty_value: true
+        - name: 'targetServiceAccounts'
+          type: Array
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          min_version: 'beta'
+          item_type:
+            type: String
+        - name: 'securityProfileGroup'
+          type: String
+          description: |
+            A fully-qualified URL of a SecurityProfile resource instance.
+            Example:
+            https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+            Must be specified if action is 'apply_security_profile_group'.
+          min_version: 'beta'
+        - name: 'tlsInspect'
+          type: Boolean
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+          min_version: 'beta'
+        - name: 'disabled'
+          type: Boolean
+          description: |
+            Denotes whether the firewall policy rule is disabled. When set to true,
+            the firewall policy rule is not enforced and traffic behaves as if it did
+            not exist. If this is unspecified, the firewall policy rule will be
+            enabled.
+          min_version: 'beta'
+  - name: 'predefinedRules'
+    type: Array
+    description: A list of firewall policy pre-defined rules.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'description'
+          type: String
+          description: |
+            A description of the rule.
+          min_version: 'beta'
+          output: true
+        - name: 'ruleName'
+          type: String
+          description: |
+            An optional name for the rule. This field is not a unique identifier
+            and can be updated.
+          min_version: 'beta'
+          output: true
+        - name: 'priority'
+          type: Integer
+          description: |
+            An integer indicating the priority of a rule in the list. The priority must be a value
+            between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
+            highest priority and 2147483647 is the lowest priority.
+          min_version: 'beta'
+          output: true
+        - name: 'match'
+          type: NestedObject
+          description:
+            A match condition that incoming traffic is evaluated against. If it
+            evaluates to true, the corresponding 'action' is enforced.
+          min_version: 'beta'
+          output: true
+          properties:
+            - name: 'srcIpRanges'
+              type: Array
+              description: |
+                Source IP address range in CIDR format. Required for
+                INGRESS rules.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destIpRanges'
+              type: Array
+              description: |
+                Destination IP address range in CIDR format. Required for
+                EGRESS rules.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic source.
+                Maximum number of source address groups is 10.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destAddressGroups'
+              type: Array
+              description: |
+                Address groups which should be matched against the traffic destination.
+                Maximum number of destination address groups is 10.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic source. Maximum number of source fqdn allowed is 100.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destFqdns'
+              type: Array
+              description: |
+                Fully Qualified Domain Name (FQDN) which should be matched against
+                traffic destination. Maximum number of destination fqdn allowed is 100.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcRegionCodes'
+              type: Array
+              description: |
+                Region codes whose IP addresses will be used to match for source
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of source region codes allowed is 5000.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destRegionCodes'
+              type: Array
+              description: |
+                Region codes whose IP addresses will be used to match for destination
+                of traffic. Should be specified as 2 letter country code defined as per
+                ISO 3166 alpha-2 country codes. ex."US"
+                Maximum number of destination region codes allowed is 5000.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'srcThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic source.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'destThreatIntelligences'
+              type: Array
+              description: |
+                Names of Network Threat Intelligence lists.
+                The IPs in these lists will be matched against traffic destination.
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: String
+            - name: 'layer4Config'
+              type: Array
+              description: |
+                Pairs of IP protocols and ports that the rule should match.
+              api_name: layer4Configs
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'ipProtocol'
+                    type: String
+                    description: |
+                      The IP protocol to which this rule applies. The protocol
+                      type is required when creating a firewall rule.
+                      This value can either be one of the following well
+                      known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
+                      or the IP protocol number.
+                    min_version: 'beta'
+                    output: true
+                  - name: 'ports'
+                    type: Array
+                    description: |
+                      An optional list of ports to which this rule applies. This field
+                      is only applicable for UDP or TCP protocol. Each entry must be
+                      either an integer or a range. If not specified, this rule
+                      applies to connections through any port.
+                      Example inputs include: ["22"], ["80","443"], and
+                      ["12345-12349"].
+                    min_version: 'beta'
+                    output: true
+                    item_type:
+                      type: String
+            - name: 'srcSecureTag'
+              type: Array
+              description: |
+                List of secure tag values, which should be matched at the source
+                of the traffic.
+                For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
+                and there is no <code>srcIpRange</code>, this rule will be ignored.
+                Maximum number of source tag values allowed is 256.
+              api_name: srcSecureTags
+              min_version: 'beta'
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the secure tag, created with TagManager's TagValue API.
+                      @pattern tagValues/[0-9]+
+                    min_version: 'beta'
+                    output: true
+                  - name: 'state'
+                    type: Enum
+                    description: |
+                      [Output Only] State of the secure tag, either `EFFECTIVE` or
+                      `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                      or its network is deleted.
+                    min_version: 'beta'
+                    output: true
+                    enum_values:
+                      - 'EFFECTIVE'
+                      - 'INEFFECTIVE'
+        - name: 'targetSecureTag'
+          type: Array
+          description: |
+            A list of secure tags that controls which instances the firewall rule
+            applies to. If <code>targetSecureTag</code> are specified, then the
+            firewall rule applies only to instances in the VPC network that have one
+            of those EFFECTIVE secure tags, if all the target_secure_tag are in
+            INEFFECTIVE state, then this rule will be ignored.
+            <code>targetSecureTag</code> may not be set at the same time as
+            <code>targetServiceAccounts</code>.
+            If neither <code>targetServiceAccounts</code> nor
+            <code>targetSecureTag</code> are specified, the firewall rule applies
+            to all instances on the specified network.
+            Maximum number of target label tags allowed is 256.
+          api_name: targetSecureTags
+          min_version: 'beta'
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name of the secure tag, created with TagManager's TagValue API.
+                  @pattern tagValues/[0-9]+
+                min_version: 'beta'
+                output: true
+              - name: 'state'
+                type: Enum
+                description: |
+                  [Output Only] State of the secure tag, either `EFFECTIVE` or
+                  `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                  or its network is deleted.
+                min_version: 'beta'
+                output: true
+                enum_values:
+                  - 'EFFECTIVE'
+                  - 'INEFFECTIVE'
+        - name: 'action'
+          type: String
+          description: |
+            The Action to perform when the client connection triggers the rule. Can currently be either
+            "allow", "deny", "apply_security_profile_group" or "goto_next".
+          min_version: 'beta'
+          output: true
+        - name: 'direction'
+          type: Enum
+          description: |
+            The direction in which this rule applies. If unspecified an INGRESS rule is created.
+          min_version: 'beta'
+          output: true
+          enum_values:
+            - 'INGRESS'
+            - 'EGRESS'
+        - name: 'enableLogging'
+          type: Boolean
+          description: |
+            Denotes whether to enable logging for a particular rule.
+            If logging is enabled, logs will be exported to the
+            configured export destination in Stackdriver.
+          min_version: 'beta'
+          output: true
+          send_empty_value: true
+        - name: 'targetServiceAccounts'
+          type: Array
+          description: |
+            A list of service accounts indicating the sets of
+            instances that are applied with this rule.
+          min_version: 'beta'
+          output: true
+          item_type:
+            type: String
+        - name: 'securityProfileGroup'
+          type: String
+          description: |
+            A fully-qualified URL of a SecurityProfile resource instance.
+            Example:
+            https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+            Must be specified if action is 'apply_security_profile_group'.
+          min_version: 'beta'
+          output: true
+        - name: 'tlsInspect'
+          type: Boolean
+          description: |
+            Boolean flag indicating if the traffic should be TLS decrypted.
+            It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+          min_version: 'beta'
+          output: true
+        - name: 'disabled'
+          type: Boolean
+          description: |
+            Denotes whether the firewall policy rule is disabled. When set to true,
+            the firewall policy rule is not enforced and traffic behaves as if it did
+            not exist. If this is unspecified, the firewall policy rule will be
+            enabled.
+          min_version: 'beta'
+          output: true
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: Fingerprint of the resource. This field is used internally during updates of this resource.
+    min_version: 'beta'
+    output: true
+  - name: 'selfLink'
+    type: String
+    description: Server-defined URL for the resource.
+    min_version: 'beta'
+    output: true
+  - name: 'selfLinkWithId'
+    type: String
+    description: Server-defined URL for this resource with the resource id.
+    min_version: 'beta'
+    output: true
+  - name: 'ruleTupleCount'
+    type: Integer
+    description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
+    min_version: 'beta'
+    output: true

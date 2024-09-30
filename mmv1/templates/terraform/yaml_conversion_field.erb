@@ -242,7 +242,7 @@
 <%      end -%>
 <%    end -%>
 <%    unless property.skip_docs_values.nil? -%>
-    skip_docs_values: <%= property.skip_docs_values %>
+    exclude_docs_values: <%= property.skip_docs_values %>
 <%    end -%>
 <%  end -%>
 <%  if property.is_a?(Api::Type::Map) -%>

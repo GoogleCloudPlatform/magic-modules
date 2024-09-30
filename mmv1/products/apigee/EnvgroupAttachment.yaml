@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,83 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EnvgroupAttachment'
-base_url: '{{envgroup_id}}/attachments'
-create_url: '{{envgroup_id}}/attachments'
-delete_url: '{{envgroup_id}}/attachments/{{name}}'
-self_link: '{{envgroup_id}}/attachments/{{name}}'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-immutable: true
 description: |
   An `Environment Group attachment` in Apigee.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups.attachments/create'
-
-autogen_async: true
+docs:
+base_url: '{{envgroup_id}}/attachments'
+self_link: '{{envgroup_id}}/attachments/{{name}}'
+create_url: '{{envgroup_id}}/attachments'
+delete_url: '{{envgroup_id}}/attachments/{{name}}'
+immutable: true
 import_format:
-  ['{{envgroup_id}}/attachments/{{name}}', '{{envgroup_id}}/{{name}}']
-skip_sweeper: true
+  - '{{envgroup_id}}/attachments/{{name}}'
+  - '{{envgroup_id}}/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 20
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apigee_environment_group_attachment.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_group_attachment_basic'
-    skip_test:
-      true
+  - name: 'apigee_environment_group_attachment_basic'
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.
     vars:
       project_id: 'my-project'
       envgroup_name: 'my-envgroup'
       environment_name: 'my-environment'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_group_attachment_basic_test'
+    exclude_test: true
+  - name: 'apigee_environment_group_attachment_basic_test'
     primary_resource_id: 'apigee_environment_group_attachment'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs:
-      true
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 30
-  delete_minutes: 30
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_environment_group_attachment.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'envgroupId'
+  - name: 'envgroupId'
+    type: String
     description: |
       The Apigee environment group associated with the Apigee environment,
       in the format `organizations/{{org_name}}/envgroups/{{envgroup_name}}`.
-    required: true
     url_param_only: true
+    required: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'environment'
+  - name: 'environment'
+    type: String
     description: |
       The resource ID of the environment.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the newly created  attachment (output parameter).
     output: true

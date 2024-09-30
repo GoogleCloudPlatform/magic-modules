@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,121 +11,138 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'OrganizationSecurityPolicyRule'
-min_version: beta
-base_url: '{{policy_id}}'
-self_link: '{{policy_id}}/getRule?priority={{priority}}'
-create_url: '{{policy_id}}/addRule?priority={{priority}}'
-update_verb: :POST
-update_url: '{{policy_id}}/patchRule?priority={{priority}}'
-delete_verb: :POST
-delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
 description: |
   A rule for the OrganizationSecurityPolicy.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/organizationSecurityPolicies/addRule'
+docs:
 id_format: '{{policy_id}}/priority/{{priority}}'
-import_format: ['{{%policy_id}}/priority/{{priority}}']
+base_url: '{{policy_id}}'
+self_link: '{{policy_id}}/getRule?priority={{priority}}'
+create_url: '{{policy_id}}/addRule?priority={{priority}}'
+update_url: '{{policy_id}}/patchRule?priority={{priority}}'
+update_verb: 'POST'
+delete_url: '{{policy_id}}/removeRule?priority={{priority}}'
+delete_verb: 'POST'
+import_format:
+  - '{{%policy_id}}/priority/{{priority}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
+  post_delete: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
+  post_update: 'templates/terraform/post_create/org_security_policy_rule.go.tmpl'
+    # TODO: Remove once b/154369201 is closed.
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'organization_security_policy_rule_basic'
+  - name: 'organization_security_policy_rule_basic'
     primary_resource_id: 'policy'
     min_version: 'beta'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/org_security_policy_rule.go.erb
-  post_delete: templates/terraform/post_create/org_security_policy_rule.go.erb
-  post_update:
-    templates/terraform/post_create/org_security_policy_rule.go.erb
-    # TODO: Remove once b/154369201 is closed.
-  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+      org_id: 'ORG_ID'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: policyId
+  - name: 'policyId'
+    type: String
     description: |
       The ID of the OrganizationSecurityPolicy this rule applies to.
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A description of the rule.
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+    min_version: 'beta'
+  - name: 'priority'
+    type: Integer
     description: |
       An integer indicating the priority of a rule in the list. The priority must be a value
       between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
       highest priority and 2147483647 is the lowest prority.
+    min_version: 'beta'
     required: true
     immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'match'
+  - name: 'match'
+    type: NestedObject
     description:
       A match condition that incoming traffic is evaluated against. If it
       evaluates to true, the corresponding 'action' is enforced.
+    min_version: 'beta'
     required: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'description'
+      - name: 'description'
+        type: String
         description: |
           A description of the rule.
-      - !ruby/object:Api::Type::Enum
-        name: 'versionedExpr'
+        min_version: 'beta'
+      - name: 'versionedExpr'
+        type: Enum
         description: |
           Preconfigured versioned expression. For organization security policy rules,
           the only supported type is "FIREWALL".
-        values:
-          - :FIREWALL
-        default_value: :FIREWALL
-      - !ruby/object:Api::Type::NestedObject
-        name: 'config'
+        min_version: 'beta'
+        default_value: "FIREWALL"
+        enum_values:
+          - 'FIREWALL'
+      - name: 'config'
+        type: NestedObject
         description: The configuration options for matching the rule.
+        min_version: 'beta'
         required: true
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'srcIpRanges'
+          - name: 'srcIpRanges'
+            type: Array
             description: |
               Source IP address range in CIDR format. Required for
               INGRESS rules.
-            item_type: Api::Type::String
+            min_version: 'beta'
             exactly_one_of:
-              - match.0.config.0.src_ip_ranges
-              - match.0.config.0.dest_ip_ranges
-          - !ruby/object:Api::Type::Array
-            name: 'destIpRanges'
+              - 'match.0.config.0.src_ip_ranges'
+              - 'match.0.config.0.dest_ip_ranges'
+            item_type:
+              type: String
+          - name: 'destIpRanges'
+            type: Array
             description: |
               Destination IP address range in CIDR format. Required for
               EGRESS rules.
-            item_type: Api::Type::String
+            min_version: 'beta'
             exactly_one_of:
-              - match.0.config.0.src_ip_ranges
-              - match.0.config.0.dest_ip_ranges
-          - !ruby/object:Api::Type::Array
-            name: 'layer4Config'
-            api_name: 'layer4Configs'
+              - 'match.0.config.0.src_ip_ranges'
+              - 'match.0.config.0.dest_ip_ranges'
+            item_type:
+              type: String
+          - name: 'layer4Config'
+            type: Array
             description: |
               Pairs of IP protocols and ports that the rule should match.
+            api_name: layer4Configs
+            min_version: 'beta'
             required: true
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'ipProtocol'
+                - name: 'ipProtocol'
+                  type: String
                   description: |
                     The IP protocol to which this rule applies. The protocol
                     type is required when creating a firewall rule.
                     This value can either be one of the following well
                     known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                     or the IP protocol number.
+                  min_version: 'beta'
                   required: true
-                - !ruby/object:Api::Type::Array
-                  item_type: Api::Type::String
-                  name: 'ports'
+                - name: 'ports'
+                  type: Array
                   description: |
                     An optional list of ports to which this rule applies. This field
                     is only applicable for UDP or TCP protocol. Each entry must be
@@ -134,41 +151,52 @@ properties:
 
                     Example inputs include: ["22"], ["80","443"], and
                     ["12345-12349"].
-  - !ruby/object:Api::Type::String
-    name: 'action'
+                  min_version: 'beta'
+                  item_type:
+                    type: String
+  - name: 'action'
+    type: String
     description: |
       The Action to perform when the client connection triggers the rule. Can currently be either
       "allow", "deny" or "goto_next".
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'preview'
+  - name: 'preview'
+    type: Boolean
     description: |
       If set to true, the specified action is not enforced.
-  - !ruby/object:Api::Type::Enum
-    name: 'direction'
+    min_version: 'beta'
+  - name: 'direction'
+    type: Enum
     description: |
       The direction in which this rule applies. If unspecified an INGRESS rule is created.
-    values:
-      - :INGRESS
-      - :EGRESS
-  - !ruby/object:Api::Type::Array
-    name: 'targetResources'
+    min_version: 'beta'
+    enum_values:
+      - 'INGRESS'
+      - 'EGRESS'
+  - name: 'targetResources'
+    type: Array
     description: |
       A list of network resource URLs to which this rule applies.
       This field allows you to control which network's VMs get
       this rule. If this field is left blank, all VMs
       within the organization will receive the rule.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableLogging'
+    min_version: 'beta'
+    item_type:
+      type: String
+  - name: 'enableLogging'
+    type: Boolean
     description: |
       Denotes whether to enable logging for a particular rule.
       If logging is enabled, logs will be exported to the
       configured export destination in Stackdriver.
+    min_version: 'beta'
     send_empty_value: true
-  - !ruby/object:Api::Type::Array
-    name: 'targetServiceAccounts'
+  - name: 'targetServiceAccounts'
+    type: Array
     description: |
       A list of service accounts indicating the sets of
       instances that are applied with this rule.
-    item_type: Api::Type::String
+    min_version: 'beta'
+    item_type:
+      type: String

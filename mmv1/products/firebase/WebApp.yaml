@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,118 +11,122 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'WebApp'
-min_version: beta
-base_url: projects/{{project}}/webApps
-self_link: 'projects/{{project}}/webApps/{{app_id}}'
-update_verb: :PATCH
-update_mask: true
-delete_verb: :POST
-delete_url: 'projects/{{project}}/webApps/{{app_id}}:remove'
 description: |
   A Google Cloud Firebase web application instance
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://firebase.google.com/'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps'
-async: !ruby/object:Api::OpAsync
+docs:
+base_url: 'projects/{{project}}/webApps'
+self_link: 'projects/{{project}}/webApps/{{app_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/webApps/{{app_id}}:remove'
+delete_verb: 'POST'
+import_format:
+  - '{{project}} projects/{{project}}/webApps/{{app_id}}'
+  - 'projects/{{project}}/webApps/{{app_id}}'
+  - 'webApps/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
   actions: ['create', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-import_format:
-  [
-    '{{project}} projects/{{project}}/webApps/{{app_id}}',
-    'projects/{{project}}/webApps/{{app_id}}',
-    'webApps/{{app_id}}',
-    '{{app_id}}',
-  ]
-autogen_async: true
-# Sweeper skipped as this resource has customized deletion.
-skip_sweeper: true
 identity:
   - appId
   - name
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples  # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
-    skip_vcr: true
-    name: 'firebase_web_app_basic'
-    min_version: 'beta'
+ # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
+  - name: 'firebase_web_app_basic'
     primary_resource_id: 'basic'
+    min_version: 'beta'
     vars:
       display_name: 'Display Name Basic'
       bucket_name: 'fb-webapp-'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      display_name: '"tf-test Display Name Basic"'
+      'display_name': '"tf-test Display Name Basic"'
     ignore_read_extra:
-      - project
-      - deletion_policy
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebase_web_app_custom_api_key'
-    min_version: 'beta'
+      - 'project'
+      - 'deletion_policy'
+    skip_vcr: true
+  - name: 'firebase_web_app_custom_api_key'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       display_name: 'Display Name'
-      api_key_name: "api-key"
+      api_key_name: 'api-key'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     ignore_read_extra:
-      - project
-      - deletion_policy
+      - 'project'
+      - 'deletion_policy'
 virtual_fields:
-  - !ruby/object:Api::Type::String
-    name: 'deletion_policy'
+  - name: 'deletion_policy'
     description: |
       Set to `ABANDON` to allow the WebApp to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful becaue the WebApp may be
       serving traffic. Set to `DELETE` to delete the WebApp. Default to `DELETE`
-    default_value: DELETE
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+    type: String
+    default_value: "DELETE"
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The fully qualified resource name of the App, for example:
       projects/projectId/webApps/appId
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: displayName
-    required: true
+  - name: 'displayName'
+    type: String
     description: |
       The user-assigned display name of the App.
-  - !ruby/object:Api::Type::String
-    name: appId
-    output: true
+    min_version: 'beta'
+    required: true
+  - name: 'appId'
+    type: String
     description: |
       The globally unique, Firebase-assigned identifier of the App.
       This identifier should be treated as an opaque token, as the data format is not specified.
-  - !ruby/object:Api::Type::Array
-    name: appUrls
+    min_version: 'beta'
     output: true
+  - name: 'appUrls'
+    type: Array
     description: |
       The URLs where the `WebApp` is hosted.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: apiKeyId
-    default_from_api: true
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: String
+  - name: 'apiKeyId'
+    type: String
     description: |
       The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the WebApp.
       If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the WebApp.
       This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.
+    min_version: 'beta'
+    default_from_api: true

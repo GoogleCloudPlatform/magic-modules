@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,85 +11,105 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource  # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
+---
+ # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
-base_url: '{{parent}}/servicePerimeters:replaceAll'
-update_url: '{{parent}}/servicePerimeters:replaceAll'
-self_link: '{{parent}}/servicePerimeters'
-update_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 description: |
   Replace all existing Service Perimeters in an Access Policy with the Service Perimeters provided. This is done atomically.
   This is a bulk edit of all Service Perimeters and may override existing Service Perimeters created by `google_access_context_manager_service_perimeter`,
   thus causing a permadiff if used alongside `google_access_context_manager_service_perimeter` on the same parent.
-autogen_async: true
-# Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
+references:
+  guides:
+    'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
+docs:
 id_format: '{{parent}}/servicePerimeters'
-import_format: ['{{parent}}/servicePerimeters']
+base_url: '{{parent}}/servicePerimeters:replaceAll'
+self_link: '{{parent}}/servicePerimeters'
+update_url: '{{parent}}/servicePerimeters:replaceAll'
+update_verb: 'POST'
+import_format:
+  - '{{parent}}/servicePerimeters'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_service_perimeters_basic'
-    skip_test: true
+  - name: 'access_context_manager_service_perimeters_basic'
     primary_resource_id: 'service-perimeter'
     vars:
       access_level_name: 'chromeos_no_lock'
       service_perimeter_name: 'restrict_storage'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
-  custom_delete: templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.erb
+    exclude_test: true
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
+  - name: 'parent'
+    type: String
     description: |
       The AccessPolicy this ServicePerimeter lives in.
       Format: accessPolicies/{policy_id}
+    required: true
+    immutable: true
     ignore_read: true
 properties:
-  - !ruby/object:Api::Type::Array
-    name: 'servicePerimeters'
+  - name: 'servicePerimeters'
+    type: Array
     description: |
       The desired Service Perimeters that should replace all existing Service Perimeters in the Access Policy.
-    custom_flatten: 'templates/terraform/custom_flatten/accesscontextmanager_serviceperimeters_custom_flatten.go.erb'
-    item_type: !ruby/object:Api::Type::NestedObject
+    custom_flatten: 'templates/terraform/custom_flatten/accesscontextmanager_serviceperimeters_custom_flatten.go.tmpl'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: name
-          immutable: true
-          required: true
+        - name: 'name'
+          type: String
           description: |
             Resource name for the ServicePerimeter. The short_name component must
             begin with a letter and only include alphanumeric and '_'.
             Format: accessPolicies/{policy_id}/servicePerimeters/{short_name}
-        - !ruby/object:Api::Type::String
-          name: title
           required: true
+          immutable: true
+        - name: 'title'
+          type: String
           description: |
             Human readable title. Must be unique within the Policy.
-        - !ruby/object:Api::Type::String
-          name: 'description'
+          required: true
+        - name: 'description'
+          type: String
           description: |
             Description of the ServicePerimeter and its use. Does not affect
             behavior.
-        - !ruby/object:Api::Type::Time
-          name: 'createTime'
+        - name: 'createTime'
+          type: Time
           description: |
             Time the AccessPolicy was created in UTC.
           output: true
-        - !ruby/object:Api::Type::Time
-          name: 'updateTime'
+        - name: 'updateTime'
+          type: Time
           description: |
             Time the AccessPolicy was updated in UTC.
           output: true
-        - !ruby/object:Api::Type::Enum
-          name: 'perimeterType'
+        - name: 'perimeterType'
+          type: Enum
           description: |
             Specifies the type of the Perimeter. There are two types: regular and
             bridge. Regular Service Perimeter contains resources, access levels,
@@ -107,35 +127,36 @@ properties:
             topologies with many independent perimeters that need to share some data
             with a common perimeter, but should not be able to share data among
             themselves.
-          values:
-            - :PERIMETER_TYPE_REGULAR
-            - :PERIMETER_TYPE_BRIDGE
-          default_value: :PERIMETER_TYPE_REGULAR
-          custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
           immutable: true
-        - !ruby/object:Api::Type::NestedObject
-          name: 'status'
+          custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+          default_value: "PERIMETER_TYPE_REGULAR"
+          enum_values:
+            - 'PERIMETER_TYPE_REGULAR'
+            - 'PERIMETER_TYPE_BRIDGE'
+        - name: 'status'
+          type: NestedObject
           description: |
             ServicePerimeter configuration. Specifies sets of resources,
             restricted services and access levels that determine
             perimeter content and boundaries.
           properties:
-            - !ruby/object:Api::Type::Array
-              name: 'resources'
+            - name: 'resources'
+              type: Array
               description: |
                 A list of GCP resources that are inside of the service perimeter.
                 Currently only projects are allowed.
                 Format: projects/{project_number}
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
               #   - status.0.resources
               #   - status.0.access_levels
               #   - status.0.restricted_services
-              item_type: Api::Type::String
-              is_set: true
-            - !ruby/object:Api::Type::Array
-              name: 'accessLevels'
+              item_type:
+                type: String
+            - name: 'accessLevels'
+              type: Array
               description: |
                 A list of AccessLevel resource names that allow resources within
                 the ServicePerimeter to be accessed from the internet.
@@ -147,91 +168,97 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
-              item_type: Api::Type::String
-              is_set: true
-            - !ruby/object:Api::Type::Array
-              name: 'restrictedServices'
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
+              item_type:
+                type: String
+            - name: 'restrictedServices'
+              type: Array
               description: |
                 GCP services that are subject to the Service Perimeter
                 restrictions. Must contain a list of services. For example, if
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
+              is_set: true
               # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
               # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
               # at_least_one_of:
-              #   - status.0.resources
-              #   - status.0.access_levels
-              #   - status.0.restricted_services
-              item_type: Api::Type::String
-              is_set: true
-            - !ruby/object:Api::Type::NestedObject
-              name: 'vpcAccessibleServices'
+              #   - spec.0.resources
+              #   - spec.0.access_levels
+              #   - spec.0.restricted_services
+              item_type:
+                type: String
+            - name: 'vpcAccessibleServices'
+              type: NestedObject
               description: |
                 Specifies how APIs are allowed to communicate within the Service
                 Perimeter.
               properties:
-                - !ruby/object:Api::Type::Boolean
-                  name: 'enableRestriction'
+                - name: 'enableRestriction'
+                  type: Boolean
                   description: |
                     Whether to restrict API calls within the Service Perimeter to the
                     list of APIs specified in 'allowedServices'.
-                - !ruby/object:Api::Type::Array
-                  name: 'allowedServices'
+                - name: 'allowedServices'
+                  type: Array
                   description: |
                     The list of APIs usable within the Service Perimeter.
                     Must be empty unless `enableRestriction` is True.
-                  item_type: Api::Type::String
                   is_set: true
-            - !ruby/object:Api::Type::Array
-              name: 'ingressPolicies'
+                  item_type:
+                    type: String
+            - name: 'ingressPolicies'
+              type: Array
               description: |
                 List of `IngressPolicies` to apply to the perimeter. A perimeter may
                 have multiple `IngressPolicies`, each of which is evaluated
                 separately. Access is granted if any `Ingress Policy` grants it.
                 Must be empty for a perimeter bridge.
               is_set: true
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'ingressFrom'
+                  - name: 'ingressFrom'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the source of a request causing this `IngressPolicy`
                       to apply.
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: 'identityType'
+                      - name: 'identityType'
+                        type: Enum
                         description: |
                           Specifies the type of identities that are allowed access from outside the
                           perimeter. If left unspecified, then members of `identities` field will be
                           allowed access.
-                        values:
-                          - :IDENTITY_TYPE_UNSPECIFIED
-                          - :ANY_IDENTITY
-                          - :ANY_USER_ACCOUNT
-                          - :ANY_SERVICE_ACCOUNT
-                      - !ruby/object:Api::Type::Array
-                        name: 'identities'
-                        is_set: true
-                        item_type: Api::Type::String
+                        enum_values:
+                          - 'IDENTITY_TYPE_UNSPECIFIED'
+                          - 'ANY_IDENTITY'
+                          - 'ANY_USER_ACCOUNT'
+                          - 'ANY_SERVICE_ACCOUNT'
+                      - name: 'identities'
+                        type: Array
                         description: |
                           A list of identities that are allowed access through this ingress policy.
                           Should be in the format of email address. The email address should represent
                           individual user or service account only.
-                      - !ruby/object:Api::Type::Array
-                        name: 'sources'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'sources'
+                        type: Array
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'accessLevel'
+                            - name: 'accessLevel'
+                              type: String
                               description: |
                                 An `AccessLevel` resource name that allow resources within the
                                 `ServicePerimeters` to be accessed from the internet. `AccessLevels` listed
@@ -241,8 +268,8 @@ properties:
                                 with request origins within the perimeter.
                                 Example `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL.`
                                 If * is specified, then all IngressSources will be allowed.
-                            - !ruby/object:Api::Type::String
-                              name: 'resource'
+                            - name: 'resource'
+                              type: String
                               description: |
                                 A Google Cloud resource that is allowed to ingress the perimeter.
                                 Requests from these resources will be allowed to access perimeter data.
@@ -250,16 +277,14 @@ properties:
                                 The project may be in any Google Cloud organization, not just the
                                 organization that the perimeter is defined in. `*` is not allowed, the case
                                 of allowing all Google Cloud resources only is not supported.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'ingressTo'
+                  - name: 'ingressTo'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the `ApiOperation` and request destination that cause
                       this `IngressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'resources'
-                        item_type: Api::Type::String
-                        is_set: true
+                      - name: 'resources'
+                        type: Array
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -269,154 +294,166 @@ properties:
                           then this `IngressTo` rule will authorize access to all
                           resources inside the perimeter, provided that the request
                           also matches the `operations` field.
-                      - !ruby/object:Api::Type::Array
-                        name: 'operations'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'operations'
+                        type: Array
                         description: |
                           A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
                           are allowed to perform in this `ServicePerimeter`.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'serviceName'
+                            - name: 'serviceName'
+                              type: String
                               description: |
                                 The name of the API whose methods or permissions the `IngressPolicy` or
                                 `EgressPolicy` want to allow. A single `ApiOperation` with `serviceName`
                                 field set to `*` will allow all methods AND permissions for all services.
-                            - !ruby/object:Api::Type::Array
-                              name: 'methodSelectors'
+                            - name: 'methodSelectors'
+                              type: Array
                               description: |
                                 API methods or permissions to allow. Method or permission must belong to
                                 the service specified by serviceName field. A single `MethodSelector` entry
                                 with `*` specified for the method field will allow all methods AND
                                 permissions for the service specified in `serviceName`.
-                              item_type: !ruby/object:Api::Type::NestedObject
+                              item_type:
+                                type: NestedObject
                                 properties:
-                                  - !ruby/object:Api::Type::String
-                                    name: 'method'
+                                  - name: 'method'
+                                    type: String
                                     description: |
                                       Value for method should be a valid method name for the corresponding
                                       serviceName in `ApiOperation`. If `*` used as value for `method`, then
                                       ALL methods and permissions are allowed.
-                                  - !ruby/object:Api::Type::String
-                                    name: 'permission'
+                                  - name: 'permission'
+                                    type: String
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
-            - !ruby/object:Api::Type::Array
-              name: 'egressPolicies'
+            - name: 'egressPolicies'
+              type: Array
               description: |
                 List of EgressPolicies to apply to the perimeter. A perimeter may
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'egressFrom'
+                  - name: 'egressFrom'
+                    type: NestedObject
                     description: |
                       Defines conditions on the source of a request causing this `EgressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: 'identityType'
+                      - name: 'identityType'
+                        type: Enum
                         description: |
                           Specifies the type of identities that are allowed access to outside the
                           perimeter. If left unspecified, then members of `identities` field will
                           be allowed access.
-                        values:
-                          - :IDENTITY_TYPE_UNSPECIFIED
-                          - :ANY_IDENTITY
-                          - :ANY_USER_ACCOUNT
-                          - :ANY_SERVICE_ACCOUNT
-                      - !ruby/object:Api::Type::Array
-                        name: 'identities'
+                        enum_values:
+                          - 'IDENTITY_TYPE_UNSPECIFIED'
+                          - 'ANY_IDENTITY'
+                          - 'ANY_USER_ACCOUNT'
+                          - 'ANY_SERVICE_ACCOUNT'
+                      - name: 'identities'
+                        type: Array
                         description: |
                           A list of identities that are allowed access through this `EgressPolicy`.
                           Should be in the format of email address. The email address should
                           represent individual user or service account only.
                         is_set: true
-                        item_type: Api::Type::String
-                      - !ruby/object:Api::Type::Array
-                        name: 'sources'
+                        item_type:
+                          type: String
+                      - name: 'sources'
+                        type: Array
                         description: 'Sources that this EgressPolicy authorizes access from.'
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'accessLevel'
+                            - name: 'accessLevel'
+                              type: String
                               description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                      - !ruby/object:Api::Type::Enum
-                        name: 'sourceRestriction'
+                      - name: 'sourceRestriction'
+                        type: Enum
                         description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
-                        values:
-                          - :SOURCE_RESTRICTION_UNSPECIFIED
-                          - :SOURCE_RESTRICTION_ENABLED
-                          - :SOURCE_RESTRICTION_DISABLED
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'egressTo'
+                        enum_values:
+                          - 'SOURCE_RESTRICTION_UNSPECIFIED'
+                          - 'SOURCE_RESTRICTION_ENABLED'
+                          - 'SOURCE_RESTRICTION_DISABLED'
+                  - name: 'egressTo'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the `ApiOperation` and destination resources that
                       cause this `EgressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'resources'
-                        item_type: Api::Type::String
-                        is_set: true
+                      - name: 'resources'
+                        type: Array
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, that match this to stanza. A request matches
                           if it contains a resource in this list. If * is specified for resources,
                           then this `EgressTo` rule will authorize access to all resources outside
                           the perimeter.
-                      - !ruby/object:Api::Type::Array
-                        name: 'externalResources'
-                        item_type: Api::Type::String
                         is_set: true
+                        item_type:
+                          type: String
+                      - name: 'externalResources'
+                        type: Array
                         description: |
                           A list of external resources that are allowed to be accessed. A request
                           matches if it contains an external resource in this list (Example:
                           s3://bucket/path). Currently '*' is not allowed.
-                      - !ruby/object:Api::Type::Array
-                        name: 'operations'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'operations'
+                        type: Array
                         description: |
                           A list of `ApiOperations` that this egress rule applies to. A request matches
                           if it contains an operation/service in this list.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'serviceName'
+                            - name: 'serviceName'
+                              type: String
                               description: |
                                 The name of the API whose methods or permissions the `IngressPolicy` or
                                 `EgressPolicy` want to allow. A single `ApiOperation` with serviceName
                                 field set to `*` will allow all methods AND permissions for all services.
-                            - !ruby/object:Api::Type::Array
-                              name: 'methodSelectors'
+                            - name: 'methodSelectors'
+                              type: Array
                               description: |
                                 API methods or permissions to allow. Method or permission must belong
                                 to the service specified by `serviceName` field. A single MethodSelector
                                 entry with `*` specified for the `method` field will allow all methods
                                 AND permissions for the service specified in `serviceName`.
-                              item_type: !ruby/object:Api::Type::NestedObject
+                              item_type:
+                                type: NestedObject
                                 properties:
-                                  - !ruby/object:Api::Type::String
-                                    name: 'method'
+                                  - name: 'method'
+                                    type: String
                                     description: |
                                       Value for `method` should be a valid method name for the corresponding
                                       `serviceName` in `ApiOperation`. If `*` used as value for method,
                                       then ALL methods and permissions are allowed.
-                                  - !ruby/object:Api::Type::String
-                                    name: 'permission'
+                                  - name: 'permission'
+                                    type: String
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'spec'
+        - name: 'spec'
+          type: NestedObject
           description: |
             Proposed (or dry run) ServicePerimeter configuration.
             This configuration allows to specify and test ServicePerimeter configuration
             without enforcing actual access restrictions. Only allowed to be set when
             the `useExplicitDryRunSpec` flag is set.
           properties:
-            - !ruby/object:Api::Type::Array
-              name: 'resources'
+            - name: 'resources'
+              type: Array
               description: |
                 A list of GCP resources that are inside of the service perimeter.
                 Currently only projects are allowed.
@@ -428,10 +465,10 @@ properties:
               #   - spec.0.access_levels
               #   - spec.0.restricted_services
               is_set: true
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::Array
-              name: 'accessLevels'
-              is_set: true
+              item_type:
+                type: String
+            - name: 'accessLevels'
+              type: Array
               description: |
                 A list of AccessLevel resource names that allow resources within
                 the ServicePerimeter to be accessed from the internet.
@@ -443,89 +480,84 @@ properties:
                 be empty.
 
                 Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::Array
-              name: 'restrictedServices'
+              is_set: true
+              item_type:
+                type: String
+            - name: 'restrictedServices'
+              type: Array
               description: |
                 GCP services that are subject to the Service Perimeter
                 restrictions. Must contain a list of services. For example, if
                 `storage.googleapis.com` is specified, access to the storage
                 buckets inside the perimeter must meet the perimeter's access
                 restrictions.
-              # TODO: (mbang) won't work for arrays yet, uncomment here once they are supported.
-              # (github.com/hashicorp/terraform-plugin-sdk/issues/470)
-              # at_least_one_of:
-              #   - spec.0.resources
-              #   - spec.0.access_levels
-              #   - spec.0.restricted_services
-              item_type: Api::Type::String
               is_set: true
-            - !ruby/object:Api::Type::NestedObject
-              name: 'vpcAccessibleServices'
+              item_type:
+                type: String
+            - name: 'vpcAccessibleServices'
+              type: NestedObject
               description: |
                 Specifies how APIs are allowed to communicate within the Service
                 Perimeter.
               properties:
-                - !ruby/object:Api::Type::Boolean
-                  name: 'enableRestriction'
+                - name: 'enableRestriction'
+                  type: Boolean
                   description: |
                     Whether to restrict API calls within the Service Perimeter to the
                     list of APIs specified in 'allowedServices'.
-                - !ruby/object:Api::Type::Array
-                  name: 'allowedServices'
+                - name: 'allowedServices'
+                  type: Array
                   description: |
                     The list of APIs usable within the Service Perimeter.
                     Must be empty unless `enableRestriction` is True.
-                  item_type: Api::Type::String
                   is_set: true
-            - !ruby/object:Api::Type::Array
-              name: 'ingressPolicies'
+                  item_type:
+                    type: String
+            - name: 'ingressPolicies'
+              type: Array
               description: |
                 List of `IngressPolicies` to apply to the perimeter. A perimeter may
                 have multiple `IngressPolicies`, each of which is evaluated
                 separately. Access is granted if any `Ingress Policy` grants it.
                 Must be empty for a perimeter bridge.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'ingressFrom'
+                  - name: 'ingressFrom'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the source of a request causing this `IngressPolicy`
                       to apply.
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: 'identityType'
+                      - name: 'identityType'
+                        type: Enum
                         description: |
                           Specifies the type of identities that are allowed access from outside the
                           perimeter. If left unspecified, then members of `identities` field will be
                           allowed access.
-                        values:
-                          - :IDENTITY_TYPE_UNSPECIFIED
-                          - :ANY_IDENTITY
-                          - :ANY_USER_ACCOUNT
-                          - :ANY_SERVICE_ACCOUNT
-                      - !ruby/object:Api::Type::Array
-                        name: 'identities'
-                        is_set: true
-                        item_type: Api::Type::String
+                        enum_values:
+                          - 'IDENTITY_TYPE_UNSPECIFIED'
+                          - 'ANY_IDENTITY'
+                          - 'ANY_USER_ACCOUNT'
+                          - 'ANY_SERVICE_ACCOUNT'
+                      - name: 'identities'
+                        type: Array
                         description: |
                           A list of identities that are allowed access through this ingress policy.
                           Should be in the format of email address. The email address should represent
                           individual user or service account only.
-                      - !ruby/object:Api::Type::Array
-                        name: 'sources'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'sources'
+                        type: Array
                         description: |
                           Sources that this `IngressPolicy` authorizes access from.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'accessLevel'
+                            - name: 'accessLevel'
+                              type: String
                               description: |
                                 An `AccessLevel` resource name that allow resources within the
                                 `ServicePerimeters` to be accessed from the internet. `AccessLevels` listed
@@ -535,8 +567,8 @@ properties:
                                 with request origins within the perimeter.
                                 Example `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL.`
                                 If * is specified, then all IngressSources will be allowed.
-                            - !ruby/object:Api::Type::String
-                              name: 'resource'
+                            - name: 'resource'
+                              type: String
                               description: |
                                 A Google Cloud resource that is allowed to ingress the perimeter.
                                 Requests from these resources will be allowed to access perimeter data.
@@ -544,16 +576,14 @@ properties:
                                 The project may be in any Google Cloud organization, not just the
                                 organization that the perimeter is defined in. `*` is not allowed, the case
                                 of allowing all Google Cloud resources only is not supported.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'ingressTo'
+                  - name: 'ingressTo'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the `ApiOperation` and request destination that cause
                       this `IngressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'resources'
-                        item_type: Api::Type::String
-                        is_set: true
+                      - name: 'resources'
+                        type: Array
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -563,146 +593,158 @@ properties:
                           then this `IngressTo` rule will authorize access to all
                           resources inside the perimeter, provided that the request
                           also matches the `operations` field.
-                      - !ruby/object:Api::Type::Array
-                        name: 'operations'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'operations'
+                        type: Array
                         description: |
                           A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
                           are allowed to perform in this `ServicePerimeter`.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'serviceName'
+                            - name: 'serviceName'
+                              type: String
                               description: |
                                 The name of the API whose methods or permissions the `IngressPolicy` or
                                 `EgressPolicy` want to allow. A single `ApiOperation` with `serviceName`
                                 field set to `*` will allow all methods AND permissions for all services.
-                            - !ruby/object:Api::Type::Array
-                              name: 'methodSelectors'
+                            - name: 'methodSelectors'
+                              type: Array
                               description: |
                                 API methods or permissions to allow. Method or permission must belong to
                                 the service specified by serviceName field. A single `MethodSelector` entry
                                 with `*` specified for the method field will allow all methods AND
                                 permissions for the service specified in `serviceName`.
-                              item_type: !ruby/object:Api::Type::NestedObject
+                              item_type:
+                                type: NestedObject
                                 properties:
-                                  - !ruby/object:Api::Type::String
-                                    name: 'method'
+                                  - name: 'method'
+                                    type: String
                                     description: |
                                       Value for method should be a valid method name for the corresponding
                                       serviceName in `ApiOperation`. If `*` used as value for `method`, then
                                       ALL methods and permissions are allowed.
-                                  - !ruby/object:Api::Type::String
-                                    name: 'permission'
+                                  - name: 'permission'
+                                    type: String
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
-            - !ruby/object:Api::Type::Array
-              name: 'egressPolicies'
+            - name: 'egressPolicies'
+              type: Array
               description: |
                 List of EgressPolicies to apply to the perimeter. A perimeter may
                 have multiple EgressPolicies, each of which is evaluated separately.
                 Access is granted if any EgressPolicy grants it. Must be empty for
                 a perimeter bridge.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'egressFrom'
+                  - name: 'egressFrom'
+                    type: NestedObject
                     description: |
                       Defines conditions on the source of a request causing this `EgressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: 'identityType'
+                      - name: 'identityType'
+                        type: Enum
                         description: |
                           Specifies the type of identities that are allowed access to outside the
                           perimeter. If left unspecified, then members of `identities` field will
                           be allowed access.
-                        values:
-                          - :IDENTITY_TYPE_UNSPECIFIED
-                          - :ANY_IDENTITY
-                          - :ANY_USER_ACCOUNT
-                          - :ANY_SERVICE_ACCOUNT
-                      - !ruby/object:Api::Type::Array
-                        name: 'identities'
+                        enum_values:
+                          - 'IDENTITY_TYPE_UNSPECIFIED'
+                          - 'ANY_IDENTITY'
+                          - 'ANY_USER_ACCOUNT'
+                          - 'ANY_SERVICE_ACCOUNT'
+                      - name: 'identities'
+                        type: Array
                         description: |
                           A list of identities that are allowed access through this `EgressPolicy`.
                           Should be in the format of email address. The email address should
                           represent individual user or service account only.
-                        item_type: Api::Type::String
                         is_set: true
-                      - !ruby/object:Api::Type::Array
-                        name: 'sources'
+                        item_type:
+                          type: String
+                      - name: 'sources'
+                        type: Array
                         description: 'Sources that this EgressPolicy authorizes access from.'
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'accessLevel'
+                            - name: 'accessLevel'
+                              type: String
                               description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
-                      - !ruby/object:Api::Type::Enum
-                        name: 'sourceRestriction'
+                      - name: 'sourceRestriction'
+                        type: Enum
                         description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
-                        values:
-                          - :SOURCE_RESTRICTION_UNSPECIFIED
-                          - :SOURCE_RESTRICTION_ENABLED
-                          - :SOURCE_RESTRICTION_DISABLED
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'egressTo'
+                        enum_values:
+                          - 'SOURCE_RESTRICTION_UNSPECIFIED'
+                          - 'SOURCE_RESTRICTION_ENABLED'
+                          - 'SOURCE_RESTRICTION_DISABLED'
+                  - name: 'egressTo'
+                    type: NestedObject
                     description: |
                       Defines the conditions on the `ApiOperation` and destination resources that
                       cause this `EgressPolicy` to apply.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'resources'
-                        item_type: Api::Type::String
-                        is_set: true
+                      - name: 'resources'
+                        type: Array
                         description: |
                           A list of resources, currently only projects in the form
                           `projects/<projectnumber>`, that match this to stanza. A request matches
                           if it contains a resource in this list. If * is specified for resources,
                           then this `EgressTo` rule will authorize access to all resources outside
                           the perimeter.
-                      - !ruby/object:Api::Type::Array
-                        name: 'externalResources'
-                        item_type: Api::Type::String
                         is_set: true
+                        item_type:
+                          type: String
+                      - name: 'externalResources'
+                        type: Array
                         description: |
                           A list of external resources that are allowed to be accessed. A request
                           matches if it contains an external resource in this list (Example:
                           s3://bucket/path). Currently '*' is not allowed.
-                      - !ruby/object:Api::Type::Array
-                        name: 'operations'
+                        is_set: true
+                        item_type:
+                          type: String
+                      - name: 'operations'
+                        type: Array
                         description: |
                           A list of `ApiOperations` that this egress rule applies to. A request matches
                           if it contains an operation/service in this list.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'serviceName'
+                            - name: 'serviceName'
+                              type: String
                               description: |
                                 The name of the API whose methods or permissions the `IngressPolicy` or
                                 `EgressPolicy` want to allow. A single `ApiOperation` with serviceName
                                 field set to `*` will allow all methods AND permissions for all services.
-                            - !ruby/object:Api::Type::Array
-                              name: 'methodSelectors'
+                            - name: 'methodSelectors'
+                              type: Array
                               description: |
                                 API methods or permissions to allow. Method or permission must belong
                                 to the service specified by `serviceName` field. A single MethodSelector
                                 entry with `*` specified for the `method` field will allow all methods
                                 AND permissions for the service specified in `serviceName`.
-                              item_type: !ruby/object:Api::Type::NestedObject
+                              item_type:
+                                type: NestedObject
                                 properties:
-                                  - !ruby/object:Api::Type::String
-                                    name: 'method'
+                                  - name: 'method'
+                                    type: String
                                     description: |
                                       Value for `method` should be a valid method name for the corresponding
                                       `serviceName` in `ApiOperation`. If `*` used as value for method,
                                       then ALL methods and permissions are allowed.
-                                  - !ruby/object:Api::Type::String
-                                    name: 'permission'
+                                  - name: 'permission'
+                                    type: String
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
-        - !ruby/object:Api::Type::Boolean
-          name: 'useExplicitDryRunSpec'
+        - name: 'useExplicitDryRunSpec'
+          type: Boolean
           description: |
             Use explicit dry run spec flag. Ordinarily, a dry-run spec implicitly exists
             for all Service Perimeters, and that spec is identical to the status for those

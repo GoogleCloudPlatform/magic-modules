@@ -39,20 +39,20 @@ var vcuEnvironmentVariables = [...]string{
 }
 
 var (
-	//go:embed vcr_cassettes_update_replaying.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl
 	replayingTmplText string
-	//go:embed vcr_cassettes_update_recording.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_recording.tmpl
 	recordingTmplText string
 )
 
 type vcrCassetteUpdateReplayingResult struct {
-	ReplayingResult    *vcr.Result
+	ReplayingResult    vcr.Result
 	ReplayingErr       error
 	AllReplayingPassed bool
 }
 
 type vcrCassetteUpdateRecordingResult struct {
-	RecordingResult    *vcr.Result
+	RecordingResult    vcr.Result
 	HasTerminatedTests bool
 	RecordingErr       error
 	AllRecordingPassed bool
@@ -90,7 +90,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "hashicorp", env["GITHUB_TOKEN_CLASSIC"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "", "ci-vcr-cassettes", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -125,17 +125,20 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
 	fmt.Println("running tests in REPLAYING mode now")
-	replayingResult, replayingErr := vt.Run(vcr.Replaying, provider.Beta, nil)
+	replayingResult, replayingErr := vt.Run(vcr.RunOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	})
 
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
 	if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying test log: %w", err)
+		fmt.Printf("Warning: error uploading replaying test log: %s\n", err)
 	}
 
 	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
 	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying build log: %w", err)
+		fmt.Printf("Warning: error uploading replaying build log: %s\n", err)
 	}
 
 	replayingData := vcrCassetteUpdateReplayingResult{
@@ -156,23 +159,29 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	if len(replayingResult.FailedTests) != 0 {
 		fmt.Println("running tests in RECORDING mode now")
 
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, nil, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
+			Mode:    vcr.Recording,
+			Version: provider.Beta,
+			Tests:   replayingResult.FailedTests,
+		})
 
 		// upload build and test logs first to preserve debugging logs in case
 		// uploading cassettes failed because recording not work
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording test log: %w", err)
+			fmt.Printf("Warning: error uploading recording test log: %s\n", err)
 		}
 
 		testLogPath := vt.LogPath(vcr.Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording build log: %w", err)
+			fmt.Printf("Warning: error uploading recording build log: %s\n", err)
 		}
+
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
-			if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
-				return fmt.Errorf("error uploading cassettes: %w", err)
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+				// There could be cases that the tests do not generate any cassettes.
+				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
 		} else {
 			fmt.Println("No tests passed in recording mode, not uploading cassettes.")

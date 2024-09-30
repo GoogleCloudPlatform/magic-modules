@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	//go:embed DIFF_COMMENT.md
+	//go:embed templates/DIFF_COMMENT.md.tmpl
 	diffComment string
 )
 
@@ -435,7 +435,7 @@ func buildDiffProcessor(diffProcessorPath, providerLocalPath string, env map[str
 		}
 	}
 	if _, err := rnr.Run("make", []string{"build"}, env); err != nil {
-		return fmt.Errorf("Error running make build in %s: %v\n", diffProcessorPath, err)
+		return fmt.Errorf("error running make build in %s: %v", diffProcessorPath, err)
 	}
 	return rnr.PopDir()
 }

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,105 +11,104 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SecurityPolicyRule'
+description: |
+  A rule for the SecurityPolicy.
+references:
+  guides:
+    'Creating global security policy rules': 'https://cloud.google.com/armor/docs/configure-security-policies'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/securityPolicies/addRule'
+docs:
+id_format: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/priority/{{priority}}'
 base_url: 'projects/{{project}}/global/securityPolicies/{{security_policy}}'
 self_link: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/getRule?priority={{priority}}'
 create_url: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/addRule?priority={{priority}}'
-update_verb: :POST
-update_mask: true
 update_url: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/patchRule?priority={{priority}}'
-delete_verb: :POST
+update_verb: 'POST'
+update_mask: true
 delete_url: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/removeRule?priority={{priority}}'
-description: |
-  A rule for the SecurityPolicy.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Creating global security policy rules': 'https://cloud.google.com/armor/docs/configure-security-policies'
-  api:
-    'https://cloud.google.com/compute/docs/reference/rest/v1/securityPolicies/addRule'
-id_format: 'projects/{{project}}/global/securityPolicies/{{security_policy}}/priority/{{priority}}'
-import_format: ['projects/{{project}}/global/securityPolicies/{{security_policy}}/priority/{{priority}}']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+delete_verb: 'POST'
+import_format:
+  - 'projects/{{project}}/global/securityPolicies/{{security_policy}}/priority/{{priority}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'security_policy_rule_basic'
+  - name: 'security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'security_policy_rule_default_rule'
+  - name: 'security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
-    skip_test: true
     vars:
       sec_policy_name: 'policyruletest'
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'security_policy_rule_multiple_rules'
+      project_id: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:
       sec_policy_name: 'policywithmultiplerules'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'security_policy'
-    required: true
-    immutable: true
+  - name: 'security_policy'
+    type: String
     description: |
       The name of the security policy this rule belongs to.
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+  - name: 'priority'
+    type: Integer
     description: |
       An integer indicating the priority of a rule in the list.
       The priority must be a positive value between 0 and 2147483647.
       Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest priority.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'match'
+  - name: 'match'
+    type: NestedObject
     description: |
       A match condition that incoming traffic is evaluated against.
       If it evaluates to true, the corresponding 'action' is enforced.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'versionedExpr'
+      - name: 'versionedExpr'
+        type: Enum
         description: |
           Preconfigured versioned expression. If this field is specified, config must also be specified.
           Available preconfigured expressions along with their requirements are: SRC_IPS_V1 - must specify the corresponding srcIpRange field in config.
-        values:
-          - :SRC_IPS_V1
-      - !ruby/object:Api::Type::NestedObject
-        name: 'expr'
+        enum_values:
+          - 'SRC_IPS_V1'
+      - name: 'expr'
+        type: NestedObject
         description: |
           User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'expression'
-            required: true
+          - name: 'expression'
+            type: String
             description: |
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
+            required: true
           # >> These fields are not yet supported, following the global security policy resource.
           # - !ruby/object:Api::Type::String
           #   name: 'title'
@@ -123,62 +122,65 @@ properties:
           #   name: 'location'
           #   description: |
           #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'exprOptions'
+      - name: 'exprOptions'
+        type: NestedObject
         description: |
           The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'recaptchaOptions'
-            required: true
+          - name: 'recaptchaOptions'
+            type: NestedObject
             description: |
               reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
+            required: true
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'actionTokenSiteKeys'
+              - name: 'actionTokenSiteKeys'
+                type: Array
                 description: |
                   A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
-                item_type: Api::Type::String
-              - !ruby/object:Api::Type::Array
-                name: 'sessionTokenSiteKeys'
+                item_type:
+                  type: String
+              - name: 'sessionTokenSiteKeys'
+                type: Array
                 description: |
                   A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
-                item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'config'
+                item_type:
+                  type: String
+      - name: 'config'
+        type: NestedObject
         description: |
           The configuration options available when specifying versionedExpr.
           This field must be specified if versionedExpr is specified and cannot be specified if versionedExpr is not specified.
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'srcIpRanges'
+          - name: 'srcIpRanges'
+            type: Array
             description: |
               CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
-            item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'preconfiguredWafConfig'
+            item_type:
+              type: String
+  - name: 'preconfiguredWafConfig'
+    type: NestedObject
     description: |
       Preconfigured WAF configuration to be applied for the rule.
       If the rule does not evaluate preconfigured WAF rules, i.e., if evaluatePreconfiguredWaf() is not used, this field will have no effect.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'exclusion'
-        api_name: 'exclusions'
+      - name: 'exclusion'
+        type: Array
         description: |
           An exclusion to apply during preconfigured WAF evaluation.
-        item_type: !ruby/object:Api::Type::NestedObject
+        api_name: exclusions
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Array
-              name: 'requestHeader'
-              api_name: 'requestHeadersToExclude'
+            - name: 'requestHeader'
+              type: Array
               description: |
                 Request header whose value will be excluded from inspection during preconfigured WAF evaluation.
-              item_type: !ruby/object:Api::Type::NestedObject
+              api_name: requestHeadersToExclude
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'operator'
-                    api_name: 'op'
-                    required: true
+                  - name: 'operator'
+                    type: String
                     description: |
                       You can specify an exact match or a partial match by using a field operator and a field value.
                       Available options:
@@ -187,25 +189,26 @@ properties:
                       ENDS_WITH: The operator matches if the field value ends with the specified value.
                       CONTAINS: The operator matches if the field value contains the specified value.
                       EQUALS_ANY: The operator matches if the field value is any value.
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
-                    api_name: 'val'
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
                     description: |
                       A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
                       The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
-            - !ruby/object:Api::Type::Array
-              name: 'requestCookie'
-              api_name: 'requestCookiesToExclude'
+                    api_name: val
+            - name: 'requestCookie'
+              type: Array
               description: |
                 Request cookie whose value will be excluded from inspection during preconfigured WAF evaluation.
-              item_type: !ruby/object:Api::Type::NestedObject
+              api_name: requestCookiesToExclude
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'operator'
-                    api_name: 'op'
-                    required: true
+                  - name: 'operator'
+                    type: String
                     description: |
                       You can specify an exact match or a partial match by using a field operator and a field value.
                       Available options:
@@ -214,26 +217,27 @@ properties:
                       ENDS_WITH: The operator matches if the field value ends with the specified value.
                       CONTAINS: The operator matches if the field value contains the specified value.
                       EQUALS_ANY: The operator matches if the field value is any value.
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
-                    api_name: 'val'
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
                     description: |
                       A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
                       The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
-            - !ruby/object:Api::Type::Array
-              name: 'requestUri'
-              api_name: 'requestUrisToExclude'
+                    api_name: val
+            - name: 'requestUri'
+              type: Array
               description: |
                 Request URI from the request line to be excluded from inspection during preconfigured WAF evaluation.
                 When specifying this field, the query or fragment part should be excluded.
-              item_type: !ruby/object:Api::Type::NestedObject
+              api_name: requestUrisToExclude
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'operator'
-                    api_name: 'op'
-                    required: true
+                  - name: 'operator'
+                    type: String
                     description: |
                       You can specify an exact match or a partial match by using a field operator and a field value.
                       Available options:
@@ -242,26 +246,27 @@ properties:
                       ENDS_WITH: The operator matches if the field value ends with the specified value.
                       CONTAINS: The operator matches if the field value contains the specified value.
                       EQUALS_ANY: The operator matches if the field value is any value.
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
-                    api_name: 'val'
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
                     description: |
                       A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
                       The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
-            - !ruby/object:Api::Type::Array
-              name: 'requestQueryParam'
-              api_name: 'requestQueryParamsToExclude'
+                    api_name: val
+            - name: 'requestQueryParam'
+              type: Array
               description: |
                 Request query parameter whose value will be excluded from inspection during preconfigured WAF evaluation.
                 Note that the parameter can be in the query string or in the POST body.
-              item_type: !ruby/object:Api::Type::NestedObject
+              api_name: requestQueryParamsToExclude
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'operator'
-                    api_name: 'op'
-                    required: true
+                  - name: 'operator'
+                    type: String
                     description: |
                       You can specify an exact match or a partial match by using a field operator and a field value.
                       Available options:
@@ -270,27 +275,30 @@ properties:
                       ENDS_WITH: The operator matches if the field value ends with the specified value.
                       CONTAINS: The operator matches if the field value contains the specified value.
                       EQUALS_ANY: The operator matches if the field value is any value.
-                    validation: !ruby/object:Provider::Terraform::Validation
-                      function: validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
-                    api_name: 'val'
+                    api_name: op
+                    required: true
+                    validation:
+                      function: 'validation.StringInSlice([]string{"EQUALS", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "EQUALS_ANY"}, false)'
+                  - name: 'value'
+                    type: String
                     description: |
                       A request field matching the specified value will be excluded from inspection during preconfigured WAF evaluation.
                       The field value must be given if the field operator is not EQUALS_ANY, and cannot be given if the field operator is EQUALS_ANY.
-            - !ruby/object:Api::Type::String
-              name: 'targetRuleSet'
-              required: true
+                    api_name: val
+            - name: 'targetRuleSet'
+              type: String
               description: |
                 Target WAF rule set to apply the preconfigured WAF exclusion.
-            - !ruby/object:Api::Type::Array
-              name: 'targetRuleIds'
+              required: true
+            - name: 'targetRuleIds'
+              type: Array
               description: |
                 A list of target rule IDs under the WAF rule set to apply the preconfigured WAF exclusion.
                 If omitted, it refers to all the rule IDs under the WAF rule set.
-              item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'action'
+              item_type:
+                type: String
+  - name: 'action'
+    type: String
     description: |
       The Action to perform when the rule is matched. The following are the valid actions:
 
@@ -304,8 +312,8 @@ properties:
 
       * throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
     required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'rateLimitOptions'
+  - name: 'rateLimitOptions'
+    type: NestedObject
     description: |
       Must be specified if the action is "rate_based_ban" or "throttle". Cannot be specified for any other actions.
     update_mask_fields:
@@ -319,44 +327,44 @@ properties:
       - 'rateLimitOptions.banThreshold'
       - 'rateLimitOptions.banDurationSec'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'rateLimitThreshold'
+      - name: 'rateLimitThreshold'
+        type: NestedObject
         description: |
           Threshold at which to begin ratelimiting.
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'count'
+          - name: 'count'
+            type: Integer
             description: |
               Number of HTTP(S) requests for calculating the threshold.
-          - !ruby/object:Api::Type::Integer
-            name: 'intervalSec'
+          - name: 'intervalSec'
+            type: Integer
             description: |
               Interval over which the threshold is computed.
-      - !ruby/object:Api::Type::String
-        name: 'conformAction'
+      - name: 'conformAction'
+        type: String
         description: |
           Action to take for requests that are under the configured rate limit threshold.
           Valid option is "allow" only.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'exceedRedirectOptions'
+      - name: 'exceedRedirectOptions'
+        type: NestedObject
         description: |
           Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. This field is only supported in Global Security Policies of type CLOUD_ARMOR.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'type'
+          - name: 'type'
+            type: String
             description: |
               Type of the redirect action.
-          - !ruby/object:Api::Type::String
-            name: 'target'
+          - name: 'target'
+            type: String
             description: |
               Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.
-      - !ruby/object:Api::Type::String
-        name: 'exceedAction'
+      - name: 'exceedAction'
+        type: String
         description: |
           Action to take for requests that are above the configured rate limit threshold, to either deny with a specified HTTP response code, or redirect to a different endpoint.
           Valid options are deny(STATUS), where valid values for STATUS are 403, 404, 429, and 502.
-      - !ruby/object:Api::Type::Enum
-        name: 'enforceOnKey'
+      - name: 'enforceOnKey'
+        type: Enum
         description: |
           Determines the key to enforce the rateLimitThreshold on. Possible values are:
           * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKey" is not configured.
@@ -369,33 +377,34 @@ properties:
           * REGION_CODE: The country/region from which the request originates.
           * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
           * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
-        values:
-          - :ALL
-          - :IP
-          - :HTTP_HEADER
-          - :XFF_IP
-          - :HTTP_COOKIE
-          - :HTTP_PATH
-          - :SNI
-          - :REGION_CODE
-          - :TLS_JA3_FINGERPRINT
-          - :USER_IP
-      - !ruby/object:Api::Type::String
-        name: 'enforceOnKeyName'
+        enum_values:
+          - 'ALL'
+          - 'IP'
+          - 'HTTP_HEADER'
+          - 'XFF_IP'
+          - 'HTTP_COOKIE'
+          - 'HTTP_PATH'
+          - 'SNI'
+          - 'REGION_CODE'
+          - 'TLS_JA3_FINGERPRINT'
+          - 'USER_IP'
+      - name: 'enforceOnKeyName'
+        type: String
         description: |
           Rate limit key name applicable only for the following key types:
           HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
           HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
-      - !ruby/object:Api::Type::Array
-        name: 'enforceOnKeyConfigs'
+      - name: 'enforceOnKeyConfigs'
+        type: Array
         description: |
           If specified, any combination of values of enforceOnKeyType/enforceOnKeyName is treated as the key on which ratelimit threshold/action is enforced.
           You can specify up to 3 enforceOnKeyConfigs.
           If enforceOnKeyConfigs is specified, enforceOnKey must not be specified.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'enforceOnKeyType'
+            - name: 'enforceOnKeyType'
+              type: Enum
               description: |
                 Determines the key to enforce the rateLimitThreshold on. Possible values are:
                 * ALL: A single rate limit threshold is applied to all the requests matching this rule. This is the default value if "enforceOnKeyConfigs" is not configured.
@@ -408,43 +417,43 @@ properties:
                 * REGION_CODE: The country/region from which the request originates.
                 * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
                 * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
-              values:
-                - :ALL
-                - :IP
-                - :HTTP_HEADER
-                - :XFF_IP
-                - :HTTP_COOKIE
-                - :HTTP_PATH
-                - :SNI
-                - :REGION_CODE
-                - :TLS_JA3_FINGERPRINT
-                - :USER_IP
-            - !ruby/object:Api::Type::String
-              name: 'enforceOnKeyName'
+              enum_values:
+                - 'ALL'
+                - 'IP'
+                - 'HTTP_HEADER'
+                - 'XFF_IP'
+                - 'HTTP_COOKIE'
+                - 'HTTP_PATH'
+                - 'SNI'
+                - 'REGION_CODE'
+                - 'TLS_JA3_FINGERPRINT'
+                - 'USER_IP'
+            - name: 'enforceOnKeyName'
+              type: String
               description: |
                 Rate limit key name applicable only for the following key types:
                 HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value.
                 HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'banThreshold'
+      - name: 'banThreshold'
+        type: NestedObject
         description: |
           Can only be specified if the action for the rule is "rate_based_ban".
           If specified, the key will be banned for the configured 'banDurationSec' when the number of requests that exceed the 'rateLimitThreshold' also exceed this 'banThreshold'.
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'count'
+          - name: 'count'
+            type: Integer
             description: |
               Number of HTTP(S) requests for calculating the threshold.
-          - !ruby/object:Api::Type::Integer
-            name: 'intervalSec'
+          - name: 'intervalSec'
+            type: Integer
             description: |
               Interval over which the threshold is computed.
-      - !ruby/object:Api::Type::Integer
-        name: 'banDurationSec'
+      - name: 'banDurationSec'
+        type: Integer
         description: |
           Can only be specified if the action for the rule is "rate_based_ban".
           If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
-  - !ruby/object:Api::Type::Boolean
-    name: 'preview'
+  - name: 'preview'
+    type: Boolean
     description: |
       If set to true, the specified action is not enforced.

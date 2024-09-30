@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,61 +11,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Taxonomy
-base_url: projects/{{project}}/locations/{{region}}/taxonomies
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
+---
+name: 'Taxonomy'
 description: |
   A collection of policy tags that classify data along a common axis.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    'Official Documentation': https://cloud.google.com/data-catalog/docs
-  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies
-sweeper: !ruby/object:Provider::Terraform::Sweeper
-  sweepable_identifier_field: 'displayName'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
+    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
+  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.taxonomies'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/taxonomies'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
   parent_resource_attribute: 'taxonomy'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}',
-      '{{taxonomy}}',
-    ]
   base_url: 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
-import_format: ['{{name}}']
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/taxonomies/{{taxonomy}}'
+    - '{{taxonomy}}'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
+sweeper:
+  sweepable_identifier_field: displayName
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'data_catalog_taxonomy_basic'
+  - name: 'data_catalog_taxonomy_basic'
     primary_resource_id: 'basic_taxonomy'
-    primary_resource_name: "fmt.Sprintf(\"tf_test_my_taxonomy%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_taxonomy%s", context["random_suffix"])'
     vars:
       display_name: 'my_taxonomy'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/data_catalog_taxonomy.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
-    url_param_only: true
-    immutable: true
+  - name: 'region'
+    type: String
     description: |
       Taxonomy location region.
+    url_param_only: true
     required: false
+    immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Resource name of this taxonomy, whose format is:
       "projects/{project}/locations/{region}/taxonomies/{taxonomy}".
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       User defined name of this taxonomy.
       The taxonomy display name must be unique within an organization.
@@ -73,21 +75,21 @@ properties:
       and spaces; not start or end with spaces; and be at most 200 bytes
       long when encoded in UTF-8.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of this taxonomy. It must: contain only unicode characters,
       tabs, newlines, carriage returns and page breaks; and be at most 2000 bytes
       long when encoded in UTF-8. If not set, defaults to an empty description.
-  - !ruby/object:Api::Type::Array
-    name: 'activatedPolicyTypes'
+  - name: 'activatedPolicyTypes'
+    type: Array
     description: |
       A list of policy types that are activated for this taxonomy. If not set,
       defaults to an empty list.
+ # TOOD: should this be enum or string
     item_type:
-      !ruby/object:Api::Type::Enum  # TOOD: should this be enum or string
-      name: 'policyType'
+      type: Enum
       description: 'Defines policy types where policy tag can be used for'
-      values:
-        - :POLICY_TYPE_UNSPECIFIED
-        - :FINE_GRAINED_ACCESS_CONTROL
+      enum_values:
+        - 'POLICY_TYPE_UNSPECIFIED'
+        - 'FINE_GRAINED_ACCESS_CONTROL'

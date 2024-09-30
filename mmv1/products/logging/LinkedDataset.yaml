@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,103 +11,120 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'LinkedDataset'
-base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links'
-create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links?linkId={{link_id}}'
-delete_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
-self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
-import_format:
-  ['{{%parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}']
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  Describes a BigQuery linked dataset
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
   api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/locations.buckets.links'
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
+docs:
+base_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links'
+self_link: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
+create_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links?linkId={{link_id}}'
+delete_url: '{{parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
 immutable: true
-description: |
-  Describes a BigQuery linked dataset
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - '{{%parent}}/locations/{{location}}/buckets/{{bucket}}/links/{{link_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/logging_linked_dataset.go.erb
+custom_code:
+  encoder: 'templates/terraform/encoders/logging_linked_dataset.go.tmpl'
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
+examples:
+  - name: 'logging_linked_dataset_basic'
+    primary_resource_id: 'logging_linked_dataset'
+    vars:
+      bucket_id: 'my-bucket'
+      link_id: 'mylink'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'logging_linked_dataset_all_params'
+    primary_resource_id: 'logging_linked_dataset'
+    vars:
+      bucket_id: 'my-bucket'
+      link_id: 'mylink'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'linkId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'linkId'
+    type: String
     description: |-
       The id of the linked dataset.
-  - !ruby/object:Api::Type::String
-    name: parent
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parent'
+    type: String
     description: The parent of the linked dataset.
     url_param_only: true
     immutable: true
     default_from_api: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: The location of the linked dataset.
     url_param_only: true
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String  # Make this a String for now since we don't have a good way to reference multiple resources.
-    name: bucket
+ # Make this a String for now since we don't have a good way to reference multiple resources.
+  - name: 'bucket'
+    type: String
     description: The bucket to which the linked dataset is attached.
     url_param_only: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of the linked dataset. The name can have up to 100 characters. A valid link id
       (at the end of the link name) must only have alphanumeric characters and underscores within it.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    output: true
+  - name: 'description'
+    type: String
     description: |
       Describes this link. The maximum length of the description is 8000 characters.
-  - !ruby/object:Api::Type::String
-    name: createTime
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       Output only. The creation timestamp of the link. A timestamp in RFC3339 UTC "Zulu" format,
       with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z"
       and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::Enum
-    name: lifecycleState
     output: true
+  - name: 'lifecycleState'
+    type: Enum
     description: |
       Output only. The linked dataset lifecycle state.
-    values:
-      - :LIFECYCLE_STATE_UNSPECIFIED
-      - :ACTIVE
-      - :DELETE_REQUESTED
-      - :UPDATING
-      - :CREATING
-      - :FAILED
-  - !ruby/object:Api::Type::NestedObject
-    name: bigqueryDataset
+    output: true
+    enum_values:
+      - 'LIFECYCLE_STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETE_REQUESTED'
+      - 'UPDATING'
+      - 'CREATING'
+      - 'FAILED'
+  - name: 'bigqueryDataset'
+    type: NestedObject
     description: |
       The information of a BigQuery Dataset. When a link is created, a BigQuery dataset is created along
       with it, in the same project as the LogBucket it's linked to. This dataset will also have BigQuery
@@ -115,28 +132,11 @@ properties:
     default_from_api: true
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: datasetId
-        output: true
+      - name: 'datasetId'
+        type: String
         description: |
           Output only. The full resource name of the BigQuery dataset. The DATASET_ID will match the ID
           of the link, so the link must match the naming restrictions of BigQuery datasets
           (alphanumeric characters and underscores only). The dataset will have a resource path of
           "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET_ID]"
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'logging_linked_dataset_basic'
-    primary_resource_id: 'logging_linked_dataset'
-    vars:
-      bucket_id: 'my-bucket'
-      link_id: 'mylink'
-    test_env_vars:
-      project: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'logging_linked_dataset_all_params'
-    primary_resource_id: 'logging_linked_dataset'
-    vars:
-      bucket_id: 'my-bucket'
-      link_id: 'mylink'
-    test_env_vars:
-      project: :PROJECT_NAME
+        output: true

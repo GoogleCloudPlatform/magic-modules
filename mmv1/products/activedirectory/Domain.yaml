@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,50 +11,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Domain'
 kind: 'activedirectory#domain'
-base_url: projects/{{project}}/locations/global/domains
-create_url: projects/{{project}}/locations/global/domains?domainName={{domain_name}}
-delete_url: projects/{{project}}/locations/global/domains/{{domain_name}}  # equivalent to {{name}}, but makes sweepers work
-update_verb: :PATCH
-update_mask: true
-self_link: '{{name}}'
 description: Creates a Microsoft AD domain
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Managed Microsoft Active Directory Quickstart': 'https://cloud.google.com/managed-microsoft-ad/docs/quickstarts'
   api: 'https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/global/domains'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/global/domains?domainName={{domain_name}}'
+update_verb: 'PATCH'
+update_mask: true
+ # equivalent to {{name}}, but makes sweepers work
+delete_url: 'projects/{{project}}/locations/global/domains/{{domain_name}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-    wait_ms:
-      1000
+    path: 'name'
+    wait_ms: 1000
       # It takes about 35-40 mins to get the resource created
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-id_format: '{{name}}'
-import_format: ['{{name}}']
-autogen_async: true
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
+examples:
+  - name: 'active_directory_domain_basic'
+    primary_resource_id: 'ad-domain'
+    vars:
+      name: 'myorg'
+      # the part of the domain before the first "." must be <15 chars, and
+      # the random suffix is 10 chars. In order to make sure these get swept,
+      # 'tfgen' is the only option here.
+      domain_name: 'tfgen'
+    ignore_read_extra:
+      - 'deletion_protection'
+    # skip the test until Active Directory setup issue got resolved
+    exclude_test: true
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
-    default_value: true
+  - name: 'deletion_protection'
     description: |
       Whether Terraform will be prevented from destroying the domain. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the domain,
@@ -62,77 +81,62 @@ virtual_fields:
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the domain will fail.
       When the field is set to false, deleting the domain is allowed.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
-  pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.erb'
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'active_directory_domain_basic'
-    primary_resource_id: 'ad-domain'
-    vars:
-      name: 'myorg'
-      # the part of the domain before the first "." must be <15 chars, and
-      # the random suffix is 10 chars. In order to make sure these get swept,
-      # 'tfgen' is the only option here.
-      domain_name:
-        tfgen
-        # skip the test until Active Directory setup issue got resolved
-    skip_test: true
-    ignore_read_extra:
-      - 'deletion_protection'
+    type: Boolean
+    default_value: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: domainName
-    required: true
-    url_param_only: true
-    immutable: true
+  - name: 'domainName'
+    type: String
     description: |
       The fully qualified domain name. e.g. mydomain.myorganization.com, with the restrictions
       of https://cloud.google.com/managed-microsoft-ad/reference/rest/v1/projects.locations.global.domains.
-    validation: !ruby/object:Provider::Terraform::Validation
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
       function: 'verify.ValidateADDomainName()'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description:
       'The unique name of the domain using the format:
       `projects/{project}/locations/global/domains/{domainName}`.'
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'Resource labels that can contain user-provided metadata'
-  - !ruby/object:Api::Type::Array
-    name: 'authorizedNetworks'
-    item_type: Api::Type::String
+  - name: 'authorizedNetworks'
+    type: Array
     description: |
       The full names of the Google Compute Engine networks the domain instance is connected to. The domain is only available on networks listed in authorizedNetworks.
       If CIDR subnets overlap between networks, domain creation will fail.
     is_set: true
-  - !ruby/object:Api::Type::String
-    name: 'reservedIpRange'
-    required: true
-    immutable: true
+    item_type:
+      type: String
+  - name: 'reservedIpRange'
+    type: String
     description: |
       The CIDR range of internal addresses that are reserved for this domain. Reserved networks must be /24 or larger.
       Ranges must be unique and non-overlapping with existing subnets in authorizedNetworks
-  - !ruby/object:Api::Type::Array
-    name: 'locations'
     required: true
-    item_type: Api::Type::String
+    immutable: true
+  - name: 'locations'
+    type: Array
     description: |
       Locations where domain needs to be provisioned. [regions][compute/docs/regions-zones/]
       e.g. us-west1 or us-east4 Service supports up to 4 locations at once. Each location will use a /26 block.
-  - !ruby/object:Api::Type::String
-    name: 'admin'
-    default_value: 'setupadmin'
-    immutable: true
+    required: true
+    item_type:
+      type: String
+  - name: 'admin'
+    type: String
     description: |
       The name of delegated administrator account used to perform Active Directory operations.
       If not specified, setupadmin will be used.
-  - !ruby/object:Api::Type::String
-    name: 'fqdn'
-    output: true
+    immutable: true
+    default_value: "setupadmin"
+  - name: 'fqdn'
+    type: String
     description: |
       The fully-qualified domain name of the exposed domain used by clients to connect to the service.
       Similar to what would be chosen for an Active Directory set up on an internal network.
+    output: true

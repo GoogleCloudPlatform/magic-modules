@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,55 +11,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'PatchDeployment'
-base_url: 'projects/{{project}}/patchDeployments'
-create_url: 'projects/{{project}}/patchDeployments?patchDeploymentId={{patch_deployment_id}}'
-self_link: '{{name}}'
 description: |
   Patch deployments are configurations that individual patch jobs use to complete a patch.
   These configurations include instance filter, package repository settings, and a schedule.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/os-patch-management'
   api: 'https://cloud.google.com/compute/docs/osconfig/rest'
-immutable: true
+docs:
 id_format: '{{name}}'
+base_url: 'projects/{{project}}/patchDeployments'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/patchDeployments?patchDeploymentId={{patch_deployment_id}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/os_config_patch_deployment.go.tmpl'
+  decoder: 'templates/terraform/decoders/os_config_patch_deployment.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_config_patch_deployment_basic'
+  - name: 'os_config_patch_deployment_basic'
     primary_resource_id: 'patch'
     vars:
       patch_deployment_id: 'patch-deploy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_config_patch_deployment_daily'
+  - name: 'os_config_patch_deployment_daily'
     primary_resource_id: 'patch'
     vars:
       patch_deployment_id: 'patch-deploy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_config_patch_deployment_daily_midnight'
+  - name: 'os_config_patch_deployment_daily_midnight'
     primary_resource_id: 'patch'
     vars:
       patch_deployment_id: 'patch-deploy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_config_patch_deployment_instance'
+  - name: 'os_config_patch_deployment_instance'
     primary_resource_id: 'patch'
     vars:
       instance_name: 'patch-deploy-inst'
       patch_deployment_id: 'patch-deploy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_config_patch_deployment_full'
+  - name: 'os_config_patch_deployment_full'
     primary_resource_id: 'patch'
     vars:
       patch_deployment_id: 'patch-deploy'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/set_computed_name.erb
-  encoder: templates/terraform/encoders/os_config_patch_deployment.go.erb
-  decoder: templates/terraform/decoders/os_config_patch_deployment.go.erb
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'patchDeploymentId'
+  - name: 'patchDeploymentId'
+    type: String
     description: |
       A name for the patch deployment in the project. When creating a name the following rules apply:
       * Must contain only lowercase letters, numbers, and hyphens.
@@ -67,855 +67,873 @@ parameters:
       * Must be between 1-63 characters.
       * Must end with a number or a letter.
       * Must be unique within the project.
-    required: true
     url_param_only: true
-    validation: !ruby/object:Provider::Terraform::Validation
-      regex: "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))"
+    required: true
+    validation:
+      regex: '(?:(?:[-a-z0-9]{1,63}\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Unique name for the patch deployment resource in a project.
       The patch deployment name is in the form: projects/{project_id}/patchDeployments/{patchDeploymentId}.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the patch deployment. Length of the description is limited to 1024 characters.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'instanceFilter'
-    required: true
+  - name: 'instanceFilter'
+    type: NestedObject
     description: |
       VM instances to patch.
+    required: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'all'
-        at_least_one_of:
-          - instance_filter.0.all
-          - instance_filter.0.group_labels
-          - instance_filter.0.zones
-          - instance_filter.0.instances
-          - instance_filter.0.instance_name_prefixes
+      - name: 'all'
+        type: Boolean
         description: |
           Target all VM instances in the project. If true, no other criteria is permitted.
-      - !ruby/object:Api::Type::Array
-        name: 'groupLabels'
         at_least_one_of:
-          - instance_filter.0.all
-          - instance_filter.0.group_labels
-          - instance_filter.0.zones
-          - instance_filter.0.instances
-          - instance_filter.0.instance_name_prefixes
+          - 'instance_filter.0.all'
+          - 'instance_filter.0.group_labels'
+          - 'instance_filter.0.zones'
+          - 'instance_filter.0.instances'
+          - 'instance_filter.0.instance_name_prefixes'
+      - name: 'groupLabels'
+        type: Array
         description: |
           Targets VM instances matching ANY of these GroupLabels. This allows targeting of disparate groups of VM instances.
-        item_type: !ruby/object:Api::Type::NestedObject
+        at_least_one_of:
+          - 'instance_filter.0.all'
+          - 'instance_filter.0.group_labels'
+          - 'instance_filter.0.zones'
+          - 'instance_filter.0.instances'
+          - 'instance_filter.0.instance_name_prefixes'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::KeyValuePairs
-              name: 'labels'
-              required: true
+            - name: 'labels'
+              type: KeyValuePairs
               description: |
                 Compute Engine instance labels that must be present for a VM instance to be targeted by this filter
-      - !ruby/object:Api::Type::Array
-        name: 'zones'
-        at_least_one_of:
-          - instance_filter.0.all
-          - instance_filter.0.group_labels
-          - instance_filter.0.zones
-          - instance_filter.0.instances
-          - instance_filter.0.instance_name_prefixes
+              required: true
+      - name: 'zones'
+        type: Array
         description: |
           Targets VM instances in ANY of these zones. Leave empty to target VM instances in any zone.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'instances'
         at_least_one_of:
-          - instance_filter.0.all
-          - instance_filter.0.group_labels
-          - instance_filter.0.zones
-          - instance_filter.0.instances
-          - instance_filter.0.instance_name_prefixes
+          - 'instance_filter.0.all'
+          - 'instance_filter.0.group_labels'
+          - 'instance_filter.0.zones'
+          - 'instance_filter.0.instances'
+          - 'instance_filter.0.instance_name_prefixes'
+        item_type:
+          type: String
+      - name: 'instances'
+        type: Array
         description: |
           Targets any of the VM instances specified. Instances are specified by their URI in the `form zones/{{zone}}/instances/{{instance_name}}`,
           `projects/{{project_id}}/zones/{{zone}}/instances/{{instance_name}}`, or
           `https://www.googleapis.com/compute/v1/projects/{{project_id}}/zones/{{zone}}/instances/{{instance_name}}`
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'instanceNamePrefixes'
         at_least_one_of:
-          - instance_filter.0.all
-          - instance_filter.0.group_labels
-          - instance_filter.0.zones
-          - instance_filter.0.instances
-          - instance_filter.0.instance_name_prefixes
+          - 'instance_filter.0.all'
+          - 'instance_filter.0.group_labels'
+          - 'instance_filter.0.zones'
+          - 'instance_filter.0.instances'
+          - 'instance_filter.0.instance_name_prefixes'
+        item_type:
+          type: String
+      - name: 'instanceNamePrefixes'
+        type: Array
         description: |
           Targets VMs whose name starts with one of these prefixes. Similar to labels, this is another way to group
           VMs when targeting configs, for example prefix="prod-".
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'patchConfig'
+        at_least_one_of:
+          - 'instance_filter.0.all'
+          - 'instance_filter.0.group_labels'
+          - 'instance_filter.0.zones'
+          - 'instance_filter.0.instances'
+          - 'instance_filter.0.instance_name_prefixes'
+        item_type:
+          type: String
+  - name: 'patchConfig'
+    type: NestedObject
     description: |
       Patch configuration that is applied.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'migInstancesAllowed'
+      - name: 'migInstancesAllowed'
+        type: Boolean
         description: |
           Allows the patch job to run on Managed instance groups (MIGs).
-      - !ruby/object:Api::Type::Enum
-        name: 'rebootConfig'
+      - name: 'rebootConfig'
+        type: Enum
         description: |
           Post-patch reboot settings.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
-        values:
-          - :DEFAULT
-          - :ALWAYS
-          - :NEVER
-      - !ruby/object:Api::Type::NestedObject
-        name: 'apt'
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
+        enum_values:
+          - 'DEFAULT'
+          - 'ALWAYS'
+          - 'NEVER'
+      - name: 'apt'
+        type: NestedObject
         description: |
           Apt update settings. Use this setting to override the default apt patch rules.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'type'
-            at_least_one_of:
-              - patch_config.0.apt.0.type
-              - patch_config.0.apt.0.excludes
-              - patch_config.0.apt.0.exclusive_packages
+          - name: 'type'
+            type: Enum
             description: |
               By changing the type to DIST, the patching is performed using apt-get dist-upgrade instead.
-            values:
-              - :DIST
-              - :UPGRADE
-          - !ruby/object:Api::Type::Array
-            name: 'excludes'
             at_least_one_of:
-              - patch_config.0.apt.0.type
-              - patch_config.0.apt.0.excludes
-              - patch_config.0.apt.0.exclusive_packages
+              - 'patch_config.0.apt.0.type'
+              - 'patch_config.0.apt.0.excludes'
+              - 'patch_config.0.apt.0.exclusive_packages'
+            enum_values:
+              - 'DIST'
+              - 'UPGRADE'
+          - name: 'excludes'
+            type: Array
             description: |
               List of packages to exclude from update. These packages will be excluded.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'exclusivePackages'
             at_least_one_of:
-              - patch_config.0.apt.0.type
-              - patch_config.0.apt.0.excludes
-              - patch_config.0.apt.0.exclusive_packages
+              - 'patch_config.0.apt.0.type'
+              - 'patch_config.0.apt.0.excludes'
+              - 'patch_config.0.apt.0.exclusive_packages'
+            item_type:
+              type: String
+          - name: 'exclusivePackages'
+            type: Array
             description: |
               An exclusive list of packages to be updated. These are the only packages that will be updated.
               If these packages are not installed, they will be ignored. This field cannot be specified with
               any other patch configuration fields.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'yum'
+            at_least_one_of:
+              - 'patch_config.0.apt.0.type'
+              - 'patch_config.0.apt.0.excludes'
+              - 'patch_config.0.apt.0.exclusive_packages'
+            item_type:
+              type: String
+      - name: 'yum'
+        type: NestedObject
         description: |
           Yum update settings. Use this setting to override the default yum patch rules.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'security'
-            at_least_one_of:
-              - patch_config.0.yum.0.security
-              - patch_config.0.yum.0.minimal
-              - patch_config.0.yum.0.excludes
-              - patch_config.0.yum.0.exclusive_packages
+          - name: 'security'
+            type: Boolean
             description: |
               Adds the --security flag to yum update. Not supported on all platforms.
-          - !ruby/object:Api::Type::Boolean
-            name: 'minimal'
             at_least_one_of:
-              - patch_config.0.yum.0.security
-              - patch_config.0.yum.0.minimal
-              - patch_config.0.yum.0.excludes
-              - patch_config.0.yum.0.exclusive_packages
+              - 'patch_config.0.yum.0.security'
+              - 'patch_config.0.yum.0.minimal'
+              - 'patch_config.0.yum.0.excludes'
+              - 'patch_config.0.yum.0.exclusive_packages'
+          - name: 'minimal'
+            type: Boolean
             description: |
               Will cause patch to run yum update-minimal instead.
-          - !ruby/object:Api::Type::Array
-            name: 'excludes'
             at_least_one_of:
-              - patch_config.0.yum.0.security
-              - patch_config.0.yum.0.minimal
-              - patch_config.0.yum.0.excludes
-              - patch_config.0.yum.0.exclusive_packages
+              - 'patch_config.0.yum.0.security'
+              - 'patch_config.0.yum.0.minimal'
+              - 'patch_config.0.yum.0.excludes'
+              - 'patch_config.0.yum.0.exclusive_packages'
+          - name: 'excludes'
+            type: Array
             description: |
               List of packages to exclude from update. These packages will be excluded.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'exclusivePackages'
             at_least_one_of:
-              - patch_config.0.yum.0.security
-              - patch_config.0.yum.0.minimal
-              - patch_config.0.yum.0.excludes
-              - patch_config.0.yum.0.exclusive_packages
+              - 'patch_config.0.yum.0.security'
+              - 'patch_config.0.yum.0.minimal'
+              - 'patch_config.0.yum.0.excludes'
+              - 'patch_config.0.yum.0.exclusive_packages'
+            item_type:
+              type: String
+          - name: 'exclusivePackages'
+            type: Array
             description: |
               An exclusive list of packages to be updated. These are the only packages that will be updated.
               If these packages are not installed, they will be ignored. This field cannot be specified with
               any other patch configuration fields.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'goo'
+            at_least_one_of:
+              - 'patch_config.0.yum.0.security'
+              - 'patch_config.0.yum.0.minimal'
+              - 'patch_config.0.yum.0.excludes'
+              - 'patch_config.0.yum.0.exclusive_packages'
+            item_type:
+              type: String
+      - name: 'goo'
+        type: NestedObject
         description: |
           goo update settings. Use this setting to override the default goo patch rules.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enabled
+          - name: 'enabled'
+            type: Boolean
             description: |
               goo update settings. Use this setting to override the default goo patch rules.
             required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'zypper'
+      - name: 'zypper'
+        type: NestedObject
         description: |
           zypper update settings. Use this setting to override the default zypper patch rules.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'withOptional'
-            at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+          - name: 'withOptional'
+            type: Boolean
             description: |
               Adds the --with-optional flag to zypper patch.
-          - !ruby/object:Api::Type::Boolean
-            name: 'withUpdate'
             at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+          - name: 'withUpdate'
+            type: Boolean
             description: |
               Adds the --with-update flag, to zypper patch.
-          - !ruby/object:Api::Type::Array
-            name: 'categories'
             at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+          - name: 'categories'
+            type: Array
             description: |
               Install only patches with these categories. Common categories include security, recommended, and feature.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'severities'
             at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+            item_type:
+              type: String
+          - name: 'severities'
+            type: Array
             description: |
               Install only patches with these severities. Common severities include critical, important, moderate, and low.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'excludes'
             at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+            item_type:
+              type: String
+          - name: 'excludes'
+            type: Array
             description: |
               List of packages to exclude from update.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'exclusivePatches'
             at_least_one_of:
-              - patch_config.0.zypper.0.withOptional
-              - patch_config.0.zypper.0.withUpdate
-              - patch_config.0.zypper.0.categories
-              - patch_config.0.zypper.0.severities
-              - patch_config.0.zypper.0.excludes
-              - patch_config.0.zypper.0.exclusive_patches
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+            item_type:
+              type: String
+          - name: 'exclusivePatches'
+            type: Array
             description: |
               An exclusive list of patches to be updated. These are the only patches that will be installed using 'zypper patch patch:' command.
               This field must not be used with any other patch configuration fields.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'windowsUpdate'
+            at_least_one_of:
+              - 'patch_config.0.zypper.0.withOptional'
+              - 'patch_config.0.zypper.0.withUpdate'
+              - 'patch_config.0.zypper.0.categories'
+              - 'patch_config.0.zypper.0.severities'
+              - 'patch_config.0.zypper.0.excludes'
+              - 'patch_config.0.zypper.0.exclusive_patches'
+            item_type:
+              type: String
+      - name: 'windowsUpdate'
+        type: NestedObject
         description: |
           Windows update settings. Use this setting to override the default Windows patch rules.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::Array
-            name: 'classifications'
-            at_least_one_of:
-              - patch_config.0.windows_update.0.classifications
-              - patch_config.0.windows_update.0.excludes
-              - patch_config.0.windows_update.0.exclusive_patches
-            conflicts:
-              - patch_config.0.windows_update.0.exclusive_patches
+          - name: 'classifications'
+            type: Array
             description: |
               Only apply updates of these windows update classifications. If empty, all updates are applied.
-            item_type: !ruby/object:Api::Type::Enum
-              name: 'classification'
-              description: 'What type of updates should we apply?'
-              values:
-                - :CRITICAL
-                - :SECURITY
-                - :DEFINITION
-                - :DRIVER
-                - :FEATURE_PACK
-                - :SERVICE_PACK
-                - :TOOL
-                - :UPDATE_ROLLUP
-                - :UPDATE
-          - !ruby/object:Api::Type::Array
-            name: 'excludes'
-            at_least_one_of:
-              - patch_config.0.windows_update.0.classifications
-              - patch_config.0.windows_update.0.excludes
-              - patch_config.0.windows_update.0.exclusive_patches
             conflicts:
               - patch_config.0.windows_update.0.exclusive_patches
+            at_least_one_of:
+              - 'patch_config.0.windows_update.0.classifications'
+              - 'patch_config.0.windows_update.0.excludes'
+              - 'patch_config.0.windows_update.0.exclusive_patches'
+            item_type:
+              type: Enum
+              description: 'What type of updates should we apply?'
+              enum_values:
+                - 'CRITICAL'
+                - 'SECURITY'
+                - 'DEFINITION'
+                - 'DRIVER'
+                - 'FEATURE_PACK'
+                - 'SERVICE_PACK'
+                - 'TOOL'
+                - 'UPDATE_ROLLUP'
+                - 'UPDATE'
+          - name: 'excludes'
+            type: Array
             description: |
               List of KBs to exclude from update.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'exclusivePatches'
-            at_least_one_of:
-              - patch_config.0.windows_update.0.classifications
-              - patch_config.0.windows_update.0.excludes
-              - patch_config.0.windows_update.0.exclusive_patches
             conflicts:
-              - patch_config.0.windows_update.0.classifications
-              - patch_config.0.windows_update.0.excludes
+              - patch_config.0.windows_update.0.exclusive_patches
+            at_least_one_of:
+              - 'patch_config.0.windows_update.0.classifications'
+              - 'patch_config.0.windows_update.0.excludes'
+              - 'patch_config.0.windows_update.0.exclusive_patches'
+            item_type:
+              type: String
+          - name: 'exclusivePatches'
+            type: Array
             description: |
               An exclusive list of kbs to be updated. These are the only patches that will be updated.
               This field must not be used with other patch configurations.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'preStep'
+            conflicts:
+              - patch_config.0.windows_update.0.classifications
+              - patch_config.0.windows_update.0.excludes
+            at_least_one_of:
+              - 'patch_config.0.windows_update.0.classifications'
+              - 'patch_config.0.windows_update.0.excludes'
+              - 'patch_config.0.windows_update.0.exclusive_patches'
+            item_type:
+              type: String
+      - name: 'preStep'
+        type: NestedObject
         description: |
           The ExecStep to run before the patch update.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'linuxExecStepConfig'
-            at_least_one_of:
-              - patch_config.0.pre_step.0.linux_exec_step_config
-              - patch_config.0.pre_step.0.windows_exec_step_config
+          - name: 'linuxExecStepConfig'
+            type: NestedObject
             description: |
               The ExecStepConfig for all Linux VMs targeted by the PatchJob.
+            at_least_one_of:
+              - 'patch_config.0.pre_step.0.linux_exec_step_config'
+              - 'patch_config.0.pre_step.0.windows_exec_step_config'
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'allowedSuccessCodes'
+              - name: 'allowedSuccessCodes'
+                type: Array
                 description: |
                   Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                item_type: Api::Type::Integer
-              - !ruby/object:Api::Type::Enum
-                name: 'interpreter'
+                item_type:
+                  type: Integer
+              - name: 'interpreter'
+                type: Enum
                 description: |
                   The script interpreter to use to run the script. If no interpreter is specified the script will
                   be executed directly, which will likely only succeed for scripts with shebang lines.
-                values:
-                  - :SHELL
-                  - :POWERSHELL
-              - !ruby/object:Api::Type::String
-                name: 'localPath'
+                enum_values:
+                  - 'SHELL'
+                  - 'POWERSHELL'
+              - name: 'localPath'
+                type: String
                 description: |
                   An absolute path to the executable on the VM.
                 exactly_one_of:
-                  - patch_config.0.pre_step.0.linux_exec_step_config.0.local_path
-                  - patch_config.0.pre_step.0.linux_exec_step_config.0.gcs_object
-              - !ruby/object:Api::Type::NestedObject
-                name: 'gcsObject'
+                  - 'patch_config.0.pre_step.0.linux_exec_step_config.0.local_path'
+                  - 'patch_config.0.pre_step.0.linux_exec_step_config.0.gcs_object'
+              - name: 'gcsObject'
+                type: NestedObject
                 description: |
                   A Cloud Storage object containing the executable.
                 exactly_one_of:
-                  - patch_config.0.pre_step.0.linux_exec_step_config.0.local_path
-                  - patch_config.0.pre_step.0.linux_exec_step_config.0.gcs_object
+                  - 'patch_config.0.pre_step.0.linux_exec_step_config.0.local_path'
+                  - 'patch_config.0.pre_step.0.linux_exec_step_config.0.gcs_object'
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'bucket'
-                    required: true
+                  - name: 'bucket'
+                    type: String
                     description: |
                       Bucket of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'object'
                     required: true
+                  - name: 'object'
+                    type: String
                     description: |
                       Name of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'generationNumber'
                     required: true
+                  - name: 'generationNumber'
+                    type: String
                     description: |
                       Generation number of the Cloud Storage object. This is used to ensure that the ExecStep specified by this PatchJob does not change.
-          - !ruby/object:Api::Type::NestedObject
-            name: 'windowsExecStepConfig'
-            at_least_one_of:
-              - patch_config.0.pre_step.0.linux_exec_step_config
-              - patch_config.0.pre_step.0.windows_exec_step_config
+                    required: true
+          - name: 'windowsExecStepConfig'
+            type: NestedObject
             description: |
               The ExecStepConfig for all Windows VMs targeted by the PatchJob.
+            at_least_one_of:
+              - 'patch_config.0.pre_step.0.linux_exec_step_config'
+              - 'patch_config.0.pre_step.0.windows_exec_step_config'
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'allowedSuccessCodes'
+              - name: 'allowedSuccessCodes'
+                type: Array
                 description: |
                   Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                item_type: Api::Type::Integer
-              - !ruby/object:Api::Type::Enum
-                name: 'interpreter'
+                item_type:
+                  type: Integer
+              - name: 'interpreter'
+                type: Enum
                 description: |
                   The script interpreter to use to run the script. If no interpreter is specified the script will
                   be executed directly, which will likely only succeed for scripts with shebang lines.
-                values:
-                  - :SHELL
-                  - :POWERSHELL
-              - !ruby/object:Api::Type::String
-                name: 'localPath'
+                enum_values:
+                  - 'SHELL'
+                  - 'POWERSHELL'
+              - name: 'localPath'
+                type: String
                 description: |
                   An absolute path to the executable on the VM.
                 exactly_one_of:
-                  - patch_config.0.pre_step.0.windows_exec_step_config.0.local_path
-                  - patch_config.0.pre_step.0.windows_exec_step_config.0.gcs_object
-              - !ruby/object:Api::Type::NestedObject
-                name: 'gcsObject'
+                  - 'patch_config.0.pre_step.0.windows_exec_step_config.0.local_path'
+                  - 'patch_config.0.pre_step.0.windows_exec_step_config.0.gcs_object'
+              - name: 'gcsObject'
+                type: NestedObject
                 description: |
                   A Cloud Storage object containing the executable.
                 exactly_one_of:
-                  - patch_config.0.pre_step.0.windows_exec_step_config.0.local_path
-                  - patch_config.0.pre_step.0.windows_exec_step_config.0.gcs_object
+                  - 'patch_config.0.pre_step.0.windows_exec_step_config.0.local_path'
+                  - 'patch_config.0.pre_step.0.windows_exec_step_config.0.gcs_object'
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'bucket'
-                    required: true
+                  - name: 'bucket'
+                    type: String
                     description: |
                       Bucket of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'object'
                     required: true
+                  - name: 'object'
+                    type: String
                     description: |
                       Name of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'generationNumber'
                     required: true
+                  - name: 'generationNumber'
+                    type: String
                     description: |
                       Generation number of the Cloud Storage object. This is used to ensure that the ExecStep specified by this PatchJob does not change.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'postStep'
+                    required: true
+      - name: 'postStep'
+        type: NestedObject
         description: |
           The ExecStep to run after the patch update.
         at_least_one_of:
-          - patch_config.0.reboot_config
-          - patch_config.0.apt
-          - patch_config.0.yum
-          - patch_config.0.goo
-          - patch_config.0.zypper
-          - patch_config.0.windows_update
-          - patch_config.0.pre_step
-          - patch_config.0.post_step
+          - 'patch_config.0.reboot_config'
+          - 'patch_config.0.apt'
+          - 'patch_config.0.yum'
+          - 'patch_config.0.goo'
+          - 'patch_config.0.zypper'
+          - 'patch_config.0.windows_update'
+          - 'patch_config.0.pre_step'
+          - 'patch_config.0.post_step'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'linuxExecStepConfig'
-            at_least_one_of:
-              - patch_config.0.post_step.0.linux_exec_step_config
-              - patch_config.0.post_step.0.windows_exec_step_config
+          - name: 'linuxExecStepConfig'
+            type: NestedObject
             description: |
               The ExecStepConfig for all Linux VMs targeted by the PatchJob.
+            at_least_one_of:
+              - 'patch_config.0.post_step.0.linux_exec_step_config'
+              - 'patch_config.0.post_step.0.windows_exec_step_config'
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'allowedSuccessCodes'
+              - name: 'allowedSuccessCodes'
+                type: Array
                 description: |
                   Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                item_type: Api::Type::Integer
-              - !ruby/object:Api::Type::Enum
-                name: 'interpreter'
+                item_type:
+                  type: Integer
+              - name: 'interpreter'
+                type: Enum
                 description: |
                   The script interpreter to use to run the script. If no interpreter is specified the script will
                   be executed directly, which will likely only succeed for scripts with shebang lines.
-                values:
-                  - :SHELL
-                  - :POWERSHELL
-              - !ruby/object:Api::Type::String
-                name: 'localPath'
+                enum_values:
+                  - 'SHELL'
+                  - 'POWERSHELL'
+              - name: 'localPath'
+                type: String
                 description: |
                   An absolute path to the executable on the VM.
                 exactly_one_of:
-                  - patch_config.0.post_step.0.linux_exec_step_config.0.local_path
-                  - patch_config.0.post_step.0.linux_exec_step_config.0.gcs_object
-              - !ruby/object:Api::Type::NestedObject
-                name: 'gcsObject'
+                  - 'patch_config.0.post_step.0.linux_exec_step_config.0.local_path'
+                  - 'patch_config.0.post_step.0.linux_exec_step_config.0.gcs_object'
+              - name: 'gcsObject'
+                type: NestedObject
                 description: |
                   A Cloud Storage object containing the executable.
                 exactly_one_of:
-                  - patch_config.0.post_step.0.linux_exec_step_config.0.local_path
-                  - patch_config.0.post_step.0.linux_exec_step_config.0.gcs_object
+                  - 'patch_config.0.post_step.0.linux_exec_step_config.0.local_path'
+                  - 'patch_config.0.post_step.0.linux_exec_step_config.0.gcs_object'
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'bucket'
-                    required: true
+                  - name: 'bucket'
+                    type: String
                     description: |
                       Bucket of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'object'
                     required: true
+                  - name: 'object'
+                    type: String
                     description: |
                       Name of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'generationNumber'
                     required: true
+                  - name: 'generationNumber'
+                    type: String
                     description: |
                       Generation number of the Cloud Storage object. This is used to ensure that the ExecStep specified by this PatchJob does not change.
-          - !ruby/object:Api::Type::NestedObject
-            name: 'windowsExecStepConfig'
-            at_least_one_of:
-              - patch_config.0.post_step.0.linux_exec_step_config
-              - patch_config.0.post_step.0.windows_exec_step_config
+                    required: true
+          - name: 'windowsExecStepConfig'
+            type: NestedObject
             description: |
               The ExecStepConfig for all Windows VMs targeted by the PatchJob.
+            at_least_one_of:
+              - 'patch_config.0.post_step.0.linux_exec_step_config'
+              - 'patch_config.0.post_step.0.windows_exec_step_config'
             properties:
-              - !ruby/object:Api::Type::Array
-                name: 'allowedSuccessCodes'
+              - name: 'allowedSuccessCodes'
+                type: Array
                 description: |
                   Defaults to [0]. A list of possible return values that the execution can return to indicate a success.
-                item_type: Api::Type::Integer
-              - !ruby/object:Api::Type::Enum
-                name: 'interpreter'
+                item_type:
+                  type: Integer
+              - name: 'interpreter'
+                type: Enum
                 description: |
                   The script interpreter to use to run the script. If no interpreter is specified the script will
                   be executed directly, which will likely only succeed for scripts with shebang lines.
-                values:
-                  - :SHELL
-                  - :POWERSHELL
-              - !ruby/object:Api::Type::String
-                name: 'localPath'
+                enum_values:
+                  - 'SHELL'
+                  - 'POWERSHELL'
+              - name: 'localPath'
+                type: String
                 description: |
                   An absolute path to the executable on the VM.
                 exactly_one_of:
-                  - patch_config.0.post_step.0.windows_exec_step_config.0.local_path
-                  - patch_config.0.post_step.0.windows_exec_step_config.0.gcs_object
-              - !ruby/object:Api::Type::NestedObject
-                name: 'gcsObject'
+                  - 'patch_config.0.post_step.0.windows_exec_step_config.0.local_path'
+                  - 'patch_config.0.post_step.0.windows_exec_step_config.0.gcs_object'
+              - name: 'gcsObject'
+                type: NestedObject
                 description: |
                   A Cloud Storage object containing the executable.
                 exactly_one_of:
-                  - patch_config.0.post_step.0.windows_exec_step_config.0.local_path
-                  - patch_config.0.post_step.0.windows_exec_step_config.0.gcs_object
+                  - 'patch_config.0.post_step.0.windows_exec_step_config.0.local_path'
+                  - 'patch_config.0.post_step.0.windows_exec_step_config.0.gcs_object'
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'bucket'
-                    required: true
+                  - name: 'bucket'
+                    type: String
                     description: |
                       Bucket of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'object'
                     required: true
+                  - name: 'object'
+                    type: String
                     description: |
                       Name of the Cloud Storage object.
-                  - !ruby/object:Api::Type::String
-                    name: 'generationNumber'
                     required: true
+                  - name: 'generationNumber'
+                    type: String
                     description: |
                       Generation number of the Cloud Storage object. This is used to ensure that the ExecStep specified by this PatchJob does not change.
-  - !ruby/object:Api::Type::String
-    name: 'duration'
+                    required: true
+  - name: 'duration'
+    type: String
     description: |
       Duration of the patch. After the duration ends, the patch times out.
       A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s"
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       Time the patch deployment was created. Timestamp is in RFC3339 text format.
       A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       Time the patch deployment was last updated. Timestamp is in RFC3339 text format.
       A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: 'lastExecuteTime'
     output: true
+  - name: 'lastExecuteTime'
+    type: String
     description: |
       The last time a patch job was started by this deployment. Timestamp is in RFC3339 text format.
       A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::NestedObject
-    name: 'oneTimeSchedule'
-    exactly_one_of:
-      - one_time_schedule
-      - recurring_schedule
+    output: true
+  - name: 'oneTimeSchedule'
+    type: NestedObject
     description: |
       Schedule a one-time execution.
+    exactly_one_of:
+      - 'one_time_schedule'
+      - 'recurring_schedule'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'executeTime'
-        required: true
+      - name: 'executeTime'
+        type: String
         description: |
           The desired patch job execution time. A timestamp in RFC3339 UTC "Zulu" format,
           accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::NestedObject
-    name: 'recurringSchedule'
-    exactly_one_of:
-      - one_time_schedule
-      - recurring_schedule
+        required: true
+  - name: 'recurringSchedule'
+    type: NestedObject
     description: |
       Schedule recurring executions.
+    exactly_one_of:
+      - 'one_time_schedule'
+      - 'recurring_schedule'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'timeZone'
-        required: true
+      - name: 'timeZone'
+        type: NestedObject
         description: |
           Defines the time zone that timeOfDay is relative to. The rules for daylight saving time are
           determined by the chosen time zone.
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'id'
-            required: true
+          - name: 'id'
+            type: String
             description: |
               IANA Time Zone Database time zone, e.g. "America/New_York".
-          - !ruby/object:Api::Type::String
-            name: 'version'
+            required: true
+          - name: 'version'
+            type: String
             description: |
               IANA Time Zone Database version number, e.g. "2019a".
-      - !ruby/object:Api::Type::String
-        name: 'startTime'
+      - name: 'startTime'
+        type: String
         description: |
           The time that the recurring schedule becomes effective. Defaults to createTime of the patch deployment.
           A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::String
-        name: 'endTime'
+      - name: 'endTime'
+        type: String
         description: |
           The end time at which a recurring patch deployment schedule is no longer active.
           A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::NestedObject
-        name: 'timeOfDay'
-        required: true
+      - name: 'timeOfDay'
+        type: NestedObject
         description: |
           Time of the day to run a recurring deployment.
-        custom_flatten: 'templates/terraform/custom_flatten/os_config_patch_deployment_recurring_schedule_time_of_day.go.erb'
+        required: true
         send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/os_config_patch_deployment_recurring_schedule_time_of_day.go.tmpl'
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'hours'
-            at_least_one_of:
-              - recurring_schedule.0.time_of_day.0.hours
-              - recurring_schedule.0.time_of_day.0.minutes
-              - recurring_schedule.0.time_of_day.0.seconds
-              - recurring_schedule.0.time_of_day.0.nanos
+          - name: 'hours'
+            type: Integer
             description: |
               Hours of day in 24 hour format. Should be from 0 to 23.
               An API may choose to allow the value "24:00:00" for scenarios like business closing time.
-            validation: !ruby/object:Provider::Terraform::Validation
-              function: 'validation.IntBetween(0,23)'
-          - !ruby/object:Api::Type::Integer
-            name: 'minutes'
             at_least_one_of:
-              - recurring_schedule.0.time_of_day.0.hours
-              - recurring_schedule.0.time_of_day.0.minutes
-              - recurring_schedule.0.time_of_day.0.seconds
-              - recurring_schedule.0.time_of_day.0.nanos
+              - 'recurring_schedule.0.time_of_day.0.hours'
+              - 'recurring_schedule.0.time_of_day.0.minutes'
+              - 'recurring_schedule.0.time_of_day.0.seconds'
+              - 'recurring_schedule.0.time_of_day.0.nanos'
+            validation:
+              function: 'validation.IntBetween(0,23)'
+          - name: 'minutes'
+            type: Integer
             description: |
               Minutes of hour of day. Must be from 0 to 59.
-            validation: !ruby/object:Provider::Terraform::Validation
-              function: 'validation.IntBetween(0,59)'
-          - !ruby/object:Api::Type::Integer
-            name: 'seconds'
             at_least_one_of:
-              - recurring_schedule.0.time_of_day.0.hours
-              - recurring_schedule.0.time_of_day.0.minutes
-              - recurring_schedule.0.time_of_day.0.seconds
-              - recurring_schedule.0.time_of_day.0.nanos
+              - 'recurring_schedule.0.time_of_day.0.hours'
+              - 'recurring_schedule.0.time_of_day.0.minutes'
+              - 'recurring_schedule.0.time_of_day.0.seconds'
+              - 'recurring_schedule.0.time_of_day.0.nanos'
+            validation:
+              function: 'validation.IntBetween(0,59)'
+          - name: 'seconds'
+            type: Integer
             description: |
               Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows leap-seconds.
-            validation: !ruby/object:Provider::Terraform::Validation
-              function: 'validation.IntBetween(0,60)'
-          - !ruby/object:Api::Type::Integer
-            name: 'nanos'
             at_least_one_of:
-              - recurring_schedule.0.time_of_day.0.hours
-              - recurring_schedule.0.time_of_day.0.minutes
-              - recurring_schedule.0.time_of_day.0.seconds
-              - recurring_schedule.0.time_of_day.0.nanos
+              - 'recurring_schedule.0.time_of_day.0.hours'
+              - 'recurring_schedule.0.time_of_day.0.minutes'
+              - 'recurring_schedule.0.time_of_day.0.seconds'
+              - 'recurring_schedule.0.time_of_day.0.nanos'
+            validation:
+              function: 'validation.IntBetween(0,60)'
+          - name: 'nanos'
+            type: Integer
             description: |
               Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
-            validation: !ruby/object:Provider::Terraform::Validation
+            at_least_one_of:
+              - 'recurring_schedule.0.time_of_day.0.hours'
+              - 'recurring_schedule.0.time_of_day.0.minutes'
+              - 'recurring_schedule.0.time_of_day.0.seconds'
+              - 'recurring_schedule.0.time_of_day.0.nanos'
+            validation:
               function: 'validation.IntBetween(0,999999999)'
-      - !ruby/object:Api::Type::String
-        name: 'lastExecuteTime'
-        output: true
+      - name: 'lastExecuteTime'
+        type: String
         description: |
           The time the last patch job ran successfully.
           A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::String
-        name: 'nextExecuteTime'
         output: true
+      - name: 'nextExecuteTime'
+        type: String
         description: |
           The time the next patch job is scheduled to run.
           A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-      - !ruby/object:Api::Type::NestedObject
-        name: 'weekly'
+        output: true
+      - name: 'weekly'
+        type: NestedObject
         description: |
           Schedule with weekly executions.
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'dayOfWeek'
-            required: true
+          - name: 'dayOfWeek'
+            type: Enum
             description: |
               IANA Time Zone Database time zone, e.g. "America/New_York".
-            values:
-              - :MONDAY
-              - :TUESDAY
-              - :WEDNESDAY
-              - :THURSDAY
-              - :FRIDAY
-              - :SATURDAY
-              - :SUNDAY
-      - !ruby/object:Api::Type::NestedObject
-        name: 'monthly'
+            required: true
+            enum_values:
+              - 'MONDAY'
+              - 'TUESDAY'
+              - 'WEDNESDAY'
+              - 'THURSDAY'
+              - 'FRIDAY'
+              - 'SATURDAY'
+              - 'SUNDAY'
+      - name: 'monthly'
+        type: NestedObject
         description: |
           Schedule with monthly executions.
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'weekDayOfMonth'
-            exactly_one_of:
-              - recurring_schedule.0.monthly.0.week_day_of_month
-              - recurring_schedule.0.monthly.0.month_day
+          - name: 'weekDayOfMonth'
+            type: NestedObject
             description: |
               Week day in a month.
+            exactly_one_of:
+              - 'recurring_schedule.0.monthly.0.week_day_of_month'
+              - 'recurring_schedule.0.monthly.0.month_day'
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: 'weekOrdinal'
-                required: true
+              - name: 'weekOrdinal'
+                type: Integer
                 description: |
                   Week number in a month. 1-4 indicates the 1st to 4th week of the month. -1 indicates the last week of the month.
-                validation: !ruby/object:Provider::Terraform::Validation
-                  function: 'validation.IntBetween(-1,4)'
-              - !ruby/object:Api::Type::Enum
-                name: 'dayOfWeek'
                 required: true
+                validation:
+                  function: 'validation.IntBetween(-1,4)'
+              - name: 'dayOfWeek'
+                type: Enum
                 description: |
                   A day of the week.
-                values:
-                  - :MONDAY
-                  - :TUESDAY
-                  - :WEDNESDAY
-                  - :THURSDAY
-                  - :FRIDAY
-                  - :SATURDAY
-                  - :SUNDAY
-              - !ruby/object:Api::Type::Integer
-                name: 'dayOffset'
+                required: true
+                enum_values:
+                  - 'MONDAY'
+                  - 'TUESDAY'
+                  - 'WEDNESDAY'
+                  - 'THURSDAY'
+                  - 'FRIDAY'
+                  - 'SATURDAY'
+                  - 'SUNDAY'
+              - name: 'dayOffset'
+                type: Integer
                 description: |
                   Represents the number of days before or after the given week day of month that the patch deployment is scheduled for.
-                validation: !ruby/object:Provider::Terraform::Validation
+                validation:
                   function: 'validation.IntBetween(-30,30)'
-          - !ruby/object:Api::Type::Integer
-            name: 'monthDay'
-            exactly_one_of:
-              - recurring_schedule.0.monthly.0.week_day_of_month
-              - recurring_schedule.0.monthly.0.month_day
+          - name: 'monthDay'
+            type: Integer
             description: |
               One day of the month. 1-31 indicates the 1st to the 31st day. -1 indicates the last day of the month.
               Months without the target day will be skipped. For example, a schedule to run "every month on the 31st"
               will not run in February, April, June, etc.
-            validation: !ruby/object:Provider::Terraform::Validation
+            exactly_one_of:
+              - 'recurring_schedule.0.monthly.0.week_day_of_month'
+              - 'recurring_schedule.0.monthly.0.month_day'
+            validation:
               function: 'validation.IntBetween(-1,31)'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'rollout'
+  - name: 'rollout'
+    type: NestedObject
     description: |
       Rollout strategy of the patch job.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'mode'
+      - name: 'mode'
+        type: Enum
         description: |
           Mode of the patch rollout.
-        values:
-          - :ZONE_BY_ZONE
-          - :CONCURRENT_ZONES
         required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'disruptionBudget'
+        enum_values:
+          - 'ZONE_BY_ZONE'
+          - 'CONCURRENT_ZONES'
+      - name: 'disruptionBudget'
+        type: NestedObject
         description: |
           The maximum number (or percentage) of VMs per zone to disrupt at any given moment. The number of VMs calculated from multiplying the percentage by the total number of VMs in a zone is rounded up.
           During patching, a VM is considered disrupted from the time the agent is notified to begin until patching has completed. This disruption time includes the time to complete reboot and any post-patch steps.
           A VM contributes to the disruption budget if its patching operation fails either when applying the patches, running pre or post patch steps, or if it fails to respond with a success notification before timing out. VMs that are not running or do not have an active agent do not count toward this disruption budget.
           For zone-by-zone rollouts, if the disruption budget in a zone is exceeded, the patch job stops, because continuing to the next zone requires completion of the patch process in the previous zone.
           For example, if the disruption budget has a fixed value of 10, and 8 VMs fail to patch in the current zone, the patch job continues to patch 2 VMs at a time until the zone is completed. When that zone is completed successfully, patching begins with 10 VMs at a time in the next zone. If 10 VMs in the next zone fail to patch, the patch job stops.
+        required: true
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: fixed
+          - name: 'fixed'
+            type: Integer
             description: |
               Specifies a fixed value.
             exactly_one_of:
-              - rollout.0.disruption_budget.0.fixed
-              - rollout.0.disruption_budget.0.percentage
-            validation: !ruby/object:Provider::Terraform::Validation
+              - 'rollout.0.disruption_budget.0.fixed'
+              - 'rollout.0.disruption_budget.0.percentage'
+            validation:
               function: 'validation.IntAtLeast(1)'
-          - !ruby/object:Api::Type::Integer
-            name: percentage
-            api_name: percent
+          - name: 'percentage'
+            type: Integer
             description: |
               Specifies the relative value defined as a percentage, which will be multiplied by a reference value.
+            api_name: percent
             exactly_one_of:
-              - rollout.0.disruption_budget.0.fixed
-              - rollout.0.disruption_budget.0.percentage
-            validation: !ruby/object:Provider::Terraform::Validation
+              - 'rollout.0.disruption_budget.0.fixed'
+              - 'rollout.0.disruption_budget.0.percentage'
+            validation:
               function: 'validation.IntBetween(0,100)'
-        required: true

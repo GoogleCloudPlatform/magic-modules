@@ -1,6 +1,0 @@
-resource "google_network_services_gateway" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['resource_name'] %>"
-  scope    = "default-scope-basic"
-  type     = "OPEN_MESH"
-  ports    = [443]
-}
