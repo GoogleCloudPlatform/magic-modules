@@ -187,8 +187,6 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	// log.Printf("Generating %s", filePath)
-
 	templateFileName := filepath.Base(templatePath)
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
@@ -218,7 +216,8 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	if goFormat && !strings.Contains(templatePath, "third_party/terraform") {
-		cmd := exec.Command("goimports", "-w", filePath)
+		cmd := exec.Command("goimports", "-w", filepath.Base(filePath))
+		cmd.Dir = filepath.Dir(filePath)
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}

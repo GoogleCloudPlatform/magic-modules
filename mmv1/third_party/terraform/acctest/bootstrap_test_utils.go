@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"strings"
 	"testing"
@@ -910,7 +911,25 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 	return poolName
 }
 
+func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkName string) string {
+	subnetOptions := map[string]interface{}{
+		"privateIpGoogleAccess": true,
+	}
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, subnetOptions)
+}
+
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, make(map[string]interface{}))
+}
+
+func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, subnetName, networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, subnetName, networkName)
+	return subnetworkName
+}
+
+func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 
@@ -932,11 +951,15 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
 		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
 
-		subnetObj := map[string]interface{}{
+		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
+		}
+
+		if len(subnetOptions) != 0 {
+			maps.Copy(defaultSubnetObj, subnetOptions)
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -945,7 +968,7 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 			Project:   projectID,
 			RawURL:    url,
 			UserAgent: config.UserAgent,
-			Body:      subnetObj,
+			Body:      defaultSubnetObj,
 			Timeout:   4 * time.Minute,
 		})
 
@@ -1176,7 +1199,14 @@ func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType 
 	if err != nil {
 		t.Fatalf("Error getting storage pool %s: %s", storagePoolName, err)
 	}
-	return storagePool.SelfLink
+
+	storagePoolResourceName, err := tpgresource.GetRelativePath(storagePool.SelfLink)
+
+	if err != nil {
+		t.Fatal("Failed to extract Storage Pool resource name from URL.")
+	}
+
+	return storagePoolResourceName
 }
 
 func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
