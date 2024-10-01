@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,95 +11,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Location'
-base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  A location is used to initialize a project.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/document-warehouse/docs/overview'
   api: 'https://cloud.google.com/document-warehouse/docs/reference/rest/v1/projects.locations'
-description: |
-  A location is used to initialize a project.
+docs:
 id_format: 'projects/{{project_number}}/locations/{{location}}'
-autogen_async: true
-async: !ruby/object:Api::OpAsync
-  actions: ['create']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms:
-      1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
+base_url: 'projects/{{project_number}}/locations/{{location}}:initialize'
+exclude_read: true
+exclude_delete: true
 immutable: true
-skip_read: true
-skip_delete: true
-skip_sweeper: true
 exclude_import: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    # docs only, testing is done in a DocumentSchema update test
-    skip_test: true
-    name: "document_ai_warehouse_location"
-    primary_resource_id: "example"
-timeouts: !ruby/object:Api::Timeouts
+timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+exclude_sweeper: true
+examples:
+  - name: 'document_ai_warehouse_location'
+    primary_resource_id: 'example'
+    # docs only, testing is done in a DocumentSchema update test
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'project_number'
-    url_param_only: true
-    required: true
+  - name: 'project_number'
+    type: String
     description: |
       The unique identifier of the project.
-  - !ruby/object:Api::Type::String
-    name: 'location'
     url_param_only: true
     required: true
+  - name: 'location'
+    type: String
     description: |
       The location in which the instance is to be provisioned. It takes the form projects/{projectNumber}/locations/{location}.
+    url_param_only: true
+    required: true
 properties:
-  - !ruby/object:Api::Type::Enum
-    name: 'databaseType'
+  - name: 'databaseType'
+    type: Enum
     description: |
       The type of database used to store customer data.
     required: true
-    values:
-      - :DB_INFRA_SPANNER
-      - :DB_CLOUD_SQL_POSTGRES
-  - !ruby/object:Api::Type::Enum
-    name: 'accessControlMode'
+    enum_values:
+      - 'DB_INFRA_SPANNER'
+      - 'DB_CLOUD_SQL_POSTGRES'
+  - name: 'accessControlMode'
+    type: Enum
     description: |
       The access control mode for accessing the customer data.
     required: true
-    values:
-      - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI
-      - :ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_BYOID
-      - :ACL_MODE_UNIVERSAL_ACCESS
-  - !ruby/object:Api::Type::String
-    name: 'kmsKey'
+    enum_values:
+      - 'ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_GCI'
+      - 'ACL_MODE_DOCUMENT_LEVEL_ACCESS_CONTROL_BYOID'
+      - 'ACL_MODE_UNIVERSAL_ACCESS'
+  - name: 'kmsKey'
+    type: String
     description: |
       The KMS key used for CMEK encryption. It is required that
       the kms key is in the same region as the endpoint. The
       same key will be used for all provisioned resources, if
       encryption is available. If the kmsKey is left empty, no
       encryption will be enforced.
-  - !ruby/object:Api::Type::Enum
-    name: 'documentCreatorDefaultRole'
+  - name: 'documentCreatorDefaultRole'
+    type: Enum
     description: |
       The default role for the person who create a document.
-    values:
-      - :DOCUMENT_ADMIN
-      - :DOCUMENT_EDITOR
-      - :DOCUMENT_VIEWER
+    enum_values:
+      - 'DOCUMENT_ADMIN'
+      - 'DOCUMENT_EDITOR'
+      - 'DOCUMENT_VIEWER'

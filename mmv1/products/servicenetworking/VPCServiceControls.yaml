@@ -11,20 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'VPCServiceControls'
-base_url: ''
-skip_delete: true
-exclude_tgc: true # excluding tgc because of helpers in custom_code.constants
-id_format: 'services/{{service}}/projects/{{project}}/networks/{{network}}'
-import_format:
-  - 'services/{{service}}/projects/{{project}}/networks/{{network}}'
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Private Google Access with VPC Service Controls': 'https://cloud.google.com/vpc-service-controls/docs/private-connectivity'
-    'Set up private connectivity to Google APIs and services': 'https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity'
-    'Enable VPC Service Controls for service networking': 'https://cloud.google.com/sdk/gcloud/reference/services/vpc-peerings/enable-vpc-service-controls'
-  api: 'https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services'
 description: |
   Manages the VPC Service Controls configuration for a service
   networking connection
@@ -50,58 +38,78 @@ description: |
     internet gateway)
   - Deletes the Cloud DNS managed private zones that provided the host
     name overrides.
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'Private Google Access with VPC Service Controls': 'https://cloud.google.com/vpc-service-controls/docs/private-connectivity'
+    'Set up private connectivity to Google APIs and services': 'https://cloud.google.com/vpc-service-controls/docs/set-up-private-connectivity'
+    'Enable VPC Service Controls for service networking': 'https://cloud.google.com/sdk/gcloud/reference/services/vpc-peerings/enable-vpc-service-controls'
+  api: 'https://cloud.google.com/service-infrastructure/docs/service-networking/reference/rest/v1/services'
+docs:
   note: |
     Destroying a `google_service_networking_vpc_service_controls`
     resource will remove it from state, but will not change the
     underlying VPC Service Controls configuration for the service
     producer network.
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "service_networking_vpc_service_controls_basic"
-    primary_resource_id: "default"
-    vars:
-      network_name: "example-network"
-      psa_range_name: "psa-range"
+id_format: 'services/{{service}}/projects/{{project}}/networks/{{network}}'
+base_url: ''
+exclude_delete: true
+import_format:
+  - 'services/{{service}}/projects/{{project}}/networks/{{network}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  actions: [] # we just need the boilerplate async code, we'll call the methods manually
-  include_project: true
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+ # we just need the boilerplate async code, we'll call the methods manually
+  actions: ['']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: templates/terraform/custom_create/service_networking_vpc_service_controls.go.erb
-  custom_update: templates/terraform/custom_create/service_networking_vpc_service_controls.go.erb
-  constants: templates/terraform/constants/service_networking_vpc_service_controls.go.erb
-  pre_read: templates/terraform/pre_read/service_networking_vpc_service_controls.go.erb
+  result:
+    resource_inside_response: false
+  include_project: true
+custom_code:
+  constants: 'templates/terraform/constants/service_networking_vpc_service_controls.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/service_networking_vpc_service_controls.go.tmpl'
+  custom_update: 'templates/terraform/custom_create/service_networking_vpc_service_controls.go.tmpl'
+ # excluding tgc because of helpers in custom_code.constants
+exclude_tgc: true
+examples:
+  - name: 'service_networking_vpc_service_controls_basic'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      psa_range_name: 'psa-range'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'network'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'network'
+    type: String
     description: |
       The network that the consumer is using to connect with services.
-  - !ruby/object:Api::Type::String
-    name: 'service'
-    required: true
     url_param_only: true
+    required: true
     immutable: true
+  - name: 'service'
+    type: String
     description: |
       The service that is managing peering connectivity for a service
       producer's organization. For Google services that support this
       functionality, this value is `servicenetworking.googleapis.com`.
-  - !ruby/object:Api::Type::String
-    name: 'project'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'project'
+    type: String
+    description: |-
+      The id of the Google Cloud project containing the consumer network.
     # required: true
     immutable: true
     ignore_read: true
-    description: |-
-      The id of the Google Cloud project containing the consumer network.
 properties:
-  - !ruby/object:Api::Type::Boolean
-    name: 'enabled'
-    required: true
+  - name: 'enabled'
+    type: Boolean
     description: |-
       Desired VPC Service Controls state service producer VPC network, as
       described at the top of this page.
+    required: true

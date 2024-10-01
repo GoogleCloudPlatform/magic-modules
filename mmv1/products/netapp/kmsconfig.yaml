@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,88 +12,94 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource # API resource name
-name: "kmsconfig"
+# API resource name
+name: 'kmsconfig'
 description: |
   NetApp Volumes always encrypts your data at rest using volume-specific keys.
 
   A CMEK policy (customer-managed encryption key) warps such volume-specific keys in a key stored in Cloud Key Management Service (KMS).
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     # Link to quickstart in the API's Guides section. For example:
     # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    "Documentation": "https://cloud.google.com/netapp/volumes/docs/configure-and-use/cmek/cmek-overview"
+    'Documentation': 'https://cloud.google.com/netapp/volumes/docs/configure-and-use/cmek/cmek-overview'
   # Link to the REST API reference for the resource. For example,
-  api: "https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs"
-base_url: projects/{{project}}/locations/{{location}}/kmsConfigs
-self_link: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{name}}
-update_url: projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}
-update_verb: :PATCH
+  api: 'https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.kmsConfigs'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs?kmsConfigId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-# Skipping the sweeper since we need to sweep multiple regions
-skip_sweeper: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-
-async: !ruby/object:Api::OpAsync
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
   # Overrides which API calls return operations. Default: ['create',
   # 'update', 'delete']
   # actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: "{{op_id}}"
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/KMS_Verify.go.erb
-
-id_format: "projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}"
-import_format:
-  ["projects/{{project}}/locations/{{location}}/kmsConfigs/{{name}}"]
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  post_create: 'templates/terraform/post_create/KMS_Verify.go.tmpl'
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
+examples:
+  - name: 'kmsConfig_create'
+    primary_resource_id: 'kmsConfig'
+    vars:
+      kms_name: 'kms-test'
+      key_ring_value: 'key-ring'
+      crypto_name: 'crypto-name'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "location"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Name of the policy location. CMEK policies apply to the whole region.
-  - !ruby/object:Api::Type::String # OK: This needs to be 'name' IMHO
-    name: "name"
-    description: |
-      Name of the CMEK policy.
+    url_param_only: true
     required: true
     immutable: true
+    # OK: This needs to be 'name' IMHO
+  - name: 'name'
+    type: String
+    description: |
+      Name of the CMEK policy.
     url_param_only: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "kmsConfig_create"
-    primary_resource_id: "kmsConfig"
-    vars:
-      kms_name: "kms-test"
-      key_ring_value: "key-ring"
-      crypto_name: "crypto-name"
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "description"
+  - name: 'description'
+    type: String
     description: |
       Description for the CMEK policy.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
-  - !ruby/object:Api::Type::String
-    name: "cryptoKeyName"
+  - name: 'cryptoKeyName'
+    type: String
     description: |
       Resource name of the KMS key to use. Only regional keys are supported. Format: `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{key}}`.
     required: true
-  - !ruby/object:Api::Type::String
-    name: "instructions"
+  - name: 'instructions'
+    type: String
     description: |
       Access to the key needs to be granted. The instructions contain gcloud commands to run to grant access.
 
       To make the policy work, a CMEK policy check is required, which verifies key access.
     output: true
-
-  - !ruby/object:Api::Type::String
-    name: "serviceAccount"
+  - name: 'serviceAccount'
+    type: String
     description: |
       The Service account which needs to have access to the  provided KMS key.
     output: true

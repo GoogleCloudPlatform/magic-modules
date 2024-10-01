@@ -37,7 +37,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
 			},
 			{
-				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
+				ResourceName:            "google_scc_v2_organization_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
@@ -46,7 +46,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_update(context),
 			},
 			{
-				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
+				ResourceName:            "google_scc_v2_organization_scc_big_query_export.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"update_time"},
@@ -80,7 +80,7 @@ resource "time_sleep" "wait_1_minute" {
 	create_duration = "3m"
 }
 
-resource "google_scc_v2_organization_scc_big_query_exports" "default" {
+resource "google_scc_v2_organization_scc_big_query_export" "default" {
   name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
@@ -94,7 +94,7 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
 
 resource "time_sleep" "wait_for_cleanup" {
 	create_duration = "3m"
-	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
+	depends_on = [google_scc_v2_organization_scc_big_query_export.default]
 }
 `, context)
 }
@@ -119,7 +119,7 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
-resource "google_scc_v2_organization_scc_big_query_exports" "default" {
+resource "google_scc_v2_organization_scc_big_query_export" "default" {
   name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
@@ -131,7 +131,7 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
 
 resource "time_sleep" "wait_for_cleanup" {
 	create_duration = "3m"
-	depends_on = [google_scc_v2_organization_scc_big_query_exports.default]
+	depends_on = [google_scc_v2_organization_scc_big_query_export.default]
 }
 `, context)
 }

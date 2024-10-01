@@ -12,36 +12,50 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "ResizeRequest"
-kind: "compute#instanceGroupManagerResizeRequest"
+name: 'ResizeRequest'
+kind: 'compute#instanceGroupManagerResizeRequest'
 description: |
   Represents a Managed Instance Group Resize Request
 
   Resize Requests are the Managed Instance Group implementation of Dynamic Workload Scheduler Flex Start.
 
   With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     # Link to quickstart in the API's Guides section. For example:
     # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    "QUICKSTART_TITLE": "https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig"
+    'QUICKSTART_TITLE': 'https://cloud.google.com/compute/docs/instance-groups/create-resize-requests-mig'
   # Link to the REST API reference for the resource. For example,
   # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: "https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests"
-
-immutable: true
-
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests'
+docs:
 ### List Method ###
-base_url: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests"
-
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
 ### Get Method
-self_link: "projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}"
-
-### Create Method ###
-# Get method with a post
-create_verb: :POST
-
+self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+# Sets parameters for handling operations returned by the API.
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
 ### Update method ###
 # Resize requests are currently not update-able
 
@@ -49,376 +63,349 @@ create_verb: :POST
 # Custom delete method to handle resize request cancellations vs. deletions.
 # If a resize request is in the ACCEPTED state, it must be canceled before it can be
 # deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_delete: templates/terraform/custom_delete/compute_mig_resize_request_delete.go.erb
-
-# Sets parameters for handling operations returned by the API.
-async: !ruby/object:Api::OpAsync
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: "compute#operation"
-    path: "name"
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: "targetLink"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "status"
-    complete: "DONE"
-    allowed:
-      - "PENDING"
-      - "RUNNING"
-      - "DONE"
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error/errors"
-    message: "message"
-
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/compute_mig_resize_request_delete.go.tmpl'
+# Examples for testing
+examples:
+  - name: 'compute_mig_resize_request'
+    primary_resource_id: 'a3_resize_request'
+    vars:
+      resize_request_name: 'a3-dws'
 # Resize request parameters injected via URL
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: "zone"
-    resource: "Zone"
-    imports: "name"
+  - name: 'zone'
+    type: ResourceRef
     description: |
       Name of the compute zone scoping this request. Name should conform to RFC1035.
-    required: true
     url_param_only: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: "instanceGroupManager"
-    resource: "InstanceGroupManager"
-    imports: "name"
+    required: true
+    resource: 'Zone'
+    imports: 'name'
+  - name: 'instanceGroupManager'
+    type: ResourceRef
     description: |
       The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
       Authorization requires the following IAM permission on the specified resource instanceGroupManager:
       *compute.instanceGroupManagers.update
-    required: true
     url_param_only: true
-
+    required: true
+    resource: 'InstanceGroupManager'
+    imports: 'name'
 # Non-URL parameters including input and output parameters
 properties:
-  - !ruby/object:Api::Type::Time
-    name: "creationTimestamp"
+  - name: 'creationTimestamp'
+    type: Time
     description: |
       The creation timestamp for this resize request in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+  - name: 'state'
+    type: Enum
     description: |
       [Output only] Current state of the request.
-    values:
-      - :CREATING
-      - :ACCEPTED
-      - :FAILED
-      - :SUCCEEDED
-      - :CANCELLED
     output: true
-  - !ruby/object:Api::Type::String
-    name: "name"
+    enum_values:
+      - 'CREATING'
+      - 'ACCEPTED'
+      - 'FAILED'
+      - 'SUCCEEDED'
+      - 'CANCELLED'
+  - name: 'name'
+    type: String
     description: |
       The name of this resize request. The name must be 1-63 characters long, and comply with RFC1035.
     required: true
-  - !ruby/object:Api::Type::String
-    name: "description"
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resize-request.
-  - !ruby/object:Api::Type::Integer
-    name: "resizeBy"
+  - name: 'resizeBy'
+    type: Integer
     description: |
       The number of instances to be created by this resize request. The group's target size will be increased by this number.
     required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "requestedRunDuration"
+  - name: 'requestedRunDuration'
+    type: NestedObject
     description: |
       Requested run duration for instances that will be created by this request. At the end of the run duration instance will be deleted.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "seconds"
+      - name: 'seconds'
+        type: String
         description: |
           Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
         required: true
-      - !ruby/object:Api::Type::Integer
-        name: "nanos"
+      - name: 'nanos'
+        type: Integer
         description: |
           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
-  - !ruby/object:Api::Type::NestedObject
-    name: "status"
+  - name: 'status'
+    type: NestedObject
     description: |
       [Output only] Status of the request.
     output: true
     properties:
       # Status.error
-      - !ruby/object:Api::Type::NestedObject
-        name: "error"
-        output: true
+      - name: 'error'
+        type: NestedObject
         description: |
           [Output only] Fatal errors encountered during the queueing or provisioning phases of the ResizeRequest that caused the transition to the FAILED state. Contrary to the lastAttempt errors, this field is final and errors are never removed from here, as the ResizeRequest is not going to retry.
+        output: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: "errors"
-            output: true
+          - name: 'errors'
+            type: NestedObject
             description: |
               [Output Only] The array of errors encountered while processing this operation.
+            output: true
             properties:
-              - !ruby/object:Api::Type::String
-                name: "code"
-                output: true
+              - name: 'code'
+                type: String
                 description: |
                   [Output Only] The error type identifier for this error.
-              - !ruby/object:Api::Type::String
-                name: "location"
                 output: true
+              - name: 'location'
+                type: String
                 description: |
                   Output Only] Indicates the field in the request that caused the error. This property is optional.
-              - !ruby/object:Api::Type::String
-                name: "message"
                 output: true
+              - name: 'message'
+                type: String
                 description: |
                   [Output Only] An optional, human-readable error message.
-              - !ruby/object:Api::Type::NestedObject
-                name: "errorDetails"
                 output: true
+              - name: 'errorDetails'
+                type: NestedObject
                 description: |
                   [Output Only] An optional list of messages that contain the error details. There is a set of defined message types to use for providing details.The syntax depends on the error code. For example, QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                output: true
                 properties:
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "errorInfo"
-                    output: true
+                  - name: 'errorInfo'
+                    type: NestedObject
                     description: |
                       [Output Only]
+                    output: true
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: "reason"
-                        output: true
+                      - name: 'reason'
+                        type: String
                         description: |
                           The reason of the error. This is a constant value that identifies the proximate cause of the error. Error reasons are unique within a particular domain of errors. This should be at most 63 characters and match a regular expression of [A-Z][A-Z0-9_]+[A-Z0-9], which represents UPPER_SNAKE_CASE.
-                      - !ruby/object:Api::Type::String
-                        name: "domain"
                         output: true
+                      - name: 'domain'
+                        type: String
                         description: |
                           The logical grouping to which the "reason" belongs. The error domain is typically the registered service name of the tool or product that generates the error. Example: "pubsub.googleapis.com". If the error is generated by some common infrastructure, the error domain must be a globally unique value that identifies the infrastructure. For Google API infrastructure, the error domain is "googleapis.com".
-                      - !ruby/object:Api::Type::KeyValuePairs
-                        name: "metadatas"
                         output: true
+                      - name: 'metadatas'
+                        type: KeyValuePairs
                         description: |
                           Additional structured details about this error.
                           Keys must match /[a-z][a-zA-Z0-9-_]+/ but should ideally be lowerCamelCase. Also they must be limited to 64 characters in length. When identifying the current value of an exceeded limit, the units should be contained in the key, not the value. For example, rather than {"instanceLimit": "100/request"}, should be returned as, {"instanceLimitPerRequest": "100"}, if the client exceeds the number of instances that can be created in a single (batch) request.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "quotaInfo"
-                    output: true
+                        output: true
+                  - name: 'quotaInfo'
+                    type: NestedObject
                     description: |
                       [Output Only]
+                    output: true
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: "metricName"
-                        output: true
+                      - name: 'metricName'
+                        type: String
                         description: |
                           The Compute Engine quota metric name.
-                      - !ruby/object:Api::Type::String
-                        name: "limitName"
                         output: true
+                      - name: 'limitName'
+                        type: String
                         description: |
                           The name of the quota limit.
-                      - !ruby/object:Api::Type::KeyValuePairs
-                        name: "dimensions"
                         output: true
+                      - name: 'dimensions'
+                        type: KeyValuePairs
                         description: |
                           The map holding related quota dimensions
-                      - !ruby/object:Api::Type::Integer
-                        name: "limit"
                         output: true
+                      - name: 'limit'
+                        type: Integer
                         description: |
                           Current effective quota limit. The limit's unit depends on the quota type or metric.
-                      - !ruby/object:Api::Type::Integer
-                        name: "futureLimit"
                         output: true
+                      - name: 'futureLimit'
+                        type: Integer
                         description: |
                           Future quota limit being rolled out. The limit's unit depends on the quota type or metric.
-                      - !ruby/object:Api::Type::String
-                        name: "rolloutStatus"
                         output: true
+                      - name: 'rolloutStatus'
+                        type: String
                         description: |
                           Rollout status of the future quota limit.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "help"
-                    output: true
+                        output: true
+                  - name: 'help'
+                    type: NestedObject
                     description: |
                       [Output Only]
+                    output: true
                     properties:
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "links"
-                        output: true
+                      - name: 'links'
+                        type: NestedObject
                         description: |
                           [Output Only]
+                        output: true
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: "description"
-                            output: true
+                          - name: 'description'
+                            type: String
                             description: |
                               Describes what the link offers.
-                          - !ruby/object:Api::Type::String
-                            name: "url"
                             output: true
+                          - name: 'url'
+                            type: String
                             description: |
                               The URL of the link.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "localizedMessage"
-                    output: true
+                            output: true
+                  - name: 'localizedMessage'
+                    type: NestedObject
                     description: |
                       [Output Only]
+                    output: true
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: "locale"
-                        output: true
+                      - name: 'locale'
+                        type: String
                         description: |
                           The locale used following the specification defined at https://www.rfc-editor.org/rfc/bcp/bcp47.txt. Examples are: "en-US", "fr-CH", "es-MX"
-                      - !ruby/object:Api::Type::String
-                        name: "message"
                         output: true
+                      - name: 'message'
+                        type: String
                         description: |
                           The localized error message in the above locale.
+                        output: true
       # Status.lastAttempt
-      - !ruby/object:Api::Type::NestedObject
-        name: "lastAttempt"
-        output: true
+      - name: 'lastAttempt'
+        type: NestedObject
         description: |
           [Output only] Information about the last attempt to fulfill the request. The value is temporary since the ResizeRequest can retry, as long as it's still active and the last attempt value can either be cleared or replaced with a different error. Since ResizeRequest retries infrequently, the value may be stale and no longer show an active problem. The value is cleared when ResizeRequest transitions to the final state (becomes inactive). If the final state is FAILED the error describing it will be storred in the "error" field only.
+        output: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: "error"
-            output: true
+          - name: 'error'
+            type: NestedObject
             description: |
               [Output only] Fatal errors encountered during the queueing or provisioning phases of the ResizeRequest that caused the transition to the FAILED state. Contrary to the lastAttempt errors, this field is final and errors are never removed from here, as the ResizeRequest is not going to retry.
+            output: true
             properties:
-              - !ruby/object:Api::Type::NestedObject
-                name: "errors"
-                output: true
+              - name: 'errors'
+                type: NestedObject
                 description: |
                   [Output Only] The array of errors encountered while processing this operation.
+                output: true
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: "code"
-                    output: true
+                  - name: 'code'
+                    type: String
                     description: |
                       [Output Only] The error type identifier for this error.
-                  - !ruby/object:Api::Type::String
-                    name: "location"
                     output: true
+                  - name: 'location'
+                    type: String
                     description: |
                       Output Only] Indicates the field in the request that caused the error. This property is optional.
-                  - !ruby/object:Api::Type::String
-                    name: "message"
                     output: true
+                  - name: 'message'
+                    type: String
                     description: |
                       [Output Only] An optional, human-readable error message.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: "errorDetails"
                     output: true
+                  - name: 'errorDetails'
+                    type: NestedObject
                     description: |
                       [Output Only] An optional list of messages that contain the error details. There is a set of defined message types to use for providing details.The syntax depends on the error code. For example, QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                    output: true
                     properties:
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "errorInfo"
-                        output: true
+                      - name: 'errorInfo'
+                        type: NestedObject
                         description: |
                           [Output Only]
+                        output: true
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: "reason"
-                            output: true
+                          - name: 'reason'
+                            type: String
                             description: |
                               The reason of the error. This is a constant value that identifies the proximate cause of the error. Error reasons are unique within a particular domain of errors. This should be at most 63 characters and match a regular expression of [A-Z][A-Z0-9_]+[A-Z0-9], which represents UPPER_SNAKE_CASE.
-                          - !ruby/object:Api::Type::String
-                            name: "domain"
                             output: true
+                          - name: 'domain'
+                            type: String
                             description: |
                               The logical grouping to which the "reason" belongs. The error domain is typically the registered service name of the tool or product that generates the error. Example: "pubsub.googleapis.com". If the error is generated by some common infrastructure, the error domain must be a globally unique value that identifies the infrastructure. For Google API infrastructure, the error domain is "googleapis.com".
-                          - !ruby/object:Api::Type::KeyValuePairs
-                            name: "metadatas"
                             output: true
+                          - name: 'metadatas'
+                            type: KeyValuePairs
                             description: |
                               Additional structured details about this error.
                               Keys must match /[a-z][a-zA-Z0-9-_]+/ but should ideally be lowerCamelCase. Also they must be limited to 64 characters in length. When identifying the current value of an exceeded limit, the units should be contained in the key, not the value. For example, rather than {"instanceLimit": "100/request"}, should be returned as, {"instanceLimitPerRequest": "100"}, if the client exceeds the number of instances that can be created in a single (batch) request.
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "quotaInfo"
-                        output: true
+                            output: true
+                      - name: 'quotaInfo'
+                        type: NestedObject
                         description: |
                           [Output Only]
+                        output: true
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: "metricName"
-                            output: true
+                          - name: 'metricName'
+                            type: String
                             description: |
                               The Compute Engine quota metric name.
-                          - !ruby/object:Api::Type::String
-                            name: "limitName"
                             output: true
+                          - name: 'limitName'
+                            type: String
                             description: |
                               The name of the quota limit.
-                          - !ruby/object:Api::Type::KeyValuePairs
-                            name: "dimensions"
                             output: true
+                          - name: 'dimensions'
+                            type: KeyValuePairs
                             description: |
                               The map holding related quota dimensions
-                          - !ruby/object:Api::Type::Integer
-                            name: "limit"
                             output: true
+                          - name: 'limit'
+                            type: Integer
                             description: |
                               Current effective quota limit. The limit's unit depends on the quota type or metric.
-                          - !ruby/object:Api::Type::Integer
-                            name: "futureLimit"
                             output: true
+                          - name: 'futureLimit'
+                            type: Integer
                             description: |
                               Future quota limit being rolled out. The limit's unit depends on the quota type or metric.
-                          - !ruby/object:Api::Type::String
-                            name: "rolloutStatus"
                             output: true
+                          - name: 'rolloutStatus'
+                            type: String
                             description: |
                               Rollout status of the future quota limit.
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "help"
-                        output: true
+                            output: true
+                      - name: 'help'
+                        type: NestedObject
                         description: |
                           [Output Only]
+                        output: true
                         properties:
-                          - !ruby/object:Api::Type::NestedObject
-                            name: "links"
-                            output: true
+                          - name: 'links'
+                            type: NestedObject
                             description: |
                               [Output Only]
+                            output: true
                             properties:
-                              - !ruby/object:Api::Type::String
-                                name: "description"
-                                output: true
+                              - name: 'description'
+                                type: String
                                 description: |
                                   Describes what the link offers.
-                              - !ruby/object:Api::Type::String
-                                name: "url"
                                 output: true
+                              - name: 'url'
+                                type: String
                                 description: |
                                   The URL of the link.
-                      - !ruby/object:Api::Type::NestedObject
-                        name: "localizedMessage"
-                        output: true
+                                output: true
+                      - name: 'localizedMessage'
+                        type: NestedObject
                         description: |
                           [Output Only]
+                        output: true
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: "locale"
-                            output: true
+                          - name: 'locale'
+                            type: String
                             description: |
                               The locale used following the specification defined at https://www.rfc-editor.org/rfc/bcp/bcp47.txt. Examples are: "en-US", "fr-CH", "es-MX"
-                          - !ruby/object:Api::Type::String
-                            name: "message"
                             output: true
+                          - name: 'message'
+                            type: String
                             description: |
                               The localized error message in the above locale.
-
-#Examples for testing
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "compute_mig_resize_request"
-    primary_resource_id: "a3_resize_request"
-    vars:
-      resize_request_name: a3-dws
+                            output: true

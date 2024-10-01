@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'HttpHealthCheck'
 kind: 'compute#httpHealthCheck'
-base_url: projects/{{project}}/global/httpHealthChecks
-collection_url_key: 'items'
-has_self_link: true
 description: |
   An HttpHealthCheck resource. This resource defines a template for how
   individual VMs should be checked for health, via HTTP.
@@ -26,64 +23,69 @@ description: |
   should be preferred for all uses except
   [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
   which still require the legacy version.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
   api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/httpHealthChecks'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'http_health_check_basic'
+  - name: 'http_health_check_basic'
     primary_resource_id: 'default'
     vars:
       http_health_check_name: 'authentication-health-check'
+parameters:
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'checkIntervalSec'
+  - name: 'checkIntervalSec'
+    type: Integer
     description: |
       How often (in seconds) to send a health check. The default value is 5
       seconds.
     default_value: 5
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Integer
-    name: 'healthyThreshold'
+  - name: 'healthyThreshold'
+    type: Integer
     description: |
       A so-far unhealthy instance will be marked healthy after this many
       consecutive successes. The default value is 2.
     default_value: 2
-  - !ruby/object:Api::Type::String
-    name: 'host'
+  - name: 'host'
+    type: String
     description: |
       The value of the host header in the HTTP health check request. If
       left empty (default value), the public IP on behalf of which this
       health check is performed will be used.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -94,27 +96,27 @@ properties:
       last character, which cannot be a dash.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Integer
-    name: 'port'
+  - name: 'port'
+    type: Integer
     description: |
       The TCP port number for the HTTP health check request.
       The default value is 80.
     default_value: 80
-  - !ruby/object:Api::Type::String
-    name: 'requestPath'
+  - name: 'requestPath'
+    type: String
     description: |
       The request path of the HTTP health check request.
       The default value is /.
-    default_value: '/'
-  - !ruby/object:Api::Type::Integer
-    name: 'timeoutSec'
+    default_value: "/"
+  - name: 'timeoutSec'
+    type: Integer
     description: |
       How long (in seconds) to wait before claiming failure.
       The default value is 5 seconds.  It is invalid for timeoutSec to have
       greater value than checkIntervalSec.
     default_value: 5
-  - !ruby/object:Api::Type::Integer
-    name: 'unhealthyThreshold'
+  - name: 'unhealthyThreshold'
+    type: Integer
     description: |
       A so-far healthy instance will be marked unhealthy after this many
       consecutive failures. The default value is 2.

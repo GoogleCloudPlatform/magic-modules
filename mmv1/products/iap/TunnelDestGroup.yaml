@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,68 +11,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TunnelDestGroup'
 description: |
   Tunnel destination groups represent resources that have the same tunnel access restrictions.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.iap_tunnel.locations.destGroups'
+references:
   guides:
     'Set up IAP TCP forwarding with an IP address or hostname in a Google Cloud or non-Google Cloud environment': 'https://cloud.google.com/iap/docs/tcp-by-host'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/projects.iap_tunnel.locations.destGroups'
+docs:
 base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups'
-create_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups?tunnelDestGroupId={{group_name}}'
-update_verb: :PATCH
 self_link: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
-import_format: [
-  'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}',
-  '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}',
-  '{{region}}/destGroups/{{group_name}}',
-]
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
-  parent_resource_attribute: 'dest_group'
+create_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups?tunnelDestGroupId={{group_name}}'
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
+  - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{group_name}}'
+  - '{{region}}/destGroups/{{group_name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-  iam_conditions_request_type: :REQUEST_BODY
+  parent_resource_attribute: 'dest_group'
+  iam_conditions_request_type: 'REQUEST_BODY'
   base_url: 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
-  import_format: [
-    'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}',
-    '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}',
-  ]
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
+    - '{{project}}/iap_tunnel/locations/{{region}}/destGroups/{{dest_group}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iap_destgroup'
-    external_providers: ["random", "time"]
+  - name: 'iap_destgroup'
     primary_resource_id: 'dest_group'
     primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    external_providers: ["random", "time"]
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
+    type: String
     description: |
       The region of the tunnel group. Must be the same as the network resources in the group.
-    immutable: true
     url_param_only: true
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'group_name'
+  - name: 'group_name'
+    type: String
     description: Unique tunnel destination group name.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: Full resource name.
     immutable: true
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'cidrs'
+  - name: 'cidrs'
+    type: Array
     description: |
       List of CIDRs that this group applies to.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'fqdns'
+    item_type:
+      type: String
+  - name: 'fqdns'
+    type: Array
     description: |
       List of FQDNs that this group applies to.
-    item_type: Api::Type::String
+    item_type:
+      type: String

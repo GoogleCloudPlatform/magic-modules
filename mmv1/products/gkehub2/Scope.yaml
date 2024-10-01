@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,121 +11,121 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Scope'
-base_url: 'projects/{{project}}/locations/global/scopes'
-create_url: 'projects/{{project}}/locations/global/scopes?scopeId={{scope_id}}'
-update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Scope represents a Scope in a Fleet.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.scopes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
+base_url: 'projects/{{project}}/locations/global/scopes'
+self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
+create_url: 'projects/{{project}}/locations/global/scopes?scopeId={{scope_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'gkehub#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: 'true'
-    allowed:
-      - 'true'
-      - 'false'
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error/errors'
     message: 'message'
-autogen_async: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: scope_id
-  exclude: false
+iam_policy:
   method_name_separator: ':'
+  parent_resource_attribute: 'scope_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/global/scopes/{{scope_id}}',
-      '{{scope_id}}',
-    ]
+    - 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
+    - '{{scope_id}}'
+custom_code:
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_scope_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
+  - name: 'gkehub_scope_basic'
     primary_resource_id: 'scope'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-scope%s", context["random_suffix"])'
     vars:
       resource_name: 'my-scope'
     test_env_vars:
-      project: :PROJECT_NAME
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}'
-import_format:
-  ['projects/{{project}}/locations/global/scopes/{{scope_id}}']
+      project: 'PROJECT_NAME'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'scopeId'
+  - name: 'scopeId'
+    type: String
     description: |
       The client-provided identifier of the scope.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the scope
-  - !ruby/object:Api::Type::String
-    name: 'uid'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       Google-generated UUID for this resource.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Scope was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Scope was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'deleteTime'
+  - name: 'deleteTime'
+    type: Time
     description: |
       Time the Scope was deleted in UTC.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'state'
+  - name: 'state'
+    type: NestedObject
     description: |
       State of the scope resource.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'code'
+      - name: 'code'
+        type: Enum
         description: |
           Code describes the state of a Scope resource.
         output: true
-        values:
-          - :CODE_UNSPECIFIED
-          - :CREATING
-          - :READY
-          - :DELETING
-          - :UPDATING
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'namespaceLabels'
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'namespaceLabels'
+    type: KeyValuePairs
     description: |
       Scope-level cluster namespace labels. For the member clusters bound
       to the Scope, these labels are applied to each namespace under the
       Scope. Scope-level labels take precedence over Namespace-level
       labels (`namespace_labels` in the Fleet Namespace resource) if they
       share a key. Keys and values must be Kubernetes-conformant.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels for this Scope.

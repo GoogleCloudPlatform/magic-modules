@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,210 +11,201 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeaturestoreEntitytype
-base_url: '{{featurestore}}/entityTypes'
-create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
-self_link: '{{featurestore}}/entityTypes/{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeaturestoreEntitytype'
+description: |-
+  An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  parent_resource_type: featurestore
-  parent_resource_attribute: entitytype
-  import_format: ['{{%featurestore}}/entityTypes/{{name}}', '{{name}}']
-  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore_entitytype.tf.erb'
-  min_version: beta
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: '{{featurestore}}/entityTypes'
+self_link: '{{featurestore}}/entityTypes/{{name}}'
+create_url: '{{featurestore}}/entityTypes?entityTypeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%featurestore}}/entityTypes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
   include_project: true
-description: |-
-  An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
-import_format: ['{{%featurestore}}/entityTypes/{{name}}']
-autogen_async: false
-skip_sweeper: true
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'featurestore'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'entitytype'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_featurestore_entitytype.tf.tmpl'
+  import_format:
+    - '{{%featurestore}}/entityTypes/{{name}}'
+    - '{{name}}'
+  min_version: 'beta'
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype.go.tmpl'
+  encoder: 'templates/terraform/encoders/vertex_ai_featurestore_entitytype.go.tmpl'
+  pre_create: 'templates/terraform/constants/vertex_ai_featurestore_entitytype.go.tmpl'
+  pre_delete: 'templates/terraform/constants/vertex_ai_featurestore_entitytype.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_entitytype'
+  - name: 'vertex_ai_featurestore_entitytype'
     primary_resource_id: 'entity'
-    primary_resource_name:
-      "fmt.Sprintf(\"projects/%s/locations/%s/featurestores/%s\"\
-      , envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
-      fmt.Sprintf(\"terraform%s\"\
-      , context[\"random_suffix\"])), fmt.Sprintf(\"terraform%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featurestores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("terraform%s", context["random_suffix"])), fmt.Sprintf("terraform%s", context["random_suffix"])'
     vars:
       name: 'terraform'
       project: 'vertex-ai'
       kms_key_name: 'kms-name'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - name: 'vertex_ai_featurestore_entitytype_with_beta_fields'
     primary_resource_id: 'entity'
+    min_version: 'beta'
     vars:
       name: 'terraform2'
       project: 'vertex-ai'
       kms_key_name: 'kms-name'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-    min_version: beta
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
-  pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype.go.erb
-  custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype.go.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype.go.erb
-  encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype.go.erb
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: featurestore
+  - name: 'featurestore'
+    type: String
     description:
       The name of the Featurestore to use, in the format
       projects/{project}/locations/{location}/featurestores/{featurestore}.
     url_param_only: true
-    immutable: true
     required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description:
       The name of the EntityType. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
-    immutable: true
     url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
     description: Optional. Description of the EntityType.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+  - name: 'etag'
+    type: String
     description: Used to perform consistent read-modify-write updates.
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
     output: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the featurestore was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp of when the featurestore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to this EntityType.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'monitoringConfig'
+  - name: 'monitoringConfig'
+    type: NestedObject
     description: |
       The default monitoring configuration for all Features under this EntityType.
 
       If this is populated with [FeaturestoreMonitoringConfig.monitoring_interval] specified, snapshot analysis monitoring is enabled. Otherwise, snapshot analysis monitoring is disabled.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'snapshotAnalysis'
+      - name: 'snapshotAnalysis'
+        type: NestedObject
         description: |
           The config for Snapshot Analysis Based Feature Monitoring.
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'disabled'
-            default_value: false
+          - name: 'disabled'
+            type: Boolean
             description: |
               The monitoring schedule for snapshot analysis. For EntityType-level config: unset / disabled = true indicates disabled by default for Features under it; otherwise by default enable snapshot analysis monitoring with monitoringInterval for Features under it.
-          - !ruby/object:Api::Type::String
-            name: 'monitoringInterval'
-            min_version: beta
-            deprecation_message: >-
-              `monitoring_interval` is deprecated and will be removed in a future release.
+            default_value: false
+          - name: 'monitoringInterval'
+            type: String
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value is rolled up to full day.
 
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+            min_version: 'beta'
             default_from_api: true
-          - !ruby/object:Api::Type::Integer
-            name: 'monitoringIntervalDays'
+            deprecation_message: '`monitoring_interval` is deprecated and will be removed in a future release.'
+          - name: 'monitoringIntervalDays'
+            type: Integer
             description: |
               Configuration of the snapshot analysis based monitoring pipeline running interval. The value indicates number of days. The default value is 1.
               If both FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days and [FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval][] are set when creating/updating EntityTypes/Features, FeaturestoreMonitoringConfig.SnapshotAnalysis.monitoring_interval_days will be used.
             default_value: 1
-          - !ruby/object:Api::Type::Integer
-            name: 'stalenessDays'
+          - name: 'stalenessDays'
+            type: Integer
             description: |
               Customized export features time window for snapshot analysis. Unit is one day. The default value is 21 days. Minimum value is 1 day. Maximum value is 4000 days.
             default_value: 21
-      - !ruby/object:Api::Type::NestedObject
-        name: 'importFeaturesAnalysis'
+      - name: 'importFeaturesAnalysis'
+        type: NestedObject
         description: |
           The config for ImportFeatures Analysis Based Feature Monitoring.
         properties:
-          - !ruby/object:Api::Type::String
-            name: state
+          - name: 'state'
+            type: String
             description: |
               Whether to enable / disable / inherite default hebavior for import features analysis. The value must be one of the values below:
               * DEFAULT: The default behavior of whether to enable the monitoring. EntityType-level config: disabled.
               * ENABLED: Explicitly enables import features analysis. EntityType-level config: by default enables import features analysis for all Features under it.
               * DISABLED: Explicitly disables import features analysis. EntityType-level config: by default disables import features analysis for all Features under it.
-          - !ruby/object:Api::Type::String
-            name: 'anomalyDetectionBaseline'
+          - name: 'anomalyDetectionBaseline'
+            type: String
             description: |
               Defines the baseline to do anomaly detection for feature values imported by each [entityTypes.importFeatureValues][] operation. The value must be one of the values below:
               * LATEST_STATS: Choose the later one statistics generated by either most recent snapshot analysis or previous import features analysis. If non of them exists, skip anomaly detection and only generate a statistics.
               * MOST_RECENT_SNAPSHOT_STATS: Use the statistics generated by the most recent snapshot analysis if exists.
               * PREVIOUS_IMPORT_FEATURES_STATS: Use the statistics generated by the previous import features analysis if exists.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'numericalThresholdConfig'
+      - name: 'numericalThresholdConfig'
+        type: NestedObject
         description: |
           Threshold for numerical features of anomaly detection. This is shared by all objectives of Featurestore Monitoring for numerical features (i.e. Features with type (Feature.ValueType) DOUBLE or INT64).
         properties:
-          - !ruby/object:Api::Type::Double
-            name: 'value'
+          - name: 'value'
+            type: Double
             description: |
               Specify a threshold value that can trigger the alert. For numerical feature, the distribution distance is calculated by Jensen–Shannon divergence. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
             required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'categoricalThresholdConfig'
+      - name: 'categoricalThresholdConfig'
+        type: NestedObject
         description: |
           Threshold for categorical features of anomaly detection. This is shared by all types of Featurestore Monitoring for categorical features (i.e. Features with type (Feature.ValueType) BOOL or STRING).
         properties:
-          - !ruby/object:Api::Type::Double
-            name: 'value'
+          - name: 'value'
+            type: Double
             description: |
               Specify a threshold value that can trigger the alert. For categorical feature, the distribution distance is calculated by L-inifinity norm. Each feature must have a non-zero threshold if they need to be monitored. Otherwise no alert will be triggered for that feature. The default value is 0.3.
             required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'offlineStorageTtlDays'
-    min_version: beta
-    default_value: 4000
+  - name: 'offlineStorageTtlDays'
+    type: Integer
     description: |
       Config for data retention policy in offline storage. TTL in days for feature values that will be stored in offline storage. The Feature Store offline storage periodically removes obsolete feature values older than offlineStorageTtlDays since the feature generation time. If unset (or explicitly set to 0), default to 4000 days TTL.
+    min_version: 'beta'
+    default_value: 4000

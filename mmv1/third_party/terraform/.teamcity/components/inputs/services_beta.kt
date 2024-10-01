@@ -311,6 +311,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Deploymentmanager",
         "path" to "./google-beta/services/deploymentmanager"
     ),
+    "developerconnect" to mapOf(
+        "name" to "developerconnect",
+        "displayName" to "Developerconnect",
+        "path" to "./google-beta/services/developerconnect"
+    ),
     "dialogflow" to mapOf(
         "name" to "dialogflow",
         "displayName" to "Dialogflow",
@@ -491,6 +496,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Memcache",
         "path" to "./google-beta/services/memcache"
     ),
+    "memorystore" to mapOf(
+        "name" to "memorystore",
+        "displayName" to "Memorystore",
+        "path" to "./google-beta/services/memorystore"
+    ),
     "migrationcenter" to mapOf(
         "name" to "migrationcenter",
         "displayName" to "Migrationcenter",
@@ -605,6 +615,11 @@ var ServicesListBeta = mapOf(
         "name" to "secretmanager",
         "displayName" to "Secretmanager",
         "path" to "./google-beta/services/secretmanager"
+    ),
+    "secretmanagerregional" to mapOf(
+        "name" to "secretmanagerregional",
+        "displayName" to "Secretmanagerregional",
+        "path" to "./google-beta/services/secretmanagerregional"
     ),
     "securesourcemanager" to mapOf(
         "name" to "securesourcemanager",

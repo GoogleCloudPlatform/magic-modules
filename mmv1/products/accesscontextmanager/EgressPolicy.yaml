@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,48 +11,68 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EgressPolicy'
-create_url: '{{egress_policy_name}}'
+description: |
+  This resource has been deprecated, please refer to ServicePerimeterEgressPolicy.
+references:
+  guides:
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy'
+docs:
+id_format: '{{egress_policy_name}}/{{resource}}'
 base_url: ''
 self_link: '{{egress_policy_name}}'
-create_verb: :PATCH
-delete_verb: :PATCH
-immutable: true
+create_url: '{{egress_policy_name}}'
+create_verb: 'PATCH'
 update_mask: true
+delete_verb: 'PATCH'
+immutable: true
+import_format:
+  - '{{egress_policy_name}}/{{resource}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
 identity:
   - resource
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  modify_by_patch: true
-  is_list_of_ids: true
+nested_query:
   keys:
     - status
     - resources
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy'
-description: |
-  This resource has been deprecated, please refer to ServicePerimeterEgressPolicy.
-autogen_async: true
+  is_list_of_ids: true
+  modify_by_patch: true
+custom_code:
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter/IngressPolicy
-skip_sweeper: true
-id_format: '{{egress_policy_name}}/{{resource}}'
-import_format: ['{{egress_policy_name}}/{{resource}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.erb
+exclude_sweeper: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'egressPolicyName'
-    resource: 'ServicePerimeter'
-    imports: 'name'
+  - name: 'egressPolicyName'
+    type: ResourceRef
     description: |
       The name of the Service Perimeter to add this resource to.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+    resource: 'ServicePerimeter'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'resource'
+  - name: 'resource'
+    type: String
     description: |
       A GCP resource that is inside of the service perimeter.
     required: true

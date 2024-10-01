@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'BackendService'
 kind: 'compute#backendService'
-base_url: projects/{{project}}/global/backendServices
-collection_url_key: 'items'
-has_self_link: true
 description: |
   A Backend Service defines a group of virtual machines that will serve
   traffic for load balancing. This resource is a global backend service,
@@ -24,115 +21,112 @@ description: |
   For managed internal load balancing, use a regional backend service instead.
 
   Currently self-managed internal load balancing is only available in beta.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
   api: 'https://cloud.google.com/compute/docs/reference/v1/backendServices'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/backendServices'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+iam_policy:
+  allowed_iam_role: 'roles/compute.admin'
+  parent_resource_attribute: 'name'
+  iam_conditions_request_type: 'QUERY_PARAM'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  min_version: 'beta'
+custom_code:
+  constants: 'templates/terraform/constants/backend_service.go.tmpl'
+  encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
+  decoder: 'templates/terraform/decoders/backend_service.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
+  post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
+schema_version: 1
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_basic'
+  - name: 'backend_service_basic'
     primary_resource_id: 'default'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-backend-service%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_external_iap'
+  - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'tf-test-backend-service-external'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_cache_simple'
+  - name: 'backend_service_cache_simple'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_cache_include_http_headers'
+  - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_cache_include_named_cookies'
+  - name: 'backend_service_cache_include_named_cookies'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_cache'
+  - name: 'backend_service_cache'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_cache_bypass_cache_on_request_headers'
+  - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_traffic_director_round_robin'
-    min_version: beta
+  - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_traffic_director_ring_hash'
-    min_version: beta
+  - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_network_endpoint'
-    min_version: beta
+  - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+  - name: 'backend_service_network_endpoint'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       neg_name: 'network-endpoint'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'backend_service_external_managed'
+  - name: 'backend_service_external_managed'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: '/'
-  fetch_iam_policy_verb: :GET
-  min_version: beta
-  iam_conditions_request_type: :QUERY_PARAM
-  parent_resource_attribute: 'name'
-  allowed_iam_role: 'roles/compute.admin'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/backend_service.go.erb'
-  encoder: 'templates/terraform/encoders/backend_service.go.erb'
-  decoder: 'templates/terraform/decoders/backend_service.go.erb'
-  post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
-  post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
-schema_version: 1
+parameters:
 properties:
-  - !ruby/object:Api::Type::Integer
-    name: 'affinityCookieTtlSec'
+  - name: 'affinityCookieTtlSec'
+    type: Integer
     description: |
       Lifetime of cookies in seconds if session_affinity is
       GENERATED_COOKIE. If set to 0, the cookie is non-persistent and lasts
@@ -140,22 +134,18 @@ properties:
       maximum allowed value for TTL is one day.
 
       When the load balancing scheme is INTERNAL, this field is not used.
-  - !ruby/object:Api::Type::Array
-    name: 'backend'
-    api_name: 'backends'
-    is_set: true
-    set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+  - name: 'backend'
+    type: Array
     description: |
       The set of backends that serve this BackendService.
-    item_type: !ruby/object:Api::Type::NestedObject
+    api_name: backends
+    is_set: true
+    set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'balancingMode'
-          default_value: :UTILIZATION
-          values:
-            - :UTILIZATION
-            - :RATE
-            - :CONNECTION
+        - name: 'balancingMode'
+          type: Enum
           description: |
             Specifies the balancing mode for this backend.
 
@@ -165,10 +155,13 @@ properties:
 
             See the [Backend Services Overview](https://cloud.google.com/load-balancing/docs/backend-service#balancing-mode)
             for an explanation of load balancing modes.
-        - !ruby/object:Api::Type::Double
-          name: 'capacityScaler'
-          send_empty_value: true
-          default_value: 1.0
+          default_value: "UTILIZATION"
+          enum_values:
+            - 'UTILIZATION'
+            - 'RATE'
+            - 'CONNECTION'
+        - name: 'capacityScaler'
+          type: Double
           description: |
             A multiplier applied to the group's maximum servicing capacity
             (based on UTILIZATION, RATE or CONNECTION).
@@ -177,13 +170,15 @@ properties:
             of its configured capacity (depending on balancingMode). A
             setting of 0 means the group is completely drained, offering
             0% of its available Capacity. Valid range is [0.0,1.0].
-        - !ruby/object:Api::Type::String
-          name: 'description'
+          send_empty_value: true
+          default_value: 1.0
+        - name: 'description'
+          type: String
           description: |
             An optional description of this resource.
             Provide this property when you create the resource.
-        - !ruby/object:Api::Type::String
-          name: 'group'
+        - name: 'group'
+          type: String
           description: |
             The fully-qualified URL of an Instance Group or Network Endpoint
             Group resource. In case of instance group this defines the list
@@ -203,11 +198,10 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
-          custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-        - !ruby/object:Api::Type::Integer
-          name: 'maxConnections'
-          default_from_api: true
+          custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
+        - name: 'maxConnections'
+          type: Integer
           description: |
             The max number of simultaneous connections for the group. Can
             be used with either CONNECTION or UTILIZATION balancing modes.
@@ -215,9 +209,9 @@ properties:
             For CONNECTION mode, either maxConnections or one
             of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
             as appropriate for group type, must be set.
-        - !ruby/object:Api::Type::Integer
-          name: 'maxConnectionsPerInstance'
           default_from_api: true
+        - name: 'maxConnectionsPerInstance'
+          type: Integer
           description: |
             The max number of simultaneous connections that a single
             backend instance can handle. This is used to calculate the
@@ -226,9 +220,9 @@ properties:
 
             For CONNECTION mode, either maxConnections or
             maxConnectionsPerInstance must be set.
-        - !ruby/object:Api::Type::Integer
-          name: 'maxConnectionsPerEndpoint'
           default_from_api: true
+        - name: 'maxConnectionsPerEndpoint'
+          type: Integer
           description: |
             The max number of simultaneous connections that a single backend
             network endpoint can handle. This is used to calculate the
@@ -237,9 +231,9 @@ properties:
 
             For CONNECTION mode, either
             maxConnections or maxConnectionsPerEndpoint must be set.
-        - !ruby/object:Api::Type::Integer
-          name: 'maxRate'
           default_from_api: true
+        - name: 'maxRate'
+          type: Integer
           description: |
             The max requests per second (RPS) of the group.
 
@@ -247,135 +241,136 @@ properties:
             but required if RATE mode. For RATE mode, either maxRate or one
             of maxRatePerInstance or maxRatePerEndpoint, as appropriate for
             group type, must be set.
-        - !ruby/object:Api::Type::Double
-          name: 'maxRatePerInstance'
           default_from_api: true
+        - name: 'maxRatePerInstance'
+          type: Double
           description: |
             The max requests per second (RPS) that a single backend
             instance can handle. This is used to calculate the capacity of
             the group. Can be used in either balancing mode. For RATE mode,
             either maxRate or maxRatePerInstance must be set.
-        - !ruby/object:Api::Type::Double
-          name: 'maxRatePerEndpoint'
           default_from_api: true
+        - name: 'maxRatePerEndpoint'
+          type: Double
           description: |
             The max requests per second (RPS) that a single backend network
             endpoint can handle. This is used to calculate the capacity of
             the group. Can be used in either balancing mode. For RATE mode,
             either maxRate or maxRatePerEndpoint must be set.
-        - !ruby/object:Api::Type::Double
-          name: 'maxUtilization'
           default_from_api: true
+        - name: 'maxUtilization'
+          type: Double
           description: |
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
-  - !ruby/object:Api::Type::NestedObject
-    name: 'circuitBreakers'
+          default_from_api: true
+  - name: 'circuitBreakers'
+    type: NestedObject
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the load_balancing_scheme is set to INTERNAL_SELF_MANAGED.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'connectTimeout'
-        min_version: beta
-        at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+      - name: 'connectTimeout'
+        type: NestedObject
         description: |
           The timeout for new network connections to hosts.
+        min_version: 'beta'
+        at_least_one_of:
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'seconds'
-            required: true
+          - name: 'seconds'
+            type: Integer
             description: |
               Span of time at a resolution of a second.
               Must be from 0 to 315,576,000,000 inclusive.
-          - !ruby/object:Api::Type::Integer
-            name: 'nanos'
+            required: true
+          - name: 'nanos'
+            type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond
               resolution. Durations less than one second are represented
               with a 0 seconds field and a positive nanos field. Must
               be from 0 to 999,999,999 inclusive.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxRequestsPerConnection'
-        at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+      - name: 'maxRequestsPerConnection'
+        type: Integer
         description: |
           Maximum requests for a single backend connection. This parameter
           is respected by both the HTTP/1.1 and HTTP/2 implementations. If
           not specified, there is no limit. Setting this parameter to 1
           will effectively disable keep alive.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxConnections'
-        default_value: 1024
         at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
+      - name: 'maxConnections'
+        type: Integer
         description: |
           The maximum number of connections to the backend cluster.
           Defaults to 1024.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxPendingRequests'
-        default_value: 1024
         at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
+        default_value: 1024
+      - name: 'maxPendingRequests'
+        type: Integer
         description: |
           The maximum number of pending requests to the backend cluster.
           Defaults to 1024.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxRequests'
-        default_value: 1024
         at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
+        default_value: 1024
+      - name: 'maxRequests'
+        type: Integer
         description: |
           The maximum number of parallel requests to the backend cluster.
           Defaults to 1024.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxRetries'
-        default_value: 3
         at_least_one_of:
-          - circuit_breakers.0.connect_timeout
-          - circuit_breakers.0.max_requests_per_connection
-          - circuit_breakers.0.max_connections
-          - circuit_breakers.0.max_pending_requests
-          - circuit_breakers.0.max_requests
-          - circuit_breakers.0.max_retries
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
+        default_value: 1024
+      - name: 'maxRetries'
+        type: Integer
         description: |
           The maximum number of parallel retries to the backend cluster.
           Defaults to 3.
-  - !ruby/object:Api::Type::Enum
-    name: 'compressionMode'
+        at_least_one_of:
+          - 'circuit_breakers.0.connect_timeout'
+          - 'circuit_breakers.0.max_requests_per_connection'
+          - 'circuit_breakers.0.max_connections'
+          - 'circuit_breakers.0.max_pending_requests'
+          - 'circuit_breakers.0.max_requests'
+          - 'circuit_breakers.0.max_retries'
+        default_value: 3
+  - name: 'compressionMode'
+    type: Enum
     description: |
       Compress text responses using Brotli or gzip compression, based on the client's Accept-Encoding header.
-    values:
-      - :AUTOMATIC
-      - :DISABLED
-  - !ruby/object:Api::Type::NestedObject
-    name: 'consistentHash'
+    enum_values:
+      - 'AUTOMATIC'
+      - 'DISABLED'
+  - name: 'consistentHash'
+    type: NestedObject
     description: |
       Consistent Hash-based load balancing can be used to provide soft session
       affinity based on HTTP headers, cookies or other properties. This load balancing
@@ -386,72 +381,67 @@ properties:
       INTERNAL_SELF_MANAGED. This field is only applicable when locality_lb_policy is
       set to MAGLEV or RING_HASH.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'httpCookie'
-        at_least_one_of:
-          - consistent_hash.0.http_cookie
-          - consistent_hash.0.http_header_name
-          - consistent_hash.0.minimum_ring_size
+      - name: 'httpCookie'
+        type: NestedObject
         description: |
           Hash is based on HTTP Cookie. This field describes a HTTP cookie
           that will be used as the hash key for the consistent hash load
           balancer. If the cookie is not present, it will be generated.
           This field is applicable if the sessionAffinity is set to HTTP_COOKIE.
+        at_least_one_of:
+          - 'consistent_hash.0.http_cookie'
+          - 'consistent_hash.0.http_header_name'
+          - 'consistent_hash.0.minimum_ring_size'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'ttl'
-            at_least_one_of:
-              - consistent_hash.0.http_cookie.0.ttl
-              - consistent_hash.0.http_cookie.0.name
-              - consistent_hash.0.http_cookie.0.path
+          - name: 'ttl'
+            type: NestedObject
             description: |
               Lifetime of the cookie.
+            at_least_one_of:
+              - 'consistent_hash.0.http_cookie.0.ttl'
+              - 'consistent_hash.0.http_cookie.0.name'
+              - 'consistent_hash.0.http_cookie.0.path'
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: 'seconds'
-                required: true
+              - name: 'seconds'
+                type: Integer
                 description: |
                   Span of time at a resolution of a second.
                   Must be from 0 to 315,576,000,000 inclusive.
-              - !ruby/object:Api::Type::Integer
-                name: 'nanos'
+                required: true
+              - name: 'nanos'
+                type: Integer
                 description: |
                   Span of time that's a fraction of a second at nanosecond
                   resolution. Durations less than one second are represented
                   with a 0 seconds field and a positive nanos field. Must
                   be from 0 to 999,999,999 inclusive.
-          - !ruby/object:Api::Type::String
-            name: 'name'
-            at_least_one_of:
-              - consistent_hash.0.http_cookie.0.ttl
-              - consistent_hash.0.http_cookie.0.name
-              - consistent_hash.0.http_cookie.0.path
+          - name: 'name'
+            type: String
             description: |
               Name of the cookie.
-          - !ruby/object:Api::Type::String
-            name: 'path'
             at_least_one_of:
-              - consistent_hash.0.http_cookie.0.ttl
-              - consistent_hash.0.http_cookie.0.name
-              - consistent_hash.0.http_cookie.0.path
+              - 'consistent_hash.0.http_cookie.0.ttl'
+              - 'consistent_hash.0.http_cookie.0.name'
+              - 'consistent_hash.0.http_cookie.0.path'
+          - name: 'path'
+            type: String
             description: |
               Path to set for the cookie.
-      - !ruby/object:Api::Type::String
-        name: 'httpHeaderName'
-        at_least_one_of:
-          - consistent_hash.0.http_cookie
-          - consistent_hash.0.http_header_name
-          - consistent_hash.0.minimum_ring_size
+            at_least_one_of:
+              - 'consistent_hash.0.http_cookie.0.ttl'
+              - 'consistent_hash.0.http_cookie.0.name'
+              - 'consistent_hash.0.http_cookie.0.path'
+      - name: 'httpHeaderName'
+        type: String
         description: |
           The hash based on the value of the specified header field.
           This field is applicable if the sessionAffinity is set to HEADER_FIELD.
-      - !ruby/object:Api::Type::Integer
-        name: 'minimumRingSize'
-        default_value: 1024
         at_least_one_of:
-          - consistent_hash.0.http_cookie
-          - consistent_hash.0.http_header_name
-          - consistent_hash.0.minimum_ring_size
+          - 'consistent_hash.0.http_cookie'
+          - 'consistent_hash.0.http_header_name'
+          - 'consistent_hash.0.minimum_ring_size'
+      - name: 'minimumRingSize'
+        type: Integer
         description: |
           The minimum number of virtual nodes to use for the hash ring.
           Larger ring sizes result in more granular load
@@ -459,55 +449,51 @@ properties:
           is larger than the ring size, each host will be assigned a single
           virtual node.
           Defaults to 1024.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'cdnPolicy'
+        at_least_one_of:
+          - 'consistent_hash.0.http_cookie'
+          - 'consistent_hash.0.http_header_name'
+          - 'consistent_hash.0.minimum_ring_size'
+        default_value: 1024
+  - name: 'cdnPolicy'
+    type: NestedObject
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'cacheKeyPolicy'
+      - name: 'cacheKeyPolicy'
+        type: NestedObject
         description: 'The CacheKeyPolicy for this CdnPolicy.'
         at_least_one_of:
-          - cdn_policy.0.cache_key_policy
-          - cdn_policy.0.signed_url_cache_max_age_sec
+          - 'cdn_policy.0.cache_key_policy'
+          - 'cdn_policy.0.signed_url_cache_max_age_sec'
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'includeHost'
-            send_empty_value: true
-            at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+          - name: 'includeHost'
+            type: Boolean
             description: |
               If true requests to different hosts will be cached separately.
-          - !ruby/object:Api::Type::Boolean
-            name: 'includeProtocol'
             send_empty_value: true
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+          - name: 'includeProtocol'
+            type: Boolean
             description: |
               If true, http and https requests will be cached separately.
-          - !ruby/object:Api::Type::Boolean
-            name: 'includeQueryString'
             send_empty_value: true
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+          - name: 'includeQueryString'
+            type: Boolean
             description: |
               If true, include query string parameters in the cache key
               according to query_string_whitelist and
@@ -516,17 +502,17 @@ properties:
 
               If false, the query string will be excluded from the cache
               key entirely.
-          - !ruby/object:Api::Type::Array
-            name: 'queryStringBlacklist'
             send_empty_value: true
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+          - name: 'queryStringBlacklist'
+            type: Array
             description: |
               Names of query string parameters to exclude in cache keys.
 
@@ -535,18 +521,19 @@ properties:
               '&' and '=' will be percent encoded and not treated as
               delimiters.
             is_set: true
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
             send_empty_value: true
-            name: 'queryStringWhitelist'
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+            item_type:
+              type: String
+          - name: 'queryStringWhitelist'
+            type: Array
             description: |
               Names of query string parameters to include in cache keys.
 
@@ -555,42 +542,50 @@ properties:
               '&' and '=' will be percent encoded and not treated as
               delimiters.
             is_set: true
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'includeHttpHeaders'
             send_empty_value: true
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+            item_type:
+              type: String
+          - name: 'includeHttpHeaders'
+            type: Array
             description: |
               Allows HTTP request headers (by name) to be used in the
               cache key.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: 'includeNamedCookies'
             send_empty_value: true
             at_least_one_of:
-              - cdn_policy.0.cache_key_policy.0.include_host
-              - cdn_policy.0.cache_key_policy.0.include_protocol
-              - cdn_policy.0.cache_key_policy.0.include_query_string
-              - cdn_policy.0.cache_key_policy.0.query_string_blacklist
-              - cdn_policy.0.cache_key_policy.0.query_string_whitelist
-              - cdn_policy.0.cache_key_policy.0.include_http_headers
-              - cdn_policy.0.cache_key_policy.0.include_named_cookies
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+            item_type:
+              type: String
+          - name: 'includeNamedCookies'
+            type: Array
             description: |
               Names of cookies to include in cache keys.
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::Integer
-        name: 'signedUrlCacheMaxAgeSec'
-        default_value: 3600
-        at_least_one_of:
-          - cdn_policy.0.cache_key_policy
-          - cdn_policy.0.signed_url_cache_max_age_sec
+            send_empty_value: true
+            at_least_one_of:
+              - 'cdn_policy.0.cache_key_policy.0.include_host'
+              - 'cdn_policy.0.cache_key_policy.0.include_protocol'
+              - 'cdn_policy.0.cache_key_policy.0.include_query_string'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_blacklist'
+              - 'cdn_policy.0.cache_key_policy.0.query_string_whitelist'
+              - 'cdn_policy.0.cache_key_policy.0.include_http_headers'
+              - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
+            item_type:
+              type: String
+      - name: 'signedUrlCacheMaxAgeSec'
+        type: Integer
         description: |
           Maximum number of seconds the response to a signed URL request
           will be considered fresh, defaults to 1hr (3600s). After this
@@ -602,124 +597,130 @@ properties:
           "Cache-Control: public, max-age=[TTL]" header, regardless of any
           existing Cache-Control header. The actual headers served in
           responses will not be altered.
-      - !ruby/object:Api::Type::Integer
-        name: 'defaultTtl'
+        at_least_one_of:
+          - 'cdn_policy.0.cache_key_policy'
+          - 'cdn_policy.0.signed_url_cache_max_age_sec'
+        default_value: 3600
+      - name: 'defaultTtl'
+        type: Integer
         description: |
           Specifies the default TTL for cached content served by this origin for responses
           that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maxTtl'
+      - name: 'maxTtl'
+        type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'clientTtl'
+      - name: 'clientTtl'
+        type: Integer
         description: |
           Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'negativeCaching'
-        send_empty_value: true
+      - name: 'negativeCaching'
+        type: Boolean
         description: |
           Negative caching allows per-status code TTLs to be set, in order to apply fine-grained caching for common errors or redirects.
         default_from_api: true
-      - !ruby/object:Api::Type::Array
-        name: 'negativeCachingPolicy'
+        send_empty_value: true
+      - name: 'negativeCachingPolicy'
+        type: Array
         description: |
           Sets a cache TTL for the specified HTTP status code. negativeCaching must be enabled to configure negativeCachingPolicy.
           Omitting the policy and leaving negativeCaching enabled will use Cloud CDN's default cache TTLs.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Integer
-              name: 'code'
+            - name: 'code'
+              type: Integer
               description: |
                 The HTTP status code to define a TTL against. Only HTTP status codes 300, 301, 308, 404, 405, 410, 421, 451 and 501
                 can be specified as values, and you cannot specify a status code more than once.
-            - !ruby/object:Api::Type::Integer
-              name: 'ttl'
+            - name: 'ttl'
+              type: Integer
               description: |
                 The TTL (in seconds) for which to cache responses with the corresponding status code. The maximum allowed value is 1800s
                 (30 minutes), noting that infrequently accessed objects may be evicted from the cache before the defined TTL.
               send_empty_value: true
-      - !ruby/object:Api::Type::Enum
-        name: 'cacheMode'
+      - name: 'cacheMode'
+        type: Enum
         description: |
           Specifies the cache setting for all responses from this backend.
           The possible values are: USE_ORIGIN_HEADERS, FORCE_CACHE_ALL and CACHE_ALL_STATIC
-        values:
-          - :USE_ORIGIN_HEADERS
-          - :FORCE_CACHE_ALL
-          - :CACHE_ALL_STATIC
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'serveWhileStale'
-        send_empty_value: true
+        enum_values:
+          - 'USE_ORIGIN_HEADERS'
+          - 'FORCE_CACHE_ALL'
+          - 'CACHE_ALL_STATIC'
+      - name: 'serveWhileStale'
+        type: Integer
         description: |
           Serve existing content from the cache (if available) when revalidating content with the origin, or when an error is encountered when refreshing the cache.
         default_from_api: true
-      - !ruby/object:Api::Type::Array
-        name: 'bypassCacheOnRequestHeaders'
+        send_empty_value: true
+      - name: 'bypassCacheOnRequestHeaders'
+        type: Array
         description: |
           Bypass the cache when the specified request headers are matched - e.g. Pragma or Authorization headers. Up to 5 headers can be specified.
           The cache is bypassed for all cdnPolicy.cacheMode settings.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'headerName'
-              required: true
+            - name: 'headerName'
+              type: String
               description: |
                 The header field name to match on when bypassing cache. Values are case-insensitive.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'connectionDraining'
+              required: true
+  - name: 'connectionDraining'
+    type: NestedObject
     description: |
       Settings for connection draining
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'connection_draining_timeout_sec'
-        api_name: 'drainingTimeoutSec'
-        default_value: 300
+      - name: 'connection_draining_timeout_sec'
+        type: Integer
         description: |
           Time for which instance will be drained (not accept new
           connections, but still work to finish started).
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+        api_name: drainingTimeoutSec
+        default_value: 300
+  - name: 'creationTimestamp'
+    type: Time
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'customRequestHeaders'
+  - name: 'customRequestHeaders'
+    type: Array
     description: |
       Headers that the HTTP/S load balancer should add to proxied
       requests.
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'customResponseHeaders'
+    item_type:
+      type: String
+  - name: 'customResponseHeaders'
+    type: Array
     description: |
       Headers that the HTTP/S load balancer should add to proxied
       responses.
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
-    output: true
+    item_type:
+      type: String
+  - name: 'fingerprint'
+    type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this
       object. This field is used in optimistic locking.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    output: true
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableCDN'
+  - name: 'enableCDN'
+    type: Boolean
     description: |
       If true, enable Cloud CDN for this BackendService.
-  - !ruby/object:Api::Type::Array
-    name: 'healthChecks'
-    min_size: 1
-    max_size: 1
+  - name: 'healthChecks'
+    type: Array
     description: |
       The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
       for health checking this BackendService. Currently at most one health
@@ -731,68 +732,64 @@ properties:
       For internal load balancing, a URL to a HealthCheck resource must be specified instead.
     is_set: true
     set_hash_func: 'tpgresource.SelfLinkRelativePathHash'
-    custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Integer
-    name: 'generated_id'
-    api_name: 'id'
+    custom_flatten: 'templates/terraform/custom_flatten/guard_self_link_array.go.tmpl'
+    item_type:
+      type: String
+    min_size: 1
+    max_size: 1
+  - name: 'generated_id'
+    type: Integer
     description:
       'The unique identifier for the resource. This identifier is defined by the
       server.'
+    api_name: id
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'iap'
+  - name: 'iap'
+    type: NestedObject
     description: Settings for enabling Cloud Identity Aware Proxy
+    default_from_api: true
     send_empty_value: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        required: true
+      - name: 'enabled'
+        type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
-      - !ruby/object:Api::Type::String
-        name: 'oauth2ClientId'
+        required: true
+      - name: 'oauth2ClientId'
+        type: String
         description: |
           OAuth2 Client ID for IAP
-      - !ruby/object:Api::Type::String
-        name: 'oauth2ClientSecret'
+      - name: 'oauth2ClientSecret'
+        type: String
         description: |
           OAuth2 Client Secret for IAP
-        send_empty_value: true
         ignore_read: true
         sensitive: true
-      - !ruby/object:Api::Type::String
-        name: 'oauth2ClientSecretSha256'
-        output: true
+        send_empty_value: true
+      - name: 'oauth2ClientSecretSha256'
+        type: String
         description: |
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
-  - !ruby/object:Api::Type::Enum
-    name: 'loadBalancingScheme'
-    immutable: true
+        output: true
+  - name: 'loadBalancingScheme'
+    type: Enum
     description: |
       Indicates whether the backend service will be used with internal or
       external load balancing. A backend service created for one type of
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-    default_value: :EXTERNAL
+    immutable: true
+    default_value: "EXTERNAL"
     # If you're modifying this value, it probably means Global ILB is now
     # an option. If that's the case, all of the documentation is based on
     # this resource supporting external load balancing only.
-    values:
-      - :EXTERNAL
-      - :INTERNAL_SELF_MANAGED
-      - :INTERNAL_MANAGED
-      - :EXTERNAL_MANAGED
-  - !ruby/object:Api::Type::Enum
-    name: 'localityLbPolicy'
-    values:
-      - :ROUND_ROBIN
-      - :LEAST_REQUEST
-      - :RING_HASH
-      - :RANDOM
-      - :ORIGINAL_DESTINATION
-      - :MAGLEV
-      - :WEIGHTED_MAGLEV
+    enum_values:
+      - 'EXTERNAL'
+      - 'INTERNAL_SELF_MANAGED'
+      - 'INTERNAL_MANAGED'
+      - 'EXTERNAL_MANAGED'
+  - name: 'localityLbPolicy'
+    type: Enum
     description: |
       The load balancing algorithm used within the scope of the locality.
       The possible values are:
@@ -822,7 +819,8 @@ properties:
                   Maglev, refer to https://ai.google/research/pubs/pub44824
 
       * `WEIGHTED_MAGLEV`: Per-instance weighted Load Balancing via health check
-                           reported weights. If set, the Backend Service must
+                           reported weights. Only applicable to loadBalancingScheme
+                           EXTERNAL. If set, the Backend Service must
                            configure a non legacy HTTP-based Health Check, and
                            health check replies are expected to contain
                            non-standard HTTP response header field
@@ -834,7 +832,7 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
-      This field is applicable to either:
+      locality_lb_policy is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
         and loadBalancingScheme set to INTERNAL_MANAGED.
@@ -843,14 +841,22 @@ properties:
         Load Balancing). Only MAGLEV and WEIGHTED_MAGLEV values are possible for External
         Network Load Balancing. The default is MAGLEV.
 
-      If session_affinity is not NONE, and this field is not set to MAGLEV, WEIGHTED_MAGLEV,
+      If session_affinity is not NONE, and locality_lb_policy is not set to MAGLEV, WEIGHTED_MAGLEV,
       or RING_HASH, session affinity settings will not take effect.
 
       Only ROUND_ROBIN and RING_HASH are supported when the backend service is referenced
       by a URL map that is bound to target gRPC proxy that has validate_for_proxyless
       field set to true.
-  - !ruby/object:Api::Type::Array
-    name: 'localityLbPolicies'
+    enum_values:
+      - 'ROUND_ROBIN'
+      - 'LEAST_REQUEST'
+      - 'RING_HASH'
+      - 'RANDOM'
+      - 'ORIGINAL_DESTINATION'
+      - 'MAGLEV'
+      - 'WEIGHTED_MAGLEV'
+  - name: 'localityLbPolicies'
+    type: Array
     description: |
       A list of locality load balancing policies to be used in order of
       preference. Either the policy or the customPolicy field should be set.
@@ -859,30 +865,22 @@ properties:
       localityLbPolicies is only supported when the BackendService is referenced
       by a URL Map that is referenced by a target gRPC proxy that has the
       validateForProxyless field set to true.
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: 'localityLbPolicyConfig'
+    item_type:
       description: |
         Container for either a built-in LB policy supported by gRPC or Envoy or
         a custom one implemented by the end user.
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'policy'
-          exactly_one_of:
-            - policy
-            - customPolicy
+        - name: 'policy'
+          type: NestedObject
           description: |
             The configuration for a built-in load balancing policy.
+          exactly_one_of:
+            - 'policy'
+            - 'customPolicy'
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'name'
-              required: true
-              values:
-                - :ROUND_ROBIN
-                - :LEAST_REQUEST
-                - :RING_HASH
-                - :RANDOM
-                - :ORIGINAL_DESTINATION
-                - :MAGLEV
+            - name: 'name'
+              type: Enum
               description: |
                 The name of a locality load balancer policy to be used. The value
                 should be one of the predefined ones as supported by localityLbPolicy,
@@ -919,18 +917,25 @@ properties:
                             Maglev is not as stable as ring hash but has faster table lookup
                             build times and host selection times. For more information about
                             Maglev, refer to https://ai.google/research/pubs/pub44824
-        - !ruby/object:Api::Type::NestedObject
-          name: 'customPolicy'
-          exactly_one_of:
-            - policy
-            - customPolicy
+              required: true
+              enum_values:
+                - 'ROUND_ROBIN'
+                - 'LEAST_REQUEST'
+                - 'RING_HASH'
+                - 'RANDOM'
+                - 'ORIGINAL_DESTINATION'
+                - 'MAGLEV'
+        - name: 'customPolicy'
+          type: NestedObject
           description: |
             The configuration for a custom policy implemented by the user and
             deployed with the client.
+          exactly_one_of:
+            - 'policy'
+            - 'customPolicy'
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
-              required: true
+            - name: 'name'
+              type: String
               description: |
                 Identifies the custom policy.
 
@@ -941,15 +946,14 @@ properties:
 
                 Note that specifying the same custom policy more than once for a
                 backend is not a valid configuration and will be rejected.
-            - !ruby/object:Api::Type::String
-              name: 'data'
+              required: true
+            - name: 'data'
+              type: String
               description: |
                 An optional, arbitrary JSON object with configuration data, understood
                 by a locally installed custom policy implementation.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -958,234 +962,224 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'outlierDetection'
+    required: true
+    immutable: true
+  - name: 'outlierDetection'
+    type: NestedObject
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       Applicable backend service types can be a global backend service with the
       loadBalancingScheme set to INTERNAL_SELF_MANAGED or EXTERNAL_MANAGED.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'baseEjectionTime'
-        at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+      - name: 'baseEjectionTime'
+        type: NestedObject
         description: |
           The base time that a host is ejected for. The real time is equal to the base
           time multiplied by the number of times the host has been ejected. Defaults to
           30000ms or 30s.
+        at_least_one_of:
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'seconds'
-            required: true
+          - name: 'seconds'
+            type: Integer
             description: |
               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
               inclusive.
-          - !ruby/object:Api::Type::Integer
-            name: 'nanos'
+            required: true
+          - name: 'nanos'
+            type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond resolution. Durations
               less than one second are represented with a 0 `seconds` field and a positive
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
-      - !ruby/object:Api::Type::Integer
-        name: 'consecutiveErrors'
-        at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+      - name: 'consecutiveErrors'
+        type: Integer
         description: |
           Number of errors before a host is ejected from the connection pool. When the
           backend host is accessed over HTTP, a 5xx return code qualifies as an error.
           Defaults to 5.
-      - !ruby/object:Api::Type::Integer
-        name: 'consecutiveGatewayFailure'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'consecutiveGatewayFailure'
+        type: Integer
         description: |
           The number of consecutive gateway failures (502, 503, 504 status or connection
           errors that are mapped to one of those status codes) before a consecutive
           gateway failure ejection occurs. Defaults to 5.
-      - !ruby/object:Api::Type::Integer
-        name: 'enforcingConsecutiveErrors'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'enforcingConsecutiveErrors'
+        type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive 5xx. This setting can be used to disable
           ejection or to ramp it up slowly. Defaults to 100.
-      - !ruby/object:Api::Type::Integer
-        name: 'enforcingConsecutiveGatewayFailure'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'enforcingConsecutiveGatewayFailure'
+        type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through consecutive gateway failures. This setting can be
           used to disable ejection or to ramp it up slowly. Defaults to 0.
-      - !ruby/object:Api::Type::Integer
-        name: 'enforcingSuccessRate'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'enforcingSuccessRate'
+        type: Integer
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
           disable ejection or to ramp it up slowly. Defaults to 100.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'interval'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'interval'
+        type: NestedObject
         description: |
           Time interval between ejection sweep analysis. This can result in both new
           ejections as well as hosts being returned to service. Defaults to 10 seconds.
+        at_least_one_of:
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'seconds'
-            required: true
+          - name: 'seconds'
+            type: Integer
             description: |
               Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
               inclusive.
-          - !ruby/object:Api::Type::Integer
-            name: 'nanos'
+            required: true
+          - name: 'nanos'
+            type: Integer
             description: |
               Span of time that's a fraction of a second at nanosecond resolution. Durations
               less than one second are represented with a 0 `seconds` field and a positive
               `nanos` field. Must be from 0 to 999,999,999 inclusive.
-      - !ruby/object:Api::Type::Integer
-        name: 'maxEjectionPercent'
-        at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+      - name: 'maxEjectionPercent'
+        type: Integer
         description: |
           Maximum percentage of hosts in the load balancing pool for the backend service
           that can be ejected. Defaults to 10%.
-      - !ruby/object:Api::Type::Integer
-        name: 'successRateMinimumHosts'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'successRateMinimumHosts'
+        type: Integer
         description: |
           The number of hosts in a cluster that must have enough request volume to detect
           success rate outliers. If the number of hosts is less than this setting, outlier
           detection via success rate statistics is not performed for any host in the
           cluster. Defaults to 5.
-      - !ruby/object:Api::Type::Integer
-        name: 'successRateRequestVolume'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'successRateRequestVolume'
+        type: Integer
         description: |
           The minimum number of total requests that must be collected in one interval (as
           defined by the interval duration above) to include this host in success rate
           based outlier detection. If the volume is lower than this setting, outlier
           detection via success rate statistics is not performed for that host. Defaults
           to 100.
-      - !ruby/object:Api::Type::Integer
-        name: 'successRateStdevFactor'
         at_least_one_of:
-          - outlier_detection.0.base_ejection_time
-          - outlier_detection.0.consecutive_errors
-          - outlier_detection.0.consecutive_gateway_failure
-          - outlier_detection.0.enforcing_consecutive_errors
-          - outlier_detection.0.enforcing_consecutive_gateway_failure
-          - outlier_detection.0.enforcing_success_rate
-          - outlier_detection.0.interval
-          - outlier_detection.0.max_ejection_percent
-          - outlier_detection.0.success_rate_minimum_hosts
-          - outlier_detection.0.success_rate_request_volume
-          - outlier_detection.0.success_rate_stdev_factor
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
+      - name: 'successRateStdevFactor'
+        type: Integer
         description: |
           This factor is used to determine the ejection threshold for success rate outlier
           ejection. The ejection threshold is the difference between the mean success
@@ -1193,144 +1187,201 @@ properties:
           success rate: mean - (stdev * success_rate_stdev_factor). This factor is divided
           by a thousand to get a double. That is, if the desired factor is 1.9, the
           runtime value should be 1900. Defaults to 1900.
+        at_least_one_of:
+          - 'outlier_detection.0.base_ejection_time'
+          - 'outlier_detection.0.consecutive_errors'
+          - 'outlier_detection.0.consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_consecutive_errors'
+          - 'outlier_detection.0.enforcing_consecutive_gateway_failure'
+          - 'outlier_detection.0.enforcing_success_rate'
+          - 'outlier_detection.0.interval'
+          - 'outlier_detection.0.max_ejection_percent'
+          - 'outlier_detection.0.success_rate_minimum_hosts'
+          - 'outlier_detection.0.success_rate_request_volume'
+          - 'outlier_detection.0.success_rate_stdev_factor'
   # 'port' is deprecated
-  - !ruby/object:Api::Type::String
-    name: 'portName'
+  - name: 'portName'
+    type: String
     description: |
       Name of backend port. The same name should appear in the instance
       groups referenced by this service. Required when the load balancing
       scheme is EXTERNAL.
     default_from_api: true
-  - !ruby/object:Api::Type::Enum
-    name: 'protocol'
+  - name: 'protocol'
+    type: Enum
     description: |
       The protocol this BackendService uses to communicate with backends.
       The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
       types and may result in errors if used with the GA API. **NOTE**: With protocol “UNSPECIFIED”,
       the backend service can be used by Layer 4 Internal Load Balancing or Network Load Balancing
       with TCP/UDP/L3_DEFAULT Forwarding Rule protocol.
-    values:
-      - :HTTP
-      - :HTTPS
-      - :HTTP2
-      - :TCP
-      - :SSL
-      - :GRPC
-      - :UNSPECIFIED
     # TODO: make a ResourceRef to Security Policy
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'securityPolicy'
+    enum_values:
+      - 'HTTP'
+      - 'HTTPS'
+      - 'HTTP2'
+      - 'TCP'
+      - 'SSL'
+      - 'GRPC'
+      - 'UNSPECIFIED'
+  - name: 'securityPolicy'
+    type: String
     description: |
       The security policy associated with this backend service.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::String
-    name: 'edgeSecurityPolicy'
+  - name: 'edgeSecurityPolicy'
+    type: String
     description: |
       The resource URL for the edge security policy associated with this backend service.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'securitySettings'
+  - name: 'securitySettings'
+    type: NestedObject
     description: |
       The security settings that apply to this backend service. This field is applicable to either
       a regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2, and
       load_balancing_scheme set to INTERNAL_MANAGED; or a global backend service with the
       load_balancing_scheme set to INTERNAL_SELF_MANAGED.
     properties:
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'clientTlsPolicy'
-        resource: 'ClientTlsPolicy'
-        imports: 'name'
+      - name: 'clientTlsPolicy'
+        type: ResourceRef
         description: |
           ClientTlsPolicy is a resource that specifies how a client should authenticate
           connections to backends of a service. This resource itself does not affect
           configuration unless it is attached to a backend service resource.
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - !ruby/object:Api::Type::Array
-        name: 'subjectAltNames'
+        resource: 'ClientTlsPolicy'
+        imports: 'name'
+      - name: 'subjectAltNames'
+        type: Array
         description: |
           A list of alternate names to verify the subject identity in the certificate.
           If specified, the client will verify that the server certificate's subject
           alt name matches one of the specified values.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'awsV4Authentication'
+        item_type:
+          type: String
+      - name: 'awsV4Authentication'
+        type: NestedObject
         description: |
           The configuration needed to generate a signature for access to private storage buckets that support AWS's Signature Version 4 for authentication.
           Allowed only for INTERNET_IP_PORT and INTERNET_FQDN_PORT NEG backends.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'accessKeyId'
+          - name: 'accessKeyId'
+            type: String
             description: |
               The identifier of an access key used for s3 bucket authentication.
-          - !ruby/object:Api::Type::String
-            name: 'accessKey'
-            ignore_read: true
-            sensitive: true
-            send_empty_value: true
+          - name: 'accessKey'
+            type: String
             description: |
               The access key used for s3 bucket authentication.
               Required for updating or creating a backend that uses AWS v4 signature authentication, but will not be returned as part of the configuration when queried with a REST API GET request.
-          - !ruby/object:Api::Type::String
-            name: 'accessKeyVersion'
+            ignore_read: true
+            sensitive: true
+            send_empty_value: true
+          - name: 'accessKeyVersion'
+            type: String
             description: |
               The optional version identifier for the access key. You can use this to keep track of different iterations of your access key.
-          - !ruby/object:Api::Type::String
-            name: 'originRegion'
+          - name: 'originRegion'
+            type: String
             description: |
               The name of the cloud region of your origin. This is a free-form field with the name of the region your cloud uses to host your origin.
               For example, "us-east-1" for AWS or "us-ashburn-1" for OCI.
-  - !ruby/object:Api::Type::Enum
-    name: 'sessionAffinity'
+  - name: 'sessionAffinity'
+    type: Enum
     description: |
       Type of session affinity to use. The default is NONE. Session affinity is
       not applicable if the protocol is UDP.
-    values:
-      - :NONE
-      - :CLIENT_IP
-      - :CLIENT_IP_PORT_PROTO
-      - :CLIENT_IP_PROTO
-      - :GENERATED_COOKIE
-      - :HEADER_FIELD
-      - :HTTP_COOKIE
     default_from_api: true
-  - !ruby/object:Api::Type::Integer
-    name: 'timeoutSec'
+    enum_values:
+      - 'NONE'
+      - 'CLIENT_IP'
+      - 'CLIENT_IP_PORT_PROTO'
+      - 'CLIENT_IP_PROTO'
+      - 'GENERATED_COOKIE'
+      - 'HEADER_FIELD'
+      - 'HTTP_COOKIE'
+      - 'STRONG_COOKIE_AFFINITY'
+  - name: 'strongSessionAffinityCookie'
+    type: NestedObject
+    description: |
+      Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
+    properties:
+      - name: 'ttl'
+        type: NestedObject
+        description: |
+          Lifetime of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Span of time at a resolution of a second.
+              Must be from 0 to 315,576,000,000 inclusive.
+            required: true
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond
+              resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must
+              be from 0 to 999,999,999 inclusive.
+      - name: 'name'
+        type: String
+        description: |
+          Name of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+      - name: 'path'
+        type: String
+        description: |
+          Path to set for the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+  - name: 'timeoutSec'
+    type: Integer
     description: |
       The backend service timeout has a different meaning depending on the type of load balancer.
       For more information see, [Backend service settings](https://cloud.google.com/compute/docs/reference/rest/v1/backendServices).
       The default is 30 seconds.
       The full range of timeout values allowed goes from 1 through 2,147,483,647 seconds.
     default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'logConfig'
+  - name: 'logConfig'
+    type: NestedObject
     description: |
       This field denotes the logging options for the load balancer traffic served by this backend service.
       If logging is enabled, logs will be exported to Stackdriver.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enable'
-        at_least_one_of:
-          - log_config.0.enable
-          - log_config.0.sample_rate
+      - name: 'enable'
+        type: Boolean
         description: |
           Whether to enable logging for the load balancer traffic served by this backend service.
         send_empty_value: true
-      - !ruby/object:Api::Type::Double
-        name: 'sampleRate'
         at_least_one_of:
-          - log_config.0.enable
-          - log_config.0.sample_rate
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+      - name: 'sampleRate'
+        type: Double
         description: |
           This field can only be specified if logging is enabled for this backend service. The value of
           the field must be in [0, 1]. This configures the sampling rate of requests to the load balancer
           where 1.0 means all logged requests are reported and 0.0 means no logged requests are reported.
           The default value is 1.0.
-        default_value: 1.0
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
         diff_suppress_func: 'suppressWhenDisabled'
-  - !ruby/object:Api::Type::String
-    name: 'serviceLbPolicy'
+        default_value: 1.0
+  - name: 'serviceLbPolicy'
+    type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
       Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.

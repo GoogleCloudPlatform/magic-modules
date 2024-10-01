@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,60 +11,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'PublicDelegatedPrefix'
-base_url: projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes
-has_self_link: true
-immutable: true
 description: |
   Represents a PublicDelegatedPrefix for use with bring your own IP addresses (BYOIP).
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using bring your own IP': 'https://cloud.google.com/vpc/docs/using-bring-your-own-ip'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/publicDelegatedPrefixes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'public_delegated_prefixes_basic'
+  - name: 'public_delegated_prefixes_basic'
     primary_resource_id: 'prefixes'
-    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
-    # resource_compute_public_advertised_prefix_test.go
-    skip_test: true
     vars:
       prefixes_name: 'my-prefix'
     test_env_vars:
-      desc: :PAP_DESCRIPTION
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
+    type: String
     description: 'A region where the prefix will reside.'
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: An optional description of this resource.
-  - !ruby/object:Api::Type::Boolean
-    name: 'isLiveMigration'
+  - name: 'isLiveMigration'
+    type: Boolean
     description: If true, the prefix will be live migrated.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. The name must be 1-63 characters long, and
       comply with RFC1035. Specifically, the name must be 1-63 characters
@@ -73,15 +75,15 @@ properties:
       following characters must be a dash, lowercase letter, or digit,
       except the last character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'parentPrefix'
+  - name: 'parentPrefix'
+    type: String
     description:
       The URL of parent prefix. Either PublicAdvertisedPrefix or
       PublicDelegatedPrefix.
     required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - !ruby/object:Api::Type::String
-    name: 'ipCidrRange'
+  - name: 'ipCidrRange'
+    type: String
     description:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.

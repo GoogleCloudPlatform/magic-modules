@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,549 +11,539 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-base_url: "projects/{{project}}/locations/{{location}}/instances"
-create_url: "projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/instances/{{name}}"
-id_format: "projects/{{project}}/locations/{{location}}/instances/{{name}}"
-import_format:
-  - "projects/{{project}}/locations/{{location}}/instances/{{name}}"
-name: Instance
+---
+name: 'Instance'
 description: A Workbench instance.
-update_verb: :PATCH
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/instances'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}'
+update_verb: 'PATCH'
 update_mask: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ":"
-  fetch_iam_policy_verb: :GET
-  parent_resource_attribute: "name"
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/instances/{{name}}',
-      '{{name}}',
-    ]
-  base_url: projects/{{project}}/locations/{{location}}/instances/{{name}}
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
+    - '{{name}}'
+custom_code:
+  constants: 'templates/terraform/constants/workbench_instance.go.tmpl'
+  post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
+  post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_basic'
+  - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_basic_container'
+  - name: 'workbench_instance_basic_container'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_basic_gpu'
+  - name: 'workbench_instance_basic_gpu'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_labels_stopped'
+  - name: 'workbench_instance_labels_stopped'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
     test_env_vars:
-      service_account: :SERVICE_ACCT
+      service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - 'desired_state'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'workbench_instance_full'
+  - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-workbench-instance%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
       key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     test_env_vars:
-      project_id: :PROJECT_NAME
-      service_account: :SERVICE_ACCT
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    test_vars_overrides:
+      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 10
-  update_minutes: 20
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/workbench_instance.go
-  post_create: templates/terraform/post_create/workbench_instance.go.erb
-  pre_update: templates/terraform/pre_update/workbench_instance.go.erb
-  post_update: templates/terraform/post_update/workbench_instance.go.erb
 virtual_fields:
-  - !ruby/object:Api::Type::String
-    name: desired_state
+  - name: 'desired_state'
     description: |
       Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
-    default_value: ACTIVE
+    type: String
+    default_value: "ACTIVE"
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: Part of `parent`. See documentation of `projectsId`.
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: instanceId
+  - name: 'instanceId'
+    type: String
     description: Required. User-defined unique ID of this instance.
     url_param_only: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The name of this workbench instance. Format: `projects/{project_id}/locations/{location}/instances/{instance_id}`
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::NestedObject
-    name: gceSetup
-    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'gceSetup'
+    type: NestedObject
     description: |
       The definition of how to configure a VM instance outside of Resources and Identity.
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: machineType
-        default_from_api: true
+      - name: 'machineType'
+        type: String
         description: |
           Optional. The machine type of the VM instance. https://cloud.google.com/compute/docs/machine-resource
+        default_from_api: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-      - !ruby/object:Api::Type::Array
-        name: acceleratorConfigs
-        diff_suppress_func: WorkbenchInstanceAcceleratorDiffSuppress
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+      - name: 'acceleratorConfigs'
+        type: Array
         description: |
           The hardware accelerators used on this instance. If you use accelerators, make sure that your configuration has
           [enough vCPUs and memory to support the `machine_type` you have selected](https://cloud.google.com/compute/docs/gpus/#gpus-list).
           Currently supports only one accelerator configuration.
-        item_type: !ruby/object:Api::Type::NestedObject
+        diff_suppress_func: 'WorkbenchInstanceAcceleratorDiffSuppress'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: type
-              values:
-                - NVIDIA_TESLA_P100
-                - NVIDIA_TESLA_V100
-                - NVIDIA_TESLA_P4
-                - NVIDIA_TESLA_T4
-                - NVIDIA_TESLA_A100
-                - NVIDIA_A100_80GB
-                - NVIDIA_L4
-                - NVIDIA_TESLA_T4_VWS
-                - NVIDIA_TESLA_P100_VWS
-                - NVIDIA_TESLA_P4_VWS
+            - name: 'type'
+              type: Enum
               description: |
                 Optional. Type of this accelerator.
-            - !ruby/object:Api::Type::String
-              name: coreCount
+              enum_values:
+                - 'NVIDIA_TESLA_P100'
+                - 'NVIDIA_TESLA_V100'
+                - 'NVIDIA_TESLA_P4'
+                - 'NVIDIA_TESLA_T4'
+                - 'NVIDIA_TESLA_A100'
+                - 'NVIDIA_A100_80GB'
+                - 'NVIDIA_L4'
+                - 'NVIDIA_TESLA_T4_VWS'
+                - 'NVIDIA_TESLA_P100_VWS'
+                - 'NVIDIA_TESLA_P4_VWS'
+            - name: 'coreCount'
+              type: String
               description: |
                 Optional. Count of cores of this accelerator.
-      - !ruby/object:Api::Type::NestedObject
-        name: shieldedInstanceConfig
-        default_from_api: true
-        allow_empty_object: true
-        send_empty_value: true
+      - name: 'shieldedInstanceConfig'
+        type: NestedObject
         description: |
           A set of Shielded Instance options. See [Images using supported Shielded
           VM features](https://cloud.google.com/compute/docs/instances/modifying-shielded-vm).
           Not all combinations are valid.
+        default_from_api: true
+        send_empty_value: true
+        allow_empty_object: true
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: enableSecureBoot
+          - name: 'enableSecureBoot'
+            type: Boolean
             description: |
               Optional. Defines whether the VM instance has Secure Boot enabled.
               Secure Boot helps ensure that the system only runs authentic software by verifying
               the digital signature of all boot components, and halting the boot process
               if signature verification fails. Disabled by default.
-          - !ruby/object:Api::Type::Boolean
-            name: enableVtpm
+          - name: 'enableVtpm'
+            type: Boolean
             description: |
               Optional. Defines whether the VM instance has the vTPM enabled.
               Enabled by default.
-          - !ruby/object:Api::Type::Boolean
-            name: enableIntegrityMonitoring
+          - name: 'enableIntegrityMonitoring'
+            type: Boolean
             description: |
               Optional. Defines whether the VM instance has integrity monitoring
               enabled. Enables monitoring and attestation of the boot integrity of the VM
               instance. The attestation is performed against the integrity policy baseline.
               This baseline is initially derived from the implicitly trusted boot image
               when the VM instance is created. Enabled by default.
-      - !ruby/object:Api::Type::Array
-        name: serviceAccounts
+      - name: 'serviceAccounts'
+        type: Array
         description: |
           The service account that serves as an identity for the VM instance. Currently supports only one service account.
-        default_from_api: true
         immutable: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        default_from_api: true
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: email
+            - name: 'email'
+              type: String
+              description: Optional. Email address of the service account.
               immutable: true
               default_from_api: true
-              description: Optional. Email address of the service account.
-            - !ruby/object:Api::Type::Array
-              name: scopes
-              item_type: Api::Type::String
+            - name: 'scopes'
+              type: Array
               description: |
                 Output only. The list of scopes to be made available for this
                 service account. Set by the CLH to https://www.googleapis.com/auth/cloud-platform
               output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: vmImage
-        custom_flatten: templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.erb
-        default_from_api: true
-        conflicts:
-          - gce_setup.0.container_image
-        immutable: true
+              item_type:
+                type: String
+      - name: 'vmImage'
+        type: NestedObject
         description: |
           Definition of a custom Compute Engine virtual machine image for starting
           a workbench instance with the environment installed directly on the VM.
+        immutable: true
+        default_from_api: true
+        conflicts:
+          - gce_setup.0.container_image
+        custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_vm_image_flatten.go.tmpl'
         properties:
-          - !ruby/object:Api::Type::String
-            name: project
-            immutable: true
+          - name: 'project'
+            type: String
             description: |
                 The name of the Google Cloud project that this VM image belongs to.
                 Format: {project_id}
-          - !ruby/object:Api::Type::String
-            name: name
             immutable: true
+          - name: 'name'
+            type: String
             description: |
               Optional. Use VM image name to find the image.
-          - !ruby/object:Api::Type::String
-            name: family
             immutable: true
+          - name: 'family'
+            type: String
             description: |
               Optional. Use this VM image family to find the image; the newest
               image in this family will be used.
-      - !ruby/object:Api::Type::NestedObject
-        name: containerImage
-        conflicts:
-          - gce_setup.0.vm_image
+            immutable: true
+      - name: 'containerImage'
+        type: NestedObject
         description: |
           Use a container image to start the workbench instance.
+        conflicts:
+          - gce_setup.0.vm_image
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'repository'
+          - name: 'repository'
+            type: String
             description: |
               The path to the container image repository.
               For example: gcr.io/{project_id}/{imageName}
             required: true
-          - !ruby/object:Api::Type::String
-            name: 'tag'
+          - name: 'tag'
+            type: String
             description: |
               The tag of the container image. If not specified, this defaults to the latest tag.
-      - !ruby/object:Api::Type::NestedObject
-        name: bootDisk
-        default_from_api: true
+      - name: 'bootDisk'
+        type: NestedObject
         description: |
           The definition of a boot disk.
+        default_from_api: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: diskSizeGb
-            default_from_api: true
+          - name: 'diskSizeGb'
+            type: String
             description: |
               Optional. The size of the boot disk in GB attached to this instance,
               up to a maximum of 64000 GB (64 TB). If not specified, this defaults to the
               recommended value of 150GB.
-          - !ruby/object:Api::Type::Enum
-            name: diskType
             default_from_api: true
-            immutable: true
-            custom_flatten: templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.erb
-            values:
-              - PD_STANDARD
-              - PD_SSD
-              - PD_BALANCED
-              - PD_EXTREME
+          - name: 'diskType'
+            type: Enum
             description: |
               Optional. Indicates the type of the disk.
-          - !ruby/object:Api::Type::Enum
-            name: diskEncryption
+            immutable: true
             default_from_api: true
-            values:
-              - GMEK
-              - CMEK
+            custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_boot_disk_type_flatten.go.tmpl'
+            enum_values:
+              - 'PD_STANDARD'
+              - 'PD_SSD'
+              - 'PD_BALANCED'
+              - 'PD_EXTREME'
+          - name: 'diskEncryption'
+            type: Enum
             description: |
               Optional. Input only. Disk encryption method used on the boot and
               data disks, defaults to GMEK.
             immutable: true
-          - !ruby/object:Api::Type::String
-            name: kmsKey
+            default_from_api: true
+            enum_values:
+              - 'GMEK'
+              - 'CMEK'
+          - name: 'kmsKey'
+            type: String
             description: |
               'Optional. The KMS key used to encrypt the disks, only
               applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
               Learn more about using your own encryption keys.'
             immutable: true
-            diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
-      - !ruby/object:Api::Type::Array
-        name: dataDisks
+            diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
+      - name: 'dataDisks'
+        type: Array
         description: |
           Data disks attached to the VM instance. Currently supports only one data disk.
-        max_size: 1
         default_from_api: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: diskSizeGb
-              default_from_api: true
+            - name: 'diskSizeGb'
+              type: String
               description: |
                 Optional. The size of the disk in GB attached to this VM instance,
                 up to a maximum of 64000 GB (64 TB). If not specified, this defaults to
                 100.
-            - !ruby/object:Api::Type::Enum
-              name: diskType
-              custom_flatten: templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.erb
-              values:
-                - PD_STANDARD
-                - PD_SSD
-                - PD_BALANCED
-                - PD_EXTREME
+              default_from_api: true
+            - name: 'diskType'
+              type: Enum
               description: |
                 Optional. Input only. Indicates the type of the disk.
               immutable: true
-            - !ruby/object:Api::Type::Enum
-              name: diskEncryption
-              default_from_api: true
-              values:
-                - GMEK
-                - CMEK
+              custom_flatten: 'templates/terraform/custom_flatten/workbench_instance_data_disk_type_flatten.go.tmpl'
+              enum_values:
+                - 'PD_STANDARD'
+                - 'PD_SSD'
+                - 'PD_BALANCED'
+                - 'PD_EXTREME'
+            - name: 'diskEncryption'
+              type: Enum
               description: |
                 Optional. Input only. Disk encryption method used on the boot
                 and data disks, defaults to GMEK.
               immutable: true
-            - !ruby/object:Api::Type::String
-              name: kmsKey
+              default_from_api: true
+              enum_values:
+                - 'GMEK'
+                - 'CMEK'
+            - name: 'kmsKey'
+              type: String
               description: |
                 'Optional. The KMS key used to encrypt the disks,
                 only applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
                 Learn more about using your own encryption keys.'
               immutable: true
-              diff_suppress_func: WorkbenchInstanceKmsDiffSuppress
-      - !ruby/object:Api::Type::Array
-        name: networkInterfaces
+              diff_suppress_func: 'WorkbenchInstanceKmsDiffSuppress'
+        max_size: 1
+      - name: 'networkInterfaces'
+        type: Array
         description: |
           The network interfaces for the VM. Supports only one interface.
-        default_from_api: true
         immutable: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        default_from_api: true
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: network
+            - name: 'network'
+              type: String
               description: |
                 Optional. The name of the VPC that this VM instance is in.
               immutable: true
-              diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
               default_from_api: true
-            - !ruby/object:Api::Type::String
-              name: subnet
-              immutable: true
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+            - name: 'subnet'
+              type: String
               description: |
                 Optional. The name of the subnet that this VM instance is in.
-              diff_suppress_func: tpgresource.CompareSelfLinkRelativePaths
-              default_from_api: true
-            - !ruby/object:Api::Type::Enum
-              name: nicType
               immutable: true
+              default_from_api: true
+              diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+            - name: 'nicType'
+              type: Enum
               description: |
                 Optional. The type of vNIC to be used on this interface. This
                 may be gVNIC or VirtioNet.
-              values:
-                - VIRTIO_NET
-                - GVNIC
-            - !ruby/object:Api::Type::Array
-              name: accessConfigs
               immutable: true
-              default_from_api: true
+              enum_values:
+                - 'VIRTIO_NET'
+                - 'GVNIC'
+            - name: 'accessConfigs'
+              type: Array
               description: |
                 Optional. An array of configurations for this interface. Currently, only one access
                 config, ONE_TO_ONE_NAT, is supported. If no accessConfigs specified, the
                 instance will have an external internet access through an ephemeral
                 external IP address.
-              item_type: !ruby/object:Api::Type::NestedObject
+              immutable: true
+              default_from_api: true
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: externalIp
-                    immutable: true
-                    required: true
+                  - name: 'externalIp'
+                    type: String
                     description: |
                       An external IP address associated with this instance. Specify an unused
                       static external IP address available to the project or leave this field
                       undefined to use an IP from a shared ephemeral IP address pool. If you
                       specify a static external IP address, it must live in the same region as
                       the zone of the instance.
-      - !ruby/object:Api::Type::Boolean
-        name: disablePublicIp
-        default_from_api: true
-        immutable: true
+                    required: true
+                    immutable: true
+      - name: 'disablePublicIp'
+        type: Boolean
         description: |
           Optional. If true, no external IP will be assigned to this VM instance.
-      - !ruby/object:Api::Type::Array
-        name: tags
-        item_type: Api::Type::String
-        default_from_api: true
-        diff_suppress_func: WorkbenchInstanceTagsDiffSuppress
         immutable: true
+        default_from_api: true
+      - name: 'tags'
+        type: Array
         description: |
           Optional. The Compute Engine tags to add to instance (see [Tagging
           instances](https://cloud.google.com/compute/docs/label-or-tag-resources#tags)).
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: metadata
+        immutable: true
         default_from_api: true
-        diff_suppress_func: WorkbenchInstanceMetadataDiffSuppress
+        diff_suppress_func: 'WorkbenchInstanceTagsDiffSuppress'
+        item_type:
+          type: String
+      - name: 'metadata'
+        type: KeyValuePairs
         description: |
           Optional. Custom metadata to apply to this instance.
-      - !ruby/object:Api::Type::Boolean
-        name: enableIpForwarding
-        immutable: true
+        default_from_api: true
+        diff_suppress_func: 'WorkbenchInstanceMetadataDiffSuppress'
+      - name: 'enableIpForwarding'
+        type: Boolean
         description: |
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
-  - !ruby/object:Api::Type::String
-    name: proxyUri
+        immutable: true
+  - name: 'proxyUri'
+    type: String
     description: |
       Output only. The proxy endpoint that is used to access the Jupyter notebook.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: instanceOwners
-    item_type: Api::Type::String
+  - name: 'instanceOwners'
+    type: Array
     description: |
       'Optional. Input only. The owner of this instance after creation. Format:
       `alias@example.com` Currently supports one owner only. If not specified, all of
       the service account users of your VM instance''s service account can use the instance.'
-    ignore_read: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: creator
+    ignore_read: true
+    item_type:
+      type: String
+  - name: 'creator'
+    type: String
     description: |
       Output only. Email address of entity that sent original CreateInstance request.
     output: true
-  - !ruby/object:Api::Type::String
-    name: state
+  - name: 'state'
+    type: String
     description: |
       Output only. The state of this instance.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: upgradeHistory
+  - name: 'upgradeHistory'
+    type: Array
     description: |
       Output only. The upgrade history of this instance.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: snapshot
+        - name: 'snapshot'
+          type: String
           description: |
             Optional. The snapshot of the boot disk of this workbench instance before upgrade.
-        - !ruby/object:Api::Type::String
-          name: vmImage
+        - name: 'vmImage'
+          type: String
           description: |
             Optional. The VM image before this instance upgrade.
-        - !ruby/object:Api::Type::String
-          name: containerImage
+        - name: 'containerImage'
+          type: String
           description: |
             Optional. The container image before this instance upgrade.
-        - !ruby/object:Api::Type::String
-          name: framework
+        - name: 'framework'
+          type: String
           description: |
             Optional. The framework of this workbench instance.
-        - !ruby/object:Api::Type::String
-          name: version
+        - name: 'version'
+          type: String
           description: |
             Optional. The version of the workbench instance before this upgrade.
-        - !ruby/object:Api::Type::String
-          name: state
+        - name: 'state'
+          type: String
           description: |
             Output only. The state of this instance upgrade history entry.
           output: true
-        - !ruby/object:Api::Type::String
-          name: createTime
+        - name: 'createTime'
+          type: String
           description: |
             An RFC3339 timestamp in UTC time. This in the format of yyyy-MM-ddTHH:mm:ss.SSSZ.
             The milliseconds portion (".SSS") is optional.
-        - !ruby/object:Api::Type::String
-          name: action
+        - name: 'action'
+          type: String
           description: |
             Optional. Action. Rolloback or Upgrade.
-        - !ruby/object:Api::Type::String
-          name: targetVersion
+        - name: 'targetVersion'
+          type: String
           description: |
             Optional. Target VM Version, like m63.
-  - !ruby/object:Api::Type::String
-    name: healthState
+  - name: 'healthState'
+    type: String
     description: |
       Output only. Instance health_state.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    properties: []
-    name: healthInfo
+  - name: 'healthInfo'
+    type: NestedObject
     description: |
       'Output only. Additional information about instance health. Example:
       healthInfo": { "docker_proxy_agent_status": "1", "docker_status": "1", "jupyterlab_api_status":
       "-1", "jupyterlab_status": "-1", "updated": "2020-10-18 09:40:03.573409" }'
     output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+    properties:
+      []
+  - name: 'createTime'
+    type: String
     description: |
       An RFC3339 timestamp in UTC time. This in the format of yyyy-MM-ddTHH:mm:ss.SSSZ.
       The milliseconds portion (".SSS") is optional.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: |
       An RFC3339 timestamp in UTC time. This in the format of yyyy-MM-ddTHH:mm:ss.SSSZ.
       The milliseconds portion (".SSS") is optional.
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: disableProxyAccess
-    immutable: true
+  - name: 'disableProxyAccess'
+    type: Boolean
     description: |
       Optional. If true, the workbench instance will not register with the proxy.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    immutable: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
-    diff_suppress_func: WorkbenchInstanceLabelsDiffSuppress
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
+    diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'

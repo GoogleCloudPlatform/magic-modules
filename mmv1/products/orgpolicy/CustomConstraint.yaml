@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,96 +11,102 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'CustomConstraint'
-self_link: '{{parent}}/customConstraints/{{name}}'
-base_url: '{{parent}}/customConstraints'
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  Custom constraints are created by administrators to provide more granular and customizable control over the specific fields that are restricted by your organization policies.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints'
     'Supported Services': 'https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services'
   api: 'https://cloud.google.com/resource-manager/docs/reference/orgpolicy/rest/v2/organizations.constraints'
-description: |
-  Custom constraints are created by administrators to provide more granular and customizable control over the specific fields that are restricted by your organization policies.
+docs:
 id_format: '{{parent}}/customConstraints/{{name}}'
-import_format: ['{{%parent}}/customConstraints/{{name}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.erb'
+base_url: '{{parent}}/customConstraints'
+self_link: '{{parent}}/customConstraints/{{name}}'
+update_verb: 'PATCH'
+import_format:
+  - '{{%parent}}/customConstraints/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/org_policy_custom_constraint.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'org_policy_custom_constraint_basic'
+  - name: 'org_policy_custom_constraint_basic'
     primary_resource_id: 'constraint'
     vars:
       policy_name: 'custom.disableGkeAutoUpgrade'
-    test_vars_overrides:
-      policy_name: '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
     test_env_vars:
-      org_id: :ORG_ID
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'org_policy_custom_constraint_full'
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'policy_name': '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
+  - name: 'org_policy_custom_constraint_full'
     primary_resource_id: 'constraint'
     vars:
       policy_name: 'custom.disableGkeAutoUpgrade'
-    test_vars_overrides:
-      policy_name: '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
     test_env_vars:
-      org_id: :ORG_TARGET
+      org_id: 'ORG_TARGET'
+    test_vars_overrides:
+      'policy_name': '"custom.tfTestDisableGkeAutoUpgrade" + acctest.RandString(t, 10)'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
+  - name: 'parent'
+    type: String
     description: |
       The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
-    immutable: true
     url_param_only: true
     required: true
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
     immutable: true
+properties:
+  - name: 'name'
+    type: String
     description: |
       Immutable. The name of the custom constraint. This is unique within the organization.
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       A human-friendly name for the constraint.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A human-friendly description of the constraint to display as an error message when the policy is violated.
-  - !ruby/object:Api::Type::String
-    name: 'condition'
-    required: true
+  - name: 'condition'
+    type: String
     description: |
       A CEL condition that refers to a supported service resource, for example `resource.management.autoUpgrade == false`. For details about CEL usage, see [Common Expression Language](https://cloud.google.com/resource-manager/docs/organization-policy/creating-managing-custom-constraints#common_expression_language).
-  - !ruby/object:Api::Type::Enum
-    name: 'actionType'
     required: true
+  - name: 'actionType'
+    type: Enum
     description: |
       The action to take if the condition is met.
-    values:
-      - :ALLOW
-      - :DENY
-  - !ruby/object:Api::Type::Array
-    name: 'methodTypes'
-    min_size: 1
     required: true
+    enum_values:
+      - 'ALLOW'
+      - 'DENY'
+  - name: 'methodTypes'
+    type: Array
     description: |
       A list of RESTful methods for which to enforce the constraint. Can be `CREATE`, `UPDATE`, or both. Not all Google Cloud services support both methods. To see supported methods for each service, find the service in [Supported services](https://cloud.google.com/resource-manager/docs/organization-policy/custom-constraint-supported-services).
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'resourceTypes'
-    immutable: true
-    min_size: 1
     required: true
+    item_type:
+      type: String
+    min_size: 1
+  - name: 'resourceTypes'
+    type: Array
     description: |
       Immutable. The fully qualified name of the Google Cloud REST resource containing the object and field you want to restrict. For example, `container.googleapis.com/NodePool`.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    output: true
+    required: true
+    immutable: true
+    item_type:
+      type: String
+    min_size: 1
+  - name: 'updateTime'
+    type: String
     description: |
       Output only. The timestamp representing when the constraint was last updated.
+    output: true

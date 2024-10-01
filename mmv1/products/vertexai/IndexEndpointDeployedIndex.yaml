@@ -11,205 +11,200 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: IndexEndpointDeployedIndex
+---
+name: 'IndexEndpointDeployedIndex'
+description: |-
+  An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
+references:
+  guides:
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex'
+docs:
+id_format: '{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
 base_url: '{{index_endpoint}}'
+self_link: '{{index_endpoint}}'
 create_url: '{{index_endpoint}}:deployIndex'
 update_url: '{{index_endpoint}}:mutateDeployedIndex'
+update_verb: 'POST'
 delete_url: '{{index_endpoint}}:undeployIndex'
-self_link: '{{index_endpoint}}'
-import_format: ['projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}']
-id_format: '{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
-update_verb: :POST
-delete_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - update
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+delete_verb: 'POST'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
+timeouts:
+  insert_minutes: 45
+  update_minutes: 45
+  delete_minutes: 20
+async:
+  actions: ['create', 'update', 'delete']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 45
       update_minutes: 45
-  result: !ruby/object:Api::OpAsync::Result
+      delete_minutes: 20
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
   include_project: true
-description: |-
-  An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
-autogen_async: false
+custom_code:
+  encoder: 'templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  decoder: 'templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_basic"
-    primary_resource_id: "basic_deployed_index"
+  - name: 'vertex_ai_index_endpoint_deployed_index_basic'
+    primary_resource_id: 'basic_deployed_index'
     vars:
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
       deployed_index_id: 'deployed_index_id'
-      display_name: "vertex-deployed-index"
+      display_name: 'vertex-deployed-index'
       display_name_index: 'test-index'
-      bucket_name: "bucket-name"
+      bucket_name: 'bucket-name'
       service_account_id: 'vertex-sa'
       address_name: 'vertex-ai-range'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_basic_two"
-    primary_resource_id: "basic_deployed_index"
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
+  - name: 'vertex_ai_index_endpoint_deployed_index_basic_two'
+    primary_resource_id: 'basic_deployed_index'
     vars:
       endpoint_name: 'endpoint-name'
       network_name: 'network-name'
       deployed_index_id: 'deployed_index_id'
-      display_name: "vertex-deployed-index"
+      display_name: 'vertex-deployed-index'
       display_name_index: 'test-index'
-      bucket_name: "bucket-name"
+      bucket_name: 'bucket-name'
       service_account_id: 'vertex-sa'
       address_name: 'vertex-ai-range'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-      address_name: 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_dedicated_resources"
-    primary_resource_id: "dedicated_resources"
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+      'address_name': 'acctest.BootstrapSharedTestGlobalAddress(t, "vpc-network-1", acctest.AddressWithPrefixLength(8))'
+  - name: 'vertex_ai_index_endpoint_deployed_index_dedicated_resources'
+    primary_resource_id: 'dedicated_resources'
     vars:
       display_name_index: 'test-index'
-      bucket_name: "bucket-name"
-      display_name: "vertex-deployed-index"
+      bucket_name: 'bucket-name'
+      display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vertex_ai_index_endpoint_deployed_index_automatic_resources"
-    primary_resource_id: "automatic_resources"
+    exclude_docs: true
+  - name: 'vertex_ai_index_endpoint_deployed_index_automatic_resources'
+    primary_resource_id: 'automatic_resources'
     vars:
       display_name_index: 'test-index'
-      bucket_name: "bucket-name"
-      display_name: "vertex-deployed-index"
+      bucket_name: 'bucket-name'
+      display_name: 'vertex-deployed-index'
       deployed_index_id: 'deployed_index_id'
-    skip_docs: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.erb
-  update_encoder: templates/terraform/update_encoder/vertex_ai_index_endpoint_deployed_index.go.erb
-  decoder: templates/terraform/decoders/vertex_ai_index_endpoint_deployed_index.go.erb
-  pre_delete: templates/terraform/pre_delete/vertex_ai_index_endpoint_deployed_index.go.erb
-  custom_import: templates/terraform/custom_import/vertex_ai_index_endpoint_deployed_index.go.erb
-
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'indexEndpoint'
+  - name: 'indexEndpoint'
+    type: ResourceRef
     description: |
       Identifies the index endpoint. Must be in the format
       'projects/{{project}}/locations/{{region}}/indexEndpoints/{{indexEndpoint}}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'IndexEndpoint'
     imports: 'name'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of the DeployedIndex resource.
-  - !ruby/object:Api::Type::String
-    name: 'deployedIndexId'
-    immutable: true
+    output: true
+  - name: 'deployedIndexId'
+    type: String
     description: The user specified ID of the DeployedIndex. The ID can be up to 128 characters long and must start with a letter and only contain letters, numbers, and underscores. The ID must be unique within the project it is created in.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'index'
+    immutable: true
+  - name: 'index'
+    type: String
     description: The name of the Index this is the deployment of.
-    immutable: true
     required: true
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
     immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'displayName'
+    type: String
     description: The display name of the Index. The name can be up to 128 characters long and can consist of any UTF-8 characters.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+    immutable: true
+  - name: 'createTime'
+    type: String
     description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::NestedObject
-    name: privateEndpoints
     output: true
+  - name: 'privateEndpoints'
+    type: NestedObject
     description: Provides paths for users to send requests directly to the deployed index services running on Cloud via private services access. This field is populated if [network](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#IndexEndpoint.FIELDS.network) is configured.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'matchGrpcAddress'
+      - name: 'matchGrpcAddress'
+        type: String
         description: The ip address used to send match gRPC requests.
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'serviceAttachment'
+      - name: 'serviceAttachment'
+        type: String
         description: The name of the service attachment resource. Populated if private service connect is enabled.
         output: true
-      - !ruby/object:Api::Type::Array
-        name: 'pscAutomatedEndpoints'
+      - name: 'pscAutomatedEndpoints'
+        type: Array
         description: |
           PscAutomatedEndpoints is populated if private service connect is enabled if PscAutomatedConfig is set.
         output: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: projectId
-              output: true
+            - name: 'projectId'
+              type: String
               description: |
                 Corresponding projectId in pscAutomationConfigs
-            - !ruby/object:Api::Type::String
-              name: network
               output: true
+            - name: 'network'
+              type: String
               description: |
                 Corresponding network in pscAutomationConfigs.
-            - !ruby/object:Api::Type::String
-              name: 'matchAddress'
               output: true
+            - name: 'matchAddress'
+              type: String
               description: |
                 ip Address created by the automated forwarding rule.
-  - !ruby/object:Api::Type::String
-    name: 'indexSyncTime'
-    output: true
+              output: true
+  - name: 'indexSyncTime'
+    type: String
     description: |
         The DeployedIndex may depend on various data on its original Index. Additionally when certain changes to the original Index are being done (e.g. when what the Index contains is being changed) the DeployedIndex may be asynchronously updated in the background to reflect these changes. If this timestamp's value is at least the [Index.update_time](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexes#Index.FIELDS.update_time) of the original Index, it means that this DeployedIndex and the original Index are in sync. If this timestamp is older, then to see which updates this DeployedIndex already contains (and which it does not), one must [list](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.operations/list#google.longrunning.Operations.ListOperations) the operations that are running on the original Index. Only the successfully completed Operations with updateTime equal or before this sync time are contained in this DeployedIndex.
 
         A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::NestedObject
-    name: automaticResources
+    output: true
+  - name: 'automaticResources'
+    type: NestedObject
     description: |
       A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
 
     # Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'minReplicaCount'
+      - name: 'minReplicaCount'
+        type: Integer
         description: |
                 The minimum number of replicas this DeployedModel will be always deployed on. If minReplicaCount is not set, the default value is 2 (we don't provide SLA when minReplicaCount=1).
 
                 If traffic against it increases, it may dynamically be deployed onto more replicas up to [maxReplicaCount](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/AutomaticResources#FIELDS.max_replica_count), and as traffic decreases, some of these extra replicas may be freed. If the requested value is too large, the deployment will error.
         default_from_api: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maxReplicaCount'
+      - name: 'maxReplicaCount'
+        type: Integer
         description: |
                 The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If maxReplicaCount is not set, the default value is minReplicaCount. The max allowed replica count is 1000.
 
                 The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If the requested value is too large, the deployment will error, but if deployment succeeds then the ability to scale the model to that many replicas is guaranteed (barring service outages). If traffic against the DeployedModel increases beyond what its replicas at maximum may handle, a portion of the traffic will be dropped. If this value is not provided, a no upper bound for scaling under heavy traffic will be assume, though Vertex AI may be unable to scale beyond certain replica number.
         default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: dedicatedResources
+  - name: 'dedicatedResources'
+    type: NestedObject
     description: |
         A description of resources that are dedicated to the DeployedIndex, and that need a higher degree of manual configuration. The field minReplicaCount must be set to a value strictly greater than 0, or else validation will fail. We don't provide SLA when minReplicaCount=1. If maxReplicaCount is not set, the default value is minReplicaCount. The max allowed replica count is 1000.
 
@@ -224,15 +219,16 @@ properties:
     # Having fields within dedicatedResources not being marked as immutable as well as removing
     # fields such as acceleratorType, acceleratorCount, tpuTopology was done in order to support the ability to update such fields. This is discussed extensively [here](https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648).
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'machineSpec'
-        description: The minimum number of replicas this DeployedModel will be always deployed on.
-            # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
-        immutable: true
+      - name: 'machineSpec'
+        type: NestedObject
+        description: |
+          The minimum number of replicas this DeployedModel will be always deployed on.
         required: true
+        # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
+        immutable: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'machineType'
+          - name: 'machineType'
+            type: String
             description: |
                         The type of the machine.
 
@@ -242,45 +238,47 @@ properties:
 
                         For [DeployedModel](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints#DeployedModel) this field is optional, and the default value is n1-standard-2. For [BatchPredictionJob](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#BatchPredictionJob) or as part of [WorkerPoolSpec](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/CustomJobSpec#WorkerPoolSpec) this field is required.
             immutable: true
-      - !ruby/object:Api::Type::Integer
-        name: 'minReplicaCount'
+      - name: 'minReplicaCount'
+        type: Integer
         description: The minimum number of machine replicas this DeployedModel will be always deployed on. This value must be greater than or equal to 1.
         required: true
-      - !ruby/object:Api::Type::Integer
-        name: 'maxReplicaCount'
+      - name: 'maxReplicaCount'
+        type: Integer
         description: The maximum number of replicas this DeployedModel may be deployed on when the traffic against it increases. If maxReplicaCount is not set, the default value is minReplicaCount
         default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: enableAccessLogging
-    description: If true, private endpoint's access logs are sent to Cloud Logging.
+  - name: 'enableAccessLogging'
+    type: Boolean
+    description: |
+      If true, private endpoint's access logs are sent to Cloud Logging.
     # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     default_value: false
-  - !ruby/object:Api::Type::NestedObject
-    name: deployedIndexAuthConfig
-    description: If set, the authentication is enabled for the private endpoint.
+  - name: 'deployedIndexAuthConfig'
+    type: NestedObject
+    description: |
+      If set, the authentication is enabled for the private endpoint.
     # This field (and its nested fields) is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: authProvider
+      - name: 'authProvider'
+        type: NestedObject
         description: Defines the authentication provider that the DeployedIndex uses.
         properties:
-          - !ruby/object:Api::Type::Array
-            name: audiences
+          - name: 'audiences'
+            type: Array
             description: The list of JWT audiences. that are allowed to access. A JWT containing any of these audiences will be accepted.
             immutable: true
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
-            name: allowedIssuers
-            immutable: true
+            item_type:
+              type: String
+          - name: 'allowedIssuers'
+            type: Array
             description: |
               A list of allowed JWT issuers. Each entry must be a valid Google service account, in the following format: service-account-name@project-id.iam.gserviceaccount.com
-            item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: reservedIpRanges
-    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
-    immutable: true
+            immutable: true
+            item_type:
+              type: String
+  - name: 'reservedIpRanges'
+    type: Array
     description: |
       A list of reserved ip ranges under the VPC network that can be used for this DeployedIndex.
       If set, we will deploy the index within the provided ip ranges. Otherwise, the index might be deployed to any ip ranges under the provided VPC network.
@@ -288,13 +286,15 @@ properties:
       The value should be the name of the address (https://cloud.google.com/compute/docs/reference/rest/v1/addresses) Example: ['vertex-ai-ip-range'].
 
       For more information about subnets and network IP ranges, please see https://cloud.google.com/vpc/docs/subnets#manually_created_subnet_ip_ranges.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: deploymentGroup
-    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
     immutable: true
-    default_value: 'default'
+    # This field is not updatable via the mutateDeployedIndex method in the API, which is the only update method usable by this 'fine-grained' resource. This is why the field is marked as immutable despite the API docs not marking the field as immutable.
+    item_type:
+      type: String
+  - name: 'deploymentGroup'
+    type: String
     description: |
       The deployment group can be no longer than 64 characters (eg: 'test', 'prod'). If not set, we will use the 'default' deployment group.
       Creating deployment_groups with reserved_ip_ranges is a recommended practice when the peered network has multiple peering ranges. This creates your deployments from predictable IP spaces for easier traffic administration. Also, one deployment_group (except 'default') can only be used with the same reserved_ip_ranges which means if the deployment_group has been used with reserved_ip_ranges: [a, b, c], using it with [a, b] or [d, e] is disallowed. [See the official documentation here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex.FIELDS.deployment_group).
       Note: we only support up to 5 deployment groups (not including 'default').
+    immutable: true
+    default_value: "default"

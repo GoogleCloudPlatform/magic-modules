@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,129 +11,134 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AppleApp'
-min_version: beta
-base_url: projects/{{project}}/iosApps
-self_link: 'projects/{{project}}/iosApps/{{app_id}}'
-update_verb: :PATCH
-delete_verb: :POST
-delete_url: 'projects/{{project}}/iosApps/{{app_id}}:remove'
-update_mask: true
 description: |
   A Google Cloud Firebase Apple application instance
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/ios/setup'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps'
-async: !ruby/object:Api::OpAsync
+docs:
+base_url: 'projects/{{project}}/iosApps'
+self_link: 'projects/{{project}}/iosApps/{{app_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/iosApps/{{app_id}}:remove'
+delete_verb: 'POST'
+import_format:
+  - '{{project}} projects/{{project}}/iosApps/{{app_id}}'
+  - 'projects/{{project}}/iosApps/{{app_id}}'
+  - 'iosApps/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
   actions: ['create', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-import_format:
-  [
-    '{{project}} projects/{{project}}/iosApps/{{app_id}}',
-    'projects/{{project}}/iosApps/{{app_id}}',
-    'iosApps/{{app_id}}',
-    '{{app_id}}'
-  ]
-autogen_async: true
-# Sweeper skipped as this resource has customized deletion.
-skip_sweeper: true
 identity:
   - appId
   - name
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/firebase_app_deletion_policy.tmpl'
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebase_apple_app_basic'
-    min_version: 'beta'
+  - name: 'firebase_apple_app_basic'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       display_name: 'Display Name Basic'
       bundle_id: 'apple.app.12345'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      display_name: '"tf-test Display Name Basic"'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebase_apple_app_full'
-    min_version: 'beta'
+      'display_name': '"tf-test Display Name Basic"'
+  - name: 'firebase_apple_app_full'
     primary_resource_id: 'full'
+    min_version: 'beta'
     vars:
       display_name: 'Display Name Full'
       bundle_id: 'apple.app.12345'
       app_store_id: '12345'
-      team_id: '9987654321'  # Has to be a 10-digit number.
+ # Has to be a 10-digit number.
+      team_id: '9987654321'
       api_key_name: 'api-key'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      app_store_id: '12345'
-      team_id: '9987654321'
-      display_name: '"tf-test Display Name Full"'
+      'app_store_id': '12345'
+      'team_id': '9987654321'
+      'display_name': '"tf-test Display Name Full"'
     ignore_read_extra:
-      - project
-      - deletion_policy
+      - 'project'
+      - 'deletion_policy'
 virtual_fields:
-  - !ruby/object:Api::Type::String
-    name: 'deletion_policy'
+  - name: 'deletion_policy'
     description: |
       (Optional) Set to `ABANDON` to allow the Apple to be untracked from terraform state
       rather than deleted upon `terraform destroy`. This is useful because the Apple may be
       serving traffic. Set to `DELETE` to delete the Apple. Defaults to `DELETE`.
-    default_value: DELETE
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_delete: templates/terraform/custom_delete/firebase_app_deletion_policy.erb
+    type: String
+    default_value: "DELETE"
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The fully qualified resource name of the App, for example:
       projects/projectId/iosApps/appId
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: displayName
-    required: true
+  - name: 'displayName'
+    type: String
     description: |
       The user-assigned display name of the App.
-  - !ruby/object:Api::Type::String
-    name: appId
-    output: true
+    min_version: 'beta'
+    required: true
+  - name: 'appId'
+    type: String
     description: |
       The globally unique, Firebase-assigned identifier of the App.
       This identifier should be treated as an opaque token, as the data format is not specified.
-  - !ruby/object:Api::Type::String
-    name: bundleId
-    required: true
-    immutable: true
+    min_version: 'beta'
+    output: true
+  - name: 'bundleId'
+    type: String
     description: |
       The canonical bundle ID of the Apple app as it would appear in the Apple AppStore.
-  - !ruby/object:Api::Type::String
-    name: appStoreId
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'appStoreId'
+    type: String
     description: |
       The automatically generated Apple ID assigned to the Apple app by Apple in the Apple App Store.
-  - !ruby/object:Api::Type::String
-    name: teamId
+    min_version: 'beta'
+  - name: 'teamId'
+    type: String
     description: |
       The Apple Developer Team ID associated with the App in the App Store.
-  - !ruby/object:Api::Type::String
-    name: apiKeyId
-    default_from_api: true
+    min_version: 'beta'
+  - name: 'apiKeyId'
+    type: String
     description: |
       The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the AppleApp.
       If apiKeyId is not set during creation, then Firebase automatically associates an apiKeyId with the AppleApp.
       This auto-associated key may be an existing valid key or, if no valid key exists, a new one will be provisioned.
+    min_version: 'beta'
+    default_from_api: true

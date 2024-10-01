@@ -1,0 +1,142 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RouterNatAddress'
+description: |
+  A resource used to set the list of IP addresses to be used in a NAT service and manage the draining of destroyed IPs.
+
+  ~> **Note:** This resource is to be used alongside a `google_compute_router_nat` resource,
+  the router nat resource must have no defined `nat_ips` or `drain_nat_ips` parameters,
+  instead using the `initial_nat_ips` parameter to set at least one IP for the creation of the resource.
+references:
+  guides:
+    'Google Cloud Router': 'https://cloud.google.com/router/docs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
+docs:
+id_format: 'projects/{{project}}/regions/{{region}}/routers/{{router}}/{{router_nat}}'
+base_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+self_link: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+create_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/regions/{{region}}/routers/{{router}}'
+delete_verb: 'PATCH'
+mutex: 'router/{{region}}/{{router}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
+    kind: 'compute#operation'
+    path: 'routerNat'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'nats'
+identity:
+  - routerNat
+nested_query:
+  keys:
+    - nats
+  is_list_of_ids: false
+  modify_by_patch: true
+# ToDo: We use a custom code for CREATE since the generated code is erroneously not replacing the generated encoder with the custom one provided
+custom_code:
+  constants: 'templates/terraform/constants/router_nat_address.go.tmpl'
+  encoder: 'templates/terraform/encoders/router_nat_address_patch_on_create.go.tmpl'
+  update_encoder: 'templates/terraform/encoders/router_nat_address_update_skip_encoder.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/router_nat_address_nested_query_create_encoder.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_router_nat_address_delete_nat_ips_only.go.tmpl'
+custom_diff:
+  - 'resourceComputeRouterNatAddressDrainNatIpsCustomDiff'
+exclude_tgc: true
+examples:
+  - name: 'router_nat_address_count'
+    primary_resource_id: 'nat_address'
+    vars:
+      router_name: 'my-router'
+      nat_name: 'my-router-nat'
+      network_name: 'my-network'
+      subnet_name: 'my-subnetwork'
+      address_name: 'nat-manual-ip'
+    exclude_test: true
+parameters:
+  - name: 'router'
+    type: ResourceRef
+    description: |
+      The name of the Cloud Router in which the referenced NAT service is configured.
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'Router'
+    imports: 'name'
+  - name: 'routerNat'
+    type: ResourceRef
+    description: |
+      The name of the Nat service in which this address will be configured.
+    api_name: name
+    required: true
+    immutable: true
+    resource: 'RouterNat'
+    imports: 'name'
+  - name: 'region'
+    type: ResourceRef
+    description: Region where the NAT service reside.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    resource: 'Region'
+    imports: 'name'
+properties:
+  - name: 'natIps'
+    type: Array
+    description: |
+      Self-links of NAT IPs to be used in a Nat service. Only valid if the referenced RouterNat
+      natIpAllocateOption is set to MANUAL_ONLY.
+    is_set: true
+    required: true
+    send_empty_value: true
+    set_hash_func: computeRouterNatIPsHash
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
+      name: 'address'
+      type: ResourceRef
+      description: 'A reference to an address to be associated with this NAT'
+      resource: 'Address'
+      imports: 'selfLink'
+  - name: 'drainNatIps'
+    type: Array
+    description: |
+      A list of URLs of the IP resources to be drained. These IPs must be
+      valid static external IPs that have been assigned to the NAT.
+    is_set: true
+    send_empty_value: true
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
+      name: 'address'
+      type: ResourceRef
+      description: 'A reference to an address associated with this NAT'
+      resource: 'Address'
+      imports: 'selfLink'

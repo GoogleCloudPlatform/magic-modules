@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,14 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Reservation'
-base_url: projects/{{project}}/zones/{{zone}}/reservations
-update_verb: :PATCH
-update_url: projects/{{project}}/zones/{{zone}}/reservations/{{name}}
-update_mask: true
-collection_url_key: 'items'
-has_self_link: true
 description: |
   Represents a reservation resource. A reservation ensures that capacity is
   held in a specific zone even if the reserved VMs are not running.
@@ -28,75 +22,77 @@ description: |
   `g1-small` machine types, preemptible VMs, sole tenant nodes, or other
   services not listed above
   like Cloud SQL and Dataflow.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Reserving zonal resources': 'https://cloud.google.com/compute/docs/instances/reserving-zonal-resources'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/reservations'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/reservations'
+has_self_link: true
+update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'reservation_basic'
+  - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'
     vars:
       reservation_name: 'gce-reservation'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'shared_reservation_basic'
+  - name: 'shared_reservation_basic'
     primary_resource_id: 'gce_reservation'
-    test_env_vars:
-      project: :PROJECT_NAME
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
     vars:
       reservation_name: 'gce-shared-reservation'
-    skip_docs:
-      true
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
       # Resource creation race
     skip_vcr: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  update_encoder: templates/terraform/update_encoder/reservation.go.erb
-  pre_update: templates/terraform/pre_update/shared_reservation_update.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: |
       The zone where the reservation is made.
     required: true
     immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
-    output: true
+  - name: 'creationTimestamp'
+    type: Time
     description: |
       Creation timestamp in RFC3339 text format.
-  - !ruby/object:Api::Type::String
-    name: 'description'
-    immutable: true
+    output: true
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
     immutable: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -105,143 +101,148 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-  - !ruby/object:Api::Type::String
-    name: 'commitment'
-    output: true
+    required: true
+    immutable: true
+  - name: 'commitment'
+    type: String
     description: |
       Full or partial URL to a parent commitment. This field displays for
       reservations that are tied to a commitment.
-  - !ruby/object:Api::Type::Boolean
-    name: 'specificReservationRequired'
-    immutable: true
-    # Not a hard API default, but this should help avoid a unset/true/false
-    # trinary.
-    default_value: false
+    output: true
+  - name: 'specificReservationRequired'
+    type: Boolean
     description: |
       When set to true, only VMs that target this reservation by name can
       consume this reservation. Otherwise, it can be consumed by VMs with
       affinity for any reservation. Defaults to false.
-  - !ruby/object:Api::Type::String
-    name: 'status'
-    output: true
+    immutable: true
+    # Not a hard API default, but this should help avoid a unset/true/false
+    # trinary.
+    default_value: false
+  - name: 'status'
+    type: String
     description: |
       The status of the reservation.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'shareSettings'
+    output: true
+  - name: 'shareSettings'
+    type: NestedObject
     description: |
       The share setting for reservations.
-    default_from_api: true
     ignore_read: true
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'shareType'
-        values:
-          - :LOCAL
-          - :SPECIFIC_PROJECTS
+      - name: 'shareType'
+        type: Enum
         description: |
           Type of sharing for this shared-reservation
-        default_from_api: true
         immutable: true
-      - !ruby/object:Api::Type::Map
-        name: 'projectMap'
+        default_from_api: true
+        enum_values:
+          - 'LOCAL'
+          - 'SPECIFIC_PROJECTS'
+      - name: 'projectMap'
+        type: Map
         description: |
           A map of project number and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-        key_name: id
+        key_name: 'id'
         key_description: |
           The project id/number which is deleting or adding to the project list.
-        value_type: !ruby/object:Api::Type::NestedObject
+        value_type:
           name: projectConfig
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'projectId'
+            - name: 'projectId'
+              type: String
               description: |
                 The project id/number, should be same as the key of this project config in the project map.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'specificReservation'
-    required: true
+  - name: 'specificReservation'
+    type: NestedObject
     description: |
       Reservation for instances with specific machine shapes.
-    update_verb: :POST
+    required: true
     update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}/resize'
+    update_verb: 'POST'
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'count'
-        required: true
+      - name: 'count'
+        type: Integer
         description: |
           The number of resources that are allocated.
-        validation: !ruby/object:Provider::Terraform::Validation
+        required: true
+        validation:
           function: 'validation.IntAtLeast(1)'
-      - !ruby/object:Api::Type::Integer
-        name: 'inUseCount'
-        output: true
+      - name: 'inUseCount'
+        type: Integer
         description: |
           How many instances are in use.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'instanceProperties'
-        required: true
-        immutable: true
+        output: true
+      - name: 'instanceProperties'
+        type: NestedObject
         description: |
           The instance properties for the reservation.
+        required: true
+        immutable: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'machineType'
-            required: true
-            immutable: true
+          - name: 'machineType'
+            type: String
             description: |
               The name of the machine type to reserve.
-          - !ruby/object:Api::Type::String
-            name: 'minCpuPlatform'
+            required: true
             immutable: true
+          - name: 'minCpuPlatform'
+            type: String
             description: |
               The minimum CPU platform for the reservation. For example,
               `"Intel Skylake"`. See
               the CPU platform availability reference](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform#availablezones)
               for information on available CPU platforms.
+            immutable: true
             default_from_api: true
-          - !ruby/object:Api::Type::Array
-            name: 'guestAccelerators'
+          - name: 'guestAccelerators'
+            type: Array
             description: |
               Guest accelerator type and count.
             immutable: true
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'acceleratorType'
-                  required: true
-                  immutable: true
+                - name: 'acceleratorType'
+                  type: String
                   description: |
                     The full or partial URL of the accelerator type to
                     attach to this instance. For example:
                     `projects/my-project/zones/us-central1-c/acceleratorTypes/nvidia-tesla-p100`
 
                     If you are creating an instance template, specify only the accelerator name.
-                - !ruby/object:Api::Type::Integer
-                  name: 'acceleratorCount'
                   required: true
                   immutable: true
+                - name: 'acceleratorCount'
+                  type: Integer
                   description: |
                     The number of the guest accelerator cards exposed to
                     this instance.
-          - !ruby/object:Api::Type::Array
-            name: 'localSsds'
-            immutable: true
+                  required: true
+                  immutable: true
+          - name: 'localSsds'
+            type: Array
             description: |
               The amount of local ssd to reserve with each instance. This
               reserves disks of type `local-ssd`.
-            item_type: !ruby/object:Api::Type::NestedObject
+            immutable: true
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: 'interface'
-                  immutable: true
-                  default_value: :SCSI
-                  values:
-                    - :SCSI
-                    - :NVME
+                - name: 'interface'
+                  type: Enum
                   description: |
                     The disk interface to use for attaching this disk.
-                - !ruby/object:Api::Type::Integer
-                  name: 'diskSizeGb'
-                  required: true
                   immutable: true
+                  default_value: "SCSI"
+                  enum_values:
+                    - 'SCSI'
+                    - 'NVME'
+                - name: 'diskSizeGb'
+                  type: Integer
                   description: |
                     The size of the disk in base-2 GB.
+                  required: true
+                  immutable: true

@@ -1,0 +1,175 @@
+package test
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai"
+	"go.uber.org/zap/zaptest"
+)
+
+func TestReadPlannedAssetsCoverage(t *testing.T) {
+	cases := []struct {
+		name string
+	}{
+		// read-only, the following tests are not in cli_test or
+		// have unique parameters that separate them
+		{name: "example_folder_iam_binding"},
+		{name: "example_folder_iam_member"},
+		{name: "example_project_create"},
+		{name: "example_project_update"},
+		{name: "example_project_iam_binding"},
+		{name: "example_project_iam_member"},
+		{name: "example_storage_bucket"},
+		{name: "example_storage_bucket_empty_project_id"},
+		{name: "example_storage_bucket_iam_binding"},
+		{name: "example_storage_bucket_iam_member"},
+		{name: "example_project_create_empty_project_id"},
+		{name: "example_project_iam_member_empty_project"},
+		// auto inserted tests that are not in list above or manually inserted in cli_test.go
+	{{- range $test := $.NonDefinedTests }}
+		{name: "{{- $test }}"},
+	{{- end }}
+	}
+	for i := range cases {
+		// Allocate a variable to make sure test can run in parallel.
+		c := cases[i]
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			// Create a temporary directory for running terraform.
+			dir, err := os.MkdirTemp(tmpDir, "terraform")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer os.RemoveAll(dir)
+
+			generateTestFiles(t, "../testdata/templates", dir, c.name+".json")
+			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
+
+			// tfstate files are for cases testing updates, eg. project update.
+			// Uses glob matching to match generateTestFiles internals.
+			tfstateMatches, err := filepath.Glob(filepath.Join("../testdata/templates", c.name+".tfstate"))
+			if err != nil {
+				t.Fatalf("malformed glob: %v", err)
+			}
+			if tfstateMatches != nil {
+				generateTestFiles(t, "../testdata/templates", dir, c.name+".tfstate")
+				err = os.Rename(
+					filepath.Join(dir, c.name+".tfstate"),
+					filepath.Join(dir, "terraform.tfstate"),
+				)
+				if err != nil {
+					t.Fatalf("renaming tfstate: %v", err)
+				}
+			}
+
+			// Run terraform init and terraform apply to generate tfplan.json files
+			terraformWorkflow(t, dir, c.name)
+
+			// Unmarshal payload from testfile into `want` variable.
+			f := filepath.Join(dir, c.name+".json")
+			want, err := readExpectedTestFile(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			planfile := filepath.Join(dir, c.name+".tfplan.json")
+			ctx := context.Background()
+			ancestryCache := map[string]string{
+				data.Provider["project"]: data.Ancestry,
+			}
+
+			jsonPlan, err := os.ReadFile(planfile)
+			if err != nil {
+				t.Fatalf("Error parsing %s: %s", f, err)
+			}
+			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+				ConvertUnchanged: false,
+				ErrorLogger:      zaptest.NewLogger(t),
+				Offline:          true,
+				DefaultProject:   data.Provider["project"],
+				DefaultRegion:    "",
+				DefaultZone:      "",
+				UserAgent:        "",
+				AncestryCache:    ancestryCache,
+			})
+			if err != nil {
+				t.Fatalf("Convert(%s, %s, \"\", \"\", %s, offline): %v", planfile, data.Provider["project"], ancestryCache, err)
+			}
+			expectedAssets := normalizeAssets(t, want, true)
+			actualAssets := normalizeAssets(t, got, true)
+			if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+				t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
+			}
+		})
+	}
+}
+
+
+
+func TestReadPlannedAssetsCoverage_WithoutDefaultProject(t *testing.T) {
+	cases := []struct {
+		name string
+	}{
+		{name: "example_project_create_empty_project_id"},
+		{name: "example_storage_bucket_empty_project_id"},
+		{name: "example_project_iam_member_empty_project"},
+	}
+	for i := range cases {
+		// Allocate a variable to make sure test can run in parallel.
+		c := cases[i]
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			// Create a temporary directory for running terraform.
+			dir, err := os.MkdirTemp(tmpDir, "terraform")
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer os.RemoveAll(dir)
+
+			generateTestFiles(t, "../testdata/templates", dir, c.name+"_without_default_project.json")
+			generateTestFiles(t, "../testdata/templates", dir, c.name+".tf")
+
+			// Run terraform init and terraform plan to generate tfplan.json files
+			terraformWorkflow(t, dir, c.name)
+
+			// Unmarshal payload from testfile into `want` variable.
+			f := filepath.Join(dir, c.name+"_without_default_project.json")
+			want, err := readExpectedTestFile(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			planfile := filepath.Join(dir, c.name+".tfplan.json")
+			ctx := context.Background()
+
+			jsonPlan, err := os.ReadFile(planfile)
+			if err != nil {
+				t.Fatalf("Error parsing %s: %s", f, err)
+			}
+			got, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
+				ConvertUnchanged: false,
+				ErrorLogger:      zaptest.NewLogger(t),
+				Offline:          true,
+				DefaultProject:   "",
+				DefaultRegion:    "",
+				DefaultZone:      "",
+				UserAgent:        "",
+				AncestryCache:    map[string]string{},
+			})
+			if err != nil {
+				t.Fatalf("WithoutProject: Convert(%s, offline): %v", planfile, err)
+			}
+			expectedAssets := normalizeAssets(t, want, true)
+			actualAssets := normalizeAssets(t, got, true)
+			if diff := cmp.Diff(expectedAssets, actualAssets); diff != "" {
+				t.Errorf("%v diff(-want, +got):\n%s", t.Name(), diff)
+			}
+		})
+	}
+}

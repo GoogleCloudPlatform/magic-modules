@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,81 +11,89 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Lien'
-base_url: liens
+description:
+  A Lien represents an encumbrance on the actions that can be performed on a
+  resource.
+docs:
+id_format: '{{name}}'
+base_url: 'liens'
 # This resource has some issues - it returns a list when you query for it.
 # You can't use the same URL for GET and DELETE.  This here is the URL that
 # we use for GET, and the DELETE is in custom code.  If this happens a lot,
 # we might build a more general solution, but this is the only resource I know
 # of where that happens.
-self_link: liens?parent={{parent}}
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - liens
+self_link: 'liens?parent={{parent}}'
+immutable: true
+import_format:
+  - '{{parent}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 identity:
   - name
-description:
-  A Lien represents an encumbrance on the actions that can be performed on a
-  resource.
-immutable: true
-id_format: '{{name}}'
-import_format: ['{{parent}}/{{name}}']
+nested_query:
+  keys:
+    - liens
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
+  post_create: 'templates/terraform/post_create/lien.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
+  post_import: 'templates/terraform/post_import/lien_import.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'resource_manager_lien'
-    skip_test: true
+  - name: 'resource_manager_lien'
     primary_resource_id: 'lien'
     vars:
       project_id: 'staging-project'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/lien.erb
-  post_import: templates/terraform/post_import/lien_import.erb
-  pre_delete: templates/terraform/pre_delete/modify_delete_url.erb
-  decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
+  - name: 'parent'
+    type: String
     description: |
       A reference to the resource this Lien is attached to.
       The server will validate the parent against those for which Liens are supported.
       Since a variety of objects can have Liens against them, you must provide the type
       prefix (e.g. "projects/my-project-name").
-  - !ruby/object:Api::Type::Array
-    name: 'restrictions'
+    required: true
+    immutable: true
+  - name: 'restrictions'
+    type: Array
     description: |
       The types of operations which should be blocked as a result of this Lien.
       Each value should correspond to an IAM permission. The server will validate
       the permissions against those for which Liens are supported.  An empty
       list is meaningless and will be rejected.
       e.g. ['resourcemanager.projects.delete']
-    item_type: 'Api::Type::String'
-    immutable: true
     required: true
+    immutable: true
+    item_type:
+      type: String
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: A system-generated unique identifier for this Lien.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: reason
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'reason'
+    type: String
     description: |
       Concise user-visible strings indicating why an action cannot be performed
       on a resource. Maximum length of 200 characters.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: origin
+    immutable: true
+  - name: 'origin'
+    type: String
     description: |
       A stable, user-visible/meaningful string identifying the origin
       of the Lien, intended to be inspected programmatically. Maximum length of
       200 characters.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    immutable: true
+  - name: 'createTime'
+    type: Time
     description: 'Time of creation'
     output: true
