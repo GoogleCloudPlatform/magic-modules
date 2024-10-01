@@ -1,0 +1,263 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CloudVmCluster'
+description: A CloudVmCluster resource.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/cloudVmClusters'
+self_link: 'projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/cloudVmClusters?cloudVmClusterId={{cloud_vm_cluster_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}'
+timeouts:
+  insert_minutes: 240
+  update_minutes: 120
+  delete_minutes: 120
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 240
+      update_minutes: 120
+      delete_minutes: 120
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'oracledatabase_vmcluster_basic'
+    primary_resource_id: 'my_vmcluster'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Resource ID segment making up resource `name`. See documentation
+    for resource type `oracledatabase.googleapis.com/DbNode`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'cloudVmClusterId'
+    type: String
+    description: "The ID of the VM Cluster to create. This value is restricted\nto
+    (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63\ncharacters in
+    length. The value must start with a letter and end with\na letter or a number. "
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. The name of the VM Cluster resource with the format:\nprojects/{project}/locations/{region}/cloudVmClusters/{cloud_vm_cluster} "
+    output: true
+  - name: 'exadataInfrastructure'
+    type: String
+    description: "The name of the Exadata Infrastructure resource on which
+    VM cluster\nresource is created, in the following format:\nprojects/{project}/locations/{region}/cloudExadataInfrastuctures/{cloud_extradata_infrastructure} "
+    required: true
+  - name: 'displayName'
+    type: String
+    description: 'User friendly name for this resource. '
+  - name: 'gcpOracleZone'
+    type: String
+    description: "GCP location where Oracle Exadata is hosted. It is same
+    as GCP Oracle zone\nof Exadata infrastructure. "
+    output: true
+  - name: 'properties'
+    type: NestedObject
+    description: 'Various properties and settings associated with Exadata VM cluster. '
+    properties:
+      - name: 'ocid'
+        type: String
+        description: 'Oracle Cloud Infrastructure ID of VM Cluster. '
+        output: true
+      - name: 'licenseType'
+        type: String
+        description: "License type of VM Cluster. \n Possible values:\n LICENSE_TYPE_UNSPECIFIED\nLICENSE_INCLUDED\nBRING_YOUR_OWN_LICENSE"
+        required: true
+      - name: 'giVersion'
+        type: String
+        description: 'Grid Infrastructure Version. '
+        ignore_read: true
+      - name: 'timeZone'
+        type: NestedObject
+        description: "Represents a time zone from the\n[IANA Time Zone Database](https://www.iana.org/time-zones). "
+        default_from_api: true
+        properties:
+          - name: 'id'
+            type: String
+            description: 'IANA Time Zone Database time zone, e.g. "America/New_York". '
+            default_from_api: true
+          - name: 'version'
+            type: String
+            description: 'IANA Time Zone Database version number, e.g. "2019a". '
+      - name: 'sshPublicKeys'
+        type: Array
+        description: 'SSH public keys to be stored with cluster. '
+        item_type:
+          type: String
+      - name: 'nodeCount'
+        type: Integer
+        description: 'Number of database servers. '
+        default_from_api: true
+      - name: 'shape'
+        type: String
+        description: 'Shape of VM Cluster. '
+        output: true
+      - name: 'ocpuCount'
+        type: Double
+        description: 'OCPU count per VM. Minimum is 0.1. '
+        default_from_api: true
+      - name: 'memorySizeGb'
+        type: Integer
+        description: 'Memory allocated in GBs. '
+        default_from_api: true
+      - name: 'dbNodeStorageSizeGb'
+        type: Integer
+        description: 'Local storage per VM '
+        default_from_api: true
+      - name: 'storageSizeGb'
+        type: Integer
+        description: 'The storage allocation for the disk group, in gigabytes
+      (GB). '
+        output: true
+      - name: 'dataStorageSizeTb'
+        type: Double
+        description: 'The data disk group size to be allocated in TBs. '
+        default_from_api: true
+      - name: 'diskRedundancy'
+        type: String
+        description: "The type of redundancy. \n Possible values:\n DISK_REDUNDANCY_UNSPECIFIED\nHIGH\nNORMAL"
+        default_from_api: true
+      - name: 'sparseDiskgroupEnabled'
+        type: Boolean
+        description: 'Use exadata sparse snapshots. '
+        default_from_api: true
+      - name: 'localBackupEnabled'
+        type: Boolean
+        description: 'Use local backup. '
+      - name: 'hostnamePrefix'
+        type: String
+        description: 'Prefix for VM cluster host names. '
+        ignore_read: true
+      - name: 'diagnosticsDataCollectionOptions'
+        type: NestedObject
+        description: 'Data collection options for diagnostics. '
+        properties:
+          - name: 'diagnosticsEventsEnabled'
+            type: Boolean
+            description: 'Indicates whether diagnostic collection is enabled for
+        the VM cluster '
+          - name: 'healthMonitoringEnabled'
+            type: Boolean
+            description: 'Indicates whether health monitoring is enabled for the
+        VM cluster '
+          - name: 'incidentLogsEnabled'
+            type: Boolean
+            description: "Indicates whether incident logs and trace collection
+        are enabled for the VM\ncluster "
+      - name: 'state'
+        type: String
+        description: "State of the cluster. \n Possible values:\n STATE_UNSPECIFIED\nPROVISIONING\nAVAILABLE\nUPDATING\nTERMINATING\nTERMINATED\nFAILED\nMAINTENANCE_IN_PROGRESS"
+        output: true
+      - name: 'scanListenerPortTcp'
+        type: Integer
+        description: 'SCAN listener port - TCP '
+        output: true
+      - name: 'scanListenerPortTcpSsl'
+        type: Integer
+        description: 'SCAN listener port - TLS '
+        output: true
+      - name: 'domain'
+        type: String
+        description: "Parent DNS domain where SCAN DNS and hosts names are
+      qualified.\nex: ocispdelegated.ocisp10jvnet.oraclevcn.com "
+        output: true
+      - name: 'scanDns'
+        type: String
+        description: "SCAN DNS name.\nex: sp2-yi0xq-scan.ocispdelegated.ocisp10jvnet.oraclevcn.com "
+        output: true
+      - name: 'hostname'
+        type: String
+        description: "host name without domain.\nformat: \"-\" with some
+      suffix.\nex: sp2-yi0xq where \"sp2\" is the hostname_prefix. "
+        output: true
+      - name: 'cpuCoreCount'
+        type: Integer
+        description: 'Number of enabled CPU cores. '
+        required: true
+      - name: 'systemVersion'
+        type: String
+        description: 'Operating system version of the image. '
+        output: true
+      - name: 'scanIpIds'
+        type: Array
+        description: 'OCIDs of scan IPs. '
+        output: true
+        item_type:
+          type: String
+      - name: 'scanDnsRecordId'
+        type: String
+        description: 'OCID of scan DNS record. '
+        output: true
+      - name: 'ociUrl'
+        type: String
+        description: 'Deep link to the OCI console to view this resource. '
+        output: true
+      - name: 'dbServerOcids'
+        type: Array
+        description: 'OCID of database servers. '
+        default_from_api: true
+        item_type:
+          type: String
+      - name: 'compartmentId'
+        type: String
+        description: 'Compartment ID of cluster. '
+        output: true
+      - name: 'dnsListenerIp'
+        type: String
+        description: 'DNS listener IP. '
+        output: true
+      - name: 'clusterName'
+        type: String
+        description: 'OCI Cluster name. '
+        default_from_api: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Labels or tags associated with the VM Cluster. '
+  - name: 'createTime'
+    type: String
+    description: 'The date and time that the VM cluster was created. '
+    output: true
+  - name: 'cidr'
+    type: String
+    description: 'Network settings. CIDR to use for cluster IP allocation. '
+    required: true
+  - name: 'backupSubnetCidr'
+    type: String
+    description: 'CIDR range of the backup subnet. '
+    required: true
+  - name: 'network'
+    type: String
+    description: "The name of the VPC network.\nFormat: projects/{project}/global/networks/{network} "
+    required: true
