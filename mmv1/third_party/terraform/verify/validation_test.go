@@ -174,7 +174,7 @@ func TestValidateRFC1035Name(t *testing.T) {
 		{TestName: "cannot end with a dash", Min: 6, Max: 10, Value: "invalid-", ExpectError: true},
 		{TestName: "too short", Min: 6, Max: 10, Value: "short", ExpectError: true},
 		{TestName: "too long", Min: 6, Max: 10, Value: "toolooooong", ExpectError: true},
-		{TestName: "min too small", Min: 1, Max: 10, Value: "", ExpectError: true},
+		{TestName: "min too small", Min: 0, Max: 10, Value: "", ExpectError: true},
 		{TestName: "min < max", Min: 6, Max: 5, Value: "", ExpectError: true},
 	}
 

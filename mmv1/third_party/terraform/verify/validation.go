@@ -22,7 +22,7 @@ const (
 
 	SubnetworkLinkRegex = "projects/(" + ProjectRegex + ")/regions/(" + RegionRegex + ")/subnetworks/(" + SubnetworkRegex + ")$"
 
-	RFC1035NameTemplate = "[a-z](?:[-a-z0-9]{%d,%d}[a-z0-9])"
+	RFC1035NameTemplate = "[a-z]([-a-z0-9]{%v,%v}[a-z0-9])?"
 	CloudIoTIdRegex     = "^[a-zA-Z][-a-zA-Z0-9._+~%]{2,254}$"
 
 	// Format of default Compute service accounts created by Google
@@ -194,10 +194,10 @@ func ValidateRFC3339Time(v interface{}, k string) (warnings []string, errors []e
 }
 
 func ValidateRFC1035Name(min, max int) schema.SchemaValidateFunc {
-	if min < 2 || max < min {
+	if min < 1 || max < min {
 		return func(i interface{}, k string) (s []string, errors []error) {
-			if min < 2 {
-				errors = append(errors, fmt.Errorf("min must be at least 2. Got: %d", min))
+			if min < 1 {
+				errors = append(errors, fmt.Errorf("min must be at least 1. Got: %d", min))
 			}
 			if max < min {
 				errors = append(errors, fmt.Errorf("max must greater than min. Got [%d, %d]", min, max))
@@ -206,7 +206,7 @@ func ValidateRFC1035Name(min, max int) schema.SchemaValidateFunc {
 		}
 	}
 
-	return ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
+	return ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-1, max-2))
 }
 
 func ValidateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {
