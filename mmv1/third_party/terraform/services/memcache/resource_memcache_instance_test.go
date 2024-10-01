@@ -49,7 +49,7 @@ resource "google_memcache_instance" "test" {
   name = "%s"
   region = "us-central1"
   authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = true
+  deletion_protection = false
 
   node_config {
     cpu_count      = 1
@@ -126,6 +126,9 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
                                 Config: testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
                                 ExpectError: regexp.MustCompile("deletion_protection"),
                         },
+			{
+				Config: testAccMemcacheInstance_update(prefix, name, network),
+			},
 		},
 	})
 }
