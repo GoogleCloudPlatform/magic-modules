@@ -1,4 +1,0 @@
-func flattenMonitoringUptimeCheckConfigResourceGroupGroupId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	project := d.Get("project").(string)
-	return fmt.Sprintf("projects/%s/groups/%s", project, v)
-}

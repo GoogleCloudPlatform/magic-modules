@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,108 +11,104 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeaturestoreEntitytypeFeature
-base_url: '{{entitytype}}/features'
-create_url: '{{entitytype}}/features?featureId={{name}}'
-self_link: '{{entitytype}}/features/{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeaturestoreEntitytypeFeature'
+description: |-
+  Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features'
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: '{{entitytype}}/features'
+self_link: '{{entitytype}}/features/{{name}}'
+create_url: '{{entitytype}}/features?featureId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%entitytype}}/features/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
   include_project: true
-description: |-
-  Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
-import_format: ['{{%entitytype}}/features/{{name}}']
-autogen_async: false
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  encoder: 'templates/terraform/encoders/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_create: 'templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  pre_delete: 'templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_featurestore_entitytype_feature.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_entitytype_feature'
+  - name: 'vertex_ai_featurestore_entitytype_feature'
     primary_resource_id: 'feature'
     vars:
       name: 'terraform'
       project: 'vertex-ai'
       kms_key_name: 'kms-name'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_featurestore_entitytype_feature_with_beta_fields'
+  - name: 'vertex_ai_featurestore_entitytype_feature_with_beta_fields'
     primary_resource_id: 'feature'
+    min_version: 'beta'
     vars:
       name: 'terraform2'
       project: 'vertex-ai'
       kms_key_name: 'kms-name'
-    min_version: beta
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
-  pre_delete: templates/terraform/constants/vertex_ai_featurestore_entitytype_feature.go.erb
-  custom_import: templates/terraform/custom_import/vertex_ai_featurestore_entitytype_feature.go.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/vertex_ai_featurestore_entitytype_feature.go.erb
-  encoder: templates/terraform/encoders/vertex_ai_featurestore_entitytype_feature.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: entitytype
+  - name: 'entitytype'
+    type: String
     description:
       The name of the Featurestore to use, in the format
       projects/{project}/locations/{location}/featurestores/{featurestore}/entityTypes/{entitytype}.
     url_param_only: true
-    immutable: true
     required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description:
       The name of the feature. The feature can be up to 64 characters long and
       can consist only of ASCII Latin letters A-Z and a-z, underscore(_), and
       ASCII digits 0-9 starting with a letter. The value will be unique given an
       entity type.
-    immutable: true
     url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'etag'
+    type: String
     description: Used to perform consistent read-modify-write updates.
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
     output: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the entity type was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp when the entity type was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs to assign to the feature.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: Description of the feature.
-  - !ruby/object:Api::Type::String
-    name: 'valueType'
+  - name: 'valueType'
+    type: String
     description: |
       Type of Feature value. Immutable. https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featurestores.entityTypes.features#ValueType
     required: true

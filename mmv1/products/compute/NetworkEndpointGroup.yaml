@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,17 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'NetworkEndpointGroup'
 kind: 'compute#networkEndpointGroup'
-base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
-immutable: true
-has_self_link: true
-collection_url_key: 'items'
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
 description: |
   Network endpoint groups (NEGs) are zonal resources that represent
   collections of IP address and port combinations for GCP resources within a
@@ -37,54 +29,61 @@ description: |
   Recreating a network endpoint group that's in use by another resource will give a
   `resourceInUseByAnotherResource` error. Use `lifecycle.create_before_destroy`
   to avoid this type of error.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/compute_network_endpoint_group.go.erb
+collection_url_key: 'items'
+custom_code:
+  constants: 'templates/terraform/constants/compute_network_endpoint_group.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_endpoint_group'
+  - name: 'network_endpoint_group'
     primary_resource_id: 'neg'
     vars:
       neg_name: 'my-lb-neg'
       network_name: 'neg-network'
       subnetwork_name: 'neg-subnetwork'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_endpoint_group_non_gcp'
+  - name: 'network_endpoint_group_non_gcp'
     primary_resource_id: 'neg'
     vars:
       neg_name: 'my-lb-neg'
       network_name: 'neg-network'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: |
       Zone where the network endpoint group is located.
     required: false
-    default_from_api: true
     ignore_read: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource; provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -94,15 +93,15 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'verify.ValidateGCEName'
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
-  - !ruby/object:Api::Type::Enum
-    name: 'networkEndpointType'
+  - name: 'networkEndpointType'
+    type: Enum
     description: |
       Type of network endpoints in this network endpoint group.
       NON_GCP_PRIVATE_IP_PORT is used for hybrid connectivity network
@@ -113,38 +112,38 @@ properties:
       CONNECTION balancing modes.
 
       Possible values include: GCE_VM_IP, GCE_VM_IP_PORT, NON_GCP_PRIVATE_IP_PORT, INTERNET_IP_PORT, INTERNET_FQDN_PORT, SERVERLESS, and PRIVATE_SERVICE_CONNECT.
-    values:
-      - :GCE_VM_IP
-      - :GCE_VM_IP_PORT
-      - :NON_GCP_PRIVATE_IP_PORT
-      - :INTERNET_IP_PORT
-      - :INTERNET_FQDN_PORT
-      - :SERVERLESS
-      - :PRIVATE_SERVICE_CONNECT
-    default_value: :GCE_VM_IP_PORT
-  - !ruby/object:Api::Type::Integer
-    name: 'size'
+    default_value: "GCE_VM_IP_PORT"
+    enum_values:
+      - 'GCE_VM_IP'
+      - 'GCE_VM_IP_PORT'
+      - 'NON_GCP_PRIVATE_IP_PORT'
+      - 'INTERNET_IP_PORT'
+      - 'INTERNET_FQDN_PORT'
+      - 'SERVERLESS'
+      - 'PRIVATE_SERVICE_CONNECT'
+  - name: 'size'
+    type: Integer
     description: Number of network endpoints in the network endpoint group.
     output: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'selfLink'
+  - name: 'network'
+    type: ResourceRef
     description: |
       The network to which all network endpoints in the NEG belong.
       Uses "default" project network if unspecified.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'subnetwork'
-    resource: 'Subnetwork'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
     imports: 'selfLink'
+  - name: 'subnetwork'
+    type: ResourceRef
     description: |
       Optional subnetwork to which all network endpoints in the NEG belong.
     diff_suppress_func: 'compareOptionalSubnet'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Integer
-    name: 'defaultPort'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Subnetwork'
+    imports: 'selfLink'
+  - name: 'defaultPort'
+    type: Integer
     description: |
       The default port used if the port number is not specified in the
       network endpoint.

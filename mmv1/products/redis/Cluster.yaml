@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,300 +11,310 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Cluster'
 description: |
   A Google Cloud Redis Cluster instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
   api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 60
-  update_minutes: 120
-  delete_minutes: 30
+docs:
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+timeouts:
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: 'redis_cluster_ha'
+    primary_resource_id: 'cluster-ha'
+    vars:
+      cluster_name: 'ha-cluster'
+      policy_name: 'mypolicy'
+      subnet_name: 'mysubnet'
+      network_name: 'mynetwork'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_ha_single_zone'
+    primary_resource_id: 'cluster-ha-single-zone'
+    vars:
+      cluster_name: 'ha-cluster-single-zone'
+      policy_name: 'mypolicy'
+      subnet_name: 'mysubnet'
+      network_name: 'mynetwork'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       Unique name of the resource in this scope including project and location using the form:
       projects/{projectId}/locations/{locationId}/clusters/{clusterId}
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'region'
-    required: false
-    immutable: true
-    url_param_only: true
+  - name: 'region'
+    type: String
     description: |
       The name of the region of the Redis cluster.
+    url_param_only: true
+    required: false
+    immutable: true
     ignore_read: true
     default_from_api: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "redis_cluster_ha"
-    primary_resource_id: "cluster-ha"
-    vars:
-      cluster_name: "ha-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      deletion_protection_enabled: 'false'
-    oics_vars_overrides:
-      deletion_protection_enabled: 'false'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "redis_cluster_ha_single_zone"
-    primary_resource_id: "cluster-ha-single-zone"
-    vars:
-      cluster_name: "ha-cluster-single-zone"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
-      deletion_protection_enabled: 'true'
-    test_vars_overrides:
-      deletion_protection_enabled: 'false'
-    oics_vars_overrides:
-      deletion_protection_enabled: 'false'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: |
       The timestamp associated with the cluster creation request. A timestamp in
       RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional
       digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: state
+  - name: 'state'
+    type: Enum
     description: |
       The current state of this cluster. Can be CREATING, READY, UPDATING, DELETING and SUSPENDED
-    values:
-      - :CREATING
-      - :READY
-      - :UPDATING
-      - :DELETING
-      - :SUSPENDED
     immutable: true
     output: true
-  - !ruby/object:Api::Type::String
-    name: uid
+    enum_values:
+      - 'CREATING'
+      - 'READY'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'SUSPENDED'
+  - name: 'uid'
+    type: String
     description: |
       System assigned, unique identifier for the cluster.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: authorizationMode
+  - name: 'authorizationMode'
+    type: Enum
     description: |
       Optional. The authorization mode of the Redis cluster. If not provided, auth feature is disabled for the cluster.
-    values:
-      - :AUTH_MODE_UNSPECIFIED
-      - :AUTH_MODE_IAM_AUTH
-      - :AUTH_MODE_DISABLED
-    default_value: :AUTH_MODE_DISABLED
-    immutable: true
     required: false
-  - !ruby/object:Api::Type::Enum
-    name: transitEncryptionMode
+    immutable: true
+    default_value: "AUTH_MODE_DISABLED"
+    enum_values:
+      - 'AUTH_MODE_UNSPECIFIED'
+      - 'AUTH_MODE_IAM_AUTH'
+      - 'AUTH_MODE_DISABLED'
+  - name: 'transitEncryptionMode'
+    type: Enum
     description: |
       Optional. The in-transit encryption for the Redis cluster.
       If not provided, encryption is disabled for the cluster.
-    values:
-      - :TRANSIT_ENCRYPTION_MODE_UNSPECIFIED
-      - :TRANSIT_ENCRYPTION_MODE_DISABLED
-      - :TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
-    default_value: :TRANSIT_ENCRYPTION_MODE_DISABLED
-    immutable: true
     required: false
-  - !ruby/object:Api::Type::Enum
-    name: nodeType
+    immutable: true
+    default_value: "TRANSIT_ENCRYPTION_MODE_DISABLED"
+    enum_values:
+      - 'TRANSIT_ENCRYPTION_MODE_UNSPECIFIED'
+      - 'TRANSIT_ENCRYPTION_MODE_DISABLED'
+      - 'TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION'
+  - name: 'nodeType'
+    type: Enum
     description: |
       The nodeType for the Redis cluster.
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
-    values:
-      - :REDIS_SHARED_CORE_NANO
-      - :REDIS_HIGHMEM_MEDIUM
-      - :REDIS_HIGHMEM_XLARGE
-      - :REDIS_STANDARD_SMALL
-    default_from_api: true
-    immutable: true
     required: false
-  - !ruby/object:Api::Type::NestedObject
-    name: zoneDistributionConfig
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'REDIS_SHARED_CORE_NANO'
+      - 'REDIS_HIGHMEM_MEDIUM'
+      - 'REDIS_HIGHMEM_XLARGE'
+      - 'REDIS_STANDARD_SMALL'
+  - name: 'zoneDistributionConfig'
+    type: NestedObject
     description: Immutable. Zone distribution config for Memorystore Redis cluster.
     immutable: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: mode
+      - name: 'mode'
+        type: Enum
         description: |
           Immutable. The mode for zone distribution for Memorystore Redis cluster.
           If not provided, MULTI_ZONE will be used as default
-        values:
-          - :MULTI_ZONE
-          - :SINGLE_ZONE
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: zone
+        enum_values:
+          - 'MULTI_ZONE'
+          - 'SINGLE_ZONE'
+      - name: 'zone'
+        type: String
         description: |
           Immutable. The zone for single zone Memorystore Redis cluster.
-  - !ruby/object:Api::Type::Array
-    name: 'pscConfigs'
+  - name: 'pscConfigs'
+    type: Array
     description: |
       Required. Each PscConfig configures the consumer network where two
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
     required: true
     ignore_read: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             Required. The consumer network where the network address of
             the discovery endpoint will be reserved, in the form of
             projects/{network_project_id_or_number}/global/networks/{network_id}.
           required: true
-  - !ruby/object:Api::Type::Array
-    name: 'discoveryEndpoints'
+  - name: 'discoveryEndpoints'
+    type: Array
     description: |
       Output only. Endpoints created on each given network,
       for Redis clients to connect to the cluster.
       Currently only one endpoint is supported.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'address'
+        - name: 'address'
+          type: String
           description: |
             Output only. Network address of the exposed Redis endpoint used by clients to connect to the service.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
+        - name: 'port'
+          type: Integer
           description: |
             Output only. The port number of the exposed Redis endpoint.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'pscConfig'
+        - name: 'pscConfig'
+          type: NestedObject
           description: |
             Output only. Customer configuration for where the endpoint
             is created and accessed from.
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'network'
+            - name: 'network'
+              type: String
               description: |
                 The consumer network where the network address of the discovery
                 endpoint will be reserved, in the form of
                 projects/{network_project_id}/global/networks/{network_id}.
-  - !ruby/object:Api::Type::Array
-    name: 'pscConnections'
+  - name: 'pscConnections'
+    type: Array
     description: |
       Output only. PSC connections for discovery of the cluster topology and accessing the cluster.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'pscConnectionId'
+        - name: 'pscConnectionId'
+          type: String
           description: |
             Output only. The PSC connection id of the forwarding rule connected to the service attachment.
-        - !ruby/object:Api::Type::String
-          name: 'address'
+        - name: 'address'
+          type: String
           description: |
             Output only. The IP allocated on the consumer network for the PSC forwarding rule.
-        - !ruby/object:Api::Type::String
-          name: 'forwardingRule'
+        - name: 'forwardingRule'
+          type: String
           description: |
             Output only. The URI of the consumer side forwarding rule. Example: projects/{projectNumOrId}/regions/us-east1/forwardingRules/{resourceId}.
-        - !ruby/object:Api::Type::String
-          name: 'projectId'
+        - name: 'projectId'
+          type: String
           description: |
             Output only. The consumer projectId where the forwarding rule is created from.
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             The consumer network where the IP address resides, in the form of projects/{projectId}/global/networks/{network_id}.
-    output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: stateInfo
+  - name: 'stateInfo'
+    type: NestedObject
     description: Output only. Additional information about the current state of the cluster.
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: updateInfo
-        properties:
-          - !ruby/object:Api::Type::Integer
-            name: targetShardCount
-            description: Target number of shards for redis cluster.
-          - !ruby/object:Api::Type::Integer
-            name: targetReplicaCount
-            description: Target number of replica nodes per shard.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: replicaCount
+    properties:
+      - name: 'updateInfo'
+        type: NestedObject
+        properties:
+          - name: 'targetShardCount'
+            type: Integer
+            description: Target number of shards for redis cluster.
+          - name: 'targetReplicaCount'
+            type: Integer
+            description: Target number of replica nodes per shard.
+  - name: 'replicaCount'
+    type: Integer
     description: |
       Optional. The number of replica nodes per shard.
     required: false
     send_empty_value: true
-  - !ruby/object:Api::Type::Integer
-    name: sizeGb
+  - name: 'sizeGb'
+    type: Integer
     description: |
       Output only. Redis memory size in GB for the entire cluster.
     output: true
-  - !ruby/object:Api::Type::Double
-    name: preciseSizeGb
+  - name: 'preciseSizeGb'
+    type: Double
     description: |
       Output only. Redis memory precise size in GB for the entire cluster.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: shardCount
+  - name: 'shardCount'
+    type: Integer
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
-  - !ruby/object:Api::Type::Boolean
-    name: deletionProtectionEnabled
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
     description: |
       Optional. Indicates if the cluster is deletion protected or not.
       If the value if set to true, any delete cluster operation will fail.
       Default value is true.
     required: false
     default_value: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'redisConfigs'
+  - name: 'redisConfigs'
+    type: KeyValuePairs
     description: |
       Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
-  - !ruby/object:Api::Type::NestedObject
-    name: maintenancePolicy
+  - name: 'maintenancePolicy'
+    type: NestedObject
     description: Maintenance policy for a cluster
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
+      - name: 'createTime'
+        type: String
         description: |
           Output only. The time when the policy was created.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'updateTime'
         output: true
+      - name: 'updateTime'
+        type: String
         description: |
           Output only. The time when the policy was last updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::Array
-        name: 'weeklyMaintenanceWindow'
+        output: true
+      - name: 'weeklyMaintenanceWindow'
+        type: Array
         description: |
           Optional. Maintenance window that is applied to resources covered by this policy.
           Minimum 1. For the current version, the maximum number
           of weekly_window is expected to be one.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'day'
-              required: true
+            - name: 'day'
+              type: Enum
               description: |
                 Required. The day of week that maintenance updates occur.
 
@@ -316,81 +326,82 @@ properties:
                 - FRIDAY: Friday
                 - SATURDAY: Saturday
                 - SUNDAY: Sunday
-              values:
-                - :DAY_OF_WEEK_UNSPECIFIED
-                - :MONDAY
-                - :TUESDAY
-                - :WEDNESDAY
-                - :THURSDAY
-                - :FRIDAY
-                - :SATURDAY
-                - :SUNDAY
-            - !ruby/object:Api::Type::String
-              name: 'duration'
-              output: true
+              required: true
+              enum_values:
+                - 'DAY_OF_WEEK_UNSPECIFIED'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'duration'
+              type: String
               description: |
                 Output only. Duration of the maintenance window.
                 The current window is fixed at 1 hour.
                 A duration in seconds with up to nine fractional digits,
                 terminated by 's'. Example: "3.5s".
-            - !ruby/object:Api::Type::NestedObject
-              name: 'startTime'
-              required: true
-              allow_empty_object: true
-              send_empty_value: true
+              output: true
+            - name: 'startTime'
+              type: NestedObject
               description: |
                 Required. Start time of the window in UTC time.
+              required: true
+              send_empty_value: true
+              allow_empty_object: true
               properties:
-                - !ruby/object:Api::Type::Integer
-                  name: 'hours'
+                - name: 'hours'
+                  type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,23)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'minutes'
+                - name: 'minutes'
+                  type: Integer
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,59)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'seconds'
+                - name: 'seconds'
+                  type: Integer
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,60)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'nanos'
+                - name: 'nanos'
+                  type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,999999999)'
-  - !ruby/object:Api::Type::NestedObject
-    name: maintenanceSchedule
-    output: true
+  - name: 'maintenanceSchedule'
+    type: NestedObject
     description: Upcoming maintenance schedule.
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'startTime'
-        output: true
+      - name: 'startTime'
+        type: String
         description: |
           Output only. The start time of any upcoming scheduled maintenance for this cluster.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'endTime'
         output: true
+      - name: 'endTime'
+        type: String
         description: |
           Output only. The end time of any upcoming scheduled maintenance for this cluster.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'scheduleDeadlineTime'
         output: true
+      - name: 'scheduleDeadlineTime'
+        type: String
         description: |
           Output only. The deadline that the maintenance schedule start time
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+        output: true

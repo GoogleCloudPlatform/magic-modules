@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,163 +11,159 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Dataset'
 kind: 'bigquery#dataset'
-base_url: projects/{{project}}/datasets
-self_link: projects/{{project}}/datasets/{{dataset_id}}
-has_self_link: true
 description: |
   Datasets allow you to organize and control access to your tables.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
-import_format: ['projects/{{project}}/datasets/{{dataset_id}}']
-delete_url: projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}
-skip_sweeper: true
+docs:
+  warning: |
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
+    The API does accept both formats but it will always return the legacy format which results in Terraform
+    showing permanent diff on each plan and apply operation.
+base_url: 'projects/{{project}}/datasets'
+self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
+has_self_link: true
+delete_url: 'projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}'
+import_format:
+  - 'projects/{{project}}/datasets/{{dataset_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_basic'
+  - name: 'bigquery_dataset_basic'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_with_max_time_travel_hours'
+  - name: 'bigquery_dataset_with_max_time_travel_hours'
     primary_resource_id: 'dataset'
-    skip_docs: true
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_cmek'
-    skip_test: true
+    exclude_docs: true
+  - name: 'bigquery_dataset_cmek'
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_authorized_dataset'
+    exclude_test: true
+  - name: 'bigquery_dataset_authorized_dataset'
     primary_resource_id: 'dataset'
     vars:
       private: 'private'
       public: 'public'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_authorized_routine'
+  - name: 'bigquery_dataset_authorized_routine'
     primary_resource_id: 'private'
     vars:
       private_dataset: 'private_dataset'
       public_dataset: 'public_dataset'
       public_routine: 'public_routine'
     test_env_vars:
-      service_account: :SERVICE_ACCT
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_case_insensitive_names'
+      service_account: 'SERVICE_ACCT'
+  - name: 'bigquery_dataset_case_insensitive_names'
     primary_resource_id: 'dataset'
-    skip_docs: true
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_default_collation_set'
+    exclude_docs: true
+  - name: 'bigquery_dataset_default_collation_set'
     primary_resource_id: 'dataset'
-    skip_docs: true
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_external_reference_aws_test'
+    exclude_docs: true
+  - name: 'bigquery_dataset_external_reference_aws_test'
     primary_resource_id: 'dataset'
-    skip_docs: true
     vars:
       dataset_id: 'example_dataset'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_external_reference_aws'
+    exclude_docs: true
+  - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
-    skip_test: true
     vars:
       dataset_id: 'example_dataset'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_resource_tags'
+    exclude_test: true
+  - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
-    primary_resource_name:
-      'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
-    skip_docs: true
+    primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
     vars:
       dataset_id: 'dataset'
       tag_key1: 'tag_key1'
       tag_value1: 'tag_value1'
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
+    exclude_docs: true
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'delete_contents_on_destroy'
-    default_value: false
+  - name: 'delete_contents_on_destroy'
     description: |
       If set to `true`, delete all the tables in the
       dataset when destroying the resource; otherwise,
       destroying the resource will fail if tables are present.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/bigquery_dataset.go.erb
-docs: !ruby/object:Provider::Terraform::Docs
-  warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
-    The API does accept both formats but it will always return the legacy format which results in Terraform
-    showing permanent diff on each plan and apply operation.
+    type: Boolean
+    default_value: false
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'maxTimeTravelHours'
+  - name: 'maxTimeTravelHours'
+    type: String
     description:
       'Defines the time travel window in hours. The value can be from 48 to 168
       hours (2 to 7 days).'
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'access'
+  - name: 'access'
+    type: Array
     description:
       'An array of objects that define dataset access for one or more entities.'
-    default_from_api: true
     is_set: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    default_from_api: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'domain'
+        - name: 'domain'
+          type: String
           description: |
             A domain to grant access to. Any users signed in with the
             domain specified will be granted the specified access
-        - !ruby/object:Api::Type::String
-          name: 'groupByEmail'
+        - name: 'groupByEmail'
+          type: String
           description: An email address of a Google Group to grant access to.
-        - !ruby/object:Api::Type::String
-          name: 'role'
+        - name: 'role'
+          type: String
           description: |
             Describes the rights granted to the user specified by the other
             member of the access object. Basic, predefined, and custom roles
             are supported. Predefined roles that have equivalent basic roles
             are swapped by the API to their basic counterparts. See
             [official docs](https://cloud.google.com/bigquery/docs/access-control).
-        - !ruby/object:Api::Type::String
-          name: 'specialGroup'
+        - name: 'specialGroup'
+          type: String
           description: |
             A special group to grant access to. Possible values include:
             * `projectOwners`: Owners of the enclosing project.
             * `projectReaders`: Readers of the enclosing project.
             * `projectWriters`: Writers of the enclosing project.
             * `allAuthenticatedUsers`: All authenticated BigQuery users.
-        - !ruby/object:Api::Type::String
-          name: 'iamMember'
+        - name: 'iamMember'
+          type: String
           description: |
             Some other type of member that appears in the IAM Policy but isn't a user,
             group, domain, or special group. For example: `allUsers`
-        - !ruby/object:Api::Type::String
-          name: 'userByEmail'
+        - name: 'userByEmail'
+          type: String
           description: |
             An email address of a user to grant access to. For example:
             fred@example.com
-        - !ruby/object:Api::Type::NestedObject
-          name: 'view'
+        - name: 'view'
+          type: NestedObject
           description: |
             A view from a different dataset to grant access to. Queries
             executed against that view will have read access to tables in
@@ -175,49 +171,50 @@ properties:
             set. If that view is updated by any user, access to the view
             needs to be granted again via an update operation.
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'datasetId'
+            - name: 'datasetId'
+              type: String
               description: The ID of the dataset containing this table.
               required: true
-            - !ruby/object:Api::Type::String
-              name: 'projectId'
+            - name: 'projectId'
+              type: String
               description: The ID of the project containing this table.
               required: true
-            - !ruby/object:Api::Type::String
-              name: 'tableId'
+            - name: 'tableId'
+              type: String
               description: |
                 The ID of the table. The ID must contain only letters (a-z,
                 A-Z), numbers (0-9), or underscores (_). The maximum length
                 is 1,024 characters.
               required: true
-        - !ruby/object:Api::Type::NestedObject
-          name: 'dataset'
+        - name: 'dataset'
+          type: NestedObject
           description: |
             Grants all resources of particular types in a particular dataset read access to the current dataset.
           properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'dataset'
-              required: true
+            - name: 'dataset'
+              type: NestedObject
               description: |
                 The dataset this entry applies to
+              required: true
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'datasetId'
+                - name: 'datasetId'
+                  type: String
                   description: The ID of the dataset containing this table.
                   required: true
-                - !ruby/object:Api::Type::String
-                  name: 'projectId'
+                - name: 'projectId'
+                  type: String
                   description: The ID of the project containing this table.
                   required: true
-            - !ruby/object:Api::Type::Array
-              name: 'targetTypes'
+            - name: 'targetTypes'
+              type: Array
               description: |
                 Which resources in the dataset this entry applies to. Currently, only views are supported,
                 but additional target types may be added in the future. Possible values: VIEWS
-              item_type: Api::Type::String
               required: true
-        - !ruby/object:Api::Type::NestedObject
-          name: 'routine'
+              item_type:
+                type: String
+        - name: 'routine'
+          type: NestedObject
           description: |
             A routine from a different dataset to grant access to. Queries
             executed against that routine will have read access to tables in
@@ -225,46 +222,46 @@ properties:
             set. If that routine is updated by any user, access to the routine
             needs to be granted again via an update operation.
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'datasetId'
+            - name: 'datasetId'
+              type: String
               description: The ID of the dataset containing this table.
               required: true
-            - !ruby/object:Api::Type::String
-              name: 'projectId'
+            - name: 'projectId'
+              type: String
               description: The ID of the project containing this table.
               required: true
-            - !ruby/object:Api::Type::String
-              name: 'routineId'
+            - name: 'routineId'
+              type: String
               description: |
                 The ID of the routine. The ID must contain only letters (a-z,
                 A-Z), numbers (0-9), or underscores (_). The maximum length
                 is 256 characters.
               required: true
-  - !ruby/object:Api::Type::Integer
-    name: 'creationTime'
-    output: true
+  - name: 'creationTime'
+    type: Integer
     description: |
       The time when this dataset was created, in milliseconds since the
       epoch.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'datasetReference'
+    output: true
+  - name: 'datasetReference'
+    type: NestedObject
     description: 'A reference that identifies the dataset.'
     required: true
     immutable: true
     flatten_object: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'datasetId'
+      - name: 'datasetId'
+        type: String
         description: |
           A unique ID for this dataset, without the project name. The ID
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores (_). The maximum length is 1,024 characters.
         required: true
         immutable: true
-        validation: !ruby/object:Provider::Terraform::Validation
+        validation:
           function: 'validateDatasetId'
-  - !ruby/object:Api::Type::Integer
-    name: 'defaultTableExpirationMs'
+  - name: 'defaultTableExpirationMs'
+    type: Integer
     description: |
       The default lifetime of all tables in the dataset, in milliseconds.
       The minimum value is 3600000 milliseconds (one hour).
@@ -277,10 +274,10 @@ properties:
       table expires, or if you provide an explicit `expirationTime` when
       creating a table, that value takes precedence over the default
       expiration time indicated by this property.
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validateDefaultTableExpirationMs'
-  - !ruby/object:Api::Type::Integer
-    name: 'defaultPartitionExpirationMs'
+  - name: 'defaultPartitionExpirationMs'
+    type: Integer
     description: |
       The default partition expiration for all partitioned tables in
       the dataset, in milliseconds.
@@ -295,50 +292,50 @@ properties:
       table. If you provide an explicit `timePartitioning.expirationMs` when
       creating or updating a partitioned table, that value takes precedence
       over the default partition expiration time indicated by this property.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: A user-friendly description of the dataset
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+  - name: 'etag'
+    type: String
     description: |
       A hash of the resource.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'externalDatasetReference'
+  - name: 'externalDatasetReference'
+    type: NestedObject
     description: |
      Information about the external metadata storage where the dataset is defined.
     immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'externalSource'
+      - name: 'externalSource'
+        type: String
         description: |
           External source that backs this dataset.
         required: true
         immutable: true
-      - !ruby/object:Api::Type::String
-        name: 'connection'
+      - name: 'connection'
+        type: String
         description: |
           The connection id that is used to access the externalSource.
           Format: projects/{projectId}/locations/{locationId}/connections/{connectionId}
         required: true
         immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'friendlyName'
+  - name: 'friendlyName'
+    type: String
     description: A descriptive name for the dataset
     send_empty_value: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       The labels associated with this dataset. You can use these to
       organize and group your datasets.
-  - !ruby/object:Api::Type::Integer
-    name: 'lastModifiedTime'
+  - name: 'lastModifiedTime'
+    type: Integer
     description: |
       The date when this dataset or any of its tables was last modified, in
       milliseconds since the epoch.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       The geographic location where the dataset should reside.
       See [official docs](https://cloud.google.com/bigquery/docs/dataset-locations).
@@ -348,33 +345,33 @@ properties:
       contains at least two geographic places.
       The default value is multi-regional location `US`.
       Changing this forces a new resource to be created.
-    default_value: US
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/bigquery_dataset_location.go.erb
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'defaultEncryptionConfiguration'
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
+    default_value: "US"
+  - name: 'defaultEncryptionConfiguration'
+    type: NestedObject
     description: |
       The default encryption key for all tables in the dataset. Once this property is set,
       all newly-created partitioned tables in the dataset will have encryption key set to
       this value, unless table creation request (or query) overrides the key.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        required: true
+      - name: 'kmsKeyName'
+        type: String
         description: |
           Describes the Cloud KMS encryption key that will be used to protect destination
           BigQuery table. The BigQuery Service Account associated with your project requires
           access to this encryption key.
-  - !ruby/object:Api::Type::Boolean
-    name: 'isCaseInsensitive'
+        required: true
+  - name: 'isCaseInsensitive'
+    type: Boolean
     description: |
       TRUE if the dataset and its table names are case-insensitive, otherwise FALSE.
       By default, this is FALSE, which means the dataset and its table names are
       case-sensitive. This field does not affect routine references.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'defaultCollation'
+  - name: 'defaultCollation'
+    type: String
     description: |
       Defines the default collation specification of future tables created
       in the dataset. If a table is created in this dataset without table-level
@@ -387,8 +384,8 @@ properties:
       - 'und:ci': undetermined locale, case insensitive.
       - '': empty string. Default to case-sensitive behavior.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'storageBillingModel'
+  - name: 'storageBillingModel'
+    type: String
     description: |
       Specifies the storage billing model for the dataset.
       Set this flag value to LOGICAL to use logical bytes for storage billing,
@@ -396,8 +393,8 @@ properties:
 
       LOGICAL is the default if this flag isn't specified.
     default_from_api: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'resourceTags'
+  - name: 'resourceTags'
+    type: KeyValuePairs
     description: |
       The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
       in the namespaced format, for example "123456789012/environment" where 123456789012 is the

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,159 +12,160 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "CustomDomain"
-min_version: beta
-base_url: projects/{{project}}/sites/{{site_id}}/customDomains
-self_link: projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}
-create_url: projects/{{project}}/sites/{{site_id}}/customDomains?customDomainId={{custom_domain}}
-update_verb: :PATCH
-update_mask: true
+name: 'CustomDomain'
 description: |
   Manages Custom Domains for Firebase Hosting. Custom Domains link your
   domain names with Firebase Hosting sites, allowing Hosting to serve content
   on those domain names.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/hosting"
-  api: "https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites.customDomains"
+    'Official Documentation': 'https://firebase.google.com/docs/hosting'
+  api: 'https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites.customDomains'
+docs:
+base_url: 'projects/{{project}}/sites/{{site_id}}/customDomains'
+self_link: 'projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}'
+create_url: 'projects/{{project}}/sites/{{site_id}}/customDomains?customDomainId={{custom_domain}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    "projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}",
-    "{{project}}/{{site_id}}/{{custom_domain}}",
-    "sites/{{site_id}}/customDomains/{{custom_domain}}",
-    "{{site_id}}/{{custom_domain}}",
-  ]
+  - 'projects/{{project}}/sites/{{site_id}}/customDomains/{{custom_domain}}'
+  - '{{project}}/{{site_id}}/{{custom_domain}}'
+  - 'sites/{{site_id}}/customDomains/{{custom_domain}}'
+  - '{{site_id}}/{{custom_domain}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  actions: ["update", "delete"]
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+async:
+  actions: ['update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
+  result:
+    path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/firebasehosting_custom_domain_wait_dns_verification.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/firebasehosting_custom_domain_soft_delete.go.erb
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  post_create: 'templates/terraform/post_create/firebasehosting_custom_domain_wait_dns_verification.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebasehosting_custom_domain_soft_delete.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_customdomain_basic"
-    min_version: "beta"
-    primary_resource_id: "default"
+  - name: 'firebasehosting_customdomain_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      site_id: site-id
-      custom_domain: custom.domain.com
+      site_id: 'site-id'
+      custom_domain: 'custom.domain.com'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
       # Use the default hosting site for the project in tests
-      site_id: envvar.GetTestProjectFromEnv()
+      'site_id': 'envvar.GetTestProjectFromEnv()'
       # Don't add random suffix
-      custom_domain: '"basic.custom.domain.com"'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_customdomain_full"
-    min_version: "beta"
-    primary_resource_id: "default"
+      'custom_domain': '"basic.custom.domain.com"'
+  - name: 'firebasehosting_customdomain_full'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      site_id: site-id-full
-      custom_domain: source.domain.com
-      redirect_target: destination.domain.com
+      site_id: 'site-id-full'
+      custom_domain: 'source.domain.com'
+      redirect_target: 'destination.domain.com'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
       # Don't add random suffix
-      custom_domain: '"full.source.domain.com"'
-      redirect_target: '"destination.domain.com"'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebasehosting_customdomain_cloud_run"
-    min_version: "beta"
-    primary_resource_id: "default"
+      'custom_domain': '"full.source.domain.com"'
+      'redirect_target': '"destination.domain.com"'
+  - name: 'firebasehosting_customdomain_cloud_run'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      site_id: site-id
-      custom_domain: run.custom.domain.com
-      cloud_run_service_id: cloud-run-service-via-hosting
+      site_id: 'site-id'
+      # Don't add random suffix
+      custom_domain: 'run.custom.domain.com'
+      cloud_run_service_id: 'cloud-run-service-via-hosting'
       deletion_protection: 'true'
-    oics_vars_overrides:
-      deletion_protection: 'false'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      # Don't add random suffix
-      custom_domain: '"run.custom.domain.com"'
-      deletion_protection: 'false'
+      'custom_domain': '"run.custom.domain.com"'
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: wait_dns_verification
+  - name: 'wait_dns_verification'
     description: |
       If true, Terraform will wait for DNS records to be fully resolved on the `CustomDomain`.
       If false, Terraform will not wait for DNS records on the `CustomDomain`. Any issues in
       the `CustomDomain` will be returned and stored in the Terraform state.
-    immutable: true
+    type: Boolean
     default_value: false
+    immutable: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: site_id
+  - name: 'site_id'
+    type: String
     description: |
       The ID of the site in which to create this custom domain association.
-    immutable: true
-    required: true
+    min_version: 'beta'
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: custom_domain
+    required: true
+    immutable: true
+  - name: 'custom_domain'
+    type: String
     description: |
       The ID of the `CustomDomain`, which is the domain name you'd like to use with Firebase Hosting.
-    immutable: true
-    required: true
+    min_version: 'beta'
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The fully-qualified name of the `CustomDomain`.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: createTime
-    output: true
+  - name: 'createTime'
+    type: Time
     description: The `CustomDomain`'s create time.
-  - !ruby/object:Api::Type::Time
-    name: updateTime
+    min_version: 'beta'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: The last time the `CustomDomain` was updated.
-  - !ruby/object:Api::Type::Time
-    name: deleteTime
+    min_version: 'beta'
     output: true
+  - name: 'deleteTime'
+    type: Time
     description: |
       The time the `CustomDomain` was deleted; null for `CustomDomains` that
       haven't been deleted. Deleted `CustomDomains` persist for approximately 30
       days, after which time Hosting removes them completely.
-  - !ruby/object:Api::Type::Time
-    name: expireTime
+    min_version: 'beta'
     output: true
+  - name: 'expireTime'
+    type: Time
     description: |
       The minimum time before a soft-deleted `CustomDomain` is completely removed
       from Hosting; null for `CustomDomains` that haven't been deleted.
-  - !ruby/object:Api::Type::Fingerprint
-    name: etag
+    min_version: 'beta'
     output: true
+  - name: 'etag'
+    type: Fingerprint
     description: |
       A string that represents the current state of the `CustomDomain` and
       allows you to confirm its initial state in requests that would modify it.
-  - !ruby/object:Api::Type::String
-    name: hostState
+    min_version: 'beta'
     output: true
+  - name: 'hostState'
+    type: String
     description: |
       The host state of your domain name. Host state is determined by checking each
       IP address associated with your domain name to see if it's serving
@@ -190,9 +191,10 @@ properties:
           All requests against your `CustomDomain`'s domain name are served by
           Hosting. If the `CustomDomain`'s `OwnershipState` is also `ACTIVE`, Hosting
           serves your Hosting Site's content on the domain name.
-  - !ruby/object:Api::Type::Enum
-    name: ownershipState
+    min_version: 'beta'
     output: true
+  - name: 'ownershipState'
+    type: Enum
     description: |
       The ownership state of your domain name. Ownership is determined at a
       Firebase project level, and established by adding `TXT` records to your
@@ -234,67 +236,79 @@ properties:
       OWNERSHIP_ACTIVE:
         Your `CustomDomain`'s domain name has `TXT` records that grant its project
         permission to act on its behalf.
-    values:
-      - :OWNERSHIP_MISSING
-      - :OWNERSHIP_UNREACHABLE
-      - :OWNERSHIP_MISMATCH
-      - :OWNERSHIP_CONFLICT
-      - :OWNERSHIP_PENDING
-      - :ACTIVE
-  - !ruby/object:Api::Type::Enum
-    name: certPreference
-    default_from_api: true
+    min_version: 'beta'
+    output: true
+    enum_values:
+      - 'OWNERSHIP_MISSING'
+      - 'OWNERSHIP_UNREACHABLE'
+      - 'OWNERSHIP_MISMATCH'
+      - 'OWNERSHIP_CONFLICT'
+      - 'OWNERSHIP_PENDING'
+      - 'ACTIVE'
+  - name: 'certPreference'
+    type: Enum
     description: |
       A field that lets you specify which SSL certificate type Hosting creates
       for your domain name. Spark plan `CustomDomain`s only have access to the
       `GROUPED` cert type, while Blaze plan can select any option.
-    values:
-      - :GROUPED
-      - :PROJECT_GROUPED
-      - :DEDICATED
-  - !ruby/object:Api::Type::String
-    name: redirectTarget
+    min_version: 'beta'
+    default_from_api: true
+    enum_values:
+      - 'GROUPED'
+      - 'PROJECT_GROUPED'
+      - 'DEDICATED'
+  - name: 'redirectTarget'
+    type: String
     description: |
       A domain name that this CustomDomain should direct traffic towards. If
       specified, Hosting will respond to requests against this CustomDomain
       with an HTTP 301 code, and route traffic to the specified `redirect_target`
       instead.
-  - !ruby/object:Api::Type::NestedObject
-    name: requiredDnsUpdates
-    output: true
+    min_version: 'beta'
+  - name: 'requiredDnsUpdates'
+    type: NestedObject
     description: |
       A set of updates you should make to the domain name's DNS records to
       let Hosting serve secure content on its behalf.
+    min_version: 'beta'
+    output: true
     properties:
-      - !ruby/object:Api::Type::Time
-        name: checkTime
-        output: true
+      - name: 'checkTime'
+        type: Time
         description: |
           The last time Hosting checked your CustomDomain's DNS records.
-      - !ruby/object:Api::Type::Array
-        name: discovered
+        min_version: 'beta'
+        output: true
+      - name: 'discovered'
+        type: Array
         description: |
           The set of DNS records Hosting discovered when inspecting a domain
-        item_type: !ruby/object:Api::Type::NestedObject
-          name: DnsRecordSet
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: domainName
+            - name: 'domainName'
+              type: String
               description: The domain name the record set pertains to.
-            - !ruby/object:Api::Type::Array
-              name: records
+              min_version: 'beta'
+            - name: 'records'
+              type: Array
               description: Records on the domain
-              item_type: !ruby/object:Api::Type::NestedObject
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: domainName
+                  - name: 'domainName'
+                    type: String
                     description: The domain name the record pertains to, e.g. `foo.bar.com.`.
-                  - !ruby/object:Api::Type::String
-                    name: type
+                    min_version: 'beta'
+                  - name: 'type'
+                    type: String
                     description: |
                       The record's type, which determines what data the record contains.
-                  - !ruby/object:Api::Type::String
-                    name: rdata
+                    min_version: 'beta'
+                  - name: 'rdata'
+                    type: String
                     description: |
                       The data of the record. The meaning of the value depends on record type:
                          - A and AAAA: IP addresses for the domain name.
@@ -303,34 +317,42 @@ properties:
                            uses TXT records to determine a which Firebase Projects have
                            permission to act on the domain name's behalf.
                          - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
-                  - !ruby/object:Api::Type::String
-                    name: requiredAction
+                    min_version: 'beta'
+                  - name: 'requiredAction'
+                    type: String
                     description: |
                       Indicates the a required action for this record.
-      - !ruby/object:Api::Type::Array
-        name: desired
+                    min_version: 'beta'
+      - name: 'desired'
+        type: Array
         description: |
           The set of DNS records Hosting needs to serve secure content on the domain.
-        item_type: !ruby/object:Api::Type::NestedObject
-          name: DnsRecordSet
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: domainName
+            - name: 'domainName'
+              type: String
               description: The domain name the record set pertains to.
-            - !ruby/object:Api::Type::Array
-              name: records
+              min_version: 'beta'
+            - name: 'records'
+              type: Array
               description: Records on the domain
-              item_type: !ruby/object:Api::Type::NestedObject
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: domainName
+                  - name: 'domainName'
+                    type: String
                     description: The domain name the record pertains to, e.g. `foo.bar.com.`.
-                  - !ruby/object:Api::Type::String
-                    name: type
+                    min_version: 'beta'
+                  - name: 'type'
+                    type: String
                     description: |
                       The record's type, which determines what data the record contains.
-                  - !ruby/object:Api::Type::String
-                    name: rdata
+                    min_version: 'beta'
+                  - name: 'rdata'
+                    type: String
                     description: |
                       The data of the record. The meaning of the value depends on record type:
                          - A and AAAA: IP addresses for the domain name.
@@ -339,102 +361,118 @@ properties:
                            uses TXT records to determine a which Firebase Projects have
                            permission to act on the domain name's behalf.
                          - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
-                  - !ruby/object:Api::Type::String
-                    name: requiredAction
+                    min_version: 'beta'
+                  - name: 'requiredAction'
+                    type: String
                     description: |
                       Indicates the a required action for this record.
-  - !ruby/object:Api::Type::Array
-    name: issues
-    output: true
+                    min_version: 'beta'
+  - name: 'issues'
+    type: Array
     description: |
       A set of errors Hosting systems encountered when trying to establish
       Hosting's ability to serve secure content for your domain name. Resolve
       these issues to ensure your `CustomDomain` behaves properly.
-    item_type: !ruby/object:Api::Type::NestedObject
-      name: issue
+    min_version: 'beta'
+    output: true
+    item_type:
       description: A `google.rpc.Status`
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Integer
-          name: code
+        - name: 'code'
+          type: Integer
           description: The status code, which should be an enum value of `google.rpc.Code`
-        - !ruby/object:Api::Type::String
-          name: message
+          min_version: 'beta'
+        - name: 'message'
+          type: String
           description: Error message
-        - !ruby/object:Api::Type::String
-          name: 'details'
+          min_version: 'beta'
+        - name: 'details'
+          type: String
           description: |
             A list of messages that carry the error details.
-          custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-          state_func:
-            'func(v interface{}) string { s, _ :=
-            structure.NormalizeJsonString(v); return s }'
-          validation: !ruby/object:Provider::Terraform::Validation
+          min_version: 'beta'
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+          validation:
             function: 'validation.StringIsJSON'
-  - !ruby/object:Api::Type::NestedObject
-    name: cert
-    output: true
+  - name: 'cert'
+    type: NestedObject
     description: |
       The SSL certificate Hosting has for this `CustomDomain`'s domain name.
       For new `CustomDomain`s, this often represents Hosting's intent to create
       a certificate, rather than an actual cert. Check the `state` field for
       more.
+    min_version: 'beta'
+    output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: type
+      - name: 'type'
+        type: String
         description: The certificate's type.
-      - !ruby/object:Api::Type::String
-        name: state
+        min_version: 'beta'
+      - name: 'state'
+        type: String
         description: |
           The state of the certificate. Only the `CERT_ACTIVE` and
           `CERT_EXPIRING_SOON` states provide SSL coverage for a domain name. If the
           state is `PROPAGATING` and Hosting had an active cert for the domain name
           before, that formerly-active cert provides SSL coverage for the domain name
           until the current cert propagates.
-      - !ruby/object:Api::Type::NestedObject
-        name: verification
+        min_version: 'beta'
+      - name: 'verification'
+        type: NestedObject
         description: |
           A set of ACME challenges you can add to your DNS records or existing,
           non-Hosting hosting provider to allow Hosting to create an SSL certificate
           for your domain name before you point traffic toward hosting. You can use
           thse challenges as part of a zero downtime transition from your old
           provider to Hosting.
+        min_version: 'beta'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: dns
+          - name: 'dns'
+            type: NestedObject
             description: |
               A `TXT` record to add to your DNS records that confirms your intent to
               let Hosting create an SSL cert for your domain name.
+            min_version: 'beta'
             properties:
-              - !ruby/object:Api::Type::Time
-                name: checkTime
-                output: true
+              - name: 'checkTime'
+                type: Time
                 description: |
                   The last time Hosting checked your CustomDomain's DNS records.
-              - !ruby/object:Api::Type::Array
-                name: discovered
+                min_version: 'beta'
+                output: true
+              - name: 'discovered'
+                type: Array
                 description: |
                   The set of DNS records Hosting discovered when inspecting a domain
-                item_type: !ruby/object:Api::Type::NestedObject
-                  name: DnsRecordSet
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: domainName
+                    - name: 'domainName'
+                      type: String
                       description: The domain name the record set pertains to.
-                    - !ruby/object:Api::Type::Array
-                      name: records
+                      min_version: 'beta'
+                    - name: 'records'
+                      type: Array
                       description: Records on the domain
-                      item_type: !ruby/object:Api::Type::NestedObject
+                      min_version: 'beta'
+                      item_type:
+                        type: NestedObject
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: domainName
+                          - name: 'domainName'
+                            type: String
                             description: The domain name the record pertains to, e.g. `foo.bar.com.`.
-                          - !ruby/object:Api::Type::String
-                            name: type
+                            min_version: 'beta'
+                          - name: 'type'
+                            type: String
                             description: |
                               The record's type, which determines what data the record contains.
-                          - !ruby/object:Api::Type::String
-                            name: rdata
+                            min_version: 'beta'
+                          - name: 'rdata'
+                            type: String
                             description: |
                               The data of the record. The meaning of the value depends on record type:
                                 - A and AAAA: IP addresses for the domain name.
@@ -443,34 +481,42 @@ properties:
                                   uses TXT records to determine a which Firebase Projects have
                                   permission to act on the domain name's behalf.
                                 - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
-                          - !ruby/object:Api::Type::String
-                            name: requiredAction
+                            min_version: 'beta'
+                          - name: 'requiredAction'
+                            type: String
                             description: |
                               Indicates the a required action for this record.
-              - !ruby/object:Api::Type::Array
-                name: desired
+                            min_version: 'beta'
+              - name: 'desired'
+                type: Array
                 description: |
                   The set of DNS records Hosting needs to serve secure content on the domain.
-                item_type: !ruby/object:Api::Type::NestedObject
-                  name: DnsRecordSet
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: domainName
+                    - name: 'domainName'
+                      type: String
                       description: The domain name the record set pertains to.
-                    - !ruby/object:Api::Type::Array
-                      name: records
+                      min_version: 'beta'
+                    - name: 'records'
+                      type: Array
                       description: Records on the domain
-                      item_type: !ruby/object:Api::Type::NestedObject
+                      min_version: 'beta'
+                      item_type:
+                        type: NestedObject
                         properties:
-                          - !ruby/object:Api::Type::String
-                            name: domainName
+                          - name: 'domainName'
+                            type: String
                             description: The domain name the record pertains to, e.g. `foo.bar.com.`.
-                          - !ruby/object:Api::Type::String
-                            name: type
+                            min_version: 'beta'
+                          - name: 'type'
+                            type: String
                             description: |
                               The record's type, which determines what data the record contains.
-                          - !ruby/object:Api::Type::String
-                            name: rdata
+                            min_version: 'beta'
+                          - name: 'rdata'
+                            type: String
                             description: |
                               The data of the record. The meaning of the value depends on record type:
                                 - A and AAAA: IP addresses for the domain name.
@@ -479,37 +525,45 @@ properties:
                                   uses TXT records to determine a which Firebase Projects have
                                   permission to act on the domain name's behalf.
                                 - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
-                          - !ruby/object:Api::Type::String
-                            name: requiredAction
+                            min_version: 'beta'
+                          - name: 'requiredAction'
+                            type: String
                             description: |
                               Indicates the a required action for this record.
-          - !ruby/object:Api::Type::NestedObject
-            name: http
+                            min_version: 'beta'
+          - name: 'http'
+            type: NestedObject
             description: |
               A file to add to your existing, non-Hosting hosting service that confirms
               your intent to let Hosting create an SSL cert for your domain name.
+            min_version: 'beta'
             properties:
-              - !ruby/object:Api::Type::String
-                name: path
+              - name: 'path'
+                type: String
                 description: The path to the file.
-              - !ruby/object:Api::Type::String
-                name: desired
+                min_version: 'beta'
+              - name: 'desired'
+                type: String
                 description: A text string to serve at the path.
-              - !ruby/object:Api::Type::String
-                name: discovered
+                min_version: 'beta'
+              - name: 'discovered'
+                type: String
                 description: |
                   Whether Hosting was able to find the required file contents on the
                   specified path during its last check.
-              - !ruby/object:Api::Type::Time
-                name: lastCheckTime
-                output: true
+                min_version: 'beta'
+              - name: 'lastCheckTime'
+                type: Time
                 description: |
                   The last time Hosting systems checked for the file contents.
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
-    output: true
+                min_version: 'beta'
+                output: true
+  - name: 'reconciling'
+    type: Boolean
     description: |
       if true, indicates that Hosting's systems are attmepting to
       make the `CustomDomain`'s state match your preferred state. This is most
       frequently `true` when initially provisioning a `CustomDomain` or when creating
       a new SSL certificate to match an updated `cert_preference`
+    min_version: 'beta'
+    output: true

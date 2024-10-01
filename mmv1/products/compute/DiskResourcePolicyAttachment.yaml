@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,77 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DiskResourcePolicyAttachment'
-immutable: true
-base_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}
-create_verb: :POST
-create_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}/addResourcePolicies
-delete_verb: :POST
-delete_url: projects/{{project}}/zones/{{zone}}/disks/{{disk}}/removeResourcePolicies
-self_link: projects/{{project}}/zones/{{zone}}/disks/{{disk}}
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - resourcePolicies
-  is_list_of_ids: true
-identity:
-  - name
 description: |
   Adds existing resource policies to a disk. You can only add one policy
   which will be applied to this disk for scheduling snapshot creation.
 
   ~> **Note:** This resource does not support regional disks (`google_compute_region_disk`). For regional disks, please refer to [`google_compute_region_disk_resource_policy_attachment`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_disk_resource_policy_attachment)
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: '{{project}}/{{zone}}/{{disk}}/{{name}}'
+base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{disk}}'
+self_link: 'projects/{{project}}/zones/{{zone}}/disks/{{disk}}'
+create_url: 'projects/{{project}}/zones/{{zone}}/disks/{{disk}}/addResourcePolicies'
+delete_url: 'projects/{{project}}/zones/{{zone}}/disks/{{disk}}/removeResourcePolicies'
+delete_verb: 'POST'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+identity:
+  - name
+nested_query:
+  keys:
+    - resourcePolicies
+  is_list_of_ids: true
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_disk_resource_policies_attachment.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_disk_resource_policies_attachment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'disk_resource_policy_attachment_basic'
+  - name: 'disk_resource_policy_attachment_basic'
     primary_resource_id: 'attachment'
     vars:
       disk_name: 'my-disk'
       policy_name: 'my-resource-policy'
-id_format: '{{project}}/{{zone}}/{{disk}}/{{name}}'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/compute_disk_resource_policies_attachment.go.erb
-  decoder: templates/terraform/decoders/compute_disk_resource_policies_attachment.go.erb
-  pre_delete: templates/terraform/pre_delete/compute_disk_resource_policies_attachment.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'disk'
-    resource: 'Disk'
-    imports: 'name'
+  - name: 'disk'
+    type: ResourceRef
     description: |
       The name of the disk in which the resource policies are attached to.
+    url_param_only: true
     required: true
-    url_param_only: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
+    resource: 'Disk'
     imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: 'A reference to the zone where the disk resides.'
-    required: false
     url_param_only: true
+    required: false
     ignore_read: true
     default_from_api: true
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource policy to be attached to the disk for scheduling snapshot
       creation. Do not specify the self link.

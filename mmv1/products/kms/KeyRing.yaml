@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'KeyRing'
-base_url: 'projects/{{project}}/locations/{{location}}/keyRings'
-create_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
-immutable: true
 description: |
   A `KeyRing` is a toplevel logical grouping of `CryptoKeys`.
 
@@ -24,39 +20,47 @@ description: |
   ~> **Note:** KeyRings cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyRing will remove it from state but
   *will not delete the resource from the project.*
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a key ring': 'https://cloud.google.com/kms/docs/creating-keys#create_a_key_ring'
   api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings'
+docs:
 id_format: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
-import_format: ['projects/{{project}}/locations/{{location}}/keyRings/{{name}}']
-skip_delete: true
+base_url: 'projects/{{project}}/locations/{{location}}/keyRings'
+self_link: 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/keyRings?keyRingId={{name}}'
+exclude_delete: true
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/keyRings/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/send_nil_body.go.tmpl'
+  decoder: 'templates/terraform/decoders/kms.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'kms_key_ring_basic'
-    primary_resource_id:
-      'example-keyring'
+  - name: 'kms_key_ring_basic'
+    primary_resource_id: 'example-keyring'
       # Because we can't really delete the resource, we get an error of
       # dangling resources with the auto generated tests. The hand-written
       # tests do a better job at testing that the key was removed from state
       # and that no keyrings are left behind since they create (and destroy)
       # a project just for this test, but they require org level IAM roles
       # for the test service account.
-    skip_test: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/kms.go.erb
-  encoder: templates/terraform/encoders/send_nil_body.go.erb
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       The location for the KeyRing.
       A full list of valid locations can be found by running `gcloud kms locations list`.
     required: true
     ignore_read: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name for the KeyRing.
     required: true

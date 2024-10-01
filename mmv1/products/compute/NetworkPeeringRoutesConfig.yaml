@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,66 +11,65 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'NetworkPeeringRoutesConfig'
-base_url: 'projects/{{project}}/global/networks/{{network}}'
-self_link: 'projects/{{project}}/global/networks/{{network}}'
 description: |
   Manage a network peering's route settings without managing the peering as
   a whole. This resource is primarily intended for use with GCP-generated
   peerings that shouldn't otherwise be managed by other tools. Deleting this
   resource is a no-op and the peering will not be modified.
-create_verb: :PATCH
-create_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
-update_verb: :PATCH
-update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
-identity:
-  - peering
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - peerings
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc-peering'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/updatePeering'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
+base_url: 'projects/{{project}}/global/networks/{{network}}'
+self_link: 'projects/{{project}}/global/networks/{{network}}'
+create_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/global/networks/{{network}}/updatePeering'
+update_verb: 'PATCH'
+exclude_delete: true
+mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+import_format:
+  - 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-id_format: 'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}'
-import_format:
-  [
-    'projects/{{project}}/global/networks/{{network}}/networkPeerings/{{peering}}',
-  ]
-mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-skip_delete: true
+identity:
+  - peering
+nested_query:
+  keys:
+    - peerings
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/network_peering_routes_config.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_peering_routes_config_basic'
+  - name: 'network_peering_routes_config_basic'
     primary_resource_id: 'peering_primary_routes'
     vars:
       peering_primary_name: 'primary-peering'
       peering_secondary_name: 'secondary-peering'
       network_primary_name: 'primary-network'
       network_secondary_name: 'secondary-network'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_peering_routes_config_gke'
-    # currently failing
-    skip_vcr: true
+  - name: 'network_peering_routes_config_gke'
     primary_resource_id: 'peering_gke_routes'
     vars:
       network_name: 'container-network'
@@ -78,38 +77,38 @@ examples:
       gke_cluster_name: 'private-cluster'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: 'templates/terraform/encoders/network_peering_routes_config.go.erb'
+      'deletion_protection': 'false'
+    # currently failing
+    skip_vcr: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'name'
+  - name: 'network'
+    type: ResourceRef
     description: |
       The name of the primary network for the peering.
-    required: true
     url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'peering'
-    # renamed to make it clear that this is an existing peering
-    api_name: 'name'
     required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    resource: 'Network'
+    imports: 'name'
+properties:
+  - name: 'peering'
+    type: String
     description: |
       Name of the peering.
-  - !ruby/object:Api::Type::Boolean
-    name: 'exportCustomRoutes'
+    # renamed to make it clear that this is an existing peering
+    api_name: name
     required: true
+  - name: 'exportCustomRoutes'
+    type: Boolean
     description: |
       Whether to export the custom routes to the peer network.
-    send_empty_value: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'importCustomRoutes'
     required: true
+    send_empty_value: true
+  - name: 'importCustomRoutes'
+    type: Boolean
     description: |
       Whether to import the custom routes to the peer network.
+    required: true
     send_empty_value: true

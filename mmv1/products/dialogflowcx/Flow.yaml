@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,66 +11,66 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Flow'
-base_url: '{{parent}}/flows'
-update_verb: :PATCH
-update_mask: true
 description: |
   Flows represents the conversation flows when you build your chatbot agent.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: '{{parent}}/flows/{{name}}'
+base_url: '{{parent}}/flows'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{parent}}/flows/{{name}}'
+timeouts:
   insert_minutes: 40
   update_minutes: 40
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/dialogflowcx_flow.go.erb
-  pre_create: templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.erb
-  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.erb
-  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_flow.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'dialogflowcx_flow_basic'
+    primary_resource_id: 'basic_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_flow_full'
+    primary_resource_id: 'basic_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+      bucket_name: 'dialogflowcx-bucket'
+  - name: 'dialogflowcx_flow_default_start_flow'
+    primary_resource_id: 'default_start_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    exclude_docs: true
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: is_default_start_flow
-    immutable: true
+  - name: 'is_default_start_flow'
     description: |
       Marks this as the [Default Start Flow](https://cloud.google.com/dialogflow/cx/docs/concept/flow#start) for an agent. When you create an agent, the Default Start Flow is created automatically.
       The Default Start Flow cannot be deleted; deleting the `google_dialogflow_cx_flow` resource does nothing to the underlying GCP resources.
 
       ~> Avoid having multiple `google_dialogflow_cx_flow` resources linked to the same agent with `is_default_start_flow = true` because they will compete to control a single Default Start Flow resource in GCP.
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_flow_basic'
-    primary_resource_id: 'basic_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_flow_full'
-    primary_resource_id: 'basic_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-      bucket_name: 'dialogflowcx-bucket'
-  - !ruby/object:Provider::Terraform::Examples
-    skip_docs: true
-    name: 'dialogflowcx_flow_default_start_flow'
-    primary_resource_id: 'default_start_flow'
-    vars:
-      agent_name: 'dialogflowcx-agent'
-skip_sweeper: true
-id_format: '{{parent}}/flows/{{name}}'
-import_format: ['{{parent}}/flows/{{name}}']
-parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    url_param_only: true
+    type: Boolean
     immutable: true
+parameters:
+  - name: 'parent'
+    type: String
     description: |
       The agent to create a flow for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
-  - !ruby/object:Api::Type::String
-    name: 'languageCode'
+    url_param_only: true
+    immutable: true
+  - name: 'languageCode'
+    type: String
     description: |
       The language of the following fields in flow:
       Flow.event_handlers.trigger_fulfillment.messages
@@ -80,26 +80,26 @@ parameters:
       If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the flow.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       The human-readable name of the flow.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
+  - name: 'description'
+    type: String
     description: |
       The description of the flow. The maximum length is 500 characters. If exceeded, the request is rejected.
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.StringLenBetween(0, 500)'
-  - !ruby/object:Api::Type::Array
-    name: 'transitionRoutes'
+  - name: 'transitionRoutes'
+    type: Array
     description: |
       A flow's transition routes serve two purposes:
       They are responsible for matching the user's first utterances in the flow.
@@ -109,67 +109,68 @@ properties:
         TransitionRoutes with intent specified.
         TransitionRoutes with only condition specified.
         TransitionRoutes with intent specified are inherited by pages in the flow.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          output: true
+        - name: 'name'
+          type: String
           description: |
             The unique identifier of this transition route.
-        - !ruby/object:Api::Type::String
-          name: 'intent'
+          output: true
+        - name: 'intent'
+          type: String
           description: |
             The unique identifier of an Intent.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>. Indicates that the transition can only happen when the given intent is matched. At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
-        - !ruby/object:Api::Type::String
-          name: 'condition'
+        - name: 'condition'
+          type: String
           description: |
             The condition to evaluate against form parameters or session parameters.
             At least one of intent or condition must be specified. When both intent and condition are specified, the transition can only happen when both are fulfilled.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'triggerFulfillment'
+        - name: 'triggerFulfillment'
+          type: NestedObject
           description: |
             The fulfillment to call when the condition is satisfied. At least one of triggerFulfillment and target must be specified. When both are defined, triggerFulfillment is executed first.
           properties:
-            - !ruby/object:Api::Type::Array
-              name: 'messages'
+            - name: 'messages'
+              type: Array
               description: |
                 The list of rich message responses to present to the user.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'channel'
+                  - name: 'channel'
+                    type: String
                     description: |
                       The channel which the response is associated with. Clients can specify the channel via QueryParameters.channel, and only associated channel response will be returned.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'text'
+                  - name: 'text'
+                    type: NestedObject
                     description: |
                       The text response message.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'text'
+                      - name: 'text'
+                        type: Array
                         description: |
                           A collection of text responses.
-                        item_type: Api::Type::String
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                        item_type:
+                          type: String
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
+                        output: true
                   # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                  - !ruby/object:Api::Type::String
-                    name: 'payload'
+                  - name: 'payload'
+                    type: String
                     description: |
                       A custom, platform-specific payload.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'conversationSuccess'
+                  - name: 'conversationSuccess'
+                    type: NestedObject
                     description: |
                       Indicates that the conversation succeeded, i.e., the bot handled the issue that the customer talked to it about.
                       Dialogflow only uses this to determine which conversations should be counted as successful and doesn't process the metadata in this message in any way. Note that Dialogflow also considers conversations that get to the conversation end page as successful even if they don't return ConversationSuccess.
@@ -178,37 +179,35 @@ properties:
                       * In a webhook response when you determine that you handled the customer issue.
                     properties:
                       # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                      - !ruby/object:Api::Type::String
-                        name: 'metadata'
+                      - name: 'metadata'
+                        type: String
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                        state_func:
-                          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                          return s }'
-                        validation: !ruby/object:Provider::Terraform::Validation
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
                           function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'outputAudioText'
+                  - name: 'outputAudioText'
+                    type: NestedObject
                     description: |
                       A text or ssml response that is preferentially used for TTS output audio synthesis, as described in the comment on the ResponseMessage message.
                     properties:
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                      - !ruby/object:Api::Type::String
-                        name: 'text'
+                        output: true
+                      - name: 'text'
+                        type: String
                         description: |
                           The raw text to be synthesized.
-                      - !ruby/object:Api::Type::String
-                        name: 'ssml'
+                      - name: 'ssml'
+                        type: String
                         description: |
                           The SSML text to be synthesized. For more information, see SSML.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'liveAgentHandoff'
+                  - name: 'liveAgentHandoff'
+                    type: NestedObject
                     description: |
                       Indicates that the conversation should be handed off to a live agent.
                       Dialogflow only uses this to determine which conversations were handed off to a human agent for measurement purposes. What else to do with this signal is up to you and your handoff procedures.
@@ -217,167 +216,163 @@ properties:
                       * In a webhook response when you determine that the customer issue can only be handled by a human.
                     properties:
                       # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                      - !ruby/object:Api::Type::String
-                        name: 'metadata'
+                      - name: 'metadata'
+                        type: String
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                        state_func:
-                          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                          return s }'
-                        validation: !ruby/object:Provider::Terraform::Validation
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
                           function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'playAudio'
+                  - name: 'playAudio'
+                    type: NestedObject
                     description: |
                       Specifies an audio clip to be played by the client as part of the response.
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'audioUri'
-                        required: true
+                      - name: 'audioUri'
+                        type: String
                         description: |
                           URI of the audio clip. Dialogflow does not impose any validation on this value. It is specific to the client that reads it.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                        required: true
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'telephonyTransferCall'
+                        output: true
+                  - name: 'telephonyTransferCall'
+                    type: NestedObject
                     description: |
                       Represents the signal that telles the client to transfer the phone call connected to the agent to a third-party endpoint.
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'phoneNumber'
-                        required: true
+                      - name: 'phoneNumber'
+                        type: String
                         description: |
                           Transfer the call to a phone number in E.164 format.
-            - !ruby/object:Api::Type::String
-              name: 'webhook'
+                        required: true
+            - name: 'webhook'
+              type: String
               description: |
                 The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
-            - !ruby/object:Api::Type::Boolean
-              name: 'returnPartialResponses'
+            - name: 'returnPartialResponses'
+              type: Boolean
               description: |
                 Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
-            - !ruby/object:Api::Type::String
-              name: 'tag'
+            - name: 'tag'
+              type: String
               description: |
                 The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
-            - !ruby/object:Api::Type::Array
-              name: 'setParameterActions'
+            - name: 'setParameterActions'
+              type: Array
               description: |
                 Set parameter values before executing the webhook.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'parameter'
+                  - name: 'parameter'
+                    type: String
                     description: |
                       Display name of the parameter.
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
+                  - name: 'value'
+                    type: String
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-            - !ruby/object:Api::Type::Array
-              name: 'conditionalCases'
+            - name: 'conditionalCases'
+              type: Array
               description: |
                 Conditional cases for this fulfillment.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
                   # This object has a recursive schema so we use a string instead of a NestedObject
-                  - !ruby/object:Api::Type::String
-                    name: 'cases'
+                  - name: 'cases'
+                    type: String
                     description: |
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-        - !ruby/object:Api::Type::String
-          name: 'targetPage'
+        - name: 'targetPage'
+          type: String
           description: |
             The target page to transition to.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
-        - !ruby/object:Api::Type::String
-          name: 'targetFlow'
+        - name: 'targetFlow'
+          type: String
           description: |
             The target flow to transition to.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
-  - !ruby/object:Api::Type::Array
-    name: 'eventHandlers'
+  - name: 'eventHandlers'
+    type: Array
     description: |
       A flow's event handlers serve two purposes:
       They are responsible for handling events (e.g. no match, webhook errors) in the flow.
       They are inherited by every page's [event handlers][Page.event_handlers], which can be used to handle common events regardless of the current page. Event handlers defined in the page have higher priority than those defined in the flow.
       Unlike transitionRoutes, these handlers are evaluated on a first-match basis. The first one that matches the event get executed, with the rest being ignored.
     default_from_api: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          output: true
+        - name: 'name'
+          type: String
           description: |
             The unique identifier of this event handler.
-        - !ruby/object:Api::Type::String
-          name: 'event'
+          output: true
+        - name: 'event'
+          type: String
           description: |
             The name of the event to handle.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'triggerFulfillment'
+        - name: 'triggerFulfillment'
+          type: NestedObject
           description: |
             The fulfillment to call when the event occurs. Handling webhook errors with a fulfillment enabled with webhook could cause infinite loop. It is invalid to specify such fulfillment for a handler handling webhooks.
           properties:
-            - !ruby/object:Api::Type::Array
-              name: 'messages'
+            - name: 'messages'
+              type: Array
               description: |
                 The list of rich message responses to present to the user.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'channel'
+                  - name: 'channel'
+                    type: String
                     description: |
                       The channel which the response is associated with. Clients can specify the channel via QueryParameters.channel, and only associated channel response will be returned.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'text'
+                  - name: 'text'
+                    type: NestedObject
                     description: |
                       The text response message.
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'text'
+                      - name: 'text'
+                        type: Array
                         description: |
                           A collection of text responses.
-                        item_type: Api::Type::String
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                        item_type:
+                          type: String
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                  - !ruby/object:Api::Type::String
-                    name: 'payload'
+                        output: true
+                  - name: 'payload'
+                    type: String
                     description: |
                       A custom, platform-specific payload.
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'conversationSuccess'
+                  - name: 'conversationSuccess'
+                    type: NestedObject
                     description: |
                       Indicates that the conversation succeeded, i.e., the bot handled the issue that the customer talked to it about.
                       Dialogflow only uses this to determine which conversations should be counted as successful and doesn't process the metadata in this message in any way. Note that Dialogflow also considers conversations that get to the conversation end page as successful even if they don't return ConversationSuccess.
@@ -385,38 +380,35 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates that the conversation succeeded.
                       * In a webhook response when you determine that you handled the customer issue.
                     properties:
-                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                      - !ruby/object:Api::Type::String
-                        name: 'metadata'
+                      - name: 'metadata'
+                        type: String
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                        state_func:
-                          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                          return s }'
-                        validation: !ruby/object:Provider::Terraform::Validation
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
                           function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'outputAudioText'
+                  - name: 'outputAudioText'
+                    type: NestedObject
                     description: |
                       A text or ssml response that is preferentially used for TTS output audio synthesis, as described in the comment on the ResponseMessage message.
                     properties:
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                      - !ruby/object:Api::Type::String
-                        name: 'text'
+                        output: true
+                      - name: 'text'
+                        type: String
                         description: |
                           The raw text to be synthesized.
-                      - !ruby/object:Api::Type::String
-                        name: 'ssml'
+                      - name: 'ssml'
+                        type: String
                         description: |
                           The SSML text to be synthesized. For more information, see SSML.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'liveAgentHandoff'
+                  - name: 'liveAgentHandoff'
+                    type: NestedObject
                     description: |
                       Indicates that the conversation should be handed off to a live agent.
                       Dialogflow only uses this to determine which conversations were handed off to a human agent for measurement purposes. What else to do with this signal is up to you and your handoff procedures.
@@ -424,161 +416,156 @@ properties:
                       * In the entryFulfillment of a Page if entering the page indicates something went extremely wrong in the conversation.
                       * In a webhook response when you determine that the customer issue can only be handled by a human.
                     properties:
-                      # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                      - !ruby/object:Api::Type::String
-                        name: 'metadata'
+                      - name: 'metadata'
+                        type: String
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                        state_func:
-                          'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                          return s }'
-                        validation: !ruby/object:Provider::Terraform::Validation
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
                           function: 'validation.StringIsJSON'
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'playAudio'
+                  - name: 'playAudio'
+                    type: NestedObject
                     description: |
                       Specifies an audio clip to be played by the client as part of the response.
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'audioUri'
-                        required: true
+                      - name: 'audioUri'
+                        type: String
                         description: |
                           URI of the audio clip. Dialogflow does not impose any validation on this value. It is specific to the client that reads it.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'allowPlaybackInterruption'
-                        output: true
+                        required: true
+                      - name: 'allowPlaybackInterruption'
+                        type: Boolean
                         description: |
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'telephonyTransferCall'
+                        output: true
+                  - name: 'telephonyTransferCall'
+                    type: NestedObject
                     description: |
                       Represents the signal that telles the client to transfer the phone call connected to the agent to a third-party endpoint.
                     properties:
-                      - !ruby/object:Api::Type::String
-                        name: 'phoneNumber'
-                        required: true
+                      - name: 'phoneNumber'
+                        type: String
                         description: |
                           Transfer the call to a phone number in E.164 format.
-            - !ruby/object:Api::Type::String
-              name: 'webhook'
+                        required: true
+            - name: 'webhook'
+              type: String
               description: |
                 The webhook to call. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
-            - !ruby/object:Api::Type::Boolean
-              name: 'returnPartialResponses'
+            - name: 'returnPartialResponses'
+              type: Boolean
               description: |
                 Whether Dialogflow should return currently queued fulfillment response messages in streaming APIs. If a webhook is specified, it happens before Dialogflow invokes webhook. Warning: 1) This flag only affects streaming API. Responses are still queued and returned once in non-streaming API. 2) The flag can be enabled in any fulfillment but only the first 3 partial responses will be returned. You may only want to apply it to fulfillments that have slow webhooks.
-            - !ruby/object:Api::Type::String
-              name: 'tag'
+            - name: 'tag'
+              type: String
               description: |
                 The tag used by the webhook to identify which fulfillment is being called. This field is required if webhook is specified.
-            - !ruby/object:Api::Type::Array
-              name: 'setParameterActions'
+            - name: 'setParameterActions'
+              type: Array
               description: |
                 Set parameter values before executing the webhook.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: 'parameter'
+                  - name: 'parameter'
+                    type: String
                     description: |
                       Display name of the parameter.
-                  - !ruby/object:Api::Type::String
-                    name: 'value'
+                  - name: 'value'
+                    type: String
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-            - !ruby/object:Api::Type::Array
-              name: 'conditionalCases'
+            - name: 'conditionalCases'
+              type: Array
               description: |
                 Conditional cases for this fulfillment.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  # This object has a recursive schema so we use a string instead of a NestedObject
-                  - !ruby/object:Api::Type::String
-                    name: 'cases'
+                  - name: 'cases'
+                    type: String
                     description: |
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    custom_expand: 'templates/terraform/custom_expand/json_value.erb'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                    state_func:
-                      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                      return s }'
-                    validation: !ruby/object:Provider::Terraform::Validation
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                    validation:
                       function: 'validation.StringIsJSON'
-        - !ruby/object:Api::Type::String
-          name: 'targetPage'
+        - name: 'targetPage'
+          type: String
           description: |
             The target page to transition to.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
-        - !ruby/object:Api::Type::String
-          name: 'targetFlow'
+        - name: 'targetFlow'
+          type: String
           description: |
             The target flow to transition to.
             Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
-  - !ruby/object:Api::Type::Array
-    name: 'transitionRouteGroups'
+  - name: 'transitionRouteGroups'
+    type: Array
     description: |
       A flow's transition route group serve two purposes:
       They are responsible for matching the user's first utterances in the flow.
       They are inherited by every page's [transition route groups][Page.transition_route_groups]. Transition route groups defined in the page have higher priority than those defined in the flow.
       Format:projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/transitionRouteGroups/<TransitionRouteGroup ID>.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'nluSettings'
+    item_type:
+      type: String
+  - name: 'nluSettings'
+    type: NestedObject
     description: |
       NLU related settings of the flow.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'modelType'
+      - name: 'modelType'
+        type: Enum
         description: |
           Indicates the type of NLU model.
           * MODEL_TYPE_STANDARD: Use standard NLU model.
           * MODEL_TYPE_ADVANCED: Use advanced NLU model.
-        values:
-          - :MODEL_TYPE_STANDARD
-          - :MODEL_TYPE_ADVANCED
-      - !ruby/object:Api::Type::Double
-        name: 'classificationThreshold'
+        enum_values:
+          - 'MODEL_TYPE_STANDARD'
+          - 'MODEL_TYPE_ADVANCED'
+      - name: 'classificationThreshold'
+        type: Double
         description: |
           To filter out false positive results and still get variety in matched natural language inputs for your agent, you can tune the machine learning classification threshold.
           If the returned score value is less than the threshold value, then a no-match event will be triggered. The score values range from 0.0 (completely uncertain) to 1.0 (completely certain). If set to 0.0, the default of 0.3 is used.
-      - !ruby/object:Api::Type::Enum
-        name: 'modelTrainingMode'
+      - name: 'modelTrainingMode'
+        type: Enum
         description: |
           Indicates NLU model training mode.
           * MODEL_TRAINING_MODE_AUTOMATIC: NLU model training is automatically triggered when a flow gets modified. User can also manually trigger model training in this mode.
           * MODEL_TRAINING_MODE_MANUAL: User needs to manually trigger NLU model training. Best for large flows whose models take long time to train.
-        values:
-          - :MODEL_TRAINING_MODE_AUTOMATIC
-          - :MODEL_TRAINING_MODE_MANUAL
-  - !ruby/object:Api::Type::NestedObject
-    name: 'advancedSettings'
+        enum_values:
+          - 'MODEL_TRAINING_MODE_AUTOMATIC'
+          - 'MODEL_TRAINING_MODE_MANUAL'
+  - name: 'advancedSettings'
+    type: NestedObject
     description: |
       Hierarchical advanced settings for this flow. The settings exposed at the lower level overrides the settings exposed at the higher level.
       Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'audioExportGcsDestination'
+      - name: 'audioExportGcsDestination'
+        type: NestedObject
         description: |
           If present, incoming audio is exported by Dialogflow to the configured Google Cloud Storage destination. Exposed at the following levels:
           * Agent level
           * Flow level
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'uri'
+          - name: 'uri'
+            type: String
             description: |
               The Google Cloud Storage URI for the exported objects. Whether a full object name, or just a prefix, its usage depends on the Dialogflow operation.
               Format: gs://bucket/object-name-or-prefix
-      - !ruby/object:Api::Type::NestedObject
-        name: 'dtmfSettings'
+      - name: 'dtmfSettings'
+        type: NestedObject
         description: |
           Define behaviors for DTMF (dual tone multi frequency). DTMF settings does not override each other. DTMF settings set at different levels define DTMF detections running in parallel. Exposed at the following levels:
           * Agent level
@@ -586,15 +573,15 @@ properties:
           * Page level
           * Parameter level
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enabled'
+          - name: 'enabled'
+            type: Boolean
             description: |
               If true, incoming audio is processed for DTMF (dual tone multi frequency) events. For example, if the caller presses a button on their telephone keypad and DTMF processing is enabled, Dialogflow will detect the event (e.g. a "3" was pressed) in the incoming audio and pass the event to the bot to drive business logic (e.g. when 3 is pressed, return the account balance).
-          - !ruby/object:Api::Type::Integer
-            name: 'maxDigits'
+          - name: 'maxDigits'
+            type: Integer
             description: |
               Max length of DTMF digits.
-          - !ruby/object:Api::Type::String
-            name: 'finishDigit'
+          - name: 'finishDigit'
+            type: String
             description: |
               The digit that terminates a DTMF digit sequence.

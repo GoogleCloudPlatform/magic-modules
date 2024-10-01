@@ -11,39 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'BackupSchedule'
-base_url: projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules
-self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A backup schedule for a Cloud Spanner Database.
   This resource is owned by the database it is backing up, and is deleted along with the database.
   The actual backups are not though.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/spanner/docs/backup'
   api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases.backupSchedules'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/spanner_schedule_backup.go.erb
-  decoder: templates/terraform/decoders/spanner_schedule_backup.go.erb
-  pre_update: templates/terraform/pre_update/spanner_schedule_backup.go.erb
-id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-import_format:
-  - 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
-  - '{{project}}/{{instance}}/{{database}}/{{name}}'
-  - '{{instance}}/{{database}}/{{name}}'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This resource creates a Spanner Backup Schedule on a project that already has
     a Spanner database.
     This resource is owned by the database it is backing up, and is deleted along
     with the database. The actual backups are not though.
+id_format: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+base_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules'
+self_link: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+create_url: 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules?backup_schedule_id={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{database}}/backupSchedules/{{name}}'
+  - '{{project}}/{{instance}}/{{database}}/{{name}}'
+  - '{{instance}}/{{database}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/spanner_schedule_backup.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_schedule_backup.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_schedule_backup.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_backup_schedule_daily_full'
+  - name: 'spanner_backup_schedule_daily_full'
     primary_resource_id: 'full-backup'
     vars:
       name: 'backup-schedule-id'
@@ -51,11 +54,10 @@ examples:
       database_name: 'database-id'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_backup_schedule_daily_incremental'
+      'deletion_protection': 'false'
+  - name: 'spanner_backup_schedule_daily_incremental'
     primary_resource_id: 'incremental-backup'
     vars:
       name: 'backup-schedule-id'
@@ -63,59 +65,59 @@ examples:
       database_name: 'database-id'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'instance'
+  - name: 'instance'
+    type: ResourceRef
+    description: 'The instance to create the database on.'
+    url_param_only: true
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
-    description: 'The instance to create the database on.'
-    immutable: true
-    required: true
+  - name: 'database'
+    type: ResourceRef
+    description: 'The database to create the backup schedule on.'
     url_param_only: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'database'
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Database'
     imports: 'name'
-    description: 'The database to create the backup schedule on.'
-    immutable: true
-    required: true
-    url_param_only: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       A unique identifier for the backup schedule, which cannot be changed after
       the backup schedule is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
     immutable: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: retentionDuration
-    required: true
+  - name: 'retentionDuration'
+    type: String
     description: |
       At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: '3.5s'.
       You can set this to a value up to 366 days.
-  - !ruby/object:Api::Type::NestedObject
-    name: spec
+    required: true
+  - name: 'spec'
+    type: NestedObject
     description: |
       Defines specifications of the backup schedule.
     send_empty_value: true
     allow_empty_object: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: cronSpec
+      - name: 'cronSpec'
+        type: NestedObject
         description: |
           Cron style schedule specification..
         properties:
-          - !ruby/object:Api::Type::String
-            name: text
+          - name: 'text'
+            type: String
             description: |
               Textual representation of the crontab. User can customize the
               backup frequency and the backup version time using the cron
@@ -128,25 +130,27 @@ properties:
                 0 2 * * *    : once a day at 2 past midnight in UTC.
                 0 2 * * 0    : once a week every Sunday at 2 past midnight in UTC.
                 0 2 8 * *    : once a month on 8th day at 2 past midnight in UTC.
-  - !ruby/object:Api::Type::NestedObject
-    name: fullBackupSpec
+  - name: 'fullBackupSpec'
+    type: NestedObject
     description: |
       The schedule creates only full backups..
-    exactly_one_of:
-      - fullBackupSpec
-      - incrementalBackupSpec
+    immutable: true
     send_empty_value: true
     allow_empty_object: true
-    immutable: true
-    properties: []
-  - !ruby/object:Api::Type::NestedObject
-    name: incrementalBackupSpec
+    exactly_one_of:
+      - 'fullBackupSpec'
+      - 'incrementalBackupSpec'
+    properties:
+      []
+  - name: 'incrementalBackupSpec'
+    type: NestedObject
     description: |
       The schedule creates incremental backup chains.
-    exactly_one_of:
-      - fullBackupSpec
-      - incrementalBackupSpec
+    immutable: true
     send_empty_value: true
     allow_empty_object: true
-    immutable: true
-    properties: []
+    exactly_one_of:
+      - 'fullBackupSpec'
+      - 'incrementalBackupSpec'
+    properties:
+      []

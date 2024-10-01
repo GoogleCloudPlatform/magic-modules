@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,27 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ServicePerimeterResource'
-create_url: '{{perimeter_name}}'
-base_url: ''
-self_link: '{{perimeter_name}}'
-create_verb: :PATCH
-delete_verb: :PATCH
-immutable: true
-update_mask: true
-identity:
-  - resource
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  modify_by_patch: true
-  is_list_of_ids: true
-  keys:
-    - status
-    - resources
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 description: |
   Allows configuring a single GCP resource that should be inside the `status` block of a service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list
@@ -42,42 +23,78 @@ description: |
   ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
   the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].resources]` so
   they don't fight over which resources should be in the policy.
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
+docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
+id_format: '{{perimeter_name}}/{{resource}}'
+base_url: ''
+self_link: '{{perimeter_name}}'
+create_url: '{{perimeter_name}}'
+create_verb: 'PATCH'
+update_mask: true
+delete_verb: 'PATCH'
+immutable: true
+mutex: '{{perimeter_name}}'
+import_format:
+  - '{{perimeter_name}}/{{resource}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - resource
+nested_query:
+  keys:
+    - status
+    - resources
+  is_list_of_ids: true
+  modify_by_patch: true
+custom_code:
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
-skip_sweeper: true
-id_format: '{{perimeter_name}}/{{resource}}'
-import_format: ['{{perimeter_name}}/{{resource}}']
-mutex: '{{perimeter_name}}'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_service_perimeter_resource_basic'
-    skip_test: true
+  - name: 'access_context_manager_service_perimeter_resource_basic'
     primary_resource_id: 'service-perimeter-resource'
     vars:
       service_perimeter_name: 'restrict_all'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.erb
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'perimeterName'
-    resource: 'ServicePerimeter'
-    imports: 'name'
+  - name: 'perimeterName'
+    type: ResourceRef
     description: |
       The name of the Service Perimeter to add this resource to.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+    resource: 'ServicePerimeter'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'resource'
+  - name: 'resource'
+    type: String
     description: |
       A GCP resource that is inside of the service perimeter.
       Currently only projects are allowed.

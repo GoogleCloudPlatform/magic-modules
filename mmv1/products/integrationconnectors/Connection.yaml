@@ -1,5 +1,4 @@
-# Copyright 2023 Google Inc.
-
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,946 +12,942 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "Connection"
+name: 'Connection'
 description: |
   An Integration connectors Connection.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Official Documentation": "https://cloud.google.com/integration-connectors/docs/createconnection"
-  api: "https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections"
-base_url: projects/{{project}}/locations/{{location}}/connections
-self_link: projects/{{project}}/locations/{{location}}/connections/{{name}}
-timeouts: !ruby/object:Api::Timeouts
+    'Official Documentation': 'https://cloud.google.com/integration-connectors/docs/createconnection'
+  api: 'https://cloud.google.com/integration-connectors/docs/reference/rest/v1/projects.locations.connections'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/integration_connectors_connection.go.erb
-  post_create: templates/terraform/post_create/integration_connectors_connection.go.erb
-  post_update: templates/terraform/post_update/integration_connectors_connection.go.erb
-  post_import: templates/terraform/post_import/integration_connectors_connection.go.erb
-create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{name}}
-update_verb: :PATCH
-update_mask: true
 autogen_async: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_basic"
-    primary_resource_id: "pubsubconnection"
-    vars:
-      connection_name: "test-pubsub"
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_advanced"
-    primary_resource_id: "zendeskconnection"
-    vars:
-      connection_name: "test-zendesk"
-      secret_id: "test-secret"
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_sa"
-    primary_resource_id: "zendeskconnection"
-    vars:
-      connection_name: "test-zendesk"
-      secret_id: "test-secret"
-    skip_docs: true
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_oauth"
-    primary_resource_id: "boxconnection"
-    vars:
-      connection_name: "test-box"
-      secret_id: "test-secret"
-    skip_docs: true
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_oauth_ssh"
-    primary_resource_id: "boxconnection"
-    vars:
-      connection_name: "test-box"
-      secret_id: "test-secret"
-    skip_docs: true
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_oauth_cc"
-    primary_resource_id: "boxconnection"
-    vars:
-      connection_name: "test-box"
-      secret_id: "test-secret"
-    skip_docs: true
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integration_connectors_connection_oauth_jwt"
-    primary_resource_id: "boxconnection"
-    vars:
-      connection_name: "test-box"
-      secret_id: "test-secret"
-    skip_docs: true
-    skip_test: true
-    ignore_read_extra:
-      - 'status.0.description'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 50
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
+  result:
+    path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - "true"
-      - "false"
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/integration_connectors_connection.go.tmpl'
+  post_create: 'templates/terraform/post_create/integration_connectors_connection.go.tmpl'
+  post_update: 'templates/terraform/post_update/integration_connectors_connection.go.tmpl'
+  post_import: 'templates/terraform/post_import/integration_connectors_connection.go.tmpl'
+examples:
+  - name: 'integration_connectors_connection_basic'
+    primary_resource_id: 'pubsubconnection'
+    vars:
+      connection_name: 'test-pubsub'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+  - name: 'integration_connectors_connection_advanced'
+    primary_resource_id: 'zendeskconnection'
+    vars:
+      connection_name: 'test-zendesk'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+  - name: 'integration_connectors_connection_sa'
+    primary_resource_id: 'zendeskconnection'
+    vars:
+      connection_name: 'test-zendesk'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+    exclude_docs: true
+  - name: 'integration_connectors_connection_oauth'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+    exclude_docs: true
+  - name: 'integration_connectors_connection_oauth_ssh'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+    exclude_docs: true
+  - name: 'integration_connectors_connection_oauth_cc'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+    exclude_docs: true
+  - name: 'integration_connectors_connection_oauth_jwt'
+    primary_resource_id: 'boxconnection'
+    vars:
+      connection_name: 'test-box'
+      secret_id: 'test-secret'
+    ignore_read_extra:
+      - 'status.0.description'
+    exclude_test: true
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "location"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Location in which Connection needs to be created.
-  - !ruby/object:Api::Type::String
-    name: "name"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       Name of Connection needs to be created.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Namespace was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Namespace was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "description"
+  - name: 'description'
+    type: String
     description: |
       An arbitrary description for the Conection.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user provided metadata.
-  - !ruby/object:Api::Type::String
-    name: "connectorVersion"
-    required: true
+  - name: 'connectorVersion'
+    type: String
     description: |
       connectorVersion of the Connector.
-  - !ruby/object:Api::Type::NestedObject
-    name: "status"
+    required: true
+  - name: 'status'
+    type: NestedObject
     description: |
       Status of the Integration Connector.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "state"
+      - name: 'state'
+        type: String
         description: |
           State of the Integration Connector
         output: true
-      - !ruby/object:Api::Type::String
-        name: "description"
-        output: true
+      - name: 'description'
+        type: String
         description: |
           Description of Status of Connection.
-      - !ruby/object:Api::Type::String
-        name: "status"
         output: true
+      - name: 'status'
+        type: String
         description: |
           Status of the Connection.
 
-  - !ruby/object:Api::Type::Array
-    name: "configVariable"
-    api_name: "configVariables"
+        output: true
+  - name: 'configVariable'
+    type: Array
     description: |
       Config Variables for the connection.
-    item_type: !ruby/object:Api::Type::NestedObject
+    api_name: configVariables
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: "key"
+        - name: 'key'
+          type: String
           description: |
             Key for the configVariable
           required: true
-        - !ruby/object:Api::Type::Integer
-          name: "integerValue"
-          api_name: "intValue"
+        - name: 'integerValue'
+          type: Integer
           description: |
             Integer Value of configVariable
-        - !ruby/object:Api::Type::String
-          name: "stringValue"
+          api_name: intValue
+        - name: 'stringValue'
+          type: String
           description: |
             String Value of configVariabley
-        - !ruby/object:Api::Type::Boolean
-          name: "booleanValue"
-          api_name: "boolValue"
+        - name: 'booleanValue'
+          type: Boolean
           description: |
             Boolean Value of configVariable
-        - !ruby/object:Api::Type::NestedObject
-          name: "secretValue"
+          api_name: boolValue
+        - name: 'secretValue'
+          type: NestedObject
           description: |
             Secret value of configVariable.
           properties:
-            - !ruby/object:Api::Type::String
-              name: "secretVersion"
-              required: true
+            - name: 'secretVersion'
+              type: String
               description: |
                 Secret version of Secret Value for Config variable.
-        - !ruby/object:Api::Type::NestedObject
-          name: "encryptionKeyValue"
+              required: true
+        - name: 'encryptionKeyValue'
+          type: NestedObject
           description: |
             Encription key value of configVariable.
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: "type"
-              required: true
+            - name: 'type'
+              type: Enum
               description: |
                 Type of Encription Key
-              values:
-                - GOOGLE_MANAGED
-                - CUSTOMER_MANAGED
-            - !ruby/object:Api::Type::String
-              name: "kmsKeyName"
+              required: true
+              enum_values:
+                - 'GOOGLE_MANAGED'
+                - 'CUSTOMER_MANAGED'
+            - name: 'kmsKeyName'
+              type: String
               description: |
                 The [KMS key name] with which the content of the Operation is encrypted. The
                 expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                 Will be empty string if google managed.
-  - !ruby/object:Api::Type::NestedObject
-    name: "authConfig"
+  - name: 'authConfig'
+    type: NestedObject
     description: |
       authConfig for the connection.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: "authType"
+      - name: 'authType'
+        type: Enum
         description: |
           authType of the Connection
         required: true
-        values:
-          - USER_PASSWORD
-          - OAUTH2_JWT_BEARER
-          - OAUTH2_CLIENT_CREDENTIALS
-          - SSH_PUBLIC_KEY
-          - OAUTH2_AUTH_CODE_FLOW
-      - !ruby/object:Api::Type::Array
-        name: "additionalVariable"
-        api_name: "additionalVariables"
+        enum_values:
+          - 'USER_PASSWORD'
+          - 'OAUTH2_JWT_BEARER'
+          - 'OAUTH2_CLIENT_CREDENTIALS'
+          - 'SSH_PUBLIC_KEY'
+          - 'OAUTH2_AUTH_CODE_FLOW'
+      - name: 'additionalVariable'
+        type: Array
         description: |
           List containing additional auth configs.
-        item_type: !ruby/object:Api::Type::NestedObject
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "key"
+            - name: 'key'
+              type: String
               description: |
                 Key for the configVariable
               required: true
-            - !ruby/object:Api::Type::Integer
-              name: "integerValue"
-              api_name: "intValue"
+            - name: 'integerValue'
+              type: Integer
               description: |
                 Integer Value of configVariable.
-            - !ruby/object:Api::Type::String
-              name: "stringValue"
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
               description: |
                 String Value of configVariabley.
-            - !ruby/object:Api::Type::Boolean
-              name: "booleanValue"
-              api_name: "boolValue"
+            - name: 'booleanValue'
+              type: Boolean
               description: |
                 Boolean Value of configVariable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "secretValue"
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
               description: |
                 Secret value of configVariable.
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "secretVersion"
-                  required: true
+                - name: 'secretVersion'
+                  type: String
                   description: |
                     Secret version of Secret Value for Config variable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "encryptionKeyValue"
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
               description: |
                 Encription key value of configVariable.
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: "type"
-                  required: true
+                - name: 'type'
+                  type: Enum
                   description: |
                     Type of Encription Key
-                  values:
-                    - GOOGLE_MANAGED
-                    - CUSTOMER_MANAGED
-                - !ruby/object:Api::Type::String
-                  name: "kmsKeyName"
+                  required: true
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
                   description: |
                     The [KMS key name] with which the content of the Operation is encrypted. The
                     expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
-      - !ruby/object:Api::Type::String
-        name: "authKey"
+      - name: 'authKey'
+        type: String
         description: |
           The type of authentication configured.
-      - !ruby/object:Api::Type::NestedObject
-        name: "userPassword"
+      - name: 'userPassword'
+        type: NestedObject
         description: |
           User password for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
-          - !ruby/object:Api::Type::String
-            name: "username"
-            required: true
+          - name: 'username'
+            type: String
             description: |
               Username for Authentication.
-          - !ruby/object:Api::Type::NestedObject
-            name: "password"
+            required: true
+          - name: 'password'
+            type: NestedObject
             description: |
               Password for Authentication.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-      - !ruby/object:Api::Type::NestedObject
-        name: "oauth2JwtBearer"
+                required: true
+      - name: 'oauth2JwtBearer'
+        type: NestedObject
         description: |
           OAuth2 JWT Bearer for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: "clientKey"
+          - name: 'clientKey'
+            type: NestedObject
             description: |
               Secret version reference containing a PKCS#8 PEM-encoded private key associated with the Client Certificate.
               This private key will be used to sign JWTs used for the jwt-bearer authorization grant.
               Specified in the form as: projects/*/secrets/*/versions/*.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-          - !ruby/object:Api::Type::NestedObject
-            name: "jwtClaims"
+                required: true
+          - name: 'jwtClaims'
+            type: NestedObject
             description: |
               JwtClaims providers fields to generate the token.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "issuer"
+              - name: 'issuer'
+                type: String
                 description: |
                   Value for the "iss" claim.
-              - !ruby/object:Api::Type::String
-                name: "subject"
+              - name: 'subject'
+                type: String
                 description: |
                   Value for the "sub" claim.
-              - !ruby/object:Api::Type::String
-                name: "audience"
+              - name: 'audience'
+                type: String
                 description: |
                   Value for the "aud" claim.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-      - !ruby/object:Api::Type::NestedObject
-        name: "oauth2ClientCredentials"
+      - name: 'oauth2ClientCredentials'
+        type: NestedObject
         description: |
           OAuth3 Client Credentials for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
-          - !ruby/object:Api::Type::String
-            name: "clientId"
-            required: true
+          - name: 'clientId'
+            type: String
             description: |
               Secret version of Password for Authentication.
-          - !ruby/object:Api::Type::NestedObject
-            name: "clientSecret"
+            required: true
+          - name: 'clientSecret'
+            type: NestedObject
             description: |
               Secret version reference containing the client secret.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-      - !ruby/object:Api::Type::NestedObject
-        name: "sshPublicKey"
+                required: true
+      - name: 'sshPublicKey'
+        type: NestedObject
         description: |
           SSH Public Key for Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
-          - !ruby/object:Api::Type::String
-            name: "username"
-            required: true
+          - name: 'username'
+            type: String
             description: |
               The user account used to authenticate.
-          - !ruby/object:Api::Type::NestedObject
-            name: "sshClientCert"
+            required: true
+          - name: 'sshClientCert'
+            type: NestedObject
             description: |
               SSH Client Cert. It should contain both public and private key.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-          - !ruby/object:Api::Type::String
-            name: "certType"
+                required: true
+          - name: 'certType'
+            type: String
             description: |
               Format of SSH Client cert.
-          - !ruby/object:Api::Type::NestedObject
-            name: "sshClientCertPass"
+          - name: 'sshClientCertPass'
+            type: NestedObject
             description: |
               Password (passphrase) for ssh client certificate if it has one.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-      - !ruby/object:Api::Type::NestedObject
-        name: "oauth2AuthCodeFlow"
+                required: true
+      - name: 'oauth2AuthCodeFlow'
+        type: NestedObject
         description: |
           Parameters to support Oauth 2.0 Auth Code Grant Authentication.
+        exactly_one_of:
+          - 'auth_config.0.user_password'
+          - 'auth_config.0.oauth2_jwt_bearer'
+          - 'auth_config.0.oauth2_client_credentials'
+          - 'auth_config.0.ssh_public_key'
+          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
-          - !ruby/object:Api::Type::String
-            name: "clientId"
+          - name: 'clientId'
+            type: String
             description: |
               Client ID for user-provided OAuth app.
-          - !ruby/object:Api::Type::NestedObject
-            name: "clientSecret"
+          - name: 'clientSecret'
+            type: NestedObject
             description: |
               Client secret for user-provided OAuth app.
             properties:
-              - !ruby/object:Api::Type::String
-                name: "secretVersion"
-                required: true
+              - name: 'secretVersion'
+                type: String
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-          - !ruby/object:Api::Type::Array
-            name: "scopes"
+                required: true
+          - name: 'scopes'
+            type: Array
             description: |
               Scopes the connection will request when the user performs the auth code flow.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Boolean
-            name: "enablePkce"
+            item_type:
+              type: String
+          - name: 'enablePkce'
+            type: Boolean
             description: |
               Whether to enable PKCE when the user performs the auth code flow.
-          - !ruby/object:Api::Type::String
-            name: "authUri"
+          - name: 'authUri'
+            type: String
             description: |
               Auth URL for Authorization Code Flow.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-
-  - !ruby/object:Api::Type::NestedObject
-    name: "lockConfig"
+  - name: 'lockConfig'
+    type: NestedObject
     description: |
       Determines whether or no a connection is locked. If locked, a reason must be specified.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: "locked"
+      - name: 'locked'
+        type: Boolean
         description: |
           Indicates whether or not the connection is locked.
         required: true
-      - !ruby/object:Api::Type::String
-        name: "reason"
+      - name: 'reason'
+        type: String
         description: |
           Describes why a connection is locked.
-  - !ruby/object:Api::Type::Array
-    name: "destinationConfig"
-    api_name: "destinationConfigs"
+  - name: 'destinationConfig'
+    type: Array
     description: |
       Define the Connectors target endpoint.
-    item_type: !ruby/object:Api::Type::NestedObject
+    api_name: destinationConfigs
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: "key"
+        - name: 'key'
+          type: String
           description: |
             The key is the destination identifier that is supported by the Connector.
           required: true
-        - !ruby/object:Api::Type::Array
-          name: "destination"
-          api_name: "destinations"
+        - name: 'destination'
+          type: Array
           description: |
             The destinations for the key.
-          item_type: !ruby/object:Api::Type::NestedObject
+          api_name: destinations
+          item_type:
+            type: NestedObject
             properties:
-              - !ruby/object:Api::Type::Integer
-                name: "port"
+              - name: 'port'
+                type: Integer
                 description: |
                   The port is the target port number that is accepted by the destination.
-              - !ruby/object:Api::Type::String
-                name: "serviceAttachment"
+              - name: 'serviceAttachment'
+                type: String
                 description: |
                   PSC service attachments. Format: projects/*/regions/*/serviceAttachments/*
-              - !ruby/object:Api::Type::String
-                name: "host"
+              - name: 'host'
+                type: String
                 description: |
                   For publicly routable host.
-  - !ruby/object:Api::Type::String
-    name: "serviceAccount"
+  - name: 'serviceAccount'
+    type: String
     description: |
       Service account needed for runtime plane to access Google Cloud resources.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: "serviceDirectory"
+  - name: 'serviceDirectory'
+    type: String
     description: |
       The name of the Service Directory service name. Used for Private Harpoon to resolve the ILB address.
       e.g. "projects/cloud-connectors-e2e-testing/locations/us-central1/namespaces/istio-system/services/istio-ingressgateway-connectors"
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: "suspended"
+  - name: 'suspended'
+    type: Boolean
     description: |
       Suspended indicates if a user has suspended a connection or not.
-  - !ruby/object:Api::Type::NestedObject
-    name: "nodeConfig"
+  - name: 'nodeConfig'
+    type: NestedObject
     description: |
       Node configuration for the connection.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: "minNodeCount"
-        required: true
-        default_from_api: true
+      - name: 'minNodeCount'
+        type: Integer
         description: |
           Minimum number of nodes in the runtime nodes.
-      - !ruby/object:Api::Type::Integer
-        name: "maxNodeCount"
         required: true
         default_from_api: true
+      - name: 'maxNodeCount'
+        type: Integer
         description: |
           Minimum number of nodes in the runtime nodes.
-  - !ruby/object:Api::Type::NestedObject
-    name: "logConfig"
+        required: true
+        default_from_api: true
+  - name: 'logConfig'
+    type: NestedObject
     description: |
       Log configuration for the connection.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: "enabled"
+      - name: 'enabled'
+        type: Boolean
         description: |
           Enabled represents whether logging is enabled or not for a connection.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "sslConfig"
+  - name: 'sslConfig'
+    type: NestedObject
     description: |
       SSL Configuration of a connection
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: "type"
+      - name: 'type'
+        type: Enum
         description: |
           Enum for controlling the SSL Type (TLS/MTLS)
         required: true
-        values:
-          - TLS
-          - MTLS
-      - !ruby/object:Api::Type::Enum
-        name: "trustModel"
+        enum_values:
+          - 'TLS'
+          - 'MTLS'
+      - name: 'trustModel'
+        type: Enum
         description: |
           Enum for Trust Model
-        values:
-          - PUBLIC
-          - PRIVATE
-          - INSECURE
-      - !ruby/object:Api::Type::NestedObject
-        name: "privateServerCertificate"
+        enum_values:
+          - 'PUBLIC'
+          - 'PRIVATE'
+          - 'INSECURE'
+      - name: 'privateServerCertificate'
+        type: NestedObject
         description: |
           Private Server Certificate. Needs to be specified if trust model is PRIVATE.
         properties:
-          - !ruby/object:Api::Type::String
-            name: "secretVersion"
-            required: true
+          - name: 'secretVersion'
+            type: String
             description: |
               Secret version of Secret Value for Config variable.
-      - !ruby/object:Api::Type::NestedObject
-        name: "clientCertificate"
+            required: true
+      - name: 'clientCertificate'
+        type: NestedObject
         description: |
           Client Certificate
         properties:
-          - !ruby/object:Api::Type::String
-            name: "secretVersion"
-            required: true
+          - name: 'secretVersion'
+            type: String
             description: |
               Secret version of Secret Value for Config variable.
-      - !ruby/object:Api::Type::NestedObject
-        name: "clientPrivateKey"
+            required: true
+      - name: 'clientPrivateKey'
+        type: NestedObject
         description: |
           Client Private Key
         properties:
-          - !ruby/object:Api::Type::String
-            name: "secretVersion"
-            required: true
+          - name: 'secretVersion'
+            type: String
             description: |
               Secret version of Secret Value for Config variable.
-      - !ruby/object:Api::Type::NestedObject
-        name: "clientPrivateKeyPass"
+            required: true
+      - name: 'clientPrivateKeyPass'
+        type: NestedObject
         description: |
           Secret containing the passphrase protecting the Client Private Key
         properties:
-          - !ruby/object:Api::Type::String
-            name: "secretVersion"
-            required: true
+          - name: 'secretVersion'
+            type: String
             description: |
               Secret version of Secret Value for Config variable.
-      - !ruby/object:Api::Type::Enum
-        name: "serverCertType"
+            required: true
+      - name: 'serverCertType'
+        type: Enum
         description: |
           Type of Server Cert (PEM/JKS/.. etc.)
-        values:
-          - PEM
-      - !ruby/object:Api::Type::Enum
-        name: "clientCertType"
+        enum_values:
+          - 'PEM'
+      - name: 'clientCertType'
+        type: Enum
         description: |
           Type of Client Cert (PEM/JKS/.. etc.)
-        values:
-          - PEM
-      - !ruby/object:Api::Type::Boolean
-        name: "useSsl"
+        enum_values:
+          - 'PEM'
+      - name: 'useSsl'
+        type: Boolean
         description: |
           Bool for enabling SSL
-      - !ruby/object:Api::Type::Array
-        name: "additionalVariable"
-        api_name: "additionalVariables"
+      - name: 'additionalVariable'
+        type: Array
         description: |
           Additional SSL related field values.
-        item_type: !ruby/object:Api::Type::NestedObject
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "key"
+            - name: 'key'
+              type: String
               description: |
                 Key for the configVariable
               required: true
-            - !ruby/object:Api::Type::Integer
-              name: "integerValue"
-              api_name: "intValue"
+            - name: 'integerValue'
+              type: Integer
               description: |
                 Integer Value of configVariable.
-            - !ruby/object:Api::Type::String
-              name: "stringValue"
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
               description: |
                 String Value of configVariabley.
-            - !ruby/object:Api::Type::Boolean
-              name: "booleanValue"
-              api_name: "boolValue"
+            - name: 'booleanValue'
+              type: Boolean
               description: |
                 Boolean Value of configVariable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "secretValue"
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
               description: |
                 Secret value of configVariable
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "secretVersion"
-                  required: true
+                - name: 'secretVersion'
+                  type: String
                   description: |
                     Secret version of Secret Value for Config variable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "encryptionKeyValue"
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
               description: |
                 Encription key value of configVariable
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: "type"
+                - name: 'type'
+                  type: Enum
                   description: |
                     Type of Encription Key
-                  values:
-                    - GOOGLE_MANAGED
-                    - CUSTOMER_MANAGED
-                - !ruby/object:Api::Type::String
-                  name: "kmsKeyName"
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
                   description: |
                     The [KMS key name] with which the content of the Operation is encrypted. The
                     expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
-  - !ruby/object:Api::Type::String
-    name: "subscriptionType"
+  - name: 'subscriptionType'
+    type: String
     description: |
       This subscription type enum states the subscription type of the project.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "connectionRevision"
+  - name: 'connectionRevision'
+    type: String
     description: |
       Connection revision. This field is only updated when the connection is created or updated by User.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "eventingEnablementType"
+  - name: 'eventingEnablementType'
+    type: Enum
     description: |
       Eventing enablement type. Will be nil if eventing is not enabled.
-    values:
-      - EVENTING_AND_CONNECTION
-      - ONLY_EVENTING
-  - !ruby/object:Api::Type::NestedObject
-    name: "eventingConfig"
+    enum_values:
+      - 'EVENTING_AND_CONNECTION'
+      - 'ONLY_EVENTING'
+  - name: 'eventingConfig'
+    type: NestedObject
     description: |
       Eventing Configuration of a connection
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "registrationDestinationConfig"
-        required: true
+      - name: 'registrationDestinationConfig'
+        type: NestedObject
         description: |
           registrationDestinationConfig
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: "key"
+          - name: 'key'
+            type: String
             description: |
               Key for the connection
-          - !ruby/object:Api::Type::Array
-            name: "destination"
-            api_name: "destinations"
+          - name: 'destination'
+            type: Array
             description: |
               destinations for the connection
-            item_type: !ruby/object:Api::Type::NestedObject
+            api_name: destinations
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::Integer
-                  name: "port"
+                - name: 'port'
+                  type: Integer
                   description: |
                     port number
-                - !ruby/object:Api::Type::String
-                  name: "serviceAttachment"
+                - name: 'serviceAttachment'
+                  type: String
                   description: |
                     Service Attachment
-                - !ruby/object:Api::Type::String
-                  name: "host"
+                - name: 'host'
+                  type: String
                   description: |
                     Host
-      - !ruby/object:Api::Type::NestedObject
-        name: "authConfig"
+      - name: 'authConfig'
+        type: NestedObject
         description: |
           authConfig for Eventing Configuration.
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: "authType"
-            required: true
+          - name: 'authType'
+            type: Enum
             description: |
               authType of the Connection
-            values:
-              - USER_PASSWORD
-          - !ruby/object:Api::Type::Array
-            name: "additionalVariable"
-            api_name: "additionalVariables"
+            required: true
+            enum_values:
+              - 'USER_PASSWORD'
+          - name: 'additionalVariable'
+            type: Array
             description: |
               List containing additional auth configs.
-            item_type: !ruby/object:Api::Type::NestedObject
+            api_name: additionalVariables
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "key"
+                - name: 'key'
+                  type: String
                   description: |
                     Key for the configVariable
                   required: true
-                - !ruby/object:Api::Type::Integer
-                  name: "integerValue"
-                  api_name: "intValue"
+                - name: 'integerValue'
+                  type: Integer
                   description: |
                     Integer Value of configVariable.
-                - !ruby/object:Api::Type::String
-                  name: "stringValue"
+                  api_name: intValue
+                - name: 'stringValue'
+                  type: String
                   description: |
                     String Value of configVariabley.
-                - !ruby/object:Api::Type::Boolean
-                  name: "booleanValue"
-                  api_name: "boolValue"
+                - name: 'booleanValue'
+                  type: Boolean
                   description: |
                     Boolean Value of configVariable.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "secretValue"
+                  api_name: boolValue
+                - name: 'secretValue'
+                  type: NestedObject
                   description: |
                     Secret value of configVariable
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: "secretVersion"
-                      required: true
+                    - name: 'secretVersion'
+                      type: String
                       description: |
                         Secret version of Secret Value for Config variable.
-                - !ruby/object:Api::Type::NestedObject
-                  name: "encryptionKeyValue"
+                      required: true
+                - name: 'encryptionKeyValue'
+                  type: NestedObject
                   description: |
                     Encription key value of configVariable
                   properties:
-                    - !ruby/object:Api::Type::Enum
-                      name: "type"
+                    - name: 'type'
+                      type: Enum
                       description: |
                         Type of Encription Key
-                      values:
-                        - GOOGLE_MANAGED
-                        - CUSTOMER_MANAGED
-                    - !ruby/object:Api::Type::String
-                      name: "kmsKeyName"
+                      enum_values:
+                        - 'GOOGLE_MANAGED'
+                        - 'CUSTOMER_MANAGED'
+                    - name: 'kmsKeyName'
+                      type: String
                       description: |
                         The [KMS key name] with which the content of the Operation is encrypted. The
                         expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                         Will be empty string if google managed.
-          - !ruby/object:Api::Type::String
-            name: "authKey"
+          - name: 'authKey'
+            type: String
             description: |
               The type of authentication configured.
-          - !ruby/object:Api::Type::NestedObject
-            name: "userPassword"
-            required: true
+          - name: 'userPassword'
+            type: NestedObject
             description: |
               User password for Authentication.
+            required: true
             properties:
-              - !ruby/object:Api::Type::String
-                name: "username"
+              - name: 'username'
+                type: String
                 description: |
                   Username for Authentication.
-              - !ruby/object:Api::Type::NestedObject
-                name: "password"
+              - name: 'password'
+                type: NestedObject
                 description: |
                   Password for Authentication.
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: "secretVersion"
-                    required: true
+                  - name: 'secretVersion'
+                    type: String
                     description: |
                       The resource name of the secret version in the format,
                       format as: projects/*/secrets/*/versions/*.
-      - !ruby/object:Api::Type::Array
-        name: "additionalVariable"
-        api_name: "additionalVariables"
+                    required: true
+      - name: 'additionalVariable'
+        type: Array
         description: |
           List containing additional auth configs.
-        item_type: !ruby/object:Api::Type::NestedObject
+        api_name: additionalVariables
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "key"
+            - name: 'key'
+              type: String
               description: |
                 Key for the configVariable
               required: true
-            - !ruby/object:Api::Type::Integer
-              name: "integerValue"
-              api_name: "intValue"
+            - name: 'integerValue'
+              type: Integer
               description: |
                 Integer Value of configVariable.
-            - !ruby/object:Api::Type::String
-              name: "stringValue"
+              api_name: intValue
+            - name: 'stringValue'
+              type: String
               description: |
                 String Value of configVariabley.
-            - !ruby/object:Api::Type::Boolean
-              name: "booleanValue"
-              api_name: "boolValue"
+            - name: 'booleanValue'
+              type: Boolean
               description: |
                 Boolean Value of configVariable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "secretValue"
+              api_name: boolValue
+            - name: 'secretValue'
+              type: NestedObject
               description: |
                 Secret value of configVariable
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "secretVersion"
-                  required: true
+                - name: 'secretVersion'
+                  type: String
                   description: |
                     Secret version of Secret Value for Config variable.
-            - !ruby/object:Api::Type::NestedObject
-              name: "encryptionKeyValue"
+                  required: true
+            - name: 'encryptionKeyValue'
+              type: NestedObject
               description: |
                 Encription key value of configVariable.
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: "type"
+                - name: 'type'
+                  type: Enum
                   description: |
                     Type of Encryption Key
-                  values:
-                    - GOOGLE_MANAGED
-                    - CUSTOMER_MANAGED
-                - !ruby/object:Api::Type::String
-                  name: "kmsKeyName"
+                  enum_values:
+                    - 'GOOGLE_MANAGED'
+                    - 'CUSTOMER_MANAGED'
+                - name: 'kmsKeyName'
+                  type: String
                   description: |
                     The [KMS key name] with which the content of the Operation is encrypted. The
                     expected format: projects/*/locations/*/keyRings/*/cryptoKeys/*.
                     Will be empty string if google managed.
-      - !ruby/object:Api::Type::Boolean
-        name: "enrichmentEnabled"
+      - name: 'enrichmentEnabled'
+        type: Boolean
         description: |
           Enrichment Enabled.
-  - !ruby/object:Api::Type::String
-    name: "connectorVersionLaunchStage"
+  - name: 'connectorVersionLaunchStage'
+    type: String
     description: |
       Flag to mark the version indicating the launch stage.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "eventingRuntimeData"
+  - name: 'eventingRuntimeData'
+    type: NestedObject
     description: |
       Eventing Runtime Data.
     output: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "status"
+      - name: 'status'
+        type: NestedObject
         description: |
           Current status of eventing.
         output: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: "state"
+          - name: 'state'
+            type: String
             description: |
               State of the Eventing
             output: true
-          - !ruby/object:Api::Type::String
-            name: "description"
+          - name: 'description'
+            type: String
             description: |
               Description of error if State is set to "ERROR".
             output: true
-      - !ruby/object:Api::Type::String
-        name: "eventsListenerEndpoint"
+      - name: 'eventsListenerEndpoint'
+        type: String
         description: |
           Events listener endpoint. The value will populated after provisioning the events listener.
-  - !ruby/object:Api::Type::NestedObject
-    name: "connectorVersionInfraConfig"
+  - name: 'connectorVersionInfraConfig'
+    type: NestedObject
     description: |
       This configuration provides infra configs like rate limit threshold which need to be configurable for every connector version.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "ratelimitThreshold"
-        output: true
+      - name: 'ratelimitThreshold'
+        type: String
         description: |
           Max QPS supported by the connector version before throttling of requests.
+        output: true

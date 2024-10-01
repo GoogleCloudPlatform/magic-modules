@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -10,66 +10,81 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
---- !ruby/object:Api::Resource
-name: "VmwareNodePool"
-base_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools"
-create_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools?vmware_node_pool_id={{name}}"
-update_url: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"
-self_link: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"
-update_verb: :PATCH
-update_mask: true
+
+---
+name: 'VmwareNodePool'
 description: "A Google Vmware Node Pool."
-autogen_async: false
-id_format: "projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"
-import_format: ["projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}"]
-taint_resource_on_failed_create: true
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools'
+self_link: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools?vmware_node_pool_id={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/vmwareClusters/{{vmware_cluster}}/vmwareNodePools/{{name}}'
+timeouts:
   insert_minutes: 60
-  delete_minutes: 60
   update_minutes: 60
+  delete_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+taint_resource_on_failed_create: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_node_pool_basic"
-    primary_resource_id: "nodepool-basic"
+  - name: 'gkeonprem_vmware_node_pool_basic'
+    primary_resource_id: 'nodepool-basic'
     vars:
-      name: "my-nodepool"
-      cluster: "my-cluster"
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
-      project: "fake-backend-360322"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_node_pool_full"
-    primary_resource_id: "nodepool-full"
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_node_pool_full'
+    primary_resource_id: 'nodepool-full'
     vars:
-      name: "my-nodepool"
-      cluster: "my-cluster"
+      name: 'my-nodepool'
+      cluster: 'my-cluster'
     test_env_vars:
-      project: "fake-backend-360322"
+      project: 'fake-backend-360322'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "name"
+  - name: 'name'
+    type: String
     description: The vmware node pool name.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: "vmwareCluster"
-    resource: "VmwareCluster"
-    imports: "name"
+    immutable: true
+  - name: 'vmwareCluster'
+    type: ResourceRef
     description: "The cluster this node pool belongs to."
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: "location"
+    resource: 'VmwareCluster'
+    imports: 'name'
+  - name: 'location'
+    type: String
     description: The location of the resource.
-    immutable: true
     url_param_only: true
     required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: "displayName"
+  - name: 'displayName'
+    type: String
     description: The display name for the node pool.
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: |
       Annotations on the node Pool.
       This field has the same restrictions as Kubernetes annotations.
@@ -79,73 +94,74 @@ properties:
       Prefix must be a DNS subdomain.
       Name must be 63 characters or less, begin and end with alphanumerics,
       with dashes (-), underscores (_), dots (.), and alphanumerics between.
-  - !ruby/object:Api::Type::NestedObject
-    name: "nodePoolAutoscaling"
+  - name: 'nodePoolAutoscaling'
+    type: NestedObject
     description: Node Pool autoscaling config for the node pool.
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: "minReplicas"
+      - name: 'minReplicas'
+        type: Integer
         description: Minimum number of replicas in the NodePool.
         required: true
-      - !ruby/object:Api::Type::Integer
-        name: "maxReplicas"
+      - name: 'maxReplicas'
+        type: Integer
         description: Maximum number of replicas in the NodePool.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: "config"
+  - name: 'config'
+    type: NestedObject
     description: The node configuration of the node pool.
     required: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: "cpus"
+      - name: 'cpus'
+        type: Integer
         description: The number of CPUs for each node in the node pool.
         default_value: 4
-      - !ruby/object:Api::Type::Integer
-        name: "memoryMb"
+      - name: 'memoryMb'
+        type: Integer
         description: The megabytes of memory for each node in the node pool.
         default_value: 8192
-      - !ruby/object:Api::Type::Integer
-        name: "replicas"
+      - name: 'replicas'
+        type: Integer
         description: The number of nodes in the node pool.
         default_value: 1
-      - !ruby/object:Api::Type::String
-        name: "imageType"
-        required: true
+      - name: 'imageType'
+        type: String
         description: |
           The OS image to be used for each node in a node pool.
           Currently `cos`, `cos_cgv2`, `ubuntu`, `ubuntu_cgv2`, `ubuntu_containerd` and `windows` are supported.
-      - !ruby/object:Api::Type::String
-        name: "image"
+        required: true
+      - name: 'image'
+        type: String
         description: The OS image name in vCenter, only valid when using Windows.
-      - !ruby/object:Api::Type::Integer
-        name: "bootDiskSizeGb"
+      - name: 'bootDiskSizeGb'
+        type: Integer
         description: VMware disk size to be used during creation.
-      - !ruby/object:Api::Type::Array
-        name: "taints"
+      - name: 'taints'
+        type: Array
         description: The initial taints assigned to nodes of this node pool.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "key"
+            - name: 'key'
+              type: String
               description: |
                 Key associated with the effect.
               required: true
-            - !ruby/object:Api::Type::String
-              name: "value"
+            - name: 'value'
+              type: String
               description: |
                 Value associated with the effect.
               required: true
-            - !ruby/object:Api::Type::Enum
-              name: "effect"
+            - name: 'effect'
+              type: Enum
               description: |
                 Available taint effects.
-              values:
-                - EFFECT_UNSPECIFIED
-                - NO_SCHEDULE
-                - PREFER_NO_SCHEDULE
-                - NO_EXECUTE
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'labels'
+              enum_values:
+                - 'EFFECT_UNSPECIFIED'
+                - 'NO_SCHEDULE'
+                - 'PREFER_NO_SCHEDULE'
+                - 'NO_EXECUTE'
+      - name: 'labels'
+        type: KeyValuePairs
         description: |
           The map of Kubernetes labels (key/value pairs) to be applied to each node.
           These will added in addition to any default label(s) that
@@ -154,42 +170,44 @@ properties:
           the Kubernetes version -- it's best to assume the behavior is undefined
           and conflicts should be avoided.
         default_from_api: true
-      - !ruby/object:Api::Type::NestedObject
-        name: "vsphereConfig"
+      - name: 'vsphereConfig'
+        type: NestedObject
         description: Specifies the vSphere config for node pool.
         properties:
-          - !ruby/object:Api::Type::String
-            name: datastore
+          - name: 'datastore'
+            type: String
             description: The name of the vCenter datastore. Inherited from the user
               cluster.
-          - !ruby/object:Api::Type::Array
-            name: "tags"
+          - name: 'tags'
+            type: Array
             description: Tags to apply to VMs.
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "category"
+                - name: 'category'
+                  type: String
                   description: The Vsphere tag category.
-                - !ruby/object:Api::Type::String
-                  name: "tag"
+                - name: 'tag'
+                  type: String
                   description: The Vsphere tag name.
-          - !ruby/object:Api::Type::Array
-            name: "hostGroups"
+          - name: 'hostGroups'
+            type: Array
             description: |
               Vsphere host groups to apply to all VMs in the node pool
-            item_type: Api::Type::String
-      - !ruby/object:Api::Type::Boolean
-        name: "enableLoadBalancer"
+            item_type:
+              type: String
+      - name: 'enableLoadBalancer'
+        type: Boolean
         description: |
           Allow node pool traffic to be load balanced. Only works for clusters with
           MetalLB load balancers.
-  - !ruby/object:Api::Type::NestedObject
-    name: status
+  - name: 'status'
+    type: NestedObject
     description: ResourceStatus representing detailed cluster state.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "errorMessage"
+      - name: 'errorMessage'
+        type: String
         description: |
           Human-friendly representation of the error message from the user cluster
           controller. The error message can be temporary as the user cluster
@@ -197,81 +215,82 @@ properties:
           for a longer period of time, it can be used to surface error message to
           indicate real problems requiring user intervention.
         output: true
-      - !ruby/object:Api::Type::Array
-        name: "conditions"
+      - name: 'conditions'
+        type: Array
         description: |
           ResourceConditions provide a standard mechanism for higher-level status reporting from user cluster controller.
         output: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: "type"
+            - name: 'type'
+              type: String
               description: |
                 Type of the condition.
                 (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
               output: true
-            - !ruby/object:Api::Type::String
-              name: "reason"
+            - name: 'reason'
+              type: String
               description: |
                 Machine-readable message indicating details about last transition.
               output: true
-            - !ruby/object:Api::Type::String
-              name: "message"
+            - name: 'message'
+              type: String
               description: |
                 Human-readable message indicating details about last transition.
               output: true
-            - !ruby/object:Api::Type::Time
-              name: "lastTransitionTime"
+            - name: 'lastTransitionTime'
+              type: Time
               description: |
                 Last time the condition transit from one status to another.
               output: true
-            - !ruby/object:Api::Type::Enum
-              name: "state"
+            - name: 'state'
+              type: Enum
               description: The lifecycle state of the condition.
               output: true
-              values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN
-  - !ruby/object:Api::Type::String
-    name: "uid"
+              enum_values:
+                - 'STATE_UNSPECIFIED'
+                - 'STATE_TRUE'
+                - 'STATE_FALSE'
+                - 'STATE_UNKNOWN'
+  - name: 'uid'
+    type: String
     description: The unique identifier of the node pool.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+  - name: 'state'
+    type: Enum
     description: The current state of this cluster.
     output: true
-    values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
-  - !ruby/object:Api::Type::Boolean
-    name: "reconciling"
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'PROVISIONING'
+      - 'RUNNING'
+      - 'RECONCILING'
+      - 'STOPPING'
+      - 'ERROR'
+      - 'DEGRADED'
+  - name: 'reconciling'
+    type: Boolean
     description: |
       If set, there are currently changes in flight to the node pool.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+  - name: 'createTime'
+    type: Time
     description: |
       The time the cluster was created, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+  - name: 'updateTime'
+    type: Time
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "deleteTime"
+  - name: 'deleteTime'
+    type: Time
     description: |
       The time the cluster was deleted, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "etag"
+  - name: 'etag'
+    type: String
     description: |
       This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the
@@ -279,8 +298,8 @@ properties:
       Allows clients to perform consistent read-modify-writes
       through optimistic concurrency control.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "onPremVersion"
+  - name: 'onPremVersion'
+    type: String
     description: |
       Anthos version for the node pool. Defaults to the user cluster version.
     output: true

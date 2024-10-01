@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,44 +11,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Bucket'
-min_version: beta
-base_url: projects/{{project}}/buckets
-self_link: projects/{{project}}/buckets/{{bucket_id}}
-create_url: projects/{{project}}/buckets/{{bucket_id}}:addFirebase
-delete_url: projects/{{project}}/buckets/{{bucket_id}}:removeFirebase
-delete_verb: :POST
 description: |
   An association between a Firebase project and a Google Cloud Storage bucket.
   This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
-immutable: true  # Does not support update operation. There is nothing to update.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/storage/'
   api: 'https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets'
+docs:
+base_url: 'projects/{{project}}/buckets'
+self_link: 'projects/{{project}}/buckets/{{bucket_id}}'
+create_url: 'projects/{{project}}/buckets/{{bucket_id}}:addFirebase'
+delete_url: 'projects/{{project}}/buckets/{{bucket_id}}:removeFirebase'
+delete_verb: 'POST'
+ # Does not support update operation. There is nothing to update.
+immutable: true
 import_format:
-  ['projects/{{project}}/buckets/{{bucket_id}}', '{{project}}/{{bucket_id}}']
+  - 'projects/{{project}}/buckets/{{bucket_id}}'
+  - '{{project}}/{{bucket_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebasestorage_bucket_basic'
-    min_version: 'beta'
+  - name: 'firebasestorage_bucket_basic'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
-      bucket_id: test_bucket
+      bucket_id: 'test_bucket'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: bucket_id
+  - name: 'bucket_id'
+    type: String
     description:
       Required. Immutable. The ID of the underlying Google Cloud Storage bucket
-    immutable: true
+    min_version: 'beta'
     url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description:
       Resource name of the bucket in the format
       projects/PROJECT_IDENTIFIER/buckets/BUCKET_ID
+    min_version: 'beta'
     output: true

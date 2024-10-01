@@ -72,7 +72,7 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
@@ -156,7 +156,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/go/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -187,8 +187,6 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	// log.Printf("Generating %s", filePath)
-
 	templateFileName := filepath.Base(templatePath)
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
@@ -218,7 +216,8 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	if goFormat && !strings.Contains(templatePath, "third_party/terraform") {
-		cmd := exec.Command("goimports", "-w", filePath)
+		cmd := exec.Command("goimports", "-w", filepath.Base(filePath))
+		cmd.Dir = filepath.Dir(filePath)
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}

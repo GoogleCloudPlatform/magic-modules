@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,93 +11,94 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Model'
-base_url: projects/{{project}}/models
-self_link: projects/{{project}}/models/{{name}}
-# This resources is not updatable (outside of versions, which is a version-level method)
-immutable: true
-schema_version: 1
-state_upgraders: true
-async: !ruby/object:Api::OpAsync
-  actions: ['delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 description: |
   Represents a machine learning solution.
 
   A model can have multiple versions, each of which is a deployed, trained model
   ready to receive prediction requests. The model itself is just a container.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/ai-platform/prediction/docs/deploying-models'
   api: 'https://cloud.google.com/ai-platform/prediction/docs/reference/rest/v1/projects.models'
+docs:
+base_url: 'projects/{{project}}/models'
+self_link: 'projects/{{project}}/models/{{name}}'
+# This resources is not updatable (outside of versions, which is a version-level method)
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+schema_version: 1
+state_upgraders: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'ml_model_basic'
+  - name: 'ml_model_basic'
     primary_resource_id: 'default'
     vars:
       model_name: 'default'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'ml_model_full'
+  - name: 'ml_model_full'
     primary_resource_id: 'default'
     vars:
       model_name: 'default'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: The name specified for the model.
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'description'
+    type: String
     description: The description specified for the model when it was created.
   # Ignoring most of defaultVersion.
   # Only name should be exposed. Use the Version resource to learn more
   # about versions.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'defaultVersion'
+  - name: 'defaultVersion'
+    type: NestedObject
     description: |
       The default version of the model. This version will be used to handle
       prediction requests that do not specify a version.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
+      - name: 'name'
+        type: String
         description: The name specified for the version when it was created.
+        required: true
   # Even though only one region is supported, keeping this as an array
   # to future-proof it.
-  - !ruby/object:Api::Type::Array
-    name: 'regions'
+  - name: 'regions'
+    type: Array
     description: |
       The list of regions where the model is going to be deployed.
       Currently only one region per model is supported
+    item_type:
+      type: String
     max_size: 1
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Boolean
-    name: 'onlinePredictionLogging'
+  - name: 'onlinePredictionLogging'
+    type: Boolean
     description:
       If true, online prediction access logs are sent to StackDriver Logging.
-  - !ruby/object:Api::Type::Boolean
-    name: 'onlinePredictionConsoleLogging'
+  - name: 'onlinePredictionConsoleLogging'
+    type: Boolean
     description:
       If true, online prediction nodes send stderr and stdout streams to
       Stackdriver Logging
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: One or more labels that you can add, to organize your models.

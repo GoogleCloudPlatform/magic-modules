@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,91 +11,93 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EventThreatDetectionCustomModule'
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, andlast updated time.
   You can create a custom module at the organization level only.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Overview of custom modules for Event Threat Detection': 'https://cloud.google.com/security-command-center/docs/custom-modules-etd-overview'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.eventThreatDetectionSettings.customModules'
+docs:
 base_url: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules'
 self_link: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules/{{name}}'
-mutex: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+mutex: 'organizations/{{organization}}/eventThreatDetectionSettings/customModules'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "scc_event_threat_detection_custom_module"
-    primary_resource_id: "example"
-    # Has a handwritten update test
-    skip_test: true
+  - name: 'scc_event_threat_detection_custom_module'
+    primary_resource_id: 'example'
     vars:
-      display_name: basic_custom_module
+      display_name: 'basic_custom_module'
       type: 'CONFIGURABLE_BAD_IP'
     test_env_vars:
-      org_id: :ORG_ID
-
+      org_id: 'ORG_ID'
+    # Has a handwritten update test
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'organization'
-    immutable: true
-    required: true
-    url_param_only: true
+  - name: 'organization'
+    type: String
     description: |
       Numerical ID of the parent organization.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+  - name: 'name'
+    type: String
     description: |
       The resource name of the Event Threat Detection custom module.
       Its format is "organizations/{organization}/eventThreatDetectionSettings/customModules/{module}".
-  - !ruby/object:Api::Type::String
-    name: 'config'
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-    state_func:
-      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-      return s }'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'config'
+    type: String
     description: |
       Config for the module. For the resident module, its config value is defined at this level.
       For the inherited module, its config value is inherited from the ancestor module.
-    validation: !ruby/object:Provider::Terraform::Validation
-      function: 'validation.StringIsJSON'
-  - !ruby/object:Api::Type::Enum
-    name: 'enablementState'
     required: true
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    validation:
+      function: 'validation.StringIsJSON'
+  - name: 'enablementState'
+    type: Enum
     description: |
       The state of enablement for the module at the given level of the hierarchy.
-    values:
-      - :ENABLED
-      - :DISABLED
-  - !ruby/object:Api::Type::String
-    name: 'type'
-    immutable: true
     required: true
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'type'
+    type: String
     description: |
       Immutable. Type for the module. e.g. CONFIGURABLE_BAD_IP.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
     description: |
       The human readable name to be displayed for the module.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The time at which the custom module was last updated.
 
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: 'lastEditor'
     output: true
+  - name: 'lastEditor'
+    type: String
     description: |
       The editor that last updated the custom module
+    output: true

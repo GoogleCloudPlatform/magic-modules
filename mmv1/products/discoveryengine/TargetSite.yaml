@@ -11,113 +11,109 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TargetSite'
 description: |
   TargetSite represents a URI pattern that the users want to confine their
   search.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
+  guides:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.targetSites'
-
-immutable: true
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites'
 delete_url: '{{name}}'
+immutable: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}',
-  ]
-
+  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "discoveryengine_targetsite_basic"
+  - name: 'discoveryengine_targetsite_basic'
     primary_resource_id: 'basic'
     vars:
-      data_store_id: "data-store-id"
+      data_store_id: 'data-store-id'
     ignore_read_extra:
       - 'project'
-  - !ruby/object:Provider::Terraform::Examples
-    name: "discoveryengine_targetsite_advanced"
+  - name: 'discoveryengine_targetsite_advanced'
     primary_resource_id: 'advanced'
     vars:
-      data_store_id: "data-store-id"
+      data_store_id: 'data-store-id'
     ignore_read_extra:
       - 'project'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/set_computed_name.erb
-  custom_import: templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The geographic location where the data store should reside. The value can
       only be one of "global", "us" and "eu".
-  - !ruby/object:Api::Type::String
-    name: 'dataStoreId'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'dataStoreId'
+    type: String
     description: |
       The unique id of the data store.
-  - !ruby/object:Api::Type::String
-    name: 'targetSiteId'
-    output: true
-    immutable: true
     url_param_only: true
+    required: true
+    immutable: true
+  - name: 'targetSiteId'
+    type: String
     description: |
       The unique id of the target site.
 
+    url_param_only: true
+    immutable: true
+    output: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The unique full resource name of the target site. Values are of the format
       `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/siteSearchEngine/targetSites/{target_site_id}`.
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'providedUriPattern'
+  - name: 'providedUriPattern'
+    type: String
     description: |
       The user provided URI pattern from which the `generated_uri_pattern` is
       generated.
     required: true
     ignore_read: true
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
+  - name: 'type'
+    type: Enum
     description: |
       The possible target site types.
-    values:
-      - :INCLUDE
-      - :EXCLUDE
-  - !ruby/object:Api::Type::Boolean
-    name: 'exactMatch'
+    enum_values:
+      - 'INCLUDE'
+      - 'EXCLUDE'
+  - name: 'exactMatch'
+    type: Boolean
     description: |
       If set to false, a uri_pattern is generated to include all pages whose
       address contains the provided_uri_pattern. If set to true, an uri_pattern
@@ -126,62 +122,62 @@ properties:
       provided_uri_pattern is always normalized to generate the URI pattern to
       be used by the search engine.
     default_value: false
-  - !ruby/object:Api::Type::String
-    name: 'generatedUriPattern'
+  - name: 'generatedUriPattern'
+    type: String
     description: |
       This is system-generated based on the `provided_uri_pattern`.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'rootDomainUri'
+  - name: 'rootDomainUri'
+    type: String
     description: |
       Root domain of the `provided_uri_pattern`.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'siteVerificationInfo'
+  - name: 'siteVerificationInfo'
+    type: NestedObject
     description: |
       Site ownership and validity verification status.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'siteVerificationState'
+      - name: 'siteVerificationState'
+        type: Enum
         description: |
           Site verification state indicating the ownership and validity.
-        values:
-          - :VERIFIED
-          - :UNVERIFIED
-          - :EXEMPTED
-      - !ruby/object:Api::Type::Time
-        name: "verifyTime"
+        enum_values:
+          - 'VERIFIED'
+          - 'UNVERIFIED'
+          - 'EXEMPTED'
+      - name: 'verifyTime'
+        type: Time
         description: |
           Latest site verification time.
-  - !ruby/object:Api::Type::Enum
-    name: 'indexingStatus'
+  - name: 'indexingStatus'
+    type: Enum
     description: |
       The indexing status.
     output: true
-    values:
-      - :PENDING
-      - :FAILED
-      - :SUCCEEDED
-      - :DELETING
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+    enum_values:
+      - 'PENDING'
+      - 'FAILED'
+      - 'SUCCEEDED'
+      - 'DELETING'
+  - name: 'updateTime'
+    type: Time
     description: |
       The target site's last updated time.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'failureReason'
+  - name: 'failureReason'
+    type: NestedObject
     description: |
       Site search indexing failure reasons.
     output: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'quotaFailure'
+      - name: 'quotaFailure'
+        type: NestedObject
         description: |
           Site verification state indicating the ownership and validity.
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'totalRequiredQuota'
+          - name: 'totalRequiredQuota'
+            type: Integer
             description: |
               This number is an estimation on how much total quota this project
               needs to successfully complete indexing.

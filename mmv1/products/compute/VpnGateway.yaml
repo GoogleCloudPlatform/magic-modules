@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,43 +11,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'VpnGateway'
 kind: 'compute#targetVpnGateway'
-base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
-collection_url_key: 'items'
-immutable: true
-has_self_link: true
 description: |
   Represents a VPN gateway running in GCP. This virtual device is managed
   by Google, but used only by you.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: 'compute#operation'
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error/errors'
-    message: 'message'
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways'
+docs:
   warning: |
     Classic VPN is deprecating certain functionality on October 31, 2021. For more information,
     see the [Classic VPN partial deprecation page](https://cloud.google.com/network-connectivity/docs/vpn/deprecations/classic-vpn-deprecation).
+base_url: 'projects/{{project}}/regions/{{region}}/targetVpnGateways'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+collection_url_key: 'items'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_vpn_gateway_basic'
+  - name: 'target_vpn_gateway_basic'
     primary_resource_id: 'target_gateway'
     vars:
       target_vpn_gateway_name: 'vpn-1'
@@ -59,27 +60,27 @@ examples:
       vpn_tunnel_name: 'tunnel1'
       route_name: 'route1'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'name'
+  - name: 'region'
+    type: ResourceRef
     description: |
       The region this gateway should sit in.
     required: false
     default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -90,17 +91,17 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Integer
-    name: 'gateway_id'
-    api_name: 'id'
+  - name: 'gateway_id'
+    type: Integer
     description: 'The unique identifier for the resource.'
+    api_name: id
     output: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'selfLink'
+  - name: 'network'
+    type: ResourceRef
     description: |
       The network this VPN gateway is accepting traffic for.
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'selfLink'

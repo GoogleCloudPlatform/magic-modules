@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,69 +11,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ServiceNetworkSettings'
 description: |
   A NetworkSettings resource is a container for ingress settings for a version or service.
+references:
+  guides:
+  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
+docs:
+id_format: 'apps/{{project}}/services/{{service}}'
 base_url: 'apps/{{project}}/services'
 self_link: 'apps/{{project}}/services/{{service}}'
 create_url: 'apps/{{project}}/services/{{service}}?updateMask=networkSettings'
-create_verb: :PATCH
+create_verb: 'PATCH'
 update_url: 'apps/{{project}}/services/{{service}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+exclude_delete: true
+mutex: 'apps/{{project}}'
+import_format:
+  - 'apps/{{project}}/services/{{service}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'appengine#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-id_format: 'apps/{{project}}/services/{{service}}'
-import_format: ['apps/{{project}}/services/{{service}}']
-mutex: 'apps/{{project}}'
-skip_delete: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'app_engine_service_network_settings'
+  - name: 'app_engine_service_network_settings'
     primary_resource_id: 'internalapp'
     vars:
       bucket_name: 'appengine-static-content'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'service'
-    api_name: 'id'
-    required: true
+  - name: 'service'
+    type: String
     description: |
       The name of the service these settings apply to.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'networkSettings'
+    api_name: id
+    required: true
+  - name: 'networkSettings'
+    type: NestedObject
     description: |
       Ingress settings for this service. Will apply to all versions.
     required: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'ingressTrafficAllowed'
+      - name: 'ingressTrafficAllowed'
+        type: Enum
         description: |
           The ingress settings for version or service.
-        default_value: :INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED
-        values:
-          - :INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED
-          - :INGRESS_TRAFFIC_ALLOWED_ALL
-          - :INGRESS_TRAFFIC_ALLOWED_INTERNAL_ONLY
-          - :INGRESS_TRAFFIC_ALLOWED_INTERNAL_AND_LB
+        default_value: "INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED"
+        enum_values:
+          - 'INGRESS_TRAFFIC_ALLOWED_UNSPECIFIED'
+          - 'INGRESS_TRAFFIC_ALLOWED_ALL'
+          - 'INGRESS_TRAFFIC_ALLOWED_INTERNAL_ONLY'
+          - 'INGRESS_TRAFFIC_ALLOWED_INTERNAL_AND_LB'
