@@ -286,6 +286,18 @@ resource "google_pubsub_topic" "example-resource-in" {
 // the PubSub API. This allows the second apply step to succeed in a test, if needed.
 func testAccSdkProvider_billing_project_useBillingProject_setupWithApiEnabled(context map[string]interface{}) string {
 	return testAccSdkProvider_billing_project_useBillingProject_setup(context) + acctest.Nprintf(`
+# Needed for post test cleanup
+  resource "google_project_service" "serviceusage" {
+  project  = google_project.project.project_id
+  service  = "serviceusage.googleapis.com"
+
+  depends_on = [
+    google_project_service.pubsub,
+    google_project_service.cloudresourcemanager
+  ]
+}
+
+# Needed for test steps to apply without error
 resource "google_project_service" "pubsub" {
   project  = google_project.project.project_id
   service  = "pubsub.googleapis.com"
@@ -294,6 +306,7 @@ resource "google_project_service" "pubsub" {
 resource "google_project_service" "cloudresourcemanager" {
   project  = google_project.project.project_id
   service  = "cloudresourcemanager.googleapis.com"
+  disable_on_destroy = false # Need it enabled in the project when the test deletes the project resource in post-test cleanup
 }
 `, context)
 }
@@ -321,6 +334,10 @@ resource "google_pubsub_topic" "example-resource-in" {
   provider = google.user_project_override
   project  = google_project.project.project_id
   name     = "tf-test-%{random_suffix}"
+
+  depends_on = [
+    google_project_service.pubsub
+  ]
 }
 `, context)
 }
