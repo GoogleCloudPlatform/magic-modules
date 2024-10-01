@@ -103,7 +103,7 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_environment" "apigee_environment_reference" {
+resource "google_apigee_environment" "apigee_environment" {
   org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
@@ -112,11 +112,11 @@ resource "google_apigee_environment" "apigee_environment_reference" {
 
 resource "google_apigee_env_keystore" "apigee_environment_keystore_1" {
   name       = "tf-test-keystore%{random_suffix}"
-  env_id     = google_apigee_environment.apigee_environment_reference.id
+  env_id     = google_apigee_environment.apigee_environment.id
 }
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
-  env_id         = google_apigee_environment.apigee_environment_reference.id
+  env_id         = google_apigee_environment.apigee_environment.id
   name           = "reference_test"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_1.name
@@ -182,7 +182,7 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_environment" "apigee_environment_reference" {
+resource "google_apigee_environment" "apigee_environment" {
   org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
   description  = "Apigee Environment"
@@ -191,11 +191,11 @@ resource "google_apigee_environment" "apigee_environment_reference" {
 
 resource "google_apigee_env_keystore" "apigee_environment_keystore_2" {
   name       = "tf-test-keystore%{random_suffix}"
-  env_id     = google_apigee_environment.apigee_environment_reference.id
+  env_id     = google_apigee_environment.apigee_environment.id
 }
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
-  env_id         = google_apigee_environment.apigee_environment_reference.id
+  env_id         = google_apigee_environment.apigee_environment.id
   name           = "reference_test"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_2.name
