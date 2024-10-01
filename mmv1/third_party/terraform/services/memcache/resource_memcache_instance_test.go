@@ -104,7 +104,7 @@ func TestAccMemcacheInstance_tags(t *testing.T) {
 
         org := envvar.GetTestOrgFromEnv(t)
         prefix := fmt.Sprintf("%d", acctest.RandInt(t))
-	name := fmt.Sprintf("tf-test-%s", prefix)
+	name := fmt.Sprintf("tf-test-new-%s", prefix)
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "memcache-instances-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "memcache-instances-tagvalue", tagKey)
 
