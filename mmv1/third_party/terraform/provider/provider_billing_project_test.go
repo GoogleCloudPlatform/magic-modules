@@ -202,15 +202,14 @@ data "google_provider_config_sdk" "default" {}
 }
 
 func testAccSdkProvider_billing_project_useBillingProject_setup(context map[string]interface{}) string {
-	// Setup where there are 2 projects provisioned and each contain a service account to impersonate
 	return acctest.Nprintf(`
 provider "google" {}
 
 # Create a new project and enable service APIs in those projects
 resource "google_project" "project" {
   provider = google
-  project_id      = "tf-test-%{random_suffix}-a"
-  name            = "tf-test-%{random_suffix}-a"
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
   deletion_policy = "DELETE"
@@ -221,13 +220,12 @@ resource "google_project" "project" {
 func testAccSdkProvider_billing_project_useBillingProject_scenario(context map[string]interface{}) string {
 
 	// SECOND APPLY
-	// This is needed as configuring the provider with impersonation fails if service APIs
-	// aren't enabled in the new project and/or the service account isn't made yet
+	// This is needed as configuring the provider depends on resources provisioned in the setup step
 	return testAccSdkProvider_billing_project_useBillingProject_setup(context) + acctest.Nprintf(`
 # Set up the usage of
 #  - user_project_override
 #  - billing_project
-#  - impersonate_service_account
+
 provider "google" {
   alias                 = "user_project_override"
   user_project_override = %{user_project_override}
