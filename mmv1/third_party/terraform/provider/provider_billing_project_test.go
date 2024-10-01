@@ -23,6 +23,8 @@ func TestAccSdkProvider_billing_project(t *testing.T) {
 		"when billing_project is set to an empty string in the config the value isn't ignored and results in an error": testAccSdkProvider_billing_project_emptyStringValidation,
 
 		// Usage
+		// TODO: https://github.com/hashicorp/terraform-provider-google/issues/17882
+		"GOOGLE_CLOUD_QUOTA_PROJECT environment variable interferes with the billing_account value used": testAccSdkProvider_billing_project_affectedByClientLibraryEnv,
 		// 1) Usage of billing_account alone is insufficient
 		// 2) Usage in combination with user_project_override changes the project where quota is used
 		"using billing_account alone doesn't impact provisioning, but using together with user_project_override does": testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride,
@@ -180,6 +182,45 @@ func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *
 	})
 }
 
+func testAccSdkProvider_billing_project_affectedByClientLibraryEnv(t *testing.T) {
+	randomString := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"org_id":                envvar.GetTestOrgFromEnv(t),
+		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
+		"user_project_override": "true", // Used in combo with billing_account
+		"random_suffix":         randomString,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		// No PreCheck for checking ENVs
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Setup resources
+				// Neither user_project_override nor billing_project value used here
+				Config: testAccSdkProvider_billing_project_useBillingProject_setupWithApiEnabled(context),
+			},
+			{
+				// This ENV interferes with setting the billing_project,
+				// so we get an error mentioning the value
+				PreConfig: func() {
+					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", "foobar")
+				},
+				Config:      testAccSdkProvider_billing_project_useBillingProject_scenarioWithApiEnabled(context),
+				ExpectError: regexp.MustCompile("Caller does not have required permission to use project foobar"),
+			},
+			{
+				// The same config without that ENV present applies without error
+				PreConfig: func() {
+					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", "")
+				},
+				Config: testAccSdkProvider_billing_project_useBillingProject_scenarioWithApiEnabled(context),
+			},
+		},
+	})
+}
+
 // testAccSdkProvider_billing_project_inProviderBlock allows setting the billing_project argument in a provider block.
 // This function uses data.google_provider_config_sdk because it is implemented with the SDKv2
 func testAccSdkProvider_billing_project_inProviderBlock(context map[string]interface{}) string {
@@ -224,7 +265,49 @@ func testAccSdkProvider_billing_project_useBillingProject_scenario(context map[s
 # Set up the usage of
 #  - user_project_override
 #  - billing_project
+provider "google" {
+  alias                 = "user_project_override"
+  user_project_override = %{user_project_override}
+  billing_project       = google_project.project.project_id
+  project               = google_project.project.project_id
+}
 
+# See if the impersonated SA can provision the PubSub resource in a way that uses
+# the newly provisioned project as the source of consumed quota
+resource "google_pubsub_topic" "example-resource-in" {
+  provider = google.user_project_override
+  project  = google_project.project.project_id
+  name     = "tf-test-%{random_suffix}"
+}
+`, context)
+}
+
+// testAccSdkProvider_billing_project_useBillingProject_setupWithApiEnabled is the same setup as above but appends config to activate
+// the PubSub API. This allows the second apply step to succeed in a test, if needed.
+func testAccSdkProvider_billing_project_useBillingProject_setupWithApiEnabled(context map[string]interface{}) string {
+	return testAccSdkProvider_billing_project_useBillingProject_setup(context) + acctest.Nprintf(`
+resource "google_project_service" "pubsub" {
+  project  = google_project.project.project_id
+  service  = "pubsub.googleapis.com"
+}
+
+resource "google_project_service" "cloudresourcemanager" {
+  project  = google_project.project.project_id
+  service  = "cloudresourcemanager.googleapis.com"
+}
+`, context)
+}
+
+// testAccSdkProvider_billing_project_useBillingProject_scenarioWithApiEnabled is the same scenario as above but includes config that
+// has activated the PubSub API. This allows the scenario to apply successfully in a test, if needed.
+func testAccSdkProvider_billing_project_useBillingProject_scenarioWithApiEnabled(context map[string]interface{}) string {
+
+	// SECOND APPLY
+	// This is needed as configuring the provider depends on resources provisioned in the setup step
+	return testAccSdkProvider_billing_project_useBillingProject_setupWithApiEnabled(context) + acctest.Nprintf(`
+# Set up the usage of
+#  - user_project_override
+#  - billing_project
 provider "google" {
   alias                 = "user_project_override"
   user_project_override = %{user_project_override}
