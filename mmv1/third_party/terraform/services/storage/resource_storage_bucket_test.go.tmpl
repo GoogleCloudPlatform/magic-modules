@@ -21,18 +21,41 @@ import (
 func TestAccStorageBucket_basic_hns(t *testing.T) {
 	t.Parallel()
 
+	// test case with hns enabled
 	bucketName := acctest.TestBucketName(t)
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_basic_hns(bucketName),
+				Config: testAccStorageBucket_basic_hns(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+
+	// test case with hns disabled
+	bucketName = acctest.TestBucketName(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic_hns(bucketName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "false"),
 				),
 			},
 			{
@@ -65,17 +88,17 @@ func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 	})
 }
 
-func testAccStorageBucket_basic_hns(bucketName string) string {
+func testAccStorageBucket_basic_hns(bucketName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
   uniform_bucket_level_access = true
   hierarchical_namespace {
-	enabled = true
+	enabled = %t
   }
 }
-`, bucketName)
+`, bucketName, enabled)
 }
 
 func testAccStorageBucket_basic_hns_with_data(bucketName string, enabled bool, forceDestroy bool) string {
