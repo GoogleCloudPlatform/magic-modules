@@ -43,7 +43,8 @@ async:
   error:
     path: 'error'
     message: 'message'
-custom_code:
+custom_code:!ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/memcache_instance.go.erb'
 examples:
   - name: 'memcache_instance_basic'
     primary_resource_id: 'instance'
