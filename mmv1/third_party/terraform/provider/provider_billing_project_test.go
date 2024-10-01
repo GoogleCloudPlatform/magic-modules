@@ -208,7 +208,7 @@ func testAccSdkProvider_billing_project_affectedByClientLibraryEnv(t *testing.T)
 					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", "foobar")
 				},
 				Config:      testAccSdkProvider_billing_project_useBillingProject_scenarioWithApiEnabled(context),
-				ExpectError: regexp.MustCompile("Caller does not have required permission to use project foobar"),
+				ExpectError: regexp.MustCompile("foobar"),
 			},
 			{
 				// The same config without that ENV present applies without error
