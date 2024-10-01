@@ -10,8 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'CloudExadataInfrastructure'
 description: A CloudExadataInfrastructure resource.
@@ -48,6 +46,8 @@ async:
 custom_code:
 examples:
   - name: 'oracledatabase_cloud_exadatainfrastructure_basic'
+    primary_resource_id: 'my-cloud-exadata'
+  - name: 'oracledatabase_cloud_exadatainfrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
 parameters:
   - name: 'location'
@@ -191,7 +191,7 @@ properties:
       - name: 'cpuCount'
         type: Integer
         description: 'The number of enabled CPU cores. '
-        default_from_api: true
+        output: true
       - name: 'maxCpuCount'
         type: Integer
         description: 'The total number of CPU cores available. '
@@ -199,7 +199,7 @@ properties:
       - name: 'memorySizeGb'
         type: Integer
         description: 'The memory allocated in GBs. '
-        default_from_api: true
+        output: true
       - name: 'maxMemoryGb'
         type: Integer
         description: 'The total memory available in GBs. '
@@ -207,7 +207,7 @@ properties:
       - name: 'dbNodeStorageSizeGb'
         type: Integer
         description: 'The local node storage allocated in GBs. '
-        default_from_api: true
+        output: true
       - name: 'maxDbNodeStorageSizeGb'
         type: Integer
         description: 'The total local node storage available in GBs. '

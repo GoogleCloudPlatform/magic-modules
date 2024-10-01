@@ -10,13 +10,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'OracleDatabase'
-display_name: 'Oracle Database@Google Cloud'
+display_name: 'OracleDatabase'
 versions:
   - name: 'ga'
+    base_url: 'https://oracledatabase.googleapis.com/v1/'
+  - name: 'beta'
     base_url: 'https://oracledatabase.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
