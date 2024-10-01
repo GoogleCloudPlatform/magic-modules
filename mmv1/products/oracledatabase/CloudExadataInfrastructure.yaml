@@ -1,0 +1,284 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'CloudExadataInfrastructure'
+description: A CloudExadataInfrastructure resource.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures'
+self_link: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures?cloudExadataInfrastructureId={{cloud_exadata_infrastructure_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}'
+timeouts:
+  insert_minutes: 240
+  update_minutes: 120
+  delete_minutes: 120
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 240
+      update_minutes: 120
+      delete_minutes: 120
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'oracledatabase_cloud_exadatainfrastructure_basic'
+    primary_resource_id: 'my-cloud-exadata'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Resource ID segment making up resource `name`. See documentation
+    for resource type `oracledatabase.googleapis.com/DbServer`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'cloudExadataInfrastructureId'
+    type: String
+    description: "The ID of the Exadata Infrastructure to create. This value
+    is restricted\nto (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of
+    63\ncharacters in length. The value must start with a letter and end with\na letter
+    or a number. "
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. The name of the Exadata Infrastructure resource with the
+    following format:\nprojects/{project}/locations/{region}/cloudExadataInfrastructures/{cloud_exadata_infrastructure} "
+    output: true
+  - name: 'displayName'
+    type: String
+    description: 'User friendly name for this resource. '
+  - name: 'gcpOracleZone'
+    type: String
+    description: 'GCP location where Oracle Exadata is hosted. '
+    default_from_api: true
+  - name: 'entitlementId'
+    type: String
+    description: "Entitlement ID of the private offer against which this
+    infrastructure\nresource is provisioned. "
+    output: true
+  - name: 'properties'
+    type: NestedObject
+    description: 'Various properties of Exadata Infrastructure. '
+    properties:
+      - name: 'ocid'
+        type: String
+        description: "OCID of created infra.\nhttps://docs.oracle.com/en-us/iaas/Content/General/Concepts/identifiers.htm#Oracle "
+        output: true
+      - name: 'computeCount'
+        type: Integer
+        description: 'The number of compute servers for the Exadata Infrastructure. '
+      - name: 'storageCount'
+        type: Integer
+        description: 'The number of Cloud Exadata storage servers for the Exadata
+      Infrastructure. '
+      - name: 'totalStorageSizeGb'
+        type: Integer
+        description: "The total storage allocated to the Exadata Infrastructure\nresource,
+      in gigabytes (GB). "
+        default_from_api: true
+      - name: 'availableStorageSizeGb'
+        type: Integer
+        description: "The available storage can be allocated to the Exadata
+      Infrastructure\nresource, in gigabytes (GB). "
+        output: true
+      - name: 'maintenanceWindow'
+        type: NestedObject
+        description: "Maintenance window as defined by Oracle.\nhttps://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/MaintenanceWindow "
+        default_from_api: true
+        properties:
+          - name: 'preference'
+            type: String
+            description: "The maintenance window scheduling preference. \n
+              Possible values:\n MAINTENANCE_WINDOW_PREFERENCE_UNSPECIFIED\nCUSTOM_PREFERENCE\nNO_PREFERENCE"
+            default_from_api: true
+          - name: 'months'
+            type: Array
+            description: 'Months during the year when maintenance should be performed. '
+            default_from_api: true
+            item_type:
+              type: String
+          - name: 'weeksOfMonth'
+            type: Array
+            description: "Weeks during the month when maintenance should be performed.
+        Weeks start on\nthe 1st, 8th, 15th, and 22nd days of the month, and have a
+        duration of 7\ndays. Weeks start and end based on calendar dates, not days
+        of the week. "
+            default_from_api: true
+            item_type:
+              type: Integer
+          - name: 'daysOfWeek'
+            type: Array
+            description: 'Days during the week when maintenance should be performed. '
+            default_from_api: true
+            item_type:
+              type: String
+          - name: 'hoursOfDay'
+            type: Array
+            description: "The window of hours during the day when maintenance
+        should be performed.\nThe window is a 4 hour slot. Valid values are:\n  0
+        - represents time slot 0:00 - 3:59 UTC\n  4 - represents time slot 4:00 -
+        7:59 UTC\n  8 - represents time slot 8:00 - 11:59 UTC\n  12 - represents time
+        slot 12:00 - 15:59 UTC\n  16 - represents time slot 16:00 - 19:59 UTC\n  20
+        - represents time slot 20:00 - 23:59 UTC "
+            default_from_api: true
+            item_type:
+              type: Integer
+          - name: 'leadTimeWeek'
+            type: Integer
+            description: "Lead time window allows user to set a lead time to prepare
+        for a down time.\nThe lead time is in weeks and valid value is between 1 to
+        4. "
+            default_from_api: true
+          - name: 'patchingMode'
+            type: String
+            description: "Cloud CloudExadataInfrastructure node patching method,
+        either \"ROLLING\"\n or \"NONROLLING\". Default value is ROLLING. \n
+        Possible values:\n PATCHING_MODE_UNSPECIFIED\nROLLING\nNON_ROLLING"
+            default_from_api: true
+          - name: 'customActionTimeoutMins'
+            type: Integer
+            description: "Determines the amount of time the system will wait before
+        the start of each\ndatabase server patching operation. Custom action timeout
+        is in minutes and\nvalid value is between 15 to 120 (inclusive). "
+            default_from_api: true
+          - name: 'isCustomActionTimeoutEnabled'
+            type: Boolean
+            description: "If true, enables the configuration of a custom action
+        timeout (waiting\nperiod) between database server patching operations. "
+            default_from_api: true
+      - name: 'state'
+        type: String
+        description: "The current lifecycle state of the Exadata Infrastructure.
+      \n Possible values:\n STATE_UNSPECIFIED\nPROVISIONING\nAVAILABLE\nUPDATING\nTERMINATING\nTERMINATED\nFAILED\nMAINTENANCE_IN_PROGRESS"
+        output: true
+      - name: 'shape'
+        type: String
+        description: "The shape of the Exadata Infrastructure. The shape determines
+      the\namount of CPU, storage, and memory resources allocated to the instance. "
+        required: true
+      - name: 'ociUrl'
+        type: String
+        description: 'Deep link to the OCI console to view this resource. '
+        output: true
+      - name: 'cpuCount'
+        type: Integer
+        description: 'The number of enabled CPU cores. '
+        default_from_api: true
+      - name: 'maxCpuCount'
+        type: Integer
+        description: 'The total number of CPU cores available. '
+        output: true
+      - name: 'memorySizeGb'
+        type: Integer
+        description: 'The memory allocated in GBs. '
+        default_from_api: true
+      - name: 'maxMemoryGb'
+        type: Integer
+        description: 'The total memory available in GBs. '
+        output: true
+      - name: 'dbNodeStorageSizeGb'
+        type: Integer
+        description: 'The local node storage allocated in GBs. '
+        default_from_api: true
+      - name: 'maxDbNodeStorageSizeGb'
+        type: Integer
+        description: 'The total local node storage available in GBs. '
+        output: true
+      - name: 'dataStorageSizeTb'
+        type: Double
+        description: 'Size, in terabytes, of the DATA disk group. '
+        output: true
+      - name: 'maxDataStorageTb'
+        type: Double
+        description: 'The total available DATA disk group size. '
+        output: true
+      - name: 'activatedStorageCount'
+        type: Integer
+        description: "The requested number of additional storage servers
+      activated for the\nExadata Infrastructure. "
+        output: true
+      - name: 'additionalStorageCount'
+        type: Integer
+        description: "The requested number of additional storage servers
+      for the Exadata\nInfrastructure. "
+        output: true
+      - name: 'dbServerVersion'
+        type: String
+        description: "The software version of the database servers (dom0)
+      in the Exadata\nInfrastructure. "
+        output: true
+      - name: 'storageServerVersion'
+        type: String
+        description: "The software version of the storage servers (cells)
+      in the Exadata\nInfrastructure. "
+        output: true
+      - name: 'nextMaintenanceRunId'
+        type: String
+        description: 'The OCID of the next maintenance run. '
+        output: true
+      - name: 'nextMaintenanceRunTime'
+        type: String
+        description: 'The time when the next maintenance run will occur. '
+        output: true
+      - name: 'nextSecurityMaintenanceRunTime'
+        type: String
+        description: 'The time when the next security maintenance run will
+      occur. '
+        output: true
+      - name: 'customerContacts'
+        type: Array
+        description: 'The list of customer contacts. '
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'email'
+              type: String
+              description: "The email address used by Oracle to send notifications
+                regarding databases\nand infrastructure. "
+              required: true
+      - name: 'monthlyStorageServerVersion'
+        type: String
+        description: "The monthly software version of the storage servers
+      (cells)\nin the Exadata Infrastructure. Example: 20.1.15 "
+        output: true
+      - name: 'monthlyDbServerVersion'
+        type: String
+        description: "The monthly software version of the database servers
+      (dom0)\nin the Exadata Infrastructure. Example: 20.1.15 "
+        output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Labels or tags associated with the resource. '
+  - name: 'createTime'
+    type: String
+    description: 'The date and time that the Exadata Infrastructure was
+    created. '
+    output: true

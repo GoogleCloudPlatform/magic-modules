@@ -1,0 +1,10 @@
+resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResourceId}}"{
+  display_name = "OFake exadata displayname"
+  cloud_exadata_infrastructure_id = "ofake-exadata"
+  location = "us-east4"
+  properties {
+    shape = "Exadata.X9M"
+    compute_count= "2"
+    storage_count= "3"
+  }
+}
