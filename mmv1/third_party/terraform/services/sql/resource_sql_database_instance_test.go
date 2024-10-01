@@ -4531,7 +4531,7 @@ func checkSwitchoverOriginalPrimaryConfigurations(primaryResourceName string, re
 		if !ok {
 			return fmt.Errorf("Master instance name is not present in state for %s", primaryResourceName)
 		}
-		if ok && primaryMasterInstanceName != replicaName {
+		if primaryMasterInstanceName != replicaName {
 			return fmt.Errorf("Error in switchover. Master_instance_name should be %s", replicaName)
 		}
 		return nil

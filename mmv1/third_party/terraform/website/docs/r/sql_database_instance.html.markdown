@@ -584,6 +584,8 @@ Users can perform a switchover on any direct `cascadable` replica by following t
 
   ~>**WARNING:** Failure to follow these steps can lead to data loss (You will be warned during plan stage). To prevent data loss during a switchover, please verify your plan with the checklist below.
 
+For a more in-depth walkthrough with example code, see the [Switchover Guide](../guides/sql_instance_switchover.html.markdown)
+
 ### Steps to Invoke Switchover
 
 Create a `cascadable` replica in a different region from the primary (`cascadable_replica` is set to true in `replica_configuration`)
@@ -607,7 +609,7 @@ Create a `cascadable` replica in a different region from the primary (`cascadabl
 - `terraform plan` does not say **"must be replaced"** for any resource
 - Every resource **"will be updated in-place"**
 - Only the 2 instances involved in switchover have planned changes
-- (Optional) Use `deletion_protection` on instances as a safety measure
+- (Recommended) Use `deletion_protection` on instances as a safety measure
 
 ## Timeouts
 

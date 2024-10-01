@@ -142,6 +142,9 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				// If we set master but this is not the new master of a switchover, require replacement and warn user.
 				return !isSwitchoverFromOldPrimarySide(d)
 			}),
+			customdiff.ForceNewIf("replica_configuration.0.cascadable_replica", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+				return !isSwitchoverFromOldPrimarySide(d)
+			}),
 			customdiff.IfValueChange("instance_type", isReplicaPromoteRequested, checkPromoteConfigurationsAndUpdateDiff),
 			privateNetworkCustomizeDiff,
 			pitrSupportDbCustomizeDiff,
@@ -808,7 +811,6 @@ is set to true. Defaults to ZONAL.`,
 						"cascadable_replica": {
 							Type: schema.TypeBool,
 							Optional: true,
-							ForceNew: false,
 							AtLeastOneOf: replicaConfigurationKeys, 
 							Description: `Specifies if a SQL Server replica is a cascadable replica. A cascadable replica is a SQL Server cross region replica that supports replica(s) under it.`,
 						},
@@ -1664,11 +1666,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if instance.ReplicaConfiguration != nil {
-		if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
-			log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
-		}
+	if err := d.Set("replica_configuration", flattenReplicaConfiguration(instance.ReplicaConfiguration, d)); err != nil {
+		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
 	}
+	
 	if err := d.Set("replica_names", instance.ReplicaNames); err != nil {
 		return fmt.Errorf("Error setting replica_names: %w", err)
 	}
@@ -2584,7 +2585,7 @@ func isSwitchoverRequested(d *schema.ResourceData) bool {
 	if !slices.Contains(newReplicaNames.([]interface{}), originalPrimaryName) {
 		return false
 	}
-	dbVersion, _ := d.GetChange("database_version")
+	dbVersion := d.Get("database_version")
 	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
 		log.Printf("[WARN] Switchover is only supported for SQL Server %q", dbVersion)
 		return false
@@ -2620,11 +2621,15 @@ func isSwitchoverFromOldPrimarySide(d *schema.ResourceDiff) bool {
 	replicaConfiguration := newReplicaConfiguration.([]interface{})[0].(map[string]interface{})
 	cascadableReplica, cascadableReplicaFieldExists := replicaConfiguration["cascadable_replica"]
 
+	instanceTypeChangedFromPrimaryToReplica := 	oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE"
+	newMasterInOldReplicaNames := slices.Contains(oldReplicaNames.([]interface{}), newMasterInstanceName)
+	newMasterNotInNewReplicaNames := !slices.Contains(newReplicaNames.([]interface{}), newMasterInstanceName)
+	isCascadableReplica := cascadableReplicaFieldExists && cascadableReplica.(bool) 
+
 	return newMasterInstanceName != nil &&
-	oldInstanceType.(string) == "CLOUD_SQL_INSTANCE" && newInstanceType.(string) == "READ_REPLICA_INSTANCE" &&
-	slices.Contains(oldReplicaNames.([]interface{}), newMasterInstanceName) &&
-	!slices.Contains(newReplicaNames.([]interface{}), newMasterInstanceName) &&
-	cascadableReplicaFieldExists && cascadableReplica.(bool) 
+	instanceTypeChangedFromPrimaryToReplica &&
+	newMasterInOldReplicaNames && newMasterNotInNewReplicaNames &&
+	isCascadableReplica
 }
 
 func checkPromoteConfigurations(d *schema.ResourceData) error {
