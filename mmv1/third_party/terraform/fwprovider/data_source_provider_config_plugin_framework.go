@@ -218,7 +218,7 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	// TODO(SarahFrench) - request_timeout
 	data.DefaultLabels = d.providerConfig.DefaultLabels
 	data.AddTerraformAttributionLabel = d.providerConfig.AddTerraformAttributionLabel
-	// TODO(SarahFrench) - terraform_attribution_label_addition_strategy
+	data.TerraformAttributionLabelAdditionStrategy = d.providerConfig.TerraformAttributionLabelAdditionStrategy
 
 	// Warn users against using this data source
 	resp.Diagnostics.Append(diag.NewWarningDiagnostic(
