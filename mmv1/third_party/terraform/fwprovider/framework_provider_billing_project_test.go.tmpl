@@ -157,11 +157,6 @@ func testAccFwProvider_billing_project_useWithAndWithoutUserProjectOverride(t *t
 		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
 		"user_project_override": "true", // Used in combo with billing_account
 		"random_suffix":         randomString,
-		// Firebase stuff below
-		"bundle_id":    "apple.app." + acctest.RandString(t, 5),
-		"display_name": "tf-test Display Name AppleAppConfig DataSource",
-		"app_store_id": 12345,
-		"team_id":      1234567890,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
