@@ -64,8 +64,11 @@ func TestAccRedisInstance_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "deletion_protection"},
 			},
 			{
-				Config:      testAccRedisInstance_deletionprotection2(name, "us-west2", true),
+				Config:      testAccRedisInstance_deletionprotection(name, "us-west2", true),
 				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccRedisInstance_update(name, true),
 			},
 		},
 	})
@@ -359,7 +362,7 @@ resource "google_redis_instance" "test" {
   name           = "%s"
   display_name   = "pre-update"
   memory_size_gb = 1
-  deletion_protection = true
+  deletion_protection = false
 
   region         = "us-central1"
 	%s
@@ -435,37 +438,6 @@ resource "google_redis_instance" "test" {
     notify-keyspace-events = "KEA"
   }
   redis_version = "REDIS_4_0"
-}
-`, name, region, lifecycleBlock)
-}
-
-func testAccRedisInstance_deletionprotection2(name string, region string, preventDestroy bool) string {
-	lifecycleBlock := ""
-	if preventDestroy {
-		lifecycleBlock = `
-		lifecycle {
-			prevent_destroy = false
-		}`
-	}
-	return fmt.Sprintf(`
-resource "google_redis_instance" "test" {
-  name           = "%s"
-  region       = "%s"
-  deletion_protection = true
-  display_name   = "post-update"
-  memory_size_gb = 1
-	%s
-
-  labels = {
-    my_key    = "my_val"
-    other_key = "new_val"
-  }
-
-  redis_configs = {
-    maxmemory-policy       = "noeviction"
-    notify-keyspace-events = ""
-  }
-  redis_version = "REDIS_5_0"
 }
 `, name, region, lifecycleBlock)
 }
