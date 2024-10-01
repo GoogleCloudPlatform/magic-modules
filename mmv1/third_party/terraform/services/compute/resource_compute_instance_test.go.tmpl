@@ -1542,7 +1542,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 	t.Parallel()
-	
+
 	var instance compute.Instance
 	context_1 := map[string]interface{}{
 		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
@@ -2188,7 +2188,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, false, "SEV_SNP"),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instanceName, "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -2196,7 +2195,6 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
 				),
 			},
-			{{- end }}
 		},
 	})
 }
@@ -7943,7 +7941,7 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
     alias_ip_range {
-      subnetwork_range_name = "inst-test-secondary"  
+      subnetwork_range_name = "inst-test-secondary"
       ip_cidr_range = "172.16.1.0/24"
     }
     alias_ip_range {
@@ -8647,7 +8645,6 @@ resource "google_compute_instance" "foobar6" {
 `, instance, minCpuPlatform, confidentialInstanceType, instance, minCpuPlatform, confidentialInstanceType)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceConfidentialInstanceConfigEnableTdx(instance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -8681,7 +8678,6 @@ resource "google_compute_instance" "foobar5" {
 }
 `, instance, confidentialInstanceType)
 }
-{{- end }}
 
 func testAccComputeInstance_attributionLabelCreate(instance, add, strategy string) string {
 	return fmt.Sprintf(`
@@ -10808,7 +10804,7 @@ resource "google_compute_instance" "foobar" {
 			storage_pool = "%s"
 		}
 	}
-	
+
 	network_interface {
 		network = "default"
 	}
@@ -10881,7 +10877,7 @@ resource "google_compute_instance" "foobar" {
   	attached_disk {
               source = google_compute_disk.foorbarattach.self_link
   	}
-	
+
 	network_interface {
 		network = "default"
         }
