@@ -28,6 +28,10 @@ func TestAccMetastoreFederation_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
+                                Config: testAccMetastoreFederationDeletionProtection(name, "us-west2"),
+                                ExpectError: regexp.MustCompile("deletion_protection"),
+                        },
+			{
 				Config: testAccMetastoreFederationDeletionProtectionFalse(name, "us-central1"),
 			},
 			{
@@ -36,10 +40,6 @@ func TestAccMetastoreFederation_deletionprotection(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			{
-                                Config: testAccMetastoreFederationDeletionProtection(name, "us-west2"),
-                                ExpectError: regexp.MustCompile("deletion_protection"),
-                        },
 		},
 	})
 }
