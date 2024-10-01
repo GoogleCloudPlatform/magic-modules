@@ -38,6 +38,7 @@ type FrameworkProviderConfig struct {
 	AccessToken                types.String
 	ImpersonateServiceAccount  types.String
 	ImpersonateServiceAccountDelegates types.List
+	AddTerraformAttributionLabel       types.Bool
 	// End temporary
 
 	BillingProject             types.String
@@ -109,6 +110,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.AccessToken = data.AccessToken
 	p.ImpersonateServiceAccount = data.ImpersonateServiceAccount
 	p.ImpersonateServiceAccountDelegates = data.ImpersonateServiceAccountDelegates
+	p.AddTerraformAttributionLabel = data.AddTerraformAttributionLabel
 	// End temporary
 
 	// Copy values from the ProviderModel struct containing data about the provider configuration (present only when responsing to ConfigureProvider rpc calls)
