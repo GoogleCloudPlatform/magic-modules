@@ -37,6 +37,7 @@ type FrameworkProviderConfig struct {
 	Credentials                types.String
 	AccessToken                types.String
 	ImpersonateServiceAccount  types.String
+	ImpersonateServiceAccountDelegates types.List
 	// End temporary
 
 	BillingProject             types.String
@@ -107,6 +108,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	p.Credentials = data.Credentials
 	p.AccessToken = data.AccessToken
 	p.ImpersonateServiceAccount = data.ImpersonateServiceAccount
+	p.ImpersonateServiceAccountDelegates = data.ImpersonateServiceAccountDelegates
 	// End temporary
 
 	// Copy values from the ProviderModel struct containing data about the provider configuration (present only when responsing to ConfigureProvider rpc calls)

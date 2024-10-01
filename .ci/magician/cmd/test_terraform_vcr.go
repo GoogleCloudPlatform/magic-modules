@@ -350,7 +350,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	return nil
 }
 
-var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (Test\w+)\(t \*testing.T\) {`)
+var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (TestAcc\w+)\(t \*testing.T\) {`)
 
 func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string) {
 	fmt.Println("Checking for new acceptance tests that were not run")
@@ -455,9 +455,9 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 
 func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
 	if len(result.Panics) > 0 {
-		comment := fmt.Sprintf(`$\textcolor{red}{\textsf{The provider crashed while running the VCR tests in %s mode}}$
-$\textcolor{red}{\textsf{Please fix it to complete your PR}}$
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, mode.Upper(), prNumber, buildID, mode.Lower())
+		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
+		comment += fmt.Sprintf(`Please fix it to complete your PR.
+View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
 		if err := gh.PostComment(prNumber, comment); err != nil {
 			return true, fmt.Errorf("error posting comment: %v", err)
 		}
