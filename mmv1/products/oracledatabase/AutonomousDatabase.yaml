@@ -1,0 +1,599 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Warning: This is a temporary file, and should not be edited directly
+---
+name: 'AutonomousDatabase'
+description: An AutonomousDatabase resource.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/autonomousDatabases'
+self_link: 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/autonomousDatabases?autonomousDatabaseId={{autonomous_database_id}}'
+immutable: true
+timeouts:
+  insert_minutes: 240
+  update_minutes: 120
+  delete_minutes: 120
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 240
+      update_minutes: 120
+      delete_minutes: 120
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'oracledatabase_autonomousdatabase_basic'
+    primary_resource_id: 'myADB'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Resource ID segment making up resource `name`. See documentation
+    for resource type `oracledatabase.googleapis.com/AutonomousDatabaseBackup`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'autonomousDatabaseId'
+    type: String
+    description: "The ID of the Autonomous Database to create. This value
+    is restricted\nto (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of
+    63\ncharacters in length. The value must start with a letter and end with\na letter
+    or a number. "
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. The name of the Autonomous Database resource in the
+     following format:\nprojects/{project}/locations/{region}/autonomousDatabases/{autonomous_database} "
+    output: true
+  - name: 'database'
+    type: String
+    description: "The name of the Autonomous Database. The database name must
+    be unique in\nthe project. The name must begin with a letter and can\ncontain
+    a maximum of 30 alphanumeric characters. "
+  - name: 'displayName'
+    type: String
+    description: "The display name for the Autonomous Database. The name does
+    not have to\nbe unique within your project. "
+  - name: 'entitlementId'
+    type: String
+    description: "The ID of the subscription entitlement associated with
+    the Autonomous\nDatabase. "
+    output: true
+  - name: 'adminPassword'
+    type: String
+    description: 'The password for the default ADMIN user. '
+    ignore_read: true
+  - name: 'properties'
+    type: NestedObject
+    description: 'The properties of an Autonomous Database. '
+    properties:
+      - name: 'ocid'
+        type: String
+        description: "OCID of the Autonomous Database.\nhttps://docs.oracle.com/en-us/iaas/Content/General/Concepts/identifiers.htm#Oracle "
+        output: true
+      - name: 'computeCount'
+        type: Double
+        description: 'The number of compute servers for the Autonomous Database. '
+        default_from_api: true
+      - name: 'cpuCoreCount'
+        type: Integer
+        description: 'The number of CPU cores to be made available to the database. '
+        default_from_api: true
+      - name: 'dataStorageSizeTb'
+        type: Integer
+        description: 'The size of the data stored in the database, in terabytes. '
+        default_from_api: true
+      - name: 'dataStorageSizeGb'
+        type: Integer
+        description: 'The size of the data stored in the database, in gigabytes. '
+        default_from_api: true
+      - name: 'dbWorkload'
+        type: String
+        description: " \n Possible values:\n DB_WORKLOAD_UNSPECIFIED\nOLTP\nDW\nAJD\nAPEX"
+        required: true
+      - name: 'dbEdition'
+        type: String
+        description: "The edition of the Autonomous Databases. \n Possible values:\n
+      DATABASE_EDITION_UNSPECIFIED\nSTANDARD_EDITION\nENTERPRISE_EDITION"
+      - name: 'characterSet'
+        type: String
+        description: 'The character set for the Autonomous Database. The default
+      is AL32UTF8. '
+        default_value: "AL32UTF8"
+      - name: 'nCharacterSet'
+        type: String
+        description: "The national character set for the Autonomous Database.
+      The default is\nAL16UTF16. "
+        default_value: "AL16UTF16"
+      - name: 'privateEndpointIp'
+        type: String
+        description: 'The private endpoint IP address for the Autonomous Database. '
+        default_from_api: true
+      - name: 'privateEndpointLabel'
+        type: String
+        description: 'The private endpoint label for the Autonomous Database. '
+        default_from_api: true
+      - name: 'dbVersion'
+        type: String
+        description: 'The Oracle Database version for the Autonomous Database. '
+      - name: 'isAutoScalingEnabled'
+        type: Boolean
+        description: "This field indicates if auto scaling is enabled for the
+      Autonomous Database\nCPU core count. "
+      - name: 'isStorageAutoScalingEnabled'
+        type: Boolean
+        description: "This field indicates if auto scaling is enabled for the
+      Autonomous Database\nstorage. "
+        default_from_api: true
+      - name: 'licenseType'
+        type: String
+        description: "The license type used for the Autonomous Database. \n
+      Possible values:\n LICENSE_TYPE_UNSPECIFIED\nLICENSE_INCLUDED\nBRING_YOUR_OWN_LICENSE"
+        required: true
+      - name: 'customerContacts'
+        type: Array
+        description: 'The list of customer contacts. '
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'email'
+              type: String
+              description: "The email address used by Oracle to send notifications
+                regarding databases\nand infrastructure. "
+              required: true
+      - name: 'secretId'
+        type: String
+        description: 'The ID of the Oracle Cloud Infrastructure vault secret. '
+      - name: 'vaultId'
+        type: String
+        description: 'The ID of the Oracle Cloud Infrastructure vault. '
+      - name: 'maintenanceScheduleType'
+        type: String
+        description: "The maintenance schedule of the Autonomous Database. \n
+      Possible values:\n MAINTENANCE_SCHEDULE_TYPE_UNSPECIFIED\nEARLY\nREGULAR"
+        default_from_api: true
+      - name: 'mtlsConnectionRequired'
+        type: Boolean
+        description: 'This field specifies if the Autonomous Database requires
+      mTLS connections. '
+      - name: 'backupRetentionPeriodDays'
+        type: Integer
+        description: "The retention period for the Autonomous Database. This
+      field is specified\nin days, can range from 1 day to 60 days, and has a default
+      value of\n60 days. "
+        default_from_api: true
+      - name: 'actualUsedDataStorageSizeTb'
+        type: Double
+        description: "The amount of storage currently being used for user
+      and system data, in\nterabytes. "
+        output: true
+      - name: 'allocatedStorageSizeTb'
+        type: Double
+        description: "The amount of storage currently allocated for the database
+      tables and\nbilled for, rounded up in terabytes. "
+        output: true
+      - name: 'apexDetails'
+        type: NestedObject
+        description: "Oracle APEX Application Development.\nhttps://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/AutonomousDatabaseApex "
+        output: true
+        properties:
+          - name: 'apexVersion'
+            type: String
+            description: 'The Oracle APEX Application Development version. '
+            output: true
+          - name: 'ordsVersion'
+            type: String
+            description: 'The Oracle REST Data Services (ORDS) version. '
+            output: true
+      - name: 'arePrimaryAllowlistedIpsUsed'
+        type: Boolean
+        description: "This field indicates the status of Data Guard and Access
+      control for the\nAutonomous Database. The field's value is null if Data Guard
+      is disabled\nor Access Control is disabled. The field's value is TRUE if both
+      Data Guard\nand Access Control are enabled, and the Autonomous Database is using\nprimary
+      IP access control list (ACL) for standby. The field's value is\nFALSE if both
+      Data Guard and Access Control are enabled, and the Autonomous\nDatabase is using
+      a different IP access control list (ACL) for standby\ncompared to primary. "
+        output: true
+      - name: 'lifecycleDetails'
+        type: String
+        description: 'The details of the current lifestyle state of the Autonomous
+      Database. '
+        output: true
+      - name: 'state'
+        type: String
+        description: " \n Possible values:\n STATE_UNSPECIFIED\nPROVISIONING\nAVAILABLE\nSTOPPING\nSTOPPED\nSTARTING\nTERMINATING\nTERMINATED\nUNAVAILABLE\nRESTORE_IN_PROGRESS\nRESTORE_FAILED\nBACKUP_IN_PROGRESS\nSCALE_IN_PROGRESS\nAVAILABLE_NEEDS_ATTENTION\nUPDATING\nMAINTENANCE_IN_PROGRESS\nRESTARTING\nRECREATING\nROLE_CHANGE_IN_PROGRESS\nUPGRADING\nINACCESSIBLE\nSTANDBY"
+        default_from_api: true
+      - name: 'autonomousContainerDatabaseId'
+        type: String
+        description: 'The Autonomous Container Database OCID. '
+        output: true
+      - name: 'availableUpgradeVersions'
+        type: Array
+        description: "The list of available Oracle Database upgrade versions
+      for an Autonomous\nDatabase. "
+        output: true
+        item_type:
+          type: String
+      - name: 'connectionStrings'
+        type: NestedObject
+        description: "The connection string used to connect to the Autonomous Database.\nhttps://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/AutonomousDatabaseConnectionStrings "
+        output: true
+        properties:
+          - name: 'allConnectionStrings'
+            type: NestedObject
+            description: "A list of all connection strings that can be used to connect to
+        the\nAutonomous Database. "
+            output: true
+            properties:
+              - name: 'high'
+                type: String
+                description: "The database service provides the highest level
+          of resources to each SQL\nstatement. "
+                output: true
+              - name: 'low'
+                type: String
+                description: "The database service provides the least level of
+          resources to each SQL\nstatement. "
+                output: true
+              - name: 'medium'
+                type: String
+                description: "The database service provides a lower level of
+          resources to each SQL\nstatement. "
+                output: true
+          - name: 'dedicated'
+            type: String
+            description: "The database service provides the least level of
+        resources to each SQL\nstatement, but supports the most number of concurrent
+        SQL statements. "
+            output: true
+          - name: 'high'
+            type: String
+            description: "The database service provides the highest level of
+        resources to each SQL\nstatement. "
+            output: true
+          - name: 'low'
+            type: String
+            description: "The database service provides the least level of
+        resources to each SQL\nstatement. "
+            output: true
+          - name: 'medium'
+            type: String
+            description: "The database service provides a lower level of resources
+        to each SQL\nstatement. "
+            output: true
+          - name: 'profiles'
+            type: Array
+            description: "A list of connection string profiles to allow clients
+  to group, filter, and\nselect values based on the structured metadata. "
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'consumerGroup'
+                  type: String
+                  description: "The current consumer group being used by the
+                  connection. \n Possible values:\n CONSUMER_GROUP_UNSPECIFIED\nHIGH\nMEDIUM\nLOW\nTP\nTPURGENT"
+                  output: true
+                - name: 'displayName'
+                  type: String
+                  description: 'The display name for the database connection. '
+                  output: true
+                - name: 'hostFormat'
+                  type: String
+                  description: "The host name format being currently used in
+            connection string. \n Possible values:\n HOST_FORMAT_UNSPECIFIED\nFQDN\nIP"
+                  output: true
+                - name: 'isRegional'
+                  type: Boolean
+                  description: "This field indicates if the connection string
+            is regional and is only\napplicable for cross-region Data Guard. "
+                  output: true
+                - name: 'protocol'
+                  type: String
+                  description: "The protocol being used by the connection. \n
+            Possible values:\n PROTOCOL_UNSPECIFIED\nTCP\nTCPS"
+                  output: true
+                - name: 'sessionMode'
+                  type: String
+                  description: "The current session mode of the connection. \n
+            Possible values:\n SESSION_MODE_UNSPECIFIED\nDIRECT\nINDIRECT"
+                  output: true
+                - name: 'syntaxFormat'
+                  type: String
+                  description: "The syntax of the connection string. \n Possible
+            values:\n SYNTAX_FORMAT_UNSPECIFIED\nLONG\nEZCONNECT\nEZCONNECTPLUS"
+                  output: true
+                - name: 'tlsAuthentication'
+                  type: String
+                  description: "This field indicates the TLS authentication type
+            of the connection. \n Possible values:\n TLS_AUTHENTICATION_UNSPECIFIED\nSERVER\nMUTUAL"
+                  output: true
+                - name: 'value'
+                  type: String
+                  description: 'The value of the connection string. '
+                  output: true
+      - name: 'connectionUrls'
+        type: NestedObject
+        description: "The URLs for accessing Oracle Application Express (APEX) and SQL
+      Developer\nWeb with a browser from a Compute instance.\nhttps://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/AutonomousDatabaseConnectionUrls "
+        output: true
+        properties:
+          - name: 'apexUri'
+            type: String
+            description: 'Oracle Application Express (APEX) URL. '
+            output: true
+          - name: 'databaseTransformsUri'
+            type: String
+            description: 'The URL of the Database Transforms for the Autonomous
+        Database. '
+            output: true
+          - name: 'graphStudioUri'
+            type: String
+            description: 'The URL of the Graph Studio for the Autonomous Database. '
+            output: true
+          - name: 'machineLearningNotebookUri'
+            type: String
+            description: "The URL of the Oracle Machine Learning (OML) Notebook
+        for the Autonomous\nDatabase. "
+            output: true
+          - name: 'machineLearningUserManagementUri'
+            type: String
+            description: 'The URL of Machine Learning user management the Autonomous
+        Database. '
+            output: true
+          - name: 'mongoDbUri'
+            type: String
+            description: 'The URL of the MongoDB API for the Autonomous Database. '
+            output: true
+          - name: 'ordsUri'
+            type: String
+            description: "The Oracle REST Data Services (ORDS) URL of the Web
+        Access for the\nAutonomous Database. "
+            output: true
+          - name: 'sqlDevWebUri'
+            type: String
+            description: 'The URL of the Oracle SQL Developer Web for the Autonomous
+        Database. '
+            output: true
+      - name: 'failedDataRecoveryDuration'
+        type: String
+        description: "This field indicates the number of seconds of data
+      loss during a Data\nGuard failover. "
+        output: true
+      - name: 'memoryTableGbs'
+        type: Integer
+        description: 'The memory assigned to in-memory tables in an Autonomous
+      Database. '
+        output: true
+      - name: 'isLocalDataGuardEnabled'
+        type: Boolean
+        description: "This field indicates whether the Autonomous Database
+      has local (in-region)\nData Guard enabled. "
+        output: true
+      - name: 'localAdgAutoFailoverMaxDataLossLimit'
+        type: Integer
+        description: "This field indicates the maximum data loss limit for
+      an Autonomous\nDatabase, in seconds. "
+        output: true
+      - name: 'localStandbyDb'
+        type: NestedObject
+        description: "Autonomous Data Guard standby database details.\nhttps://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/datatypes/AutonomousDatabaseStandbySummary "
+        output: true
+        properties:
+          - name: 'lagTimeDuration'
+            type: String
+            description: "The amount of time, in seconds, that the data of
+        the standby database lags\nin comparison to the data of the primary database. "
+            output: true
+          - name: 'lifecycleDetails'
+            type: String
+            description: "The additional details about the current lifecycle
+        state of the\nAutonomous Database. "
+            output: true
+          - name: 'state'
+            type: String
+            description: " \n Possible values:\n STATE_UNSPECIFIED\nPROVISIONING\nAVAILABLE\nSTOPPING\nSTOPPED\nSTARTING\nTERMINATING\nTERMINATED\nUNAVAILABLE\nRESTORE_IN_PROGRESS\nRESTORE_FAILED\nBACKUP_IN_PROGRESS\nSCALE_IN_PROGRESS\nAVAILABLE_NEEDS_ATTENTION\nUPDATING\nMAINTENANCE_IN_PROGRESS\nRESTARTING\nRECREATING\nROLE_CHANGE_IN_PROGRESS\nUPGRADING\nINACCESSIBLE\nSTANDBY"
+            output: true
+          - name: 'dataGuardRoleChangedTime'
+            type: String
+            description: "The date and time the Autonomous Data Guard role
+        was switched for the\nstandby Autonomous Database. "
+            output: true
+          - name: 'disasterRecoveryRoleChangedTime'
+            type: String
+            description: "The date and time the Disaster Recovery role was
+        switched for the standby\nAutonomous Database. "
+            output: true
+      - name: 'memoryPerOracleComputeUnitGbs'
+        type: Integer
+        description: 'The amount of memory enabled per ECPU, in gigabytes. '
+        output: true
+      - name: 'localDisasterRecoveryType'
+        type: String
+        description: "This field indicates the local disaster recovery (DR)
+      type of an\nAutonomous Database. \n Possible values:\n LOCAL_DISASTER_RECOVERY_TYPE_UNSPECIFIED\nADG\nBACKUP_BASED"
+        output: true
+      - name: 'dataSafeState'
+        type: String
+        description: "The current state of the Data Safe registration for
+      the\nAutonomous Database. \n Possible values:\n DATA_SAFE_STATE_UNSPECIFIED\nREGISTERING\nREGISTERED\nDEREGISTERING\nNOT_REGISTERED\nFAILED"
+        output: true
+      - name: 'databaseManagementState'
+        type: String
+        description: "The current state of database management for the Autonomous
+      Database. \n Possible values:\n DATABASE_MANAGEMENT_STATE_UNSPECIFIED\nENABLING\nENABLED\nDISABLING\nNOT_ENABLED\nFAILED_ENABLING\nFAILED_DISABLING"
+        output: true
+      - name: 'openMode'
+        type: String
+        description: "This field indicates the current mode of the Autonomous
+      Database. \n Possible values:\n OPEN_MODE_UNSPECIFIED\nREAD_ONLY\nREAD_WRITE"
+        output: true
+      - name: 'operationsInsightsState'
+        type: String
+        description: " \n Possible values:\n OPERATIONS_INSIGHTS_STATE_UNSPECIFIED\nENABLING\nENABLED\nDISABLING\nNOT_ENABLED\nFAILED_ENABLING\nFAILED_DISABLING"
+        default_from_api: true
+      - name: 'peerDbIds'
+        type: Array
+        description: "The list of OCIDs of standby databases located in Autonomous
+      Data Guard\nremote regions that are associated with the source database. "
+        output: true
+        item_type:
+          type: String
+      - name: 'permissionLevel'
+        type: String
+        description: "The permission level of the Autonomous Database. \n
+      Possible values:\n PERMISSION_LEVEL_UNSPECIFIED\nRESTRICTED\nUNRESTRICTED"
+        output: true
+      - name: 'privateEndpoint'
+        type: String
+        description: 'The private endpoint for the Autonomous Database. '
+        output: true
+      - name: 'refreshableMode'
+        type: String
+        description: "The refresh mode of the cloned Autonomous Database.
+      \n Possible values:\n REFRESHABLE_MODE_UNSPECIFIED\nAUTOMATIC\nMANUAL"
+        output: true
+      - name: 'refreshableState'
+        type: String
+        description: "The refresh State of the clone. \n Possible values:\n
+      REFRESHABLE_STATE_UNSPECIFIED\nREFRESHING\nNOT_REFRESHING"
+        output: true
+      - name: 'role'
+        type: String
+        description: "The Data Guard role of the Autonomous Database. \n
+      Possible values:\n ROLE_UNSPECIFIED\nPRIMARY\nSTANDBY\nDISABLED_STANDBY\nBACKUP_COPY\nSNAPSHOT_STANDBY"
+        output: true
+      - name: 'scheduledOperationDetails'
+        type: Array
+        description: "The list and details of the scheduled operations of
+      the Autonomous\nDatabase. "
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dayOfWeek'
+              type: String
+              description: " \n Possible values:\n DAY_OF_WEEK_UNSPECIFIED\nMONDAY\nTUESDAY\nWEDNESDAY\nTHURSDAY\nFRIDAY\nSATURDAY\nSUNDAY"
+            - name: 'startTime'
+              type: NestedObject
+              description: "Represents a time of day. The date and time zone are either
+          not significant\nor are specified elsewhere. An API may choose to allow
+          leap seconds. Related\ntypes are google.type.Date and `google.protobuf.Timestamp`. "
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: "Hours of day in 24 hour format. Should be from 0 to 23. An
+            API may choose\nto allow the value \"24:00:00\" for scenarios like business
+            closing time. "
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59. '
+                - name: 'seconds'
+                  type: Integer
+                  description: "Seconds of minutes of the time. Must normally be from 0 to
+            59. An API may\nallow the value 60 if it allows leap-seconds. "
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999. '
+            - name: 'stopTime'
+              type: NestedObject
+              description: "Represents a time of day. The date and time zone are either
+          not significant\nor are specified elsewhere. An API may choose to allow
+          leap seconds. Related\ntypes are google.type.Date and `google.protobuf.Timestamp`. "
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: "Hours of day in 24 hour format. Should be from 0 to 23. An
+            API may choose\nto allow the value \"24:00:00\" for scenarios like business
+            closing time. "
+                - name: 'minutes'
+                  type: Integer
+                  description: 'Minutes of hour of day. Must be from 0 to 59. '
+                - name: 'seconds'
+                  type: Integer
+                  description: "Seconds of minutes of the time. Must normally be from 0 to
+            59. An API may\nallow the value 60 if it allows leap-seconds. "
+                - name: 'nanos'
+                  type: Integer
+                  description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999. '
+      - name: 'sqlWebDeveloperUrl'
+        type: String
+        description: 'The SQL Web Developer URL for the Autonomous Database. '
+        output: true
+      - name: 'supportedCloneRegions'
+        type: Array
+        description: "The list of available regions that can be used to create
+      a clone for the\nAutonomous Database. "
+        output: true
+        item_type:
+          type: String
+      - name: 'usedDataStorageSizeTbs'
+        type: Integer
+        description: 'The storage space used by Autonomous Database, in gigabytes. '
+        output: true
+      - name: 'ociUrl'
+        type: String
+        description: 'The Oracle Cloud Infrastructure link for the Autonomous
+      Database. '
+        output: true
+      - name: 'totalAutoBackupStorageSizeGbs'
+        type: Double
+        description: "The storage space used by automatic backups of Autonomous
+      Database, in\ngigabytes. "
+        output: true
+      - name: 'nextLongTermBackupTime'
+        type: String
+        description: 'The long term backup schedule of the Autonomous Database. '
+        output: true
+      - name: 'maintenanceBeginTime'
+        type: String
+        description: 'The date and time when maintenance will begin. '
+        output: true
+      - name: 'maintenanceEndTime'
+        type: String
+        description: 'The date and time when maintenance will end. '
+        output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'The labels or tags associated with the Autonomous Database. '
+  - name: 'network'
+    type: String
+    description: "The name of the VPC network used by the Autonomous Database.\nFormat:
+    projects/{project}/global/networks/{network} "
+    required: true
+  - name: 'cidr'
+    type: String
+    description: 'The subnet CIDR range for the Autonmous Database. '
+    required: true
+  - name: 'createTime'
+    type: String
+    description: 'The date and time that the Autonomous Database was created. '
+    output: true
