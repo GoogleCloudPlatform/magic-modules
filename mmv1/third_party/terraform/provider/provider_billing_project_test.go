@@ -144,7 +144,7 @@ func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *
 	contextUserProjectOverrideFalse := map[string]interface{}{
 		"org_id":                envvar.GetTestOrgFromEnv(t),
 		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
-		"user_project_override": "true", // Used in combo with billing_account
+		"user_project_override": "false", // Used in combo with billing_account
 		"random_suffix":         randomString,
 	}
 
@@ -160,9 +160,8 @@ func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// With user_project_override=false the PubSub topic can be provisioned because quota is consumed
-				// from the project the Terraform identity is in, and that project has PubSub API enabled.
-				// The billing_project value isn't used, meaning the error doesn't happen, because user_project_override=false
+				// Setup resources
+				// Neither user_project_override nor billing_project value used here
 				Config: testAccSdkProvider_billing_project_useBillingProject_setup(contextUserProjectOverrideFalse),
 			},
 			{
@@ -171,6 +170,12 @@ func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *
 				// The billing_project is used, leading to the error occurring, because user_project_override=true
 				Config:      testAccSdkProvider_billing_project_useBillingProject_scenario(contextUserProjectOverrideTrue),
 				ExpectError: regexp.MustCompile(fmt.Sprintf("Error 403: Cloud Pub/Sub API has not been used in project tf-test-%s", randomString)),
+			},
+			{
+				// With user_project_override=false the PubSub topic can be provisioned because quota is consumed
+				// from the project the Terraform identity is in, and that project has PubSub API enabled.
+				// The billing_project value isn't used, meaning the error doesn't happen, because user_project_override=false
+				Config: testAccSdkProvider_billing_project_useBillingProject_scenario(contextUserProjectOverrideFalse),
 			},
 		},
 	})
