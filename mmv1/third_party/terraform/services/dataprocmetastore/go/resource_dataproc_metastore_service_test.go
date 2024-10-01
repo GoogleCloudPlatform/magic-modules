@@ -65,7 +65,7 @@ func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testin
                                 ExpectError: regexp.MustCompile("deletion_protection"),
                         },
                         {
-                                Config: testAccDataprocMetastoreService_updateAndImport(name, tier[1]),
+                                Config: testAccDataprocMetastoreService_updateAndImport(name, tier[0]),
                         },
                 },
         })
