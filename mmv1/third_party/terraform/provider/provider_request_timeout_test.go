@@ -113,13 +113,14 @@ func testAccSdkProvider_request_timeout_usage(t *testing.T) {
 	shortTimeout := "10ms" // short time that will result in an error
 	longTimeout := "120s"
 
+	randomString := acctest.RandString(t, 10)
 	context1 := map[string]interface{}{
 		"request_timeout": shortTimeout,
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix":   randomString,
 	}
 	context2 := map[string]interface{}{
 		"request_timeout": longTimeout,
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix":   randomString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
