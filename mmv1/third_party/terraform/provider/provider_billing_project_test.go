@@ -91,8 +91,8 @@ func testAccSdkProvider_billing_project_precedenceOrderEnvironmentVariables(t *t
 			{
 				// GOOGLE_BILLING_PROJECT is used if set
 				PreConfig: func() {
-					t.Setenv("GOOGLE_BILLING_PROJECT", GOOGLE_BILLING_PROJECT)         //used
-					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT) //used
+					t.Setenv("GOOGLE_BILLING_PROJECT", GOOGLE_BILLING_PROJECT) //used
+					t.Setenv("GOOGLE_CLOUD_QUOTA_PROJECT", GOOGLE_CLOUD_QUOTA_PROJECT)
 				},
 				Config: testAccSdkProvider_billing_project_inEnvsOnly(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
