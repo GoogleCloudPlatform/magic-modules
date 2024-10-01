@@ -138,7 +138,6 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 }
 
 func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *testing.T) {
-	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	randomString := acctest.RandString(t, 10)
 	contextUserProjectOverrideFalse := map[string]interface{}{
