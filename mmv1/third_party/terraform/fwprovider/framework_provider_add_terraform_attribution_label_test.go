@@ -13,8 +13,8 @@ import (
 func TestAccFwProvider_add_terraform_attribution_label(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"when add_terraform_attribution_label is set in the config, the value is set in the provider meta data":              testAccFwProvider_add_terraform_attribution_label_configUsed,
-		"when add_terraform_attribution_label is unset in the config, the default value isn't set on the provider meta data": testAccFwProvider_add_terraform_attribution_label_defaultValue,
+		"when add_terraform_attribution_label is set in the config, the value is set in the provider meta data":                      testAccFwProvider_add_terraform_attribution_label_configUsed,
+		"when add_terraform_attribution_label is unset in the config, the default value 'true' is NOT set on the provider meta data": testAccFwProvider_add_terraform_attribution_label_defaultValue,
 	}
 
 	for name, tc := range testCases {

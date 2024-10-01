@@ -13,8 +13,8 @@ import (
 func TestAccFwProvider_terraform_attribution_label_addition_strategy(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"config sets terraform_attribution_label_addition_strategy values":                                                                 testAccFwProvider_terraform_attribution_label_addition_strategy_configUsed,
-		"when terraform_attribution_label_addition_strategy is unset in the config, the default value isn't set on the provider meta data": testAccFwProvider_terraform_attribution_label_addition_strategy_defaultValue,
+		"config sets terraform_attribution_label_addition_strategy values":                                                                                 testAccFwProvider_terraform_attribution_label_addition_strategy_configUsed,
+		"when terraform_attribution_label_addition_strategy is unset in the config, the default value'CREATION_ONLY' is NOT set in the provider meta data": testAccFwProvider_terraform_attribution_label_addition_strategy_defaultValue,
 	}
 
 	for name, tc := range testCases {
