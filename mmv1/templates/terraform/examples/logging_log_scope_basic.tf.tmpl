@@ -1,6 +1,5 @@
 resource "google_logging_log_scope" "{{$.PrimaryResourceId}}" {
     parent         = "projects/{{index $.TestEnvVars "project"}}"
-    location       = "global"
     name           = "projects/{{index $.TestEnvVars "project"}}/locations/global/logScopes/{{index $.Vars "log_scope_name"}}"
     resource_names = [
         "projects/{{index $.TestEnvVars "project"}}",
