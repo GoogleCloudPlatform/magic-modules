@@ -57,24 +57,13 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
-virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
-    default_value: true
-    description: |
-      Whether Terraform will be prevented from destroying the service. Defaults to false.
-      When the field is set to true in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the service will fail.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: 'templates/terraform/pre_delete/dataproc_metastore_service.go.tmpl'
+custom_code:
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
-    ignore_read_extra:
-      - 'deletion_protection'
   - name: 'dataproc_metastore_service_cmek_test'
     primary_resource_id: 'default'
     vars:

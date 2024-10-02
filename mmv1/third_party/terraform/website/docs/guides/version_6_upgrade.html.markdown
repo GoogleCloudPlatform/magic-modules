@@ -369,9 +369,9 @@ Support for the deletionProtectionEnabled field has been added. Redis clusters w
 
 ## Resource: `google_sql_database_instance`
 
-### `settings.ip_configuration.require_ssl` is now removed (in 6.0.1)
+### `settings.ip_configuration.require_ssl` is now removed
 
-Removed in favor of field `settings.ip_configuration.ssl_mode`. `settings.ip_configuration.require_ssl` was intended to be removed in 6.0.0, but is removed in 6.0.1 instead.
+Removed in favor of field `settings.ip_configuration.ssl_mode`.
 
 ## Resource: `google_storage_bucket`
 
@@ -415,4 +415,3 @@ that are derived from the API.
 ### `host.gce_instance.disable_ssh` now defaults to true
 
 `disable_ssh` field now defaults to true. To enable SSH, please set `disable_ssh` to false.
-
