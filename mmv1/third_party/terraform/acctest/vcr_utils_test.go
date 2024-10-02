@@ -15,28 +15,64 @@ import (
 
 func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 
-	// Same description used to make both structs being compared,
-	// so everything should be determined as a match
-	cases := map[string]requestDescription{
-		"matching POST requests with empty body": {
-			scheme: "https",
-			method: "POST",
-			host:   "example.com",
-			path:   "foobar",
-			body:   "{}",
+	// Everything should be determined as a match in this test
+	cases := map[string]struct {
+		httpRequest     requestDescription
+		cassetteRequest requestDescription
+	}{
+		"matches POST requests with empty bodies": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{}",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{}",
+			},
 		},
-		"matching POST requests with body": {
-			scheme: "https",
-			method: "POST",
-			host:   "example.com",
-			path:   "foobar",
-			body:   "{\"field\":\"value\"}",
+		"matches POST requests with exact matching bodies": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field\":\"value\"}",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field\":\"value\"}",
+			},
 		},
-		"matching GET requests": {
-			scheme: "https",
-			method: "GET",
-			host:   "example.com",
-			path:   "foobar",
+		"matches POST requests with matching but re-ordered bodies, but only if Content-Type contains 'application/json'": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"Content-Type": "application/json",
+				},
+				body: "{\"field1\":\"value1\",\"field2\":\"value2\"}", // 1 before 2
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"Content-Type": "application/json",
+				},
+				body: "{\"field2\":\"value2\",\"field1\":\"value1\"}", // 2 before 1
+			},
 		},
 	}
 
@@ -44,8 +80,8 @@ func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			// Make matcher
 			ctx := context.Background()
-			req := prepareHttpRequest(tc)
-			cassetteReq := prepareCassetteRequest(tc)
+			req := prepareHttpRequest(tc.httpRequest)
+			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
 			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
@@ -61,11 +97,12 @@ func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 
 func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 
+	// All these cases are expected to end with no match detected
 	cases := map[string]struct {
 		httpRequest     requestDescription
 		cassetteRequest requestDescription
 	}{
-		"different methods": {
+		"requests with different methods": {
 			httpRequest: requestDescription{
 				scheme: "https",
 				method: "POST",
@@ -81,7 +118,7 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 				body:   "{}",
 			},
 		},
-		"different bodies": {
+		"POST requests with different bodies": {
 			httpRequest: requestDescription{
 				scheme: "https",
 				method: "POST",
@@ -95,6 +132,28 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 				host:   "example.com",
 				path:   "foobar",
 				body:   "{\"field\":\"value is MNLOP\"}",
+			},
+		},
+		"POST requests with matching but re-ordered bodies aren't matching if Content-Type header is not 'application/json'": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"Content-Type": "foobar",
+				},
+				body: "{\"field1\":\"value1\",\"field2\":\"value2\"}", // 1 before 2
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"Content-Type": "foobar",
+				},
+				body: "{\"field2\":\"value2\",\"field1\":\"value1\"}", // 2 before 1
 			},
 		},
 	}
