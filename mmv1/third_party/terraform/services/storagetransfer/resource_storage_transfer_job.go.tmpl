@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagetransfer
 
 import (
@@ -7,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -50,12 +52,11 @@ var (
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
 	}
-	{{- if ne $.TargetVersionName "ga" }}
 	azureOptionCredentials = []string{
 		"transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials",
 		"transfer_spec.0.azure_blob_storage_data_source.0.credentials_secret",
+		"transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_cfg",
 	}
-	{{- end }}
 )
 
 func ResourceStorageTransferJob() *schema.Resource {
@@ -566,12 +567,8 @@ func azureBlobStorageDataSchema() *schema.Resource {
 			},
 			"azure_credentials": {
 				Type:         schema.TypeList,
-				{{- if ne $.TargetVersionName "ga" }}
 				Optional:     true,
 				ExactlyOneOf: azureOptionCredentials,
-				{{- else }}
-				Required:     true,
-				{{- end }}
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -585,14 +582,35 @@ func azureBlobStorageDataSchema() *schema.Resource {
 				},
 				Description: ` Credentials used to authenticate API requests to Azure.`,
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			"credentials_secret": {
 				Optional:     true,
 				Type:         schema.TypeString,
 				Description:  `The Resource name of a secret in Secret Manager containing SAS Credentials in JSON form. Service Agent must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
 				ExactlyOneOf: azureOptionCredentials,
 			},
-			{{- end }}
+			"federated_identity_cfg": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				ExactlyOneOf: azureOptionCredentials,
+				MaxItems:     1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"client_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Sensitive:   true,
+							Description: `AZURE CLIENT ID.`,
+						},
+						"tenant_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Sensitive:   true,
+							Description: `AZURE TENANT ID.`,
+						},
+					},
+				},
+				Description: ` Workload Identity Details used to authenticate API requests to Azure.`,
+			},
 		},
 	}
 }
@@ -1061,7 +1079,7 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 		"path":        awsS3Data.Path,
 		"role_arn":    awsS3Data.RoleArn,
 	}
-	if _, exist := d.GetOkExists("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist{
+	if _, exist := d.GetOkExists("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist {
 		data["aws_access_key"] = flattenAwsAccessKeys(d)
 	}
 	return []map[string]interface{}{data}
@@ -1117,15 +1135,37 @@ func expandAzureCredentials(azureCredentials []interface{}) *storagetransfer.Azu
 }
 
 func flattenAzureCredentials(d *schema.ResourceData) []map[string]interface{} {
-	{{- if ne $.TargetVersionName "ga" }}
 	if d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token") == "" {
 		return []map[string]interface{}{}
 	}
-	{{- end }}
 	data := map[string]interface{}{
 		"sas_token": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token"),
 	}
 
+	return []map[string]interface{}{data}
+}
+
+func expandAzureFederatedIdentifyConfig(federatedIdentifyConfig []interface{}) *storagetransfer.FederatedIdentifyConfig {
+	if len(federatedIdentifyConfig) == 0 || federatedIdentifyConfig[0] == nil {
+		return nil
+	}
+
+	federatedIdentifyConfig := federatedIdentifyConfig[0].(map[string]interface{})
+	return &storagetransfer.FederatedIdentifyConfig{
+		ClientId: federatedIdentifyConfig["client_id"].(string),
+		TenantId: federatedIdentifyConfig["tenant_id"].(string),
+	}
+}
+
+func flattenAzureFederatedIdentifyConfig(d *schema.ResourceData) []map[string]interface{} {
+	if ((d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_cfg.0.client_id") == "") || (d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_cfg.0.tenant_id") == "") ){
+		return []map[string]interface{}{}
+	}
+	
+	data := map[string]interface{}{
+		"client_id": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_cfg.0.client_id"),
+		"tenant_id": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_cfg.0.tenant_id"),
+	}
 	return []map[string]interface{}{data}
 }
 
@@ -1141,9 +1181,8 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 		Path:              azureBlobStorageData["path"].(string),
 		StorageAccount:    azureBlobStorageData["storage_account"].(string),
 		AzureCredentials:  expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
-		{{- if ne $.TargetVersionName "ga" }}
+		FederatedIdentifyConfig: expandAzureFederatedIdentifyConfig(azureBlobStorageData["federated_identity_cfg"].([]interface{})),
 		CredentialsSecret: azureBlobStorageData["credentials_secret"].(string),
-		{{- end }}
 	}
 }
 
@@ -1153,9 +1192,8 @@ func flattenAzureBlobStorageData(azureBlobStorageData *storagetransfer.AzureBlob
 		"path":               azureBlobStorageData.Path,
 		"storage_account":    azureBlobStorageData.StorageAccount,
 		"azure_credentials":  flattenAzureCredentials(d),
-		{{- if ne $.TargetVersionName "ga" }}
+		"federated_identity_cfg": flattenAzureFederatedIdentifyConfig(d),
 		"credentials_secret": azureBlobStorageData.CredentialsSecret,
-		{{- end }}
 	}
 
 	return []map[string]interface{}{data}
