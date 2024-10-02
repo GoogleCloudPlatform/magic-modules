@@ -169,6 +169,8 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+        // Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context),
@@ -177,6 +179,8 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
+        // Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
 			},
 		},
 	})
@@ -210,7 +214,6 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
   priority                = 1000
   tls_inspect             = false
   rule_name               = "tf-test-rule-%{random_suffix}"
-  target_service_accounts = ["%{service_acct}"]
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -426,7 +429,6 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
   security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_updated.id}"
   direction              = "INGRESS"
   disabled               = false
-
   match {
     layer4_configs {
       ip_protocol = "tcp"
