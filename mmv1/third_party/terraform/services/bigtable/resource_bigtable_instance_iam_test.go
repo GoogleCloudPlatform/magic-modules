@@ -139,7 +139,7 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 }
 
 func testAccBigtableInstanceIamBinding_basic(context map[string]interface{}) string {
-	return testBigtableInstanceIam(context) + acctest.Nprintf(`
+	return testBigtableInstanceConfig(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account1" {
   account_id   = "%{account}-1"
   display_name = "Bigtable Instance IAM Testing Account"
@@ -161,7 +161,7 @@ resource "google_bigtable_instance_iam_binding" "binding" {
 }
 
 func testAccBigtableInstanceIamBinding_update(context map[string]interface{}) string {
-	return testBigtableInstanceIam(context) + acctest.Nprintf(`
+	return testBigtableInstanceConfig(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account1" {
   account_id   = "%{account}-1"
   display_name = "Bigtable Instance IAM Testing Account"
@@ -184,7 +184,7 @@ resource "google_bigtable_instance_iam_binding" "binding" {
 }
 
 func testAccBigtableInstanceIamMember(context map[string]interface{}) string {
-	return testBigtableInstanceIam(context) + acctest.Nprintf(`
+	return testBigtableInstanceConfig(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%{account}"
   display_name = "Bigtable Instance IAM Testing Account"
@@ -199,7 +199,7 @@ resource "google_bigtable_instance_iam_member" "member" {
 }
 
 func testAccBigtableInstanceIamPolicy(context map[string]interface{}) string {
-	return testBigtableInstanceIam(context) + acctest.Nprintf(`
+	return testBigtableInstanceConfig(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%{account}"
   display_name = "Bigtable Instance IAM Testing Account"
@@ -224,7 +224,7 @@ data "google_bigtable_instance_iam_policy" "policy" {
 }
 
 // Smallest instance possible for testing
-func testBigtableInstanceIam(context map[string]interface{}) string {
+func testBigtableInstanceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigtable_instance" "instance" {
 	name                  = "%{instance}"
