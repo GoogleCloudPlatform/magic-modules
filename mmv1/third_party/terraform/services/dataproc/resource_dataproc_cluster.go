@@ -2177,8 +2177,15 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	}
 	if v, ok := cfg["internal_ip_only"]; ok {
 		conf.InternalIpOnly = v.(bool)
-		conf.ForceSendFields = append(conf.ForceSendFields, "InternalIpOnly")
+		if isInternalIpOnlySpecified(d) {
+			// Normally default values are omitted. Concretely this means that if v is
+			// false, then it would not get sent on the request to Dataproc. However,
+			// the user has explicitly set internal_ip_only, therefore we need to send
+			// it on the wire to ensure Dataproc does not use server-side defaulting.
+			conf.ForceSendFields = append(conf.ForceSendFields, "InternalIpOnly")
+		}
 	}
+
 	if v, ok := cfg["metadata"]; ok {
 		conf.Metadata = tpgresource.ConvertStringMap(v.(map[string]interface{}))
 	}
@@ -2216,6 +2223,43 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 		}
 	}
 	return conf, nil
+}
+
+// isInternalIpOnlySpecified returns true if the original configuration specified by
+// the user sets 'cluster_config.0.gce_cluster_config.0.internal_ip_only' to
+// any non-nil value (true or false).
+func isInternalIpOnlySpecified(d *schema.ResourceData) bool {
+	rawConfig := d.GetRawConfig()
+	if !rawConfig.Type().IsObjectType() {
+		return false
+	}
+	if _, ok := rawConfig.Type().AttributeTypes()["cluster_config"]; !ok {
+		return false
+	}
+	clusterConfig := rawConfig.GetAttr("cluster_config")
+	if !clusterConfig.Type().IsListType() || len(clusterConfig.AsValueSlice()) == 0 {
+		return false
+	}
+	clusterConfig0 := clusterConfig.AsValueSlice()[0]
+	if !clusterConfig0.Type().IsObjectType() {
+		return false
+	}
+	if _, ok := clusterConfig0.Type().AttributeTypes()["gce_cluster_config"]; !ok {
+		return false
+	}
+	gceClusterConfig := clusterConfig0.GetAttr("gce_cluster_config")
+	if !gceClusterConfig.Type().IsListType() || len(gceClusterConfig.AsValueSlice()) == 0 {
+		return false
+	}
+	gceClusterConfig0 := gceClusterConfig.AsValueSlice()[0]
+	if !gceClusterConfig0.Type().IsObjectType() {
+		return false
+	}
+	if _, ok := gceClusterConfig0.Type().AttributeTypes()["internal_ip_only"]; !ok {
+		return false
+	}
+	internalIpOnly := gceClusterConfig0.GetAttr("internal_ip_only")
+	return !internalIpOnly.IsNull()
 }
 
 func expandSecurityConfig(cfg map[string]interface{}) *dataproc.SecurityConfig {
