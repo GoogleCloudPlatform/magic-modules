@@ -219,6 +219,105 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 	}
 }
 
+// Currently there is no code to actively force the matcher to overlook differing User-Agent values.
+// It isn't checked at any point in the matcher logic.
+func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
+
+	cases := map[string]struct {
+		httpRequest     requestDescription
+		cassetteRequest requestDescription
+		expectMatch     bool
+	}{
+		"GET requests with different useragents are matched": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"User-Agent": "user-agent-HTTP",
+				},
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar",
+				headers: map[string]string{
+					"User-Agent": "user-agent-CASSETTE",
+				},
+			},
+			expectMatch: true,
+		},
+		"POST requests with identical bodies and different useragents are matched": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field\":\"value\"}",
+				headers: map[string]string{
+					"User-Agent": "user-agent-HTTP",
+				},
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field\":\"value\"}",
+				headers: map[string]string{
+					"User-Agent": "user-agent-CASSETTE",
+				},
+			},
+			expectMatch: true,
+		},
+		"POST requests with reordered but matching bodies and different useragents are matched if Content-Type contains 'application/json'": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field1\":\"value1\",\"field2\":\"value2\"}",
+				headers: map[string]string{
+					"User-Agent":   "user-agent-HTTP",
+					"Content-Type": "application/json",
+				},
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "POST",
+				host:   "example.com",
+				path:   "foobar",
+				body:   "{\"field2\":\"value2\",\"field1\":\"value1\"}",
+				headers: map[string]string{
+					"User-Agent":   "user-agent-CASSETTE",
+					"Content-Type": "application/json",
+				},
+			},
+			expectMatch: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			// Make matcher
+			ctx := context.Background()
+			req := prepareHttpRequest(tc.httpRequest)
+			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
+
+			// Act - use matcher
+			matchDetected := matcher(req, cassetteReq)
+
+			// Assert match
+			if matchDetected != tc.expectMatch {
+				t.Fatalf("expected matcher to match the requests")
+			}
+		})
+	}
+}
+
 type requestDescription struct {
 	scheme  string
 	method  string
