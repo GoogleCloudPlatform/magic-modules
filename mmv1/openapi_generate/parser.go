@@ -90,8 +90,28 @@ func (parser Parser) WriteYaml(filePath string) {
 	resourcePaths := findResources(doc)
 	productPath := buildProduct(filePath, parser.Output, doc)
 
-	log.Printf("%+v", resourcePaths)
-	log.Printf("%+v", productPath)
+	log.Printf("Generated product %+v/product.yaml", productPath)
+	for _, pathArray := range resourcePaths {
+		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
+
+		// template method
+		resourceOutPathTemplate := filepath.Join(productPath, fmt.Sprintf("%s_template.yaml", resource.Name))
+		templatePath := "openapi_generate/resource_yaml.tmpl"
+		WriteGoTemplate(templatePath, resourceOutPathTemplate, resource)
+		log.Printf("Generated resource %s", resourceOutPathTemplate)
+
+		// marshal method
+		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s_marshal.yaml", resource.Name))
+		bytes, err := yaml.Marshal(resource)
+		if err != nil {
+			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
+		}
+		err = os.WriteFile(resourceOutPathMarshal, bytes, 0644)
+		if err != nil {
+			log.Fatalf("error writing product to path %v: %v", resourceOutPathMarshal, err)
+		}
+		log.Printf("Generated resource %s", resourceOutPathMarshal)
+	}
 }
 
 func findResources(doc *openapi3.T) [][]string {
@@ -162,6 +182,120 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 	}
 
 	return productPath
+}
+
+func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
+	resource := api.Resource{}
+
+	parsedObjects := parseOpenApi(resourcePath, resourceName, root)
+
+	parameters := parsedObjects[0].([]*api.Type)
+	properties := parsedObjects[1].([]*api.Type)
+	queryParam := parsedObjects[2].(string)
+
+	// TODO base_url(resource_path)
+	baseUrl := resourcePath
+	selfLink := fmt.Sprintf("%s/%s", baseUrl, strings.ToLower(queryParam))
+
+	resource.Name = resourceName
+	resource.Parameters = parameters
+	resource.Properties = properties
+	resource.SelfLink = selfLink
+
+	return resource
+}
+
+func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
+	returnArray := []any{}
+	path := root.Paths.Find(resourcePath)
+
+	parameters := []*api.Type{}
+	var idParam string
+	for _, param := range path.Post.Parameters {
+		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
+			idParam = param.Value.Name
+		}
+		paramObj := writeObject(param.Value.Name, param.Value.Schema, *param.Value.Schema.Value.Type, true)
+
+		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
+			continue
+		}
+
+		// All parameters are immutable
+		paramObj.Immutable = true
+		parameters = append(parameters, &paramObj)
+	}
+
+	// TODO build_properties
+	properties := []*api.Type{}
+
+	returnArray = append(returnArray, parameters)
+	returnArray = append(returnArray, properties)
+	returnArray = append(returnArray, idParam)
+
+	return returnArray
+}
+
+func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
+	var field api.Type
+
+	switch name {
+	case "projectsId", "project":
+		// projectsId and project are omitted in MMv1 as they are inferred from
+		// the presence of {{project}} in the URL
+		return field
+	case "locationsId":
+		name = "location"
+	}
+	additionalDescription := ""
+
+	// log.Printf("%s %+v", name, obj.Value.AllOf)
+
+	if len(obj.Value.AllOf) > 0 {
+		obj = obj.Value.AllOf[0]
+		objType = *obj.Value.Type
+	}
+
+	if objType.Is("string") {
+		field.Type = "string"
+		field.Name = name
+		if len(obj.Value.Enum) > 0 {
+			var enums []string
+			for _, enum := range obj.Value.Enum {
+				enums = append(enums, fmt.Sprintf("%v", enum))
+			}
+			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
+		}
+	}
+
+	description := fmt.Sprintf("%s %s", obj.Value.Description, additionalDescription)
+	if strings.TrimSpace(description) == "" {
+		description = "No description"
+	}
+
+	if urlParam {
+		field.UrlParamOnly = true
+		field.Required = true
+	}
+
+	// These methods are only available when the field is set
+	if obj.Value.ReadOnly {
+		field.Output = true
+	}
+
+	// x-google-identifier fields are described by AIP 203 and are represented
+	// as output only in Terraform.
+	xGoogleId, err := obj.JSONLookup("x-google-identifier")
+	if err == nil && xGoogleId != nil {
+		field.Output = true
+	}
+
+	xGoogleImmutable, err := obj.JSONLookup("x-google-immutable")
+	if obj.Value.ReadOnly || (err == nil && xGoogleImmutable != nil) {
+		field.Immutable = true
+	}
+
+	return field
 }
 
 func WriteGoTemplate(templatePath, filePath string, input any) {
