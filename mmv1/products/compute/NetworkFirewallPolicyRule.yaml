@@ -137,7 +137,7 @@ properties:
         type: Array
         immutable: true
         description: |
-          regionNetworkFirewallPolicies.list of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+          List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
         item_type:
           type: NestedObject
           immutable: true
