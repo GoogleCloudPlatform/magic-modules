@@ -119,11 +119,12 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 }
 
 type requestDescription struct {
-	scheme string
-	method string
-	host   string
-	path   string
-	body   string
+	scheme  string
+	method  string
+	host    string
+	path    string
+	body    string
+	headers map[string]string
 }
 
 func prepareHttpRequest(d requestDescription) *http.Request {
@@ -143,6 +144,13 @@ func prepareHttpRequest(d requestDescription) *http.Request {
 		body := io.NopCloser(bytes.NewBufferString(d.body))
 		req.Body = body
 	}
+	// Conditionally set headers
+	if len(d.headers) > 0 {
+		req.Header = http.Header{}
+		for k, v := range d.headers {
+			req.Header.Set(k, v)
+		}
+	}
 
 	return req
 }
@@ -158,6 +166,13 @@ func prepareCassetteRequest(d requestDescription) cassette.Request {
 	// Conditionally set a body
 	if d.body != "" {
 		req.Body = d.body
+	}
+	// Conditionally set headers
+	if len(d.headers) > 0 {
+		req.Headers = http.Header{}
+		for k, v := range d.headers {
+			req.Headers.Add(k, v)
+		}
 	}
 
 	return req
