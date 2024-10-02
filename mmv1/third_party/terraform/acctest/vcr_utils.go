@@ -347,13 +347,13 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		return pollInterval, rndTripper, diags
 	}
 	// Defines how VCR will match requests to responses.
-	rec.SetMatcher(NewMatcherFunc(ctx))
+	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
 	return pollInterval, rec, diags
 }
 
-// NewMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
-func NewMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Request) bool {
+// NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
+func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Request) bool {
 	return func(r *http.Request, i cassette.Request) bool {
 		// Default matcher compares method and URL only
 		if !cassette.DefaultMatcher(r, i) {

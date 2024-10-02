@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestNewMatcherFunc_canDetectMatches(t *testing.T) {
+func TestNewVcrMatcherFunc_canDetectMatches(t *testing.T) {
 
 	// Same description used to make both structs being compared,
 	// so everything should be determined as a match
@@ -46,7 +46,7 @@ func TestNewMatcherFunc_canDetectMatches(t *testing.T) {
 			ctx := context.Background()
 			req := prepareHttpRequest(tc)
 			cassetteReq := prepareCassetteRequest(tc)
-			matcher := acctest.NewMatcherFunc(ctx)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
 			matchDetected := matcher(req, cassetteReq)
@@ -59,7 +59,7 @@ func TestNewMatcherFunc_canDetectMatches(t *testing.T) {
 	}
 }
 
-func TestNewMatcherFunc_canDetectMismatches(t *testing.T) {
+func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 
 	cases := map[string]struct {
 		httpRequest     requestDescription
@@ -105,7 +105,7 @@ func TestNewMatcherFunc_canDetectMismatches(t *testing.T) {
 			ctx := context.Background()
 			req := prepareHttpRequest(tc.httpRequest)
 			cassetteReq := prepareCassetteRequest(tc.cassetteRequest)
-			matcher := acctest.NewMatcherFunc(ctx)
+			matcher := acctest.NewVcrMatcherFunc(ctx)
 
 			// Act - use matcher
 			matchDetected := matcher(req, cassetteReq)
