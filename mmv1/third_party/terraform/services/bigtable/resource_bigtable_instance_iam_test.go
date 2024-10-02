@@ -14,13 +14,17 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	cluster := "c-" + acctest.RandString(t, 10)
-	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	role := "roles/bigtable.user"
+	randomString := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"instance": "tf-bigtable-iam-" + randomString,
+		"cluster":  "c-" + randomString,
+		"account":  "tf-bigtable-iam-" + randomString,
+		"role":     "roles/bigtable.user",
+	}
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s",
-		envvar.GetTestProjectFromEnv(), instance, role)
+		envvar.GetTestProjectFromEnv(), context["instance"].(string), context["role"].(string))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -28,10 +32,10 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamBinding_basic(instance, cluster, account, role),
+				Config: testAccBigtableInstanceIamBinding_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_binding.binding", "role", role),
+						"google_bigtable_instance_iam_binding.binding", "role", context["role"].(string)),
 				),
 			},
 			{
@@ -42,7 +46,7 @@ func TestAccBigtableInstanceIamBinding(t *testing.T) {
 			},
 			{
 				// Test IAM Binding update
-				Config: testAccBigtableInstanceIamBinding_update(instance, cluster, account, role),
+				Config: testAccBigtableInstanceIamBinding_update(context),
 			},
 			{
 				ResourceName:      "google_bigtable_instance_iam_binding.binding",
@@ -59,16 +63,20 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	cluster := "c-" + acctest.RandString(t, 10)
-	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	role := "roles/bigtable.user"
+	randomString := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"instance": "tf-bigtable-iam-" + randomString,
+		"cluster":  "c-" + randomString,
+		"account":  "tf-bigtable-iam-" + randomString,
+		"role":     "roles/bigtable.user",
+	}
 
 	importId := fmt.Sprintf("projects/%s/instances/%s %s serviceAccount:%s",
 		envvar.GetTestProjectFromEnv(),
-		instance,
-		role,
-		envvar.ServiceAccountCanonicalEmail(account))
+		context["instance"].(string),
+		context["role"].(string),
+		envvar.ServiceAccountCanonicalEmail(context["account"].(string)))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -76,12 +84,12 @@ func TestAccBigtableInstanceIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamMember(instance, cluster, account, role),
+				Config: testAccBigtableInstanceIamMember(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_member.member", "role", role),
+						"google_bigtable_instance_iam_member.member", "role", context["role"].(string)),
 					resource.TestCheckResourceAttr(
-						"google_bigtable_instance_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(account)),
+						"google_bigtable_instance_iam_member.member", "member", "serviceAccount:"+envvar.ServiceAccountCanonicalEmail(context["account"].(string))),
 				),
 			},
 			{
@@ -99,13 +107,17 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	instance := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	cluster := "c-" + acctest.RandString(t, 10)
-	account := "tf-bigtable-iam-" + acctest.RandString(t, 10)
-	role := "roles/bigtable.user"
+	randomString := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"instance": "tf-bigtable-iam-" + randomString,
+		"cluster":  "c-" + randomString,
+		"account":  "tf-bigtable-iam-" + randomString,
+		"role":     "roles/bigtable.user",
+	}
 
 	importId := fmt.Sprintf("projects/%s/instances/%s",
-		envvar.GetTestProjectFromEnv(), instance)
+		envvar.GetTestProjectFromEnv(), context["instance"].(string))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -113,7 +125,7 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccBigtableInstanceIamPolicy(instance, cluster, account, role),
+				Config: testAccBigtableInstanceIamPolicy(context),
 				Check:  resource.TestCheckResourceAttrSet("data.google_bigtable_instance_iam_policy.policy", "policy_data"),
 			},
 			{
@@ -126,76 +138,76 @@ func TestAccBigtableInstanceIamPolicy(t *testing.T) {
 	})
 }
 
-func testAccBigtableInstanceIamBinding_basic(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableInstanceIamBinding_basic(context map[string]interface{}) string {
+	return testBigtableInstanceIam(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account1" {
-  account_id   = "%s-1"
+  account_id   = "%{account}-1"
   display_name = "Bigtable Instance IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
-  account_id   = "%s-2"
+  account_id   = "%{account}-2"
   display_name = "Bigtable instance Iam Testing Account"
 }
 
 resource "google_bigtable_instance_iam_binding" "binding" {
   instance = google_bigtable_instance.instance.name
-  role     = "%s"
+  role     = "%{role}"
   members = [
     "serviceAccount:${google_service_account.test-account1.email}",
   ]
 }
-`, instance, cluster, account, account, role)
+`, context)
 }
 
-func testAccBigtableInstanceIamBinding_update(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableInstanceIamBinding_update(context map[string]interface{}) string {
+	return testBigtableInstanceIam(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account1" {
-  account_id   = "%s-1"
+  account_id   = "%{account}-1"
   display_name = "Bigtable Instance IAM Testing Account"
 }
 
 resource "google_service_account" "test-account2" {
-  account_id   = "%s-2"
+  account_id   = "%{account}-2"
   display_name = "Bigtable Instance IAM Testing Account"
 }
 
 resource "google_bigtable_instance_iam_binding" "binding" {
   instance = google_bigtable_instance.instance.name
-  role     = "%s"
+  role     = "%{role}"
   members = [
     "serviceAccount:${google_service_account.test-account1.email}",
     "serviceAccount:${google_service_account.test-account2.email}",
   ]
 }
-`, instance, cluster, account, account, role)
+`, context)
 }
 
-func testAccBigtableInstanceIamMember(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableInstanceIamMember(context map[string]interface{}) string {
+	return testBigtableInstanceIam(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account" {
-  account_id   = "%s"
+  account_id   = "%{account}"
   display_name = "Bigtable Instance IAM Testing Account"
 }
 
 resource "google_bigtable_instance_iam_member" "member" {
   instance = google_bigtable_instance.instance.name
-  role     = "%s"
+  role     = "%{role}"
   member   = "serviceAccount:${google_service_account.test-account.email}"
 }
-`, instance, cluster, account, role)
+`, context)
 }
 
-func testAccBigtableInstanceIamPolicy(instance, cluster, account, role string) string {
-	return fmt.Sprintf(testBigtableInstanceIam+`
+func testAccBigtableInstanceIamPolicy(context map[string]interface{}) string {
+	return testBigtableInstanceIam(context) + acctest.Nprintf(`
 resource "google_service_account" "test-account" {
-  account_id   = "%s"
+  account_id   = "%{account}"
   display_name = "Bigtable Instance IAM Testing Account"
 }
 
 data "google_iam_policy" "policy" {
   binding {
-    role    = "%s"
+    role    = "%{role}"
     members = ["serviceAccount:${google_service_account.test-account.email}"]
   }
 }
@@ -208,21 +220,23 @@ resource "google_bigtable_instance_iam_policy" "policy" {
 data "google_bigtable_instance_iam_policy" "policy" {
   instance    = google_bigtable_instance.instance.name
 }
-`, instance, cluster, account, role)
+`, context)
 }
 
 // Smallest instance possible for testing
-var testBigtableInstanceIam = `
+func testBigtableInstanceIam(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_bigtable_instance" "instance" {
-	name                  = "%s"
+	name                  = "%{instance}"
     instance_type = "DEVELOPMENT"
 
     cluster {
-      cluster_id   = "%s"
+      cluster_id   = "%{cluster}"
       zone         = "us-central1-b"
       storage_type = "HDD"
     }
 
     deletion_protection = false
 }
-`
+`, context)
+}
