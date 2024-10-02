@@ -29,8 +29,8 @@ func TestAccFwProvider_user_project_override(t *testing.T) {
 
 		// Usage
 {{ if ne $.TargetVersionName `ga` -}}
-		"user_project_override controls which project is used for quota and billing purposes": testAccFwProvider_UserProjectOverride,
-		// We cannot currently implement this test case in a PF-specific way: "user_project_override works for resources that don't take a project id as an argument directly"
+		"user_project_override uses a resource's project argument to control which project is used for quota and billing purposes": testAccFwProvider_UserProjectOverride,
+		// We cannot currently implement this test case in a PF-specific way: "user_project_override works for resources that don't take a project argument (provider-level default project value is used)"
 {{- else }}
 		// Usage tests cases are currently implemented in a Beta-only way
 {{- end }}

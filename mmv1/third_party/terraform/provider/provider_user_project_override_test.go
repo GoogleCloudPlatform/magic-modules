@@ -24,8 +24,8 @@ func TestAccSdkProvider_user_project_override(t *testing.T) {
 		"when user_project_override is set via environment variables any of these values can be used: true/false/1/0":          testAccSdkProvider_user_project_override_envStringsAccepted,
 
 		// Usage
-		"user_project_override controls which project is used for quota and billing purposes":            testAccProviderUserProjectOverride,
-		"user_project_override works for resources that don't take a project id as an argument directly": testAccProviderIndirectUserProjectOverride,
+		"user_project_override uses a resource's project argument to control which project is used for quota and billing purposes":    testAccProviderUserProjectOverride,
+		"user_project_override works for resources that don't take a project argument (provider-level default project value is used)": testAccProviderIndirectUserProjectOverride,
 	}
 
 	for name, tc := range testCases {
