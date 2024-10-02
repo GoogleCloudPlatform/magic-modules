@@ -145,6 +145,7 @@ func testAccFwProvider_billing_project_emptyStringValidation(t *testing.T) {
 
 {{- if ne $.TargetVersionName "ga" }}
 func testAccFwProvider_billing_project_useWithAndWithoutUserProjectOverride(t *testing.T) {
+	acctest.SkipIfVcr(t) // VCR fails to record final interaction that fails with 403
 
 	randomString := acctest.RandString(t, 10)
 	contextUserProjectOverrideFalse := map[string]interface{}{
@@ -189,8 +190,9 @@ func testAccFwProvider_billing_project_useWithAndWithoutUserProjectOverride(t *t
 }
 
 func testAccFwProvider_billing_project_affectedByClientLibraryEnv(t *testing.T) {
-	randomString := acctest.RandString(t, 10)
+	acctest.SkipIfVcr(t) // VCR fails to record final interaction that fails with 403
 
+	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"org_id":                envvar.GetTestOrgFromEnv(t),
 		"billing_account":       envvar.GetTestBillingAccountFromEnv(t),
