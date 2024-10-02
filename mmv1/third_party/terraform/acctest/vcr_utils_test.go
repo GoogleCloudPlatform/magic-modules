@@ -102,6 +102,48 @@ func TestNewVcrMatcherFunc_canDetectMismatches(t *testing.T) {
 		httpRequest     requestDescription
 		cassetteRequest requestDescription
 	}{
+		"requests using different schemes": {
+			httpRequest: requestDescription{
+				scheme: "http",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar",
+			},
+		},
+		"requests using different hosts": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "google.com",
+				path:   "foobar",
+			},
+		},
+		"requests using different paths": {
+			httpRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar1",
+			},
+			cassetteRequest: requestDescription{
+				scheme: "https",
+				method: "GET",
+				host:   "example.com",
+				path:   "foobar2",
+			},
+		},
 		"requests with different methods": {
 			httpRequest: requestDescription{
 				scheme: "https",
