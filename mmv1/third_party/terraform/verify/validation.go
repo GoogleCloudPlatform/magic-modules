@@ -22,7 +22,7 @@ const (
 
 	SubnetworkLinkRegex = "projects/(" + ProjectRegex + ")/regions/(" + RegionRegex + ")/subnetworks/(" + SubnetworkRegex + ")$"
 
-	RFC1035NameTemplate = "[a-z]([-a-z0-9]{%v,%v}[a-z0-9])?"
+	RFC1035NameTemplate = "[a-z]([-a-z0-9]{%d,%d}[a-z0-9])?"
 	CloudIoTIdRegex     = "^[a-zA-Z][-a-zA-Z0-9._+~%]{2,254}$"
 
 	// Format of default Compute service accounts created by Google
