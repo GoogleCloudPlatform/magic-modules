@@ -100,5 +100,10 @@ var (
 			startDate: newDate(2024, 9, 20, bstLoc),
 			endDate:   newDate(2024, 9, 23, bstLoc),
 		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 10, 2, bstLoc),
+			endDate:   newDate(2024, 10, 14, bstLoc),
+		},
 	}
 )
