@@ -166,4 +166,90 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 }
 `, context)
 }
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesUpdateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRules(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRulesUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "regionSecPolicy" {
+		name        = "tf-test%{random_suffix}"
+		description = "region security policy with rules updated"
+		type        = "CLOUD_ARMOR"
+
+		rules {
+			action   = "deny"
+			priority = "2147483647"
+			match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+			}
+			description = "default rule"
+		}
+
+		rules {
+			action   = "deny"
+			priority = "1000"
+			match {
+			expr {
+				expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
+			}
+			}
+		}
+	}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withRulesUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_compute_region_security_policy" "regionSecPolicy" {
+		name        = "tf-test%{random_suffix}"
+		description = "region security policy with rules updated"
+		type        = "CLOUD_ARMOR"
+
+		rules {
+			action   = "allow"
+			priority = "2147483647"
+			match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+			}
+			description = "default rule updated"
+		}
+	}
+	`, context)
+}
 {{- end }}
