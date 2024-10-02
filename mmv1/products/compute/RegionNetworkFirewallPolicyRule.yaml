@@ -20,15 +20,15 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addRule'
 docs:
-id_format: '{{firewall_policy}}/{{priority}}'
-base_url: '{{firewall_policy}}'
-self_link: '{{firewall_policy}}/getRule?priority={{priority}}'
-create_url: '{{firewall_policy}}/addRule'
-update_url: '{{firewall_policy}}/patchRule?priority={{priority}}'
+id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addRule'
+update_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
 update_verb: 'POST'
-delete_url: '{{firewall_policy}}/removeRule?priority={{priority}}'
+delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
 delete_verb: 'POST'
-immutable: true
+legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
   - '{{project}}/{{region}}/{{firewall_policy}}/{{priority}}'
@@ -41,11 +41,7 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.tmpl'
   post_delete: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/region_network_firewall_policy_rule_import.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
-custom_diff:
-  - 'tpgresource.DefaultProviderProject'
-  - 'tpgresource.DefaultProviderRegion'
 examples:
   - name: 'region_network_firewall_policy_rule'
     primary_resource_id: 'primary'
@@ -61,27 +57,19 @@ examples:
       service_acct: 'SERVICE_ACCT'
 parameters:
   - name: 'firewallPolicy'
-    type: String
+    type: ResourceRef
     description: |
       The firewall policy of the resource.
     url_param_only: true
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    resource: 'NetworkFirewallPolicy'
   - name: 'region'
     type: String
     description: 'The location of this resource.'
     url_param_only: true
     immutable: true
     default_from_api: true
-  - name: 'project'
-    type: String
-    description: |
-      The project for the resource
-    url_param_only: true
-    immutable: true
-    default_from_api: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
 properties:
   - name: 'creationTimestamp'
     type: String
@@ -109,38 +97,45 @@ properties:
     required: true
   - name: 'match'
     type: NestedObject
+    immutable: true
     description: |
       A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
     required: true
     properties:
       - name: 'srcIpRanges'
         type: Array
+        immutable: true
         description: |
           CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'destIpRanges'
         type: Array
+        immutable: true
         description: |
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'layer4Configs'
         type: Array
+        immutable: true
         description: |
           Pairs of IP protocols and ports that the rule should match.
         required: true
         item_type:
           type: NestedObject
+          immutable: true
           properties:
             - name: 'ipProtocol'
               type: String
+              immutable: true
               description: |
                 The IP protocol to which this rule applies. The protocol type is required when creating a firewall rule.
                 This value can either be one of the following well known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp), or the IP protocol number.
               required: true
             - name: 'ports'
               type: Array
+              immutable: true
               description: |
                 An optional list of ports to which this rule applies. This field is only applicable for UDP or TCP protocol. Each entry must be either an integer or a range. If not specified, this rule applies to connections through any port.
                 Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
@@ -148,18 +143,22 @@ properties:
                 type: String
       - name: 'srcSecureTags'
         type: Array
+        immutable: true
         description: |
           List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
         item_type:
           type: NestedObject
+          immutable: true
           properties:
             - name: 'name'
               type: String
+              immutable: true
               description: |
                 Name of the secure tag, created with TagManager's TagValue API.
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'state'
               type: Enum
+              immutable: true
               description: |
                 State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
               output: true
@@ -168,48 +167,56 @@ properties:
                 - 'INEFFECTIVE'
       - name: 'destAddressGroups'
         type: Array
+        immutable: true
         description: |
           Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
         item_type:
           type: String
       - name: 'srcAddressGroups'
         type: Array
+        immutable: true
         description: |
           Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
         item_type:
           type: String
       - name: 'srcFqdns'
         type: Array
+        immutable: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
         item_type:
           type: String
       - name: 'destFqdns'
         type: Array
+        immutable: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
         item_type:
           type: String
       - name: 'srcRegionCodes'
         type: Array
+        immutable: true
         description: |
           Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destRegionCodes'
         type: Array
+        immutable: true
         description: |
           Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destThreatIntelligences'
         type: Array
+        immutable: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
         item_type:
           type: String
       - name: 'srcThreatIntelligences'
         type: Array
+        immutable: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
