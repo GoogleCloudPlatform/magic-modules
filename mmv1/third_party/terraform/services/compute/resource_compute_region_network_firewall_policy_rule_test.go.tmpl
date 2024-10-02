@@ -507,6 +507,7 @@ resource "google_compute_network" "network1" {
 resource "google_compute_region_network_firewall_policy" "fw_policy" {
   name        = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"
+  region      = "%{region}"
 }
 
 resource "google_compute_region_network_firewall_policy_association" "fw_policy_a" {
