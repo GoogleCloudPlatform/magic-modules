@@ -30,15 +30,10 @@ data "google_kms_crypto_key" "example_key" {
   key_ring        = "{{index $.Vars "key_ring_name"}}"
 }
 
-resource "google_kms_crypto_key_iam_member" "crypto_key_member" {
-  provider = google-beta
-
-  crypto_key_id = data.google_kms_crypto_key.example_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataform.iam.gserviceaccount.com"
-}
-
+# Permissions are already provisioned for the default Dataform Serivce Account in the test projects
+#   - Service account `service-YOUR_PROJECT_NUMBER@gcp-sa-dataform.iam.gserviceaccount.com`
+#   - Needs the role roles/cloudkms.cryptoKeyEncrypterDecrypter
+#   - On the KMS key used by the Repository
 resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name = "{{index $.Vars "dataform_repository_name"}}"
