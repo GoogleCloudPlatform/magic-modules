@@ -170,7 +170,7 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
         // Referencing using ID causes import to fail
-				ImportStateVerifyIgnore: []string{"firewall_policy"},
+				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context),
@@ -180,7 +180,7 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
         // Referencing using ID causes import to fail
-				ImportStateVerifyIgnore: []string{"firewall_policy"},
+				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 		},
 	})
@@ -210,10 +210,11 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
   direction               = "INGRESS"
   disabled                = false
   enable_logging          = true
-  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.id
+  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
   priority                = 1000
   tls_inspect             = false
   rule_name               = "tf-test-rule-%{random_suffix}"
+  project                 = "projects/%{project_name}"
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -284,6 +285,7 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
   priority        = 1000
   tls_inspect     = false
   rule_name       = "tf-test-updated-rule-%{random_suffix}"
+  project         = "projects/%{project_name}"
 
   match {
     dest_ip_ranges = ["0.0.0.0/0"]
