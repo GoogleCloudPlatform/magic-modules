@@ -544,8 +544,8 @@ var ServicesListGa = mapOf(
     "oracledatabase" to mapOf(
         "name" to "oracledatabase",
         "displayName" to "OracleDatabase",
-        "path" to "./google/services/oracledatabase",
-    )
+        "path" to "./google/services/oracledatabase"
+    ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
         "displayName" to "Orgpolicy",

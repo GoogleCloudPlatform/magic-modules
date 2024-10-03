@@ -549,8 +549,8 @@ var ServicesListBeta = mapOf(
     "oracledatabase" to mapOf(
         "name" to "oracledatabase",
         "displayName" to "OracleDatabase",
-        "path" to "./google-beta/services/oracledatabase",
-    )
+        "path" to "./google-beta/services/oracledatabase"
+    ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
         "displayName" to "Orgpolicy",
