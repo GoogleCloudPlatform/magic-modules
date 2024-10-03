@@ -29,6 +29,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+update_verb: 'PATCH'
+update_mask: true
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
