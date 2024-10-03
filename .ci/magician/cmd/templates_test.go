@@ -15,13 +15,25 @@ func TestColor(t *testing.T) {
 			name:  "red",
 			color: "red",
 			text:  "Test text",
-			want:  "$\\textcolor{red}{\\textsf{Test text}}$",
+			want:  "🔴 Test text",
+		},
+		{
+			name:  "yellow",
+			color: "yellow",
+			text:  "Test text",
+			want:  "🟡 Test text",
 		},
 		{
 			name: "green",
 			color: "green",
 			text: "Test text",
-			want: "$\\textcolor{green}{\\textsf{Test text}}$",
+			want: "🟢 Test text",
+		},
+		{
+			name: "unsupported color",
+			color: "mauve",
+			text: "Test text",
+			want: "Test text",
 		},
 		{
 			name: "empty color",
