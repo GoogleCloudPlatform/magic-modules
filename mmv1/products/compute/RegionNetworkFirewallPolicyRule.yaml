@@ -38,10 +38,20 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  post_create: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.tmpl'
-  post_delete: 'templates/terraform/constants/compute_region_network_firewall_policy_rule_operation.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
 examples:
   - name: 'region_network_firewall_policy_rule'
     primary_resource_id: 'primary'
@@ -64,6 +74,7 @@ parameters:
     required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     resource: 'NetworkFirewallPolicy'
+    imports: 'name'
   - name: 'region'
     type: String
     description: 'The location of this resource.'
