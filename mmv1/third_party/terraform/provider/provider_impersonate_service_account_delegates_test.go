@@ -96,6 +96,9 @@ func testAccSdkProvider_impersonate_service_account_delegates_usage(t *testing.T
 	acctest.VcrTest(t, resource.TestCase{
 		// No PreCheck for checking ENVs
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSdkProvider_impersonate_service_account_delegates_testViaFailure_1(context),
@@ -167,6 +170,15 @@ resource "google_service_account_iam_member" "delegate_create_target_token" {
   service_account_id = google_service_account.target.name
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${google_service_account.delegate.email}"
+}
+
+resource "time_sleep" "wait_5_minutes" {
+  depends_on = [
+    google_service_account_iam_member.base_create_delegate_token,
+    google_service_account_iam_member.delegate_create_target_token
+  ]
+
+  create_duration = "300s"	
 }
 `, context)
 }
