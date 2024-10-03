@@ -319,7 +319,7 @@ resource "google_spanner_instance" "basic" {
   config       = "regional-us-central1"
   display_name = "%s-dname"
   num_nodes    = 1
-  edition      = "ENTERPRISE"
+  edition      = "ENTERPRISE" 
 }
 `, name, name)
 }
@@ -330,7 +330,6 @@ resource "google_spanner_instance" "basic" {
   name         = "%s"
   config       = "regional-us-central1"
   display_name = "%s-dname"
-  edition      = "ENTERPRISE"
 }
 `, name, name)
 }
@@ -341,7 +340,6 @@ resource "google_spanner_instance" "basic" {
   config       = "regional-us-central1"
   display_name = "%s"
   num_nodes    = 1
-  edition      = "ENTERPRISE"
 }
 `, name)
 }
@@ -361,7 +359,6 @@ resource "google_spanner_instance" "updater" {
     "key1" = "value1"
     %s
   }
-  edition      = "ENTERPRISE"
 }
 `, name, nodes, extraLabel)
 }
@@ -374,7 +371,6 @@ resource "google_spanner_instance" "basic" {
   display_name = "%s"
   processing_units = 100
   force_destroy    = "%s"
-  edition      = "ENTERPRISE"
 }
 `, name, name, virtual)
 }
