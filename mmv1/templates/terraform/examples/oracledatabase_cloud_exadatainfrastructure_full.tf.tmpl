@@ -1,8 +1,7 @@
 resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResourceId}}"{
   display_name = "OFake exadata displayname"
-  cloud_exadata_infrastructure_id = "ofake-exadata-2"
+  cloud_exadata_infrastructure_id = "ofake-exadata-id"
   location = "us-east4"
-  project = "oci-terraform-testing"
   gcp_oracle_zone = "us-east4-b-r1"
   properties {
     shape = "Exadata.X9M"
@@ -23,5 +22,8 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResou
       weeks_of_month                   = [4]
     }
     total_storage_size_gb = "196608"
+  }
+  labels = {
+    "label-one" = "value-one"
   }
 }

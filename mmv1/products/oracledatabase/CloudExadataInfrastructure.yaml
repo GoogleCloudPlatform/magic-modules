@@ -47,8 +47,12 @@ custom_code:
 examples:
   - name: 'oracledatabase_cloud_exadatainfrastructure_basic'
     primary_resource_id: 'my-cloud-exadata'
+    test_env_vars:
+      project: 'PROJECT_NAME'
   - name: 'oracledatabase_cloud_exadatainfrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
