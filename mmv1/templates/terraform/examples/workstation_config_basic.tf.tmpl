@@ -58,6 +58,8 @@ resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
     "label" = "key"
   }
 
+  maxUsableWorkstations = 1
+
   host {
     gce_instance {
       machine_type                = "e2-standard-4"
