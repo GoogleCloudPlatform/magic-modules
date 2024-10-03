@@ -66,6 +66,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+    exclude_test: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
     min_version: 'beta'
@@ -78,6 +79,7 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String
