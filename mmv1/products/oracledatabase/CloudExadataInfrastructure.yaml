@@ -48,11 +48,11 @@ examples:
   - name: 'oracledatabase_cloud_exadatainfrastructure_basic'
     primary_resource_id: 'my-cloud-exadata'
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project: 'OCI_PROJECT_ID'
   - name: 'oracledatabase_cloud_exadatainfrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project: 'OCI_PROJECT_ID'
 parameters:
   - name: 'location'
     type: String
