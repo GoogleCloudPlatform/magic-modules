@@ -811,6 +811,8 @@ resource "google_workstations_workstation_config" "default" {
   labels = {
 	foo = "bar"
   }
+  
+  maxUsableWorkstations: 1
 
   lifecycle {
     prevent_destroy = true

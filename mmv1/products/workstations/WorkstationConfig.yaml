@@ -653,7 +653,7 @@ properties:
   - name: 'maxUsableWorkstations'
     type: Integer
     description: |
-      Maximum number of workstations under this configuration a user can have workstations.workstation.use permission on. Only enforced on CreateWorkstation API calls on the user issuing the API request 
+      Maximum number of workstations under this configuration a user can have workstations.workstation.use permission on. Only enforced on CreateWorkstation API calls on the user issuing the API request.
     min_version: 'beta'
   - name: 'conditions'
     type: Array
