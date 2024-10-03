@@ -468,8 +468,8 @@ func TestWithReplayFailedTests(t *testing.T) {
 
 func TestWithoutReplayFailedTests(t *testing.T) {
 	tests := []struct {
-		name string
-		data withoutReplayFailedTests
+		name         string
+		data         withoutReplayFailedTests
 		wantContains []string
 	}{
 		{
@@ -477,7 +477,9 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 			data: withoutReplayFailedTests{
 				ReplayingErr: fmt.Errorf("some error"),
 				BuildID:      "build-123",
-				PRNumber:     "123",
+				Head:         "auto-pr-123",
+				LogBucket:    "ci-vcr-logs",
+				Version:      provider.Beta.String(),
 			},
 			wantContains: []string{
 				color("red", "Errors occurred during REPLAYING mode. Please fix them to complete your PR."),
@@ -487,8 +489,10 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 		{
 			name: "without replay error",
 			data: withoutReplayFailedTests{
-				BuildID:  "build-123",
-				PRNumber: "123",
+				BuildID:   "build-123",
+				Head:      "auto-pr-123",
+				LogBucket: "ci-vcr-logs",
+				Version:   provider.Beta.String(),
 			},
 			wantContains: []string{
 				color("green", "All tests passed!"),
@@ -513,8 +517,8 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 
 func TestRecordReplay(t *testing.T) {
 	tests := []struct {
-		name string
-		data recordReplay
+		name         string
+		data         recordReplay
 		wantContains []string
 	}{
 		{
@@ -531,7 +535,9 @@ func TestRecordReplay(t *testing.T) {
 				HasTerminatedTests: true,
 				RecordingErr:       fmt.Errorf("some error"),
 				BuildID:            "build-123",
-				PRNumber:           "123",
+				LogBucket:          "ci-vcr-logs",
+				Version:            provider.Beta.String(),
+				Head:               "auto-pr-123",
 			},
 			wantContains: []string{
 				color("green", "Tests passed during RECORDING mode:"),
@@ -562,7 +568,9 @@ func TestRecordReplay(t *testing.T) {
 				},
 				AllRecordingPassed: true,
 				BuildID:            "build-123",
-				PRNumber:           "123",
+				Head:               "auto-pr-123",
+				Version:            provider.Beta.String(),
+				LogBucket:          "ci-vcr-logs",
 			},
 			wantContains: []string{
 				color("green", "Tests passed during RECORDING mode:"),

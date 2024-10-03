@@ -72,7 +72,9 @@ type withReplayFailedTests struct {
 
 type withoutReplayFailedTests struct {
 	ReplayingErr error
-	PRNumber     string
+	LogBucket    string
+	Version      string
+	Head         string
 	BuildID      string
 }
 
@@ -82,7 +84,9 @@ type recordReplay struct {
 	HasTerminatedTests            bool
 	RecordingErr                  error
 	AllRecordingPassed            bool
-	PRNumber                      string
+	LogBucket                     string
+	Version                       string
+	Head                          string
 	BuildID                       string
 }
 
@@ -334,7 +338,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
-			PRNumber:                      prNumber,
+			LogBucket:                     "ci-vcr-logs",
+			Version:                       provider.Beta.String(),
+			Head:                          newBranch,
 			BuildID:                       buildID,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
@@ -348,7 +354,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	} else { //  len(replayingResult.FailedTests) == 0
 		withoutReplayFailedTestsData := withoutReplayFailedTests{
 			ReplayingErr: replayingErr,
-			PRNumber:     prNumber,
+			Head:         newBranch,
+			LogBucket:    "ci-vcr-logs",
 			BuildID:      buildID,
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
