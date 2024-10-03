@@ -48,6 +48,9 @@ examples:
       secret_name: 'my-secret'
       key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
+    test_vars_overrides:
+      key_ring_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").KeyRing.Name'
+      crypto_key_name: 'tpgresource.GetResourceNameFromSelfLink(acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name)'
     # This example is used in the docs to address this issue
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     exclude_test: true
@@ -60,8 +63,10 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
-      key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
+    test_vars_overrides:
+      key_ring_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").KeyRing.Name'
+      crypto_key_name: 'tpgresource.GetResourceNameFromSelfLink(acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name)'
     # Although the Terraform config can be applied without error, the connection between Dataform and the SourceRepo aren't yet functional
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319

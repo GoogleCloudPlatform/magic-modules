@@ -23,29 +23,20 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "{{index $.Vars "data"}}"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  provider = google-beta
-  
-  name     = "{{index $.Vars "key_ring_name"}}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example_key" {
+data "google_kms_crypto_key" "example_key" {
   provider = google-beta
   
   name            = "{{index $.Vars "crypto_key_name"}}"
-  key_ring        = google_kms_key_ring.keyring.id
+  key_ring        = "{{index $.Vars "key_ring_name"}}"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
+resource "google_kms_crypto_key_iam_member" "crypto_key_member" {
   provider = google-beta
 
-  crypto_key_id = google_kms_crypto_key.example_key.id
+  crypto_key_id = data.google_kms_crypto_key.example_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
-  members = [
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataform.iam.gserviceaccount.com",
-  ]
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-dataform.iam.gserviceaccount.com"
 }
 
 resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
@@ -53,7 +44,7 @@ resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "dataform_repository_name"}}"
   display_name = "{{index $.Vars "dataform_repository_name"}}"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
-  kms_key_name = google_kms_crypto_key.example_key.id
+  kms_key_name = data.google_kms_crypto_key.example_key.id
 
   labels = {
     label_foo1 = "label-bar1"
@@ -72,6 +63,6 @@ resource "google_dataform_repository" "{{$.PrimaryResourceId}}" {
   }
 
   depends_on = [
-    google_kms_crypto_key_iam_binding.crypto_key_binding
+    google_kms_crypto_key_iam_member.crypto_key_member
   ]
 }
