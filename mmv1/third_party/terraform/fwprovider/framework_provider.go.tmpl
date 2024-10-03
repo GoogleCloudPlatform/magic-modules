@@ -18,7 +18,6 @@ import (
 
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
-    "github.com/hashicorp/terraform-provider-google/google/fwtransport"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
@@ -44,7 +43,6 @@ func New(primary *sdk_schema.Provider) provider.ProviderWithMetaSchema {
 
 // FrameworkProvider is the provider implementation.
 type FrameworkProvider struct {
-    fwtransport.FrameworkProviderConfig
     Version string
     Primary *sdk_schema.Provider
 }
@@ -260,16 +258,17 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
         return
     }
 
-    // Configuration values are now available.
-    p.LoadAndValidateFramework(ctx, &data, req.TerraformVersion, &resp.Diagnostics, p.Version)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+	// Configuration values are now available.
+    // However we don't use them; for the plugin-framework implementation of the provider
+	// we take the configuration values from the SDK implementation of the provider. This avoids duplicated logic and inconsistencies in implementation.
+	// The trade off is that we don't benefit from the new type system that differentiates Null and Unknown values, which is especially useful for strings.
+
 
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
-	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument. 
-	resp.DataSourceData = &p.FrameworkProviderConfig
-	resp.ResourceData = &p.FrameworkProviderConfig
+	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
+	meta := p.Primary.Meta().(*transport_tpg.Config)
+	resp.DataSourceData = meta
+	resp.ResourceData = meta
 }
 
 
