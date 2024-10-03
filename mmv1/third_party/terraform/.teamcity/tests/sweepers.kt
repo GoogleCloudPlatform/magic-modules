@@ -136,7 +136,7 @@ class SweeperTests {
 
         // Find Project sweeper project's build
         val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
-        val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject!!, ProjectSweeperName)
+        val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject, ProjectSweeperName)
         
         // Check only one schedule trigger is on the builds in question
         assertTrue(sweeperGa.triggers.items.size == 1)
