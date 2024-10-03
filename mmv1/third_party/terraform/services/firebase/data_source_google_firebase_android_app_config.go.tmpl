@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/firebase/v1beta1"
+	firebase "google.golang.org/api/firebase/v1beta1"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -13,8 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -29,8 +30,8 @@ func NewGoogleFirebaseAndroidAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseAndroidAppConfigDataSource defines the data source implementation
 type GoogleFirebaseAndroidAppConfigDataSource struct {
-	client  *firebase.Service
-	project types.String
+	client         *firebase.Service
+	providerConfig *transport_tpg.Config
 }
 
 type GoogleFirebaseAndroidAppConfigModel struct {
@@ -90,20 +91,20 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Configure(ctx context.Context
 		return
 	}
 
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
+	p, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
 
-	d.client = p.NewFirebaseClient(p.UserAgent, &resp.Diagnostics)
+	d.client = p.NewFirebaseClient(ctx, p.UserAgent)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	d.project = p.Project
+	d.providerConfig = p
 }
 
 func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -126,7 +127,7 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 		return
 	}
 
-	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
