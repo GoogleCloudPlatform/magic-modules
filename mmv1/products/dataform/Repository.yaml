@@ -63,6 +63,7 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my-secret'
+      key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
     test_vars_overrides:
       key_ring_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").KeyRing.Name'
