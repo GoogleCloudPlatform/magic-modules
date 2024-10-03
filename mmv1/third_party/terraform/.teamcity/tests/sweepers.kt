@@ -8,9 +8,9 @@
 package tests
 
 import ProjectSweeperName
-import ServiceSweeperName
 import ServiceSweeperCronName
 import ServiceSweeperManualName
+import ServiceSweeperName
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
