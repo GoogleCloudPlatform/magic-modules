@@ -80,8 +80,6 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
-    # These tests create a new KMS key ring and key with each run, which cannot be deleted.
-    exclude_test: true
 parameters:
   - name: 'region'
     type: String
