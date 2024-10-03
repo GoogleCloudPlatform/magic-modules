@@ -58,6 +58,7 @@ fun featureBranchEphemeralResourcesSubProject(allConfig: AllContextParameters): 
     // Enable testing using modular-magician/terraform-provider-google
     parentId = "${projectId}_MM_GA"
     val buildConfigModularMagicianGa = BuildConfigurationForSinglePackage(packageName, resourceManagerPackageGa.getValue("path"), "Ephemeral resources in $packageName (GA provider, MM upstream)", ProviderNameGa, parentId, ModularMagicianVCSRootGa, listOf(SharedResourceNameVcr), vcrConfig)
+    // No trigger added here (MM upstream is manual only)
 
     // Beta
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)
@@ -71,13 +72,18 @@ fun featureBranchEphemeralResourcesSubProject(allConfig: AllContextParameters): 
     // Enable testing using modular-magician/terraform-provider-google-beta
     parentId = "${projectId}_MM_BETA"
     val buildConfigModularMagicianBeta = BuildConfigurationForSinglePackage(packageName, resourceManagerPackageBeta.getValue("path"), "Ephemeral resources in $packageName (Beta provider, MM upstream)", ProviderNameBeta, parentId, ModularMagicianVCSRootBeta, listOf(SharedResourceNameVcr), vcrConfig)
+    // No trigger added here (MM upstream is manual only)
 
+
+    // ------
+
+    // Make all builds use a 1.10.0-ish version of TF core
     val allBuildConfigs = listOf(buildConfigHashiCorpGa, buildConfigModularMagicianGa, buildConfigHashiCorpBeta, buildConfigModularMagicianBeta)
-
-    // Make these builds use a 1.10.0-ish version of TF core
     allBuildConfigs.forEach{ b ->
         b.overrideTerraformCoreVersion(EphemeralResourcesTfCoreVersion)
     }
+
+    // ------
 
     return Project{
         id(projectId)
