@@ -129,7 +129,10 @@ func testAccSdkProvider_impersonate_service_account_usage(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccSdkProvider_impersonate_service_account_testViaFailure(context),
+				Config: testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context),
+			},
+			{
+				Config:      testAccSdkProvider_impersonate_service_account_testViaFailure_scenario(context),
 				ExpectError: regexp.MustCompile("Error creating Topic: googleapi: Error 403: User not authorized"),
 			},
 		},
@@ -156,7 +159,8 @@ data "google_provider_config_sdk" "default" {}
 `, context)
 }
 
-func testAccSdkProvider_impersonate_service_account_testViaFailure(context map[string]interface{}) string {
+func testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context map[string]interface{}) string {
+	// Setup where we make resources we'll use for testing impersonation in the next step
 	return acctest.Nprintf(`
 // This will succeed due to the Terraform identity having necessary permissions
 resource "google_pubsub_topic" "ok" {
@@ -177,7 +181,12 @@ resource "google_service_account_iam_member" "token" {
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
 }
+`, context)
+}
 
+func testAccSdkProvider_impersonate_service_account_testViaFailure_scenario(context map[string]interface{}) string {
+	// Setup plus config where we test impersonation
+	return testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context) + acctest.Nprintf(`
 // Impersonate the created service account
 provider "google" {
   alias = "impersonation"
