@@ -132,8 +132,6 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 		return
 	}
 
-
-
 	// GET Request
 	service := firebase.NewProjectsAndroidAppsService(d.client)
 	appName := fmt.Sprintf("projects/%s/androidApps/%s/config", data.Project.ValueString(), data.AppId.ValueString())
