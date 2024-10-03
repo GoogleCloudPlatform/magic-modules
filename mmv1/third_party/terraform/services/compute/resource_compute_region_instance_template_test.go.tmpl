@@ -714,7 +714,6 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -722,7 +721,6 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
-			{{- end }}
 		},
 	})
 }
@@ -2982,7 +2980,6 @@ resource "google_compute_region_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -3016,7 +3013,6 @@ resource "google_compute_region_instance_template" "foobar5" {
 }
 `, suffix, confidentialInstanceType)
 }
-{{- end }}
 
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`

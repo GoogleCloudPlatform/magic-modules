@@ -50,6 +50,11 @@ examples:
       engine_id: 'chat-engine-id'
       data_store_id: 'data-store'
       data_store_2_id: 'data-store-2'
+  - name: 'discoveryengine_chat_engine_existing_dialogflow_agent'
+    primary_resource_id: 'primary'
+    vars:
+      engine_id: 'chat-engine-id'
+      data_store_id: 'data-store'
 parameters:
   - name: 'engineId'
     type: String
@@ -99,7 +104,6 @@ properties:
     description: |
       The data stores associated with this engine. Multiple DataStores in the same Collection can be associated here. All listed DataStores must be `SOLUTION_TYPE_CHAT`. Adding or removing data stores will force recreation.
     required: true
-    immutable: true
     item_type:
       type: String
     min_size: 1
@@ -125,7 +129,12 @@ properties:
         type: NestedObject
         description: |
           The configuration to generate the Dialogflow agent that is associated to this Engine.
-        required: true
+          Exactly one of `agent_creation_config` or `dialogflow_agent_to_link` must be set.
+        immutable: true
+        ignore_read: true
+        exactly_one_of:
+          - 'chat_engine_config.0.agent_creation_config'
+          - 'chat_engine_config.0.dialogflow_agent_to_link'
         properties:
           - name: 'business'
             type: String
@@ -145,6 +154,18 @@ properties:
             type: String
             description: |
               Agent location for Agent creation, currently supported values: global/us/eu, it needs to be the same region as the Chat Engine.
+      - name: 'dialogflowAgentToLink'
+        type: String
+        description: |
+          The resource name of an existing Dialogflow agent to link to this Chat Engine. Format: `projects/<Project_ID>/locations/<Location_ID>/agents/<Agent_ID>`.
+          Exactly one of `agent_creation_config` or `dialogflow_agent_to_link` must be set.
+        immutable: true
+        ignore_read: true
+        validation:
+          regex: '^projects\/[a-zA-Z0-9-]+(?:\/locations\/[a-zA-Z0-9-]+)?\/agents\/[a-zA-Z0-9-]+$'
+        exactly_one_of:
+          - 'chat_engine_config.0.agent_creation_config'
+          - 'chat_engine_config.0.dialogflow_agent_to_link'
   - name: 'commonConfig'
     type: NestedObject
     description: |
