@@ -3,6 +3,8 @@ package fwprovider
 import (
     "context"
 
+    sdk_schema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
     "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/function"
@@ -33,9 +35,10 @@ var (
 )
 
 // New is a helper function to simplify provider server and testing implementation.
-func New() provider.ProviderWithMetaSchema {
+func New(primary *sdk_schema.Provider) provider.ProviderWithMetaSchema {
     return &FrameworkProvider{
         Version: version.ProviderVersion,
+        Primary: primary,
     }
 }
 
@@ -43,6 +46,7 @@ func New() provider.ProviderWithMetaSchema {
 type FrameworkProvider struct {
     fwtransport.FrameworkProviderConfig
     Version string
+    Primary *sdk_schema.Provider
 }
 
 // Metadata returns the provider type name.
