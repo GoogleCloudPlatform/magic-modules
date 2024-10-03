@@ -172,6 +172,13 @@ resource "google_service_account_iam_member" "delegate_create_target_token" {
   member             = "serviceAccount:${google_service_account.delegate.email}"
 }
 
+# Despite provisioning all the needed service accounts and permissions above
+# this test sometimes fails with "Permission 'iam.serviceAccounts.getAccessToken' denied on resource (or it may not exist)"
+# This can either be caused by
+#   - the service account not existing
+#   - or, the IAM Service Account Credentials API not being enabled
+# Splitting this test into 2 steps should ensure all the service accounts etc are present before we try to impersonate them,
+# but this sleep will make sure timing isn't a factor.
 resource "time_sleep" "wait_5_minutes" {
   depends_on = [
     google_service_account_iam_member.base_create_delegate_token,
