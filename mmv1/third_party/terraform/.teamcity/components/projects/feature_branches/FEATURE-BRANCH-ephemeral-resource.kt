@@ -41,7 +41,7 @@ fun featureBranchEphemeralResourcesSubProject(allConfig: AllContextParameters): 
     val packageName = "resourcemanager" // All ephemeral resources will be in the resourcemanager package
     val vcrConfig = getVcrAcceptanceTestConfig(allConfig) // Reused below for both MM testing build configs
     val trigger  = NightlyTriggerConfiguration(
-        branch = featureBranchEphemeralResources // triggered builds must test the feature branch
+        branch = "refs/heads/$featureBranchEphemeralResources" // triggered builds must test the feature branch
     )
 
 
