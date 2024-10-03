@@ -1,0 +1,111 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'QuotaAdjusterSettings'
+description: |
+  QuotaAdjusterSettings represents the preferred quota configuration specified for a project, folder or organization. There is only one QuotaAdjusterSettings resource for a quota value targeting a unique set of dimensions.
+min_version: beta
+references:
+  guides:
+    'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'
+  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1/projects.locations.'
+docs:
+id_format: '{{parent}}/locations/global/quotaAdjusterSettings'
+base_url: '{{parent}}/locations/global/quotaAdjusterSettings'
+self_link: '{{parent}}/locations/global/quotaAdjusterSettings'
+create_url: '{{parent}}/locations/global/quotaAdjusterSettings'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
+create_verb: 'PATCH'
+update_url: '{{parent}}/locations/global/quotaAdjusterSettings'
+update_verb: 'PATCH'
+# This is a singleton resource that cannot be deleted, so skip delete.
+exclude_delete: true
+import_format:
+  - '{{%parent}}/locations/global/quotaAdjusterSettings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'cloud_quotas_quota_adjuster_settings_basic'
+    primary_resource_id: 'adjuster_settings'
+    vars:
+      parent: "projects/445654108168"
+      enablement: "ENABLED"
+    test_vars_overrides:
+      'parent': '"projects/445654108168"'
+      'enablement': '"ENABLED"'
+parameters:
+  - name: 'parent'
+    type: String
+    description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
+    url_param_only: true
+    required: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'enablement'
+    type: Enum
+    description: |
+      Required. The configured value of the enablement at the given resource.
+    required: true
+    enum_values:
+      - 'DEFAULT'
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'effectiveContainer'
+    type: String
+    description: |
+      Fields to capture the hierarchy enablement.
+      The container (org/folder/project) that determines if the quota adjuster is set for this project/folder/org. We use the nearest-ancestor to determine the effective container.
+      The nearest ancestor (including this container) with `enabled` set (either true or false) will be returned.
+    output: true
+  - name: 'effectiveEnablement'
+    type: Enum
+    description: |
+      Based on the effective container`s setting above, determines Whether this container has the quota adjuster enabled.
+    output: true
+    enum_values:
+      - 'DEFAULT'
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'etag'
+    type: String
+    description: |
+      The current etag of the QuotaAdjusterSettings.
+      If an etag is provided on update and does not match the current server's etag of the QuotaAdjusterSettings, the request will be blocked and an ABORTED error will be returned.
+      See https://google.aip.dev/134#etags for more details on etags.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Update time stamp.
+      The timestamp when the QuotaAdjusterSettings was last updated.
+    output: true

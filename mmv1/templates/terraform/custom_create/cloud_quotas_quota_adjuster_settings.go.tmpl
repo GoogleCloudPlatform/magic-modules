@@ -1,0 +1,5 @@
+	_, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+    return resourceCloudQuotasQuotaAdjusterSettingsUpdate(d, meta)

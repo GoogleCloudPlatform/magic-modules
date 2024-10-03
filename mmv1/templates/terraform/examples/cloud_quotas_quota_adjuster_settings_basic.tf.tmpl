@@ -1,0 +1,5 @@
+resource "google_cloud_quotas_quota_adjuster_settings" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  parent        = "{{index $.Vars "parent"}}"
+  enablement    = "{{index $.Vars "enablement"}}"
+}

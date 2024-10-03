@@ -17,5 +17,7 @@ display_name: 'Cloud Quotas'
 versions:
   - name: 'ga'
     base_url: 'https://cloudquotas.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://autopush-cloudquotas.sandbox.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
