@@ -30,7 +30,7 @@ func NewGoogleFirebaseWebAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseWebAppConfigDataSource defines the data source implementation
 type GoogleFirebaseWebAppConfigDataSource struct {
-	client         *firebase.Service
+	fwresource.DataSourceWithConfigure
 	providerConfig *transport_tpg.Config
 }
 
@@ -131,28 +131,6 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 			},
 		},
 	}
-}
-
-func (d *GoogleFirebaseWebAppConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	d.client = p.NewFirebaseClient(ctx, p.UserAgent)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	d.providerConfig = p
 }
 
 func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

@@ -24,7 +24,7 @@ func NewGoogleClientConfigDataSource() datasource.DataSource {
 }
 
 type GoogleClientConfigDataSource struct {
-	providerConfig *transport_tpg.Config
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleClientConfigModel struct {
@@ -96,25 +96,6 @@ func (d *GoogleClientConfigDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
-func (d *GoogleClientConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	// Required for accessing project, region, zone and tokenSource
-	d.providerConfig = p
-}
-
 func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleClientConfigModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -131,18 +112,18 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	locationInfo := data.GetLocationDescription(d.providerConfig)
+	locationInfo := data.GetLocationDescription(d.Config)
 	region, _ := locationInfo.GetRegion()
 	zone, _ := locationInfo.GetZone()
 
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.Project, region.String(), zone.String()))
-	data.Project = types.StringValue(d.providerConfig.Project)
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.Config.Project, region.String(), zone.String()))
+	data.Project = types.StringValue(d.Config.Project)
 	data.Region = region
 	data.Zone = zone
 
 	// Convert default labels from SDK type system to plugin-framework data type
 	m := map[string]*string{}
-	for k, v := range d.providerConfig.DefaultLabels {
+	for k, v := range d.Config.DefaultLabels {
 		// m[k] = types.StringValue(v)
 		val := v
 		m[k] = &val
@@ -155,7 +136,7 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 
 	data.DefaultLabels = dls
 
-	token, err := d.providerConfig.TokenSource.Token()
+	token, err := d.Config.TokenSource.Token()
 	if err != nil {
 		resp.Diagnostics.AddError("Error setting access_token", err.Error())
 		return
