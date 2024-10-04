@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -31,7 +30,7 @@ func NewGoogleFirebaseAndroidAppConfigDataSource() datasource.DataSource {
 // GoogleFirebaseAndroidAppConfigDataSource defines the data source implementation
 type GoogleFirebaseAndroidAppConfigDataSource struct {
 	fwresource.DataSourceWithConfigure
-	providerConfig *transport_tpg.Config
+	fwresource.WithGetProject
 }
 
 type GoogleFirebaseAndroidAppConfigModel struct {
@@ -103,15 +102,18 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 	}
 
 	// Use provider_meta to set User-Agent
-	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, d.Config.UserAgent)
 
-	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.providerConfig.Project), &resp.Diagnostics)
+	// Check if provider-default value(s) need to be used
+	project := d.GetProject(data.Project, d.Config, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	data.Project = project
 
 	// GET Request
-	service := firebase.NewProjectsAndroidAppsService(d.client)
+	client := d.Config.NewFirebaseClient(ctx, userAgent)
+	service := firebase.NewProjectsAndroidAppsService(client)
 	appName := fmt.Sprintf("projects/%s/androidApps/%s/config", data.Project.ValueString(), data.AppId.ValueString())
 	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
