@@ -54,6 +54,10 @@ examples:
   - name: 'org_policy_policy_dry_run_spec'
     primary_resource_id: 'primary'
     exclude_test: true
+  - name: 'org_policy_policy_parameters_enforce'
+    primary_resource_id: 'primary'
+    exclude_test: true
+    min_version: 'beta'
 parameters:
   - name: 'parent'
     type: String
@@ -121,6 +125,14 @@ properties:
               send_empty_value: true
               custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
               custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
+            - name: 'parameters'
+              description: 'Optional. Required for Managed Constraints if parameters defined in constraints. Pass parameter values when policy enforcement is enabled. Ensure that parameter value types match those defined in the constraint definition. For example: { \"allowedLocations\" : [\"us-east1\", \"us-west1\"], \"allowAll\" : true }'
+              min_version: beta
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              validation:
+                function: 'validation.StringIsJSON'
             - name: 'condition'
               type: NestedObject
               description: 'A condition which determines whether this rule is used in the evaluation of the policy. When set, the `expression` field in the `Expr'' must include from 1 to 10 subexpressions, joined by the "||" or "&&" operators. Each subexpression must be of the form "resource.matchTag(''/tag_key_short_name, ''tag_value_short_name'')". or "resource.matchTagId(''tagKeys/key_id'', ''tagValues/value_id'')". where key_name and value_name are the resource names for Label Keys and Values. These names are available from the Tag Manager Service. An example expression is: "resource.matchTag(''123456789/environment, ''prod'')". or "resource.matchTagId(''tagKeys/123'', ''tagValues/456'')".'
@@ -197,6 +209,14 @@ properties:
               send_empty_value: true
               custom_flatten: 'templates/terraform/custom_flatten/enum_bool.go.tmpl'
               custom_expand: 'templates/terraform/custom_expand/enum_bool.go.tmpl'
+            - name: 'parameters'
+              description: 'Optional. Required for Managed Constraints if parameters defined in constraints. Pass parameter values when policy enforcement is enabled. Ensure that parameter value types match those defined in the constraint definition. For example: { \"allowedLocations\" : [\"us-east1\", \"us-west1\"], \"allowAll\" : true }'
+              min_version: beta
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              validation:
+                function: 'validation.StringIsJSON'
             - name: 'condition'
               type: NestedObject
               description: 'A condition which determines whether this rule is used in the evaluation of the policy. When set, the `expression` field in the `Expr'' must include from 1 to 10 subexpressions, joined by the "||" or "&&" operators. Each subexpression must be of the form "resource.matchTag(''/tag_key_short_name, ''tag_value_short_name'')". or "resource.matchTagId(''tagKeys/key_id'', ''tagValues/value_id'')". where key_name and value_name are the resource names for Label Keys and Values. These names are available from the Tag Manager Service. An example expression is: "resource.matchTag(''123456789/environment, ''prod'')". or "resource.matchTagId(''tagKeys/123'', ''tagValues/456'')".'
