@@ -70,6 +70,7 @@ examples:
     exclude_test: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
+    primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       git_repository_name: 'my/repository'
