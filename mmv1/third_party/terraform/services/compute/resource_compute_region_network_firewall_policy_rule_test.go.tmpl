@@ -184,7 +184,7 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
   tls_inspect     = false
   rule_name       = "tf-test-rule-%{random_suffix}"
   project         = "projects/%{project_name}"
-  
+
   target_service_accounts = ["%{service_acct}"]
 
   match {
@@ -260,7 +260,7 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
   region          = "%{region}"
   tls_inspect     = false
   rule_name       = "tf-test-updated-rule-%{random_suffix}"
-  project         = "projects/%{project_name}"
+  project         = "%{project_name}"
 
   match {
     dest_ip_ranges = ["0.0.0.0/0"]

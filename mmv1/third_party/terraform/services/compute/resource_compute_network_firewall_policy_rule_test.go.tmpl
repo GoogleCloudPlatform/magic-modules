@@ -205,16 +205,16 @@ resource "google_compute_network_firewall_policy" "basic_network_firewall_policy
 }
 
 resource "google_compute_network_firewall_policy_rule" "primary" {
-  action                  = "allow"
-  description             = "This is a simple rule description"
-  direction               = "INGRESS"
-  disabled                = false
-  enable_logging          = true
-  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
-  priority                = 1000
-  tls_inspect             = false
-  rule_name               = "tf-test-rule-%{random_suffix}"
-  project                 = "projects/%{project_name}"
+  action          = "allow"
+  description     = "This is a simple rule description"
+  direction       = "INGRESS"
+  disabled        = false
+  enable_logging  = true
+  firewall_policy = google_compute_network_firewall_policy.basic_network_firewall_policy.name
+  priority        = 1000
+  tls_inspect     = false
+  rule_name       = "tf-test-rule-%{random_suffix}"
+  project         = "%{project_name}"
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
