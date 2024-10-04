@@ -35,8 +35,12 @@ import (
 
     "fmt"
     "log"
+    "net/http"
     "reflect"
-{{- if and (not $.Immutable) ($.UpdateMask) }}
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
     "strings"
 {{- end }}
     "time"
