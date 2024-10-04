@@ -88,7 +88,6 @@ properties:
     description: Output only. The current lifecycle state of this hub.
     output: true
     exactly_one_of:
-      - STATE_UNSPECIFIED
       - CREATING
       - ACTIVE
       - DELETING
