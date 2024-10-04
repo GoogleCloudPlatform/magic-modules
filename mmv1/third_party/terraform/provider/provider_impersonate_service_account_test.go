@@ -127,6 +127,9 @@ func testAccSdkProvider_impersonate_service_account_usage(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		// No PreCheck for checking ENVs
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context),
