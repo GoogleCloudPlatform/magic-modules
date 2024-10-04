@@ -71,6 +71,12 @@ examples:
     vars:
       internal_range_name: 'overlap-range'
       network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_migration'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'migration'
+      network_name: 'internal-ranges'
+      source_subnet_name: 'source-subnet'
 parameters:
 properties:
   - name: 'name'
@@ -163,7 +169,7 @@ properties:
           The project for the source resource should match the project for the
           InternalRange.
           An example /projects/{project}/regions/{region}/subnetworks/{subnet}
-        requred: true
+        required: true
       - name: 'target'
         type: String
         description: |
