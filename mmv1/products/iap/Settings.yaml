@@ -294,10 +294,8 @@ properties:
               Raw string CEL expression. Must return a list of attributes. A maximum of 45 attributes can
               be selected. Expressions can select different attribute types from attributes:
               attributes.saml_attributes, attributes.iap_attributes.
-              attributes.saml_attributes, attributes.iap_attributes.
           - name: 'enable'
             type: Boolean
             description: |
               Whether the provided attribute propagation settings should be evaluated on user requests.
               If set to true, attributes returned from the expression will be propagated in the set output credentials.
-
