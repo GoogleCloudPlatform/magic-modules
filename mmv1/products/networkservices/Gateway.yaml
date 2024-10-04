@@ -53,7 +53,6 @@ async:
     message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
   pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
 examples:
@@ -212,7 +211,6 @@ properties:
     immutable: true
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
-    custom_flatten: 'templates/terraform/custom_flatten/network_services_gateway_routing_mode.go.tmpl'
     enum_values:
       - 'EXPLICIT_ROUTING_MODE'
       - 'NEXT_HOP_ROUTING_MODE'
