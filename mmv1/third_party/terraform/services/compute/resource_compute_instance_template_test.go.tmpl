@@ -1619,21 +1619,21 @@ func TestAccComputeInstanceTemplate_keyRevocationActionType(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	context_1 := map[string]interface{}{
 		"instance_name":              fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"key_revocation_action_type": `key_revocation_action_type = "NONE"`,
+		"key_revocation_action_type": `"NONE"`,
 	}
 	context_2 := map[string]interface{}{
 		"instance_name":              context_1["instance_name"].(string),
-		"key_revocation_action_type": `key_revocation_action_type = "STOP"`,
+		"key_revocation_action_type": `"STOP"`,
 	}
 	context_3 := map[string]interface{}{
 		"instance_name":              context_1["instance_name"].(string),
-		"key_revocation_action_type": ``, //no parameter should be set to NONE as default
+		"key_revocation_action_type": `""`,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_keyRevocationActionType(context_1),
@@ -1656,7 +1656,7 @@ func TestAccComputeInstanceTemplate_keyRevocationActionType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
-					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "key_revocation_action_type", "NONE"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "key_revocation_action_type", ""),
 				),
 			},
 		},
@@ -4474,7 +4474,7 @@ resource "google_compute_instance_template" "foobar" {
 	network = "default"
   }
 
-  %{key_revocation_action_type}
+  key_revocation_action_type = %{key_revocation_action_type}
 }
 `, context)
 }
