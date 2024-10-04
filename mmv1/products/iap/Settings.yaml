@@ -1,0 +1,303 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Settings'
+description: |
+  gcloud iap settings - manage IAP settings
+references:
+  guides:
+    'Customizing IAP': 'https://cloud.google.com/iap/docs/customizing'
+  api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
+docs:
+id_format: '{{name}}/iapSettings'
+base_url: '{{name}}:iapSettings'
+self_link: '{{name}}:iapSettings'
+create_verb: 'PATCH'
+update_url: '{{name}}:iapSettings'
+update_verb: 'PATCH'
+import_format:
+  - '{{name}}/iapSettings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/clear_iap_settings.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/iap_settings.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+# Skipping the sweeper because instances will be deleted during cluster sweeps
+exclude_sweeper: true
+examples:
+  - name: 'iap_settings_basic'
+    primary_resource_id: 'iap_settings'
+    vars:
+      backend_service_name: 'iap-settings-tf'
+      health_check_name: 'iap-bs-health-check'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the IAP protected resource. Name can have below resources:
+      * organizations/{organization_id}
+      * folders/{folder_id}
+      * projects/{projects_id}
+      * projects/{projects_id}/iap_web
+      * projects/{projects_id}/iap_web/compute
+      * projects/{projects_id}/iap_web/compute-{region}
+      * projects/{projects_id}/iap_web/compute/service/{service_id}
+      * projects/{projects_id}/iap_web/compute-{region}/service/{service_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}
+      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}/version/{version_id}
+
+    required: true
+    immutable: true
+    ignore_read: true
+  - name: 'accessSettings'
+    type: NestedObject
+    description: |
+      Top level wrapper for all access related setting in IAP.
+    properties:
+      - name: 'gcipSettings'
+        type: NestedObject
+        description: |
+          GCIP claims and endpoint configurations for 3p identity providers.
+        properties:
+          - name: 'tenantIds'
+            type: Array
+            description: |
+              GCIP tenant ids that are linked to the IAP resource. tenantIds could be a string
+              beginning with a number character to indicate authenticating with GCIP tenant flow,
+              or in the format of _ to indicate authenticating with GCIP agent flow. If agent flow
+              is used, tenantIds should only contain one single element, while for tenant flow,
+              tenantIds can contain multiple elements.
+            item_type:
+              type: String
+          - name: 'loginPageUri'
+            type: String
+            description: |
+              Login page URI associated with the GCIP tenants. Typically, all resources within
+              the same project share the same login page, though it could be overridden at the
+              sub resource level.
+      - name: 'corsSettings'
+        type: NestedObject
+        description: |
+          Configuration to allow cross-origin requests via IAP.
+        properties:
+          - name: 'allowHttpOptions'
+            type: Boolean
+            description: |
+              Configuration to allow HTTP OPTIONS calls to skip authorization.
+              If undefined, IAP will not apply any special logic to OPTIONS requests.
+      - name: 'oauthSettings'
+        type: NestedObject
+        description: |
+          Settings to configure IAP's OAuth behavior.
+        properties:
+          - name: 'loginHint'
+            type: String
+            description: |
+              Domain hint to send as hd=? parameter in OAuth request flow.
+              Enables redirect to primary IDP by skipping Google's login screen.
+              (https://developers.google.com/identity/protocols/OpenIDConnect#hd-param)
+              Note: IAP does not verify that the id token's hd claim matches this value
+              since access behavior is managed by IAM policies.
+          - name: 'programmaticClients'
+            type: Array
+            description: |
+              List of client ids allowed to use IAP programmatically.
+            item_type:
+              type: String
+      - name: 'reauthSettings'
+        type: NestedObject
+        description: |
+          Settings to configure reauthentication policies in IAP.
+        properties:
+          - name: 'method'
+            type: Enum
+            description: |
+              Reauth method requested. The possible values are:
+
+              * `LOGIN`: Prompts the user to log in again.
+              * `SECURE_KEY`: User must use their secure key 2nd factor device.
+              * `ENROLLED_SECOND_FACTORS`: User can use any enabled 2nd factor.
+            required: true
+            enum_values:
+              - 'LOGIN'
+              - 'SECURE_KEY'
+              - 'ENROLLED_SECOND_FACTORS'
+          - name: 'maxAge'
+            type: String
+            description: |
+              Reauth session lifetime, how long before a user has to reauthenticate again.
+              A duration in seconds with up to nine fractional digits, ending with 's'.
+              Example: "3.5s".
+            required: true
+          - name: 'policyType'
+            type: Enum
+            description: |
+              How IAP determines the effective policy in cases of hierarchical policies.
+              Policies are merged from higher in the hierarchy to lower in the hierarchy.
+              The possible values are:
+
+              * `MINIMUM`: This policy acts as a minimum to other policies, lower in the hierarchy.
+              		   Effective policy may only be the same or stricter.
+              * `DEFAULT`: This policy acts as a default if no other reauth policy is set.
+            required: true
+            enum_values:
+              - 'MINIMUM'
+              - 'DEFAULT'
+      - name: 'allowedDomainsSettings'
+        type: NestedObject
+        description: |
+          Settings to configure and enable allowed domains.
+        properties:
+          - name: 'domains'
+            type: Array
+            description: |
+              List of trusted domains.
+            item_type:
+              type: String
+          - name: 'enable'
+            type: Boolean
+            description: |
+              Configuration for customers to opt in for the feature.
+      - name: 'workforceIdentitySettings'
+        type: NestedObject
+        description: |
+          Settings to configure the workforce identity federation, including workforce pools
+          and OAuth 2.0 settings.
+        properties:
+          - name: 'workforcePools'
+            type: Array
+            description: |
+              The workforce pool resources. Only one workforce pool is accepted.
+            item_type:
+              type: String
+            max_size: 1
+          - name: 'oauth2'
+            type: NestedObject
+            description: |
+              OAuth 2.0 settings for IAP to perform OIDC flow with workforce identity
+              federation services.
+            properties:
+              - name: 'clientId'
+                type: String
+                description: |
+                  The OAuth 2.0 client ID registered in the workforce identity
+                  federation OAuth 2.0 Server.
+              - name: 'clientSecret'
+                type: String
+                description: |
+                  Input only. The OAuth 2.0 client secret created while registering
+                  the client ID.
+                ignore_read: true
+                sensitive: true
+              - name: 'clientSecretSha256'
+                type: String
+                description: |
+                  Output only. SHA256 hash value for the client secret. This field
+                  is returned by IAP when the settings are retrieved.
+                output: true
+      - name: 'identitySources'
+        type: Array
+        description: |
+          Identity sources that IAP can use to authenticate the end user. Only one identity source
+          can be configured. The possible values are:
+
+          * `WORKFORCE_IDENTITY_FEDERATION`: Use external identities set up on Google Cloud Workforce
+            				     Identity Federation.
+        item_type:
+          type: Enum
+          description: |
+            Identity sources Enum
+          enum_values:
+            - 'WORKFORCE_IDENTITY_FEDERATION'
+  - name: 'applicationSettings'
+    type: NestedObject
+    description: |
+      Top level wrapper for all application related settings in IAP.
+    properties:
+      - name: 'csmSettings'
+        type: NestedObject
+        description: |
+          Settings to configure IAP's behavior for a service mesh.
+        properties:
+          - name: 'rctokenAud'
+            type: String
+            description: |
+              Audience claim set in the generated RCToken. This value is not validated by IAP.
+      - name: 'accessDeniedPageSettings'
+        type: NestedObject
+        description: |
+          Customization for Access Denied page. IAP allows customers to define a custom URI
+          to use as the error page when access is denied to users. If IAP prevents access
+          to this page, the default IAP error page will be displayed instead.
+        properties:
+          - name: 'accessDeniedPageUri'
+            type: String
+            description: |
+              The URI to be redirected to when access is denied.
+          - name: 'generateTroubleshootingUri'
+            type: Boolean
+            description: |
+              Whether to generate a troubleshooting URL on access denied events to this application.
+          - name: 'remediationTokenGenerationEnabled'
+            type: Boolean
+            description: |
+              Whether to generate remediation token on access denied events to this application.
+      - name: 'cookieDomain'
+        type: String
+        description: |
+          The Domain value to set for cookies generated by IAP. This value is not validated by the API,
+          but will be ignored at runtime if invalid.
+      - name: 'attributePropagationSettings'
+        type: NestedObject
+        description: |
+          Settings to configure attribute propagation.
+        properties:
+          - name: 'outputCredentials'
+            type: Array
+            description: |
+              Which output credentials attributes selected by the CEL expression should be propagated in.
+              All attributes will be fully duplicated in each selected output credential.
+              Possible values are:
+
+              * `HEADER`: Propagate attributes in the headers with "x-goog-iap-attr-" prefix.
+              * `JWT`: Propagate attributes in the JWT of the form:
+                       "additional_claims": { "my_attribute": ["value1", "value2"] }
+              * `RCTOKEN`: Propagate attributes in the RCToken of the form: "
+                           additional_claims": { "my_attribute": ["value1", "value2"] }
+            item_type:
+              type: Enum
+              description: |
+                Output credentials attributes selected by the CEL expression
+              enum_values:
+                - 'HEADER'
+                - 'JWT'
+                - 'RCTOKEN'
+          - name: 'expression'
+            type: String
+            description: |
+              Raw string CEL expression. Must return a list of attributes. A maximum of 45 attributes can
+              be selected. Expressions can select different attribute types from attributes:
+              attributes.saml_attributes, attributes.iap_attributes.
+              attributes.saml_attributes, attributes.iap_attributes.
+          - name: 'enable'
+            type: Boolean
+            description: |
+              Whether the provided attribute propagation settings should be evaluated on user requests.
+              If set to true, attributes returned from the expression will be propagated in the set output credentials.
+
