@@ -91,7 +91,6 @@ properties:
       - CREATING
       - ACTIVE
       - DELETING
-    default_value: null
   - name: autoAccept
     type: NestedObject
     description: Optional. The auto-accept setting for this group.
