@@ -2,13 +2,13 @@ package resourcemanager
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -24,7 +24,7 @@ func NewGoogleClientOpenIDUserinfoDataSource() datasource.DataSource {
 }
 
 type GoogleClientOpenIDUserinfoDataSource struct {
-	providerConfig *transport_tpg.Config
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleClientOpenIDUserinfoModel struct {
@@ -63,25 +63,6 @@ This datasource enables you to export the email of the account you've authentica
 	}
 }
 
-func (d *GoogleClientOpenIDUserinfoDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	// Required for accessing userAgent and passing as an argument into a util function
-	d.providerConfig = p
-}
-
 func (d *GoogleClientOpenIDUserinfoDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleClientOpenIDUserinfoModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -99,8 +80,8 @@ func (d *GoogleClientOpenIDUserinfoDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, d.providerConfig.UserAgent)
-	email, err := transport_tpg.GetCurrentUserEmail(d.providerConfig, userAgent)
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, d.Config.UserAgent)
+	email, err := transport_tpg.GetCurrentUserEmail(d.Config, userAgent)
 	if err != nil {
 		diags.AddError("error retrieving userinfo for your provider credentials", err.Error())
 		return

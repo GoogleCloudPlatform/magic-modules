@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -30,8 +29,7 @@ func NewGoogleFirebaseWebAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseWebAppConfigDataSource defines the data source implementation
 type GoogleFirebaseWebAppConfigDataSource struct {
-	client         *firebase.Service
-	providerConfig *transport_tpg.Config
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleFirebaseWebAppConfigModel struct {
@@ -133,28 +131,6 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 	}
 }
 
-func (d *GoogleFirebaseWebAppConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	d.client = p.NewFirebaseClient(ctx, p.UserAgent)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	d.providerConfig = p
-}
-
 func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleFirebaseWebAppConfigModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -172,15 +148,16 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 	}
 
 	// Use provider_meta to set User-Agent
-	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, d.Config.UserAgent)
 
-	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.providerConfig.Project), &resp.Diagnostics)
+	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.Config.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// GET Request
-	service := firebase.NewProjectsWebAppsService(d.client)
+	client := d.Config.NewFirebaseClient(ctx, userAgent)
+	service := firebase.NewProjectsWebAppsService(client)
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
 	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
