@@ -3537,15 +3537,15 @@ func TestAccComputeInstance_keyRevocationActionType(t *testing.T) {
 	var instance compute.Instance
 	context_1 := map[string]interface{}{
 		"instance_name":              fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"key_revocation_action_type": `key_revocation_action_type = "NONE"`,
+		"key_revocation_action_type": `"NONE"`,
 	}
 	context_2 := map[string]interface{}{
 		"instance_name":              context_1["instance_name"].(string),
-		"key_revocation_action_type": `key_revocation_action_type = "STOP"`,
+		"key_revocation_action_type": `"STOP"`,
 	}
 	context_3 := map[string]interface{}{
 		"instance_name":              context_1["instance_name"].(string),
-		"key_revocation_action_type": ``, //no parameter should be set to NONE as default
+		"key_revocation_action_type": `""`,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3574,7 +3574,7 @@ func TestAccComputeInstance_keyRevocationActionType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", "NONE"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", ""),
 				),
 			},
 		},
@@ -10910,7 +10910,7 @@ resource "google_compute_instance" "foobar" {
 	network = "default"
   }
 
-  %{key_revocation_action_type}
+  key_revocation_action_type = %{key_revocation_action_type}
 }
 `, context)
 }
