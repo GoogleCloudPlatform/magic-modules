@@ -852,6 +852,9 @@ func TestAccComposer1Environment_withNodeConfig(t *testing.T) {
 		PreCheck:		          func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposer1Environment_nodeCfg(envName, network, subnetwork, serviceAccount),
