@@ -23,7 +23,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/backupVaults?backupVaul
 update_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_update}}'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_delete}}&allowMissing={{allow_missing}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{ignore_inactive_datasources}}&ignoreBackupPlanReferences={{ignore_backup_plan_references}}&allowMissing={{allow_missing}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}'
 timeouts:
@@ -78,11 +78,18 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     default_value: false
-  - name: 'force_delete'
+  - name: 'ignore_inactive_datasources'
     type: Boolean
     description: |
        If set, the following restrictions against deletion of the backup vault instance can be overridden:
           * deletion of a backup vault instance containing no backups, but still containing empty datasources.
+    min_version: 'beta'
+    url_param_only: true
+    default_value: false
+  - name: 'ignore_backup_plan_references'
+    type: Boolean
+    description: |
+       If set, the following restrictions against deletion of the backup vault instance can be overridden:
           * deletion of a backup vault instance that is being referenced by an active backup plan.
     min_version: 'beta'
     url_param_only: true
