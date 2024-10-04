@@ -17,7 +17,7 @@ func TestAccDataprocClusterIamBinding(t *testing.T) {
 	role := "roles/editor"
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s",
@@ -63,7 +63,7 @@ func TestAccDataprocClusterIamMember(t *testing.T) {
 	role := "roles/editor"
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s %s serviceAccount:%s",
@@ -105,7 +105,7 @@ func TestAccDataprocClusterIamPolicy(t *testing.T) {
 	role := "roles/editor"
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	subnetworkName := acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-cluster", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/clusters/%s",
