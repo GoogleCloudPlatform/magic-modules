@@ -34,7 +34,7 @@ func TestAccNetworkConnectivityGroup_BasicGroup(t *testing.T) {
 				ResourceName:            "google_network_connectivity_group.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"hub", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"hub", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkConnectivityGroup_BasicGroupUpdate0(context),
@@ -43,7 +43,7 @@ func TestAccNetworkConnectivityGroup_BasicGroup(t *testing.T) {
 				ResourceName:            "google_network_connectivity_group.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"hub", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"hub", "terraform_labels"},
 			},
 		},
 	})
@@ -62,6 +62,10 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_group" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   name = "default"
+  labels = {
+    label-one = "value-one"
+  }
+  description = "A sample hub group"
   auto_accept {
     auto_accept_projects = ["tf-test-name%{project_random_suffix_1}"]
   }
@@ -82,6 +86,10 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_group" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   name = "default"
+  labels = {
+    label-one = "value-two"
+  }
+  description = "A sample hub group update"
   auto_accept {
     auto_accept_projects = ["tf-test-name%{project_random_suffix_1}", "tf-test-name%{project_random_suffix_2}"]
   }
