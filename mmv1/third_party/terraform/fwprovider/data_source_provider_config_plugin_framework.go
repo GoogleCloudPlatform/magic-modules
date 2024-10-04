@@ -2,7 +2,6 @@ package fwprovider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -26,7 +25,7 @@ func NewGoogleProviderConfigPluginFrameworkDataSource() datasource.DataSource {
 }
 
 type GoogleProviderConfigPluginFrameworkDataSource struct {
-	providerConfig *transport_tpg.Config
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleProviderConfigPluginFrameworkModel struct {
@@ -167,25 +166,6 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Schema(ctx context.Conte
 	}
 }
 
-func (d *GoogleProviderConfigPluginFrameworkDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*transport_tpg.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	// Required for accessing project, region, zone and tokenSource
-	d.providerConfig = p
-}
-
 func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleProviderConfigPluginFrameworkModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -203,12 +183,12 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 
 	// Copy all values from the provider config into this data source
-	data.Credentials = types.StringValue(d.providerConfig.Credentials)
-	data.AccessToken = types.StringValue(d.providerConfig.AccessToken)
-	data.ImpersonateServiceAccount = types.StringValue(d.providerConfig.ImpersonateServiceAccount)
+	data.Credentials = types.StringValue(d.Config.Credentials)
+	data.AccessToken = types.StringValue(d.Config.AccessToken)
+	data.ImpersonateServiceAccount = types.StringValue(d.Config.ImpersonateServiceAccount)
 
-	delegateAttrs := make([]attr.Value, len(d.providerConfig.ImpersonateServiceAccountDelegates))
-	for i, delegate := range d.providerConfig.ImpersonateServiceAccountDelegates {
+	delegateAttrs := make([]attr.Value, len(d.Config.ImpersonateServiceAccountDelegates))
+	for i, delegate := range d.Config.ImpersonateServiceAccountDelegates {
 		delegateAttrs[i] = types.StringValue(delegate)
 	}
 	delegates, di := types.ListValue(types.StringType, delegateAttrs)
@@ -217,14 +197,14 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 	data.ImpersonateServiceAccountDelegates = delegates
 
-	data.Project = types.StringValue(d.providerConfig.Project)
-	data.Region = types.StringValue(d.providerConfig.Region)
-	data.BillingProject = types.StringValue(d.providerConfig.BillingProject)
-	data.Zone = types.StringValue(d.providerConfig.Zone)
-	data.UniverseDomain = types.StringValue(d.providerConfig.UniverseDomain)
+	data.Project = types.StringValue(d.Config.Project)
+	data.Region = types.StringValue(d.Config.Region)
+	data.BillingProject = types.StringValue(d.Config.BillingProject)
+	data.Zone = types.StringValue(d.Config.Zone)
+	data.UniverseDomain = types.StringValue(d.Config.UniverseDomain)
 
-	scopeAttrs := make([]attr.Value, len(d.providerConfig.Scopes))
-	for i, scope := range d.providerConfig.Scopes {
+	scopeAttrs := make([]attr.Value, len(d.Config.Scopes))
+	for i, scope := range d.Config.Scopes {
 		scopeAttrs[i] = types.StringValue(scope)
 	}
 	scopes, di := types.ListValue(types.StringType, scopeAttrs)
@@ -233,11 +213,11 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 	data.Scopes = scopes
 
-	data.UserProjectOverride = types.BoolValue(d.providerConfig.UserProjectOverride)
-	data.RequestReason = types.StringValue(d.providerConfig.RequestReason)
+	data.UserProjectOverride = types.BoolValue(d.Config.UserProjectOverride)
+	data.RequestReason = types.StringValue(d.Config.RequestReason)
 
-	lbs := make(map[string]attr.Value, len(d.providerConfig.DefaultLabels))
-	for k, v := range d.providerConfig.DefaultLabels {
+	lbs := make(map[string]attr.Value, len(d.Config.DefaultLabels))
+	for k, v := range d.Config.DefaultLabels {
 		lbs[k] = types.StringValue(v)
 	}
 	labels, di := types.MapValueFrom(ctx, types.StringType, lbs)
@@ -246,8 +226,8 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 	data.DefaultLabels = labels
 
-	data.AddTerraformAttributionLabel = types.BoolValue(d.providerConfig.AddTerraformAttributionLabel)
-	data.TerraformAttributionLabelAdditionStrategy = types.StringValue(d.providerConfig.TerraformAttributionLabelAdditionStrategy)
+	data.AddTerraformAttributionLabel = types.BoolValue(d.Config.AddTerraformAttributionLabel)
+	data.TerraformAttributionLabelAdditionStrategy = types.StringValue(d.Config.TerraformAttributionLabelAdditionStrategy)
 
 	// Warn users against using this data source
 	resp.Diagnostics.Append(diag.NewWarningDiagnostic(
