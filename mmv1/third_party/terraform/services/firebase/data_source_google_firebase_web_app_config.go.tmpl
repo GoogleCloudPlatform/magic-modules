@@ -152,10 +152,12 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.providerConfig.Project), &resp.Diagnostics)
+	// Check if provider-default value(s) need to be used
+	project := d.GetProject(data.Project, d.Config, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	data.Project = project
 
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
 	data.Id = data.WebAppId
