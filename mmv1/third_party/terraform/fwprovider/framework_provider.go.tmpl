@@ -28,6 +28,7 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces
 var (
+    _ provider.Provider               = &FrameworkProvider{}
     _ provider.ProviderWithMetaSchema = &FrameworkProvider{}
     _ provider.ProviderWithFunctions  = &FrameworkProvider{}
 )
