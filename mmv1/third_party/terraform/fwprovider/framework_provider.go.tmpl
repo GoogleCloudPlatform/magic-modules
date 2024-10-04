@@ -249,7 +249,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 // Configure prepares the metadata/'meta' required for data sources and resources to function.
 // Configuration logic implemented here should take user inputs and use them to populate a struct
 // with that necessary metadata, e.g. default project value, configured client, etc.
-// That prepared 'meta' struct is then returned in the response.
+// That prepared 'meta' struct is then returned in the response, and that value will later be supplied to all resources/data sources when they need to configure themselves.
 func (p *FrameworkProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
     var data fwmodels.ProviderModel
 
