@@ -416,6 +416,15 @@ resource "google_project_iam_member" "healthcare_agent_storage_object_admin" {
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
 }
 
+# TestAccHealthcarePipelineJob_healthcarePipelineJobMappingReconDestExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobReconciliationExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobWhistleMappingExample
+resource "google_project_iam_member" "healthcare_agent_fhir_resource_editor" {
+  project = google_project.proj.project_id
+  role    = "roles/healthcare.fhirResourceEditor"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+}
+
 # TestAccVertexAIEndpoint_vertexAiEndpointNetwork
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeExample
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeWithBetaFieldsExample
