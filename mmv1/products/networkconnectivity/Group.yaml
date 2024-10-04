@@ -38,7 +38,7 @@ examples:
   - name: 'network_connectivity_group_basic'
     primary_resource_id: 'primary'
     vars:
-      hub_name: "hub1"
+      hub_name: "network-connectivity-hub1"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
 description: The NetworkConnectivity Group resource
