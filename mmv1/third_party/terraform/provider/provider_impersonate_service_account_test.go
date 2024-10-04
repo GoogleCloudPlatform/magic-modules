@@ -181,6 +181,14 @@ resource "google_service_account_iam_member" "token" {
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
 }
+
+# To ensure that all permissions have propagated before the next test step, we add this sleep
+resource "time_sleep" "wait_5_minutes" {
+  depends_on = [
+    google_service_account_iam_member.token
+  ]
+  create_duration = "300s"	
+}
 `, context)
 }
 
