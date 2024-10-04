@@ -170,7 +170,7 @@ resource "google_network_services_gateway" "default" {
 	return config
 }
 
-func TestAccNetworkServicesGateway_updateSwp(t *testing.T) {
+func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	cmName := fmt.Sprintf("tf-test-gateway-swp-cm-%s", acctest.RandString(t, 10))
 	netName := fmt.Sprintf("tf-test-gateway-swp-net-%s", acctest.RandString(t, 10))
 	subnetName := fmt.Sprintf("tf-test-gateway-swp-subnet-%s", acctest.RandString(t, 10))

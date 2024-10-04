@@ -208,7 +208,6 @@ properties:
       type: String
   - name: 'routingMode'
     type: Enum
-    immutable: true
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
     enum_values:
