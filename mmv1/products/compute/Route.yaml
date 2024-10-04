@@ -228,6 +228,24 @@ properties:
     description: |
       URL to a Network that should handle matching packets.
     output: true
+  - name: 'nextHopOrigin'
+    type: String
+    description: |
+      Indicates the origin of the route. Can be IGP (Interior Gateway Protocol), EGP (Exterior Gateway Protocol), or INCOMPLETE.
+    min_version: 'beta'
+    output: true
+  - name: 'nextHopMed'
+    type: String
+    description: |
+      Multi-Exit Discriminator, a BGP route metric that indicates the desirability of a particular route in a network.
+    min_version: 'beta'
+    output: true
+  - name: 'nextHopInterRegionCost'
+    type: String
+    description: |
+      Internal fixed region-to-region cost that Google Cloud calculates based on factors such as network performance, distance, and available bandwidth between regions.
+    min_version: 'beta'
+    output: true
   - name: 'nextHopIlb'
     type: String
     description: |
