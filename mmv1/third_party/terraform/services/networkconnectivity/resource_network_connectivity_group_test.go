@@ -34,7 +34,7 @@ func TestAccNetworkConnectivityGroup_BasicGroup(t *testing.T) {
 				ResourceName:            "google_network_connectivity_group.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"hub", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"hub", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkConnectivityGroup_BasicGroupUpdate0(context),
@@ -43,7 +43,7 @@ func TestAccNetworkConnectivityGroup_BasicGroup(t *testing.T) {
 				ResourceName:            "google_network_connectivity_group.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"hub", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"hub", "labels", "terraform_labels"},
 			},
 		},
 	})
