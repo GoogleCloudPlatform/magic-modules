@@ -38,7 +38,7 @@ examples:
   - name: 'network_connectivity_group_basic'
     primary_resource_id: 'primary'
     vars:
-      hub_name: "hub1"
+      hub_name: "network-connectivity-hub1"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
 description: The NetworkConnectivity Group resource
@@ -56,7 +56,7 @@ parameters:
 properties:
   - name: name
     type: Enum
-    description: 'The name of the group. Group names must be unique. They use the following form: `projects/{projectNumber}/locations/global/hubs/{hub}/groups/{groupId}`'
+    description: 'The name of the group. Group names must be unique.
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     required: true
     immutable: true
