@@ -6,7 +6,7 @@ if err != nil {
 
 // Get cancel url
 var cancelUrl string
-cancelUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}/cancel")
+cancelUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}/cancel")
 
 if err != nil {
 	return err
@@ -14,12 +14,12 @@ if err != nil {
 
 // Get delete url
 var deleteUrl string
-deleteUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}")
+deleteUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}instance_group_manager{{"}}"}}/resizeRequests/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return err
 }
 
-// Get current state (accepted or not) and delete
+// Either cancel and delete the request based on current state or delete
 if d.Get("state") == "CREATING" || d.Get("state") == "ACCEPTED" {
 	// cancel resize request
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -38,7 +38,7 @@ if d.Get("state") == "CREATING" || d.Get("state") == "ACCEPTED" {
 	err = ComputeOperationWaitTime(
 		config, res, project, "Cancelling the resize request", userAgent,
 		d.Timeout(schema.TimeoutDelete))
-	
+
 	if err != nil {
 		return err
 	}
