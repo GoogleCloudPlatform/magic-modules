@@ -34,6 +34,8 @@ async:
   error:
     path: 'error/errors'
     message: 'message'
+# A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
+exclude_sweeper: true
 examples:
   - name: 'network_connectivity_group_basic'
     primary_resource_id: 'primary'
@@ -61,8 +63,6 @@ properties:
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    # A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
-    exclude_sweeper: true
     enum_values:
       - 'default'
       - 'center'
