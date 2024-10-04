@@ -1,6 +1,7 @@
 package resourcemanager
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			resourceGoogleServiceAccountPlanOutputs,
 		),
 		Schema: map[string]*schema.Schema{
 			"email": {
@@ -321,4 +323,24 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceGoogleServiceAccountPlanOutputs(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if !d.HasChange("account_id") {
+		return nil
+	}
+
+	aid := d.Get("account_id")
+	proj := d.Get("project")
+	if aid != nil && proj != nil {
+		email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
+		if err := d.SetNew("email", email); err != nil {
+			return fmt.Errorf("error setting email: %s", err)
+		}
+		if err := d.SetNew("member", "serviceAccount:"+email); err != nil {
+			return fmt.Errorf("error setting member: %s", err)
+		}
+	}
+
+	return nil
 }
