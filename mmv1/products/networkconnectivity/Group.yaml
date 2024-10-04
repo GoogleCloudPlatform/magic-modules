@@ -14,7 +14,7 @@
 name: Group
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
-create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects
+create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
 self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
 create_verb: 'PATCH'
 update_verb: 'PATCH'
@@ -80,7 +80,7 @@ properties:
     description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
   - name: description
     type: String
-    description: An optional description of the hub.
+    description: An optional description of the group.
   - name: uid
     type: String
     description: Output only. The Google-generated UUID for the group. This value is unique across all group resources. If a group is deleted and another with the same name is created, the new route table is assigned a different uniqueId.

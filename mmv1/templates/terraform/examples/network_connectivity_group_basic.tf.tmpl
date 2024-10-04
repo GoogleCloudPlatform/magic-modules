@@ -9,6 +9,10 @@ resource "google_network_connectivity_hub" "basic_hub"  {
 resource "google_network_connectivity_group" "{{$.PrimaryResourceId}}"  {
  hub         = google_network_connectivity_hub.basic_hub.id
  name        = "default"
+ labels = {
+  label-one = "value-one"
+ }
+ description = "A sample hub group"
  auto_accept {
     auto_accept_projects = [
       "{{index $.Vars "auto_accept_project_1_name"}}", 

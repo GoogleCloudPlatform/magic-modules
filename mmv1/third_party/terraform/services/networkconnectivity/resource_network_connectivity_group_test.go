@@ -65,7 +65,7 @@ resource "google_network_connectivity_group" "primary" {
   labels = {
     label-one = "value-one"
   }
-  description = "A sample hub group"
+  description = "A sample group"
   auto_accept {
     auto_accept_projects = ["tf-test-name%{project_random_suffix_1}"]
   }
@@ -87,9 +87,9 @@ resource "google_network_connectivity_group" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   name = "default"
   labels = {
-    label-one = "value-two"
+    label-two = "value-one"
   }
-  description = "A sample hub group update"
+  description = "An updated sample group"
   auto_accept {
     auto_accept_projects = ["tf-test-name%{project_random_suffix_1}", "tf-test-name%{project_random_suffix_2}"]
   }
