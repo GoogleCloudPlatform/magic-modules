@@ -85,6 +85,15 @@ examples:
       router_name: 'external-vpn-gateway'
       interconnect_attachment_name: 'partner-interconnect1'
       interconnect_attachment_spoke_name: 'interconnect-attachment-spoke'
+  - name: 'network_connectivity_spoke_linked_producer_vpc_network_basic'
+    config_path: "{{override_path}}/examples/network_connectivity_spoke_linked_producer_vpc_network_basic.tf.erb"
+    primary_resource_id: 'primary'
+    vars:
+      network_name: "net-spoke"
+      global_name: 'test-address'
+      hub_name: "hub-basic"
+      spoke_name: "vpc-spoke"
+      producer_spoke_name: "producer-spoke"
 parameters:
   - name: 'location'
     type: String
@@ -128,6 +137,7 @@ properties:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'uris'
         type: Array
@@ -156,6 +166,7 @@ properties:
       - linked_vpn_tunnels
       - linked_router_appliance_instances
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'uris'
         type: Array
@@ -184,6 +195,7 @@ properties:
       - linked_interconnect_attachments
       - linked_vpn_tunnels
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'instances'
         type: Array
@@ -223,6 +235,7 @@ properties:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpn_tunnels
+      - linked_producer_vpc_network
     properties:
       - name: 'uri'
         type: String
@@ -242,6 +255,41 @@ properties:
         immutable: true
         item_type:
           type: String
+  - name: linkedProducerVpcNetwork
+    description: Producer VPC network that is associated with the spoke.
+    immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
+      - linked_vpc_network
+    properties:
+      - name: network
+        type: String
+        description: The URI of the Service Consumer VPC that the Producer VPC is peered with.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: peering
+        type: String
+        description: The name of the VPC peering between the Service Consumer VPC and the Producer VPC (defined in the Tenant project) which is added to the NCC hub. This peering must be in ACTIVE state.
+        required: true
+        immutable: true
+      - name: producerNetwork
+        type: String
+        description: ga
+        output: true
+        immutable: true
+      - name: includeExportRanges
+        type: Array
+        description: IP ranges allowed to be included from peering.
+        immutable: true
+        item_type: Api::Type::String
+      - name: excludeExportRanges
+        type: Array
+        description: IP ranges encompassing the subnets to be excluded from peering.
+        immutable: true
+        item_type: Api::Type::String
   - name: 'uniqueId'
     type: String
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.
