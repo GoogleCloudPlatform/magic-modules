@@ -20,13 +20,13 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation'
 docs:
-id_format: '{{firewall_policy}}/associations/{{name}}'
-base_url: '{{firewall_policy}}'
-self_link: '{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: '{{firewall_policy}}/addAssociation'
-delete_url: '{{firewall_policy}}/removeAssociation?name={{name}}'
+id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
+self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation'
+delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
-immutable: true
+legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
   - '{{project}}/{{firewall_policy}}/{{name}}'
@@ -34,11 +34,20 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
-  post_create: 'templates/terraform/constants/compute_region_network_firewall_policy_association_operation.go.tmpl'
-  post_delete: 'templates/terraform/constants/compute_region_network_firewall_policy_association_operation.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/network_region_firewall_policy_association_import.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
 examples:
   - name: 'region_network_firewall_policy_association'
     primary_resource_id: 'default'
@@ -48,22 +57,17 @@ examples:
       network_name: 'my-network'
     test_env_vars:
       region: 'REGION'
+      project_name: 'PROJECT_NAME'
 parameters:
   - name: 'firewallPolicy'
-    type: String
+    type: ResourceRef
     description: |
       The firewall policy of the resource.
     url_param_only: true
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-  - name: 'project'
-    type: String
-    description: |
-      The project for the resource
-    immutable: true
-    default_from_api: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    resource: 'NetworkFirewallPolicy'
+    imports: 'name'
   - name: 'region'
     type: String
     description: 'The location of this resource.'
