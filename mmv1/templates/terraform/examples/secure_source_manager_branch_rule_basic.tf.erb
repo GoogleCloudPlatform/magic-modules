@@ -1,0 +1,19 @@
+resource "google_secure_source_manager_instance" "instance" {
+    location = "us-central1"
+    instance_id = "<%= ctx[:vars]['instance_id'] %>"
+}
+
+resource "google_secure_source_manager_repository" "repository" {
+    location = "us-central1"
+    repository_id = "<%= ctx[:vars]['repository_id'] %>"
+    instance = google_secure_source_manager_instance.instance.name
+}
+
+resource "google_secure_source_manager_branch_rule" "<%= ctx[:primary_resource_id] %>" {
+    # Ensure this resource depends on both the instance and repository
+    depends_on = [
+        google_secure_source_manager_instance.instance,
+        google_secure_source_manager_repository.repository
+    ]
+    branch_rule_id = "<%= ctx[:vars]['branch_rule_id'] %>"
+}
