@@ -58,6 +58,8 @@ custom_code:
   constants: 'templates/terraform/constants/firebase_project.go.tmpl'
   pre_create: 'templates/terraform/pre_create/firebase_project.go.tmpl'
 exclude_sweeper: true
+# The generated resource converter is not used. Instead, a handwritten converter is used.
+exclude_tgc: true
 examples:
   - name: 'firebase_project_basic'
     primary_resource_id: 'default'

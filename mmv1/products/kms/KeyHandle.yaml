@@ -54,8 +54,9 @@ examples:
     primary_resource_id: 'example-keyhandle'
     min_version: 'beta'
     vars:
+      folder_name: 'my-folder'
       key_project_name: 'key-proj'
-      resource_project_name: 'resources'
+      resource_project_name: 'res-proj'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
