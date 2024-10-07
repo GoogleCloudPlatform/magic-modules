@@ -955,7 +955,7 @@ func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName s
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
-			"ipCidrRange": "10.77.0.0/20",
+			"ipCidrRange": "10.78.0.0/20",
 		}
 
 		if len(subnetOptions) != 0 {
