@@ -307,7 +307,7 @@ func TestAccDataprocJob_Presto(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
 	subnetworkName := acctest.BootstrapSubnetForDataprocBatches(t, "dataproc-cluster-internal", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
-	
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -866,6 +866,8 @@ resource "google_dataproc_cluster" "basic" {
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
+      # 2.1 removes Presto in favor of Trino. So use 2.0 for the Presto test.
+      image_version = "2.0"
       optional_components = ["PRESTO"]
     }
 
