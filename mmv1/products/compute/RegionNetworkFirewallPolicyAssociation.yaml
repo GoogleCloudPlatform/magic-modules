@@ -20,11 +20,11 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation'
 docs:
-id_format: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
-base_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}'
-self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation'
-delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
+id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation'
+delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
 legacy_long_form_project: true
 import_format:
