@@ -19,6 +19,7 @@ weight: 10
 1. A reviewer will automatically be assigned to your PR.
 1. Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; VCR tests can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
    - While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We **strongly** recommend you [test your changes locally before pushing]({{< ref "/develop/test/run-tests" >}}) even after the initial change.
+   - VCR tests will first attempt to play back recorded HTTP requests (REPLAYING mode). If any tests fail, they will run in RECORDING mode to generate a new cassette; then, the same tests will run again in REPLAYING mode to detect any nondeterministic behavior in the test (which can cause flaky tests.)
 1. If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.
 
 {{< hint info >}}
