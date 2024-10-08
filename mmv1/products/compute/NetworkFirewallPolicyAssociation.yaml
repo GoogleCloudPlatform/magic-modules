@@ -26,6 +26,7 @@ self_link: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/get
 create_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/addAssociation'
 delete_url: 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
+immutable: true
 legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
@@ -73,17 +74,14 @@ properties:
     description: |
       The name for an association.
     required: true
-    immutable: true
   - name: 'attachmentTarget'
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'shortName'
     type: String
     description: |
       The short name of the firewall policy of the association.
-    immutable: true
     output: true

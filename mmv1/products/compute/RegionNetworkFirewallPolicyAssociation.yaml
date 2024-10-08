@@ -26,6 +26,7 @@ self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_
 create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation'
 delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
+immutable: true
 legacy_long_form_project: true
 import_format:
   - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
@@ -66,13 +67,12 @@ parameters:
     url_param_only: true
     required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    resource: 'NetworkFirewallPolicy'
+    resource: 'RegionNetworkFirewallPolicy'
     imports: 'name'
   - name: 'region'
     type: String
     description: 'The location of this resource.'
     url_param_only: true
-    immutable: true
     default_from_api: true
 properties:
   - name: 'name'
@@ -80,17 +80,14 @@ properties:
     description: |
       The name for an association.
     required: true
-    immutable: true
   - name: 'attachmentTarget'
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'shortName'
     type: String
     description: |
       The short name of the firewall policy of the association.
-    immutable: true
     output: true
