@@ -605,4 +605,140 @@ resource "google_project_service_identity" "ck_sa" {
 
 `, context)
 }
+
+func TestAccSpannerDatabase_mrcmek(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerDatabase_mrcmek(context),
+			},
+			{
+				ResourceName:            "google_spanner_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccSpannerDatabase_mrcmek(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  provider     = google-beta
+  config       = "nam3"
+  display_name = "main-instance1"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "database" {
+  provider = google-beta
+  instance = google_spanner_instance.main.name
+  name     = "tf-test-mrcmek-db%{random_suffix}"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+
+  encryption_config {
+  	kms_key_names = [
+	  google_kms_crypto_key.example-key-us-central1.id,
+	  google_kms_crypto_key.example-key-us-east1.id,
+	  google_kms_crypto_key.example-key-us-east4.id,
+	]
+  }
+
+  deletion_protection = false
+
+  depends_on = [google_kms_crypto_key_iam_member.crypto-key-binding-us-central1,
+		google_kms_crypto_key_iam_member.crypto-key-binding-us-east1,
+		google_kms_crypto_key_iam_member.crypto-key-binding-us-east4,]
+}
+
+resource "google_kms_key_ring" "keyring-us-central1" {
+  provider = google-beta
+  name     = "tf-test-ring%{random_suffix}"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "example-key-us-central1" {
+  provider        = google-beta
+  name            = "tf-test-key%{random_suffix}"
+  key_ring        = google_kms_key_ring.keyring-us-central1.id
+  rotation_period = "100000s"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-central1" {
+  provider      = google-beta
+  crypto_key_id = google_kms_crypto_key.example-key-us-central1.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  member = google_project_service_identity.ck_sa.member
+}
+
+resource "google_kms_key_ring" "keyring-us-east1" {
+  provider = google-beta
+  name     = "tf-test-ring%{random_suffix}"
+  location = "us-east1"
+}
+
+resource "google_kms_crypto_key" "example-key-us-east1" {
+  provider        = google-beta
+  name            = "tf-test-key%{random_suffix}"
+  key_ring        = google_kms_key_ring.keyring-us-east1.id
+  rotation_period = "100000s"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-east1" {
+  provider      = google-beta
+  crypto_key_id = google_kms_crypto_key.example-key-us-east1.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  member = google_project_service_identity.ck_sa.member
+}
+
+resource "google_kms_key_ring" "keyring-us-east4" {
+  provider = google-beta
+  name     = "tf-test-ring%{random_suffix}"
+  location = "us-east4"
+}
+
+resource "google_kms_crypto_key" "example-key-us-east4" {
+  provider        = google-beta
+  name            = "tf-test-key%{random_suffix}"
+  key_ring        = google_kms_key_ring.keyring-us-east4.id
+  rotation_period = "100000s"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-east4" {
+  provider      = google-beta
+  crypto_key_id = google_kms_crypto_key.example-key-us-east4.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+
+  member = google_project_service_identity.ck_sa.member
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_project_service_identity" "ck_sa" {
+  provider = google-beta
+  project  = data.google_project.project.project_id
+  service  = "spanner.googleapis.com"
+}
+
+`, context)
+}
+
 {{- end }}
