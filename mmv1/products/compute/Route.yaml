@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,13 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Route'
 kind: 'compute#route'
-base_url: projects/{{project}}/global/routes
-collection_url_key: 'items'
-immutable: true
-has_self_link: true
 description: |
   Represents a Route resource.
 
@@ -42,39 +38,53 @@ description: |
   nextHopGateway, nextHopInstance, nextHopIp, nextHopVpnTunnel, or
   nextHopIlb.
 
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+  optional_properties: |
+    * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+      specified)  The zone of the instance specified in
+      `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+      a URL.
+base_url: 'projects/{{project}}/global/routes'
+has_self_link: true
+immutable: true
+mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-mutex: 'projects/{{project}}/global/networks/{{network}}/peerings'
-error_retry_predicates: ['transport_tpg.IsPeeringOperationInProgress']
+collection_url_key: 'items'
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/route.tmpl'
+  constants: 'templates/terraform/constants/compute_route.go.tmpl'
+  decoder: 'templates/terraform/decoders/route.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsPeeringOperationInProgress'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'route_basic'
+  - name: 'route_basic'
     primary_resource_id: 'default'
     vars:
       route_name: 'network-route'
       network_name: 'compute-network'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'route_ilb'
+  - name: 'route_ilb'
     primary_resource_id: 'route-ilb'
     vars:
       network_name: 'compute-network'
@@ -83,10 +93,9 @@ examples:
       health_check_name: 'proxy-health-check'
       backend_name: 'compute-backend'
       route_name: 'route-ilb'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'route_ilb_vip'
+  - name: 'route_ilb_vip'
     primary_resource_id: 'route-ilb'
-    min_version: beta
+    min_version: 'beta'
     vars:
       producer_name: 'producer'
       consumer_name: 'consumer'
@@ -94,30 +103,21 @@ examples:
       health_check_name: 'proxy-health-check'
       backend_name: 'compute-backend'
       route_name: 'route-ilb'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/compute_route.go.erb
-  decoder: templates/terraform/decoders/route.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
-docs: !ruby/object:Provider::Terraform::Docs
-  optional_properties: |
-    * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
-      specified)  The zone of the instance specified in
-      `next_hop_instance`.  Omit if `next_hop_instance` is specified as
-      a URL.
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'destRange'
+  - name: 'destRange'
+    type: String
     description: |
       The destination range of outgoing packets that this route applies to.
       Only IPv4 is supported.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property
       when you create the resource.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -127,19 +127,19 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the
       last character, which cannot be a dash.
     required: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
+  - name: 'network'
+    type: ResourceRef
+    description: 'The network that this route applies to.'
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
-    description: 'The network that this route applies to.'
-    immutable: true
-    required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+  - name: 'priority'
+    type: Integer
     description: |
       The priority of this route. Priority is used to break ties in cases
       where there is more than one matching route of equal prefix length.
@@ -149,24 +149,18 @@ properties:
 
       Default value is 1000. Valid range is 0 through 65535.
     immutable: true
-    default_value: 1000
     send_empty_value: true
-  - !ruby/object:Api::Type::Array
-    name: 'tags'
+    default_value: 1000
+  - name: 'tags'
+    type: Array
     description: 'A list of instance tags to which this route applies.'
-    immutable: true
-    custom_expand: templates/terraform/custom_expand/set_to_list.erb
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'nextHopGateway'
     immutable: true
-    exactly_one_of:
-      - next_hop_gateway
-      - next_hop_instance
-      - next_hop_ip
-      - next_hop_vpn_tunnel
-      - next_hop_ilb
+    custom_expand: 'templates/terraform/custom_expand/set_to_list.tmpl'
+    item_type:
+      type: String
+  - name: 'nextHopGateway'
+    type: String
     description: |
       URL to a gateway that should handle matching packets.
       Currently, you can only specify the internet gateway, using a full or
@@ -175,19 +169,17 @@ properties:
       * `projects/project/global/gateways/default-internet-gateway`
       * `global/gateways/default-internet-gateway`
       * The string `default-internet-gateway`.
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: templates/terraform/custom_expand/route_gateway.erb
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'nextHopInstance'
-    resource: 'Instance'
-    imports: 'selfLink'
     immutable: true
     exactly_one_of:
-      - next_hop_gateway
-      - next_hop_instance
-      - next_hop_ip
-      - next_hop_vpn_tunnel
-      - next_hop_ilb
+      - 'next_hop_gateway'
+      - 'next_hop_instance'
+      - 'next_hop_ip'
+      - 'next_hop_vpn_tunnel'
+      - 'next_hop_ilb'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/route_gateway.tmpl'
+  - name: 'nextHopInstance'
+    type: ResourceRef
     description: |
       URL to an instance that should handle matching packets.
       You can specify this as a full or partial URL. For example:
@@ -195,40 +187,67 @@ properties:
       * `projects/project/zones/zone/instances/instance`
       * `zones/zone/instances/instance`
       * Just the instance name, with the zone in `next_hop_instance_zone`.
-    custom_expand: templates/terraform/custom_expand/route_instance.erb
-  - !ruby/object:Api::Type::String
-    name: 'nextHopIp'
+    immutable: true
+    exactly_one_of:
+      - 'next_hop_gateway'
+      - 'next_hop_instance'
+      - 'next_hop_ip'
+      - 'next_hop_vpn_tunnel'
+      - 'next_hop_ilb'
+    custom_expand: 'templates/terraform/custom_expand/route_instance.tmpl'
+    resource: 'Instance'
+    imports: 'selfLink'
+  - name: 'nextHopIp'
+    type: String
     description: |
       Network IP address of an instance that should handle matching packets.
     immutable: true
-    exactly_one_of:
-      - next_hop_gateway
-      - next_hop_instance
-      - next_hop_ip
-      - next_hop_vpn_tunnel
-      - next_hop_ilb
     default_from_api: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'nextHopVpnTunnel'
-    resource: 'VpnTunnel'
-    imports: 'selfLink'
-    immutable: true
     exactly_one_of:
-      - next_hop_gateway
-      - next_hop_instance
-      - next_hop_ip
-      - next_hop_vpn_tunnel
-      - next_hop_ilb
+      - 'next_hop_gateway'
+      - 'next_hop_instance'
+      - 'next_hop_ip'
+      - 'next_hop_vpn_tunnel'
+      - 'next_hop_ilb'
+  - name: 'nextHopVpnTunnel'
+    type: ResourceRef
     description: |
       URL to a VpnTunnel that should handle matching packets.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::String
-    name: 'nextHopNetwork'
-    output: true
+    immutable: true
+    exactly_one_of:
+      - 'next_hop_gateway'
+      - 'next_hop_instance'
+      - 'next_hop_ip'
+      - 'next_hop_vpn_tunnel'
+      - 'next_hop_ilb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'VpnTunnel'
+    imports: 'selfLink'
+  - name: 'nextHopNetwork'
+    type: String
     description: |
       URL to a Network that should handle matching packets.
-  - !ruby/object:Api::Type::String
-    name: 'nextHopIlb'
+    output: true
+  - name: 'nextHopOrigin'
+    type: String
+    description: |
+      Indicates the origin of the route. Can be IGP (Interior Gateway Protocol), EGP (Exterior Gateway Protocol), or INCOMPLETE.
+    min_version: 'beta'
+    output: true
+  - name: 'nextHopMed'
+    type: String
+    description: |
+      Multi-Exit Discriminator, a BGP route metric that indicates the desirability of a particular route in a network.
+    min_version: 'beta'
+    output: true
+  - name: 'nextHopInterRegionCost'
+    type: String
+    description: |
+      Internal fixed region-to-region cost that Google Cloud calculates based on factors such as network performance, distance, and available bandwidth between regions.
+    min_version: 'beta'
+    output: true
+  - name: 'nextHopIlb'
+    type: String
     description: |
       The IP address or URL to a forwarding rule of type
       loadBalancingScheme=INTERNAL that should handle matching
@@ -248,9 +267,9 @@ properties:
       a public (non-RFC 1918) IP CIDR range.
     immutable: true
     exactly_one_of:
-      - next_hop_gateway
-      - next_hop_instance
-      - next_hop_ip
-      - next_hop_vpn_tunnel
-      - next_hop_ilb
+      - 'next_hop_gateway'
+      - 'next_hop_instance'
+      - 'next_hop_ip'
+      - 'next_hop_vpn_tunnel'
+      - 'next_hop_ilb'
     diff_suppress_func: 'CompareIpAddressOrSelfLinkOrResourceName'

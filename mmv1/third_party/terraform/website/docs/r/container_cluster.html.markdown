@@ -292,7 +292,7 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
-* `secret_manager_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `secret_manager_config` - (Optional) Configuration for the
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
 
@@ -327,6 +327,15 @@ channel. Structure is [documented below](#nested_release_channel).
     setting `initial_node_count` to at least `1`.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
+
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 * `cost_management_config` - (Optional) Configuration for the
     [Cost Allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
@@ -645,8 +654,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
 * `enable_metrics` - (Required) Whether or not to enable advanced datapath metrics.
-* `enable_relay` - (Optional) Whether or not Relay is enabled.
-* `relay_mode` - (Optional, Deprecated) Mode used to make Relay available. Deprecated in favor of `enable_relay` field. Remove this attribute's configuration as this field will be removed in the next major release and `enable_relay` will become a required field.
+* `enable_relay` - (Required) Whether or not Relay is enabled.
 
 <a name="nested_maintenance_policy"></a>The `maintenance_policy` block supports:
 * `daily_maintenance_window` - (Optional) structure documented below.
@@ -933,6 +941,8 @@ gvnic {
 
 * `shielded_instance_config` - (Optional) Shielded Instance options. Structure is [documented below](#nested_shielded_instance_config).
 
+* `storage_pools` - (Optional) The list of Storage Pools where boot disks are provisioned.
+
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
@@ -1076,11 +1086,18 @@ workload_identity_config {
 
 <a name="nested_node_pool_auto_config"></a>The `node_pool_auto_config` block supports:
 
+* `node_kubelet_config` - (Optional) Kubelet configuration for Autopilot clusters. Currently, only `insecure_kubelet_readonly_port_enabled` is supported here.
+Structure is [documented below](#nested_node_kubelet_config).
+
 * `resource_manager_tags` - (Optional) A map of resource manager tag keys and values to be attached to the nodes for managing Compute Engine firewalls using Network Firewall Policies. Tags must be according to specifications found [here](https://cloud.google.com/vpc/docs/tags-firewalls-overview#specifications). A maximum of 5 tag key-value pairs can be specified. Existing tags will be replaced with new values. Tags must be in one of the following formats ([KEY]=[VALUE]) 1. `tagKeys/{tag_key_id}=tagValues/{tag_value_id}` 2. `{org_id}/{tag_key_name}={tag_value_name}` 3. `{project_id}/{tag_key_name}={tag_value_name}`.
 
-* `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools.
+* `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools. Structure is [documented below](#nested_network_tags).
 
-The `network_tags` block supports:
+<a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
+
+* `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
+
+<a name="nested_network_tags"></a>The `network_tags` block supports:
 
 * `tags` (Optional) - List of network tags applied to auto-provisioned node pools.
 
@@ -1097,9 +1114,11 @@ node_pool_auto_config {
 
 The `node_config_defaults` block supports:
 
+* `insecure_kubelet_readonly_port_enabled` (Optional) Controls whether the kubelet read-only port is enabled for newly created node pools in the cluster. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
+
 * `logging_variant` (Optional) The type of logging agent that is deployed by default for newly created node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
-* `gcfs_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
+* `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 
@@ -1211,6 +1230,7 @@ not.
     * RAPID: Weekly upgrade cadence; Early testers and developers who requires new features.
     * REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
+    * EXTENDED: GKE provides extended support for Kubernetes minor versions through the Extended channel. With this channel, you can stay on a minor version for up to 24 months.
 
 <a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
 
@@ -1270,9 +1290,11 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 
 <a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
 
-* `cpu_manager_policy` - (Required) The CPU management policy on the node. See
+* `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
-One of `"none"` or `"static"`. Defaults to `none` when `kubelet_config` is unset.
+One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
+Prior to the 6.4.0 this field was marked as required. The workaround for the required field 
+is setting the empty string `""`, which will function identically to not setting this field.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
 containers that specify CPU limits.
@@ -1282,10 +1304,7 @@ as a sequence of decimal numbers, each with optional fraction and a unit suffix,
 such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 "h". The value must be a positive duration.
 
--> Note: At the time of writing (2020/08/18) the GKE API rejects the `none`
-value and accepts an invalid `default` value instead. While this remains true,
-not specifying the `kubelet_config` block should be the equivalent of specifying
-`none`.
+* `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 
 * `pod_pids_limit` - (Optional) Controls the maximum number of processes allowed to run in a pod. The value must be greater than or equal to 1024 and less than 4194304.
 
@@ -1310,6 +1329,14 @@ linux_node_config {
     * `CGROUP_MODE_UNSPECIFIED`: CGROUP_MODE_UNSPECIFIED is when unspecified cgroup configuration is used. The default for the GKE node OS image will be used.
     * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
     * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
+
+* `hugepages_config` - (Optional) Amounts for 2M and 1G hugepages. Structure is [documented below](#nested_hugepages_config).
+
+<a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
+
+* `hugepage_size_2m` - (Optional) Amount of 2M hugepages.
+
+* `hugepage_size_1g` - (Optional) Amount of 1G hugepages.
 
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 
@@ -1337,7 +1364,7 @@ linux_node_config {
 
 <a name="nested_dns_config"></a>The `dns_config` block supports:
 
-* `additive_vpc_scope_dns_domain` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) This will enable Cloud DNS additive VPC scope. Must provide a domain name that is unique within the VPC. For this to work `cluster_dns = "CLOUD_DNS"` and `cluster_dns_scope = "CLUSTER_SCOPE"` must both be set as well.
+* `additive_vpc_scope_dns_domain` - (Optional) This will enable Cloud DNS additive VPC scope. Must provide a domain name that is unique within the VPC. For this to work `cluster_dns = "CLOUD_DNS"` and `cluster_dns_scope = "CLUSTER_SCOPE"` must both be set as well.
 
 * `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS`.
 

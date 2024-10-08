@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,53 +11,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/groups
-create_url: projects/{{project}}/locations/{{location}}/groups?groupId={{group_id}}
-self_link: projects/{{project}}/locations/{{location}}/groups/{{group_id}}
-id_format: projects/{{project}}/locations/{{location}}/groups/{{group_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/groups/{{group_id}}
-name: Group
+---
+name: 'Group'
 description: 'A resource that represents an asset group. The purpose of an asset
   group is to bundle a set of assets that have something in common, while
   allowing users to add annotations to the group.'
-update_verb: :PATCH
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/groups'
+self_link: 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/groups?groupId={{group_id}}'
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/groups/{{group_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'migration_group_basic'
+  - name: 'migration_group_basic'
     primary_resource_id: 'default'
     vars:
       group_name: 'group-test'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: 'The location of the group.'
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: groupId
+  - name: 'groupId'
+    type: String
     description: 'Required. User specified ID for the group. It will become the last
       component of the group name. The ID must be unique within the project, must conform
       with RFC-1034, is restricted to lower-cased letters, and has a maximum length
@@ -66,24 +66,24 @@ parameters:
     required: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: 'Output only. The name of the group.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: 'Output only. The timestamp when the group was created.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: 'Output only. The timestamp when the group was last updated.'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'Labels as key value pairs.'
-  - !ruby/object:Api::Type::String
-    name: displayName
+  - name: 'displayName'
+    type: String
     description: 'Optional. User-friendly display name.'
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: 'Optional. The description of the group.'

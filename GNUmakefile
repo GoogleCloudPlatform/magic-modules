@@ -9,9 +9,7 @@ ifeq ($(ENGINE),tpgtools)
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
 else ifneq ($(PRODUCT),)
-  mmv1_compile=-p products/$(PRODUCT)
-else
-  mmv1_compile=-a
+  mmv1_compile=--product $(PRODUCT)
 endif
 
 # tpgtools setup
@@ -26,12 +24,12 @@ else
 endif
 
 ifneq ($(RESOURCE),)
-  mmv1_compile += -t $(RESOURCE)
+  mmv1_compile += --resource $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-  mmv1_compile += -r $(OVERRIDES)
+  mmv1_compile += --overrides $(OVERRIDES)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
@@ -62,12 +60,11 @@ terraform build provider:
 
 mmv1:
 	cd mmv1;\
-		bundle; \
 		if [ "$(VERSION)" = "ga" ]; then \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v ga --no-docs $(mmv1_compile); \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v beta --no-code $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
 		else \
-			bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
 
 tpgtools:
@@ -91,19 +88,16 @@ clean-tgc:
 
 tgc:
 	cd mmv1;\
-		bundle;\
-		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
-		bundle exec compiler -e terraform -f tgc_cai2hcl -v beta -o $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
+		go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
 
 tf-oics:
 	cd mmv1;\
-		bundle;\
-		bundle exec compiler.rb -e terraform -f oics -o $(OUTPUT_PATH) $(mmv1_compile);\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \
-		bundle; \
-		bundle exec rake test
+		go test ./...
 
 serialize:
 	cd tpgtools;\
@@ -120,7 +114,7 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
 validate_environment:

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,42 +11,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Index'
-base_url: projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes
-self_link: '{{name}}'
-immutable: true
-error_retry_predicates:
-  ["transport_tpg.FirestoreIndex409Retry"]
 description: |
   Cloud Firestore indexes enable simple and complex queries against documents in a database.
    Both Firestore Native and Datastore Mode indexes are supported.
    This resource manages composite indexes and not single field indexes.
    To manage single field indexes, use the `google_firestore_field` resource instead.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.collectionGroups.indexes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-autogen_async: true
-import_format: ['{{name}}']
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This resource creates a Firestore Index on a project that already has
     a Firestore database. If you haven't already created it, you may
@@ -54,76 +30,97 @@ docs: !ruby/object:Provider::Terraform::Docs
     to your chosen location. If you wish to use App Engine, you may
     instead create a `google_app_engine_application` resource.
     Your Firestore location will be the same as the App Engine location specified.
+base_url: 'projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes'
+self_link: '{{name}}'
+immutable: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/firestore_index.go.tmpl'
+  encoder: 'templates/terraform/encoders/index.go.tmpl'
+  post_create: 'templates/terraform/post_create/index.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.FirestoreIndex409Retry'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_index_basic'
-    primary_resource_id:
-      'my-index'
+  - name: 'firestore_index_basic'
+    primary_resource_id: 'my-index'
     vars:
-      database_id: "database-id"
+      database_id: 'database-id'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     external_providers: ["random", "time"]
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_index_datastore_mode'
-    primary_resource_id:
-      'my-index'
+  - name: 'firestore_index_datastore_mode'
+    primary_resource_id: 'my-index'
     vars:
-      database_id: "database-id-dm"
+      database_id: 'database-id-dm'
     test_env_vars:
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_index_vector'
-    primary_resource_id:
-      'my-index'
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_vector'
+    primary_resource_id: 'my-index'
     vars:
-      database_id: "database-id-vector"
+      database_id: 'database-id-vector'
     test_env_vars:
-      project_id: :PROJECT_NAME
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/index_self_link_as_name_set_project.go.erb
-  encoder: templates/terraform/encoders/index.go.erb
-  post_create: templates/terraform/post_create/index.go.erb
-  constants: templates/terraform/constants/firestore_index.go.erb
+      project_id: 'PROJECT_NAME'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       A server defined name for this index. Format:
       `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}`
-  - !ruby/object:Api::Type::String
-    name: database
-    default_value: '(default)'
+    output: true
+  - name: 'database'
+    type: String
     description: |
       The Firestore database id. Defaults to `"(default)"`.
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: collection
-    required: true
+    default_value: "(default)"
+  - name: 'collection'
+    type: String
     description: |
       The collection being indexed.
+    required: true
     ignore_read: true
-  - !ruby/object:Api::Type::Enum
-    name: queryScope
+  - name: 'queryScope'
+    type: Enum
     description: |
       The scope at which a query is run.
-    default_value: :COLLECTION
-    values:
-      - :COLLECTION
-      - :COLLECTION_GROUP
-      - :COLLECTION_RECURSIVE
-  - !ruby/object:Api::Type::Enum
-    name: apiScope
+    default_value: "COLLECTION"
+    enum_values:
+      - 'COLLECTION'
+      - 'COLLECTION_GROUP'
+      - 'COLLECTION_RECURSIVE'
+  - name: 'apiScope'
+    type: Enum
     description: |
       The API scope at which a query is run.
-    default_value: :ANY_API
-    values:
-      - :ANY_API
-      - :DATASTORE_MODE_API
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-  - !ruby/object:Api::Type::Array
-    name: fields
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+    default_value: "ANY_API"
+    enum_values:
+      - 'ANY_API'
+      - 'DATASTORE_MODE_API'
+  - name: 'fields'
+    type: Array
     description: |
       The fields supported by this index. The last non-stored field entry is
       always for the field path `__name__`. If, on creation, `__name__` was not
@@ -132,48 +129,51 @@ properties:
       composite index is not directional, the `__name__` will be ordered
       `"ASCENDING"` (unless explicitly specified otherwise).
     required: true
-    # Single field indexes _exist_, but the API only lets us manage composite ones.
-    min_size: 2
-    diff_suppress_func: firestoreIFieldsDiffSuppress
-    item_type: !ruby/object:Api::Type::NestedObject
+    diff_suppress_func: 'firestoreIFieldsDiffSuppress'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'fieldPath'
+        - name: 'fieldPath'
+          type: String
           description: |
             Name of the field.
-        - !ruby/object:Api::Type::Enum
-          name: 'order'
+        - name: 'order'
+          type: Enum
           # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
             Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
-          values:
-            - :ASCENDING
-            - :DESCENDING
-        - !ruby/object:Api::Type::Enum
-          name: 'arrayConfig'
+          enum_values:
+            - 'ASCENDING'
+            - 'DESCENDING'
+        - name: 'arrayConfig'
+          type: Enum
           # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified.
-          values:
-            - :CONTAINS
-        - !ruby/object:Api::Type::NestedObject
-          name: 'vectorConfig'
+          enum_values:
+            - 'CONTAINS'
+        - name: 'vectorConfig'
+          type: NestedObject
           # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.
           properties:
-            - !ruby/object:Api::Type::Integer
-              name: dimension
+            - name: 'dimension'
+              type: Integer
               description: |
                 The resulting index will only include vectors of this dimension, and can be used for vector search
                 with the same dimension.
-            - !ruby/object:Api::Type::NestedObject
-              name: flat
+            - name: 'flat'
+              type: NestedObject
               description: |
                 Indicates the vector index is a flat index.
-              allow_empty_object: true
               send_empty_value: true
-              properties: [] # Meant to be an empty object with no properties.
+              allow_empty_object: true
+              properties:
+ # Meant to be an empty object with no properties.
+                []
+    # Single field indexes _exist_, but the API only lets us manage composite ones.
+    min_size: 2

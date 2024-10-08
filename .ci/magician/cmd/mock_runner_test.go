@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"magician/exec"
 	"os"
 	"path/filepath"
 	"sort"
@@ -32,7 +31,7 @@ import (
 type ParameterList []any
 
 type MockRunner interface {
-	exec.ExecRunner
+	ExecRunner
 	Calls(method string) ([]ParameterList, bool)
 }
 
@@ -111,6 +110,10 @@ func (mr *mockRunner) ReadFile(name string) (string, error) {
 }
 
 func (mr *mockRunner) WriteFile(name, data string) error {
+	return nil
+}
+
+func (mr *mockRunner) AppendFile(name, data string) error {
 	return nil
 }
 

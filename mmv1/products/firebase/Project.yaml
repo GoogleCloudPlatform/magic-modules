@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,52 +11,75 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Project'
-min_version: beta
-base_url: projects/{{project}}
-self_link: projects/{{project}}
-create_url: projects/{{project}}:addFirebase
-immutable: true
-docs: !ruby/object:Provider::Terraform::Docs
-  note: |
-    This resource should usually be used with a provider configuration
-    with `user_project_override = true` unless you wish for your quota
-    project to be different from the Firebase project.
 description: |
   A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
   identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
   Once Firebase has been added to a Google Project it cannot be removed.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/projects/terraform/get-started'
   api: 'https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects'
-import_format: ['projects/{{project}}', '{{project}}']
+docs:
+  note: |
+    This resource should usually be used with a provider configuration
+    with `user_project_override = true` unless you wish for your quota
+    project to be different from the Firebase project.
+base_url: 'projects/{{project}}'
+self_link: 'projects/{{project}}'
+create_url: 'projects/{{project}}:addFirebase'
+exclude_delete: true
+immutable: true
+import_format:
+  - 'projects/{{project}}'
+  - '{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-skip_delete: true
-skip_sweeper: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/firebase_project.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/firebase_project.go.tmpl'
+exclude_sweeper: true
+# The generated resource converter is not used. Instead, a handwritten converter is used.
+exclude_tgc: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firebase_project_basic'
-    min_version: 'beta'
+  - name: 'firebase_project_basic'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       instance_name: 'memory-cache'
-      project_name: "my-project"
+      project_name: 'my-project'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/firebase_project.go.erb
-  pre_create: templates/terraform/pre_create/firebase_project.go.erb
+      org_id: 'ORG_ID'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: projectNumber
-    output: true
+  - name: 'projectNumber'
+    type: String
     description: |
       The number of the google project that firebase is enabled on.
-  - !ruby/object:Api::Type::String
-    name: displayName
+    min_version: 'beta'
     output: true
+  - name: 'displayName'
+    type: String
     description: |
       The GCP project display name
+    min_version: 'beta'
+    output: true

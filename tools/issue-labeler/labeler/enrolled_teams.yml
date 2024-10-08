@@ -24,6 +24,7 @@ service/aiplatform-metadata:
 service/aiplatform-prediction:
   resources:
   - google_vertex_ai_endpoint
+  - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
 service/aiplatform-tensorboard:
   resources:
@@ -163,7 +164,7 @@ service/compute-instances:
   - google_compute_resource_policy
 service/compute-interconnect:
   resources:
-  - google_compute_interconnect_.*
+  - google_compute_interconnect.*
 service/compute-ipam:
   resources:
   - google_compute_address
@@ -198,6 +199,7 @@ service/compute-managed:
   - google_compute_region_instance_group_manager.*
   - google_compute_per_instance_config.*
   - google_compute_region_per_instance_config.*
+  - google_compute_resize_request.*
 service/compute-nat:
   resources:
   - google_compute_router_nat
@@ -611,6 +613,7 @@ service/sqladmin-security:
   - google_sql_ca_certs
   - google_sql_ssl_cert
 service/storage:
+  team: gcs-terraform-eng
   resources:
   - google_storage_.*
 service/tpu:

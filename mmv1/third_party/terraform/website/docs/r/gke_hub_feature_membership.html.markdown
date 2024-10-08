@@ -8,7 +8,10 @@ description: |-
 
 Contains information about a GKEHub Feature Memberships. Feature Memberships configure GKEHub Features that apply to specific memberships rather than the project as a whole. The google_gke_hub is the Fleet API.
 
-## Example Usage - Config Management
+## Example Usage - Config Management with Config Sync auto-upgrades and without Git/OCI
+
+With [Config Sync auto-upgrades](https://cloud.devsite.corp.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/upgrade-config-sync#auto-upgrade-config), Google assumes responsibility for automatically upgrading Config Sync versions
+and overseeing the lifecycle of its components.
 
 ```hcl
 resource "google_container_cluster" "cluster" {
@@ -40,8 +43,54 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.6.2"
+    # Don't use the `version` field with Config Sync auto-upgrades.
+    # To disable Config Sync auto-upgrades, you need to set the field `management` to
+    # `MANAGEMENT_MANUAL` if it has been set previously. Removing the field does not work.
+    management= "MANAGEMENT_AUTOMATIC"
     config_sync {
+      # The field `enabled` was introduced in Terraform version 5.41.0, and
+      # needs to be set to `true` explicitly to install Config Sync.
+      enabled = true
+    }
+  }
+}
+```
+
+## Example Usage - Config Management with Git
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.19.0"
+    config_sync {
+      enabled = true
       git {
         sync_repo = "https://github.com/hashicorp/terraform"
       }
@@ -49,6 +98,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   }
 }
 ```
+
 ## Example Usage - Config Management with OCI
 
 ```hcl
@@ -81,14 +131,60 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.15.1"
+    version = "1.19.0"
     config_sync {
+      enabled = true
       oci {
         sync_repo = "us-central1-docker.pkg.dev/sample-project/config-repo/config-sync-gke:latest"
         policy_dir = "config-connector"
         sync_wait_secs = "20"
         secret_type = "gcpserviceaccount"
         gcp_service_account_email = "sa@project-id.iam.gserviceaccount.com"
+      }
+    }
+  }
+}
+```
+
+## Example Usage - Config Management with Regional Membership
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  location      = "us-central1"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  membership_location = google_gke_hub_membership.membership.location
+  configmanagement {
+    version = "1.19.0"
+    config_sync {
+      enabled = true
+      git {
+        sync_repo = "https://github.com/hashicorp/terraform"
       }
     }
   }
@@ -136,50 +232,6 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   membership = google_gke_hub_membership.membership.membership_id
   mesh {
     management = "MANAGEMENT_AUTOMATIC"
-  }
-}
-```
-
-## Example Usage - Config Management with Regional Membership
-
-```hcl
-resource "google_container_cluster" "cluster" {
-  name               = "my-cluster"
-  location           = "us-central1-a"
-  initial_node_count = 1
-}
-
-resource "google_gke_hub_membership" "membership" {
-  membership_id = "my-membership"
-  location      = "us-central1"
-  endpoint {
-    gke_cluster {
-      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
-    }
-  }
-}
-
-resource "google_gke_hub_feature" "feature" {
-  name = "configmanagement"
-  location = "global"
-
-  labels = {
-    foo = "bar"
-  }
-}
-
-resource "google_gke_hub_feature_membership" "feature_member" {
-  location = "global"
-  feature = google_gke_hub_feature.feature.name
-  membership = google_gke_hub_membership.membership.membership_id
-  membership_location = google_gke_hub_membership.membership.location
-  configmanagement {
-    version = "1.6.2"
-    config_sync {
-      git {
-        sync_repo = "https://github.com/hashicorp/terraform"
-      }
-    }
   }
 }
 ```
@@ -306,26 +358,41 @@ The following arguments are supported:
 
 
 <a name="nested_configmanagement"></a>The `configmanagement` block supports:
-    
-* `binauthz` -
-  (Optional)
-  Binauthz configuration for the cluster. Structure is [documented below](#nested_binauthz).
-    
+
 * `config_sync` -
   (Optional)
   Config Sync configuration for the cluster. Structure is [documented below](#nested_config_sync).
-    
+
+* `management` -
+  (Optional)
+  Set this field to MANAGEMENT_AUTOMATIC to enable
+  [Config Sync auto-upgrades](http://cloud/kubernetes-engine/enterprise/config-sync/docs/how-to/upgrade-config-sync#auto-upgrade-config),
+  and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.
+  This field was introduced in Terraform version [5.41.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v5.41.0).
+
+* `version` -
+  (Optional)
+  Version of ACM installed.
+
+* `binauthz` -
+  (Optional, Deprecated)
+  Binauthz configuration for the cluster. Structure is [documented below](#nested_binauthz).
+  This field will be ignored and should not be set.
+
 * `hierarchy_controller` -
   (Optional)
   Hierarchy Controller configuration for the cluster. Structure is [documented below](#nested_hierarchy_controller).
+  Configuring Hierarchy Controller through the configmanagement feature is no longer recommended.
+  Use open source Kubernetes [Hierarchical Namespace Controller (HNC)](https://github.com/kubernetes-sigs/hierarchical-namespaces) instead.
+  Follow the [instructions](https://cloud.google.com/kubernetes-engine/enterprise/config-sync/docs/how-to/migrate-hierarchy-controller)
+  to migrate from Hierarchy Controller to HNC.
     
 * `policy_controller` -
   (Optional)
   Policy Controller configuration for the cluster. Structure is [documented below](#nested_policy_controller).
-    
-* `version` -
-  (Optional)
-  Version of ACM installed.
+  Configuring Policy Controller through the configmanagement feature is no longer recommended.
+  Use the policycontroller feature instead.
+
     
 <a name="nested_binauthz"></a>The `binauthz` block supports:
     
@@ -334,7 +401,13 @@ The following arguments are supported:
   Whether binauthz is enabled in this cluster.
     
 <a name="nested_config_sync"></a>The `config_sync` block supports:
-    
+
+* `enabled` -
+  (Optional)
+  Whether Config Sync is enabled in the cluster. This field was introduced in Terraform version
+  [5.41.0](https://github.com/hashicorp/terraform-provider-google/releases/tag/v5.41.0), and
+  needs to be set to `true` explicitly to install Config Sync.
+
 * `git` -
   (Optional) Structure is [documented below](#nested_git).
 

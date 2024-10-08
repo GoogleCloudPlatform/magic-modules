@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,63 +11,65 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TargetTcpProxy'
 kind: 'compute#targetTcpProxy'
-base_url: projects/{{project}}/global/targetTcpProxies
-collection_url_key: 'items'
-immutable: true
-has_self_link: true
 description: |
   Represents a TargetTcpProxy resource, which is used by one or more
   global forwarding rule to route incoming TCP requests to a Backend
   service.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Setting Up TCP proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
   api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/global/targetTcpProxies'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_tcp_proxy_basic'
+  - name: 'target_tcp_proxy_basic'
     primary_resource_id: 'default'
     vars:
       target_tcp_proxy_name: 'test-proxy'
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+parameters:
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     immutable: true
-  - !ruby/object:Api::Type::Integer
-    name: 'proxyId'
-    api_name: 'id'
+  - name: 'proxyId'
+    type: Integer
     description: 'The unique identifier for the resource.'
+    api_name: id
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -76,32 +78,32 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'proxyHeader'
+    immutable: true
+  - name: 'proxyHeader'
+    type: Enum
     description: |
       Specifies the type of proxy header to append before sending data to
       the backend.
-    values:
-      - :NONE
-      - :PROXY_V1
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader'
-    default_value: :NONE
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'backendService'
-    api_name: 'service'
-    resource: 'BackendService'
-    imports: 'selfLink'
+    update_verb: 'POST'
+    default_value: "NONE"
+    enum_values:
+      - 'NONE'
+      - 'PROXY_V1'
+  - name: 'backendService'
+    type: ResourceRef
     description: |
       A reference to the BackendService resource.
+    api_name: service
     required: true
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::Boolean
-    name: 'proxyBind'
+    update_verb: 'POST'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'BackendService'
+    imports: 'selfLink'
+  - name: 'proxyBind'
+    type: Boolean
     description: |
       This field only applies when the forwarding rule that references
       this target proxy has a loadBalancingScheme set to INTERNAL_SELF_MANAGED.

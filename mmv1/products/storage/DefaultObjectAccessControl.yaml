@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,15 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DefaultObjectAccessControl'
 kind: 'storage#objectAccessControl'
-base_url: b/{{bucket}}/defaultObjectAcl
-self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
-  api: 'https://cloud.google.com/storage/docs/json_api/v1/defaultObjectAccessControls'
 description: |
   The DefaultObjectAccessControls resources represent the Access Control
   Lists (ACLs) applied to a new object within a Google Cloud Storage bucket
@@ -34,35 +28,47 @@ description: |
   object is always an OWNER.
   For more information, see Access Control, with the caveat that this API
   uses READER and OWNER instead of READ and FULL_CONTROL.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
+  api: 'https://cloud.google.com/storage/docs/json_api/v1/defaultObjectAccessControls'
+docs:
+id_format: '{{bucket}}/{{entity}}'
+base_url: 'b/{{bucket}}/defaultObjectAcl'
+self_link: 'b/{{bucket}}/defaultObjectAcl/{{entity}}'
+mutex: 'storage/buckets/{{bucket}}'
+import_format:
+  - '{{bucket}}/{{entity}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'storage_default_object_access_control_public'
+  - name: 'storage_default_object_access_control_public'
     primary_resource_id: 'public_rule'
     vars:
       bucket_name: 'static-content-bucket'
-id_format: '{{bucket}}/{{entity}}'
-import_format: ['{{bucket}}/{{entity}}']
-mutex: 'storage/buckets/{{bucket}}'
-skip_sweeper: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'bucket'
-    resource: 'Bucket'
-    imports: 'name'
+  - name: 'bucket'
+    type: ResourceRef
     description: 'The name of the bucket.'
     required: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'domain'
+    resource: 'Bucket'
+    imports: 'name'
+  - name: 'domain'
+    type: String
     description: 'The domain associated with the entity.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'email'
+  - name: 'email'
+    type: String
     description: 'The email address associated with the entity.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'entity'
-    required: true
+  - name: 'entity'
+    type: String
     description: |
       The entity holding the permission, in one of the following forms:
         * user-{{userId}}
@@ -73,39 +79,40 @@ properties:
         * project-team-{{projectId}}
         * allUsers
         * allAuthenticatedUsers
-  - !ruby/object:Api::Type::String
-    name: 'entityId'
-    output: true
+    required: true
+  - name: 'entityId'
+    type: String
     description: 'The ID for the entity'
+    output: true
   # | 'etag' is not applicable for state convergence.
-  - !ruby/object:Api::Type::Integer
-    name: 'generation'
+  - name: 'generation'
+    type: Integer
     description:
       'The content generation of the object, if applied to an object.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'object'
+  - name: 'object'
+    type: String
     description: 'The name of the object, if applied to an object.'
     required: false
-  - !ruby/object:Api::Type::NestedObject
-    name: 'projectTeam'
+  - name: 'projectTeam'
+    type: NestedObject
     description: 'The project team associated with the entity'
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'projectNumber'
+      - name: 'projectNumber'
+        type: String
         description: 'The project team associated with the entity'
-      - !ruby/object:Api::Type::Enum
-        name: 'team'
+      - name: 'team'
+        type: Enum
         description: 'The team.'
-        values:
-          - :editors
-          - :owners
-          - :viewers
-  - !ruby/object:Api::Type::Enum
-    name: 'role'
+        enum_values:
+          - 'editors'
+          - 'owners'
+          - 'viewers'
+  - name: 'role'
+    type: Enum
     description: 'The access permission for the entity.'
     required: true
-    values:
-      - :OWNER
-      - :READER
+    enum_values:
+      - 'OWNER'
+      - 'READER'

@@ -319,7 +319,7 @@ resource "google_composer_environment" "example" {
 
   config {
 
-    enable_private_ip_environment = true
+    enable_private_environment = true
 
     # ... other configuration parameters
   }
@@ -879,6 +879,24 @@ The following arguments are supported:
   for high resilience and `STANDARD_RESILIENCE` for standard
   resilience.
 
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config_c2).
+
+<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config_c2).
+
+<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
 * `master_authorized_networks_config` -
   (Optional)
   Configuration options for the master authorized networks feature. Enabled
@@ -904,24 +922,6 @@ The following arguments are supported:
 * `cidr_block` -
   (Required)
   `cidr_block` must be specified in CIDR notation.
-
-* `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or newer only)
-  Configuration setting for airflow data rentention mechanism. Structure is
-  [documented below](#nested_data_retention_config_c2).
-
-<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
-* `task_logs_retention_config` - 
-  (Optional)
-  The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config_c2).
-
-<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
-* `storage_mode` - 
-  (Optional)
-  The mode of storage for Airflow workers task logs. Values for storage mode are 
-  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
-  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
 <a name="nested_storage_config_c2"></a>The `storage_config` block supports:
@@ -1037,8 +1037,7 @@ The following arguments are supported:
   major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
 
 * `cloud_data_lineage_integration` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
+  (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration_c2).
 
@@ -1335,7 +1334,7 @@ The following arguments are supported:
   and `ENVIRONMENT_SIZE_LARGE`.
 
 * `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or later only)
+  (Optional)
   Configuration setting for Airflow database retention mechanism. Structure is
   [documented below](#nested_data_retention_config_c3).
 
@@ -1465,8 +1464,7 @@ The following arguments are supported:
   **Important**: In-place upgrade for Composer 3 is not yet supported.
 
 * `cloud_data_lineage_integration` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
+  (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration_c3).
 

@@ -1,0 +1,71 @@
+// Build custom mask since the notebooks API does not support gce_setup as a valid mask
+stopInstance := false
+newUpdateMask := []string{}
+if d.HasChange("gce_setup.0.machine_type") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.machine_type")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.accelerator_configs") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.accelerator_configs")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_secure_boot") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_secure_boot")
+    stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_vtpm") {
+  newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_vtpm")
+  stopInstance = true
+}
+if d.HasChange("gce_setup.0.shielded_instance_config.0.enable_integrity_monitoring") {
+  newUpdateMask = append(newUpdateMask, "gce_setup.shielded_instance_config.enable_integrity_monitoring")
+  stopInstance = true
+}
+if d.HasChange("gce_setup.0.metadata") {
+    newUpdateMask = append(newUpdateMask, "gceSetup.metadata")
+}
+if d.HasChange("effective_labels") {
+    newUpdateMask = append(newUpdateMask, "labels")
+}
+updateMask = newUpdateMask
+// Overwrite the previously set mask.
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
+if err != nil {
+    return err
+}
+
+if d.HasChange("effective_labels") {
+  old_labels_interface, new_labels_interface := d.GetChange("effective_labels")
+  old_labels := old_labels_interface.(map[string]interface{})
+  new_labels := new_labels_interface.(map[string]interface{})
+  obj["labels"] = mergeLabels(old_labels,new_labels)
+}
+
+name := d.Get("name").(string)
+if stopInstance{
+  state := d.Get("state").(string)
+
+  if state != "STOPPED" {
+    dRes, err := modifyWorkbenchInstanceState(config, d, project, billingProject, userAgent, "stop")
+    if err != nil {
+      return err
+    }
+
+    if err := waitForWorkbenchOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+      return fmt.Errorf("Error stopping Workbench Instance: %s", err)
+    }
+
+  } else {
+    log.Printf("[DEBUG] Workbench Instance %q has state %q.", name, state)
+  }
+
+} else {
+  log.Printf("[DEBUG] Workbench Instance %q need not be stopped for the update.", name)
+}
+
+if d.HasChange("gce_setup.0.boot_disk.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, true)
+}
+if d.HasChange("gce_setup.0.data_disks.0.disk_size_gb") {
+  resizeWorkbenchInstanceDisk(config, d, project, userAgent, false)
+}

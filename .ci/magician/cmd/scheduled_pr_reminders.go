@@ -38,13 +38,13 @@ var (
 	// used for flags
 	dryRun bool
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
 	waitingForContributorTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
 	waitingForMergeTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
 	waitingForReviewTemplate string
 )
 
@@ -189,7 +189,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error posting comment to PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error posting comment to PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -208,7 +208,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error closing PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error closing PR %d: %w", *pr.Number, err)
 				}
 			}
 		}

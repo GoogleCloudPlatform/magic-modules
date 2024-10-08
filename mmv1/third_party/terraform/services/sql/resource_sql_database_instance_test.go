@@ -2076,6 +2076,41 @@ func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_SqlServerTimezoneUpdate(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
+	timezone := "Eastern Standard Time"
+	timezoneUpdate := "Pacific Standard Time"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezone),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezoneUpdate),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -2376,9 +2411,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 		// We don't do ImportStateVerify for the ssl_mode because of the implementation. The ssl_mode is expected to be discarded if the local state doesn't have it.
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2389,9 +2423,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ENCRYPTED_ONLY"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ENCRYPTED_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
 			},
@@ -2402,9 +2435,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, true, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "true"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				),
 			},
@@ -2415,9 +2447,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2457,7 +2488,51 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 	})
 }
 
-func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, requireSsl bool, sslMode string) string {
+func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, "GOOGLE_MANAGED_CAS_CA"),
+				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA")),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, serverCaMode string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_15"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = "true"
+      server_ca_mode  = "%s"
+    }
+  }
+}
+`, databaseName, serverCaMode)
+}
+
+func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2468,11 +2543,10 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = %t
       ssl_mode = "%s"
     }
   }
-}`, databaseName, databaseVersion, requireSsl, sslMode)
+}`, databaseName, databaseVersion, sslMode)
 }
 
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
@@ -2556,7 +2630,7 @@ resource "google_sql_database_instance" "instance" {
     collation = "Polish_CI_AS"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = true
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
 }
@@ -2687,6 +2761,25 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, instanceName, tier, edition)
+}
+
+func testGoogleSqlDatabaseInstance_SqlServerTimezone(instance, rootPassword, timezone string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-1-3840"
+    ip_configuration {
+      ipv4_enabled       = "true"
+    }
+    time_zone = "%s"
+  }
+}
+`, instance, rootPassword, timezone)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
@@ -3035,6 +3128,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3062,6 +3156,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3095,6 +3190,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3128,6 +3224,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3162,6 +3259,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {

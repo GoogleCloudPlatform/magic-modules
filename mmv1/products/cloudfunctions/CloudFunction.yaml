@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,200 +11,198 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'CloudFunction'
-base_url: projects/{{project}}/locations/{{region}}/functions
-create_verb: :POST
+legacy_name: 'google_cloudfunctions_function'
 description: |
   A Cloud Function that contains user computation executed in response to an event.
-collection_url_key: 'functions'
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
+base_url: 'projects/{{project}}/locations/{{region}}/functions'
 update_mask: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'cloud_function'
+collection_url_key: 'functions'
+iam_policy:
   method_name_separator: ':'
-
-legacy_name: 'google_cloudfunctions_function'
-id_format: 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
-import_format:
-  ['projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}']
-exclude_resource: true
+  parent_resource_attribute: 'cloud_function'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudfunctions_cloud_function'
+  - name: 'cloudfunctions_cloud_function'
     primary_resource_id: 'function'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-function%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-function%s", context["random_suffix"])'
     vars:
       function_name: 'my-function'
       bucket_name: 'cloudfunctions-function-example-bucket'
       zip_path: 'path/to/index.zip'
     test_vars_overrides:
-      zip_path: 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
+      'zip_path': 'acctest.CreateZIPArchiveForCloudFunctionSource(t, testHTTPTriggerPath)'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'region'
-    required: true
+  - name: 'region'
+    type: String
     description: The location of this cloud function.
+    required: true
     # This is not a real API field.
     # This is a more user-centric way for users to specify
     # that they want to use a HTTP Trigger rather than
     # send httpsTrigger with an empty dictionary.
-  - !ruby/object:Api::Type::Boolean
-    name: 'trigger_http'
+  - name: 'trigger_http'
+    type: Boolean
     description: 'Use HTTP to trigger this function'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
+  - name: 'name'
+    type: String
     description: |
       A user-defined name of the function. Function names must
       be unique globally and match pattern `projects/*/locations/*/functions/*`.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
+  - name: 'description'
+    type: String
     description: 'User-provided description of a function.'
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
-    output: true
+  - name: 'status'
+    type: Enum
     description: |
       Status of the function deployment.
-    values:
-      - :CLOUD_FUNCTION_STATUS_UNSPECIFIED
-      - :ACTOVE
-      - :OFFLINE
-      - :DEPLOY_IN_PROGRESS
-      - :DELETE_IN_PROGRESS
-      - :UNKNOWN
-  - !ruby/object:Api::Type::String
-    name: 'entryPoint'
+    output: true
+    enum_values:
+      - 'CLOUD_FUNCTION_STATUS_UNSPECIFIED'
+      - 'ACTOVE'
+      - 'OFFLINE'
+      - 'DEPLOY_IN_PROGRESS'
+      - 'DELETE_IN_PROGRESS'
+      - 'UNKNOWN'
+  - name: 'entryPoint'
+    type: String
     description: |
       The name of the function (as defined in source code) that will be executed.
       Defaults to the resource name suffix, if not specified. For backward
       compatibility, if function with given name is not found, then the system
       will try to use function named "function". For Node.js this is name of a
       function exported by the module specified in source_location.
-  - !ruby/object:Api::Type::String
-    name: 'runtime'
+  - name: 'runtime'
+    type: String
     description: |
       The runtime in which the function is going to run. If empty,
       defaults to Node.js 6.
-  - !ruby/object:Api::Type::String
-    name: 'timeout'
+  - name: 'timeout'
+    type: String
     description: |
       The function execution timeout. Execution is considered failed and can
       be terminated if the function is not completed at the end of the timeout
       period. Defaults to 60 seconds.
-  - !ruby/object:Api::Type::Integer
-    name: 'availableMemoryMb'
+  - name: 'availableMemoryMb'
+    type: Integer
     description: 'The amount of memory in MB available for a function.'
-  - !ruby/object:Api::Type::String
-    name: 'serviceAccountEmail'
-    output: true
+  - name: 'serviceAccountEmail'
+    type: String
     description: 'The email of the service account for this function.'
-  - !ruby/object:Api::Type::String
-    name: 'buildServiceAccount'
-    default_from_api: true
+    output: true
+  - name: 'buildServiceAccount'
+    type: String
     description: 'The fully-qualified name of the service account to be used for the build step of deploying this function'
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
-    output: true
+    default_from_api: true
+  - name: 'updateTime'
+    type: String
     description: 'The last update timestamp of a Cloud Function'
-  - !ruby/object:Api::Type::String
-    name: 'versionId'
     output: true
+  - name: 'versionId'
+    type: String
     description: |
       The version identifier of the Cloud Function. Each deployment attempt
       results in a new version of a function being created.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       A set of key/value label pairs associated with this Cloud Function.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'environmentVariables'
+  - name: 'environmentVariables'
+    type: KeyValuePairs
     description: |
       Environment variables that shall be available during function execution.
-  - !ruby/object:Api::Type::String
-    name: 'sourceArchiveUrl'
+  - name: 'sourceArchiveUrl'
+    type: String
     description: |
       The Google Cloud Storage URL, starting with gs://, pointing to the zip
       archive which contains the function.
     exactly_one_of:
-      - source_repository
-      - source_archive_url
-      - source_upload_url
-  - !ruby/object:Api::Type::String
-    name: 'sourceUploadUrl'
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
+  - name: 'sourceUploadUrl'
+    type: String
     description: |
       The Google Cloud Storage signed URL used for source uploading.
     exactly_one_of:
-      - source_repository
-      - source_archive_url
-      - source_upload_url
-  - !ruby/object:Api::Type::NestedObject
-    name: 'sourceRepository'
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
+  - name: 'sourceRepository'
+    type: NestedObject
     description: |
       The source repository where a function is hosted.
     exactly_one_of:
-      - source_repository
-      - source_archive_url
-      - source_upload_url
+      - 'source_repository'
+      - 'source_archive_url'
+      - 'source_upload_url'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'url'
-        required: true
+      - name: 'url'
+        type: String
         description: |
           The URL pointing to the hosted repository where the function is defined
-      - !ruby/object:Api::Type::String
-        name: 'deployedUrl'
-        output: true
+        required: true
+      - name: 'deployedUrl'
+        type: String
         description: |
           The URL pointing to the hosted repository where the function were defined
           at the time of deployment.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'httpsTrigger'
-    description: |
-      An HTTPS endpoint type of source that can be triggered via URL.
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'url'
         output: true
-        description: 'The deployed url for the function.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'eventTrigger'
+  - name: 'httpsTrigger'
+    type: NestedObject
     description: |
       An HTTPS endpoint type of source that can be triggered via URL.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'eventType'
-        required: true
+      - name: 'url'
+        type: String
+        description: 'The deployed url for the function.'
+        output: true
+  - name: 'eventTrigger'
+    type: NestedObject
+    description: |
+      An HTTPS endpoint type of source that can be triggered via URL.
+    properties:
+      - name: 'eventType'
+        type: String
         description: |
           The type of event to observe. For example:
           `providers/cloud.storage/eventTypes/object.change` and
           `providers/cloud.pubsub/eventTypes/topic.publish`.
-      - !ruby/object:Api::Type::String
-        name: 'resource'
         required: true
+      - name: 'resource'
+        type: String
         description: |
           The resource(s) from which to observe events,
           for example, `projects/_/buckets/myBucket.`
-      - !ruby/object:Api::Type::String
-        name: 'service'
+        required: true
+      - name: 'service'
+        type: String
         description: |
           The hostname of the service that should be observed.

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,59 +11,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'SSHPublicKey'
-kind: user#sshPublicKeys
-base_url: 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
-create_url: 'users/{{user}}:importSshPublicKey'
-create_verb: :POST
-update_verb: :PATCH
+kind: 'user#sshPublicKeys'
 description: |
   The SSH public key information associated with a Google account.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/oslogin'
   api: 'https://cloud.google.com/compute/docs/oslogin/rest/v1/users.sshPublicKeys'
-update_mask: true
-# Skip sweeper since due to URL containing user ID
-skip_sweeper: true
+docs:
 id_format: 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
-import_format: ['users/{{user}}/sshPublicKeys/{{fingerprint}}']
+base_url: 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
+create_url: 'users/{{user}}:importSshPublicKey'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'users/{{user}}/sshPublicKeys/{{fingerprint}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/os_login_ssh_public_key.go.tmpl'
+  post_create: 'templates/terraform/post_create/sshkeyfingerprint.go.tmpl'
+# Skip sweeper since due to URL containing user ID
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'os_login_ssh_key_basic'
+  - name: 'os_login_ssh_key_basic'
     primary_resource_id: 'cache'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/os_login_ssh_public_key.go.erb
-  post_create: templates/terraform/post_create/sshkeyfingerprint.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: user
+  - name: 'user'
+    type: String
     description: |
       The user email.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: project
+    immutable: true
+  - name: 'project'
+    type: String
     description: |
       The project ID of the Google Cloud Platform project.
-    immutable: true
     url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'key'
+  - name: 'key'
+    type: String
     description: |
       Public key text in SSH format, defined by RFC4253 section 6.6.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'expirationTimeUsec'
+  - name: 'expirationTimeUsec'
+    type: String
     description: |
       An expiration time in microseconds since epoch.
     required: false
-  - !ruby/object:Api::Type::String
-    name: fingerprint
+  - name: 'fingerprint'
+    type: String
     description: |
       The SHA-256 fingerprint of the SSH public key.
     output: true

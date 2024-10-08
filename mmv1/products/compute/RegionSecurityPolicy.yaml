@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,168 +11,185 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'RegionSecurityPolicy'
-min_version: beta
-base_url: projects/{{project}}/regions/{{region}}/securityPolicies
-self_link: projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}
-update_verb: :PATCH
-update_mask: true
 description: |
   Represents a Region Cloud Armor Security Policy resource.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/security-policy-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionSecurityPolicies'
-import_format: ['projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/securityPolicies'
+self_link: 'projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_security_policy_basic'
+  - name: 'region_security_policy_basic'
     primary_resource_id: 'region-sec-policy-basic'
     vars:
       sec_policy_name: 'my-sec-policy-basic'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_security_policy_with_ddos_protection_config'
+  - name: 'region_security_policy_with_ddos_protection_config'
     primary_resource_id: 'region-sec-policy-ddos-protection'
     vars:
       sec_policy_name: 'my-sec-policy-ddos-protection'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_security_policy_with_user_defined_fields'
+  - name: 'region_security_policy_with_user_defined_fields'
     primary_resource_id: 'region-sec-policy-user-defined-fields'
     vars:
       sec_policy_name: 'my-sec-policy-user-defined-fields'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'name'
-    required: false
-    immutable: true
+  - name: 'region'
+    type: ResourceRef
     description: |
       The Region in which the created Region Security Policy should reside.
       If it is not provided, the provider region is used.
+    min_version: 'beta'
+    required: false
+    immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'policyId'
-    api_name: 'id'
+  - name: 'policyId'
+    type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    immutable: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long, and comply with RFC1035.
       Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    immutable: true
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when you create the resource.
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'fingerprint'
+    min_version: 'beta'
+  - name: 'fingerprint'
+    type: Fingerprint
     description: |
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
-    immutable: true
+  - name: 'type'
+    type: Enum
     description: |
       The type indicates the intended use of the security policy.
       - CLOUD_ARMOR: Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers.
       - CLOUD_ARMOR_EDGE: Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.
       - CLOUD_ARMOR_NETWORK: Cloud Armor network policies can be configured to filter packets targeting network load balancing resources such as backend services, target pools, target instances, and instances with external IPs. They filter requests before the request is served from the application.
       This field can be set only at resource creation time.
-    values:
-      - :CLOUD_ARMOR
-      - :CLOUD_ARMOR_EDGE
-      - :CLOUD_ARMOR_NETWORK
-  - !ruby/object:Api::Type::NestedObject
-    name: 'ddosProtectionConfig'
+    min_version: 'beta'
+    immutable: true
+    enum_values:
+      - 'CLOUD_ARMOR'
+      - 'CLOUD_ARMOR_EDGE'
+      - 'CLOUD_ARMOR_NETWORK'
+  - name: 'ddosProtectionConfig'
+    type: NestedObject
     description: |
       Configuration for Google Cloud Armor DDOS Proctection Config.
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'ddosProtection'
+      - name: 'ddosProtection'
+        type: Enum
         description: |
           Google Cloud Armor offers the following options to help protect systems against DDoS attacks:
           - STANDARD: basic always-on protection for network load balancers, protocol forwarding, or VMs with public IP addresses.
           - ADVANCED: additional protections for Managed Protection Plus subscribers who use network load balancers, protocol forwarding, or VMs with public IP addresses.
           - ADVANCED_PREVIEW: flag to enable the security policy in preview mode.
-        values:
-          - :ADVANCED
-          - :ADVANCED_PREVIEW
-          - :STANDARD
+        min_version: 'beta'
         required: true
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
-    output: true
+        enum_values:
+          - 'ADVANCED'
+          - 'ADVANCED_PREVIEW'
+          - 'STANDARD'
+  - name: 'selfLink'
+    type: String
     description: |
       Server-defined URL for the resource.
-  - !ruby/object:Api::Type::String
-    name: 'selfLinkWithPolicyId'
-    api_name: 'selfLinkWithId'
+    min_version: 'beta'
     output: true
+  - name: 'selfLinkWithPolicyId'
+    type: String
     description: |
       Server-defined URL for this resource with the resource id.
-  - !ruby/object:Api::Type::Array
-    name: 'userDefinedFields'
+    api_name: selfLinkWithId
+    min_version: 'beta'
+    output: true
+  - name: 'userDefinedFields'
+    type: Array
     description: |
       Definitions of user-defined fields for CLOUD_ARMOR_NETWORK policies.
       A user-defined field consists of up to 4 bytes extracted from a fixed offset in the packet, relative to the IPv4, IPv6, TCP, or UDP header, with an optional mask to select certain bits.
       Rules may then specify matching values for these fields.
-    item_type: !ruby/object:Api::Type::NestedObject
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
+        - name: 'name'
+          type: String
           description: |
             The name of this field. Must be unique within the policy.
-        - !ruby/object:Api::Type::Enum
-          name: 'base'
-          required: true
+          min_version: 'beta'
+        - name: 'base'
+          type: Enum
           description: |
             The base relative to which 'offset' is measured. Possible values are:
             - IPV4: Points to the beginning of the IPv4 header.
             - IPV6: Points to the beginning of the IPv6 header.
             - TCP: Points to the beginning of the TCP header, skipping over any IPv4 options or IPv6 extension headers. Not present for non-first fragments.
             - UDP: Points to the beginning of the UDP header, skipping over any IPv4 options or IPv6 extension headers. Not present for non-first fragments.
-          values:
-            - :IPV4
-            - :IPV6
-            - :TCP
-            - :UDP
-        - !ruby/object:Api::Type::Integer
-          name: 'offset'
+          min_version: 'beta'
+          required: true
+          enum_values:
+            - 'IPV4'
+            - 'IPV6'
+            - 'TCP'
+            - 'UDP'
+        - name: 'offset'
+          type: Integer
           description: |
             Offset of the first byte of the field (in network byte order) relative to 'base'.
-        - !ruby/object:Api::Type::Integer
-          name: 'size'
+          min_version: 'beta'
+        - name: 'size'
+          type: Integer
           description: |
             Size of the field in bytes. Valid values: 1-4.
-        - !ruby/object:Api::Type::String
-          name: 'mask'
+          min_version: 'beta'
+        - name: 'mask'
+          type: String
           description: |
             If specified, apply this mask (bitwise AND) to the field to ignore bits before matching.
             Encoded as a hexadecimal number (starting with "0x").
             The last byte of the field (in network byte order) corresponds to the least significant byte of the mask.
+          min_version: 'beta'

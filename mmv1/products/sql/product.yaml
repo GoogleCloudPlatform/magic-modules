@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,42 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: SQL
-display_name: Cloud SQL
+---
+name: 'SQL'
+display_name: 'Cloud SQL'
 client_name: 'SqlAdmin'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://sqladmin.googleapis.com/sql/v1beta4/
+  - name: 'ga'
+    base_url: 'https://sqladmin.googleapis.com/sql/v1beta4/'
 scopes:
-  - https://www.googleapis.com/auth/sqlservice.admin
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+  - 'https://www.googleapis.com/auth/sqlservice.admin'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: 'projects/{{project}}/operations/{{op_id}}'
     kind: 'sql#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/operations/{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-# 'BackupRun' is not idempotent and will not be covered.
-# | - !ruby/object:Api::Resource
-# |   name: 'BackupRun'
-# |   kind: 'sql#backupRun'
-# |   base_url: projects/{{project}}/instances/{{instance}}/backupRuns
-# 'Operation' is not idempotent and will not be covered.
-# (it is used internally to assert the state of operations being performed)
-# | - !ruby/object:Api::Resource
-# |   name: 'Operation'
-# |   kind: 'sql#operation'
-# |   base_url: projects/{{project}}/operations

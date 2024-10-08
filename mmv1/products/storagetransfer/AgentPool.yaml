@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,39 +11,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AgentPool'
 description: 'Represents an On-Premises Agent pool.'
-base_url: 'projects/{{project}}/agentPools'
-self_link: 'projects/{{project}}/agentPools/{{name}}'
-create_url: 'projects/{{project}}/agentPools?agentPoolId={{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/storage-transfer/docs/on-prem-agent-pools'
   api: 'https://cloud.google.com/storage-transfer/docs/reference/rest/v1/projects.agentPools'
+docs:
+base_url: 'projects/{{project}}/agentPools'
+self_link: 'projects/{{project}}/agentPools/{{name}}'
+create_url: 'projects/{{project}}/agentPools?agentPoolId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/agent_pool.go.tmpl'
+  post_create: 'templates/terraform/post_create/agent_pool.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/agent_pool.go.tmpl'
+  post_import: 'templates/terraform/post_import/agent_pool.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'agent_pool_basic'
-    primary_resource_id:
-      'example'
-      # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
-    skip_test: true
+  - name: 'agent_pool_basic'
+    primary_resource_id: 'example'
     vars:
       agent-pool-name: 'agent-pool-example'
     test_env_vars:
-      project_id: :PROJECT_NAME
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 30
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/agent_pool.go.erb
-  post_create: templates/terraform/post_create/agent_pool.go.erb
-  pre_update: templates/terraform/pre_update/agent_pool.go.erb
-  post_import: templates/terraform/post_import/agent_pool.go.erb
+      project_id: 'PROJECT_NAME'
+      # Skip generating this test as the example is covered in resource_storage_transfer_agent_pool_test.go
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The ID of the agent pool to create.
 
@@ -55,27 +57,27 @@ properties:
         * One or more numerals or lowercase ASCII characters.
 
       As expressed by the regular expression: ^(?!goog)[a-z]([a-z0-9-._~]*[a-z0-9])?$.
-    immutable: true
-    required: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    required: true
+    immutable: true
+  - name: 'displayName'
+    type: String
     description: 'Specifies the client-specified AgentPool description.'
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: 'Specifies the state of the AgentPool.'
     output: true
-    values:
-      - :CREATING
-      - :CREATED
-      - :DELETING
-  - !ruby/object:Api::Type::NestedObject
-    name: 'bandwidthLimit'
+    enum_values:
+      - 'CREATING'
+      - 'CREATED'
+      - 'DELETING'
+  - name: 'bandwidthLimit'
+    type: NestedObject
     description: |
       Specifies the bandwidth limit details. If this field is unspecified, the default value is set as 'No Limit'.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'limitMbps'
+      - name: 'limitMbps'
+        type: String
         description:
           'Bandwidth rate in megabytes per second, distributed across all the
           agents in the pool.'

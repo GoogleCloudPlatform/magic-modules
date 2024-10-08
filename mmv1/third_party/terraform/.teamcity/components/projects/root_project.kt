@@ -18,8 +18,7 @@ import generated.ServicesListBeta
 import generated.ServicesListGa
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.sharedResource
-import projects.feature_branches.featureBranchMajorRelease600_Project
-
+import projects.feature_branches.featureBranchEphemeralResourcesSubProject
 
 // googleCloudRootProject returns a root project that contains a subprojects for the GA and Beta version of the
 // Google provider. There are also resources to help manage the test projects used for acceptance tests.
@@ -64,8 +63,9 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
         subProject(googleSubProjectBeta(allConfig))
         subProject(projectSweeperSubProject(allConfig))
 
-        // Feature branch testing
-        subProject(featureBranchMajorRelease600_Project(allConfig)) // FEATURE-BRANCH-major-release-6.0.0
+        // Feature branch-testing projects - these will be added and removed as needed
+        subProject(featureBranchEphemeralResourcesSubProject(allConfig))
+
 
         params {
             readOnlySettings()

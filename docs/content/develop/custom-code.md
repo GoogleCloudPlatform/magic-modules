@@ -10,12 +10,12 @@ This document covers how to add "custom code" to [MMv1 resources]({{< ref "/get-
 Most custom code attributes are strings that contain a path to a template file relative to the `mmv1` directory. For example:
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  # References mmv1/templates/terraform/custom_delete/resource_name_custom_delete.go.erb
-  custom_delete: templates/terraform/custom_delete/resource_name_custom_delete.go.erb
+custom_code:
+  # References mmv1/templates/terraform/custom_delete/resource_name_custom_delete.go.tmpl
+  custom_delete: templates/terraform/custom_delete/resource_name_custom_delete.go.tmpl
 ```
 
-By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as ruby templates which render go code.
+By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
 
 When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/get-started/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
 
@@ -24,8 +24,8 @@ The following sections describe types of custom code in more detail.
 ## Add reusable variables and functions
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/PRODUCT_RESOURCE.go.erb
+custom_code:
+  constants: templates/terraform/constants/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.constants` to inject top-level code in a resource file. This is useful for anything that should be referenced from other parts of the resource, such as:
@@ -53,15 +53,15 @@ These are described in more detail in the following sections.
 ### Modify the API request value for a specific field {#custom_expand}
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'FIELD'
-  custom_expand: 'templates/terraform/custom_expand/PRODUCT_RESOURCE_FIELD.go.erb'
+- name: 'FIELD'
+  type: String
+  custom_expand: 'templates/terraform/custom_expand/PRODUCT_RESOURCE_FIELD.go.tmpl'
 ```
 
 Set `custom_expand` on a field to inject code that modifies the value to send to the API for that field. Custom expanders run _before_ any [`encoder` or `update_encoder`]({{< ref "#encoder" >}}). The referenced file must include the function signature for the expander. For example:
 
 ```erb
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
   if v == nil {
     return nil, nil
   }
@@ -81,9 +81,9 @@ The function returns a final value that will be sent to the API.
 ### Modify the API request data for an entire resource {#encoder}
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoder/PRODUCT_RESOURCE.go.erb
-  update_encoder: templates/terraform/update_encoder/PRODUCT_RESOURCE.go.erb
+custom_code:
+  encoder: templates/terraform/encoder/PRODUCT_RESOURCE.go.tmpl
+  update_encoder: templates/terraform/update_encoder/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.encoder` to inject code that modifies the data that will be sent in the API request. This is useful if the API expects the data to be in a significantly different structure than Terraform does - for example, if the API expects the entire object to be nested under a key, or a particular field must never be sent to the API. The encoder will run _after_ any [`custom_expand`]({{< ref "#custom_expand" >}}) code.
@@ -110,8 +110,8 @@ If the Create and Update methods for the resource need different logic, set `cus
 ### Modify the API response data for an entire resource {#decoder}
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoder/PRODUCT_RESOURCE.go.erb
+custom_code:
+  decoder: templates/terraform/decoder/PRODUCT_RESOURCE.go.tmpl
 ```
 
 
@@ -136,15 +136,15 @@ The function returns data that will be set in Terraform state and an optional er
 ### Modify the API response value for a specific field {#custom_flatten}
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'FIELD'
-  custom_flatten: 'templates/terraform/custom_flatten/PRODUCT_RESOURCE_FIELD.go.erb'
+- name: 'FIELD'
+  type: String
+  custom_flatten: 'templates/terraform/custom_flatten/PRODUCT_RESOURCE_FIELD.go.tmpl'
 ```
 
 Set `custom_flatten` on a field to inject code that modifies the value returned by the API prior to storing it in Terraform state. Custom flatteners run _after_ any [`decoder`]({{< ref "#encoder" >}}). The referenced file must include the function signature for the flattener. For example:
 
 ```erb
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   if v == nil {
     return "0"
   }
@@ -163,19 +163,19 @@ The function returns a final value that will be stored in Terraform state for th
 ## Inject code before / after CRUD operations and Import {#pre_post_injection}
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/PRODUCT_RESOURCE.go.erb
-  post_create: templates/terraform/post_create/PRODUCT_RESOURCE.go.erb
+custom_code:
+  pre_create: templates/terraform/pre_create/PRODUCT_RESOURCE.go.tmpl
+  post_create: templates/terraform/post_create/PRODUCT_RESOURCE.go.tmpl
 
-  pre_read: templates/terraform/pre_read/PRODUCT_RESOURCE.go.erb
+  pre_read: templates/terraform/pre_read/PRODUCT_RESOURCE.go.tmpl
 
-  pre_update: templates/terraform/pre_update/PRODUCT_RESOURCE.go.erb
-  post_update: templates/terraform/post_update/PRODUCT_RESOURCE.go.erb
+  pre_update: templates/terraform/pre_update/PRODUCT_RESOURCE.go.tmpl
+  post_update: templates/terraform/post_update/PRODUCT_RESOURCE.go.tmpl
 
-  pre_delete: templates/terraform/pre_delete/PRODUCT_RESOURCE.go.erb
-  post_delete: templates/terraform/post_delete/PRODUCT_RESOURCE.go.erb
+  pre_delete: templates/terraform/pre_delete/PRODUCT_RESOURCE.go.tmpl
+  post_delete: templates/terraform/post_delete/PRODUCT_RESOURCE.go.tmpl
 
-  post_import: templates/terraform/post_import/PRODUCT_RESOURCE.go.erb
+  post_import: templates/terraform/post_import/PRODUCT_RESOURCE.go.tmpl
 ```
 
 CRUD operations can be modified with pre/post hooks. This code will be injected directly into the relevant CRUD method as close as possible to the related API call and will have access to any variables that are present when it runs. `pre_create` and `pre_update` run after any [`encoder`]({{< ref "#encoder" >}}). Some example use cases:
@@ -187,8 +187,8 @@ CRUD operations can be modified with pre/post hooks. This code will be injected 
 ### Custom create error handling
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode 
-  post_create_failure: templates/terraform/post_create_failure/PRODUCT_RESOURCE.go.erb
+custom_code:
+  post_create_failure: templates/terraform/post_create_failure/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Use `custom_code.post_create_failure` to inject code that runs if a Create request to the API returns an error.
@@ -209,11 +209,11 @@ The parameters the function receives are:
 ## Replace entire CRUD methods
 
 ```yaml
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_create: templates/terraform/custom_create/PRODUCT_RESOURCE.go.erb
-  custom_update: templates/terraform/custom_update/PRODUCT_RESOURCE.go.erb
-  custom_delete: templates/terraform/custom_delete/PRODUCT_RESOURCE.go.erb
-  custom_import: templates/terraform/custom_import/PRODUCT_RESOURCE.go.erb
+custom_code:
+  custom_create: templates/terraform/custom_create/PRODUCT_RESOURCE.go.tmpl
+  custom_update: templates/terraform/custom_update/PRODUCT_RESOURCE.go.tmpl
+  custom_delete: templates/terraform/custom_delete/PRODUCT_RESOURCE.go.tmpl
+  custom_import: templates/terraform/custom_import/PRODUCT_RESOURCE.go.tmpl
 ```
 
 Custom methods replace the entire contents of the Create, Update, Delete, or Import methods. For example:
@@ -237,7 +237,7 @@ Use `custom_code.extra_schema_entry` to add additional fields to a resource. Do 
 Any fields added in this way will need to be have documentation manually added using the top-level `docs` field:
 
 ```yaml
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   optional_properties: |
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```

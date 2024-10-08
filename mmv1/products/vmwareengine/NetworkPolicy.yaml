@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,169 +11,168 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'NetworkPolicy'
+description: |
+  Represents a network policy resource. Network policies are regional resources.
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.networkPolicies'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/networkPolicies'
 self_link: 'projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/networkPolicies?networkPolicyId={{name}}'
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.networkPolicies'
-description: |
-  Represents a network policy resource. Network policies are regional resources.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 5000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-
-import_format: ["projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}"]
-autogen_async: true
-
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_network_policy_basic"
-    primary_resource_id: "vmw-engine-network-policy"
+  - name: 'vmware_engine_network_policy_basic'
+    primary_resource_id: 'vmw-engine-network-policy'
     vars:
       network_name: 'sample-network'
       network_policy_name: 'sample-network-policy'
     test_env_vars:
-      region: :REGION
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_network_policy_full"
-    primary_resource_id: "vmw-engine-network-policy"
+      region: 'REGION'
+  - name: 'vmware_engine_network_policy_full'
+    primary_resource_id: 'vmw-engine-network-policy'
     vars:
       network_name: 'sample-network'
       network_policy_name: 'sample-network-policy'
     test_env_vars:
-      region: :REGION
-
+      region: 'REGION'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "location"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The resource name of the location (region) to create the new network policy in.
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-central1
-  - !ruby/object:Api::Type::String
-    name: "name"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The ID of the Network Policy.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Creation time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       Last updated time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
-  - !ruby/object:Api::Type::String
-    name: 'uid'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       System-generated unique identifier for the resource.
 
-  - !ruby/object:Api::Type::String
-    name: 'vmwareEngineNetworkCanonical'
     output: true
+  - name: 'vmwareEngineNetworkCanonical'
+    type: String
     description: |
       The canonical name of the VMware Engine network in the form:
       projects/{project_number}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId}
 
-  - !ruby/object:Api::Type::String
-    name: 'edgeServicesCidr'
-    required: true
+    output: true
+  - name: 'edgeServicesCidr'
+    type: String
     description: |
       IP address range in CIDR notation used to create internet access and external IP access.
       An RFC 1918 CIDR block, with a "/26" prefix, is required. The range cannot overlap with any
       prefixes either in the consumer VPC network or in use by the private clouds attached to that VPC network.
 
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
+  - name: 'description'
+    type: String
     description: |
       User-provided description for this network policy.
 
-  - !ruby/object:Api::Type::String
-    name: 'vmwareEngineNetwork'
-    required: true
-    immutable: true
+  - name: 'vmwareEngineNetwork'
+    type: String
     description: |
       The relative resource name of the VMware Engine network. Specify the name in the following form:
       projects/{project}/locations/{location}/vmwareEngineNetworks/{vmwareEngineNetworkId} where {project}
       can either be a project number or a project ID.
 
-  - !ruby/object:Api::Type::NestedObject
-    name: 'internetAccess'
+    required: true
+    immutable: true
+  - name: 'internetAccess'
+    type: NestedObject
     description: |
       Network service that allows VMware workloads to access the internet.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: enabled
-        send_empty_value: true
+      - name: 'enabled'
+        type: Boolean
         description: |
           True if the service is enabled; false otherwise.
 
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
+        send_empty_value: true
+      - name: 'state'
+        type: Enum
         description: |
           State of the service. New values may be added to this enum when appropriate.
         output: true
-        values:
-          - :UNPROVISIONED
-          - :RECONCILING
-          - :ACTIVE
-
-  - !ruby/object:Api::Type::NestedObject
-    name: 'externalIp'
+        enum_values:
+          - 'UNPROVISIONED'
+          - 'RECONCILING'
+          - 'ACTIVE'
+  - name: 'externalIp'
+    type: NestedObject
     description: |
       Network service that allows External IP addresses to be assigned to VMware workloads.
       This service can only be enabled when internetAccess is also enabled.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: enabled
-        send_empty_value: true
+      - name: 'enabled'
+        type: Boolean
         description: |
           True if the service is enabled; false otherwise.
 
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
+        send_empty_value: true
+      - name: 'state'
+        type: Enum
         description: |
           State of the service. New values may be added to this enum when appropriate.
         output: true
-        values:
-          - :UNPROVISIONED
-          - :RECONCILING
-          - :ACTIVE
+        enum_values:
+          - 'UNPROVISIONED'
+          - 'RECONCILING'
+          - 'ACTIVE'

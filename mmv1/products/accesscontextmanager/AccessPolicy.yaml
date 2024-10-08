@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,90 +11,109 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AccessPolicy'
-base_url: accessPolicies
-self_link: 'accessPolicies/{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
 description: |
   AccessPolicy is a container for AccessLevels (which define the necessary
   attributes to use GCP services) and ServicePerimeters (which define
   regions of services able to freely pass data within a perimeter). An
   access policy is globally visible within an organization, and the
   restrictions it specifies apply to all projects within an organization.
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
+docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-autogen_async: true
 id_format: '{{name}}'
-import_format: ['{{name}}']
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'name'
-  allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
+base_url: 'accessPolicies'
+self_link: 'accessPolicies/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  import_format: ['accessPolicies/{{name}}', '{{name}}']
-  iam_conditions_request_type: null
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/accesscontextmanager.policyAdmin'
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'accessPolicies/{{name}}'
+    - '{{name}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/accesspolicy.tmpl'
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_access_policy_basic'
-    skip_test: true
+  - name: 'access_context_manager_access_policy_basic'
     primary_resource_id: 'access-policy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_access_policy_scoped'
-    skip_test: true
-    skip_import_test: true
+    exclude_test: true
+  - name: 'access_context_manager_access_policy_scoped'
     primary_resource_id: 'access-policy'
     test_env_vars:
-      org_id: :ORG_ID
-      project: :PROJECT_NAME
-# Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/accesspolicy.erb
+      org_id: 'ORG_ID'
+      project: 'PROJECT_NAME'
+    exclude_test: true
+    exclude_import_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
+  - name: 'parent'
+    type: String
     description: |
       The parent of this AccessPolicy in the Cloud Resource Hierarchy.
       Format: 'organizations/{{organization_id}}'
-  - !ruby/object:Api::Type::String
-    name: title
     required: true
+    immutable: true
+  - name: 'title'
+    type: String
     description: |
       Human readable title. Does not affect behavior.
-  - !ruby/object:Api::Type::Array
-    name: scopes
+    required: true
+  - name: 'scopes'
+    type: Array
     description: |
       Folder or project on which this policy is applicable.
       Format: 'folders/{{folder_id}}' or 'projects/{{project_number}}'
-    item_type: Api::Type::String
+    item_type:
+      type: String
     max_size: 1
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       Resource name of the AccessPolicy. Format: '{{policy_id}}'
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the AccessPolicy was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the AccessPolicy was updated in UTC.
     output: true
