@@ -93,23 +93,23 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 				uri = "${google_storage_bucket.bucket.url}/prefix-"
 			}
 			speech_settings {
-				endpointer_sensitivity = 30
-				no_speech_timeout = "3.500s"
+				endpointer_sensitivity        = 30
+				no_speech_timeout             = "3.500s"
 				use_timeout_based_endpointing = true
-				models = { 
-					name: "wrench"
-					mass: "1.3kg"
-					count: "3" 
+				models = {
+				name : "wrench"
+				mass : "1.3kg"
+				count : "3"
 				}
 			}
 			dtmf_settings {
-				enabled = true
-				max_digits = 1
+				enabled      = true
+				max_digits   = 1
 				finish_digit = "#"
 			}
 			logging_settings {
-				enable_stackdriver_logging = true
-				enable_interaction_logging = true
+				enable_stackdriver_logging     = true
+				enable_interaction_logging     = true
 				enable_consent_based_redaction = true
 			}
 		}
