@@ -1804,7 +1804,7 @@ resource "google_dataproc_cluster" "with_init_action" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1836,7 +1836,7 @@ resource "google_dataproc_cluster" "updatable" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1844,7 +1844,7 @@ resource "google_dataproc_cluster" "updatable" {
 
     worker_config {
       num_instances = "%d"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1874,7 +1874,7 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1882,7 +1882,7 @@ resource "google_dataproc_cluster" "non_preemptible_secondary" {
   
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1913,7 +1913,7 @@ resource "google_dataproc_cluster" "spot_secondary" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1921,7 +1921,7 @@ resource "google_dataproc_cluster" "spot_secondary" {
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1952,7 +1952,7 @@ resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1960,7 +1960,7 @@ resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -1997,7 +1997,7 @@ resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
 
     master_config {
       num_instances = "1"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2005,7 +2005,7 @@ resource "google_dataproc_cluster" "with_auxiliary_node_groups" {
 
     worker_config {
       num_instances = "2"
-      machine_type  = "e2-medium"
+      machine_type  = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2081,7 +2081,7 @@ resource "google_dataproc_cluster" "with_bucket" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2115,7 +2115,7 @@ resource "google_dataproc_cluster" "with_bucket" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2305,7 +2305,7 @@ resource "google_dataproc_cluster" "with_service_account" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2384,7 +2384,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_name" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
@@ -2414,7 +2414,7 @@ resource "google_dataproc_cluster" "with_net_ref_by_url" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "n1-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
