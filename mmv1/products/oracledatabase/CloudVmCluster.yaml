@@ -47,14 +47,18 @@ async:
     message: 'message'
 custom_code:
 examples:
-  - name: 'oracledatabase_vmcluster_basic'
+  - name: 'oracledatabase_cloud_vmcluster_basic'
     primary_resource_id: 'my_vmcluster'
-    test_env_vars:
-      project: 'OCI_PROJECT_ID'
-  - name: 'oracledatabase_vmcluster_full'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
+  - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
-    test_env_vars:
-      project: 'OCI_PROJECT_ID'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
 parameters:
   - name: 'location'
     type: String
