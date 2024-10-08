@@ -86,7 +86,6 @@ examples:
       interconnect_attachment_name: 'partner-interconnect1'
       interconnect_attachment_spoke_name: 'interconnect-attachment-spoke'
   - name: 'network_connectivity_spoke_linked_producer_vpc_network_basic'
-    config_path: "{{override_path}}/examples/network_connectivity_spoke_linked_producer_vpc_network_basic.tf.erb"
     primary_resource_id: 'primary'
     vars:
       network_name: "net-spoke"
@@ -284,12 +283,14 @@ properties:
         type: Array
         description: IP ranges allowed to be included from peering.
         immutable: true
-        item_type: Api::Type::String
+        item_type: 
+          type: String
       - name: excludeExportRanges
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
         immutable: true
-        item_type: Api::Type::String
+        item_type:
+          type: String
   - name: 'uniqueId'
     type: String
     description: Output only. The Google-generated UUID for the spoke. This value is unique across all spoke resources. If a spoke is deleted and another with the same name is created, the new spoke is assigned a different unique_id.
