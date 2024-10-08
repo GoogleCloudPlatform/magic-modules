@@ -30,7 +30,6 @@ func preconfiguredWafConfigIsEmptyValue(config *compute.SecurityPolicyRulePrecon
 			tpgresource.IsEmptyValue(reflect.ValueOf(config.NullFields))) {
 		return true
 	}
-
 	return false
 }
 
@@ -1283,7 +1282,7 @@ func flattenPreconfiguredWafConfig(config *compute.SecurityPolicyRulePreconfigur
 				if preconfiguredWafConfigIsEmptyValue(config) && tpgresource.IsEmptyValue(reflect.ValueOf(item["preconfigured_waf_config"])) {
 					return nil
 				}
-        break
+				break
 			}
 		}
 	}
