@@ -163,7 +163,7 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 							Optional:    true,
 							ForceNew:    true,
 							Computed:    true,
-							Description: `Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).`,
+							Description: `Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. Values must greater than or equal to 1. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).`,
 						},
 
 						"resource_manager_tags": {
