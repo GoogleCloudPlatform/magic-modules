@@ -1073,14 +1073,14 @@ func TestAccDataprocCluster_withMetastoreConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig(clusterName, subnetworkName, basicServiceId),
+				Config: testAccDataprocCluster_withMetastoreConfig(pid, clusterName, subnetworkName, basicServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_basic),
 				),
 			},
 			{
-				Config: testAccDataprocCluster_withMetastoreConfig_update(clusterName, subnetworkName, updateServiceId),
+				Config: testAccDataprocCluster_withMetastoreConfig_update(pid, clusterName, subnetworkName, updateServiceId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_metastore_config", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_metastore_config", "cluster_config.0.metastore_config.0.dataproc_metastore_service", msName_update),
@@ -2554,7 +2554,7 @@ resource "google_dataproc_autoscaling_policy" "asp" {
 `, rnd, subnetworkName, rnd)
 }
 
-func testAccDataprocCluster_withMetastoreConfig(clusterName, subnetworkName, serviceId string) string {
+func testAccDataprocCluster_withMetastoreConfig(projectName, clusterName, subnetworkName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
   name                  = "%s"
@@ -2584,11 +2584,17 @@ resource "google_dataproc_metastore_service" "ms" {
   hive_metastore_config {
     version = "3.1.2"
   }
+
+  network_config {
+    consumers {
+      subnetwork = "projects/%s/regions/us-central1/subnetworks/%s"
+    }
+  }
 }
-`, clusterName, subnetworkName, serviceId)
+`, clusterName, subnetworkName, serviceId, projectName, subnetworkName)
 }
 
-func testAccDataprocCluster_withMetastoreConfig_update(clusterName, subnetworkName, serviceId string) string {
+func testAccDataprocCluster_withMetastoreConfig_update(projectName, clusterName, subnetworkName, serviceId string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "with_metastore_config" {
   name                  = "%s"
@@ -2618,7 +2624,13 @@ resource "google_dataproc_metastore_service" "ms" {
   hive_metastore_config {
     version = "3.1.2"
   }
+
+  network_config {
+    consumers {
+      subnetwork = "projects/%s/regions/us-central1/subnetworks/%s"
+    }
+  }
 }
-`, clusterName, subnetworkName, serviceId)
+`, clusterName, subnetworkName, serviceId, projectName, subnetworkName)
 }
 
