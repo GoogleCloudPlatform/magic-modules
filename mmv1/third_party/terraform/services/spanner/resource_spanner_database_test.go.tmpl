@@ -539,7 +539,7 @@ func TestAccSpannerDatabase_cmek(t *testing.T) {
 				ResourceName:            "google_spanner_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection", "encryption_config.0.kms_key_names"},
 			},
 		},
 	})
