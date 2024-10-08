@@ -24,9 +24,9 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{region}}/functions/{{cloud_function}}'
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
