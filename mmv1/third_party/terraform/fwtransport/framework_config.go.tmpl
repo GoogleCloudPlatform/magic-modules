@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -57,6 +58,7 @@ type FrameworkProviderConfig struct {
 	DefaultLabels              types.Map
 
 	// paths for client setup
+	IAMCredentialsBasePath           string // TODO: This will be removed once we resove the muxing issues
 	{{- range $product := $.Products }}
 	{{ $product.Name }}BasePath string
 	{{- end }}
@@ -99,6 +101,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 
 	// Setup Base Paths for clients
 	// Generated products
+	p.IAMCredentialsBasePath = data.IamCredentialsCustomEndpoint.ValueString() // TODO: This will be removed once we resove the muxing issues
 	{{- range $product := $.Products }}
 	p.{{ $product.Name }}BasePath = data.{{ $product.Name }}CustomEndpoint.ValueString()
 	{{- end }}
@@ -518,6 +521,26 @@ func (p *FrameworkProviderConfig) SetupGrpcLogging() {
 		option.WithGRPCDialOption(grpc.WithStreamInterceptor(
 			grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
 	)
+}
+
+// Remove the `/{{version}}/` from a base path if present.
+func RemoveBasePathVersion(url string) string {
+	re := regexp.MustCompile(`(?P<base>http[s]://.*)(?P<version>/[^/]+?/$)`)
+	return re.ReplaceAllString(url, "$1/")
+}
+
+func (p *FrameworkProviderConfig) NewIamCredentialsClient(userAgent string) *iamcredentials.Service {
+	iamCredentialsClientBasePath := RemoveBasePathVersion(p.IAMCredentialsBasePath)
+	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
+	clientIamCredentials, err := iamcredentials.NewService(p.Context, option.WithHTTPClient(p.Client))
+	if err != nil {
+		log.Printf("[WARN] Error creating client iam credentials: %s", err)
+		return nil
+	}
+	clientIamCredentials.UserAgent = userAgent
+	clientIamCredentials.BasePath = iamCredentialsClientBasePath
+
+	return clientIamCredentials
 }
 
 func (p *FrameworkProviderConfig) logGoogleIdentities(ctx context.Context, data fwmodels.ProviderModel, diags *diag.Diagnostics) {
