@@ -255,6 +255,7 @@ properties:
         item_type:
           type: String
   - name: linkedProducerVpcNetwork
+    type: NestedObject
     description: Producer VPC network that is associated with the spoke.
     immutable: true
     conflicts:
