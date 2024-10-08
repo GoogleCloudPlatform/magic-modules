@@ -1352,6 +1352,16 @@ resource "google_dataproc_cluster" "basic" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
   }
 }
 `, rnd, subnetworkName)
@@ -1537,6 +1547,16 @@ resource "google_dataproc_cluster" "basic" {
         enable_vtpm                 = true
       }
     }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
   }
 }
 `, rnd, rnd, rnd, rnd)
@@ -1557,6 +1577,16 @@ resource "google_dataproc_cluster" "basic" {
       }
       tags = ["my-tag", "your-tag", "our-tag", "their-tag"]
     }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
   }
 }
 `, rnd, subnetworkName)
@@ -1572,12 +1602,16 @@ resource "google_dataproc_cluster" "with_min_num_instances" {
     gce_cluster_config {
       subnetwork = "%s"
     }
-    master_config{
+    master_config {
       num_instances=1
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
-    worker_config{
+    worker_config {
       num_instances = 3
       min_num_instances = 2
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
   }
 }
@@ -1637,6 +1671,15 @@ resource "google_dataproc_cluster" "basic" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+
+    master_config {
+      machine_type  = "n1-standard-2"
+    }
+
+    worker_config {
+      machine_type  = "n1-standard-2"
+    }
+
     dataproc_metric_config {
       metrics {
         metric_source = "HDFS"
@@ -1713,6 +1756,9 @@ resource "google_dataproc_cluster" "single_node_cluster" {
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
+    }
+    master_config {
+      machine_type  = "n1-standard-2"
     }
   }
 }
@@ -2134,6 +2180,16 @@ resource "google_dataproc_cluster" "with_labels" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
   }
 
   labels = {
@@ -2151,6 +2207,16 @@ resource "google_dataproc_cluster" "with_labels" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
   }
 
@@ -2170,6 +2236,16 @@ resource "google_dataproc_cluster" "with_labels" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
   }
 }
 `, rnd, subnetworkName)
@@ -2184,6 +2260,16 @@ resource "google_dataproc_cluster" "with_endpoint_config" {
 	cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
 
 		endpoint_config {
@@ -2205,6 +2291,16 @@ resource "google_dataproc_cluster" "with_image_version" {
       subnetwork = "%s"
     }
 
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
     software_config {
       image_version = "%s"
     }
@@ -2222,6 +2318,16 @@ resource "google_dataproc_cluster" "with_opt_components" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
 
     software_config {
@@ -2243,6 +2349,16 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
       subnetwork = "%s"
     }
 
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
     lifecycle_config {
       idle_delete_ttl = "%s"
     }
@@ -2260,6 +2376,16 @@ resource "google_dataproc_cluster" "with_lifecycle_config" {
  cluster_config {
   gce_cluster_config {
       subnetwork = "%s"
+    }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
 
    lifecycle_config {
@@ -2471,6 +2597,16 @@ resource "google_dataproc_cluster" "kerb" {
       subnetwork = "%s"
     }
 
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
     security_config {
       kerberos_config {
         root_principal_password_uri = google_storage_bucket_object.password.self_link
@@ -2491,6 +2627,16 @@ resource "google_dataproc_cluster" "basic" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
 
     autoscaling_config {
@@ -2529,6 +2675,16 @@ resource "google_dataproc_cluster" "basic" {
       subnetwork = "%s"
     }
 
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+
     autoscaling_config {
       policy_uri = ""
     }
@@ -2563,6 +2719,14 @@ resource "google_dataproc_cluster" "with_metastore_config" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
     metastore_config {
       dataproc_metastore_service = google_dataproc_metastore_service.ms.name
@@ -2603,6 +2767,14 @@ resource "google_dataproc_cluster" "with_metastore_config" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+    master_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
+    }
+    worker_config {
+      # The Terraform testing projects have a lot more n1 quota than anything else.
+      machine_type = "n1-standard-2"
     }
     metastore_config {
       dataproc_metastore_service = google_dataproc_metastore_service.ms.name
