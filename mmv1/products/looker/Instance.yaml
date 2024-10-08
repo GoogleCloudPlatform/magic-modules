@@ -24,6 +24,7 @@ docs:
 base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
 update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}?force=True'
 update_mask: true
 timeouts:
   insert_minutes: 90
