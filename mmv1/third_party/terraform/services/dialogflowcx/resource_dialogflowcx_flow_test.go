@@ -25,17 +25,19 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 				Config: testAccDialogflowCXFlow_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 			{
 				Config: testAccDialogflowCXFlow_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 		},
 	})

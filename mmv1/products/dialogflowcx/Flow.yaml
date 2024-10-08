@@ -42,6 +42,8 @@ examples:
     primary_resource_id: 'basic_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
+    ignore_read_extra:
+      - 'advanced_settings.0.logging_settings'
   - name: 'dialogflowcx_flow_full'
     primary_resource_id: 'basic_flow'
     vars:

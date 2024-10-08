@@ -40,6 +40,8 @@ examples:
       bucket_name: 'dialogflowcx-bucket'
     ignore_read_extra:
       - 'git_integration_settings.0.github_settings.0.access_token'
+      - 'enable_stackdriver_logging'
+      - 'advanced_settings.0.logging_settings'
 parameters:
 properties:
   - name: 'name'
@@ -191,6 +193,8 @@ properties:
               The digit that terminates a DTMF digit sequence.
       - name: 'loggingSettings'
         type: NestedObject
+        # Due to inconsistent  API behaviour http://b/303056144, ignore read can be removed once fixed
+        ignore_read: true
         description: |
           Settings for logging. Settings for Dialogflow History, Contact Center messages, StackDriver logs, and speech logging. Exposed at the following levels:
           * Agent level
