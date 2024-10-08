@@ -54,7 +54,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.tmpl'
+  pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
@@ -206,3 +206,9 @@ properties:
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
     item_type:
       type: String
+  - name: 'routingMode'
+    type: Enum
+    description: |
+      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+    enum_values:
+      - 'NEXT_HOP_ROUTING_MODE'
