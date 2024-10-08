@@ -654,7 +654,6 @@ properties:
     type: Integer
     description: |
       Maximum number of workstations under this configuration a user can have workstations.workstation.use permission on. Only enforced on CreateWorkstation API calls on the user issuing the API request.
-    min_version: 'beta'
     default_from_api: true
   - name: 'conditions'
     type: Array
