@@ -284,7 +284,7 @@ properties:
         type: Array
         description: IP ranges allowed to be included from peering.
         immutable: true
-        item_type: 
+        item_type:
           type: String
       - name: excludeExportRanges
         type: Array
