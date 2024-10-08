@@ -65,6 +65,27 @@ examples:
       network_name: 'vpc-network'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode'
+    primary_resource_id: 'vpc_network'
+    min_version: 'beta'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode_standard'
+    primary_resource_id: 'vpc_network'
+    min_version: 'beta'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
+    primary_resource_id: 'vpc_network'
+    min_version: 'beta'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'delete_default_routes_on_create'
     description: |
@@ -144,6 +165,39 @@ properties:
         enum_values:
           - 'REGIONAL'
           - 'GLOBAL'
+      - name: 'bgpBestPathSelectionMode'
+        type: Enum
+        description: |
+         The BGP best selection algorithm to be employed. MODE can be LEGACY or STANDARD.
+        min_version: 'beta'
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+        enum_values:
+          - 'LEGACY'
+          - 'STANDARD'
+      - name: 'bgpAlwaysCompareMed'
+        type: Boolean
+        description: |
+         Enables/disables the comparison of MED across routes with different Neighbor ASNs.
+         This value can only be set if the --bgp-best-path-selection-mode is STANDARD
+        min_version: 'beta'
+        required: false
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+      - name: 'bgpInterRegionCost'
+        type: Enum
+        description: |
+         Choice of the behavior of inter-regional cost and MED in the BPS algorithm.
+        min_version: 'beta'
+        required: false
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+        enum_values:
+          - 'DEFAULT'
+          - 'ADD_COST_TO_MED'
   - name: 'mtu'
     type: Integer
     description: |

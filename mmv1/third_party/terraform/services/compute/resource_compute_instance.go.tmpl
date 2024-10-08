@@ -938,7 +938,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Optional:    true,
 							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
-						
+
 						"maintenance_interval": {
 							Type:          schema.TypeString,
 							Optional:      true,
@@ -1129,7 +1129,7 @@ be from 0 to 999,999,999 inclusive.`,
 								The confidential computing technology the instance uses.
 								SEV is an AMD feature. TDX is an Intel feature. One of the following
 								values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
-								"AMD Milan" is currently required. TDX is only available in beta.`,
+								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
 					},
@@ -1741,7 +1741,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					di["disk_encryption_key_sha256"] = key.Sha256
 				}
 			}
-			
+
 			// We want the disks to remain in the order we set in the config, so if a disk
 			// is present in the config, make sure it's at the correct index. Otherwise, append it.
 			if inConfig {
