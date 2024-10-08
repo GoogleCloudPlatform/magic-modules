@@ -147,7 +147,7 @@ properties:
           Settings for speech to text detection. Exposed at the following levels:
           * Agent level
           * Flow level
-          * Page level 
+          * Page level
           * Parameter level
         properties:
           - name: 'endpointerSensitivity'
