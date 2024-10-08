@@ -2606,7 +2606,7 @@ func isReplicaPromoteRequested(_ context.Context, oldInstanceType interface{}, n
 
 // Check if this resource change is the manual update done on old primary after a switchover. If true, no replacement is needed.
 func isSwitchoverFromOldPrimarySide(d *schema.ResourceDiff) bool {
-	dbVersion, _ := d.GetChange("database_version")
+	dbVersion := d.Get("database_version")
 	if !strings.HasPrefix(dbVersion.(string), "SQLSERVER") {
 		log.Printf("[WARN] Switchover is only supported for SQL Server %q", dbVersion)
 		return false
