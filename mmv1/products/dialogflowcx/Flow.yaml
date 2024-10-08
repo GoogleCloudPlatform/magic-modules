@@ -564,6 +564,33 @@ properties:
             description: |
               The Google Cloud Storage URI for the exported objects. Whether a full object name, or just a prefix, its usage depends on the Dialogflow operation.
               Format: gs://bucket/object-name-or-prefix
+      - name: 'speechSettings'
+        type: NestedObject
+        description: |
+          Settings for speech to text detection. Exposed at the following levels:
+          * Agent level
+          * Flow level
+          * Page level 
+          * Parameter level
+        properties:
+          - name: 'endpointerSensitivity'
+            type: Integer
+            description: |
+              Sensitivity of the speech model that detects the end of speech. Scale from 0 to 100.
+          - name: 'noSpeechTimeout'
+            type: String
+            description: |
+              Timeout before detecting no speech.
+              A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+          - name: 'useTimeoutBasedEndpointing'
+            type: Boolean
+            description: |
+              Use timeout based endpointing, interpreting endpointer sensitivy as seconds of timeout value.
+          - name: 'models'
+            type: KeyValuePairs
+            description: |
+              Mapping from language to Speech-to-Text model. The mapped Speech-to-Text model will be selected for requests from its corresponding language. For more information, see [Speech models](https://cloud.google.com/dialogflow/cx/docs/concept/speech-models).
+              An object containing a list of **"key": value** pairs. Example: **{ "name": "wrench", "mass": "1.3kg", "count": "3" }**.
       - name: 'dtmfSettings'
         type: NestedObject
         description: |
@@ -585,3 +612,23 @@ properties:
             type: String
             description: |
               The digit that terminates a DTMF digit sequence.
+      - name: 'loggingSettings'
+        type: NestedObject
+        ignore_read: true
+        # Ignore read as API does not return loggingSettings back, only accepts in the /create/update API call
+        description: |
+          Settings for logging. Settings for Dialogflow History, Contact Center messages, StackDriver logs, and speech logging. Exposed at the following levels:
+          * Agent level
+        properties:
+          - name: 'enableStackdriverLogging'
+            type: Boolean
+            description: |
+              Enables Google Cloud Logging.
+          - name: 'enableInteractionLogging'
+            type: Boolean
+            description: |
+              Enables DF Interaction logging.
+          - name: 'enableConsentBasedRedaction'
+            type: Boolean
+            description: |
+              Enables consent-based end-user input redaction, if true, a pre-defined session parameter **$session.params.conversation-redaction** will be used to determine if the utterance should be redacted.
