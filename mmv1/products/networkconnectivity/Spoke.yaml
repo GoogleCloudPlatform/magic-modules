@@ -126,6 +126,7 @@ properties:
     immutable: true
     conflicts:
       - linked_interconnect_attachments
+      - linked_producer_vpc_network
       - linked_router_appliance_instances
       - linked_vpc_network
     properties:
@@ -154,6 +155,7 @@ properties:
     immutable: true
     conflicts:
       - linked_vpn_tunnels
+      - linked_producer_vpc_network
       - linked_router_appliance_instances
       - linked_vpc_network
     properties:
@@ -176,12 +178,53 @@ properties:
           The only allowed value for now is "ALL_IPV4_RANGES".
         item_type:
           type: String
+  - name: 'linkedProducerVpcNetwork'
+    type: NestedObject
+    description: Producer VPC network that is associated with the spoke.
+    immutable: true
+    min_version: beta
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
+      - linked_vpc_network
+    properties:
+      - name: 'network'
+        type: String
+        description: VPC network that contains the peering to the Producer VPC
+        min_version: beta
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: 'peering'
+        type: String
+        description: |
+          name of the peering between the VPC network and the Producer
+          VPC. Only `servicenetworking-googleapis-com` is supported.
+        min_version: beta
+        required: true
+        immutable: true
+      - name: 'excludeExportRanges'
+        type: Array
+        description: the IP address ranges to be excluded from exporting to the hub.
+        min_version: beta
+        immutable: true
+        item_type:
+          type: String
+      - name: 'includeExportRanges'
+        type: Array
+        description: the IP address ranges to be included when exporting to the hub
+        min_version: beta
+        immutable: true
+        item_type:
+          type: String
   - name: 'linkedRouterApplianceInstances'
     type: NestedObject
     description: The URIs of linked Router appliance resources
     immutable: true
     conflicts:
       - linked_interconnect_attachments
+      - linked_producer_vpc_network
       - linked_vpn_tunnels
       - linked_vpc_network
     properties:
@@ -221,6 +264,7 @@ properties:
     immutable: true
     conflicts:
       - linked_interconnect_attachments
+      - linked_producer_vpc_network
       - linked_router_appliance_instances
       - linked_vpn_tunnels
     properties:
