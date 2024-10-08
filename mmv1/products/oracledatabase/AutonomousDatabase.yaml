@@ -10,8 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'AutonomousDatabase'
 description: An AutonomousDatabase resource.
@@ -47,8 +45,18 @@ async:
     message: 'message'
 custom_code:
 examples:
-  - name: 'oracledatabase_autonomousdatabase_basic'
+  - name: 'oracledatabase_autonomous_database_basic'
     primary_resource_id: 'myADB'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
+  - name: 'oracledatabase_autonomous_database_full'
+    primary_resource_id: 'myADB'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
 parameters:
   - name: 'location'
     type: String

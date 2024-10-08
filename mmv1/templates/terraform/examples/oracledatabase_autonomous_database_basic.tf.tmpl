@@ -2,6 +2,7 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
   display_name = "autonomousDatabase displayname"
   autonomous_database_id = "my-adb-instance"
   location = "us-east4"
+  project = "{{index $.Vars "project"}}"
   database = "testADBdb"
   admin_password = "123Abpassword"
   network = data.google_compute_network.default.id
