@@ -30,7 +30,7 @@ var outputPath = flag.String("output", "", "path to output generated files to")
 // Example usage: --version beta
 var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
-var overrideDirectory = flag.String("override", "", "directory containing yaml overrides")
+var overrideDirectory = flag.String("overrides", "", "directory containing yaml overrides")
 
 var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
@@ -55,6 +55,8 @@ var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml 
 
 var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
 var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
+
+var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
 
 func main() {
 
@@ -193,6 +195,8 @@ func main() {
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 	}
+
+	provider.FixImports(*outputPath, *showImportDiffs)
 }
 
 func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
@@ -279,11 +283,6 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 		}
 		for _, overrideYamlPath := range overrideFiles {
 			if filepath.Base(overrideYamlPath) == "product.yaml" || filepath.Ext(overrideYamlPath) != ".yaml" {
-				continue
-			}
-
-			// Prepend "go_" to the Go yaml files' name to distinguish with the ruby yaml files
-			if filepath.Base(overrideYamlPath) == "go_product.yaml" || !strings.HasPrefix(filepath.Base(overrideYamlPath), "go_") {
 				continue
 			}
 
