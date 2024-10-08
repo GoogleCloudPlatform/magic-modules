@@ -210,10 +210,10 @@ func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}
 			action   = "deny"
 			priority = "2147483647"
 			match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = ["*"]
-			}
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
 			}
 			description = "default rule"
 		}
@@ -222,9 +222,9 @@ func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}
 			action   = "deny"
 			priority = "1000"
 			match {
-			expr {
-				expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
-			}
+				expr {
+					expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
+				}
 			}
 		}
 	}
@@ -242,10 +242,10 @@ func testAccComputeRegionSecurityPolicy_withRulesUpdate(context map[string]inter
 			action   = "allow"
 			priority = "2147483647"
 			match {
-			versioned_expr = "SRC_IPS_V1"
-			config {
-				src_ip_ranges = ["*"]
-			}
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
 			}
 			description = "default rule updated"
 		}
