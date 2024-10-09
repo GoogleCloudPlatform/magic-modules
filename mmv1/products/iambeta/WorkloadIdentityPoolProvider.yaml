@@ -59,6 +59,11 @@ examples:
     vars:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
+  - name: 'iam_workload_identity_pool_provider_github_actions'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
   - name: 'iam_workload_identity_pool_provider_oidc_basic'
     primary_resource_id: 'example'
     vars:
