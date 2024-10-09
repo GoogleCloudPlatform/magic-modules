@@ -45,14 +45,18 @@ async:
     message: 'message'
 custom_code:
 examples:
-  - name: 'oracledatabase_cloud_exadatainfrastructure_basic'
+  - name: 'oracledatabase_cloud_exadata_infrastructure_basic'
     primary_resource_id: 'my-cloud-exadata'
-    test_env_vars:
-      project: 'OCI_PROJECT_ID'
-  - name: 'oracledatabase_cloud_exadatainfrastructure_full'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
+  - name: 'oracledatabase_cloud_exadata_infrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
-    test_env_vars:
-      project: 'OCI_PROJECT_ID'
+    vars:
+      project: 'my-project'
+    test_vars_overrides:
+      'project': '"oci-terraform-testing"'
 parameters:
   - name: 'location'
     type: String
