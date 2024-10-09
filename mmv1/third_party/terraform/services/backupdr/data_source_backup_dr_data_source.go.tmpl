@@ -1,5 +1,4 @@
 package backupdr
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -103,5 +102,3 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 
     return nil
 }
-
-{{- end }}
