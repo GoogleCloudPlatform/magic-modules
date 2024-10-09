@@ -326,13 +326,13 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 }
 
 func resourceGoogleServiceAccountPlanOutputs(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if !d.HasChange("account_id") {
+	if d.Get("email") != "" || d.Get("member") != "" {
 		return nil
 	}
 
 	aid := d.Get("account_id")
 	proj := d.Get("project")
-	if aid != nil && proj != nil {
+	if aid != "" && proj != "" {
 		email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
 		if err := d.SetNew("email", email); err != nil {
 			return fmt.Errorf("error setting email: %s", err)
