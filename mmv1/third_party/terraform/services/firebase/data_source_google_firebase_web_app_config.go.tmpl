@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/firebase/v1beta1"
+	firebase "google.golang.org/api/firebase/v1beta1"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -29,8 +30,8 @@ func NewGoogleFirebaseWebAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseWebAppConfigDataSource defines the data source implementation
 type GoogleFirebaseWebAppConfigDataSource struct {
-	client  *firebase.Service
-	project types.String
+	fwresource.DataSourceWithConfigure
+	providerConfig *transport_tpg.Config
 }
 
 type GoogleFirebaseWebAppConfigModel struct {
@@ -131,28 +132,6 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 	}
 }
 
-func (d *GoogleFirebaseWebAppConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	d.client = p.NewFirebaseClient(p.UserAgent, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	d.project = p.Project
-}
-
 func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleFirebaseWebAppConfigModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -173,10 +152,12 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	// Check if provider-default value(s) need to be used
+	project := d.GetProject(data.Project, d.Config, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	data.Project = project
 
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
 	data.Id = data.WebAppId
