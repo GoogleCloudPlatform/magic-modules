@@ -102,6 +102,7 @@ properties:
     description: 'An optional description for this resource.'
   - name: 'priority'
     type: Integer
+    immutable: true
     description: |
       An integer indicating the priority of a rule in the list.
       The priority must be a positive value between 0 and 2147483647.
