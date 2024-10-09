@@ -1,0 +1,27 @@
+[
+  {
+    "name": "//monitoring.googleapis.com/placeholder-foobar",
+    "asset_type": "monitoring.googleapis.com/Snooze",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v3",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/monitoring/v3/rest",
+      "discovery_name": "Snooze",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "displayName": "monitoring snooze",
+        "interval": {
+          "startTime": "{{.Time.RFC3339Nano}}",
+          "endTime": "{{.Time.RFC3339Nano}}"
+        },
+        "criteria": {
+          "policies": [
+            "projects/{{.Provider.project}}/alertPolicies/policy-1",
+            "projects/{{.Provider.project}}/alertPolicies/policy-2",
+            "projects/{{.Provider.project}}/alertPolicies/policy-3"
+          ]
+        }
+      }
+    }
+  }
+]
