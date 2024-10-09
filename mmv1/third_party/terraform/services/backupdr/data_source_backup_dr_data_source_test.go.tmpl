@@ -48,7 +48,7 @@ data "google_backup_dr_data_source” "from_name" {
   location      = "us-central1"
   project = 1234
   data_source_id = “%{data_source_id}”
-  backup_vault_id = google_backup_dr_backup_vault.foo. backup_vault_id
+  backup_vault_id = google_backup_dr_backup_vault.foo.backup_vault_id
 }
 
 `, context)
