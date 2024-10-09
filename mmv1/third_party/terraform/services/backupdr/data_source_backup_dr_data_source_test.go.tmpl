@@ -1,5 +1,7 @@
 package backupdr_test
 
+{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"testing"
 	"fmt"
@@ -27,7 +29,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
             Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
             Check:  resource.ComposeTestCheckFunc(
                 acctest.CheckDataSourceStateMatchesResourceState()
-            )
+            ),
         },
     })
 }
@@ -51,3 +53,5 @@ data "google_backup_dr_data_source” "from_name" {
 
 `, context)
 }
+
+{{- end }}
