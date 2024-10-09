@@ -44,7 +44,7 @@ func DataSourceBackupDRDataSource() *schema.Resource {
                 Required: true,
             },
         }
-    tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "project", "backupvault_id")
+    tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "project", "dataSourceId", "backupVaultId")
 
     return &schema.Resource{
         Read: DataSourceBackupDRDataSourceRead,
@@ -72,8 +72,18 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
+    dataSourceId, err := d.Get("dataSourceId").(string)
+    if err != nil {
+        return err
+    }
+    
+    backupVaultId := d.Get("backupVaultId").(string)
+    if err != nil {
+        return err
+    }
+
     billingProject := project
-    url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults")
+    url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}backupVaultId{{"}}"}}/dataSources/{{"{{"}}dataSourceId{{"}}"}}")
     if err != nil {
         return err
     }
