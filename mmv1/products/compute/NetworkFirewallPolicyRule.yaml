@@ -108,18 +108,21 @@ properties:
     properties:
       - name: 'srcIpRanges'
         type: Array
+        send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'destIpRanges'
         type: Array
+        send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'layer4Configs'
         type: Array
+        send_empty_value: true
         description: |
           Pairs of IP protocols and ports that the rule should match.
         required: true
@@ -141,6 +144,7 @@ properties:
                 type: String
       - name: 'srcSecureTags'
         type: Array
+        send_empty_value: true
         description: |
           List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
         item_type:
@@ -161,48 +165,56 @@ properties:
                 - 'INEFFECTIVE'
       - name: 'destAddressGroups'
         type: Array
+        send_empty_value: true
         description: |
           Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
         item_type:
           type: String
       - name: 'srcAddressGroups'
         type: Array
+        send_empty_value: true
         description: |
           Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
         item_type:
           type: String
       - name: 'srcFqdns'
         type: Array
+        send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
         item_type:
           type: String
       - name: 'destFqdns'
         type: Array
+        send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
         item_type:
           type: String
       - name: 'srcRegionCodes'
         type: Array
+        send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destRegionCodes'
         type: Array
+        send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destThreatIntelligences'
         type: Array
+        send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
         item_type:
           type: String
       - name: 'srcThreatIntelligences'
         type: Array
+        send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
@@ -245,12 +257,14 @@ properties:
     output: true
   - name: 'targetServiceAccounts'
     type: Array
+    send_empty_value: true
     description: |
       A list of service accounts indicating the sets of instances that are applied with this rule.
     item_type:
       type: String
   - name: 'targetSecureTags'
     type: Array
+    send_empty_value: true
     description: |
       A list of secure tags that controls which instances the firewall rule applies to.
       If targetSecureTag are specified, then the firewall rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.

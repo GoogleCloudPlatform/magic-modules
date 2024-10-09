@@ -477,7 +477,7 @@ resource "google_compute_region_network_firewall_policy_rule" "fw_policy_rule1" 
   enable_logging          = false
   action                  = "deny"
   direction               = "INGRESS"
-  disabled                = true
+  disabled                = false
   region                  = "%{region}"
 
   target_service_accounts = [

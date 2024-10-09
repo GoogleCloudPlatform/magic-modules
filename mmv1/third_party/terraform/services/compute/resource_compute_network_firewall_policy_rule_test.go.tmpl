@@ -596,7 +596,7 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
   enable_logging          = false
   action                  = "deny"
   direction               = "INGRESS"
-  disabled                = true
+  disabled                = false
   target_service_accounts = [
     google_service_account.service_account1.email,
     google_service_account.service_account2.email
