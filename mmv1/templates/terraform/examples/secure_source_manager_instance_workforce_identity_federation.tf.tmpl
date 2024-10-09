@@ -2,7 +2,7 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
     location = "us-central1"
     instance_id = "{{index $.Vars "instance_id"}}"
 
-    workforce_identity_federation {
+    workforce_identity_federation_config {
       enabled = true
     }
 
