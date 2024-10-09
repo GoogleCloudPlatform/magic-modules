@@ -56,6 +56,8 @@ var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml 
 var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
 var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
 
+var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
+
 func main() {
 
 	flag.Parse()
@@ -193,6 +195,8 @@ func main() {
 	if generateCode {
 		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
 	}
+
+	provider.FixImports(*outputPath, *showImportDiffs)
 }
 
 func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
