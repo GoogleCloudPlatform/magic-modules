@@ -28,7 +28,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
         Steps: []resource.TestStep{
             Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
             Check:  resource.ComposeTestCheckFunc(
-                acctest.CheckDataSourceStateMatchesResourceState(),
+                acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_data_source.foo", "google_backup_dr_backup_vault.foo"),
             ),
         },
     })
@@ -43,12 +43,11 @@ resource "google_backup_dr_backup_vault" “foo” {
   provider = google-beta
 }
 
-
-data "google_backup_dr_data_source” "from_name" {
+data "google_backup_dr_data_source” "foo" {
   location      = "us-central1"
   project = 1234
   data_source_id = “%{data_source_id}”
-  backup_vault_id = google_backup_dr_backup_vault.foo.backup_vault_id
+  backup_vault_id = “%{backup_vault_id}”
 }
 
 `, context)
