@@ -2,15 +2,15 @@ package fwprovider
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the data source satisfies the expected interfaces.
@@ -25,7 +25,7 @@ func NewGoogleProviderConfigPluginFrameworkDataSource() datasource.DataSource {
 }
 
 type GoogleProviderConfigPluginFrameworkDataSource struct {
-	providerConfig *fwtransport.FrameworkProviderConfig
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleProviderConfigPluginFrameworkModel struct {
@@ -53,12 +53,12 @@ type GoogleProviderConfigPluginFrameworkModel struct {
 	TerraformAttributionLabelAdditionStrategy types.String `tfsdk:"terraform_attribution_label_addition_strategy"`
 }
 
-func (m *GoogleProviderConfigPluginFrameworkModel) GetLocationDescription(providerConfig *fwtransport.FrameworkProviderConfig) fwresource.LocationDescription {
+func (m *GoogleProviderConfigPluginFrameworkModel) GetLocationDescription(providerConfig *transport_tpg.Config) fwresource.LocationDescription {
 	return fwresource.LocationDescription{
 		RegionSchemaField: types.StringValue("region"),
 		ZoneSchemaField:   types.StringValue("zone"),
-		ProviderRegion:    providerConfig.Region,
-		ProviderZone:      providerConfig.Zone,
+		ProviderRegion:    types.StringValue(providerConfig.Region),
+		ProviderZone:      types.StringValue(providerConfig.Zone),
 	}
 }
 
@@ -166,25 +166,6 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Schema(ctx context.Conte
 	}
 }
 
-func (d *GoogleProviderConfigPluginFrameworkDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	// Required for accessing project, region, zone and tokenSource
-	d.providerConfig = p
-}
-
 func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleProviderConfigPluginFrameworkModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -202,23 +183,51 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 
 	// Copy all values from the provider config into this data source
+	data.Credentials = types.StringValue(d.Config.Credentials)
+	data.AccessToken = types.StringValue(d.Config.AccessToken)
+	data.ImpersonateServiceAccount = types.StringValue(d.Config.ImpersonateServiceAccount)
 
-	data.Credentials = d.providerConfig.Credentials
-	data.AccessToken = d.providerConfig.AccessToken
-	data.ImpersonateServiceAccount = d.providerConfig.ImpersonateServiceAccount
-	data.ImpersonateServiceAccountDelegates = d.providerConfig.ImpersonateServiceAccountDelegates
-	data.Project = d.providerConfig.Project
-	data.Region = d.providerConfig.Region
-	data.BillingProject = d.providerConfig.BillingProject
-	data.Zone = d.providerConfig.Zone
-	data.UniverseDomain = d.providerConfig.UniverseDomain
-	data.Scopes = d.providerConfig.Scopes
-	data.UserProjectOverride = d.providerConfig.UserProjectOverride
-	data.RequestReason = d.providerConfig.RequestReason
-	// TODO(SarahFrench) - request_timeout
-	data.DefaultLabels = d.providerConfig.DefaultLabels
-	data.AddTerraformAttributionLabel = d.providerConfig.AddTerraformAttributionLabel
-	data.TerraformAttributionLabelAdditionStrategy = d.providerConfig.TerraformAttributionLabelAdditionStrategy
+	delegateAttrs := make([]attr.Value, len(d.Config.ImpersonateServiceAccountDelegates))
+	for i, delegate := range d.Config.ImpersonateServiceAccountDelegates {
+		delegateAttrs[i] = types.StringValue(delegate)
+	}
+	delegates, di := types.ListValue(types.StringType, delegateAttrs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.ImpersonateServiceAccountDelegates = delegates
+
+	data.Project = types.StringValue(d.Config.Project)
+	data.Region = types.StringValue(d.Config.Region)
+	data.BillingProject = types.StringValue(d.Config.BillingProject)
+	data.Zone = types.StringValue(d.Config.Zone)
+	data.UniverseDomain = types.StringValue(d.Config.UniverseDomain)
+
+	scopeAttrs := make([]attr.Value, len(d.Config.Scopes))
+	for i, scope := range d.Config.Scopes {
+		scopeAttrs[i] = types.StringValue(scope)
+	}
+	scopes, di := types.ListValue(types.StringType, scopeAttrs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.Scopes = scopes
+
+	data.UserProjectOverride = types.BoolValue(d.Config.UserProjectOverride)
+	data.RequestReason = types.StringValue(d.Config.RequestReason)
+
+	lbs := make(map[string]attr.Value, len(d.Config.DefaultLabels))
+	for k, v := range d.Config.DefaultLabels {
+		lbs[k] = types.StringValue(v)
+	}
+	labels, di := types.MapValueFrom(ctx, types.StringType, lbs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.DefaultLabels = labels
+
+	data.AddTerraformAttributionLabel = types.BoolValue(d.Config.AddTerraformAttributionLabel)
+	data.TerraformAttributionLabelAdditionStrategy = types.StringValue(d.Config.TerraformAttributionLabelAdditionStrategy)
 
 	// Warn users against using this data source
 	resp.Diagnostics.Append(diag.NewWarningDiagnostic(

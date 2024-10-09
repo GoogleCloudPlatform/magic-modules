@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/firebase/v1beta1"
+	firebase "google.golang.org/api/firebase/v1beta1"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -29,8 +29,7 @@ func NewGoogleFirebaseWebAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseWebAppConfigDataSource defines the data source implementation
 type GoogleFirebaseWebAppConfigDataSource struct {
-	client  *firebase.Service
-	project types.String
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleFirebaseWebAppConfigModel struct {
@@ -131,28 +130,6 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 	}
 }
 
-func (d *GoogleFirebaseWebAppConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	d.client = p.NewFirebaseClient(p.UserAgent, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	d.project = p.Project
-}
-
 func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleFirebaseWebAppConfigModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -163,9 +140,10 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, d.Config.UserAgent)
 
-	client := firebase.NewProjectsWebAppsService(d.client)
+	client := d.Config.NewFirebaseClient(ctx, userAgent)
+	service := firebase.NewProjectsWebAppsService(client)
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -173,7 +151,7 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.Config.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -181,7 +159,7 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
 	data.Id = data.WebAppId
 
-	clientResp, err := client.GetConfig(appName).Do()
+	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
 		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseWebAppConfig %q", data.WebAppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
