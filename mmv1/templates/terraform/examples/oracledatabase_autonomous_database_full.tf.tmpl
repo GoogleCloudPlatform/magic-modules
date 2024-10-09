@@ -25,4 +25,5 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
 
 data "google_compute_network" "default" {
   name     = "new"
+  project = "{{index $.Vars "project"}}"
 }
