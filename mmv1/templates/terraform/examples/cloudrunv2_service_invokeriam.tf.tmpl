@@ -1,0 +1,14 @@
+resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+  invokerIamDisabled = true
+  description = "The serving URL of this service will not perform any IAM check when invoked"
+  ingress = "INGRESS_TRAFFIC_ALL"
+  
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+    }
+  }
+}
