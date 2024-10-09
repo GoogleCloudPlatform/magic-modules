@@ -1,6 +1,9 @@
 ---
 title: "Immutable fields"
 weight: 10
+aliases:
+  - /docs/best-practices
+  - /best-practices
 ---
 
 # Immutable fields
