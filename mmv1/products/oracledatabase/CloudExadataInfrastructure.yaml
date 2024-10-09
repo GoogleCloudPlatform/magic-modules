@@ -13,6 +13,10 @@
 ---
 name: 'CloudExadataInfrastructure'
 description: A CloudExadataInfrastructure resource.
+references:
+  guides:
+    'Create Exadata Infrastructure instances': 'https://cloud.google.com/oracle/database/docs/create-instances'
+  api: 'https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudExadataInfrastructures'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures/{{cloud_exadata_infrastructure_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/cloudExadataInfrastructures'
