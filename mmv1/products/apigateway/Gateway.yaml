@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,99 +11,120 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Gateway'
-min_version: beta
-create_url: projects/{{project}}/locations/{{region}}/gateways?gatewayId={{gateway_id}}
-self_link: projects/{{project}}/locations/{{region}}/gateways/{{gateway_id}}
-base_url: projects/{{project}}/locations/{{region}}/gateways
-update_verb: :PATCH
-update_mask: true
-identity:
-  - gatewayId
 description: |
   A consumable API that can be used by multiple Gateways.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/api-gateway/docs/quickstart'
   api: 'https://cloud.google.com/api-gateway/docs/reference/rest/v1beta/projects.locations.apis'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/gateways'
+self_link: 'projects/{{project}}/locations/{{region}}/gateways/{{gateway_id}}'
+create_url: 'projects/{{project}}/locations/{{region}}/gateways?gatewayId={{gateway_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
-  allowed_iam_role: 'roles/apigateway.viewer'
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - gatewayId
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
+  allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'gateway'
-  base_url: projects/{{project}}/locations/{{region}}/gateways/{{gateway}}
+  base_url: 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}',
-      '{{project}}/{{region}}/{{gateway}}',
-      '{{region}}/{{gateway}}',
-      '{{gateway}}',
-    ]
+    - 'projects/{{project}}/locations/{{region}}/gateways/{{gateway}}'
+    - '{{project}}/{{region}}/{{gateway}}'
+    - '{{region}}/{{gateway}}'
+    - '{{gateway}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'apigateway_gateway_basic'
+  - name: 'apigateway_gateway_basic'
     primary_resource_id: 'api_gw'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
       gateway_id: 'my-gateway'
-  - !ruby/object:Provider::Terraform::Examples
-    skip_docs: true
-    min_version: beta
-    name: 'apigateway_gateway_full'
+  - name: 'apigateway_gateway_full'
     primary_resource_id: 'api_gw'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-gateway%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       api_id: 'my-api'
       config_id: 'my-config'
       gateway_id: 'my-gateway'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
+    type: String
     description: |
       The region of the gateway for the API.
-    immutable: true
+    min_version: 'beta'
     url_param_only: true
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: gatewayId
+  - name: 'gatewayId'
+    type: String
     description: |
       Identifier to assign to the Gateway. Must be unique within scope of the parent resource(project).
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Resource name of the Gateway. Format: projects/{project}/locations/{region}/gateways/{gateway}
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       A user-visible name for the API.
+    min_version: 'beta'
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'apiConfig'
-    required: true
+  - name: 'apiConfig'
+    type: String
     description: |
       Resource name of the API Config for this Gateway. Format: projects/{project}/locations/global/apis/{api}/configs/{apiConfig}.
       When changing api configs please ensure the new config is a new resource and the
       [lifecycle](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle) rule `create_before_destroy` is set.
-    diff_suppress_func: tpgresource.CompareResourceNames
-  - !ruby/object:Api::Type::String
-    name: 'defaultHostname'
-    output: true
+    min_version: 'beta'
+    required: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+  - name: 'defaultHostname'
+    type: String
     description:
       The default API Gateway host name of the form
       {gatewayId}-{hash}.{region_code}.gateway.dev.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
+    min_version: 'beta'

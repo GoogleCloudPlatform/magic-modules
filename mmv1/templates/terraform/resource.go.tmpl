@@ -35,8 +35,12 @@ import (
 
     "fmt"
     "log"
+    "net/http"
     "reflect"
-{{- if and (not $.Immutable) ($.UpdateMask) }}
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
     "strings"
 {{- end }}
     "time"
@@ -106,7 +110,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{-       end }}
         },
 {{- end }}
-{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.SkipDefaultCdiff)) $.CustomDiff }}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
         CustomizeDiff: customdiff.All(
 {{-   if $.UnorderedListProperties }}
 {{-     range $prop := $.UnorderedListProperties }}
@@ -118,13 +122,13 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         {{ $cdiff }},
 {{- end}}
 {{- end}}
-{{- if and ($.HasProject) (not $.SkipDefaultCdiff) }}
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
             tpgresource.DefaultProviderProject,
 {{- end -}}
-{{if and ($.HasRegion) (not $.SkipDefaultCdiff)  }}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderRegion,
 {{- end -}}
-{{if and ($.HasZone) (not $.SkipDefaultCdiff)  }}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
             tpgresource.DefaultProviderZone,
 {{- end }}
         ),
@@ -505,7 +509,7 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 }
 {{  end }}
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
-{{if $.SkipRead -}}
+{{if $.ExcludeRead -}}
   // This resource could not be read from the API.
   return nil
 {{  else  -}}

@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,113 +11,131 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 # This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
 name: 'AccessLevels'
-base_url: '{{parent}}/accessLevels:replaceAll'
-update_url: '{{parent}}/accessLevels:replaceAll'
-self_link: '{{parent}}/accessLevels'
-update_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
+  This is a bulk edit of all Access Levels and may override existing Access Levels created by `google_access_context_manager_access_level`,
+  thus causing a permadiff if used alongside `google_access_context_manager_access_level` on the same parent.
+references:
   guides:
     'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This resource is authoritative over the access levels under an access policy. Due to a limitation in Terraform,
     it will overwrite all preexisting access levels during a create opration without displaying the old values on
     the left side of plan. To prevent this, we recommend importing the resource before applying it if overwriting
     preexisting rules, as the plan will correctly display the complete changes to your access policy if the
     resource is present in state.
-description: |
-  Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
-  This is a bulk edit of all Access Levels and may override existing Access Levels created by `google_access_context_manager_access_level`,
-  thus causing a permadiff if used alongside `google_access_context_manager_access_level` on the same parent.
-autogen_async: true
 id_format: '{{parent}}/accessLevels'
-import_format: ['{{parent}}/accessLevels']
+base_url: '{{parent}}/accessLevels:replaceAll'
+self_link: '{{parent}}/accessLevels'
+update_url: '{{parent}}/accessLevels:replaceAll'
+update_verb: 'POST'
+import_format:
+  - '{{parent}}/accessLevels'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
+# Skipping the sweeper due to the non-standard base_url
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_access_levels_basic'
-    skip_test: true
+  - name: 'access_context_manager_access_levels_basic'
     primary_resource_id: 'access-levels'
     vars:
       access_level_name1: 'chromeos_no_lock'
       access_level_name2: 'mac_no_lock'
-# Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.erb
-  custom_delete: templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.erb
+    exclude_test: true
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
-    url_param_only: true
+  - name: 'parent'
+    type: String
     description: |
       The AccessPolicy this AccessLevel lives in.
       Format: accessPolicies/{policy_id}
+    url_param_only: true
+    required: true
+    immutable: true
     ignore_read: true
 properties:
-  - !ruby/object:Api::Type::Array
-    name: 'accessLevels'
+  - name: 'accessLevels'
+    type: Array
     description: |
       The desired Access Levels that should replace all existing Access Levels in the Access Policy.
     is_set: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: name
-          immutable: true
-          required: true
+        - name: 'name'
+          type: String
           description: |
             Resource name for the Access Level. The short_name component must begin
             with a letter and only include alphanumeric and '_'.
             Format: accessPolicies/{policy_id}/accessLevels/{short_name}
-        - !ruby/object:Api::Type::String
-          name: title
           required: true
+          immutable: true
+        - name: 'title'
+          type: String
           description: |
             Human readable title. Must be unique within the Policy.
-        - !ruby/object:Api::Type::String
-          name: 'description'
+          required: true
+        - name: 'description'
+          type: String
           description: |
             Description of the AccessLevel and its use. Does not affect behavior.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'basic'
+        - name: 'basic'
+          type: NestedObject
           description: |
             A set of predefined conditions for the access level and a combining function.
           # conflicts:
           #   - custom
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'combiningFunction'
+            - name: 'combiningFunction'
+              type: Enum
               description: |
                 How the conditions list should be combined to determine if a request
                 is granted this AccessLevel. If AND is used, each Condition in
                 conditions must be satisfied for the AccessLevel to be applied. If
                 OR is used, at least one Condition in conditions must be satisfied
                 for the AccessLevel to be applied.
-              default_value: :AND
-              values:
-                - :AND
-                - :OR
-              custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+              custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+              default_value: "AND"
+              enum_values:
+                - 'AND'
+                - 'OR'
             # All of the false defaults below here are omitted on purpose.
             # Let's keep this as simple as possible, since they will all be set by the API.
-            - !ruby/object:Api::Type::Array
-              name: 'conditions'
-              required: true
-              min_size: 1
+            - name: 'conditions'
+              type: Array
               description: |
                 A set of requirements for the AccessLevel to be granted.
-              item_type: !ruby/object:Api::Type::NestedObject
+              required: true
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Array
-                    name: 'ipSubnetworks'
+                  - name: 'ipSubnetworks'
+                    type: Array
                     description: |
                       A list of CIDR block IP subnetwork specification. May be IPv4
                       or IPv6.
@@ -129,18 +147,20 @@ properties:
                       is not. The originating IP of a request must be in one of the
                       listed subnets in order for this Condition to be true.
                       If empty, all IP addresses are allowed.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::Array
-                    name: 'requiredAccessLevels'
+                    item_type:
+                      type: String
+                  - name: 'requiredAccessLevels'
+                    type: Array
                     description: |
                       A list of other access levels defined in the same Policy,
                       referenced by resource name. Referencing an AccessLevel which
                       does not exist is an error. All access levels listed must be
                       granted for the Condition to be true.
                       Format: accessPolicies/{policy_id}/accessLevels/{short_name}
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::Array
-                    name: 'members'
+                    item_type:
+                      type: String
+                  - name: 'members'
+                    type: Array
                     description: |
                       An allowed list of members (users, service accounts).
                       Using groups is not supported yet.
@@ -150,146 +170,152 @@ properties:
                       from any user (logged in/not logged in, not present in any
                       groups, etc.).
                       Formats: `user:{emailid}`, `serviceAccount:{emailid}`
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::Boolean
-                    name: 'negate'
+                    item_type:
+                      type: String
+                  - name: 'negate'
+                    type: Boolean
                     description: |
                       Whether to negate the Condition. If true, the Condition becomes
                       a NAND over its non-empty fields, each field must be false for
                       the Condition overall to be satisfied. Defaults to false.
-                  - !ruby/object:Api::Type::NestedObject
-                    name: 'devicePolicy'
+                  - name: 'devicePolicy'
+                    type: NestedObject
                     description: |
                       Device specific restrictions, all restrictions must hold for
                       the Condition to be true. If not specified, all devices are
                       allowed.
                     properties:
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'requireScreenLock'
-                        api_name: 'requireScreenlock'
+                      - name: 'requireScreenLock'
+                        type: Boolean
                         description: |
                           Whether or not screenlock is required for the DevicePolicy
                           to be true. Defaults to false.
-                      - !ruby/object:Api::Type::Array
-                        name: 'allowedEncryptionStatuses'
+                        api_name: requireScreenlock
+                      - name: 'allowedEncryptionStatuses'
+                        type: Array
                         description: |
                           A list of allowed encryptions statuses.
                           An empty list allows all statuses.
-                        item_type: !ruby/object:Api::Type::Enum
-                          name: 'undefined'
+                        item_type:
+                          type: Enum
                           description: |
                             This field only has a name and description because of MM
                             limitations. It should not appear in downstreams.
-                          values:
-                            - :ENCRYPTION_UNSPECIFIED
-                            - :ENCRYPTION_UNSUPPORTED
-                            - :UNENCRYPTED
-                            - :ENCRYPTED
-                      - !ruby/object:Api::Type::Array
-                        name: 'allowedDeviceManagementLevels'
+                          enum_values:
+                            - 'ENCRYPTION_UNSPECIFIED'
+                            - 'ENCRYPTION_UNSUPPORTED'
+                            - 'UNENCRYPTED'
+                            - 'ENCRYPTED'
+                      - name: 'allowedDeviceManagementLevels'
+                        type: Array
                         description: |
                           A list of allowed device management levels.
                           An empty list allows all management levels.
-                        item_type: !ruby/object:Api::Type::Enum
-                          name: 'undefined'
+                        item_type:
+                          type: Enum
                           description: |
                             This field only has a name and description because of MM
                             limitations. It should not appear in downstreams.
-                          values:
-                            - :MANAGEMENT_UNSPECIFIED
-                            - :NONE
-                            - :BASIC
-                            - :COMPLETE
-                      - !ruby/object:Api::Type::Array
-                        name: 'osConstraints'
+                          enum_values:
+                            - 'MANAGEMENT_UNSPECIFIED'
+                            - 'NONE'
+                            - 'BASIC'
+                            - 'COMPLETE'
+                      - name: 'osConstraints'
+                        type: Array
                         description: |
                           A list of allowed OS versions.
                           An empty list allows all types and all versions.
-                        item_type: !ruby/object:Api::Type::NestedObject
+                        item_type:
+                          type: NestedObject
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'minimumVersion'
+                            - name: 'minimumVersion'
+                              type: String
                               description: |
                                 The minimum allowed OS version. If not set, any version
                                 of this OS satisfies the constraint.
                                 Format: "major.minor.patch" such as "10.5.301", "9.2.1".
-                            - !ruby/object:Api::Type::Enum
-                              name: 'osType'
-                              required: true
+                            - name: 'osType'
+                              type: Enum
                               description: |
                                 The operating system type of the device.
-                              values:
-                                - :OS_UNSPECIFIED
-                                - :DESKTOP_MAC
-                                - :DESKTOP_WINDOWS
-                                - :DESKTOP_LINUX
-                                - :DESKTOP_CHROME_OS
-                                - :ANDROID
-                                - :IOS
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'requireAdminApproval'
+                              required: true
+                              enum_values:
+                                - 'OS_UNSPECIFIED'
+                                - 'DESKTOP_MAC'
+                                - 'DESKTOP_WINDOWS'
+                                - 'DESKTOP_LINUX'
+                                - 'DESKTOP_CHROME_OS'
+                                - 'ANDROID'
+                                - 'IOS'
+                      - name: 'requireAdminApproval'
+                        type: Boolean
                         description: |
                           Whether the device needs to be approved by the customer admin.
-                      - !ruby/object:Api::Type::Boolean
-                        name: 'requireCorpOwned'
+                      - name: 'requireCorpOwned'
+                        type: Boolean
                         description: |
                           Whether the device needs to be corp owned.
-                  - !ruby/object:Api::Type::Array
-                    name: 'regions'
+                  - name: 'regions'
+                    type: Array
                     description: |
                       The request must originate from one of the provided
                       countries/regions.
                       Format: A valid ISO 3166-1 alpha-2 code.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::Array
-                    name: 'vpcNetworkSources'
+                    item_type:
+                      type: String
+                  - name: 'vpcNetworkSources'
+                    type: Array
                     description: 'The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field together with `ip_subnetworks`.'
-                    item_type: !ruby/object:Api::Type::NestedObject
+                    item_type:
+                      type: NestedObject
                       properties:
-                        - !ruby/object:Api::Type::NestedObject
-                          name: 'vpcSubnetwork'
+                        - name: 'vpcSubnetwork'
+                          type: NestedObject
                           description: 'Sub networks within a VPC network.'
                           properties:
-                            - !ruby/object:Api::Type::String
-                              name: 'network'
-                              required: true
+                            - name: 'network'
+                              type: String
                               description: 'Required. Network name to be allowed by this Access Level. Networks of foreign organizations requires `compute.network.get` permission to be granted to caller.'
-                            - !ruby/object:Api::Type::Array
-                              name: 'vpcIpSubnetworks'
+                              required: true
+                            - name: 'vpcIpSubnetworks'
+                              type: Array
                               description: 'CIDR block IP subnetwork specification. Must be IPv4.'
-                              item_type: Api::Type::String
-        - !ruby/object:Api::Type::NestedObject
-          name: 'custom'
+                              item_type:
+                                type: String
+              min_size: 1
+        - name: 'custom'
+          type: NestedObject
           description: |
             Custom access level conditions are set using the Cloud Common Expression Language to represent the necessary conditions for the level to apply to a request.
             See CEL spec at: https://github.com/google/cel-spec.
           # conflicts:
           #   - basic
           properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'expr'
-              required: true
+            - name: 'expr'
+              type: NestedObject
               description: |
                 Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression language.
                 This page details the objects and attributes that are used to the build the CEL expressions for
                 custom access levels - https://cloud.google.com/access-context-manager/docs/custom-access-level-spec.
+              required: true
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'expression'
-                  required: true
+                - name: 'expression'
+                  type: String
                   description:
                     Textual representation of an expression in Common Expression
                     Language syntax.
-                - !ruby/object:Api::Type::String
-                  name: 'title'
+                  required: true
+                - name: 'title'
+                  type: String
                   description:
                     Title for the expression, i.e. a short string describing its
                     purpose.
-                - !ruby/object:Api::Type::String
-                  name: 'description'
+                - name: 'description'
+                  type: String
                   description: Description of the expression
-                - !ruby/object:Api::Type::String
-                  name: 'location'
+                - name: 'location'
+                  type: String
                   description:
                     String indicating the location of the expression for error
                     reporting, e.g. a file name and a position in the file

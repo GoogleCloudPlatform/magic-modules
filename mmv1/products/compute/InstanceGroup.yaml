@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,67 +11,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'InstanceGroup'
 kind: 'compute#instanceGroup'
-base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
-collection_url_key: 'items'
-has_self_link: true
 description: |
   Represents an Instance Group resource. Instance groups are self-managed
   and can contain identical or different instances. Instance groups do not
   use an instance template. Unlike managed instance groups, you must create
   and add instances to an instance group manually.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+exclude: true
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroups'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-immutable: true
-exclude: true
+collection_url_key: 'items'
+custom_code:
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: 'A reference to the zone where the instance group resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
   # 'fingerprint' not applicable to state convergence.
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
+  - name: 'id'
+    type: Integer
     description: 'A unique identifier for this instance group.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the instance group.
       The name must be 1-63 characters long, and comply with RFC1035.
-  - !ruby/object:Api::Type::Array
-    name: 'namedPorts'
+  - name: 'namedPorts'
+    type: Array
     description: |
       Assigns a name to a port number.
       For example: {name: "http", port: 80}.
@@ -83,36 +85,37 @@ properties:
       For example: [{name: "http", port: 80},{name: "http", port: 8080}]
 
       Named ports apply to all instances in this instance group.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
+        - name: 'name'
+          type: String
           description: |
             The name for this named port.
             The name must be 1-63 characters long, and comply with RFC1035.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
+        - name: 'port'
+          type: Integer
           description: |
             The port number, which can be a value between 1 and 65535.
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'network'
-    resource: 'Network'
-    imports: 'selfLink'
+  - name: 'network'
+    type: ResourceRef
     description: |
       The network to which all instances in the instance group belong.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
     imports: 'selfLink'
+  - name: 'region'
+    type: ResourceRef
     description: |
       The region where the instance group is located
       (for regional resources).
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'subnetwork'
-    resource: 'Subnetwork'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
     imports: 'selfLink'
+  - name: 'subnetwork'
+    type: ResourceRef
     description: |
       The subnetwork to which all instances in the instance group belong.
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Subnetwork'
+    imports: 'selfLink'

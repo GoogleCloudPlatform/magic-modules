@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,17 +11,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DatasetAccess'
+description: |
+  Gives dataset access for a single entity. This resource is intended to be used in cases where
+  it is not possible to compile a full list of access blocks to include in a
+  `google_bigquery_dataset` resource, to enable them to be added separately.
+
+  ~> **Note:** If this resource is used alongside a `google_bigquery_dataset` resource, the
+  dataset resource must either have no defined `access` blocks or a `lifecycle` block with
+  `ignore_changes = [access]` so they don't fight over which accesses should be on the dataset.
+  Additionally, both resource cannot be modified in the same apply.
+references:
+  guides:
+    'Controlling access to datasets': 'https://cloud.google.com/bigquery/docs/dataset-access-controls'
+  api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
+docs:
+  warning: |
+    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
+    The API does accept both formats but it will always return the legacy format which results in Terraform
+    showing permanent diff on each plan and apply operation.
+base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
+self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
+create_verb: 'PATCH'
+delete_verb: 'PATCH'
 immutable: true
-base_url: projects/{{project}}/datasets/{{dataset_id}}
-self_link: projects/{{project}}/datasets/{{dataset_id}}
-create_verb: :PATCH
-delete_verb: :PATCH
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - access
-  modify_by_patch: true
+mutex: '{{dataset_id}}'
+exclude_import: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 identity:
   - role
   - userByEmail
@@ -32,76 +52,63 @@ identity:
   - view
   - dataset
   - routine
-description: |
-  Gives dataset access for a single entity. This resource is intended to be used in cases where
-  it is not possible to compile a full list of access blocks to include in a
-  `google_bigquery_dataset` resource, to enable them to be added separately.
-
-  ~> **Note:** If this resource is used alongside a `google_bigquery_dataset` resource, the
-  dataset resource must either have no defined `access` blocks or a `lifecycle` block with
-  `ignore_changes = [access]` so they don't fight over which accesses should be on the dataset.
-  Additionally, both resource cannot be modified in the same apply.
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Controlling access to datasets': 'https://cloud.google.com/bigquery/docs/dataset-access-controls'
-  api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
-exclude_import: true
-skip_sweeper: true
+nested_query:
+  keys:
+    - access
+  is_list_of_ids: false
+  modify_by_patch: true
+custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/bigquery_dataset_access.go.tmpl'
+  constants: 'templates/terraform/constants/bigquery_dataset_access.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
-error_retry_predicates: ['transport_tpg.IsBigqueryIAMQuotaError']
-mutex: '{{dataset_id}}'
+exclude_sweeper: true
+error_retry_predicates:
+
+  - 'transport_tpg.IsBigqueryIAMQuotaError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_access_basic_user'
-    skip_test: true  # not importable
+  - name: 'bigquery_dataset_access_basic_user'
     primary_resource_id: 'access'
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_access_view'
-    skip_test: true  # not importable
+ # not importable
+    exclude_test: true
+  - name: 'bigquery_dataset_access_view'
     primary_resource_id: 'access'
     vars:
       dataset_id: 'example_dataset'
       dataset_id2: 'example_dataset2'
       table_id: 'example_table'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_access_authorized_dataset'
-    skip_test: true  # not importable
+ # not importable
+    exclude_test: true
+  - name: 'bigquery_dataset_access_authorized_dataset'
     primary_resource_id: 'access'
     vars:
       private: 'private'
       public: 'public'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'bigquery_dataset_access_authorized_routine'
-    skip_test: true  # not importable
-    primary_resource_type: 'google_bigquery_dataset_access'
+ # not importable
+    exclude_test: true
+  - name: 'bigquery_dataset_access_authorized_routine'
     primary_resource_id: 'authorized_routine'
     vars:
       private_dataset: 'private_dataset'
       public_dataset: 'public_dataset'
       public_routine: 'public_routine'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/bigquery_dataset_access.go.erb
-  post_create: templates/terraform/post_create/bigquery_dataset_access.go.erb
-  extra_schema_entry: templates/terraform/extra_schema_entry/bigquery_dataset_access.go.erb
-docs: !ruby/object:Provider::Terraform::Docs
-  warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
-    The API does accept both formats but it will always return the legacy format which results in Terraform
-    showing permanent diff on each plan and apply operation.
+ # not importable
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'datasetId'
+  - name: 'datasetId'
+    type: String
     description: |
       A unique ID for this dataset, without the project name. The ID
       must contain only letters (a-z, A-Z), numbers (0-9), or
       underscores (_). The maximum length is 1,024 characters.
     required: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'role'
+  - name: 'role'
+    type: String
     description: |
       Describes the rights granted to the user specified by the other
       member of the access object. Basic, predefined, and custom roles are
@@ -110,54 +117,56 @@ properties:
       post-create. See
       [official docs](https://cloud.google.com/bigquery/docs/access-control).
     diff_suppress_func: 'resourceBigQueryDatasetAccessRoleDiffSuppress'
-    custom_expand: 'templates/terraform/custom_expand/bigquery_access_role.go.erb'
-  - !ruby/object:Api::Type::String
-    name: 'userByEmail'
+    custom_expand: 'templates/terraform/custom_expand/bigquery_access_role.go.tmpl'
+  - name: 'userByEmail'
+    type: String
     description: |
       An email address of a user to grant access to. For example:
       fred@example.com
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
-    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
-    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'groupByEmail'
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
+    diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
+  - name: 'groupByEmail'
+    type: String
     description: An email address of a Google Group to grant access to.
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
-    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.erb'
-    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'domain'
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
+    diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
+  - name: 'domain'
+    type: String
     description: |
       A domain to grant access to. Any users signed in with the
       domain specified will be granted the specified access
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
-    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'specialGroup'
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
+    diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+  - name: 'specialGroup'
+    type: String
     description: |
       A special group to grant access to. Possible values include:
       * `projectOwners`: Owners of the enclosing project.
@@ -165,32 +174,32 @@ properties:
       * `projectWriters`: Writers of the enclosing project.
       * `allAuthenticatedUsers`: All authenticated BigQuery users.
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
-    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
-  - !ruby/object:Api::Type::String
-    name: 'iamMember'
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
+    diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+  - name: 'iamMember'
+    type: String
     description: |
       Some other type of member that appears in the IAM Policy but isn't a user,
       group, domain, or special group. For example: `allUsers`
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
-    diff_suppress_func: resourceBigQueryDatasetAccessIamMemberDiffSuppress
-  - !ruby/object:Api::Type::NestedObject
-    name: 'view'
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
+    diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
+  - name: 'view'
+    type: NestedObject
     description: |
       A view from a different dataset to grant access to. Queries
       executed against that view will have read access to tables in
@@ -198,67 +207,68 @@ properties:
       set. If that view is updated by any user, access to the view
       needs to be granted again via an update operation.
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'datasetId'
+      - name: 'datasetId'
+        type: String
         description: The ID of the dataset containing this table.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
+      - name: 'projectId'
+        type: String
         description: The ID of the project containing this table.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'tableId'
+      - name: 'tableId'
+        type: String
         description: |
           The ID of the table. The ID must contain only letters (a-z,
           A-Z), numbers (0-9), or underscores (_). The maximum length
           is 1,024 characters.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'dataset'
+  - name: 'dataset'
+    type: NestedObject
     description: |
       Grants all resources of particular types in a particular dataset read access to the current dataset.
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'dataset'
-        required: true
+      - name: 'dataset'
+        type: NestedObject
         description: |
           The dataset this entry applies to
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'datasetId'
+          - name: 'datasetId'
+            type: String
             description: The ID of the dataset containing this table.
             required: true
-          - !ruby/object:Api::Type::String
-            name: 'projectId'
+          - name: 'projectId'
+            type: String
             description: The ID of the project containing this table.
             required: true
-      - !ruby/object:Api::Type::Array
-        name: 'targetTypes'
+      - name: 'targetTypes'
+        type: Array
         description: |
           Which resources in the dataset this entry applies to. Currently, only views are supported,
           but additional target types may be added in the future. Possible values: VIEWS
-        item_type: Api::Type::String
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'routine'
+        item_type:
+          type: String
+  - name: 'routine'
+    type: NestedObject
     description: |
       A routine from a different dataset to grant access to. Queries
       executed against that routine will have read access to tables in
@@ -266,25 +276,25 @@ properties:
       set. If that routine is updated by any user, access to the routine
       needs to be granted again via an update operation.
     exactly_one_of:
-      - user_by_email
-      - group_by_email
-      - domain
-      - special_group
-      - iam_member
-      - view
-      - dataset
-      - routine
+      - 'user_by_email'
+      - 'group_by_email'
+      - 'domain'
+      - 'special_group'
+      - 'iam_member'
+      - 'view'
+      - 'dataset'
+      - 'routine'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'datasetId'
+      - name: 'datasetId'
+        type: String
         description: The ID of the dataset containing this table.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
+      - name: 'projectId'
+        type: String
         description: The ID of the project containing this table.
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'routineId'
+      - name: 'routineId'
+        type: String
         description: |
           The ID of the routine. The ID must contain only letters (a-z,
           A-Z), numbers (0-9), or underscores (_). The maximum length

@@ -11,97 +11,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Schema'
 description: |
   Schema defines the structure and layout of a type of document data.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Provide a schema for your data store': 'https://cloud.google.com/generative-ai-app-builder/docs/provide-schema'
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.schemas'
-
-immutable: true
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas?schemaId={{schema_id}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
+immutable: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}',
-  ]
-
+  - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/schemas/{{schema_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "discoveryengine_schema_basic"
+  - name: 'discoveryengine_schema_basic'
     primary_resource_id: 'basic'
     vars:
-      data_store_id: "data-store-id"
-      schema_id: "schema-id"
+      data_store_id: 'data-store-id'
+      schema_id: 'schema-id'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The geographic location where the data store should reside. The value can
       only be one of "global", "us" and "eu".
-  - !ruby/object:Api::Type::String
-    name: 'dataStoreId'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'dataStoreId'
+    type: String
     description: |
       The unique id of the data store.
-  - !ruby/object:Api::Type::String
-    name: 'schemaId'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'schemaId'
+    type: String
     description: |
       The unique id of the schema.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The unique full resource name of the schema. Values are of the format
       `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/schemas/{schema_id}`.
       This field must be a UTF-8 encoded string with a length limit of 1024
       characters.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'jsonSchema'
+  - name: 'jsonSchema'
+    type: String
     description: |
       The JSON representation of the schema.
     immutable: true
     exactly_one_of:
-      - json_schema
-    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.erb'
-    state_func:
-      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-      return s }'
-    validation: !ruby/object:Provider::Terraform::Validation
+      - 'json_schema'
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: 'templates/terraform/custom_flatten/discoveryengine_schema_json_schema.go.tmpl'
+    validation:
       function: 'validation.StringIsJSON'

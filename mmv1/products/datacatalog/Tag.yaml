@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,31 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Tag
-base_url: '{{parent}}/tags'
-self_link: '{{parent}}/tags'
-update_url: '{{name}}'
-update_verb: :PATCH
-update_mask: true
-delete_url: '{{name}}'
-read_query_params: '?pageSize=1000'
-nested_query: !ruby/object:Api::Resource::NestedQuery
-  keys:
-    - tags
+---
+name: 'Tag'
 description: |
   Tags are used to attach custom metadata to Data Catalog resources. Tags conform to the specifications within their tag template.
 
   See [Data Catalog IAM](https://cloud.google.com/data-catalog/docs/concepts/iam) for information on the permissions needed to create or view tags.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    'Official Documentation': https://cloud.google.com/data-catalog/docs
-  api: https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.tags
-import_format: ['{{name}}']
+    'Official Documentation': 'https://cloud.google.com/data-catalog/docs'
+  api: 'https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.tags'
+docs:
 id_format: '{{name}}'
+base_url: '{{parent}}/tags'
+self_link: '{{parent}}/tags'
+update_url: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+
+read_query_params: '?pageSize=1000'
+delete_url: '{{name}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+nested_query:
+  keys:
+    - tags
+  is_list_of_ids: false
+  modify_by_patch: false
+custom_code:
+  encoder: 'templates/terraform/encoders/data_catalog_tag.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/data_catalog_tag.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'data_catalog_entry_tag_basic'
+  - name: 'data_catalog_entry_tag_basic'
     primary_resource_id: 'basic_tag'
     vars:
       entry_group_id: 'my_entry_group'
@@ -43,11 +54,10 @@ examples:
       tag_template_id: 'my_template'
       force_delete: 'false'
     test_vars_overrides:
-      force_delete: 'true'
+      'force_delete': 'true'
     oics_vars_overrides:
-      force_delete: 'true'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'data_catalog_entry_group_tag'
+      'force_delete': 'true'
+  - name: 'data_catalog_entry_group_tag'
     primary_resource_id: 'entry_group_tag'
     vars:
       entry_group_id: 'my_entry_group'
@@ -56,14 +66,23 @@ examples:
       tag_template_id: 'my_template'
       force_delete: 'false'
     test_vars_overrides:
-      force_delete: 'true'
+      'force_delete': 'true'
     oics_vars_overrides:
-      force_delete: 'true'
-  - !ruby/object:Provider::Terraform::Examples
-    name:
-      'data_catalog_entry_tag_full'
-      # Multiple fine-grained resources
+      'force_delete': 'true'
+  - name: 'data_catalog_entry_tag_full'
+    primary_resource_id: 'basic_tag'
+    vars:
+      entry_group_id: 'my_entry_group'
+      entry_id: 'my_entry'
+      tag_template_id: 'my_template'
+      force_delete: 'false'
+    test_vars_overrides:
+      'force_delete': 'true'
+    oics_vars_overrides:
+      'force_delete': 'true'
+    # Multiple fine-grained resources
     skip_vcr: true
+  - name: 'data_catalog_entry_tag_false'
     primary_resource_id: 'basic_tag'
     vars:
       entry_group_id: 'my_entry_group'
@@ -71,110 +90,97 @@ examples:
       tag_template_id: 'my_template'
       force_delete: 'false'
     test_vars_overrides:
-      force_delete: 'true'
+      'force_delete': 'true'
     oics_vars_overrides:
-      force_delete: 'true'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'data_catalog_entry_tag_false'
-    primary_resource_id: 'basic_tag'
-    vars:
-      entry_group_id: 'my_entry_group'
-      entry_id: 'my_entry'
-      tag_template_id: 'my_template'
-      force_delete: 'false'
-    test_vars_overrides:
-      force_delete: 'true'
-    oics_vars_overrides:
-      force_delete: 'true'
-    skip_docs: true  # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/data_catalog_tag.go.erb
-  encoder: templates/terraform/encoders/data_catalog_tag.go.erb
+      'force_delete': 'true'
+ # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    url_param_only: true
-    immutable: true
+  - name: 'parent'
+    type: String
     description: |
       The name of the parent this tag is attached to. This can be the name of an entry or an entry group. If an entry group, the tag will be attached to
       all entries in that group.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The resource name of the tag in URL format. Example:
       projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/entries/{entryId}/tags/{tag_id} or
       projects/{project_id}/locations/{location}/entrygroups/{entryGroupId}/tags/{tag_id}
       where tag_id is a system-generated identifier. Note that this Tag may not actually be stored in the location in this name.
     output: true
-  - !ruby/object:Api::Type::String
-    name: template
+  - name: 'template'
+    type: String
     description: |
       The resource name of the tag template that this tag uses. Example:
       projects/{project_id}/locations/{location}/tagTemplates/{tagTemplateId}
       This field cannot be modified after creation.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: template_displayname
-    api_name: templateDisplayName
+  - name: 'template_displayname'
+    type: String
     description: |
       The display name of the tag template.
+    api_name: templateDisplayName
     output: true
-  - !ruby/object:Api::Type::Map
-    name: fields
+  - name: 'fields'
+    type: Map
     description: |
       This maps the ID of a tag field to the value of and additional information about that field.
       Valid field IDs are defined by the tag's template. A tag must have at least 1 field and at most 500 fields.
     required: true
-    key_name: field_name
-    value_type: !ruby/object:Api::Type::NestedObject
+    key_name: 'field_name'
+    value_type:
       name: field_value
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: display_name
+        - name: 'display_name'
+          type: String
           description: |
             The display name of this field
           output: true
-        - !ruby/object:Api::Type::Integer
-          name: order
+        - name: 'order'
+          type: Integer
           description: |
             The order of this field with respect to other fields in this tag. For example, a higher value can indicate
             a more important field. The value can be negative. Multiple fields can have the same order, and field orders
             within a tag do not have to be sequential.
           output: true
-        - !ruby/object:Api::Type::Double
-          name: doubleValue
+        - name: 'doubleValue'
+          type: Double
           description: |
             Holds the value for a tag field with double type.
-        - !ruby/object:Api::Type::String
-          name: stringValue
+        - name: 'stringValue'
+          type: String
           description: |
             Holds the value for a tag field with string type.
-        - !ruby/object:Api::Type::Boolean
-          name: boolValue
-          send_empty_value: true
+        - name: 'boolValue'
+          type: Boolean
           description: |
             Holds the value for a tag field with boolean type.
-        - !ruby/object:Api::Type::String
-          name: timestampValue
+          send_empty_value: true
+        - name: 'timestampValue'
+          type: String
           description: |
             Holds the value for a tag field with timestamp type.
-        - !ruby/object:Api::Type::NestedObject
-          name: enumValue
+        - name: 'enumValue'
+          type: NestedObject
           description: |
             Holds the value for a tag field with enum type. This value must be one of the allowed values in the definition of this enum.
+          custom_flatten: 'templates/terraform/custom_flatten/data_catalog_tag.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/data_catalog_tag.go.tmpl'
           flatten_object: true
-          custom_expand: templates/terraform/custom_expand/data_catalog_tag.go.erb
-          custom_flatten: templates/terraform/custom_flatten/data_catalog_tag.go.erb
           properties:
-            - !ruby/object:Api::Type::String
-              name: enum_value
-              api_name: 'displayName'
+            - name: 'enum_value'
+              type: String
               description: |
                 The display name of the enum value.
-  - !ruby/object:Api::Type::String
-    name: column
+              api_name: displayName
+  - name: 'column'
+    type: String
     description: |
       Resources like Entry can have schemas associated with them. This scope allows users to attach tags to an
       individual column based on that schema.

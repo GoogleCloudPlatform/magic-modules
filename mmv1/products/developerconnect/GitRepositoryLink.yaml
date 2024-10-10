@@ -1,116 +1,141 @@
---- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks
-create_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}
-self_link: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
-id_format: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'GitRepositoryLink'
+description: "A git repository link to a parent connection."
+min_version: 'beta'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}'
+immutable: true
 import_format:
-  - projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+  - 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
   # These tests depend on secrets stored in a separate project, so we prefer not
   # to show them in the docs.
-  - !ruby/object:Provider::Terraform::Examples
-    name: "developer_connect_git_repository_link_github"
-    primary_resource_id: "primary"
-    skip_docs: true
-    min_version: beta
+  - name: 'developer_connect_git_repository_link_github'
+    primary_resource_id: 'primary'
+    min_version: 'beta'
     vars:
-      connection_name: "my-connection"
-      git_repository_link_name: "my-repository"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "developer_connect_git_repository_link_github_doc"
-    min_version: beta
-    skip_test: true
-name: GitRepositoryLink
-description: "A git repository link to a parent connection."
-min_version: "beta"
-autogen_async: true
+      connection_name: 'my-connection'
+      git_repository_link_name: 'my-repository'
+    exclude_docs: true
+  - name: 'developer_connect_git_repository_link_github_doc'
+    min_version: 'beta'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description:
       "Resource ID segment making up resource `name`. It identifies the resource
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: parent_connection
+  - name: 'parent_connection'
+    type: String
     description:
       "Resource ID segment making up resource `name`. It identifies the resource
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: gitRepositoryLinkId
+  - name: 'gitRepositoryLinkId'
+    type: String
     description:
       "Required. The ID to use for the repository, which will become the
       final component of\nthe repository's resource name. This ID should be unique in
       the connection.\nAllows alphanumeric characters and any of -._~%!$&'()*+,;=@. "
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
-immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: "Identifier. Resource name of the repository, in the format\n`projects/*/locations/*/connections/*/gitRepositoryLinks/*`. "
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: cloneUri
+  - name: 'cloneUri'
+    type: String
     description: "Required. Git Clone URI. "
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: "Output only. [Output only] Create timestamp "
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: "Output only. [Output only] Update timestamp "
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: deleteTime
+  - name: 'deleteTime'
+    type: String
     description: "Output only. [Output only] Delete timestamp "
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+  - name: 'labels'
+    type: KeyValueLabels
     description: "Optional. Labels as key value pairs "
-  - !ruby/object:Api::Type::String
-    name: etag
+    min_version: 'beta'
+  - name: 'etag'
+    type: String
     description:
       "Optional. This checksum is computed by the server based on the value
       of other\nfields, and may be sent on update and delete requests to ensure the\nclient
       has an up-to-date value before proceeding. "
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
+    min_version: 'beta'
+  - name: 'reconciling'
+    type: Boolean
     description:
       "Output only. Set to true when the connection is being set up or updated
       in the\nbackground. "
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: annotations
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: "Optional. Allows clients to store small amounts of arbitrary data. "
-  - !ruby/object:Api::Type::String
-    name: uid
+    min_version: 'beta'
+  - name: 'uid'
+    type: String
     description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
+    min_version: 'beta'
     output: true

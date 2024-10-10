@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,74 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EdgeCacheKeyset'
-base_url: 'projects/{{project}}/locations/global/edgeCacheKeysets'
-create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}'
-self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   EdgeCacheKeyset represents a collection of public keys used for validating signed requests.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Create keysets': 'https://cloud.google.com/media-cdn/docs/create-keyset'
   api: 'https://cloud.google.com/media-cdn/docs/reference/rest/v1/projects.locations.edgeCacheKeysets'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/global/edgeCacheKeysets'
+self_link: 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
+create_url: 'projects/{{project}}/locations/global/edgeCacheKeysets?edgeCacheKeysetId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}'
+timeouts:
+  insert_minutes: 90
+  update_minutes: 90
+  delete_minutes: 90
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 90
       update_minutes: 90
       delete_minutes: 90
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-import_format:
-  ['projects/{{project}}/locations/global/edgeCacheKeysets/{{name}}']
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
+custom_code:
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_edge_cache_keyset_basic'
+  - name: 'network_services_edge_cache_keyset_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-keyset'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_edge_cache_keyset_dual_token'
+  - name: 'network_services_edge_cache_keyset_dual_token'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-keyset'
       secret_name: 'secret-name'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource; provided by the client when the resource is created.
       The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]* which means the first character must be a letter,
       and all following characters must be a dash, underscore, letter or digit.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A human-readable description of the resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'Set of label tags associated with the EdgeCache resource.'
-  - !ruby/object:Api::Type::Array
-    name: 'public_key'
+  - name: 'public_key'
+    type: Array
     description: |
       An ordered list of Ed25519 public keys to use for validating signed requests.
       You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.
@@ -87,45 +90,47 @@ properties:
 
       Ed25519 public keys are not secret, and only allow Google to validate a request was signed by your corresponding private key.
       Ensure that the private key is kept secret, and that only authorized users can add public keys to a keyset.
-    min_size: 1
-    max_size: 3
-    api_name: 'publicKeys'
+    api_name: publicKeys
     at_least_one_of:
-      - public_key
-      - validation_shared_keys
-    item_type: !ruby/object:Api::Type::NestedObject
+      - 'public_key'
+      - 'validation_shared_keys'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'id'
-          required: true
+        - name: 'id'
+          type: String
           description: |
             The ID of the public key. The ID must be 1-63 characters long, and comply with RFC1035.
             The name must be 1-64 characters long, and match the regular expression [a-zA-Z][a-zA-Z0-9_-]*
             which means the first character must be a letter, and all following characters must be a dash, underscore, letter or digit.
-        - !ruby/object:Api::Type::String
-          name: 'value'
+          required: true
+        - name: 'value'
+          type: String
           description: |
             The base64-encoded value of the Ed25519 public key. The base64 encoding can be padded (44 bytes) or unpadded (43 bytes).
             Representations or encodings of the public key other than this will be rejected with an error.
           sensitive: true
-        - !ruby/object:Api::Type::Boolean
-          name: 'managed'
+        - name: 'managed'
+          type: Boolean
           description: |
             Set to true to have the CDN automatically manage this public key value.
-  - !ruby/object:Api::Type::Array
-    name: 'validationSharedKeys'
+    min_size: 1
+    max_size: 3
+  - name: 'validationSharedKeys'
+    type: Array
     description: |
       An ordered list of shared keys to use for validating signed requests.
       Shared keys are secret.  Ensure that only authorized users can add `validation_shared_keys` to a keyset.
       You can rotate keys by appending (pushing) a new key to the list of `validation_shared_keys` and removing any superseded keys.
       You must specify `public_keys` or `validation_shared_keys` (or both). The keys in `public_keys` are checked first.
-    min_size: 1
-    max_size: 3
-    item_type: !ruby/object:Api::Type::NestedObject
+    at_least_one_of:
+      - 'public_key'
+      - 'validation_shared_keys'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'secretVersion'
-          required: true
+        - name: 'secretVersion'
+          type: String
           description: |
             The name of the secret version in Secret Manager.
 
@@ -134,6 +139,6 @@ properties:
             * If you are using HMAC-SHA1, we suggest 20-byte secrets.
             * If you are using HMAC-SHA256, we suggest 32-byte secrets.
             See RFC 2104, Section 3 for more details on these recommendations.
-    at_least_one_of:
-      - public_key
-      - validation_shared_keys
+          required: true
+    min_size: 1
+    max_size: 3

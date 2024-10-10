@@ -37,6 +37,12 @@ type Type struct {
 
 	DefaultValue interface{} `yaml:"default_value"`
 
+	// Expected to follow the format as follows:
+	//
+	//	description: |
+	//		This is a description of a field.
+	//		If it comprises multiple lines, it must continue to be indented.
+	//
 	Description string
 
 	Exclude bool
@@ -135,7 +141,7 @@ type Type struct {
 
 	EnumValues []string `yaml:"enum_values"`
 
-	SkipDocsValues bool `yaml:"skip_docs_values"`
+	ExcludeDocsValues bool `yaml:"exclude_docs_values"`
 
 	// ====================
 	// Array Fields
@@ -329,6 +335,11 @@ func (t *Type) SetDefault(r *Resource) {
 		if t.Description == "" {
 			t.Description = fmt.Sprintf("A reference to %s resource", t.Resource)
 		}
+	case t.IsA("Fingerprint"):
+		// Represents a fingerprint.  A fingerprint is an output-only
+		// field used for optimistic locking during updates.
+		// They are fetched from the GCP response.
+		t.Output = true
 	default:
 	}
 
@@ -422,7 +433,8 @@ func (t *Type) GetPrefix() string {
 	if t.Prefix == "" {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
-			if t.ResourceMetadata.NestedQuery != nil {
+			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
+			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
 				nestedPrefix = "Nested"
 			}
 
@@ -639,17 +651,6 @@ func (t Type) Deprecated() bool {
 func (t *Type) GetDescription() string {
 	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
-
-// TODO rewrite: validation
-// Represents a fingerprint.  A fingerprint is an output-only
-// field used for optimistic locking during updates.
-// They are fetched from the GCP response.
-// class Fingerprint < FetchedExternal
-//   func (t *Type) validate
-//     super
-//     @output = true if @output.nil?
-//   end
-// end
 
 // TODO rewrite: validation
 // class Array < Composite

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,158 +11,158 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: "NodePool"
+---
+name: 'NodePool'
 description: |
   "A set of Kubernetes nodes in a cluster with common configuration and specification."
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Google Distributed Cloud Edge": "https://cloud.google.com/distributed-cloud/edge/latest/docs"
-  api: "https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters.nodePools"
-base_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools"
+    'Google Distributed Cloud Edge': 'https://cloud.google.com/distributed-cloud/edge/latest/docs'
+  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/container/rest/v1/projects.locations.clusters.nodePools'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
-create_url: "projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}"
+create_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools?nodePoolId={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}'
+timeouts:
+  insert_minutes: 480
+  update_minutes: 480
+  delete_minutes: 480
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 480
       update_minutes: 480
       delete_minutes: 480
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-import_format: ["projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools/{{name}}"]
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
   # Skip the node-pool test as we only have limited machine resources
   # The node-pool creation is tested in edgecontainer_local_control_plane_node_pool_internal
   # in order to avoid exposing the node location and machine name to public.
-  - !ruby/object:Provider::Terraform::Examples
-    name: "edgecontainer_node_pool"
-    primary_resource_id: "default"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "edgecontainer_node_pool_with_cmek"
-    primary_resource_id: "default"
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: "edgecontainer_local_control_plane_node_pool"
-    primary_resource_id: "default"
-    skip_test: true
+  - name: 'edgecontainer_node_pool'
+    primary_resource_id: 'default'
+    exclude_test: true
+  - name: 'edgecontainer_node_pool_with_cmek'
+    primary_resource_id: 'default'
+    exclude_test: true
+  - name: 'edgecontainer_local_control_plane_node_pool'
+    primary_resource_id: 'default'
+    exclude_test: true
   # Skip the docs generation for the edgecontainer_local_control_plane_node_pool_internal test
   # to avoid leaking the machine name, and node location to public.
   # Skip the vcr test because as we only have limited machine resources and we don't want it run
   # in github presubmit test.
   # TODO: enable the test when GDCE have extra prod rack for TF e2e testing.
-  - !ruby/object:Provider::Terraform::Examples
-    name: "edgecontainer_local_control_plane_node_pool_internal"
-    primary_resource_id: "default"
-    skip_docs: true
+  - name: 'edgecontainer_local_control_plane_node_pool_internal'
+    primary_resource_id: 'default'
+    exclude_test: true
+    exclude_docs: true
     skip_vcr: true
-    skip_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "name"
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of the node pool.
-  - !ruby/object:Api::Type::String
-    name: "location"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The location of the resource.
-  - !ruby/object:Api::Type::String
-    name: "cluster"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'cluster'
+    type: String
     description: |
       The name of the target Distributed Cloud Edge Cluster.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: |
       The time when the node pool was created.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: updateTime
+  - name: 'updateTime'
+    type: Time
     description: |
       The time when the node pool was last updated.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: "labels"
+  - name: 'labels'
+    type: KeyValueLabels
     description: "Labels associated with this resource."
-  - !ruby/object:Api::Type::String
-    name: "nodeLocation"
-    required: true
-    immutable: true
+  - name: 'nodeLocation'
+    type: String
     description: |
       Name of the Google Distributed Cloud Edge zone where this node pool will be created. For example: `us-central1-edge-customer-a`.
-  - !ruby/object:Api::Type::Integer
-    name: "nodeCount"
     required: true
+    immutable: true
+  - name: 'nodeCount'
+    type: Integer
     description: |
       The number of nodes in the pool.
-  - !ruby/object:Api::Type::String
-    name: "machineFilter"
-    default_from_api: true
+    required: true
+  - name: 'machineFilter'
+    type: String
     description: |
       Only machines matching this filter will be allowed to join the node pool.
       The filtering language accepts strings like "name=<name>", and is
       documented in more detail in [AIP-160](https://google.aip.dev/160).
-  - !ruby/object:Api::Type::NestedObject
-    name: localDiskEncryption
+    default_from_api: true
+  - name: 'localDiskEncryption'
+    type: NestedObject
     description: |
       Local disk encryption options. This field is only used when enabling CMEK support.
     properties:
-      - !ruby/object:Api::Type::String
-        name: "kmsKey"
-        immutable: true
+      - name: 'kmsKey'
+        type: String
         description: |
           The Cloud KMS CryptoKey e.g. projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey} to use for protecting node local disks.
           If not specified, a Google-managed key will be used instead.
-      - !ruby/object:Api::Type::String
-        name: "kmsKeyActiveVersion"
-        output: true
+        immutable: true
+      - name: 'kmsKeyActiveVersion'
+        type: String
         description: |
           The Cloud KMS CryptoKeyVersion currently in use for protecting node local disks. Only applicable if kmsKey is set.
-      - !ruby/object:Api::Type::String
-        name: kmsKeyState
+        output: true
+      - name: 'kmsKeyState'
+        type: String
         description: |
           Availability of the Cloud KMS CryptoKey. If not KEY_AVAILABLE, then nodes may go offline as they cannot access their local data.
           This can be caused by a lack of permissions to use the key, or if the key is disabled or deleted.
         output: true
-  - !ruby/object:Api::Type::String
-    name: "nodeVersion"
-    output: true
+  - name: 'nodeVersion'
+    type: String
     description: |
       The lowest release version among all worker nodes.
-  - !ruby/object:Api::Type::NestedObject
-    name: nodeConfig
-    default_from_api: true
+    output: true
+  - name: 'nodeConfig'
+    type: NestedObject
     description: |
       Configuration for each node in the NodePool
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: "labels"
-        default_from_api: true
+      - name: 'labels'
+        type: KeyValuePairs
         description: |
           "The Kubernetes node labels"
+        default_from_api: true

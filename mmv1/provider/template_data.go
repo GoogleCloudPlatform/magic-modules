@@ -15,6 +15,7 @@ package provider
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/format"
 	"log"
@@ -22,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"text/template"
 
@@ -46,6 +48,9 @@ type TemplateData struct {
 var GA_VERSION = "ga"
 var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
+var PRIVATE_VERSION = "private"
+
+var goimportFiles sync.Map
 
 func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
@@ -53,7 +58,7 @@ func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	if versionName == GA_VERSION {
 		td.TerraformResourceDirectory = "google"
 		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
-	} else if versionName == ALPHA_VERSION {
+	} else if versionName == ALPHA_VERSION || versionName == PRIVATE_VERSION {
 		td.TerraformResourceDirectory = "google-private"
 		td.TerraformProviderModule = "internal/terraform-next"
 	} else {
@@ -71,7 +76,7 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
@@ -155,7 +160,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/go/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_context.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -168,9 +173,24 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
-	// log.Printf("Generating %s", filePath)
+func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_property_method.go.tmpl",
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
 
+func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc/resource_converter_iam.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
@@ -192,28 +212,62 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 		} else {
 			sourceByte = formattedByte
 		}
+		if !strings.Contains(templatePath, "third_party/terraform") {
+			goimportFiles.Store(filePath, struct{}{})
+		}
 	}
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
 		glog.Exit(err)
 	}
-
-	if goFormat && !strings.Contains(templatePath, "third_party/terraform") {
-		cmd := exec.Command("goimports", "-w", filePath)
-		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}
 }
 
 func (td *TemplateData) ImportPath() string {
 	if td.VersionName == GA_VERSION {
 		return "github.com/hashicorp/terraform-provider-google/google"
-	} else if td.VersionName == ALPHA_VERSION {
+	} else if td.VersionName == ALPHA_VERSION || td.VersionName == PRIVATE_VERSION {
 		return "internal/terraform-next/google-private"
 	}
 	return "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+}
+
+func FixImports(outputPath string, dumpDiffs bool) {
+	log.Printf("Fixing go import paths")
+
+	baseArgs := []string{"-w"}
+	if dumpDiffs {
+		baseArgs = []string{"-d", "-w"}
+	}
+
+	// -w and -d are mutually exclusive; if dumpDiffs is requested we need to run twice.
+	for _, base := range baseArgs {
+		hasFiles := false
+		args := []string{base}
+		goimportFiles.Range(func(filePath, _ any) bool {
+			p, err := filepath.Rel(outputPath, filePath.(string))
+			if err != nil {
+				log.Fatal(err)
+			}
+			args = append(args, p)
+			hasFiles = true
+			return true
+		})
+
+		if hasFiles {
+			cmd := exec.Command("goimports", args...)
+			cmd.Dir = outputPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				var exitErr *exec.ExitError
+				if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
+					glog.Error(string(exitErr.Stderr))
+				}
+				log.Fatal(err)
+			}
+		}
+	}
 }
 
 type TestInput struct {

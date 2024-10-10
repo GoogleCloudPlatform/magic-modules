@@ -1118,7 +1118,7 @@ The `node_config_defaults` block supports:
 
 * `logging_variant` (Optional) The type of logging agent that is deployed by default for newly created node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
-* `gcfs_config` (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
+* `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 
@@ -1293,6 +1293,8 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 * `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
 One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
+Prior to the 6.4.0 this field was marked as required. The workaround for the required field 
+is setting the empty string `""`, which will function identically to not setting this field.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
 containers that specify CPU limits.
@@ -1327,6 +1329,14 @@ linux_node_config {
     * `CGROUP_MODE_UNSPECIFIED`: CGROUP_MODE_UNSPECIFIED is when unspecified cgroup configuration is used. The default for the GKE node OS image will be used.
     * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
     * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
+
+* `hugepages_config` - (Optional) Amounts for 2M and 1G hugepages. Structure is [documented below](#nested_hugepages_config).
+
+<a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
+
+* `hugepage_size_2m` - (Optional) Amount of 2M hugepages.
+
+* `hugepage_size_1g` - (Optional) Amount of 1G hugepages.
 
 <a name="nested_containerd_config"></a>The `containerd_config` block supports:
 

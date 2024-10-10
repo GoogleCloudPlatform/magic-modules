@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	//go:embed DIFF_COMMENT.md
+	//go:embed templates/DIFF_COMMENT.md.tmpl
 	diffComment string
 )
 
@@ -504,9 +504,9 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
-	tmpl, err := template.New("DIFF_COMMENT.md").Parse(diffComment)
+	tmpl, err := template.New("DIFF_COMMENT.md.tmpl").Parse(diffComment)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse DIFF_COMMENT.md: %s", err))
+		return "", fmt.Errorf("unable to parse template DIFF_COMMENT.md.tmpl: %s", err)
 	}
 	sb := new(strings.Builder)
 	err = tmpl.Execute(sb, data)

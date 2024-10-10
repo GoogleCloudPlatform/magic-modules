@@ -122,13 +122,13 @@ type Examples struct {
 	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool `yaml:"skip_test"`
+	ExcludeTest bool `yaml:"exclude_test"`
 
 	// Whether to skip generating docs for this example
-	SkipDocs bool `yaml:"skip_docs"`
+	ExcludeDocs bool `yaml:"exclude_docs"`
 
 	// Whether to skip import tests for this example
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test"`
 
 	// The name of the primary resource for use in IAM tests. IAM tests need
 	// a reference to the primary resource to create IAM policies for
@@ -156,6 +156,7 @@ type Examples struct {
 
 	DocumentationHCLText string
 	TestHCLText          string
+	OicsHCLText          string
 }
 
 // Set default value for fields
@@ -169,7 +170,7 @@ func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	}
 
 	if e.ConfigPath == "" {
-		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
 	}
 	e.SetHCLText()
 
@@ -285,7 +286,7 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/go/bigquery_table_ref.go.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/terraform/expand_property_method.go.tmpl",
 		"templates/terraform/update_mask.go.tmpl",
@@ -358,4 +359,37 @@ func SubstituteTestPaths(config string) string {
 	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
 	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
 	return config
+}
+
+// Executes example templates for documentation and tests
+func (e *Examples) SetOiCSHCLText() {
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
+
+	// // Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+
+	testVars := make(map[string]string)
+	for key, value := range originalVars {
+		testVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
+
+	// Apply overrides from YAML
+	for key, value := range e.OicsVarsOverrides {
+		testVars[key] = value
+	}
+
+	e.Vars = testVars
+	e.OicsHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
+
+	// Remove region tags
+	e.OicsHCLText = re1.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = re2.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = SubstituteExamplePaths(e.OicsHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
 }

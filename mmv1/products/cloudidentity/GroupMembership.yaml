@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,184 +11,184 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'GroupMembership'
-base_url: '{{group}}/memberships'
-self_link: '{{name}}'
 description: |
   A Membership defines a relationship between a Group and an entity belonging to that Group, referred to as a "member".
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
-immutable: true
-read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
     in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-import_format: ['{{%name}}']
-skip_sweeper: true
+base_url: '{{group}}/memberships'
+self_link: '{{name}}'
+immutable: true
+import_format:
+  - '{{%name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_update: 'templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl'
+  post_import: 'templates/terraform/post_import/cloud_identity_group_membership.go.tmpl'
+exclude_sweeper: true
+read_error_transform: 'transformCloudIdentityGroupMembershipReadError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name:
-      'cloud_identity_group_membership'
-      # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
-    skip_test: true
+  - name: 'cloud_identity_group_membership'
     primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
       id_group: 'my-identity-group'
     test_env_vars:
-      org_domain: :ORG_DOMAIN
-      cust_id: :CUST_ID
-  - !ruby/object:Provider::Terraform::Examples
-    name:
-      'cloud_identity_group_membership_user'
-      # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
-    skip_test: true
+      org_domain: 'ORG_DOMAIN'
+      cust_id: 'CUST_ID'
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
+  - name: 'cloud_identity_group_membership_user'
     primary_resource_id: 'cloud_identity_group_membership_basic'
     vars:
       id_group: 'my-identity-group'
     test_env_vars:
-      org_domain: :ORG_DOMAIN
-      cust_id: :CUST_ID
-      identity_user: :IDENTITY_USER
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: templates/terraform/post_create/set_computed_name.erb
-  post_import: templates/terraform/post_import/cloud_identity_group_membership.go.erb
-  custom_update: templates/terraform/custom_update/cloud_identity_group_membership.go.erb
-
+      org_domain: 'ORG_DOMAIN'
+      cust_id: 'CUST_ID'
+      identity_user: 'IDENTITY_USER'
+    # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'group'
-    resource: 'Group'
-    imports: 'name'
+  - name: 'group'
+    type: ResourceRef
     description: |
       The name of the Group to create this membership in.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+    resource: 'Group'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'memberKey'
-    immutable: true
-    description: |
-      EntityKey of the member.
-    min_version: beta
-    exactly_one_of:
-      - member_key
-      - preferred_member_key
-    default_from_api: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'id'
-        required: true
-        immutable: true
-        description: |
-          The ID of the entity.
-
-          For Google-managed entities, the id must be the email address of an existing
-          group or user.
-
-          For external-identity-mapped entities, the id must be a string conforming
-          to the Identity Source's requirements.
-
-          Must be unique within a namespace.
-      - !ruby/object:Api::Type::String
-        name: 'namespace'
-        immutable: true
-        description: |
-          The namespace in which the entity exists.
-
-          If not specified, the EntityKey represents a Google-managed entity
-          such as a Google user or a Google Group.
-
-          If specified, the EntityKey represents an external-identity-mapped group.
-          The namespace must correspond to an identity source created in Admin Console
-          and must be in the form of `identitysources/{identity_source_id}`.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'preferredMemberKey'
-    immutable: true
-    description: |
-      EntityKey of the member.
-    exactly_one_of:
-      - member_key
-      - preferred_member_key
-    default_from_api: true
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'id'
-        required: true
-        immutable: true
-        description: |
-          The ID of the entity.
-
-          For Google-managed entities, the id must be the email address of an existing
-          group or user.
-
-          For external-identity-mapped entities, the id must be a string conforming
-          to the Identity Source's requirements.
-
-          Must be unique within a namespace.
-      - !ruby/object:Api::Type::String
-        name: 'namespace'
-        immutable: true
-        description: |
-          The namespace in which the entity exists.
-
-          If not specified, the EntityKey represents a Google-managed entity
-          such as a Google user or a Google Group.
-
-          If specified, the EntityKey represents an external-identity-mapped group.
-          The namespace must correspond to an identity source created in Admin Console
-          and must be in the form of `identitysources/{identity_source_id}`.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
     output: true
+  - name: 'memberKey'
+    type: NestedObject
+    description: |
+      EntityKey of the member.
+    min_version: 'beta'
+    immutable: true
+    default_from_api: true
+    exactly_one_of:
+      - 'member_key'
+      - 'preferred_member_key'
+    properties:
+      - name: 'id'
+        type: String
+        description: |
+          The ID of the entity.
+
+          For Google-managed entities, the id must be the email address of an existing
+          group or user.
+
+          For external-identity-mapped entities, the id must be a string conforming
+          to the Identity Source's requirements.
+
+          Must be unique within a namespace.
+        required: true
+        immutable: true
+      - name: 'namespace'
+        type: String
+        description: |
+          The namespace in which the entity exists.
+
+          If not specified, the EntityKey represents a Google-managed entity
+          such as a Google user or a Google Group.
+
+          If specified, the EntityKey represents an external-identity-mapped group.
+          The namespace must correspond to an identity source created in Admin Console
+          and must be in the form of `identitysources/{identity_source_id}`.
+        immutable: true
+  - name: 'preferredMemberKey'
+    type: NestedObject
+    description: |
+      EntityKey of the member.
+    immutable: true
+    default_from_api: true
+    exactly_one_of:
+      - 'member_key'
+      - 'preferred_member_key'
+    properties:
+      - name: 'id'
+        type: String
+        description: |
+          The ID of the entity.
+
+          For Google-managed entities, the id must be the email address of an existing
+          group or user.
+
+          For external-identity-mapped entities, the id must be a string conforming
+          to the Identity Source's requirements.
+
+          Must be unique within a namespace.
+        required: true
+        immutable: true
+      - name: 'namespace'
+        type: String
+        description: |
+          The namespace in which the entity exists.
+
+          If not specified, the EntityKey represents a Google-managed entity
+          such as a Google user or a Google Group.
+
+          If specified, the EntityKey represents an external-identity-mapped group.
+          The namespace must correspond to an identity source created in Admin Console
+          and must be in the form of `identitysources/{identity_source_id}`.
+        immutable: true
+  - name: 'createTime'
+    type: String
     description: |
       The time when the Membership was created.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The time when the Membership was last updated.
-  - !ruby/object:Api::Type::Array
-    name: 'roles'
-    required: true
+    output: true
+  - name: 'roles'
+    type: Array
     description: |
       The MembershipRoles that apply to the Membership.
       Must not contain duplicate MembershipRoles with the same name.
-    update_verb: :POST
-    update_url: '{{name}}:modifyMembershipRoles'
     is_set: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    required: true
+    update_url: '{{name}}:modifyMembershipRoles'
+    update_verb: 'POST'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'name'
-          required: true
+        - name: 'name'
+          type: Enum
           description: |
             The name of the MembershipRole. Must be one of OWNER, MANAGER, MEMBER.
-          values:
-            - :OWNER
-            - :MANAGER
-            - :MEMBER
-        - !ruby/object:Api::Type::NestedObject
-          name: 'expiryDetail'
+          required: true
+          enum_values:
+            - 'OWNER'
+            - 'MANAGER'
+            - 'MEMBER'
+        - name: 'expiryDetail'
+          type: NestedObject
           description: |
             The MembershipRole expiry details, only supported for MEMBER role.
             Other roles cannot be accompanied with MEMBER role having expiry.
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'expireTime'
-              required: true
+            - name: 'expireTime'
+              type: String
               description: |
                 The time at which the MembershipRole will expire.
 
@@ -196,8 +196,9 @@ properties:
                 resolution and up to nine fractional digits.
 
                 Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
-  - !ruby/object:Api::Type::String
-    name: 'type'
-    output: true
+              required: true
+  - name: 'type'
+    type: String
     description: |
       The type of the membership.
+    output: true

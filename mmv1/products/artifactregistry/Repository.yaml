@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,64 +11,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Repository'
-base_url: projects/{{project}}/locations/{{location}}/repositories
-create_url: projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}
-self_link: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
-update_verb: :PATCH
-update_mask: true
 description: A repository for storing artifacts
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/artifact-registry/docs/overview'
   api: 'https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator:
-    ':'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/repositories'
+self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
+  - '{{repository_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  allowed_iam_role: 'roles/artifactregistry.reader'
     # TODO (camthornton): Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
+  base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/repositories/{{repository}}',
-      '{{repository}}',
-    ]
-  base_url: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-  self_link: projects/{{project}}/locations/{{location}}/repositories/{{name}}
-  allowed_iam_role: 'roles/artifactregistry.reader'
-id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
-import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}',
-    '{{repository_id}}',
-  ]
-autogen_async: true
+    - 'projects/{{project}}/locations/{{location}}/repositories/{{repository}}'
+    - '{{repository}}'
+custom_code:
+  constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
+  encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_basic'
+  - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-repository%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_docker'
+  - name: 'artifact_registry_repository_docker'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_cmek'
+  - name: 'artifact_registry_repository_cmek'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       kms_key_name: 'kms-key'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_virtual'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+  - name: 'artifact_registry_repository_virtual'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
@@ -76,37 +88,28 @@ examples:
       upstream_repository_id: 'my-repository-upstream'
       upstream_desc: 'example docker repository (upstream source)'
       upstream_policy_id: 'my-repository-upstream'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote'
+  - name: 'artifact_registry_repository_remote'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example remote docker repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_apt'
+  - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'debian-buster'
       desc: 'example remote apt repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_yum'
+  - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'rocky-9'
       desc: 'example remote yum repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_cleanup'
+  - name: 'artifact_registry_repository_cleanup'
     primary_resource_id: 'my-repo'
     vars:
       repository_id: 'my-repository'
       desc: 'example docker repository with cleanup policies'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_dockerhub_auth'
+  - name: 'artifact_registry_repository_remote_dockerhub_auth'
     primary_resource_id: 'my-repo'
-    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-    # response.
-    ignore_read_extra:
-      - 'remote_repository_config.0.disable_upstream_validation'
     vars:
       repository_id: 'example-dockerhub-remote'
       desc: 'example remote dockerhub repository with credentials'
@@ -114,13 +117,12 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_docker_custom_with_auth'
-    primary_resource_id: 'my-repo'
+    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+    # response.
     ignore_read_extra:
-      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-      # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_docker_custom_with_auth'
+    primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-docker-custom-remote'
       desc: 'example remote custom docker repository with credentials'
@@ -128,13 +130,12 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_maven_custom_with_auth'
-    primary_resource_id: 'my-repo'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_maven_custom_with_auth'
+    primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-maven-custom-remote'
       desc: 'example remote custom maven repository with credentials'
@@ -142,13 +143,12 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_npm_custom_with_auth'
-    primary_resource_id: 'my-repo'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_npm_custom_with_auth'
+    primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-npm-custom-remote'
       desc: 'example remote custom npm repository with credentials'
@@ -156,13 +156,12 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'artifact_registry_repository_remote_python_custom_with_auth'
-    primary_resource_id: 'my-repo'
     ignore_read_extra:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_python_custom_with_auth'
+    primary_resource_id: 'my-repo'
     vars:
       repository_id: 'example-python-custom-remote'
       desc: 'example remote custom python repository with credentials'
@@ -170,38 +169,39 @@ examples:
       secret_resource_id: 'example-remote-secret'
       username: 'remote-username'
       secret_data: 'remote-password'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/artifact_registry_repository.go.erb
-  encoder: templates/terraform/encoders/location_from_region.go.erb
-  pre_create: templates/terraform/pre_create/artifact_registry_remote_repository.go.erb
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |-
       The name of the repository, for example:
       "repo1"
     output: true
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: repository_id
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+  - name: 'repository_id'
+    type: String
     description: |-
       The last part of the repository name, for example:
       "repo1"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'location'
+    type: String
     description: |
       The name of the location this repository is located in.
+    url_param_only: true
     required: false
     immutable: true
-    url_param_only: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: format
+  - name: 'format'
+    type: String
     description: |-
       The format of packages that are stored in the repository. Supported formats
       can be found [here](https://cloud.google.com/artifact-registry/docs/supported-formats).
@@ -210,46 +210,46 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: |-
       The user-provided description of the repository.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels with user-defined metadata.
       This field may contain up to 64 entries. Label keys and values may be no
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
       and dashes.
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
+  - name: 'kmsKeyName'
+    type: String
     description: |-
       The Cloud KMS resource name of the customer managed encryption key that’s
       used to encrypt the contents of the Repository. Has the form:
       `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
       This value may not be changed after the Repository has been created.
     immutable: true
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: The time when the repository was created.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: updateTime
+  - name: 'updateTime'
+    type: Time
     description: The time when the repository was last updated.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'dockerConfig'
+  - name: 'dockerConfig'
+    type: NestedObject
     description: |-
       Docker repository config contains repository level configuration for the repositories of docker type.
     allow_empty_object: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'immutableTags'
+      - name: 'immutableTags'
+        type: Boolean
         description: |-
           The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'mavenConfig'
+  - name: 'mavenConfig'
+    type: NestedObject
     description: |-
       MavenRepositoryConfig is maven related repository details.
       Provides additional configuration details for repositories of the maven
@@ -257,407 +257,414 @@ properties:
     allow_empty_object: true
     properties:
       # Maven properties.
-      - !ruby/object:Api::Type::Boolean
-        name: 'allowSnapshotOverwrites'
+      - name: 'allowSnapshotOverwrites'
+        type: Boolean
         description: |-
           The repository with this flag will allow publishing the same
           snapshot versions.
         immutable: true
-      - !ruby/object:Api::Type::Enum
-        name: 'versionPolicy'
+      - name: 'versionPolicy'
+        type: Enum
         description: |-
           Version policy defines the versions that the registry will accept.
         immutable: true
-        values:
-          - :VERSION_POLICY_UNSPECIFIED
-          - :RELEASE
-          - :SNAPSHOT
-        default_value: :VERSION_POLICY_UNSPECIFIED
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-  - !ruby/object:Api::Type::Enum
-    name: 'mode'
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+        default_value: "VERSION_POLICY_UNSPECIFIED"
+        enum_values:
+          - 'VERSION_POLICY_UNSPECIFIED'
+          - 'RELEASE'
+          - 'SNAPSHOT'
+  - name: 'mode'
+    type: Enum
     description: |-
       The mode configures the repository to serve artifacts from different sources.
     immutable: true
-    values:
-      - :STANDARD_REPOSITORY
-      - :VIRTUAL_REPOSITORY
-      - :REMOTE_REPOSITORY
-    default_value: :STANDARD_REPOSITORY
-  - !ruby/object:Api::Type::NestedObject
-    name: 'virtualRepositoryConfig'
-    conflicts:
-      - remote_repository_config
+    default_value: "STANDARD_REPOSITORY"
+    enum_values:
+      - 'STANDARD_REPOSITORY'
+      - 'VIRTUAL_REPOSITORY'
+      - 'REMOTE_REPOSITORY'
+  - name: 'virtualRepositoryConfig'
+    type: NestedObject
     description: |-
       Configuration specific for a Virtual Repository.
+    conflicts:
+      - remote_repository_config
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'upstreamPolicies'
-        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
+      - name: 'upstreamPolicies'
+        type: Array
         description: |-
           Policies that configure the upstream artifacts distributed by the Virtual
           Repository. Upstream policies cannot be set on a standard repository.
-        item_type: !ruby/object:Api::Type::NestedObject
+        diff_suppress_func: 'upstreamPoliciesDiffSuppress'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'id'
+            - name: 'id'
+              type: String
               description: |-
                 The user-provided ID of the upstream policy.
-            - !ruby/object:Api::Type::String
-              name: 'repository'
+            - name: 'repository'
+              type: String
               description: |
                 A reference to the repository resource, for example:
                 "projects/p1/locations/us-central1/repository/repo1".
-            - !ruby/object:Api::Type::Integer
-              name: 'priority'
+            - name: 'priority'
+              type: Integer
               description: |-
                 Entries with a greater priority value take precedence in the pull order.
-  - !ruby/object:Api::Type::Map
-    name: 'cleanupPolicies'
+  - name: 'cleanupPolicies'
+    type: Map
     description: |-
       Cleanup policies for this repository. Cleanup policies indicate when
       certain package versions can be automatically deleted.
       Map keys are policy IDs supplied by users during policy creation. They must
       unique within a repository and be under 128 characters in length.
-    key_name: id
+    key_name: 'id'
     key_description: |-
       The policy ID. Must be unique within a repository.
-    value_type: !ruby/object:Api::Type::NestedObject
+    value_type:
+      name: cleanupPolicies
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
-          name: action
+        - name: 'action'
+          type: Enum
           description: |-
             Policy action.
-          values:
-            - :DELETE
-            - :KEEP
-        - !ruby/object:Api::Type::NestedObject
-          name: condition
+          enum_values:
+            - 'DELETE'
+            - 'KEEP'
+        - name: 'condition'
+          type: NestedObject
           description: |-
             Policy condition for matching versions.
           # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: tagState
+            - name: 'tagState'
+              type: Enum
               description: |-
                 Match versions by tag status.
-              values:
-                - :TAGGED
-                - :UNTAGGED
-                - :ANY
-              default_value: :ANY
-            - !ruby/object:Api::Type::Array
-              name: tagPrefixes
+              default_value: "ANY"
+              enum_values:
+                - 'TAGGED'
+                - 'UNTAGGED'
+                - 'ANY'
+            - name: 'tagPrefixes'
+              type: Array
               description: |-
                 Match versions by tag prefix. Applied on any prefix match.
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::Array
-              name: versionNamePrefixes
+              item_type:
+                type: String
+            - name: 'versionNamePrefixes'
+              type: Array
               description: |-
                 Match versions by version name prefix. Applied on any prefix match.
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::Array
-              name: packageNamePrefixes
+              item_type:
+                type: String
+            - name: 'packageNamePrefixes'
+              type: Array
               description: |-
                 Match versions by package prefix. Applied on any prefix match.
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::String
-              name: olderThan
+              item_type:
+                type: String
+            - name: 'olderThan'
+              type: String
               description: |-
                 Match versions older than a duration.
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
-            - !ruby/object:Api::Type::String
-              name: newerThan
+            - name: 'newerThan'
+              type: String
               description: |-
                 Match versions newer than a duration.
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
-        - !ruby/object:Api::Type::NestedObject
-          name: mostRecentVersions
+        - name: 'mostRecentVersions'
+          type: NestedObject
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
           # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
           properties:
-            - !ruby/object:Api::Type::Array
-              name: packageNamePrefixes
+            - name: 'packageNamePrefixes'
+              type: Array
               description: |-
                 Match versions by package prefix. Applied on any prefix match.
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::Integer
-              name: keepCount
+              item_type:
+                type: String
+            - name: 'keepCount'
+              type: Integer
               description: |-
                 Minimum number of versions to keep.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'remoteRepositoryConfig'
-    conflicts:
-      - virtual_repository_config
+  - name: 'remoteRepositoryConfig'
+    type: NestedObject
     description: |-
       Configuration specific for a Remote Repository.
     immutable: true
+    conflicts:
+      - virtual_repository_config
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'description'
+      - name: 'description'
+        type: String
         description: |-
           The description of the remote source.
         immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'aptRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'aptRepository'
+        type: NestedObject
         description: |-
           Specific settings for an Apt remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: NestedObject
             description: |-
               One of the publicly available Apt repositories supported by Artifact Registry.
             immutable: true
             properties:
-              - !ruby/object:Api::Type::Enum
-                name: 'repositoryBase'
-                required: true
+              - name: 'repositoryBase'
+                type: Enum
                 description: |-
                   A common public repository base for Apt, e.g. `"debian/dists/buster"`
-                immutable: true
-                values:
-                  - :DEBIAN
-                  - :UBUNTU
-              - !ruby/object:Api::Type::String
-                name: 'repositoryPath'
                 required: true
+                immutable: true
+                enum_values:
+                  - 'DEBIAN'
+                  - 'UBUNTU'
+              - name: 'repositoryPath'
+                type: String
                 description: |-
                   Specific repository from the base.
+                required: true
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'dockerRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'dockerRepository'
+        type: NestedObject
         description: |-
           Specific settings for a Docker remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: Enum
             description: |-
               Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
-            values:
-              - :DOCKER_HUB
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: :DOCKER_HUB
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-          - !ruby/object:Api::Type::NestedObject
-            name: 'customRepository'
+            default_value: "DOCKER_HUB"
+            enum_values:
+              - 'DOCKER_HUB'
+          - name: 'customRepository'
+            type: NestedObject
             description: |-
               Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.public_repository
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'uri'
+              - name: 'uri'
+                type: String
                 description: |-
                   Specific uri to the registry, e.g. `"https://registry-1.docker.io"`
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'mavenRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'mavenRepository'
+        type: NestedObject
         description: |-
           Specific settings for a Maven remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: Enum
             description: |-
               Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
-            values:
-              - :MAVEN_CENTRAL
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: :MAVEN_CENTRAL
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-          - !ruby/object:Api::Type::NestedObject
-            name: 'customRepository'
+            default_value: "MAVEN_CENTRAL"
+            enum_values:
+              - 'MAVEN_CENTRAL'
+          - name: 'customRepository'
+            type: NestedObject
             description: |-
               Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.public_repository
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'uri'
+              - name: 'uri'
+                type: String
                 description: |-
                   Specific uri to the registry, e.g. `"https://repo.maven.apache.org/maven2"`
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'npmRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'npmRepository'
+        type: NestedObject
         description: |-
           Specific settings for an Npm remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: Enum
             description: |-
               Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
-            values:
-              - :NPMJS
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: :NPMJS
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-          - !ruby/object:Api::Type::NestedObject
-            name: 'customRepository'
+            default_value: "NPMJS"
+            enum_values:
+              - 'NPMJS'
+          - name: 'customRepository'
+            type: NestedObject
             description: |-
               Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.public_repository
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'uri'
+              - name: 'uri'
+                type: String
                 description: |-
                   Specific uri to the registry, e.g. `"https://registry.npmjs.org"`
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'pythonRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'pythonRepository'
+        type: NestedObject
         description: |-
           Specific settings for a Python remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: Enum
             description: |-
               Address of the remote repository.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
-            values:
-              - :PYPI
+            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
             # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: :PYPI
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-          - !ruby/object:Api::Type::NestedObject
-            name: 'customRepository'
+            default_value: "PYPI"
+            enum_values:
+              - 'PYPI'
+          - name: 'customRepository'
+            type: NestedObject
             description: |-
               Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.public_repository
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'uri'
+              - name: 'uri'
+                type: String
                 description: |-
                   Specific uri to the registry, e.g. `"https://pypi.io"`
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'yumRepository'
-        exactly_one_of:
-          - remoteRepositoryConfig.0.apt_repository
-          - remoteRepositoryConfig.0.docker_repository
-          - remoteRepositoryConfig.0.maven_repository
-          - remoteRepositoryConfig.0.npm_repository
-          - remoteRepositoryConfig.0.python_repository
-          - remoteRepositoryConfig.0.yum_repository
+      - name: 'yumRepository'
+        type: NestedObject
         description: |-
           Specific settings for an Yum remote repository.
         immutable: true
+        exactly_one_of:
+          - 'remoteRepositoryConfig.0.apt_repository'
+          - 'remoteRepositoryConfig.0.docker_repository'
+          - 'remoteRepositoryConfig.0.maven_repository'
+          - 'remoteRepositoryConfig.0.npm_repository'
+          - 'remoteRepositoryConfig.0.python_repository'
+          - 'remoteRepositoryConfig.0.yum_repository'
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'publicRepository'
+          - name: 'publicRepository'
+            type: NestedObject
             description: |-
               One of the publicly available Yum repositories supported by Artifact Registry.
             immutable: true
             properties:
-              - !ruby/object:Api::Type::Enum
-                name: 'repositoryBase'
-                required: true
+              - name: 'repositoryBase'
+                type: Enum
                 description: |-
                   A common public repository base for Yum.
-                immutable: true
-                values:
-                  - :CENTOS
-                  - :CENTOS_DEBUG
-                  - :CENTOS_VAULT
-                  - :CENTOS_STREAM
-                  - :ROCKY
-                  - :EPEL
-              - !ruby/object:Api::Type::String
-                name: 'repositoryPath'
                 required: true
+                immutable: true
+                enum_values:
+                  - 'CENTOS'
+                  - 'CENTOS_DEBUG'
+                  - 'CENTOS_VAULT'
+                  - 'CENTOS_STREAM'
+                  - 'ROCKY'
+                  - 'EPEL'
+              - name: 'repositoryPath'
+                type: String
                 description: |-
                   Specific repository from the base, e.g. `"pub/rocky/9/BaseOS/x86_64/os"`
+                required: true
                 immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'upstreamCredentials'
+      - name: 'upstreamCredentials'
+        type: NestedObject
         description: |-
           The credentials used to access the remote repository.
         immutable: true
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'usernamePasswordCredentials'
+          - name: 'usernamePasswordCredentials'
+            type: NestedObject
             description: |-
               Use username and password to access the remote repository.
             immutable: true
             properties:
-              - !ruby/object:Api::Type::String
-                name: 'username'
+              - name: 'username'
+                type: String
                 description: |-
                   The username to access the remote repository.
                 immutable: true
-              - !ruby/object:Api::Type::String
-                name: 'passwordSecretVersion'
+              - name: 'passwordSecretVersion'
+                type: String
                 description: |-
                   The Secret Manager key version that holds the password to access the
                   remote repository. Must be in the format of
                   `projects/{project}/secrets/{secret}/versions/{version}`.
                 immutable: true
-      - !ruby/object:Api::Type::Boolean
-        name: 'disableUpstreamValidation'
-        # Ignore read on this field because it is INPUT_ONLY.
-        # Need to use custom flatten because ignore_read doesn't work with nested fields.
-        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.erb'
+      - name: 'disableUpstreamValidation'
+        type: Boolean
         description: |-
           If true, the remote repository upstream and upstream credentials will
           not be validated.
-  - !ruby/object:Api::Type::Boolean
-    name: 'cleanupPolicyDryRun'
+        # Ignore read on this field because it is INPUT_ONLY.
+        # Need to use custom flatten because ignore_read doesn't work with nested fields.
+        custom_flatten: 'templates/terraform/custom_flatten/artifactregistry_rr_disable_upstream_validation.go.tmpl'
+  - name: 'cleanupPolicyDryRun'
+    type: Boolean
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.

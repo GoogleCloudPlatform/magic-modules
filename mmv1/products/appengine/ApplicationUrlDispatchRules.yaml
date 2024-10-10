@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,71 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ApplicationUrlDispatchRules'
 description: |
   Rules to match an HTTP request and dispatch that request to a service.
+references:
+  guides:
+  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
+docs:
+id_format: '{{project}}'
 base_url: 'apps/{{project}}'
 create_url: 'apps/{{project}}?updateMask=dispatch_rules'
-create_verb: :PATCH
-delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
-delete_verb: :PATCH
+create_verb: 'PATCH'
 update_url: 'apps/{{project}}?updateMask=dispatch_rules'
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps#UrlDispatchRule'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+update_verb: 'PATCH'
+delete_url: 'apps/{{project}}?updateMask=dispatch_rules'
+delete_verb: 'PATCH'
+mutex: 'apps/{{project}}'
+import_format:
+  - '{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
-id_format: '{{project}}'
-import_format: ['{{project}}']
-mutex: 'apps/{{project}}'
-error_retry_predicates: ['transport_tpg.IsAppEngineRetryableError']
-skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  test_check_destroy: templates/terraform/custom_check_destroy/appengine.go.erb
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/appengine.go.tmpl'
+exclude_sweeper: true
+error_retry_predicates:
+
+  - 'transport_tpg.IsAppEngineRetryableError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'app_engine_application_url_dispatch_rules_basic'
+  - name: 'app_engine_application_url_dispatch_rules_basic'
     primary_resource_id: 'web_service'
     vars:
       bucket_name: 'appengine-test-bucket'
+parameters:
 properties:
-  - !ruby/object:Api::Type::Array
-    name: 'dispatchRules'
-    required: true
+  - name: 'dispatchRules'
+    type: Array
     description: |
       Rules to match an HTTP request and dispatch that request to a service.
-    item_type: !ruby/object:Api::Type::NestedObject
+    required: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'domain'
-          default_value: '*'
+        - name: 'domain'
+          type: String
           description: |
             Domain name to match against. The wildcard "*" is supported if specified before a period: "*.".
             Defaults to matching all domains: "*".
-        - !ruby/object:Api::Type::String
-          name: 'path'
+          default_value: "*"
+        - name: 'path'
+          type: String
           description: |
             Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
             The sum of the lengths of the domain and path may not exceed 100 characters.
           required: true
-        - !ruby/object:Api::Type::String
-          name: 'service'
+        - name: 'service'
+          type: String
           description: |
             Pathname within the host. Must start with a "/". A single "*" can be included at the end of the path.
             The sum of the lengths of the domain and path may not exceed 100 characters.

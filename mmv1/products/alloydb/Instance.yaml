@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,54 +11,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-docs: !ruby/object:Provider::Terraform::Docs
+description: 'A managed alloydb cluster instance.'
+references:
+  guides:
+    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create'
+docs:
   warning: |
     Deleting an instance with instanceType = SECONDARY does not delete the secondary instance, and abandons it instead.
     Use deletion_policy = "FORCE" in the associated secondary cluster and delete the cluster forcefully to delete the secondary cluster as well its associated secondary instance.
     Users can undo the delete secondary instance action by importing the deleted secondary instance by calling terraform import.
-self_link: '{{cluster}}/instances/{{instance_id}}'
 base_url: '{{cluster}}/instances?instanceId={{instance_id}}'
-update_verb: :PATCH
+self_link: '{{cluster}}/instances/{{instance_id}}'
+update_verb: 'PATCH'
 update_mask: true
-description: 'A managed alloydb cluster instance.'
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'AlloyDB': 'https://cloud.google.com/alloydb/docs/'
-  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.clusters.instances/create'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}'
+timeouts:
+  insert_minutes: 120
+  update_minutes: 120
+  delete_minutes: 120
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
   include_project: true
-import_format: ['projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/instances/{{instance_id}}']
+custom_code:
+  pre_create: 'templates/terraform/pre_create/alloydb_instance.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/alloydb_instance.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/alloydb_instance.go.tmpl'
 # Skipping the sweeper because instances will be deleted during cluster sweeps
-skip_sweeper: true
-autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/alloydb_instance.go.erb
-  pre_create: templates/terraform/pre_create/alloydb_instance.go.erb
-  pre_delete: templates/terraform/pre_delete/alloydb_instance.go.erb
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_instance_basic'
+  - name: 'alloydb_instance_basic'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
@@ -67,9 +68,8 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_secondary_instance_basic'
+    exclude_test: true
+  - name: 'alloydb_secondary_instance_basic'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
@@ -80,22 +80,20 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_instance_basic_test'
+    exclude_test: true
+  - name: 'alloydb_instance_basic_test'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_secondary_instance_basic_test'
+    exclude_docs: true
+  - name: 'alloydb_secondary_instance_basic_test'
     primary_resource_id: 'secondary'
     vars:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
@@ -104,13 +102,12 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'alloydb_instance_psc_test'
+    exclude_docs: true
+  - name: 'alloydb_instance_psc_test'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
@@ -119,84 +116,84 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    skip_docs: true
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'cluster'
+  - name: 'cluster'
+    type: ResourceRef
     description: |
       Identifies the alloydb cluster. Must be in the format
       'projects/{project}/locations/{location}/clusters/{cluster_id}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Cluster'
     imports: 'name'
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'instanceId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'instanceId'
+    type: String
     description: |
       The ID of the alloydb instance.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of the instance resource.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Instance was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Instance was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+  - name: 'uid'
+    type: String
     description: |
       The system-generated UID of the resource.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'User-defined labels for the alloydb instance.'
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: 'annotations'
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description:
       'Annotations to allow client tools to store small amount of arbitrary
       data. This is distinct from labels.'
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    output: true
+  - name: 'state'
+    type: String
     description: |
       The current state of the alloydb instance.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       User-settable and human-readable display name for the Instance.
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'gceZone'
+  - name: 'gceZone'
+    type: String
     description: |
       The Compute Engine zone that the instance should serve from, per https://cloud.google.com/compute/docs/regions-zones This can ONLY be specified for ZONAL instances. If present for a REGIONAL instance, an error will be thrown. If this is absent for a ZONAL instance, instance is created in a random zone with available capacity.
-  - !ruby/object:Api::Type::Boolean
-    name: 'reconciling'
-    output: true
+  - name: 'reconciling'
+    type: Boolean
     description: |
       Set to true if the current state of Instance does not match the user's intended state, and the service is actively updating the resource to reconcile them. This can happen due to user-triggered updates or system actions like failover or maintenance.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'databaseFlags'
-    default_from_api: true
+    output: true
+  - name: 'databaseFlags'
+    type: KeyValuePairs
     description:
       'Database flags. Set at instance level. * They are copied from primary
       instance on read instance creation. * Read instances can set new or
       override existing flags that are relevant for reads, e.g. for enabling
       columnar cache on a read instance. Flags set on read instance may or may
       not be present on primary.'
-  - !ruby/object:Api::Type::Enum
-    name: 'availabilityType'
+    default_from_api: true
+  - name: 'availabilityType'
+    type: Enum
     description: |
       'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
       Note that primary and read instances can have different availability types.
@@ -204,15 +201,13 @@ properties:
       Zone is automatically chosen from the list of zones in the region specified.
       Read pool of size 1 can only have zonal availability. Read pools with node count of 2 or more
       can have regional availability (nodes are present in 2 or more zones in a region).'
-    values:
-      - :AVAILABILITY_TYPE_UNSPECIFIED
-      - :ZONAL
-      - :REGIONAL
     default_from_api: true
-  - !ruby/object:Api::Type::Enum
-    name: 'instanceType'
-    required: true
-    immutable: true
+    enum_values:
+      - 'AVAILABILITY_TYPE_UNSPECIFIED'
+      - 'ZONAL'
+      - 'REGIONAL'
+  - name: 'instanceType'
+    type: Enum
     description: |
       The type of the instance.
       If the instance type is READ_POOL, provide the associated PRIMARY/SECONDARY instance in the `depends_on` meta-data attribute.
@@ -221,171 +216,176 @@ properties:
       If the instance type is SECONDARY, the terraform delete instance operation does not delete the secondary instance but abandons it instead.
       Use deletion_policy = "FORCE" in the associated secondary cluster and delete the cluster forcefully to delete the secondary cluster as well its associated secondary instance.
       Users can undo the delete secondary instance action by importing the deleted secondary instance by calling terraform import.
-    values:
-      - :PRIMARY
-      - :READ_POOL
-      - :SECONDARY
-  - !ruby/object:Api::Type::String
-    name: 'ipAddress'
-    output: true
+    required: true
+    immutable: true
+    enum_values:
+      - 'PRIMARY'
+      - 'READ_POOL'
+      - 'SECONDARY'
+  - name: 'ipAddress'
+    type: String
     description: |
       The IP address for the Instance. This is the connection endpoint for an end-user application.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'queryInsightsConfig'
-    default_from_api: true
+    output: true
+  - name: 'queryInsightsConfig'
+    type: NestedObject
     description: 'Configuration for query insights.'
-    properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'queryStringLength'
-        description: 'Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'recordApplicationTags'
-        description: 'Record application tags for an instance. This flag is turned "on" by default.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'recordClientAddress'
-        description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
-      - !ruby/object:Api::Type::Integer
-        name: 'queryPlansPerMinute'
-        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'observabilityConfig'
-    description: 'Configuration for enhanced query insights.'
     default_from_api: true
-    min_version: beta
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
-        description: 'Observability feature status for an instance.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'preserveComments'
-        description: 'Preserve comments in the query string.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'trackWaitEvents'
-        description: 'Record wait events during query execution for an instance.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'trackWaitEventTypes'
-        description: 'Record wait event types during query execution for an instance.'
-      - !ruby/object:Api::Type::Integer
-        name: 'maxQueryStringLength'
-        description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'recordApplicationTags'
+      - name: 'queryStringLength'
+        type: Integer
+        description: 'Query string length. The default value is 1024. Any integer between 256 and 4500 is considered valid.'
+      - name: 'recordApplicationTags'
+        type: Boolean
         description: 'Record application tags for an instance. This flag is turned "on" by default.'
-      - !ruby/object:Api::Type::Integer
-        name: 'queryPlansPerMinute'
+      - name: 'recordClientAddress'
+        type: Boolean
+        description: 'Record client address for an instance. Client address is PII information. This flag is turned "on" by default.'
+      - name: 'queryPlansPerMinute'
+        type: Integer
+        description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 20 is considered valid.'
+  - name: 'observabilityConfig'
+    type: NestedObject
+    description: 'Configuration for enhanced query insights.'
+    min_version: 'beta'
+    default_from_api: true
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: 'Observability feature status for an instance.'
+      - name: 'preserveComments'
+        type: Boolean
+        description: 'Preserve comments in the query string.'
+      - name: 'trackWaitEvents'
+        type: Boolean
+        description: 'Record wait events during query execution for an instance.'
+      - name: 'trackWaitEventTypes'
+        type: Boolean
+        description: 'Record wait event types during query execution for an instance.'
+      - name: 'maxQueryStringLength'
+        type: Integer
+        description: 'Query string length. The default value is 10240. Any integer between 1024 and 100000 is considered valid.'
+      - name: 'recordApplicationTags'
+        type: Boolean
+        description: 'Record application tags for an instance. This flag is turned "on" by default.'
+      - name: 'queryPlansPerMinute'
+        type: Integer
         description: 'Number of query execution plans captured by Insights per minute for all queries combined. The default value is 5. Any integer between 0 and 200 is considered valid.'
-      - !ruby/object:Api::Type::Boolean
-        name: 'trackActiveQueries'
+      - name: 'trackActiveQueries'
+        type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'readPoolConfig'
+  - name: 'readPoolConfig'
+    type: NestedObject
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'nodeCount'
+      - name: 'nodeCount'
+        type: Integer
         description:
           'Read capacity, i.e. number of nodes in a read pool instance.'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'machineConfig'
+  - name: 'machineConfig'
+    type: NestedObject
     description:
       'Configurations for the machines that host the underlying database engine.'
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'cpuCount'
+      - name: 'cpuCount'
+        type: Integer
         description: "The number of CPU's in the VM instance."
 
         default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'clientConnectionConfig'
-    default_from_api: true
+  - name: 'clientConnectionConfig'
+    type: NestedObject
     description: |
       Client connection specific configurations.
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: requireConnectors
+      - name: 'requireConnectors'
+        type: Boolean
         description: |
           Configuration to enforce connectors only (ex: AuthProxy) connections to the database.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'sslConfig'
-        default_from_api: true
+      - name: 'sslConfig'
+        type: NestedObject
         description: |
           SSL config option for this instance.
+        default_from_api: true
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: 'sslMode'
-            default_from_api: true
+          - name: 'sslMode'
+            type: Enum
             description: 'SSL mode. Specifies client-server SSL/TLS connection behavior.'
-            values:
-              - :ENCRYPTED_ONLY
-              - :ALLOW_UNENCRYPTED_AND_ENCRYPTED
-  - !ruby/object:Api::Type::NestedObject
-    name: 'pscInstanceConfig'
-    default_from_api: true
+            default_from_api: true
+            enum_values:
+              - 'ENCRYPTED_ONLY'
+              - 'ALLOW_UNENCRYPTED_AND_ENCRYPTED'
+  - name: 'pscInstanceConfig'
+    type: NestedObject
     description: |
       Configuration for Private Service Connect (PSC) for the instance.
+    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'serviceAttachmentLink'
-        output: true
+      - name: 'serviceAttachmentLink'
+        type: String
         description: |
           The service attachment created when Private Service Connect (PSC) is enabled for the instance.
           The name of the resource will be in the format of
           `projects/<alloydb-tenant-project-number>/regions/<region-name>/serviceAttachments/<service-attachment-name>`
-      - !ruby/object:Api::Type::Array
-        name: allowedConsumerProjects
-        item_type: Api::Type::String
+        output: true
+      - name: 'allowedConsumerProjects'
+        type: Array
         description: |
           List of consumer projects that are allowed to create PSC endpoints to service-attachments to this instance.
           These should be specified as project numbers only.
-        item_validation: !ruby/object:Provider::Terraform::Validation
+        item_type:
+          type: String
+        item_validation:
           regex: '^\d+$'
-      - !ruby/object:Api::Type::String
-        name: 'pscDnsName'
-        output: true
+      - name: 'pscDnsName'
+        type: String
         description: |
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
-  - !ruby/object:Api::Type::NestedObject
-    name: 'networkConfig'
+        output: true
+  - name: 'networkConfig'
+    type: NestedObject
     description: |
       Instance level network configuration.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'authorizedExternalNetworks'
+      - name: 'authorizedExternalNetworks'
+        type: Array
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
           true.
         required_with:
-          - networkConfig.0.enablePublicIp
-        item_type: !ruby/object:Api::Type::NestedObject
+          - 'networkConfig.0.enablePublicIp'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'cidrRange'
+            - name: 'cidrRange'
+              type: String
               description: 'CIDR range for one authorized network of the instance.'
-      - !ruby/object:Api::Type::Boolean
-        name: enablePublicIp
+      - name: 'enablePublicIp'
+        type: Boolean
         description: |
           Enabling public ip for the instance. If a user wishes to disable this,
           please also clear the list of the authorized external networks set on
           the same instance.
-      - !ruby/object:Api::Type::Boolean
-        name: enableOutboundPublicIp
+      - name: 'enableOutboundPublicIp'
+        type: Boolean
         description: |
           Enabling outbound public ip for the instance.
-  - !ruby/object:Api::Type::String
-    name: 'publicIpAddress'
-    output: true
+  - name: 'publicIpAddress'
+    type: String
     description: |
       The public IP addresses for the Instance. This is available ONLY when
       networkConfig.enablePublicIp is set to true. This is the connection
       endpoint for an end-user application.
-  - !ruby/object:Api::Type::Array
-    item_type: Api::Type::String
-    name: 'outboundPublicIpAddresses'
     output: true
+  - name: 'outboundPublicIpAddresses'
+    type: Array
     description: |
       The outbound public IP addresses for the instance. This is available ONLY when
       networkConfig.enableOutboundPublicIp is set to true. These IP addresses are used
       for outbound connections.
+    output: true
+    item_type:
+      type: String

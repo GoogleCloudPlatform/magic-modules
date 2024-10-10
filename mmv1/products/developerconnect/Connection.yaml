@@ -1,3 +1,4 @@
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,170 +11,212 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/connections
-create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}
-self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
-id_format: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: "developer_connect_connection_basic"
-    primary_resource_id: "my-connection"
-    primary_resource_name: "fmt.Sprintf(\"tf-test-connection%s\",
-      context[\"random_suffix\"\
-      ])"
-    vars:
-      connection_name: "tf-test-connection"
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: "developer_connect_connection_github_doc"
-    skip_test: true
-name: Connection
-description: "A connection to a GitHub App installation."
-min_version: "beta"
-update_verb: :PATCH
+---
+name: 'Connection'
+description: |
+  A connection to a GitHub App installation.
+min_version: 'beta'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}'
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-parameters:
-  - !ruby/object:Api::Type::String
-    name: location
-    description:
-      "Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122. See documentation
-      for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
-    url_param_only: true
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::String
-    name: connectionId
-    description:
-      "Required. Id of the requesting object\nIf auto-generating Id server-side,
-      remove this field and\nconnection_id from the method_signature of Create RPC "
-    url_param_only: true
-    required: true
-    immutable: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
+  result:
+    path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'developer_connect_connection_basic'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_github_doc'
+    min_version: 'beta'
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `developerconnect.googleapis.com/GitRepositoryLink`.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'connectionId'
+    type: String
+    description: |
+      Required. Id of the requesting object. If auto-generating Id server-side,
+      remove this field and connection_id from the method_signature of Create RPC.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::NestedObject
-    name: githubConfig
-    description: "Configuration for connections to github.com. "
+  - name: 'githubConfig'
+    type: NestedObject
+    description: |
+      Configuration for connections to github.com.
+    min_version: 'beta'
     properties:
-      - !ruby/object:Api::Type::String
-        name: githubApp
-        description:
-          "Required. Immutable. The GitHub Application that was installed to
-          the GitHub user or\norganization. \n Possible values:\n GIT_HUB_APP_UNSPECIFIED\nDEVELOPER_CONNECT\nFIREBASE"
+      - name: 'githubApp'
+        type: String
+        description: |
+          Required. Immutable. The GitHub Application that was installed to
+          the GitHub user or organization.
+          Possible values:
+            GIT_HUB_APP_UNSPECIFIED
+            DEVELOPER_CONNECT
+            FIREBASE"
+        min_version: 'beta'
         required: true
         immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: authorizerCredential
-        description:
-          "Represents an OAuth token of the account that authorized the Connection,\nand
-          associated metadata. "
+      - name: 'authorizerCredential'
+        type: NestedObject
+        description: |
+          Represents an OAuth token of the account that authorized the Connection,and
+          associated metadata.
+        min_version: 'beta'
         properties:
-          - !ruby/object:Api::Type::String
-            name: oauthTokenSecretVersion
-            description:
-              "Required. A SecretManager resource containing the OAuth token
-              that authorizes\nthe connection. Format: `projects/*/secrets/*/versions/*`. "
+          - name: 'oauthTokenSecretVersion'
+            type: String
+            description: |
+              Required. A SecretManager resource containing the OAuth token
+              that authorizes the connection.
+              Format: `projects/*/secrets/*/versions/*`.
+            min_version: 'beta'
             required: true
-          - !ruby/object:Api::Type::String
-            name: username
-            description: "Output only. The username associated with this token. "
+          - name: 'username'
+            type: String
+            description: |
+              Output only. The username associated with this token.
+            min_version: 'beta'
             output: true
-      - !ruby/object:Api::Type::String
-        name: appInstallationId
-        description: "Optional. GitHub App installation id. "
-      - !ruby/object:Api::Type::String
-        name: installationUri
-        description:
-          "Output only. The URI to navigate to in order to manage the installation
-          associated\nwith this GitHubConfig. "
+      - name: 'appInstallationId'
+        type: String
+        description: |
+          Optional. GitHub App installation id.
+        min_version: 'beta'
+      - name: 'installationUri'
+        type: String
+        description: |
+          Output only. The URI to navigate to in order to manage the installation
+          associated with this GitHubConfig.
+        min_version: 'beta'
         output: true
-  - !ruby/object:Api::Type::String
-    name: name
-    description: "Identifier. The resource name of the connection, in the format\n`projects/{project}/locations/{location}/connections/{connection_id}`. "
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the connection, in the format
+      `projects/{project}/locations/{location}/connections/{connection_id}`.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
-    description: "Output only. [Output only] Create timestamp "
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. [Output only] Create timestamp
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
-    description: "Output only. [Output only] Update timestamp "
+  - name: 'updateTime'
+    type: String
+    description: |
+      Output only. [Output only] Update timestamp
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: deleteTime
-    description: "Output only. [Output only] Delete timestamp "
+  - name: 'deleteTime'
+    type: String
+    description: |
+      Output only. [Output only] Delete timestamp
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    description: "Optional. Labels as key value pairs "
-  - !ruby/object:Api::Type::NestedObject
-    name: installationState
-    description:
-      "Describes stage and necessary actions to be taken by the\nuser to
-      complete the installation. Used for GitHub and GitHub Enterprise\nbased connections. "
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Optional. Labels as key value pairs
+    min_version: 'beta'
+  - name: 'installationState'
+    type: NestedObject
+    description: |
+      Describes stage and necessary actions to be taken by the user to complete the installation.
+      Used for GitHub and GitHub Enterprise based connections.
+    min_version: 'beta'
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: stage
-        description:
-          "Output only. Current step of the installation process. \n Possible
-          values:\n STAGE_UNSPECIFIED\nPENDING_CREATE_APP\nPENDING_USER_OAUTH\nPENDING_INSTALL_APP\nCOMPLETE"
+      - name: 'stage'
+        type: String
+        description: |
+          Output only. Current step of the installation process.
+          Possible values:
+            STAGE_UNSPECIFIED
+            PENDING_CREATE_APP
+            PENDING_USER_OAUTH
+            PENDING_INSTALL_APP
+            COMPLETE
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::String
-        name: message
-        description:
-          "Output only. Message of what the user should do next to continue
-          the installation.\nEmpty string if the installation is already complete. "
-      - !ruby/object:Api::Type::String
-        name: actionUri
-        description:
-          "Output only. Link to follow for next action. Empty string if the
-          installation is already\ncomplete. "
-  - !ruby/object:Api::Type::Boolean
-    name: disabled
+      - name: 'message'
+        type: String
+        description: |
+          Output only. Message of what the user should do next to continue
+          the installation.Empty string if the installation is already complete.
+        min_version: 'beta'
+      - name: 'actionUri'
+        type: String
+        description: |
+          Output only. Link to follow for next action. Empty string if the
+          installation is already complete.
+        min_version: 'beta'
+  - name: 'disabled'
+    type: Boolean
     description:
-      "Optional. If disabled is set to true, functionality is disabled for
-      this connection.\nRepository based API methods and webhooks processing for repositories
-      in\nthis connection will be disabled. "
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
-    description:
-      "Output only. Set to true when the connection is being set up or updated
-      in the\nbackground. "
+      Optional. If disabled is set to true, functionality is disabled for
+      this connection. Repository based API methods and webhooks processing
+      for repositories in this connection will be disabled.
+    min_version: 'beta'
+  - name: 'reconciling'
+    type: Boolean
+    description: |
+      Output only. Set to true when the connection is being set up or updated
+      in the background.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: annotations
-    description: "Optional. Allows clients to store small amounts of arbitrary data. "
-  - !ruby/object:Api::Type::String
-    name: etag
-    description:
-      "Optional. This checksum is computed by the server based on the value
-      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
-      has an up-to-date value before proceeding. "
-  - !ruby/object:Api::Type::String
-    name: uid
-    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Optional. Allows clients to store small amounts of arbitrary data.
+    min_version: 'beta'
+  - name: 'etag'
+    type: String
+    description: |
+      Optional. This checksum is computed by the server based on the value
+      of other fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+    min_version: 'beta'
+  - name: 'uid'
+    type: String
+    description: |
+      Output only. A system-assigned unique identifier for a the GitRepositoryLink.
+    min_version: 'beta'
     output: true

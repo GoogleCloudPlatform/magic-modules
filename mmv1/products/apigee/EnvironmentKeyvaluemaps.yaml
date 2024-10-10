@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,65 +11,65 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EnvironmentKeyvaluemaps'
 description: |
   Collection of key/value string pairs.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using key value maps': 'https://cloud.google.com/apigee/docs/api-platform/cache/key-value-maps'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.keyvaluemaps/create'
-
+docs:
 base_url: '{{env_id}}/keyvaluemaps'
+self_link: '{{env_id}}/keyvaluemaps/{{name}}/entries'
 create_url: '{{env_id}}/keyvaluemaps'
 delete_url: '{{env_id}}/keyvaluemaps/{{name}}'
-self_link: '{{env_id}}/keyvaluemaps/{{name}}/entries'
-import_format: ['{{env_id}}/keyvaluemaps/{{name}}', '{{env_id}}/{{name}}']
-skip_sweeper: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_keyvaluemaps_basic'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_keyvaluemaps_test'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'apigee_environment_keyvaluemaps_beta_test'
-    primary_resource_id: 'apigee_environment_keyvaluemaps'
-    test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
-    skip_docs: true
-    min_version: beta
 immutable: true
-timeouts: !ruby/object:Api::Timeouts
+import_format:
+  - '{{env_id}}/keyvaluemaps/{{name}}'
+  - '{{env_id}}/{{name}}'
+timeouts:
   insert_minutes: 1
+  update_minutes: 20
   delete_minutes: 1
 autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.erb
-  custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go'
-  decoder: templates/terraform/decoders/apigee_environment_keyvaluemaps.go.erb
+custom_code:
+  decoder: 'templates/terraform/decoders/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/apigee_environment_keyvaluemaps.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/apigee_environment_keyvaluemaps.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'apigee_environment_keyvaluemaps_basic'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_test: true
+  - name: 'apigee_environment_keyvaluemaps_test'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+  - name: 'apigee_environment_keyvaluemaps_beta_test'
+    primary_resource_id: 'apigee_environment_keyvaluemaps'
+    min_version: 'beta'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'envId'
+  - name: 'envId'
+    type: String
     description: |
       The Apigee environment group associated with the Apigee environment,
       in the format `organizations/{{org_name}}/environments/{{env_name}}`.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Required. ID of the key value map.
     required: true

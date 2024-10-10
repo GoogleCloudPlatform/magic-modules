@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -34,13 +33,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
-
-const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
-const TERRAFORM_PROVIDER_BETA = "github.com/hashicorp/terraform-provider-google-beta"
-const TERRAFORM_PROVIDER_PRIVATE = "internal/terraform-next"
-const RESOURCE_DIRECTORY_GA = "google"
-const RESOURCE_DIRECTORY_BETA = "google-beta"
-const RESOURCE_DIRECTORY_PRIVATE = "google-private"
 
 type Terraform struct {
 	ResourceCount int
@@ -58,7 +50,7 @@ type Terraform struct {
 	StartTime time.Time
 }
 
-func NewTerraform(product *api.Product, versionName string, startTime time.Time) *Terraform {
+func NewTerraform(product *api.Product, versionName string, startTime time.Time) Terraform {
 	t := Terraform{
 		ResourceCount:     0,
 		IAMResourceCount:  0,
@@ -70,14 +62,14 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
 	for _, r := range t.Product.Objects {
-		r.SetCompiler(t.providerName())
-		r.ImportPath = t.ImportPathFromVersion(versionName)
+		r.SetCompiler(ProviderName(t))
+		r.ImportPath = ImportPathFromVersion(versionName)
 	}
 
-	return &t
+	return t
 }
 
-func (t *Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
@@ -148,7 +140,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
-		if !example.SkipTest {
+		if !example.ExcludeTest {
 			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
@@ -214,7 +206,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 
 		// Only generate test if testable examples exist.
 		examples := google.Reject(object.Examples, func(e resource.Examples) bool {
-			return e.SkipTest
+			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
 			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))
@@ -246,8 +238,10 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
+	} else if t.TargetVersionName == "beta" {
+		return "google-beta"
 	}
-	return "google-beta"
+	return "google-private"
 }
 
 func (t *Terraform) FullResourceName(object api.Resource) string {
@@ -273,10 +267,10 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
-	log.Printf("Copying common files for %s", t.providerName())
+	log.Printf("Copying common files for %s", ProviderName(t))
 
 	files := t.getCommonCopyFiles(t.TargetVersionName, generateCode, generateDocs)
-	t.CopyFileList(outputFolder, files)
+	t.CopyFileList(outputFolder, files, generateCode)
 }
 
 // To copy a new folder, add the folder to foldersCopiedToRootDir or foldersCopiedToGoogleDir.
@@ -322,9 +316,9 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 	// Case 3: When copy a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
 		"go.sum":                           "third_party/terraform/go.sum",
-		"go.mod":                           "third_party/terraform/go/go.mod",
+		"go.mod":                           "third_party/terraform/go.mod",
 		".go-version":                      "third_party/terraform/.go-version",
-		"terraform-registry-manifest.json": "third_party/terraform/go/terraform-registry-manifest.json",
+		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json.tmpl",
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
@@ -334,8 +328,12 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string]string {
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
-		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") {
-			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+		if !di.IsDir() && !strings.HasSuffix(di.Name(), ".tmpl") && !strings.HasSuffix(di.Name(), ".erb") { // Exception files
+			if di.Name() == "gha-branch-renaming.png" || di.Name() == "clock-timings-of-branch-making-and-usage.png" {
+				return nil
+			}
+
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			target := fname
 			if targetDir != "." {
 				target = fmt.Sprintf("%s/%s", targetDir, fname)
@@ -348,7 +346,7 @@ func (t Terraform) getCopyFilesInFolder(folderPath, targetDir string) map[string
 	return m
 }
 
-func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
+func (t Terraform) CopyFileList(outputFolder string, files map[string]string, generateCode bool) {
 	for target, source := range files {
 		targetFile := filepath.Join(outputFolder, target)
 		targetDir := filepath.Dir(targetFile)
@@ -367,13 +365,20 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string) {
 			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
 		}
 
-		err = os.WriteFile(targetFile, sourceByte, 0644)
+		var permission fs.FileMode
+		if strings.HasSuffix(targetDir, "scripts") {
+			permission = 0755
+		} else {
+			permission = 0644
+		}
+
+		err = os.WriteFile(targetFile, sourceByte, permission)
 		if err != nil {
 			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
 		}
 
 		// Replace import path based on version (beta/alpha)
-		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".mod" {
+		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
 
@@ -419,10 +424,10 @@ func (t Terraform) getCommonCompileFiles(versionName string) map[string]string {
 
 	// Case 3: When compile a single file, save the target as key and source as value to the map singleFiles
 	singleFiles := map[string]string{
-		"main.go":                       "third_party/terraform/go/main.go.tmpl",
-		".goreleaser.yml":               "third_party/terraform/go/.goreleaser.yml.tmpl",
-		".release/release-metadata.hcl": "third_party/terraform/go/release-metadata.hcl.tmpl",
-		".copywrite.hcl":                "third_party/terraform/go/.copywrite.hcl.tmpl",
+		"main.go":                       "third_party/terraform/main.go.tmpl",
+		".goreleaser.yml":               "third_party/terraform/.goreleaser.yml.tmpl",
+		".release/release-metadata.hcl": "third_party/terraform/release-metadata.hcl.tmpl",
+		".copywrite.hcl":                "third_party/terraform/.copywrite.hcl.tmpl",
 	}
 	maps.Copy(commonCompileFiles, singleFiles)
 
@@ -433,7 +438,7 @@ func (t Terraform) getCompileFilesInFolder(folderPath, targetDir string) map[str
 	m := make(map[string]string, 0)
 	filepath.WalkDir(folderPath, func(path string, di fs.DirEntry, err error) error {
 		if !di.IsDir() && strings.HasSuffix(di.Name(), ".tmpl") {
-			fname := strings.TrimPrefix(strings.Replace(path, "/go/", "/", 1), "third_party/terraform/")
+			fname := strings.TrimPrefix(path, "third_party/terraform/")
 			fname = strings.TrimSuffix(fname, ".tmpl")
 			target := fname
 			if targetDir != "." {
@@ -565,8 +570,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 
 	data := string(sourceByte)
 
-	gaImportPath := t.ImportPathFromVersion("ga")
-	betaImportPath := t.ImportPathFromVersion("beta")
+	gaImportPath := ImportPathFromVersion("ga")
+	betaImportPath := ImportPathFromVersion("beta")
 
 	if strings.Contains(data, betaImportPath) {
 		log.Fatalf("Importing a package from module %s is not allowed in file %s. Please import a package from module %s.", betaImportPath, filepath.Base(target), gaImportPath)
@@ -605,22 +610,6 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
-}
-
-func (t Terraform) ImportPathFromVersion(v string) string {
-	var tpg, dir string
-	switch v {
-	case "ga":
-		tpg = TERRAFORM_PROVIDER_GA
-		dir = RESOURCE_DIRECTORY_GA
-	case "beta":
-		tpg = TERRAFORM_PROVIDER_BETA
-		dir = RESOURCE_DIRECTORY_BETA
-	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-	}
-	return fmt.Sprintf("%s/%s", tpg, dir)
 }
 
 func (t Terraform) ProviderFromVersion() string {
@@ -694,7 +683,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			if iamPolicy != nil && !iamPolicy.Exclude {
 				t.IAMResourceCount += 3
 
-				if !(iamPolicy.MinVersion != "" && iamPolicy.MinVersion < t.TargetVersionName) {
+				if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
 					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
 				}
 			}
@@ -706,12 +695,6 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 			})
 		}
 	}
-}
-
-// # TODO(nelsonjr): Review all object interfaces and move to private methods
-// # that should not be exposed outside the object hierarchy.
-func (t Terraform) providerName() string {
-	return reflect.TypeOf(t).Name()
 }
 
 // # Adapted from the method used in templating

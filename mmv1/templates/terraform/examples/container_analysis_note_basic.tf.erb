@@ -1,8 +1,0 @@
-resource "google_container_analysis_note" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]["note_name"] %>"
-  attestation_authority {
-    hint {
-      human_readable_name = "Attestor Note"
-    }
-  }
-}

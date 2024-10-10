@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,45 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Database'
-base_url: projects/{{project}}/instances/{{instance}}/databases
-update_verb: :PATCH
-update_mask: true
 description: |
   A Cloud Spanner Database which is hosted on a Spanner instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/spanner/'
   api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
-async: !ruby/object:Api::OpAsync
-  actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
-autogen_async: true
-# Sweeper skipped as this resource has customized deletion.
-skip_sweeper: true
-id_format: '{{instance}}/{{name}}'
-import_format:
-  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
-  - 'instances/{{instance}}/databases/{{name}}'
-  - '{{project}}/{{instance}}/{{name}}'
-  - '{{instance}}/{{name}}'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     On newer versions of the provider, you must explicitly set `deletion_protection=false`
     (and run `terraform apply` to write the field to state) in order to destroy an instance.
@@ -58,21 +28,56 @@ docs: !ruby/object:Provider::Terraform::Docs
     on databases in order to prevent accidental data loss. See
     [Terraform docs](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#prevent_destroy)
     for more information on lifecycle parameters.
+id_format: '{{instance}}/{{name}}'
+base_url: 'projects/{{project}}/instances/{{instance}}/databases'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/instances/{{instance}}/databases/{{name}}'
+  - 'instances/{{instance}}/databases/{{name}}'
+  - '{{project}}/{{instance}}/{{name}}'
+  - '{{instance}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/spanner_database.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_database.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/spanner_database.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_database.go.tmpl'
+  post_create: 'templates/terraform/post_create/spanner_database.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/spanner_database.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/resource_spanner_database.go.tmpl'
+custom_diff:
+  - 'resourceSpannerDBDdlCustomDiff'
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'spanner_database_basic'
-    primary_resource_id:
-      'database'
-      # Randomness due to spanner instance
-    skip_vcr: true
+  - name: 'spanner_database_basic'
+    primary_resource_id: 'database'
     vars:
       database_name: 'my-database'
     ignore_read_extra:
       - 'deletion_protection'
+      # Randomness due to spanner instance
+    skip_vcr: true
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
-    default_value: true
+  - name: 'deletion_protection'
     description: |
       Whether Terraform will be prevented from destroying the database. Defaults to true.
       When a`terraform destroy` or `terraform apply` would delete the database,
@@ -80,44 +85,33 @@ virtual_fields:
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the database will fail.
       When the field is set to false, deleting the database is allowed.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/spanner_database.go.erb'
-  encoder: templates/terraform/encoders/spanner_database.go.erb
-  decoder: templates/terraform/decoders/spanner_database.go.erb
-  update_encoder: templates/terraform/update_encoder/spanner_database.go.erb
-  post_create: templates/terraform/post_create/spanner_database.go.erb
-  pre_delete: templates/terraform/pre_delete/resource_spanner_database.go
-  pre_update: templates/terraform/pre_update/spanner_database.go.erb
-custom_diff: [
-  'resourceSpannerDBDdlCustomDiff',
-]
+    type: Boolean
+    default_value: true
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'instance'
+  - name: 'instance'
+    type: ResourceRef
+    description: 'The instance to create the database on.'
+    required: true
+    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Instance'
     imports: 'name'
-    description: 'The instance to create the database on.'
-    immutable: true
-    required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
 properties:
   # This resource returns only one attribute ("name") from which we parse
   # "instance", "name", and "project".  You will need custom code handling
   # to deal with this resource.
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       A unique identifier for the database, which cannot be changed after
       the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
-    immutable: true
     required: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    validation:
       regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'versionRetentionPeriod'
-    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
-    update_verb: :PATCH
+  - name: 'versionRetentionPeriod'
+    type: String
     description: |
       The retention period for the database. The retention period must be between 1 hour
       and 7 days, and can be specified in days, hours, minutes, or seconds. For example,
@@ -125,51 +119,51 @@ properties:
       If this property is used, you must avoid adding new DDL statements to `ddl` that
       update the database's version_retention_period.
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'ddl'
-    api_name: 'extraStatements'
-    update_url: projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl
-    update_verb: :PATCH
-    ignore_read: true
+    update_url: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl'
+  - name: 'ddl'
+    type: Array
     description: |
       An optional list of DDL statements to run inside the newly created
       database. Statements can create tables, indexes, etc. These statements
       execute atomically with the creation of the database: if there is an
       error in any statement, the database is not created.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+    api_name: extraStatements
+    ignore_read: true
+    update_url: 'projects/{{project}}/instances/{{instance}}/databases/{{name}}/ddl'
+    item_type:
+      type: String
+  - name: 'state'
+    type: Enum
     description: An explanation of the status of the database.
     output: true
-    values:
-      - :READY
-      - :CREATING
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionConfig'
-    immutable: true
+    enum_values:
+      - 'READY'
+      - 'CREATING'
+  - name: 'encryptionConfig'
+    type: NestedObject
     description: |
       Encryption configuration for the database
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        immutable: true
-        required: true
+      - name: 'kmsKeyName'
+        type: String
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
-  - !ruby/object:Api::Type::Enum
-    name: 'databaseDialect'
-    immutable: true
+        required: true
+        immutable: true
+  - name: 'databaseDialect'
+    type: Enum
     description: |
       The dialect of the Cloud Spanner Database.
       If it is not provided, "GOOGLE_STANDARD_SQL" will be used.
-    values:
-      - :GOOGLE_STANDARD_SQL
-      - :POSTGRESQL
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableDropProtection'
-    default_value: false
+    enum_values:
+      - 'GOOGLE_STANDARD_SQL'
+      - 'POSTGRESQL'
+  - name: 'enableDropProtection'
+    type: Boolean
     description: |
       Whether drop protection is enabled for this database. Defaults to false.
       Drop protection is different from
@@ -178,3 +172,4 @@ properties:
       whereas setting “enableDropProtection” to true protects the database from deletions in all interfaces.
       (2) Setting "enableDropProtection" to true also prevents the deletion of the parent instance containing the database.
       "deletion_protection" attribute does not provide protection against the deletion of the parent instance.
+    default_value: false

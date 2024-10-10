@@ -1,0 +1,80 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Workspace'
+description: |
+  A Data Mapper workspace is used to configure Data Mapper access, permissions and data sources for mapping clinical patient data to the FHIR standard.
+references:
+  guides:
+    'Create and manage Data Mapper workspaces ': 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/manage-workspaces'
+  api: 'https://cloud.google.com/healthcare-api/healthcare-data-engine/docs/reference/rest/v1/projects.locations.datasets.dataMapperWorkspaces'
+docs:
+id_format: '{{dataset}}/dataMapperWorkspaces/{{name}}'
+base_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
+self_link: '{{dataset}}/dataMapperWorkspaces/{{name}}'
+create_url: '{{dataset}}/dataMapperWorkspaces?workspaceId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%dataset}}/dataMapperWorkspaces/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+exclude_sweeper: true
+examples:
+  - name: 'healthcare_workspace_basic'
+    primary_resource_id: 'default'
+    vars:
+      dataset_name: 'example-dataset'
+      workspace_name: 'example-dm-workspace'
+      source_project_id: 'example-data-source-project-id'
+parameters:
+  - name: 'dataset'
+    type: ResourceRef
+    description: |
+      Identifies the dataset addressed by this request. Must be in the format
+      'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
+    required: true
+    immutable: true
+    resource: 'Dataset'
+    imports: 'selfLink'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the workspace, in the format 'projects/{projectId}/locations/{location}/datasets/{datasetId}/dataMapperWorkspaces/{workspaceId}'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'settings'
+    type: NestedObject
+    description: |
+      Settings associated with this workspace.
+    required: true
+    properties:
+      - name: 'dataProjectIds'
+        type: Array
+        description: |
+          Project IDs for data projects hosted in a workspace.
+        required: true
+        item_type:
+          type: String
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The user labels. An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }
+    required: false

@@ -11,17 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'FolderNotificationConfig'
-base_url: folders/{{folder}}/notificationConfigs
-self_link: 'folders/{{folder}}/notificationConfigs/{{config_id}}'
-create_url: folders/{{folder}}/notificationConfigs?configId={{config_id}}
-update_verb: :PATCH
-update_mask: true
-import_format:
-  - 'folders/{{folder}}/notificationConfigs/{{config_id}}'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_import: templates/terraform/post_import/scc_v1_folder_notification_config.go.erb
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the
@@ -30,74 +21,85 @@ description: |
   ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
   in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
   Without doing so, you may run into errors during resource creation.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
   api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/folders.notificationConfigs'
+docs:
+base_url: 'folders/{{folder}}/notificationConfigs'
+self_link: 'folders/{{folder}}/notificationConfigs/{{config_id}}'
+create_url: 'folders/{{folder}}/notificationConfigs?configId={{config_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'folders/{{folder}}/notificationConfigs/{{config_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_import: 'templates/terraform/post_import/scc_v1_folder_notification_config.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'scc_folder_notification_config_basic'
+  - name: 'scc_folder_notification_config_basic'
     primary_resource_id: 'custom_notification_config'
-    external_providers: ["random", "time"]
-    skip_test: true
     vars:
-      folder_display_name: "folder-name"
+      folder_display_name: 'folder-name'
       config_id: 'my-config'
       topic_name: 'my-topic'
     test_env_vars:
-      org_id: :ORG_ID
-
+      org_id: 'ORG_ID'
+    external_providers: ["random", "time"]
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: folder
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'folder'
+    type: String
     description: |
       Numerical ID of the parent folder.
-  - !ruby/object:Api::Type::String
-    name: configId
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'configId'
+    type: String
     description: |
       This must be unique within the organization.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The resource name of this notification config, in the format
       `folders/{{folder}}/notificationConfigs/{{config_id}}`.
-  - !ruby/object:Api::Type::String
-    name: description
+    output: true
+  - name: 'description'
+    type: String
     description: |
       The description of the notification config (max of 1024 characters).
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.StringLenBetween(0, 1024)'
-  - !ruby/object:Api::Type::String
-    name: pubsubTopic
-    required: true
+  - name: 'pubsubTopic'
+    type: String
     description: |
       The Pub/Sub topic to send notifications to. Its format is
       "projects/[project_id]/topics/[topic]".
-  - !ruby/object:Api::Type::String
-    name: serviceAccount
-    output: true
+    required: true
+  - name: 'serviceAccount'
+    type: String
     description: |
       The service account that needs "pubsub.topics.publish" permission to
       publish to the Pub/Sub topic.
-  - !ruby/object:Api::Type::NestedObject
-    name: streamingConfig
-    required: true
+    output: true
+  - name: 'streamingConfig'
+    type: NestedObject
     description: |
       The config for triggering streaming-based notifications.
+    required: true
     update_mask_fields:
       - 'streamingConfig.filter'
     properties:
-      - !ruby/object:Api::Type::String
-        name: filter
-        required: true
+      - name: 'filter'
+        type: String
         description: |
           Expression that defines the filter to apply across create/update
           events of assets or findings as specified by the event type. The
@@ -124,3 +126,4 @@ properties:
           See
           [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
           for information on how to write a filter.
+        required: true

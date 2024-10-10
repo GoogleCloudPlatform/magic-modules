@@ -11,99 +11,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Client'
 description: |
   Application Integration Client.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/application-integration/docs/overview'
     'Set up Application Integration': 'https://cloud.google.com/application-integration/docs/setup-application-integration'
   api: 'https://cloud.google.com/application-integration/docs/reference/rest/v1/projects.locations.clients'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/clients'
 self_link: 'projects/{{project}}/locations/{{location}}/clients'
-immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/clients:provision'
 delete_url: 'projects/{{project}}/locations/{{location}}/clients:deprovision'
-delete_verb: :POST
-autogen_async: false
+delete_verb: 'POST'
+immutable: true
+mutex: 'Client/{{location}}'
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/clients',
-  ]
-mutex: Client/{{location}}
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/integrations_client.go.erb
-  pre_create: templates/terraform/pre_create/integrations_client.go.erb
+  - 'projects/{{project}}/locations/{{location}}/clients'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
+examples:
+  - name: 'integrations_client_basic'
+    primary_resource_id: 'example'
+  - name: 'integrations_client_full'
+    primary_resource_id: 'example'
+    vars:
+      key_ring_name: 'my-keyring'
+      service_account_id: 'service-acc'
+    skip_vcr: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Location in which client needs to be provisioned.
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::NestedObject
-    name: 'cloudKmsConfig'
+  - name: 'cloudKmsConfig'
+    type: NestedObject
     description: |
       Cloud KMS config for AuthModule to encrypt/decrypt credentials.
     immutable: true
     ignore_read: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: "kmsLocation"
-        required: true
+      - name: 'kmsLocation'
+        type: String
         description: |
           Location name of the key ring, e.g. "us-west1".
-      - !ruby/object:Api::Type::String
-        name: "kmsRing"
         required: true
+      - name: 'kmsRing'
+        type: String
         description: |
           A key ring organizes keys in a specific Google Cloud location and allows you to
           manage access control on groups of keys. A key ring's name does not need to be
           unique across a Google Cloud project, but must be unique within a given location.
-      - !ruby/object:Api::Type::String
-        name: "key"
         required: true
+      - name: 'key'
+        type: String
         description: |
           A Cloud KMS key is a named object containing one or more key versions, along
           with metadata for the key. A key exists on exactly one key ring tied to a
           specific location.
-      - !ruby/object:Api::Type::String
-        name: "keyVersion"
+        required: true
+      - name: 'keyVersion'
+        type: String
         description: |
           Each version of a key contains key material used for encryption or signing.
           A key's version is represented by an integer, starting at 1. To decrypt data
           or verify a signature, you must use the same key version that was used to
           encrypt or sign the data.
-      - !ruby/object:Api::Type::String
-        name: "kmsProjectId"
+      - name: 'kmsProjectId'
+        type: String
         description: |
           The Google Cloud project id of the project where the kms key stored. If empty,
           the kms key is stored at the same project as customer's project and ecrypted
           with CMEK, otherwise, the kms key is stored in the tenant project and
           encrypted with GMEK.
-  - !ruby/object:Api::Type::Boolean
-    name: 'createSampleIntegrations'
+  - name: 'createSampleIntegrations'
+    type: Boolean
     description: |
       Indicates if sample integrations should be created along with provisioning.
     immutable: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: 'runAsServiceAccount'
+  - name: 'runAsServiceAccount'
+    type: String
     description: |
       User input run-as service account, if empty, will bring up a new default service account.
     immutable: true
     ignore_read: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integrations_client_basic"
-    primary_resource_id: "example"
-  - !ruby/object:Provider::Terraform::Examples
-    name: "integrations_client_full"
-    primary_resource_id: "example"
-    skip_vcr: true
-    vars:
-      key_ring_name: my-keyring
-      service_account_id: service-acc

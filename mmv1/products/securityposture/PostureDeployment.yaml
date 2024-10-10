@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'PostureDeployment'
 description: |
   Represents a deployment of a security posture on a resource. A posture contains user curated policy sets. A posture can
@@ -19,125 +19,135 @@ description: |
   and its revision_id in the posture deployment configuration. Every update to a deployed posture generates a new revision_id.
   Thus, the updated revision_id should be used in the respective posture deployment's configuration to deploy that posture
   on a resource.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Create and deploy a posture': 'https://cloud.google.com/security-command-center/docs/how-to-use-security-posture'
-import_format: ['{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}']
+docs:
 base_url: '{{parent}}/locations/{{location}}/postureDeployments'
 self_link: '{{parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
 create_url: '{{parent}}/locations/{{location}}/postureDeployments?postureDeploymentId={{posture_deployment_id}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/postureDeployments/{{posture_deployment_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-
+  result:
+    resource_inside_response: false
+custom_code:
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
+  - name: 'parent'
+    type: String
     description: |
       The parent of the resource, an organization. Format should be `organizations/{organization_id}`.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: location
+    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location of the resource, eg. global`.
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: postureDeploymentId
+    immutable: true
+  - name: 'postureDeploymentId'
+    type: String
     description: |
       ID of the posture deployment.
-    immutable: true
-    required: true
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the posture deployment instance.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'targetResource'
-    required: true
-    immutable: true
+  - name: 'targetResource'
+    type: String
     description: |
       The resource on which the posture should be deployed. This can be in one of the following formats:
       projects/{project_number},
       folders/{folder_number},
       organizations/{organization_id}
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+    required: true
+    immutable: true
+  - name: 'state'
+    type: Enum
     description: |
       State of the posture deployment. A posture deployment can be in the following terminal states:
       ACTIVE, CREATE_FAILED, UPDATE_FAILED, DELETE_FAILED.
     output: true
-    values:
-      - :STATE_UNSPECIFIED
-      - :CREATING
-      - :DELETING
-      - :UPDATING
-      - :ACTIVE
-      - :CREATE_FAILED
-      - :UPDATE_FAILED
-      - :DELETE_FAILED
-  - !ruby/object:Api::Type::String
-    name: 'postureId'
-    required: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'DELETING'
+      - 'UPDATING'
+      - 'ACTIVE'
+      - 'CREATE_FAILED'
+      - 'UPDATE_FAILED'
+      - 'DELETE_FAILED'
+  - name: 'postureId'
+    type: String
     description: |
       Relative name of the posture which needs to be deployed. It should be in the format:
         organizations/{organization_id}/locations/{location}/postures/{posture_id}
-  - !ruby/object:Api::Type::String
-    name: 'postureRevisionId'
     required: true
+  - name: 'postureRevisionId'
+    type: String
     description: |
       Revision_id the posture which needs to be deployed.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    required: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time the posture deployment was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the posture deployment was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       Description of the posture deployment.
-  - !ruby/object:Api::Type::String
-    name: 'etag'
+  - name: 'etag'
+    type: String
     description: 'For Resource freshness validation (https://google.aip.dev/154)'
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: reconciling
+  - name: 'reconciling'
+    type: Boolean
     description: |
       If set, there are currently changes in flight to the posture deployment.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'desiredPostureId'
+  - name: 'desiredPostureId'
+    type: String
     description: |
       This is an output only optional field which will be filled in case when
       PostureDeployment state is UPDATE_FAILED or CREATE_FAILED or DELETE_FAILED.
       It denotes the desired posture to be deployed.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'desiredPostureRevisionId'
-    output: true
+  - name: 'desiredPostureRevisionId'
+    type: String
     description: |
       This is an output only optional field which will be filled in case when
       PostureDeployment state is UPDATE_FAILED or CREATE_FAILED or DELETE_FAILED.
       It denotes the desired posture revision_id to be deployed.
-  - !ruby/object:Api::Type::String
-    name: 'failureMessage'
     output: true
+  - name: 'failureMessage'
+    type: String
     description: |
       This is a output only optional field which will be filled in case where
       PostureDeployment enters a failure state like UPDATE_FAILED or
       CREATE_FAILED or DELETE_FAILED. It will have the failure message for posture deployment's
       CREATE/UPDATE/DELETE methods.
+    output: true

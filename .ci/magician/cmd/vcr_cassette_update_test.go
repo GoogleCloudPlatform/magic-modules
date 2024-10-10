@@ -34,6 +34,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 5",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -47,7 +49,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"#################################",
 					"",
 					"#################################",
-					"Errors occurred during REPLAYING mode.", "#################################",
+					"Errors occurred during REPLAYING mode: some error.",
+					"#################################",
 				},
 				"\n",
 			),
@@ -65,6 +68,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 3",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -74,7 +79,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"",
 					"",
 					"#################################",
-					"All tests passed in REPLAYING mode.", "#################################",
+					"All tests passed in REPLAYING mode.",
+					"#################################",
 				},
 				"\n",
 			),
@@ -93,6 +99,8 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 				[]string{
 					"#################################",
 					"Tests Analytics",
+					"#################################",
+					"",
 					"Total tests: 5",
 					"Passed tests: 2",
 					"Skipped tests: 1",
@@ -160,6 +168,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -173,7 +182,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 					"",
 					"",
 					"",
-					"Errors occurred during RECORDING mode.",
+					"Errors occurred during RECORDING mode: some error.",
 				},
 				"\n",
 			),
@@ -190,6 +199,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -219,6 +229,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -264,6 +275,7 @@ func TestFormatVCRCassettesUpdateRecording(t *testing.T) {
 				[]string{
 					"#################################",
 					"RECORDING Tests Report",
+					"#################################",
 					"",
 					"",
 					"Tests passed during RECORDING mode:",
@@ -371,7 +383,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 					}},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording_test.log", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/recording/"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-h", "Content-Type:text/plain", "-q", "cp", "-r", "/mock/dir/magic-modules/.ci/magician/testlogs/recording/beta/*", "gs://vcr-nightly/beta/2024-07-08/buildID/logs/build-log/"}, map[string]string(nil)},
-					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta", "gs://ci-vcr-cassettes/beta/fixtures/"}, map[string]string(nil)},
+					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta/*", "gs://ci-vcr-cassettes/beta/fixtures/"}, map[string]string(nil)},
 				},
 			},
 		},
@@ -389,7 +401,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			ctlr := source.NewController("gopath", "hashicorp", "token", rnr)
 			vt, err := vcr.NewTester(map[string]string{
 				"SA_KEY": "sa_key",
-			}, rnr)
+			}, "ci-vcr-cassettes", "", rnr)
 			if err != nil {
 				t.Fatalf("Failed to create new tester: %v", err)
 			}

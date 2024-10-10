@@ -15,6 +15,7 @@ package api
 
 import (
 	"log"
+	"reflect"
 	"strings"
 	"unicode"
 
@@ -230,4 +231,95 @@ func (p *Product) TerraformName() string {
 // Redefined on Product to terminate the calls up the parent chain.
 func (p Product) Lineage() string {
 	return p.Name
+}
+
+func Merge(self, otherObj reflect.Value) {
+
+	selfObj := reflect.Indirect(self)
+	for i := 0; i < selfObj.NumField(); i++ {
+
+		// skip if the override is the "empty" value
+		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())
+
+		if emptyOverrideValue && selfObj.Type().Field(i).Name != "Required" {
+			continue
+		}
+
+		if selfObj.Field(i).Kind() == reflect.Slice {
+			DeepMerge(selfObj.Field(i), otherObj.Field(i))
+		} else {
+			selfObj.Field(i).Set(otherObj.Field(i))
+		}
+	}
+}
+
+func DeepMerge(arr1, arr2 reflect.Value) {
+	if arr1.Len() == 0 {
+		arr1.Set(arr2)
+		return
+	}
+	if arr2.Len() == 0 {
+		return
+	}
+
+	// Scopes is an array of standard strings. In which case return the
+	// version in the overrides. This allows scopes to be removed rather
+	// than allowing for a merge of the two arrays
+	if arr1.Index(0).Kind() == reflect.String {
+		arr1.Set(arr2)
+		return
+	}
+
+	// Merge any elements that exist in both
+	for i := 0; i < arr1.Len(); i++ {
+		currentVal := arr1.Index(i)
+		pointer := currentVal.Kind() == reflect.Ptr
+		if pointer {
+			currentVal = currentVal.Elem()
+		}
+		var otherVal reflect.Value
+		for j := 0; j < arr2.Len(); j++ {
+			currentName := currentVal.FieldByName("Name").Interface()
+			tempOtherVal := arr2.Index(j)
+			if pointer {
+				tempOtherVal = tempOtherVal.Elem()
+			}
+			otherName := tempOtherVal.FieldByName("Name").Interface()
+
+			if otherName == currentName {
+				otherVal = tempOtherVal
+				break
+			}
+		}
+		if otherVal.IsValid() {
+			Merge(currentVal, otherVal)
+		}
+	}
+
+	// Add any elements of arr2 that don't exist in arr1
+	for i := 0; i < arr2.Len(); i++ {
+		otherVal := arr2.Index(i)
+		pointer := otherVal.Kind() == reflect.Ptr
+		if pointer {
+			otherVal = otherVal.Elem()
+		}
+
+		found := false
+		for j := 0; j < arr1.Len(); j++ {
+			currentVal := arr1.Index(j)
+			if pointer {
+				currentVal = currentVal.Elem()
+			}
+			currentName := currentVal.FieldByName("Name").Interface()
+			otherName := otherVal.FieldByName("Name").Interface()
+
+			if otherName == currentName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			arr1.Set(reflect.Append(arr1, arr2.Index(i)))
+		}
+	}
 }

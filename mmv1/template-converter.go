@@ -30,19 +30,22 @@ func find(root, ext string) []string {
 	return a
 }
 
-func convertTemplates() {
+func convertTemplates(tempFileTargets string) {
 	// exculding iam
 	folders := []string{"examples", "constants", "custom_check_destroy", "custom_create", "custom_delete", "custom_import", "custom_update", "decoders", "encoders", "extra_schema_entry", "post_create", "post_create_failure", "post_delete", "post_import", "post_update", "pre_create", "pre_delete", "pre_read", "pre_update", "state_migrations", "update_encoder", "custom_expand", "custom_flatten", "iam/example_config_body"}
 	counts := 0
 	for _, folder := range folders {
-		counts += convertTemplate(folder)
+		counts += convertTemplate(folder, tempFileTargets)
 	}
 	// log.Printf("%d template files in %d subfolders total", counts, len(folders))
 }
 
-func convertTemplate(folder string) int {
+func convertTemplate(folder, tempFileTargets string) int {
 	rubyDir := fmt.Sprintf("templates/terraform/%s", folder)
 	goDir := fmt.Sprintf("%s/go", rubyDir)
+	if tempFileTargets != "" {
+		goDir = rubyDir
+	}
 
 	if err := os.MkdirAll(goDir, os.ModePerm); err != nil {
 		glog.Error(fmt.Errorf("error creating directory %v: %v", goDir, err))
@@ -51,10 +54,25 @@ func convertTemplate(folder string) int {
 	templates := find(rubyDir, ".erb")
 	// log.Printf("%d template files in folder %s", len(templates), folder)
 
+	tempSlice := strings.Split(tempFileTargets, ",")
+
 	for _, file := range templates {
 		filePath := path.Join(rubyDir, file)
 		if checkExceptionList(filePath) {
 			continue
+		}
+		if len(tempSlice) > 1 {
+			found := false
+			for _, targetFile := range tempSlice {
+				parts := strings.Split(targetFile, "mmv1/")
+				if filePath == parts[len(parts)-1] {
+					found = true
+				}
+			}
+			if !found {
+				continue
+			}
+			log.Printf("continuing with template temp target %s", filePath)
 		}
 		data, err := os.ReadFile(filePath)
 		if err != nil {
@@ -64,7 +82,11 @@ func convertTemplate(folder string) int {
 		data = replace(data)
 
 		goTemplate := strings.Replace(file, "erb", "tmpl", 1)
-		err = ioutil.WriteFile(path.Join(goDir, goTemplate), data, 0644)
+		outPath := path.Join(goDir, goTemplate)
+		if len(tempSlice) > 1 {
+			outPath = outPath + ".temp"
+		}
+		err = ioutil.WriteFile(outPath, data, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -73,7 +95,7 @@ func convertTemplate(folder string) int {
 	return len(templates)
 }
 
-func convertAllHandwrittenFiles() int {
+func convertAllHandwrittenFiles(handwrittenTempFiles string) int {
 	// Add third_party/terraform to convert files in this folder
 	folders := []string{"third_party/terraform"}
 
@@ -105,15 +127,18 @@ func convertAllHandwrittenFiles() int {
 
 	counts := 0
 	for _, folder := range folders {
-		counts += convertHandwrittenFiles(folder)
+		counts += convertHandwrittenFiles(folder, handwrittenTempFiles)
 	}
 	// log.Printf("%d handwritten files in total", counts)
 
 	return counts
 }
 
-func convertHandwrittenFiles(folder string) int {
+func convertHandwrittenFiles(folder, handwrittenTempFiles string) int {
 	goDir := fmt.Sprintf("%s/go", folder)
+	if handwrittenTempFiles != "" {
+		goDir = folder
+	}
 
 	if err := os.MkdirAll(goDir, os.ModePerm); err != nil {
 		glog.Error(fmt.Errorf("error creating directory %v: %v", goDir, err))
@@ -122,23 +147,37 @@ func convertHandwrittenFiles(folder string) int {
 	files := find(folder, ".erb")
 	// log.Printf("%d handwritten files in folder %s", len(files), folder)
 
+	tempSlice := strings.Split(handwrittenTempFiles, ",")
+
 	for _, file := range files {
 		filePath := path.Join(folder, file)
 		if checkExceptionList(filePath) {
 			continue
+		}
+		if len(tempSlice) > 1 {
+			found := false
+			for _, targetFile := range tempSlice {
+				parts := strings.Split(targetFile, "mmv1/")
+				if filePath == parts[len(parts)-1] {
+					found = true
+				}
+			}
+			if !found {
+				continue
+			}
+			log.Printf("continuing with handwritten temp target %s", filePath)
 		}
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Fatalf("Cannot open the file: %v", file)
 		}
 		data = replace(data)
-		goTemplate := ""
-		if strings.Contains(string(data), "{{") {
-			goTemplate = strings.Replace(file, ".erb", ".tmpl", 1)
-		} else {
-			goTemplate = strings.Replace(file, ".erb", "", 1)
+		goTemplate := strings.Replace(file, ".erb", ".tmpl", 1)
+		outPath := path.Join(goDir, goTemplate)
+		if len(tempSlice) > 1 {
+			outPath = outPath + ".temp"
 		}
-		err = ioutil.WriteFile(path.Join(goDir, goTemplate), data, 0644)
+		err = ioutil.WriteFile(outPath, data, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}

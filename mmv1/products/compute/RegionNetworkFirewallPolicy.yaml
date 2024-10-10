@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,76 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: RegionNetworkFirewallPolicy
-base_url: projects/{{project}}/regions/{{region}}/firewallPolicies
-create_url: projects/{{project}}/regions/{{region}}/firewallPolicies
-self_link: projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}
-update_verb: :PATCH
+---
+name: 'RegionNetworkFirewallPolicy'
 description: "The Compute NetworkFirewallPolicy resource"
-legacy_long_form_project: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
+legacy_long_form_project: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'region_network_firewall_policy_full'
+  - name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'
     vars:
       policy_name: 'tf-test-policy'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of this resource.
     url_param_only: true
-    default_from_api: true
     immutable: true
+    default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: creationTimestamp
+  - name: 'creationTimestamp'
+    type: String
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: User-provided name of the Network firewall policy. The name should be unique in the project in which the firewall policy is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: regionNetworkFirewallPolicyId
+  - name: 'regionNetworkFirewallPolicyId'
+    type: String
     description: The unique identifier for the resource. This identifier is defined by the server.
-    output: true
     api_name: id
-  - !ruby/object:Api::Type::String
-    name: description
+    output: true
+  - name: 'description'
+    type: String
     description: An optional description of this resource. Provide this property when you create the resource.
-  - !ruby/object:Api::Type::Fingerprint
-    name: fingerprint
+  - name: 'fingerprint'
+    type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
     output: true
-  - !ruby/object:Api::Type::String
-    name: selfLink
+  - name: 'selfLink'
+    type: String
     description: Server-defined URL for the resource.
     output: true
-  - !ruby/object:Api::Type::String
-    name: selfLinkWithId
+  - name: 'selfLinkWithId'
+    type: String
     description: Server-defined URL for this resource with the resource id.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: ruleTupleCount
+  - name: 'ruleTupleCount'
+    type: Integer
     description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
     output: true

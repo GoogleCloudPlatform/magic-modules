@@ -1,127 +1,125 @@
 # Copyright 2024 Google Inc.
-# # Licensed under the Apache License, Version 2.0 (the "License");
-# # you may not use this file except in compliance with the License.
-# # You may obtain a copy of the License at
-# #
-# #     http://www.apache.org/licenses/LICENSE-2.0
-# #
-# # Unless required by applicable law or agreed to in writing, software
-# # distributed under the License is distributed on an "AS IS" BASIS,
-# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# # See the License for the specific language governing permissions and
-# # limitations under the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'RegionalEndpoint'
 description: |
   Regional Private Service Connect (PSC) endpoint resource.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Access regional Google APIs through endpoints': 'https://cloud.google.com/vpc/docs/access-regional-google-apis-endpoints'
   api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.regionalEndpoints'
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/regionalEndpoints/{{name}}'
-immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints?regional_endpoint_id={{name}}'
 delete_url: 'projects/{{project}}/locations/{{location}}/regionalEndpoints/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
+async:
   actions: ['create', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_regional_endpoint_regional_access'
+  - name: 'network_connectivity_regional_endpoint_regional_access'
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_connectivity_regional_endpoint_global_access'
+  - name: 'network_connectivity_regional_endpoint_global_access'
     primary_resource_id: 'default'
     vars:
       rep_name: 'my-rep'
       rep_network: 'my-network'
       rep_subnetwork: 'my-subnetwork'
-
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The name of the RegionalEndpoint.
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The location of the RegionalEndpoint.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time when the RegionalEndpoint was created.
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       Time when the RegionalEndpoint was updated.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-defined labels.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A description of this resource.
-  - !ruby/object:Api::Type::String
-    name: 'targetGoogleApi'
-    required: true
+  - name: 'targetGoogleApi'
+    type: String
     description: |
       The service endpoint this private regional endpoint connects to. Format: `{apiname}.{region}.p.rep.googleapis.com` Example: \"cloudkms.us-central1.p.rep.googleapis.com\".
-  - !ruby/object:Api::Type::String
-    name: 'network'
+    required: true
+  - name: 'network'
+    type: String
     description: |
       The name of the VPC network for this private regional endpoint. Format: `projects/{project}/global/networks/{network}`
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'subnetwork'
+  - name: 'subnetwork'
+    type: String
     description: |
       The name of the subnetwork from which the IP address will be allocated. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`
     default_from_api: true
-  - !ruby/object:Api::Type::Enum
-    name: accessType
-    required: true
+  - name: 'accessType'
+    type: Enum
     description: |
       The access type of this regional endpoint. This field is reflected in the PSC Forwarding Rule configuration to enable global access.
-    values:
-      - :GLOBAL
-      - :REGIONAL
-  - !ruby/object:Api::Type::String
-    name: 'pscForwardingRule'
-    output: true
+    required: true
+    enum_values:
+      - 'GLOBAL'
+      - 'REGIONAL'
+  - name: 'pscForwardingRule'
+    type: String
     description: |
       The resource reference of the PSC Forwarding Rule created on behalf of the customer. Format: `//compute.googleapis.com/projects/{project}/regions/{region}/forwardingRules/{forwarding_rule_name}`
-  - !ruby/object:Api::Type::String
-    name: 'address'
+    output: true
+  - name: 'address'
+    type: String
     description: |
       The IP Address of the Regional Endpoint. When no address is provided, an IP from the subnetwork is allocated. Use one of the following formats: * IPv4 address as in `10.0.0.1` * Address resource URI as in `projects/{project}/regions/{region}/addresses/{address_name}`
 

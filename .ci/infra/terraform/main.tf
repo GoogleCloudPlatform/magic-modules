@@ -376,8 +376,6 @@ resource "google_project_service_identity" "sqladmin_sa" {
   service = "sqladmin.googleapis.com"
 }
 
-# TODO: Replace these permissions with bootstrapped permissions
-
 # TestAccComposerEnvironment_fixPyPiPackages
 # TestAccComposerEnvironmentComposer2_private
 # TestAccComposerEnvironment_withEncryptionConfigComposer1
@@ -409,6 +407,24 @@ resource "google_project_iam_member" "compute_agent_secret_accessor" {
   member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
 }
 
+# TestAccHealthcarePipelineJob_healthcarePipelineJobMappingReconDestExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobReconciliationExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobWhistleMappingExample
+resource "google_project_iam_member" "healthcare_agent_storage_object_admin" {
+  project = google_project.proj.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+}
+
+# TestAccHealthcarePipelineJob_healthcarePipelineJobMappingReconDestExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobReconciliationExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobWhistleMappingExample
+resource "google_project_iam_member" "healthcare_agent_fhir_resource_editor" {
+  project = google_project.proj.project_id
+  role    = "roles/healthcare.fhirResourceEditor"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+}
+
 # TestAccVertexAIEndpoint_vertexAiEndpointNetwork
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeExample
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeWithBetaFieldsExample
@@ -422,6 +438,21 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_default_sa_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_agent_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
 
 data "google_organization" "org2" {
   organization = var.org2_id

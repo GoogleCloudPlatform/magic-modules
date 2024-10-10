@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,83 +11,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Api'
-min_version: beta
-create_url: projects/{{project}}/locations/global/apis?apiId={{api_id}}
-self_link: projects/{{project}}/locations/global/apis/{{api_id}}
-base_url: projects/{{project}}/locations/global/apis
-update_verb: :PATCH
-update_mask: true
-identity:
-  - apiId
 description: |
   A consumable API that can be used by multiple Gateways.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/api-gateway/docs/quickstart'
   api: 'https://cloud.google.com/api-gateway/docs/reference/rest/v1beta/projects.locations.apis'
+docs:
+base_url: 'projects/{{project}}/locations/global/apis'
+self_link: 'projects/{{project}}/locations/global/apis/{{api_id}}'
+create_url: 'projects/{{project}}/locations/global/apis?apiId={{api_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  allowed_iam_role: 'roles/apigateway.viewer'
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+identity:
+  - apiId
+iam_policy:
   method_name_separator: ':'
+  allowed_iam_role: 'roles/apigateway.viewer'
   parent_resource_attribute: 'api'
-  base_url: projects/{{project}}/locations/global/apis/{{api}}
+  base_url: 'projects/{{project}}/locations/global/apis/{{api}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/global/apis/{{api}}',
-      '{{project}}/{{api}}',
-      '{{api}}',
-    ]
+    - 'projects/{{project}}/locations/global/apis/{{api}}'
+    - '{{project}}/{{api}}'
+    - '{{api}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'apigateway_api_basic'
+  - name: 'apigateway_api_basic'
     primary_resource_id: 'api'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       api_id: 'my-api'
-  - !ruby/object:Provider::Terraform::Examples
-    skip_docs: true
-    min_version: beta
-    name: 'apigateway_api_full'
+  - name: 'apigateway_api_full'
     primary_resource_id: 'api'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-api%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       api_id: 'my-api'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: apiId
+  - name: 'apiId'
+    type: String
     description: |
       Identifier to assign to the API. Must be unique within scope of the parent resource(project)
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name of the API. Format `projects/{{project}}/locations/global/apis/{{apiId}}`
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       A user-visible name for the API.
+    min_version: 'beta'
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'managedService'
-    immutable: true
+  - name: 'managedService'
+    type: String
     description: |
       Immutable. The name of a Google Managed Service ( https://cloud.google.com/service-infrastructure/docs/glossary#managed).
       If not specified, a new Service will automatically be created in the same project as this API.
+    min_version: 'beta'
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: Creation timestamp in RFC3339 text format.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
+    min_version: 'beta'

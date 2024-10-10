@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,150 +11,164 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'MembershipRBACRoleBinding'
-base_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings'
-create_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/?rbacrolebinding_id={{membership_rbac_role_binding_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
-immutable: true
-min_version: beta
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.memberships'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings'
+self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/?rbacrolebinding_id={{membership_rbac_role_binding_id}}'
+immutable: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'gkehub#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: 'true'
-    allowed:
-      - 'true'
-      - 'false'
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error/errors'
     message: 'message'
-autogen_async: true
+custom_code:
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_rbac_role_binding_basic'
-    primary_resource_name: 'fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])'
+  - name: 'gkehub_membership_rbac_role_binding_basic'
     primary_resource_id: 'membership_rbac_role_binding'
-    min_version: beta
+    primary_resource_name: 'fmt.Sprintf(\"tf-test-membership%s\", context[\"random_suffix\"]), fmt.Sprintf(\"tf-test-rbac-role-binding%s\", context[\"random_suffix\"])'
+    min_version: 'beta'
     vars:
-      cluster_name: "basic-cluster"
+      cluster_name: 'basic-cluster'
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      deletion_protection: 'false'
     test_env_vars:
-      project: :PROJECT_NAME
+      project: 'PROJECT_NAME'
       location: 'global'
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}'
-import_format:
-  ['projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}/rbacrolebindings/{{membership_rbac_role_binding_id}}']
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'membership_id'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'membership_id'
+    type: String
     description: |
       Id of the membership
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Location of the Membership
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'membershipRbacRoleBindingId'
-    description: |
-      The client-provided identifier of the RBAC Role Binding.
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
+properties:
+  - name: 'membershipRbacRoleBindingId'
+    type: String
+    description: |
+      The client-provided identifier of the RBAC Role Binding.
+    min_version: 'beta'
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
     description: |
       The resource name for the RBAC Role Binding
-  - !ruby/object:Api::Type::String
-    name: 'uid'
+    min_version: 'beta'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       Google-generated UUID for this resource.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time the RBAC Role Binding was created in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the RBAC Role Binding was updated in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'deleteTime'
+  - name: 'deleteTime'
+    type: Time
     description: |
       Time the RBAC Role Binding was deleted in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'state'
+  - name: 'state'
+    type: NestedObject
     description: |
       State of the RBAC Role Binding resource.
+    min_version: 'beta'
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'code'
+      - name: 'code'
+        type: Enum
         description: |
           Code describes the state of a RBAC Role Binding resource.
+        min_version: 'beta'
         output: true
-        values:
-          - :CODE_UNSPECIFIED
-          - :CREATING
-          - :READY
-          - :DELETING
-          - :UPDATING
-  - !ruby/object:Api::Type::String
-    name: 'user'
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'user'
+    type: String
     description: |
       Principal that is be authorized in the cluster (at least of one the oneof
       is required). Updating one will unset the other automatically.
       user is the name of the user as seen by the kubernetes cluster, example
       "alice" or "alice@domain.tld"
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'role'
+  - name: 'role'
+    type: NestedObject
     description: |
       Role to bind to the principal.
+    min_version: 'beta'
     required: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'predefinedRole'
+      - name: 'predefinedRole'
+        type: Enum
         description: |
           PredefinedRole is an ENUM representation of the default Kubernetes Roles
+        min_version: 'beta'
         required: true
-        values:
-          - :UNKNOWN
-          - :ADMIN
-          - :EDIT
-          - :VIEW
-          - :ANTHOS_SUPPORT
+        enum_values:
+          - 'UNKNOWN'
+          - 'ADMIN'
+          - 'EDIT'
+          - 'VIEW'
+          - 'ANTHOS_SUPPORT'

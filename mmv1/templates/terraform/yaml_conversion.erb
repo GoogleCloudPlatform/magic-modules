@@ -40,7 +40,7 @@ exclude: <%= object.exclude %>
 readonly: <%= object.readonly %>
 <%  end -%>
 <%  unless !object.skip_attribution_label -%>
-skip_attribution_label: <%= object.skip_attribution_label %>
+exclude_attribution_label: <%= object.skip_attribution_label %>
 <%  end -%>
 <%
 #references blocks
@@ -118,7 +118,7 @@ read_verb: '<%= object.read_verb.to_s %>'
 read_query_params: '<%= object.read_query_params %>'
 <%  end -%>
 <%  unless !object.skip_read -%>
-skip_read: <%= object.skip_read %>
+exclude_read: <%= object.skip_read %>
 <%  end -%>
 <%  unless object.delete_url.nil? -%>
 delete_url: '<%= object.delete_url %>'
@@ -287,7 +287,7 @@ iam_policy:
   exclude_tgc: <%= object.iam_policy.exclude_tgc %>
 <%    end -%>
 <%    unless !object.iam_policy.skip_import_test -%>
-  skip_import_test: <%= object.iam_policy.skip_import_test %>
+  exclude_import_test: <%= object.iam_policy.skip_import_test %>
 <%    end -%>
 <%    unless object.iam_policy.method_name_separator == '/' -%>
   method_name_separator: '<%= object.iam_policy.method_name_separator %>'
@@ -428,7 +428,7 @@ custom_diff:
 <%    end -%>
 <%  end -%>
 <%  unless !object.skip_default_cdiff -%>
-skip_default_cdiff: <%= object.skip_default_cdiff %>
+exclude_default_cdiff: <%= object.skip_default_cdiff %>
 <%  end -%>
 <%
 #terraform overrides
@@ -531,6 +531,14 @@ examples:
 <%        end -%>
 <%      end -%>
 <%      end -%>
+<%      unless example.oics_vars_overrides.nil? -%>
+<%      unless example.oics_vars_overrides.empty? -%>
+    oics_vars_overrides:
+<%         example.oics_vars_overrides.each do |vname, val| -%>
+      '<%= vname -%>': '<%= val %>'
+<%        end -%>
+<%      end -%>
+<%      end -%>
 <%      unless example.ignore_read_extra.empty? -%>
     ignore_read_extra:
 <%        example.ignore_read_extra.each do |irextra| -%>
@@ -541,13 +549,13 @@ examples:
     external_providers: <%= example.external_providers %>
 <%      end -%>
 <%      unless example.skip_test.nil? -%>
-    skip_test: <%= example.skip_test %>
+    exclude_test: <%= example.skip_test %>
 <%      end -%>
 <%      unless example.skip_import_test.nil? -%>
-    skip_import_test: <%= example.skip_import_test %>
+    exclude_import_test: <%= example.skip_import_test %>
 <%      end -%>
 <%      unless example.skip_docs.nil? -%>
-    skip_docs: <%= example.skip_docs %>
+    exclude_docs: <%= example.skip_docs %>
 <%      end -%>
 <%      unless example.skip_vcr.nil? -%>
     skip_vcr: <%= example.skip_vcr %>

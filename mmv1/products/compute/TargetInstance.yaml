@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,13 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TargetInstance'
 kind: 'compute#targetInstance'
-base_url: projects/{{project}}/zones/{{zone}}/targetInstances
-collection_url_key: 'items'
-has_self_link: true
-immutable: true
 description: |
   Represents a TargetInstance resource which defines an endpoint instance
   that terminates traffic of certain protocols. In particular, they are used
@@ -25,68 +21,70 @@ description: |
   non-NAT'ed target instance. Each target instance contains a single
   virtual machine instance that receives and handles traffic from the
   corresponding forwarding rules.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Using Protocol Forwarding': 'https://cloud.google.com/compute/docs/protocol-forwarding'
   api: 'https://cloud.google.com/compute/docs/reference/v1/targetInstances'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+base_url: 'projects/{{project}}/zones/{{zone}}/targetInstances'
+has_self_link: true
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+custom_code:
+  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'target_instance_basic'
+  - name: 'target_instance_basic'
     primary_resource_id: 'default'
     vars:
       target_name: 'target'
       instance_name: 'target-vm'
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'target_instance_custom_network'
+  - name: 'target_instance_custom_network'
     primary_resource_id: 'custom_network'
+    min_version: 'beta'
     vars:
       target_name: 'custom-network'
       instance_name: 'custom-network-target-vm'
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'target_instance_with_security_policy'
+  - name: 'target_instance_with_security_policy'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       network_name: 'custom-default-network'
       subnetname_name: 'custom-default-subnet'
       instance_name: 'target-vm'
       region_sec_policy: 'region-secpolicy'
       target_name: 'target-instance'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.erb'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
-    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: |
       URL of the zone where the target instance resides.
     required: false
     immutable: true
     default_from_api: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -96,25 +94,23 @@ properties:
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
     required: true
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'network'
+  - name: 'network'
+    type: String
     description:
       'The URL of the network this target instance uses to forward traffic. If
       not specified, the traffic will be forwarded to the network that the
       default network interface belongs to.'
+    min_version: 'beta'
     immutable: true
-    min_version: beta
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'instance'
-    resource: 'Instance'
-    imports: 'selfLink'
+  - name: 'instance'
+    type: ResourceRef
     description: |
       The Compute instance VM handling traffic for this target instance.
       Accepts the instance self-link, relative path
@@ -125,20 +121,22 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
-  - !ruby/object:Api::Type::Enum
-    name: 'natPolicy'
+    custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
+    resource: 'Instance'
+    imports: 'selfLink'
+  - name: 'natPolicy'
+    type: Enum
     description: |
       NAT option controlling how IPs are NAT'ed to the instance.
       Currently only NO_NAT (default value) is supported.
     immutable: true
-    default_value: :NO_NAT
-    values:
-      - :NO_NAT
-  - !ruby/object:Api::Type::String
-    name: 'securityPolicy'
-    min_version: beta
+    default_value: "NO_NAT"
+    enum_values:
+      - 'NO_NAT'
+  - name: 'securityPolicy'
+    type: String
     description: |
       The resource URL for the security policy associated with this target instance.
-    update_url: projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy
-    update_verb: :POST
+    min_version: 'beta'
+    update_url: 'projects/{{project}}/zones/{{zone}}/targetInstances/{{name}}/setSecurityPolicy'
+    update_verb: 'POST'

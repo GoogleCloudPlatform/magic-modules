@@ -1,65 +1,70 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the 'License');
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Gateway'
-base_url: 'projects/{{project}}/locations/{{location}}/gateways'
-create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
-self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Gateway represents the configuration for a proxy, typically a load balancer.
   It captures the ip:port over which the services are exposed by the proxy,
   along with any policy configurations. Routes have reference to to Gateways
   to dictate how requests should be routed by this Gateway.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
+  guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1/projects.locations.gateways'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/gateways'
+self_link: 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/gateways?gatewayId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/gateways/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-import_format: ['projects/{{project}}/locations/{{location}}/gateways/{{name}}']
+custom_code:
+  constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_gateway_basic'
+  - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-gateway'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_gateway_advanced'
+  - name: 'network_services_gateway_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-gateway'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_gateway_secure_web_proxy'
+  - name: 'network_services_gateway_secure_web_proxy'
     primary_resource_id: 'default'
     vars:
       certificate_name: 'my-certificate'
@@ -72,8 +77,7 @@ examples:
       scope_1: 'my-default-scope1'
     ignore_read_extra:
       - 'delete_swg_autogen_router_on_destroy'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'network_services_gateway_multiple_swp_same_network'
+  - name: 'network_services_gateway_multiple_swp_same_network'
     primary_resource_id: 'default'
     vars:
       certificate_name: 'my-certificate'
@@ -89,117 +93,122 @@ examples:
     ignore_read_extra:
       - 'delete_swg_autogen_router_on_destroy'
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'delete_swg_autogen_router_on_destroy'
-    default_value: false
+  - name: 'delete_swg_autogen_router_on_destroy'
     description: |
       When deleting a gateway of type 'SECURE_WEB_GATEWAY', this boolean option will also delete auto generated router by the gateway creation.
       If there is no other gateway of type 'SECURE_WEB_GATEWAY' remaining for that region and network it will be deleted.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  post_delete: 'templates/terraform/post_delete/network_services_gateway.go.erb'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.erb'
-  constants: 'templates/terraform/constants/network_services_gateway.go.erb'
+    type: Boolean
+    default_value: false
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       Short name of the Gateway resource to be created.
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    default_value: 'global'
+    url_param_only: true
+    required: true
+  - name: 'location'
+    type: String
     description: |
       The location of the gateway.
       The default value is `global`.
     url_param_only: true
+    default_value: "global"
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+  - name: 'selfLink'
+    type: String
     description: |
       Server-defined URL of this resource.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the AccessPolicy was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the AccessPolicy was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: Set of label tags associated with the Gateway resource.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
-    required: true
-    immutable: true
+  - name: 'type'
+    type: Enum
     description: |
       Immutable. The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
-    values:
-      - :TYPE_UNSPECIFIED
-      - :OPEN_MESH
-      - :SECURE_WEB_GATEWAY
-  - !ruby/object:Api::Type::Array
-    name: 'ports'
     required: true
     immutable: true
+    enum_values:
+      - 'TYPE_UNSPECIFIED'
+      - 'OPEN_MESH'
+      - 'SECURE_WEB_GATEWAY'
+  - name: 'ports'
+    type: Array
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
       limited to 1 port. Gateways of type 'OPEN_MESH' listen on 0.0.0.0 and support multiple ports.
-    item_type: Api::Type::Integer
-  - !ruby/object:Api::Type::String
-    name: 'scope'
+    required: true
     immutable: true
+    item_type:
+      type: Integer
+  - name: 'scope'
+    type: String
     description: |
       Immutable. Scope determines how configuration across multiple Gateway instances are merged.
       The configuration for multiple Gateway instances with the same scope will be merged as presented as
       a single coniguration to the proxy/load balancer.
       Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
-  - !ruby/object:Api::Type::String
-    name: 'serverTlsPolicy'
+    immutable: true
+  - name: 'serverTlsPolicy'
+    type: String
     description: |
       A fully-qualified ServerTLSPolicy URL reference. Specifies how TLS traffic is terminated.
       If empty, TLS termination is disabled.
-  - !ruby/object:Api::Type::Array
-    name: 'addresses'
-    immutable: true
-    default_from_api: true
+  - name: 'addresses'
+    type: Array
     description: |
       Zero or one IPv4-address on which the Gateway will receive the traffic. When no address is provided,
       an IP from the subnetwork is allocated This field only applies to gateways of type 'SECURE_WEB_GATEWAY'.
       Gateways of type 'OPEN_MESH' listen on 0.0.0.0.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'subnetwork'
     immutable: true
+    default_from_api: true
+    item_type:
+      type: String
+  - name: 'subnetwork'
+    type: String
     description: |
       The relative resource name identifying the subnetwork in which this SWG is allocated.
       For example: `projects/*/regions/us-central1/subnetworks/network-1`.
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY.
-  - !ruby/object:Api::Type::String
-    name: 'network'
     immutable: true
+  - name: 'network'
+    type: String
     description: |
       The relative resource name identifying the VPC network that is using this configuration.
       For example: `projects/*/global/networks/network-1`.
       Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
-  - !ruby/object:Api::Type::String
-    name: 'gatewaySecurityPolicy'
+    immutable: true
+  - name: 'gatewaySecurityPolicy'
+    type: String
     description: |
       A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections.
       For example: `projects/*/locations/*/gatewaySecurityPolicies/swg-policy`.
       This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
-  - !ruby/object:Api::Type::Array
-    name: 'certificateUrls'
+  - name: 'certificateUrls'
+    type: Array
     description: |
       A fully-qualified Certificates URL reference. The proxy presents a Certificate (selected based on SNI) when establishing a TLS connection.
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
-    item_type: Api::Type::String
+    item_type:
+      type: String
+  - name: 'routingMode'
+    type: Enum
+    description: |
+      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+    enum_values:
+      - 'NEXT_HOP_ROUTING_MODE'

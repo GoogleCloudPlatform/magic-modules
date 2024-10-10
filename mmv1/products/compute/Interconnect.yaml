@@ -11,68 +11,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Interconnect'
 kind: 'compute#Interconnect'
 description: |
   Represents an Interconnect resource. The Interconnect resource is a dedicated connection between
   Google's network and your on-premises network.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Create a Dedicated Interconnect': 'https://cloud.google.com/network-connectivity/docs/interconnect/concepts/dedicated-overview'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/interconnects'
+docs:
 base_url: 'projects/{{project}}/global/interconnects'
 self_link: 'projects/{{project}}/global/interconnects/{{name}}'
-immutable: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+update_verb: 'PATCH'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'compute#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 10000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+custom_code:
+  constants: 'templates/terraform/constants/interconnect.go.tmpl'
+  post_create: 'templates/terraform/post_create/labels.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'compute_interconnect_basic'
-    skip_test: true
+  - name: 'compute_interconnect_basic'
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
       customer_name: 'example_customer'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'compute_interconnect_basic_test'
-    skip_docs: true
+      'deletion_protection': 'false'
+    exclude_test: true
+  - name: 'compute_interconnect_basic_test'
     primary_resource_id: 'example-interconnect'
     vars:
       interconnect_name: 'example-interconnect'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/interconnect.go.erb
+    exclude_docs: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional description of this resource. Provide this property when you create the resource.
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. Provided by the client when the resource is created. The name must be
       1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters
@@ -81,73 +82,73 @@ properties:
       lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'location'
+  - name: 'location'
+    type: ResourceRef
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
+      Specifies the location inside Google's Networks, should not be passed in case of cross-cloud interconnect.
+    immutable: true
     resource: 'InterconnectLocations'
     imports: 'selfLink'
-    required: true
-    immutable: true
-  - !ruby/object:Api::Type::Enum
-    name: 'linkType'
+  - name: 'linkType'
+    type: Enum
     description: |
       Type of link requested. Note that this field indicates the speed of each of the links in the
       bundle, not the speed of the entire bundle. Can take one of the following values:
         - LINK_TYPE_ETHERNET_10G_LR: A 10G Ethernet with LR optics.
         - LINK_TYPE_ETHERNET_100G_LR: A 100G Ethernet with LR optics.
-    values:
-      - :LINK_TYPE_ETHERNET_10G_LR
-      - :LINK_TYPE_ETHERNET_100G_LR
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Integer
-    name: 'requestedLinkCount'
+    enum_values:
+      - 'LINK_TYPE_ETHERNET_10G_LR'
+      - 'LINK_TYPE_ETHERNET_100G_LR'
+  - name: 'requestedLinkCount'
+    type: Integer
     description: |
       Target number of physical links in the link bundle, as requested by the customer.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Enum
-    name: 'interconnectType'
+  - name: 'interconnectType'
+    type: Enum
     description: |
       Type of interconnect. Note that a value IT_PRIVATE has been deprecated in favor of DEDICATED.
       Can take one of the following values:
         - PARTNER: A partner-managed interconnection shared between customers though a partner.
         - DEDICATED: A dedicated physical interconnection with the customer.
-    values:
-      - :DEDICATED
-      - :PARTNER
-      - :IT_PRIVATE
     required: true
     immutable: true
-    diff_suppress_func: InterconnectTypeDiffSuppress
-  - !ruby/object:Api::Type::Boolean
-    name: 'adminEnabled'
-    send_empty_value: true
-    default_value: true
+    diff_suppress_func: 'InterconnectTypeDiffSuppress'
+    enum_values:
+      - 'DEDICATED'
+      - 'PARTNER'
+      - 'IT_PRIVATE'
+  - name: 'adminEnabled'
+    type: Boolean
     description: |
       Administrative status of the interconnect. When this is set to true, the Interconnect is
       functional and can carry traffic. When set to false, no packets can be carried over the
       interconnect and no BGP routes are exchanged over it. By default, the status is set to true.
-  - !ruby/object:Api::Type::String
-    name: 'nocContactEmail'
+    send_empty_value: true
+    default_value: true
+  - name: 'nocContactEmail'
+    type: String
     description: |
       Email address to contact the customer NOC for operations and maintenance notifications
       regarding this Interconnect. If specified, this will be used for notifications in addition to
       all other forms described, such as Cloud Monitoring logs alerting and Cloud Notifications.
       This field is required for users who sign up for Cloud Interconnect using workforce identity
       federation.
-  - !ruby/object:Api::Type::String
-    name: 'customerName'
+  - name: 'customerName'
+    type: String
     description: |
       Customer name, to put in the Letter of Authorization as the party authorized to request a
-      crossconnect.
+      crossconnect. This field is required for Dedicated and Partner Interconnect, should not be specified
+      for cross-cloud interconnect.
     immutable: true
-    required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'operationalStatus'
+  - name: 'operationalStatus'
+    type: Enum
     description: |
       The current status of this Interconnect's functionality, which can take one of the following:
         - OS_ACTIVE: A valid Interconnect, which is turned up and is ready to use. Attachments may
@@ -156,69 +157,70 @@ properties:
         provisioned on this Interconnect.
         - OS_UNDER_MAINTENANCE: An Interconnect that is undergoing internal maintenance. No
         attachments may be provisioned or updated on this Interconnect.
-    values:
-      - :OS_ACTIVE
-      - :OS_UNPROVISIONED
-      - :OS_UNDER_MAINTENANCE
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'provisionedLinkCount'
+    enum_values:
+      - 'OS_ACTIVE'
+      - 'OS_UNPROVISIONED'
+      - 'OS_UNDER_MAINTENANCE'
+  - name: 'provisionedLinkCount'
+    type: Integer
     description: |
       Number of links actually provisioned in this interconnect.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'interconnectAttachments'
-    item_type: Api::Type::String
+  - name: 'interconnectAttachments'
+    type: Array
     description: |
       A list of the URLs of all InterconnectAttachments configured to use this Interconnect.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'peerIpAddress'
+    item_type:
+      type: String
+  - name: 'peerIpAddress'
+    type: String
     description: |
       IP address configured on the customer side of the Interconnect link.
       The customer should configure this IP address during turnup when prompted by Google NOC.
       This can be used only for ping tests.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'googleIpAddress'
+  - name: 'googleIpAddress'
+    type: String
     description: |
       IP address configured on the Google side of the Interconnect link.
       This can be used only for ping tests.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'googleReferenceId'
+  - name: 'googleReferenceId'
+    type: String
     description: |
       Google reference ID to be used when raising support tickets with Google or otherwise to debug
       backend connectivity issues.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'expectedOutages'
-    output: true
+  - name: 'expectedOutages'
+    type: Array
     description: A list of outages expected for this Interconnect.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'name'
-          output: true
+        - name: 'name'
+          type: String
           description: |
             Unique identifier for this outage notification.
-        - !ruby/object:Api::Type::String
-          name: 'description'
           output: true
+        - name: 'description'
+          type: String
           description: |
             A description about the purpose of the outage.
-        - !ruby/object:Api::Type::Enum
-          name: 'source'
           output: true
+        - name: 'source'
+          type: Enum
           description: |
             The party that generated this notification. Note that the value of NSRC_GOOGLE has been
             deprecated in favor of GOOGLE. Can take the following value:
               - GOOGLE: this notification as generated by Google.
-          values:
-            - :GOOGLE
-        - !ruby/object:Api::Type::Enum
-          name: 'state'
           output: true
+          enum_values:
+            - 'GOOGLE'
+        - name: 'state'
+          type: Enum
           description: |
             State of this notification. Note that the versions of this enum prefixed with "NS_" have
             been deprecated in favor of the unprefixed values. Can take one of the following values:
@@ -227,13 +229,13 @@ properties:
               - CANCELLED: The outage associated with this notification was cancelled before the
               outage was due to start.
               - COMPLETED: The outage associated with this notification is complete.
-          values:
-            - :ACTIVE
-            - :CANCELLED
-            - :COMPLETED
-        - !ruby/object:Api::Type::Enum
-          name: 'issueType'
           output: true
+          enum_values:
+            - 'ACTIVE'
+            - 'CANCELLED'
+            - 'COMPLETED'
+        - name: 'issueType'
+          type: Enum
           description: |
             Form this outage is expected to take. Note that the versions of this enum prefixed with
             "IT_" have been deprecated in favor of the unprefixed values. Can take one of the
@@ -242,63 +244,71 @@ properties:
               specified window.
               - PARTIAL_OUTAGE: Some circuits comprising the Interconnect as a whole should remain
               up, but with reduced bandwidth.
-          values:
-            - :OUTAGE
-            - :PARTIAL_OUTAGE
-        - !ruby/object:Api::Type::Array
-          name: 'affectedCircuits'
           output: true
-          item_type: Api::Type::String
+          enum_values:
+            - 'OUTAGE'
+            - 'PARTIAL_OUTAGE'
+        - name: 'affectedCircuits'
+          type: Array
           description: |
             If issueType is IT_PARTIAL_OUTAGE, a list of the Google-side circuit IDs that will be
             affected.
-        - !ruby/object:Api::Type::String
-          name: 'startTime'
           output: true
+          item_type:
+            type: String
+        - name: 'startTime'
+          type: String
           description: |
             Scheduled start time for the outage (milliseconds since Unix epoch).
-        - !ruby/object:Api::Type::String
-          name: 'endTime'
           output: true
+        - name: 'endTime'
+          type: String
           description: |
             Scheduled end time for the outage (milliseconds since Unix epoch).
-  - !ruby/object:Api::Type::Array
-    name: 'circuitInfos'
-    output: true
-    description: A list of CircuitInfo objects, that describe the individual circuits in this LAG.
-    item_type: !ruby/object:Api::Type::NestedObject
-      properties:
-        - !ruby/object:Api::Type::String
-          name: 'googleCircuitId'
           output: true
+  - name: 'circuitInfos'
+    type: Array
+    description: A list of CircuitInfo objects, that describe the individual circuits in this LAG.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'googleCircuitId'
+          type: String
           description: |
             Google-assigned unique ID for this circuit. Assigned at circuit turn-up.
-        - !ruby/object:Api::Type::String
-          name: 'googleDemarcId'
           output: true
+        - name: 'googleDemarcId'
+          type: String
           description: |
             Google-side demarc ID for this circuit. Assigned at circuit turn-up and provided by
             Google to the customer in the LOA.
-        - !ruby/object:Api::Type::String
-          name: 'customerDemarcId'
           output: true
+        - name: 'customerDemarcId'
+          type: String
           description: |
             Customer-side demarc ID for this circuit.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+          output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
+    update_verb: 'POST'
     description: |
       Labels for this resource. These can only be added or modified by the setLabels
       method. Each label key/value pair must comply with RFC1035. Label values may be empty.
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
+  - name: 'labelFingerprint'
+    type: Fingerprint
+    update_url: 'projects/{{project}}/global/interconnects/{{name}}/setLabels'
+    update_verb: 'POST'
     description: |
       A fingerprint for the labels being applied to this Interconnect, which is essentially a hash
       of the labels set used for optimistic locking. The fingerprint is initially generated by
       Compute Engine and changes after every request to modify or update labels.
       You must always provide an up-to-date fingerprint hash in order to update or change labels,
       otherwise the request will fail with error 412 conditionNotMet.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+    output: true
+  - name: 'state'
+    type: Enum
     description: |
       The current state of Interconnect functionality, which can take one of the following values:
         - ACTIVE: The Interconnect is valid, turned up and ready to use.
@@ -307,89 +317,102 @@ properties:
          provisioned on this Interconnect.
         - UNDER_MAINTENANCE: The Interconnect is undergoing internal maintenance. No attachments may
          be provisioned or updated on this Interconnect.
-    values:
-      - :ACTIVE
-      - :UNPROVISIONED
-      - :UNDER_MAINTENANCE
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'satisfiesPzs'
+    enum_values:
+      - 'ACTIVE'
+      - 'UNPROVISIONED'
+      - 'UNDER_MAINTENANCE'
+  - name: 'satisfiesPzs'
+    type: Boolean
     description: Reserved for future use.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'macsec'
+  - name: 'macsec'
+    type: NestedObject
     description: |
       Configuration that enables Media Access Control security (MACsec) on the Cloud
       Interconnect connection between Google and your on-premises router.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'preSharedKeys'
+      - name: 'preSharedKeys'
+        type: Array
         description: |
           A keychain placeholder describing a set of named key objects along with their
           start times. A MACsec CKN/CAK is generated for each key in the key chain.
           Google router automatically picks the key with the most recent startTime when establishing
           or re-establishing a MACsec secure link.
         required: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
-              required: true
+            - name: 'name'
+              type: String
               description: |
                 A name for this pre-shared key. The name must be 1-63 characters long, and
                  comply with RFC1035. Specifically, the name must be 1-63 characters long and match
                  the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character
                  must be a lowercase letter, and all following characters must be a dash, lowercase
                  letter, or digit, except the last character, which cannot be a dash.
-              validation: !ruby/object:Provider::Terraform::Validation
+              required: true
+              validation:
                 regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-            - !ruby/object:Api::Type::String
-              name: 'startTime'
+            - name: 'startTime'
+              type: String
               description: |
                 A RFC3339 timestamp on or after which the key is valid. startTime can be in the
                 future. If the keychain has a single key, startTime can be omitted. If the keychain
                 has multiple keys, startTime is mandatory for each key. The start times of keys must
                 be in increasing order. The start times of two consecutive keys must be at least 6
                 hours apart.
-            - !ruby/object:Api::Type::Boolean
-              name: 'failOpen'
+            - name: 'failOpen'
+              type: Boolean
               description: |
                 If set to true, the Interconnect connection is configured with a should-secure
                 MACsec security policy, that allows the Google router to fallback to cleartext
                 traffic if the MKA session cannot be established. By default, the Interconnect
                 connection is configured with a must-secure security policy that drops all traffic
                 if the MKA session cannot be established with your router.
-  - !ruby/object:Api::Type::Boolean
-    name: 'macsecEnabled'
+              deprecation_message: '`failOpen` is deprecated and will be removed in a future major release. Use other `failOpen` instead.'
+      - name: 'failOpen'
+        type: Boolean
+        description: |
+          If set to true, the Interconnect connection is configured with a should-secure
+          MACsec security policy, that allows the Google router to fallback to cleartext
+          traffic if the MKA session cannot be established. By default, the Interconnect
+          connection is configured with a must-secure security policy that drops all traffic
+          if the MKA session cannot be established with your router.
+  - name: 'macsecEnabled'
+    type: Boolean
     description: |
       Enable or disable MACsec on this Interconnect connection.
       MACsec enablement fails if the MACsec object is not specified.
-  - !ruby/object:Api::Type::String
-    name: 'remoteLocation'
+  - name: 'remoteLocation'
+    type: String
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
-  - !ruby/object:Api::Type::Array
-    name: 'requestedFeatures'
+    immutable: true
+  - name: 'requestedFeatures'
+    type: Array
     description: |
       interconnects.list of features requested for this Interconnect connection. Options: IF_MACSEC (
       If specified then the connection is created on MACsec capable hardware ports. If not
       specified, the default value is false, which allocates non-MACsec capable ports first if
       available). Note that MACSEC is still technically allowed for compatibility reasons, but it
       does not work with the API, and will be removed in an upcoming major version.
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'requestedFeatures'
+    immutable: true
+    item_type:
+      type: Enum
       description: |
         interconnects.list of features requested for this Interconnect connection
-      values:
-        - :MACSEC
-        - :IF_MACSEC
-  - !ruby/object:Api::Type::Array
-    name: 'availableFeatures'
+      enum_values:
+        - 'MACSEC'
+        - 'IF_MACSEC'
+  - name: 'availableFeatures'
+    type: Array
     description: |
       interconnects.list of features available for this Interconnect connection. Can take the value:
       MACSEC. If present then the Interconnect connection is provisioned on MACsec capable hardware
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
-    item_type: Api::Type::String
+    item_type:
+      type: String

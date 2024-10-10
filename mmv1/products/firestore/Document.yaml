@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,22 +11,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Document'
-base_url: projects/{{project}}/databases/{{database}}/documents/{{collection}}
-create_url: projects/{{project}}/databases/{{database}}/documents/{{collection}}?documentId={{document_id}}
-update_verb: :PATCH
-self_link: '{{name}}'
 description: |
   In Cloud Firestore, the unit of storage is the document. A document is a lightweight record
   that contains fields, which map to values. Each document is identified by a name.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/manage-data/add-data'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents'
-import_format: ['{{name}}']
-skip_sweeper: true
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This resource creates a Firestore Document on a project that already has
     a Firestore database. If you haven't already created it, you may
@@ -36,81 +30,87 @@ docs: !ruby/object:Provider::Terraform::Docs
     `google_app_engine_application` resource with `database_type` set to
     `"CLOUD_FIRESTORE"`. Your Firestore location will be the same as
     the App Engine location specified.
+base_url: 'projects/{{project}}/databases/{{database}}/documents/{{collection}}'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/databases/{{database}}/documents/{{collection}}?documentId={{document_id}}'
+update_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/firestore_document.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/firestore_document.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_document_basic'
+  - name: 'firestore_document_basic'
     primary_resource_id: 'mydoc'
-    test_env_vars:
-      org_id: :ORG_ID
     vars:
       document_id: 'my-doc-id'
       project_id: 'project-id'
-    external_providers: ["random", "time"]
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_document_nested_document'
-    primary_resource_id: 'mydoc'
     test_env_vars:
-      org_id: :ORG_ID
+      org_id: 'ORG_ID'
+    external_providers: ["random", "time"]
+  - name: 'firestore_document_nested_document'
+    primary_resource_id: 'mydoc'
     vars:
       document_id: 'my-doc-id'
       project_id: 'project-id'
+    test_env_vars:
+      org_id: 'ORG_ID'
     external_providers: ["random", "time"]
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/firestore_document.go.erb
-  decoder: templates/terraform/decoders/firestore_document.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'database'
-    default_value: '(default)'
+  - name: 'database'
+    type: String
     description: |
       The Firestore database id. Defaults to `"(default)"`.
-    immutable: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'collection'
+    immutable: true
+    default_value: "(default)"
+  - name: 'collection'
+    type: String
     description: |
       The collection ID, relative to database. For example: chatrooms or chatrooms/my-document/private-messages.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'documentId'
+  - name: 'documentId'
+    type: String
     description: |
       The client-assigned document ID to use for this document during creation.
-    immutable: true
-    required: true
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       A server defined name for this document. Format:
       `projects/{{project_id}}/databases/{{database_id}}/documents/{{path}}/{{document_id}}`
-  - !ruby/object:Api::Type::String
-    name: path
     output: true
+  - name: 'path'
+    type: String
     description: |
       A relative path to the collection this document exists within
+    output: true
     # This is a string instead of a NestedObject because fields can be deeply nested
-  - !ruby/object:Api::Type::String
-    name: fields
-    required: true
+  - name: 'fields'
+    type: String
     description: |
       The document's [fields](https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.documents) formated as a json string.
-    custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-    state_func:
-      'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-      return s }'
-    validation: !ruby/object:Provider::Terraform::Validation
+    required: true
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    validation:
       function: 'validation.StringIsJSON'
-
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: 'Creation timestamp in RFC3339 format.'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: 'Last update timestamp in RFC3339 format.'
     output: true

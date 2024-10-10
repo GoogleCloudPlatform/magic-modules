@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,67 +11,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FolderSettings
-base_url: 'folders/{{folder_id}}/accessApprovalSettings'
-self_link: 'folders/{{folder_id}}/accessApprovalSettings'
-create_verb: :PATCH
-update_verb: :PATCH
-update_mask: true
+---
+name: 'FolderSettings'
+legacy_name: 'google_folder_access_approval_settings'
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
+  guides:
   api: 'https://cloud.google.com/access-approval/docs/reference/rest/v1/folders'
-legacy_name: 'google_folder_access_approval_settings'
-import_format: ['folders/{{folder_id}}/accessApprovalSettings']
+docs:
+base_url: 'folders/{{folder_id}}/accessApprovalSettings'
+self_link: 'folders/{{folder_id}}/accessApprovalSettings'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'folders/{{folder_id}}/accessApprovalSettings'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/access_approval.go.tmpl'
+  pre_create: 'templates/terraform/update_mask.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'folder_access_approval_full'
+  - name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'
     vars:
       folder_name: 'my-folder'
     test_env_vars:
-      org_id: :ORG_ID
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'folder_access_approval_active_key_version'
+      org_id: 'ORG_ID'
+    exclude_test: true
+  - name: 'folder_access_approval_active_key_version'
     primary_resource_id: 'folder_access_approval'
     vars:
       folder_name: 'my-folder'
     test_env_vars:
-      org_id: :ORG_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_delete: templates/terraform/custom_delete/clear_folder_access_approval_settings.go.erb
-  pre_create: templates/terraform/update_mask.erb
-  constants: templates/terraform/constants/access_approval.go.erb
+      org_id: 'ORG_ID'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: folder_id
+  - name: 'folder_id'
+    type: String
     description: |
       ID of the folder of the access approval settings.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The resource name of the settings. Format is "folders/{folder_id}/accessApprovalSettings"
     output: true
-  - !ruby/object:Api::Type::Array
-    name: notificationEmails
+  - name: 'notificationEmails'
+    type: Array
     description: |
       A list of email addresses to which notifications relating to approval requests should be sent.
       Notifications relating to a resource will be sent to all emails in the settings of ancestor
       resources of that resource. A maximum of 50 email addresses are allowed.
-    max_size: 50
-    item_type: Api::Type::String
     is_set: true
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: enrolledServices
-    required: true
+    item_type:
+      type: String
+    max_size: 50
+  - name: 'enrolledServices'
+    type: Array
     description: |
       A list of Google Cloud Services for which the given resource has Access Approval enrolled.
       Access requests for the resource given by name against any of these services contained here will be required
@@ -79,12 +84,13 @@ properties:
 
       A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
     is_set: true
+    required: true
     set_hash_func: accessApprovalEnrolledServicesHash
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: cloudProduct
-          required: true
+        - name: 'cloudProduct'
+          type: String
           description: |
             The product for which Access Approval will be enrolled. Allowed values are listed (case-sensitive):
               * all
@@ -110,34 +116,35 @@ properties:
               * iam.googleapis.com
               * pubsub.googleapis.com
               * storage.googleapis.com
-        - !ruby/object:Api::Type::Enum
-          name: enrollmentLevel
+          required: true
+        - name: 'enrollmentLevel'
+          type: Enum
           description: |
             The enrollment level of the service.
-          default_value: :BLOCK_ALL
-          values:
-            - :BLOCK_ALL
-  - !ruby/object:Api::Type::Boolean
-    name: enrolledAncestor
-    output: true
+          default_value: "BLOCK_ALL"
+          enum_values:
+            - 'BLOCK_ALL'
+  - name: 'enrolledAncestor'
+    type: Boolean
     description: |
       If the field is true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of the Folder.
-  - !ruby/object:Api::Type::String
-    name: activeKeyVersion
+    output: true
+  - name: 'activeKeyVersion'
+    type: String
     description: |
       The asymmetric crypto key version to use for signing approval requests.
       Empty active_key_version indicates that a Google-managed key should be used for signing.
       This property will be ignored if set by an ancestor of the resource, and new non-empty values may not be set.
-  - !ruby/object:Api::Type::Boolean
-    name: ancestorHasActiveKeyVersion
-    output: true
+  - name: 'ancestorHasActiveKeyVersion'
+    type: Boolean
     description: |
       If the field is true, that indicates that an ancestor of this Folder has set active_key_version.
-  - !ruby/object:Api::Type::Boolean
-    name: invalidKeyVersion
     output: true
+  - name: 'invalidKeyVersion'
+    type: Boolean
     description: |
       If the field is true, that indicates that there is some configuration issue with the active_key_version
       configured on this Folder (e.g. it doesn't exist or the Access Approval service account doesn't have the
       correct permissions on it, etc.) This key version is not necessarily the effective key version at this level,
       as key versions are inherited top-down.
+    output: true

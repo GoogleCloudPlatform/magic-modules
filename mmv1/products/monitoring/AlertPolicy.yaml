@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,125 +11,133 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AlertPolicy'
-base_url: v3/projects/{{project}}/alertPolicies
-self_link: 'v3/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A description of the conditions under which some aspect of your system is
   considered to be "unhealthy" and the ways to notify people or services
   about this state.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/monitoring/alerts/'
   api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.alertPolicies'
+docs:
 id_format: '{{name}}'
-import_format: ['{{name}}']
-mutex: alertPolicy/{{project}}
-error_retry_predicates: ['transport_tpg.IsMonitoringConcurrentEditError']
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
+base_url: 'v3/projects/{{project}}/alertPolicies'
+self_link: 'v3/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: 'alertPolicy/{{project}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/monitoring_alert_policy.go.tmpl'
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+error_retry_predicates:
+
+  - 'transport_tpg.IsMonitoringConcurrentEditError'
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
 examples:
   # skipping tests because the API is full of race conditions
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'monitoring_alert_policy_basic'
+  - name: 'monitoring_alert_policy_basic'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    exclude_test: true
   # skipping tests because the API is full of race conditions
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'monitoring_alert_policy_evaluation_missing_data'
+  - name: 'monitoring_alert_policy_evaluation_missing_data'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    exclude_test: true
   # skipping tests because the API is full of race conditions
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'monitoring_alert_policy_forecast_options'
+  - name: 'monitoring_alert_policy_forecast_options'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
+    exclude_test: true
   # skipping tests because the API is full of race conditions
-  - !ruby/object:Provider::Terraform::Examples
-    skip_test: true
-    name: 'monitoring_alert_policy_promql_condition'
+  - name: 'monitoring_alert_policy_promql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/monitoring_alert_policy.go.erb
-  custom_import: templates/terraform/custom_import/self_link_as_name.erb
-  post_create: templates/terraform/post_create/set_computed_name.erb
-
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The unique resource name for this policy.
       Its syntax is: projects/[PROJECT_ID]/alertPolicies/[ALERT_POLICY_ID]
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       A short name or phrase used to identify the policy in
       dashboards, notifications, and incidents. To avoid confusion, don't use
       the same display name for multiple policies in the same project. The
       name is limited to 512 Unicode characters.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: combiner
+  - name: 'combiner'
+    type: Enum
     description: |
       How to combine the results of multiple conditions to
       determine if an incident should be opened.
-    values:
-      - :AND
-      - :OR
-      - :AND_WITH_MATCHING_RESOURCE
     required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: creationRecord
+    enum_values:
+      - 'AND'
+      - 'OR'
+      - 'AND_WITH_MATCHING_RESOURCE'
+  - name: 'creationRecord'
+    type: NestedObject
     description: |
       A read-only record of the creation of the alerting policy.
       If provided in a call to create or update, this field will
       be ignored.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: mutateTime
-        output: true
+      - name: 'mutateTime'
+        type: String
         description: |
           When the change occurred.
-      - !ruby/object:Api::Type::String
         output: true
-        name: mutatedBy
+      - name: 'mutatedBy'
+        type: String
         description: |
           The email address of the user making the change.
-  - !ruby/object:Api::Type::Boolean
-    name: enabled
-    default_value: true
-    send_empty_value: true
+        output: true
+  - name: 'enabled'
+    type: Boolean
     description: |
       Whether or not the policy is enabled. The default is true.
-  - !ruby/object:Api::Type::Array
-    name: 'conditions'
+    send_empty_value: true
+    default_value: true
+  - name: 'conditions'
+    type: Array
     description: |
       A list of conditions for the policy. The conditions are combined by
       AND or OR according to the combiner field. If the combined conditions
       evaluate to true, then an incident is created. A policy can have from
       one to six conditions.
-    item_type: !ruby/object:Api::Type::NestedObject
+    required: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: conditionAbsent
+        - name: 'conditionAbsent'
+          type: NestedObject
           description: |
             A condition that checks that a time series
             continues to receive new data points.
           properties:
-            - !ruby/object:Api::Type::Array
-              name: aggregations
+            - name: 'aggregations'
+              type: Array
               description: |
                 Specifies the alignment of data points in
                 individual time series as well as how to
@@ -140,10 +148,11 @@ properties:
                 all members of a group of resources).
                 Multiple aggregations are applied in the
                 order specified.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Enum
-                    name: perSeriesAligner
+                  - name: 'perSeriesAligner'
+                    type: Enum
                     description: |
                       The approach to be used to align
                       individual time series. Not all
@@ -162,28 +171,28 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :ALIGN_NONE
-                      - :ALIGN_DELTA
-                      - :ALIGN_RATE
-                      - :ALIGN_INTERPOLATE
-                      - :ALIGN_NEXT_OLDER
-                      - :ALIGN_MIN
-                      - :ALIGN_MAX
-                      - :ALIGN_MEAN
-                      - :ALIGN_COUNT
-                      - :ALIGN_SUM
-                      - :ALIGN_STDDEV
-                      - :ALIGN_COUNT_TRUE
-                      - :ALIGN_COUNT_FALSE
-                      - :ALIGN_FRACTION_TRUE
-                      - :ALIGN_PERCENTILE_99
-                      - :ALIGN_PERCENTILE_95
-                      - :ALIGN_PERCENTILE_50
-                      - :ALIGN_PERCENTILE_05
-                      - :ALIGN_PERCENT_CHANGE
-                  - !ruby/object:Api::Type::Array
-                    name: groupByFields
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
                     description: |
                       The set of fields to preserve when
                       crossSeriesReducer is specified.
@@ -210,9 +219,10 @@ properties:
                       time series. If crossSeriesReducer
                       is not defined, this field is
                       ignored.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::String
-                    name: alignmentPeriod
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
                     description: |
                       The alignment period for per-time
                       series alignment. If present,
@@ -228,8 +238,8 @@ properties:
                       does not equal ALIGN_NONE, then
                       this field must be defined;
                       otherwise an error is returned.
-                  - !ruby/object:Api::Type::Enum
-                    name: crossSeriesReducer
+                  - name: 'crossSeriesReducer'
+                    type: Enum
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -248,24 +258,24 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :REDUCE_NONE
-                      - :REDUCE_MEAN
-                      - :REDUCE_MIN
-                      - :REDUCE_MAX
-                      - :REDUCE_SUM
-                      - :REDUCE_STDDEV
-                      - :REDUCE_COUNT
-                      - :REDUCE_COUNT_TRUE
-                      - :REDUCE_COUNT_FALSE
-                      - :REDUCE_FRACTION_TRUE
-                      - :REDUCE_PERCENTILE_99
-                      - :REDUCE_PERCENTILE_95
-                      - :REDUCE_PERCENTILE_50
-                      - :REDUCE_PERCENTILE_05
-                    diff_suppress_func: crossSeriesReducerDiffSuppress
-            - !ruby/object:Api::Type::NestedObject
-              name: trigger
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'trigger'
+              type: NestedObject
               description: |
                 The number/percent of time series for which
                 the comparison must hold in order for the
@@ -274,20 +284,20 @@ properties:
                 is true for any of the time series that have
                 been identified by filter and aggregations.
               properties:
-                - !ruby/object:Api::Type::Double
-                  name: percent
+                - name: 'percent'
+                  type: Double
                   description: |
                     The percentage of time series that
                     must fail the predicate for the
                     condition to be triggered.
-                - !ruby/object:Api::Type::Integer
-                  name: count
+                - name: 'count'
+                  type: Integer
                   description: |
                     The absolute number of time series
                     that must fail the predicate for the
                     condition to be triggered.
-            - !ruby/object:Api::Type::String
-              name: duration
+            - name: 'duration'
+              type: String
               description: |
                 The amount of time that a time series must
                 fail to report new data to be considered
@@ -295,8 +305,8 @@ properties:
                 multiple of a minute--e.g. 60s, 120s, or 300s
                 --are supported.
               required: true
-            - !ruby/object:Api::Type::String
-              name: filter
+            - name: 'filter'
+              type: String
               description: |
                 A filter that identifies which time series
                 should be compared with the threshold.The
@@ -310,8 +320,8 @@ properties:
                 resource labels, and metric labels. This
                 field may not exceed 2048 Unicode characters
                 in length.
-        - !ruby/object:Api::Type::String
-          name: name
+        - name: 'name'
+          type: String
           description: |
             The unique resource name for this condition.
             Its syntax is:
@@ -320,19 +330,18 @@ properties:
             the condition is created as part of a new or updated alerting
             policy.
           output: true
-        - !ruby/object:Api::Type::NestedObject
-          name: conditionMonitoringQueryLanguage
+        - name: 'conditionMonitoringQueryLanguage'
+          type: NestedObject
           description: |
             A Monitoring Query Language query that outputs a boolean stream
           properties:
-            - !ruby/object:Api::Type::String
-              name: query
+            - name: 'query'
+              type: String
               description: |
                 Monitoring Query Language query that outputs a boolean stream.
               required: true
-            - !ruby/object:Api::Type::String
-              name: duration
-              required: true
+            - name: 'duration'
+              type: String
               description: |
                 The amount of time that a time series must
                 violate the threshold to be considered
@@ -349,8 +358,9 @@ properties:
                 generate spurious alerts, but short enough
                 that unhealthy states are detected and
                 alerted on quickly.
-            - !ruby/object:Api::Type::NestedObject
-              name: trigger
+              required: true
+            - name: 'trigger'
+              type: NestedObject
               description: |
                 The number/percent of time series for which
                 the comparison must hold in order for the
@@ -361,41 +371,41 @@ properties:
                 or by the ratio, if denominator_filter and
                 denominator_aggregations are specified.
               properties:
-                - !ruby/object:Api::Type::Double
-                  name: percent
+                - name: 'percent'
+                  type: Double
                   description: |
                     The percentage of time series that
                     must fail the predicate for the
                     condition to be triggered.
-                - !ruby/object:Api::Type::Integer
-                  name: count
+                - name: 'count'
+                  type: Integer
                   description: |
                     The absolute number of time series
                     that must fail the predicate for the
                     condition to be triggered.
-            - !ruby/object:Api::Type::Enum
-              name: evaluationMissingData
+            - name: 'evaluationMissingData'
+              type: Enum
               description: |
                 A condition control that determines how
                 metric-threshold conditions are evaluated when
                 data stops arriving.
-              values:
-                - :EVALUATION_MISSING_DATA_INACTIVE
-                - :EVALUATION_MISSING_DATA_ACTIVE
-                - :EVALUATION_MISSING_DATA_NO_OP
-        - !ruby/object:Api::Type::NestedObject
-          name: conditionThreshold
+              enum_values:
+                - 'EVALUATION_MISSING_DATA_INACTIVE'
+                - 'EVALUATION_MISSING_DATA_ACTIVE'
+                - 'EVALUATION_MISSING_DATA_NO_OP'
+        - name: 'conditionThreshold'
+          type: NestedObject
           description: |
             A condition that compares a time series against a
             threshold.
           properties:
-            - !ruby/object:Api::Type::Double
-              name: thresholdValue
+            - name: 'thresholdValue'
+              type: Double
               description: |
                 A value against which to compare the time
                 series.
-            - !ruby/object:Api::Type::String
-              name: denominatorFilter
+            - name: 'denominatorFilter'
+              type: String
               description: |
                 A filter that identifies a time series that
                 should be used as the denominator of a ratio
@@ -412,8 +422,8 @@ properties:
                 resource labels, and metric labels. This
                 field may not exceed 2048 Unicode characters
                 in length.
-            - !ruby/object:Api::Type::Array
-              name: denominatorAggregations
+            - name: 'denominatorAggregations'
+              type: Array
               description: |
                 Specifies the alignment of data points in
                 individual time series selected by
@@ -431,10 +441,11 @@ properties:
                 the MetricService.ListTimeSeries request. It
                 is advisable to use the ListTimeSeries
                 method when debugging this field.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Enum
-                    name: perSeriesAligner
+                  - name: 'perSeriesAligner'
+                    type: Enum
                     description: |
                       The approach to be used to align
                       individual time series. Not all
@@ -453,28 +464,28 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :ALIGN_NONE
-                      - :ALIGN_DELTA
-                      - :ALIGN_RATE
-                      - :ALIGN_INTERPOLATE
-                      - :ALIGN_NEXT_OLDER
-                      - :ALIGN_MIN
-                      - :ALIGN_MAX
-                      - :ALIGN_MEAN
-                      - :ALIGN_COUNT
-                      - :ALIGN_SUM
-                      - :ALIGN_STDDEV
-                      - :ALIGN_COUNT_TRUE
-                      - :ALIGN_COUNT_FALSE
-                      - :ALIGN_FRACTION_TRUE
-                      - :ALIGN_PERCENTILE_99
-                      - :ALIGN_PERCENTILE_95
-                      - :ALIGN_PERCENTILE_50
-                      - :ALIGN_PERCENTILE_05
-                      - :ALIGN_PERCENT_CHANGE
-                  - !ruby/object:Api::Type::Array
-                    name: groupByFields
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
                     description: |
                       The set of fields to preserve when
                       crossSeriesReducer is specified.
@@ -501,9 +512,10 @@ properties:
                       time series. If crossSeriesReducer
                       is not defined, this field is
                       ignored.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::String
-                    name: alignmentPeriod
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
                     description: |
                       The alignment period for per-time
                       series alignment. If present,
@@ -519,8 +531,8 @@ properties:
                       does not equal ALIGN_NONE, then
                       this field must be defined;
                       otherwise an error is returned.
-                  - !ruby/object:Api::Type::Enum
-                    name: crossSeriesReducer
+                  - name: 'crossSeriesReducer'
+                    type: Enum
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -539,25 +551,24 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :REDUCE_NONE
-                      - :REDUCE_MEAN
-                      - :REDUCE_MIN
-                      - :REDUCE_MAX
-                      - :REDUCE_SUM
-                      - :REDUCE_STDDEV
-                      - :REDUCE_COUNT
-                      - :REDUCE_COUNT_TRUE
-                      - :REDUCE_COUNT_FALSE
-                      - :REDUCE_FRACTION_TRUE
-                      - :REDUCE_PERCENTILE_99
-                      - :REDUCE_PERCENTILE_95
-                      - :REDUCE_PERCENTILE_50
-                      - :REDUCE_PERCENTILE_05
-                    diff_suppress_func: crossSeriesReducerDiffSuppress
-            - !ruby/object:Api::Type::String
-              name: duration
-              required: true
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'duration'
+              type: String
               description: |
                 The amount of time that a time series must
                 violate the threshold to be considered
@@ -574,8 +585,9 @@ properties:
                 generate spurious alerts, but short enough
                 that unhealthy states are detected and
                 alerted on quickly.
-            - !ruby/object:Api::Type::NestedObject
-              name: forecastOptions
+              required: true
+            - name: 'forecastOptions'
+              type: NestedObject
               description: |
                 When this field is present, the `MetricThreshold`
                 condition forecasts whether the time series is
@@ -584,8 +596,8 @@ properties:
                 `MetricThreshold` tests the current value of the
                 timeseries against the threshold.
               properties:
-                - !ruby/object:Api::Type::String
-                  name: forecastHorizon
+                - name: 'forecastHorizon'
+                  type: String
                   description: |
                     The length of time into the future to forecast
                     whether a timeseries will violate the threshold.
@@ -594,8 +606,8 @@ properties:
                     forecasts made for the Configured `duration`,
                     then the timeseries is considered to be failing.
                   required: true
-            - !ruby/object:Api::Type::Enum
-              name: comparison
+            - name: 'comparison'
+              type: Enum
               description: |
                 The comparison to apply between the time
                 series (indicated by filter and aggregation)
@@ -605,16 +617,16 @@ properties:
                 the left-hand side and the threshold on the
                 right-hand side. Only COMPARISON_LT and
                 COMPARISON_GT are supported currently.
-              values:
-                - :COMPARISON_GT
-                - :COMPARISON_GE
-                - :COMPARISON_LT
-                - :COMPARISON_LE
-                - :COMPARISON_EQ
-                - :COMPARISON_NE
               required: true
-            - !ruby/object:Api::Type::NestedObject
-              name: trigger
+              enum_values:
+                - 'COMPARISON_GT'
+                - 'COMPARISON_GE'
+                - 'COMPARISON_LT'
+                - 'COMPARISON_LE'
+                - 'COMPARISON_EQ'
+                - 'COMPARISON_NE'
+            - name: 'trigger'
+              type: NestedObject
               description: |
                 The number/percent of time series for which
                 the comparison must hold in order for the
@@ -625,20 +637,20 @@ properties:
                 or by the ratio, if denominator_filter and
                 denominator_aggregations are specified.
               properties:
-                - !ruby/object:Api::Type::Double
-                  name: percent
+                - name: 'percent'
+                  type: Double
                   description: |
                     The percentage of time series that
                     must fail the predicate for the
                     condition to be triggered.
-                - !ruby/object:Api::Type::Integer
-                  name: count
+                - name: 'count'
+                  type: Integer
                   description: |
                     The absolute number of time series
                     that must fail the predicate for the
                     condition to be triggered.
-            - !ruby/object:Api::Type::Array
-              name: aggregations
+            - name: 'aggregations'
+              type: Array
               description: |
                 Specifies the alignment of data points in
                 individual time series as well as how to
@@ -653,10 +665,11 @@ properties:
                 request. It is advisable to use the
                 ListTimeSeries method when debugging this
                 field.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Enum
-                    name: perSeriesAligner
+                  - name: 'perSeriesAligner'
+                    type: Enum
                     description: |
                       The approach to be used to align
                       individual time series. Not all
@@ -675,28 +688,28 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :ALIGN_NONE
-                      - :ALIGN_DELTA
-                      - :ALIGN_RATE
-                      - :ALIGN_INTERPOLATE
-                      - :ALIGN_NEXT_OLDER
-                      - :ALIGN_MIN
-                      - :ALIGN_MAX
-                      - :ALIGN_MEAN
-                      - :ALIGN_COUNT
-                      - :ALIGN_SUM
-                      - :ALIGN_STDDEV
-                      - :ALIGN_COUNT_TRUE
-                      - :ALIGN_COUNT_FALSE
-                      - :ALIGN_FRACTION_TRUE
-                      - :ALIGN_PERCENTILE_99
-                      - :ALIGN_PERCENTILE_95
-                      - :ALIGN_PERCENTILE_50
-                      - :ALIGN_PERCENTILE_05
-                      - :ALIGN_PERCENT_CHANGE
-                  - !ruby/object:Api::Type::Array
-                    name: groupByFields
+                    enum_values:
+                      - 'ALIGN_NONE'
+                      - 'ALIGN_DELTA'
+                      - 'ALIGN_RATE'
+                      - 'ALIGN_INTERPOLATE'
+                      - 'ALIGN_NEXT_OLDER'
+                      - 'ALIGN_MIN'
+                      - 'ALIGN_MAX'
+                      - 'ALIGN_MEAN'
+                      - 'ALIGN_COUNT'
+                      - 'ALIGN_SUM'
+                      - 'ALIGN_STDDEV'
+                      - 'ALIGN_COUNT_TRUE'
+                      - 'ALIGN_COUNT_FALSE'
+                      - 'ALIGN_FRACTION_TRUE'
+                      - 'ALIGN_PERCENTILE_99'
+                      - 'ALIGN_PERCENTILE_95'
+                      - 'ALIGN_PERCENTILE_50'
+                      - 'ALIGN_PERCENTILE_05'
+                      - 'ALIGN_PERCENT_CHANGE'
+                  - name: 'groupByFields'
+                    type: Array
                     description: |
                       The set of fields to preserve when
                       crossSeriesReducer is specified.
@@ -723,9 +736,10 @@ properties:
                       time series. If crossSeriesReducer
                       is not defined, this field is
                       ignored.
-                    item_type: Api::Type::String
-                  - !ruby/object:Api::Type::String
-                    name: alignmentPeriod
+                    item_type:
+                      type: String
+                  - name: 'alignmentPeriod'
+                    type: String
                     description: |
                       The alignment period for per-time
                       series alignment. If present,
@@ -741,8 +755,8 @@ properties:
                       does not equal ALIGN_NONE, then
                       this field must be defined;
                       otherwise an error is returned.
-                  - !ruby/object:Api::Type::Enum
-                    name: crossSeriesReducer
+                  - name: 'crossSeriesReducer'
+                    type: Enum
                     description: |
                       The approach to be used to combine
                       time series. Not all reducer
@@ -761,24 +775,24 @@ properties:
                       and alignmentPeriod must be
                       specified; otherwise, an error is
                       returned.
-                    values:
-                      - :REDUCE_NONE
-                      - :REDUCE_MEAN
-                      - :REDUCE_MIN
-                      - :REDUCE_MAX
-                      - :REDUCE_SUM
-                      - :REDUCE_STDDEV
-                      - :REDUCE_COUNT
-                      - :REDUCE_COUNT_TRUE
-                      - :REDUCE_COUNT_FALSE
-                      - :REDUCE_FRACTION_TRUE
-                      - :REDUCE_PERCENTILE_99
-                      - :REDUCE_PERCENTILE_95
-                      - :REDUCE_PERCENTILE_50
-                      - :REDUCE_PERCENTILE_05
-                    diff_suppress_func: crossSeriesReducerDiffSuppress
-            - !ruby/object:Api::Type::String
-              name: filter
+                    diff_suppress_func: 'crossSeriesReducerDiffSuppress'
+                    enum_values:
+                      - 'REDUCE_NONE'
+                      - 'REDUCE_MEAN'
+                      - 'REDUCE_MIN'
+                      - 'REDUCE_MAX'
+                      - 'REDUCE_SUM'
+                      - 'REDUCE_STDDEV'
+                      - 'REDUCE_COUNT'
+                      - 'REDUCE_COUNT_TRUE'
+                      - 'REDUCE_COUNT_FALSE'
+                      - 'REDUCE_FRACTION_TRUE'
+                      - 'REDUCE_PERCENTILE_99'
+                      - 'REDUCE_PERCENTILE_95'
+                      - 'REDUCE_PERCENTILE_50'
+                      - 'REDUCE_PERCENTILE_05'
+            - name: 'filter'
+              type: String
               description: |
                 A filter that identifies which time series
                 should be compared with the threshold.The
@@ -792,38 +806,38 @@ properties:
                 resource labels, and metric labels. This
                 field may not exceed 2048 Unicode characters
                 in length.
-            - !ruby/object:Api::Type::Enum
-              name: evaluationMissingData
+            - name: 'evaluationMissingData'
+              type: Enum
               description: |
                 A condition control that determines how
                 metric-threshold conditions are evaluated when
                 data stops arriving.
-              values:
-                - :EVALUATION_MISSING_DATA_INACTIVE
-                - :EVALUATION_MISSING_DATA_ACTIVE
-                - :EVALUATION_MISSING_DATA_NO_OP
-        - !ruby/object:Api::Type::String
-          name: displayName
-          required: true
+              enum_values:
+                - 'EVALUATION_MISSING_DATA_INACTIVE'
+                - 'EVALUATION_MISSING_DATA_ACTIVE'
+                - 'EVALUATION_MISSING_DATA_NO_OP'
+        - name: 'displayName'
+          type: String
           description: |
             A short name or phrase used to identify the
             condition in dashboards, notifications, and
             incidents. To avoid confusion, don't use the same
             display name for multiple conditions in the same
             policy.
-        - !ruby/object:Api::Type::NestedObject
-          name: conditionMatchedLog
+          required: true
+        - name: 'conditionMatchedLog'
+          type: NestedObject
           description: |
             A condition that checks for log messages matching given constraints.
             If set, no other conditions can be present.
           properties:
-            - !ruby/object:Api::Type::String
-              name: filter
+            - name: 'filter'
+              type: String
               description: |
                 A logs-based filter.
               required: true
-            - !ruby/object:Api::Type::KeyValuePairs
-              name: labelExtractors
+            - name: 'labelExtractors'
+              type: KeyValuePairs
               description: |
                 A map from a label key to an extractor expression, which is used to
                 extract the value for this label key. Each entry in this map is
@@ -832,8 +846,8 @@ properties:
                 a separate rule for the purposes of triggering notifications.
                 Label keys and corresponding values can be used in notifications
                 generated by this condition.
-        - !ruby/object:Api::Type::NestedObject
-          name: conditionPrometheusQueryLanguage
+        - name: 'conditionPrometheusQueryLanguage'
+          type: NestedObject
           description: |
             A condition type that allows alert policies to be defined using
             Prometheus Query Language (PromQL).
@@ -841,30 +855,30 @@ properties:
             The PrometheusQueryLanguageCondition message contains information
             from a Prometheus alerting rule and its associated rule group.
           properties:
-            - !ruby/object:Api::Type::String
-              name: query
+            - name: 'query'
+              type: String
               description: |
                 The PromQL expression to evaluate. Every evaluation cycle this
                 expression is evaluated at the current time, and all resultant time
                 series become pending/firing alerts. This field must not be empty.
               required: true
-            - !ruby/object:Api::Type::String
-              name: duration
+            - name: 'duration'
+              type: String
               description: |
                 Alerts are considered firing once their PromQL expression evaluated
                 to be "true" for this long. Alerts whose PromQL expression was not
                 evaluated to be "true" for long enough are considered pending. The
                 default value is zero. Must be zero or positive.
-            - !ruby/object:Api::Type::String
-              name: evaluationInterval
+            - name: 'evaluationInterval'
+              type: String
               description: |
                 How often this rule should be evaluated. Must be a positive multiple
                 of 30 seconds or missing. The default value is 30 seconds. If this
                 PrometheusQueryLanguageCondition was generated from a Prometheus
                 alerting rule, then this value should be taken from the enclosing
                 rule group.
-            - !ruby/object:Api::Type::KeyValuePairs
-              name: 'labels'
+            - name: 'labels'
+              type: KeyValuePairs
               description: |
                 Labels to add to or overwrite in the PromQL query result. Label names
                 must be valid.
@@ -873,8 +887,8 @@ properties:
                 variable names are the names of the labels in the PromQL result, including
                 "__name__" and "value". "labels" may be empty. This field is intended to be
                 used for organizing and identifying the AlertPolicy
-            - !ruby/object:Api::Type::String
-              name: ruleGroup
+            - name: 'ruleGroup'
+              type: String
               description: |
                 The rule group name of this alert in the corresponding Prometheus
                 configuration file.
@@ -884,8 +898,8 @@ properties:
                 The rule group name and the alert name are necessary to update the
                 relevant AlertPolicies in case the definition of the rule group changes
                 in the future. This field is optional.
-            - !ruby/object:Api::Type::String
-              name: alertRule
+            - name: 'alertRule'
+              type: String
               description: |
                 The alerting rule name of this alert in the corresponding Prometheus
                 configuration file.
@@ -898,9 +912,8 @@ properties:
 
                 This field is optional. If this field is not empty, then it must be a
                 valid Prometheus label name.
-    required: true
-  - !ruby/object:Api::Type::Array
-    name: 'notificationChannels'
+  - name: 'notificationChannels'
+    type: Array
     # TODO chrisst - turn this into a resource ref
     description: |
       Identifies the notification channels to which notifications should be
@@ -910,66 +923,69 @@ properties:
       returned from the notificationChannels.list method. The syntax of the
       entries in this field is
       `projects/[PROJECT_ID]/notificationChannels/[CHANNEL_ID]`
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: alertStrategy
+    item_type:
+      type: String
+  - name: 'alertStrategy'
+    type: NestedObject
     description: |
       Control over how this alert policy's notification channels are notified.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: notificationRateLimit
+      - name: 'notificationRateLimit'
+        type: NestedObject
         description: |
           Required for alert policies with a LogMatch condition.
           This limit is not implemented for alert policies that are not log-based.
         properties:
-          - !ruby/object:Api::Type::String
-            name: period
+          - name: 'period'
+            type: String
             description: |
               Not more than one notification per period.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example "60.5s".
-      - !ruby/object:Api::Type::String
-        name: autoClose
+      - name: 'autoClose'
+        type: String
         description: |
           If an alert policy that was active has no data for this long, any open incidents will close.
-      - !ruby/object:Api::Type::Array
-        name: notificationChannelStrategy
+      - name: 'notificationChannelStrategy'
+        type: Array
         description: |
           Control over how the notification channels in `notification_channels`
           are notified when this alert fires, on a per-channel basis.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Array
-              name: notificationChannelNames
+            - name: 'notificationChannelNames'
+              type: Array
               description: |
                 The notification channels that these settings apply to. Each of these
                 correspond to the name field in one of the NotificationChannel objects
                 referenced in the notification_channels field of this AlertPolicy. The format is
                 `projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]`
-              item_type: Api::Type::String
-            - !ruby/object:Api::Type::String
-              name: renotifyInterval
+              item_type:
+                type: String
+            - name: 'renotifyInterval'
+              type: String
               description: |
                 The frequency at which to send reminder notifications for open incidents.
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: userLabels
+  - name: 'userLabels'
+    type: KeyValuePairs
     description: |
       This field is intended to be used for organizing and identifying the AlertPolicy
       objects.The field can contain up to 64 entries. Each key and value is limited
       to 63 Unicode characters or 128 bytes, whichever is smaller. Labels and values
       can contain only lowercase letters, numerals, underscores, and dashes. Keys
       must begin with a letter.
-  - !ruby/object:Api::Type::Enum
-    name: severity
+  - name: 'severity'
+    type: Enum
     description: |
       The severity of an alert policy indicates how important incidents generated
       by that policy are. The severity level will be displayed on the Incident
       detail page and in notifications.
-    values:
-      - :CRITICAL
-      - :ERROR
-      - :WARNING
-  - !ruby/object:Api::Type::NestedObject
-    name: documentation
+    enum_values:
+      - 'CRITICAL'
+      - 'ERROR'
+      - 'WARNING'
+  - name: 'documentation'
+    type: NestedObject
     description: |
       Documentation that is included with notifications and incidents related
       to this policy. Best practice is for the documentation to include information
@@ -977,57 +993,58 @@ properties:
       problems detected by the alerting policy. Notification channels that have
       limited capacity might not show this documentation.
     properties:
-      - !ruby/object:Api::Type::String
-        name: content
-        at_least_one_of:
-          - documentation.0.content
-          - documentation.0.mime_type
-          - documentation.0.subject
-          - documentation.0.links
+      - name: 'content'
+        type: String
         description: |
           The text of the documentation, interpreted according to mimeType.
           The content may not exceed 8,192 Unicode characters and may not
           exceed more than 10,240 bytes when encoded in UTF-8 format,
           whichever is smaller.
-      - !ruby/object:Api::Type::String
-        name: mimeType
         at_least_one_of:
-          - documentation.0.content
-          - documentation.0.mime_type
-          - documentation.0.subject
-          - documentation.0.links
-        default_value: text/markdown
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+      - name: 'mimeType'
+        type: String
         description: |
           The format of the content field. Presently, only the value
           "text/markdown" is supported.
-      - !ruby/object:Api::Type::String
-        name: subject
         at_least_one_of:
-          - documentation.0.content
-          - documentation.0.mime_type
-          - documentation.0.subject
-          - documentation.0.links
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+        default_value: "text/markdown"
+      - name: 'subject'
+        type: String
         description: |
           The subject line of the notification. The subject line may not
           exceed 10,240 bytes. In notifications generated by this policy the contents
           of the subject line after variable expansion will be truncated to 255 bytes
           or shorter at the latest UTF-8 character boundary.
-      - !ruby/object:Api::Type::Array
-        name: links
         at_least_one_of:
-          - documentation.0.content
-          - documentation.0.mime_type
-          - documentation.0.subject
-          - documentation.0.links
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+      - name: 'links'
+        type: Array
         description: |
           Links to content such as playbooks, repositories, and other resources. This field can contain up to 3 entries.
-        item_type: !ruby/object:Api::Type::NestedObject
+        at_least_one_of:
+          - 'documentation.0.content'
+          - 'documentation.0.mime_type'
+          - 'documentation.0.subject'
+          - 'documentation.0.links'
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: displayName
+            - name: 'displayName'
+              type: String
               description: |
                 A short display name for the link. The display name must not be empty or exceed 63 characters. Example: "playbook".
-            - !ruby/object:Api::Type::String
-              name: url
+            - name: 'url'
+              type: String
               description: |
                 The url of a webpage. A url can be templatized by using variables in the path or the query parameters. The total length of a URL should not exceed 2083 characters before and after variable expansion. Example: "https://my_domain.com/playbook?name=${resource.name}".

@@ -139,7 +139,7 @@ The following arguments are supported:
 
 <a name="nested_attached_disk"></a>The `attached_disk` block supports:
 
-* `source` - The name or self_link of the disk attached to this instance.
+* `source` - The self_link of the disk attached to this instance.
 
 * `device_name` - Name with which the attached disk is accessible
     under `/dev/disk/by-id/`
@@ -187,6 +187,8 @@ The following arguments are supported:
 * `scopes` - A list of service scopes.
 
 <a name="nested_scheduling"></a>The `scheduling` block supports:
+
+* `host_error_timeout_seconds` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Time in seconds for host error detection.
 
 * `preemptible` - Whether the instance is preemptible.
 

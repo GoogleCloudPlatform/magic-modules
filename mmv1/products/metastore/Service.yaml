@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,403 +11,400 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Service'
-base_url: 'projects/{{project}}/locations/{{location}}/services'
-create_url: 'projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A managed metastore service that serves metadata queries.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataproc-metastore/docs/overview'
   api: 'https://cloud.google.com/dataproc-metastore/docs/reference/rest/v1/projects.locations.services'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: service_id
-  method_name_separator: ':'
-  import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/services/{{service_id}}',
-      '{{service_id}}',
-    ]
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/services'
+self_link: 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-import_format:
-  ['projects/{{project}}/locations/{{location}}/services/{{service_id}}']
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'service_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+    - '{{service_id}}'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_basic'
-    primary_resource_name:
-      'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+  - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_cmek_test'
-    skip_docs: true
+  - name: 'dataproc_metastore_service_deletion_protection'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
+    vars:
+      metastore_service_name: 'metastore-srv'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+  - name: 'dataproc_metastore_service_cmek_test'
+    primary_resource_id: 'default'
+    vars:
+      metastore_service_name: 'example-service'
+      key_name: 'example-key'
+      keyring_name: 'example-keyring'
+    exclude_docs: true
     skip_vcr: true
+  - name: 'dataproc_metastore_service_cmek_example'
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_cmek_example'
-    skip_test: true
-    primary_resource_id: 'default'
-    vars:
-      metastore_service_name: 'example-service'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_endpoint'
-    skip_docs: true
+    exclude_test: true
+  - name: 'dataproc_metastore_service_endpoint'
     primary_resource_id: 'endpoint'
     vars:
       metastore_service_name: 'metastore-endpoint'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_aux'
-    skip_docs: true
+    exclude_docs: true
+  - name: 'dataproc_metastore_service_aux'
     primary_resource_id: 'aux'
     vars:
       metastore_service_name: 'metastore-aux'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_metadata'
-    skip_docs: true
+    exclude_docs: true
+  - name: 'dataproc_metastore_service_metadata'
     primary_resource_id: 'metadata'
     vars:
       metastore_service_name: 'metastore-metadata'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_private_service_connect'
-    skip_test: true
-    primary_resource_id: default
+    exclude_docs: true
+  - name: 'dataproc_metastore_service_private_service_connect'
+    primary_resource_id: 'default'
     vars:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_private_service_connect_custom_routes'
-    skip_test: true
-    min_version: beta
-    primary_resource_id: default
+    exclude_test: true
+  - name: 'dataproc_metastore_service_private_service_connect_custom_routes'
+    primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       metastore_service_name: 'metastore-srv'
       network_name: 'my-network'
       subnet_name: 'my-subnetwork'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_telemetry'
-    skip_docs: true
+    exclude_test: true
+  - name: 'dataproc_metastore_service_telemetry'
     primary_resource_id: 'telemetry'
     vars:
       metastore_service_name: 'ms-telemetry'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_dpms2'
+    exclude_docs: true
+  - name: 'dataproc_metastore_service_dpms2'
     primary_resource_id: 'dpms2'
     vars:
       metastore_service_name: 'ms-dpms2'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_dpms2_scaling_factor'
+  - name: 'dataproc_metastore_service_dpms2_scaling_factor'
     primary_resource_id: 'dpms2_scaling_factor'
     vars:
       metastore_service_name: 'ms-dpms2sf'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_dpms2_scaling_factor_lt1'
-    skip_docs: true
+  - name: 'dataproc_metastore_service_dpms2_scaling_factor_lt1'
     primary_resource_id: 'dpms2_scaling_factor_lt1'
     vars:
       metastore_service_name: 'ms-dpms2sflt1'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_scheduled_backup'
+    exclude_docs: true
+  - name: 'dataproc_metastore_service_scheduled_backup'
     primary_resource_id: 'backup'
     vars:
       metastore_service_name: 'backup'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
+  - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:
       metastore_service_name: 'test-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
+  - name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:
       metastore_service_name: 'test-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
+  - name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
     primary_resource_id: 'test_resource'
     vars:
       metastore_service_name: 'test-service'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataproc_metastore_service_autoscaling_no_limit_config'
-    min_version: beta
+  - name: 'dataproc_metastore_service_autoscaling_no_limit_config'
     primary_resource_id: 'test_resource'
+    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'serviceId'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'serviceId'
+    type: String
     description: |
       The ID of the metastore service. The id must contain only letters (a-z, A-Z), numbers (0-9), underscores (_),
       and hyphens (-). Cannot begin or end with underscore or hyphen. Must consist of between
       3 and 63 characters.
-  - !ruby/object:Api::Type::String
-    name: 'location'
     url_param_only: true
+    required: true
     immutable: true
-    default_value: global
+  - name: 'location'
+    type: String
     description: |
       The location where the metastore service should reside.
       The default value is `global`.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the metastore service.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: 'User-defined labels for the metastore service.'
   # This is an x-product resource reference.
-  - !ruby/object:Api::Type::String
-    name: 'network'
-    immutable: true
+  - name: 'network'
+    type: String
     description: |
       The relative resource name of the VPC network on which the instance can be accessed. It is specified in the following form:
 
       "projects/{projectNumber}/global/networks/{network_id}".
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'endpointUri'
-    output: true
+  - name: 'endpointUri'
+    type: String
     description: |
       The URI of the endpoint used to access the metastore service.
-  - !ruby/object:Api::Type::Integer
-    name: 'port'
+    output: true
+  - name: 'port'
+    type: Integer
     description: |
       The TCP port at which the metastore service is reached. Default: 9083.
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'state'
-    output: true
+  - name: 'state'
+    type: String
     description: |
       The current state of the metastore service.
-  - !ruby/object:Api::Type::String
-    name: 'stateMessage'
     output: true
+  - name: 'stateMessage'
+    type: String
     description: |
       Additional information about the current state of the metastore service, if available.
-  - !ruby/object:Api::Type::String
-    name: 'artifactGcsUri'
     output: true
+  - name: 'artifactGcsUri'
+    type: String
     description: |
       A Cloud Storage URI (starting with gs://) that specifies where artifacts related to the metastore service are stored.
-  - !ruby/object:Api::Type::Enum
-    name: 'tier'
+    output: true
+  - name: 'tier'
+    type: Enum
     description: |
       The tier of the service.
-    values:
-      - :DEVELOPER
-      - :ENTERPRISE
     default_from_api: true
     conflicts:
       - scalingConfig
-
-  - !ruby/object:Api::Type::NestedObject
-    name: 'scalingConfig'
+    enum_values:
+      - 'DEVELOPER'
+      - 'ENTERPRISE'
+  - name: 'scalingConfig'
+    type: NestedObject
     description: |
       Represents the scaling configuration of a metastore service.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'instanceSize'
+      - name: 'instanceSize'
+        type: Enum
         description: |
           Metastore instance sizes.
         required: false
-        exactly_one_of:
-          - scaling_config.0.instance_size
-          - scaling_config.0.scaling_factor
-          - scaling_config.0.autoscaling_config
         conflicts:
           - tier
-        values:
-          - :EXTRA_SMALL
-          - :SMALL
-          - :MEDIUM
-          - :LARGE
-          - :EXTRA_LARGE
-      - !ruby/object:Api::Type::Double
-        name: 'scalingFactor'
+        exactly_one_of:
+          - 'scaling_config.0.instance_size'
+          - 'scaling_config.0.scaling_factor'
+          - 'scaling_config.0.autoscaling_config'
+        enum_values:
+          - 'EXTRA_SMALL'
+          - 'SMALL'
+          - 'MEDIUM'
+          - 'LARGE'
+          - 'EXTRA_LARGE'
+      - name: 'scalingFactor'
+        type: Double
         description: |
           Scaling factor, in increments of 0.1 for values less than 1.0, and increments of 1.0 for values greater than 1.0.
         required: false
-      - !ruby/object:Api::Type::NestedObject
-        name: 'autoscalingConfig'
-        min_version: beta
+      - name: 'autoscalingConfig'
+        type: NestedObject
         description: |
           Represents the autoscaling configuration of a metastore service.
+        min_version: 'beta'
         required: false
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'autoscalingEnabled'
+          - name: 'autoscalingEnabled'
+            type: Boolean
             description: |
               Defines whether autoscaling is enabled. The default value is false.
-          - !ruby/object:Api::Type::NestedObject
-            name: 'limitConfig'
-            default_from_api: true
+          - name: 'limitConfig'
+            type: NestedObject
             description: |
               Represents the limit configuration of a metastore service.
+            default_from_api: true
             properties:
-              - !ruby/object:Api::Type::Double
-                name: 'minScalingFactor'
+              - name: 'minScalingFactor'
+                type: Double
                 description: |
                   The minimum scaling factor that the service will autoscale to. The default value is 0.1.
                 default_from_api: true
-              - !ruby/object:Api::Type::Double
-                name: 'maxScalingFactor'
+              - name: 'maxScalingFactor'
+                type: Double
                 description: |
                   The maximum scaling factor that the service will autoscale to. The default value is 6.0.
                 default_from_api: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'scheduledBackup'
+  - name: 'scheduledBackup'
+    type: NestedObject
     description: |
       The configuration of scheduled backup for the metastore service.
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: 'enabled'
+      - name: 'enabled'
+        type: Boolean
         description: |
           Defines whether the scheduled backup is enabled. The default value is false.
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: 'cronSchedule'
+      - name: 'cronSchedule'
+        type: String
         description: |
           The scheduled interval in Cron format, see https://en.wikipedia.org/wiki/Cron The default is empty: scheduled backup is not enabled. Must be specified to enable scheduled backups.
-      - !ruby/object:Api::Type::String
-        name: 'timeZone'
+      - name: 'timeZone'
+        type: String
         description: |
           Specifies the time zone to be used when interpreting cronSchedule. Must be a time zone name from the time zone database (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones), e.g. America/Los_Angeles or Africa/Abidjan. If left unspecified, the default is UTC.
         default_from_api: true
-      - !ruby/object:Api::Type::String
-        name: 'backupLocation'
+      - name: 'backupLocation'
+        type: String
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'maintenanceWindow'
+  - name: 'deletionProtection'
+    type: Boolean
+    description: |
+      Indicates if the dataproc metastore should be protected against accidental deletions.
+  - name: 'maintenanceWindow'
+    type: NestedObject
     description: |
       The one hour maintenance window of the metastore service.
       This specifies when the service can be restarted for maintenance purposes in UTC time.
       Maintenance window is not needed for services with the `SPANNER` database type.
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'hourOfDay'
+      - name: 'hourOfDay'
+        type: Integer
         description: |
           The hour of day (0-23) when the window starts.
         required: true
-      - !ruby/object:Api::Type::Enum
-        name: 'dayOfWeek'
+      - name: 'dayOfWeek'
+        type: Enum
         description: |
           The day of week, when the window starts.
         required: true
-        values:
-          - :MONDAY
-          - :TUESDAY
-          - :WEDNESDAY
-          - :THURSDAY
-          - :FRIDAY
-          - :SATURDAY
-          - :SUNDAY
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionConfig'
+        enum_values:
+          - 'MONDAY'
+          - 'TUESDAY'
+          - 'WEDNESDAY'
+          - 'THURSDAY'
+          - 'FRIDAY'
+          - 'SATURDAY'
+          - 'SUNDAY'
+  - name: 'encryptionConfig'
+    type: NestedObject
     description: |
       Information used to configure the Dataproc Metastore service to encrypt
       customer data at rest.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKey'
+      - name: 'kmsKey'
+        type: String
         description: |
           The fully qualified customer provided Cloud KMS key name to use for customer data encryption.
           Use the following format: `projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)`
         required: true
         immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'hiveMetastoreConfig'
+  - name: 'hiveMetastoreConfig'
+    type: NestedObject
     description: |
       Configuration information specific to running Hive metastore software as the metastore service.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'endpointProtocol'
-        immutable: true
-        default_value: :THRIFT
+      - name: 'endpointProtocol'
+        type: Enum
         description: |
           The protocol to use for the metastore service endpoint. If unspecified, defaults to `THRIFT`.
-        values:
-          - :THRIFT
-          - :GRPC
-      - !ruby/object:Api::Type::String
-        name: 'version'
         immutable: true
-        required: true
+        default_value: "THRIFT"
+        enum_values:
+          - 'THRIFT'
+          - 'GRPC'
+      - name: 'version'
+        type: String
         description: |
           The Hive metastore schema version.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'configOverrides'
+        required: true
+        immutable: true
+      - name: 'configOverrides'
+        type: KeyValuePairs
         description: |
           A mapping of Hive metastore configuration key-value pairs to apply to the Hive metastore (configured in hive-site.xml).
           The mappings override system defaults (some keys cannot be overridden)
         default_from_api: true
         diff_suppress_func: 'dataprocMetastoreServiceOverrideSuppress'
-      - !ruby/object:Api::Type::NestedObject
-        name: 'kerberosConfig'
+      - name: 'kerberosConfig'
+        type: NestedObject
         description: |
           Information used to configure the Hive metastore service as a service principal in a Kerberos realm.
         properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'keytab'
-            required: true
+          - name: 'keytab'
+            type: NestedObject
             description: |
               A Kerberos keytab file that can be used to authenticate a service principal with a Kerberos Key Distribution Center (KDC).
+            required: true
             properties:
-              - !ruby/object:Api::Type::String
-                required: true
-                name: 'cloudSecret'
+              - name: 'cloudSecret'
+                type: String
                 description: |
                   The relative resource name of a Secret Manager secret version, in the following form:
 
                   "projects/{projectNumber}/secrets/{secret_id}/versions/{version_id}".
-          - !ruby/object:Api::Type::String
-            name: 'principal'
-            required: true
+                required: true
+          - name: 'principal'
+            type: String
             description: |
               A Kerberos principal that exists in the both the keytab the KDC to authenticate as. A typical principal is of the form "primary/instance@REALM", but there is no exact format.
-          - !ruby/object:Api::Type::String
-            name: 'krb5ConfigGcsUri'
             required: true
+          - name: 'krb5ConfigGcsUri'
+            type: String
             description: |
               A Cloud Storage URI that specifies the path to a krb5.conf file. It is of the form gs://{bucket_name}/path/to/krb5.conf, although the file does not need to be named krb5.conf explicitly.
-      - !ruby/object:Api::Type::Map
-        name: 'auxiliaryVersions'
+            required: true
+      - name: 'auxiliaryVersions'
+        type: Map
         description: |
           A mapping of Hive metastore version to the auxiliary version configuration.
           When specified, a secondary Hive metastore service is created along with the primary service.
@@ -417,100 +414,103 @@ properties:
         key_name: 'key'
         key_description: |
           The auxiliary service name
-        value_type: !ruby/object:Api::Type::NestedObject
+        value_type:
+          name: auxiliaryVersions
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'version'
-              required: true
+            - name: 'version'
+              type: String
               description: |
                 The Hive metastore version of the auxiliary service. It must be less than the primary Hive metastore service's version.
-            - !ruby/object:Api::Type::KeyValuePairs
-              name: 'configOverrides'
+              required: true
+            - name: 'configOverrides'
+              type: KeyValuePairs
               description: |
                 A mapping of Hive metastore configuration key-value pairs to apply to the auxiliary Hive metastore (configured in hive-site.xml) in addition to the primary version's overrides.
                 If keys are present in both the auxiliary version's overrides and the primary version's overrides, the value from the auxiliary version's overrides takes precedence.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'networkConfig'
-    immutable: true
+  - name: 'networkConfig'
+    type: NestedObject
     description: |
       The configuration specifying the network settings for the Dataproc Metastore service.
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'consumers'
+      - name: 'consumers'
+        type: Array
         description: |
           The consumer-side network configuration for the Dataproc Metastore instance.
         required: true
         immutable: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'endpointUri'
+            - name: 'endpointUri'
+              type: String
               description: |
                 The URI of the endpoint used to access the metastore service.
               output: true
-            - !ruby/object:Api::Type::String
-              name: 'subnetwork'
-              required: true
+            - name: 'subnetwork'
+              type: String
               description: |
                 The subnetwork of the customer project from which an IP address is reserved and used as the Dataproc Metastore service's endpoint.
                 It is accessible to hosts in the subnet and to all hosts in a subnet in the same region and same network.
                 There must be at least one IP address available in the subnet's primary range. The subnet is specified in the following form:
                 `projects/{projectNumber}/regions/{region_id}/subnetworks/{subnetwork_id}
-      - !ruby/object:Api::Type::Boolean
-        name: 'customRoutesEnabled'
-        min_version: beta
+              required: true
+      - name: 'customRoutesEnabled'
+        type: Boolean
         description: |
           Enables custom routes to be imported and exported for the Dataproc Metastore service's peered VPC network.
-  - !ruby/object:Api::Type::Enum
-    name: 'databaseType'
-    immutable: true
-    default_value: :MYSQL
+        min_version: 'beta'
+  - name: 'databaseType'
+    type: Enum
     description: |
       The database type that the Metastore service stores its data.
-    values:
-      - :MYSQL
-      - :SPANNER
-  - !ruby/object:Api::Type::Enum
-    name: 'releaseChannel'
     immutable: true
-    default_value: :STABLE
+    default_value: "MYSQL"
+    enum_values:
+      - 'MYSQL'
+      - 'SPANNER'
+  - name: 'releaseChannel'
+    type: Enum
     description: |
       The release channel of the service. If unspecified, defaults to `STABLE`.
-    values:
-      - :CANARY
-      - :STABLE
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+    immutable: true
+    default_value: "STABLE"
+    enum_values:
+      - 'CANARY'
+      - 'STABLE'
+  - name: 'uid'
+    type: String
     description: |
       The globally unique resource identifier of the metastore service.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'metadataIntegration'
+    output: true
+  - name: 'metadataIntegration'
+    type: NestedObject
     description: |
       The setting that defines how metastore metadata should be integrated with external services and systems.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'dataCatalogConfig'
-        required: true
+      - name: 'dataCatalogConfig'
+        type: NestedObject
         description: |
           The integration config for the Data Catalog service.
+        required: true
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enabled'
-            required: true
+          - name: 'enabled'
+            type: Boolean
             description: |
               Defines whether the metastore metadata should be synced to Data Catalog. The default value is to disable syncing metastore metadata to Data Catalog.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'telemetryConfig'
+            required: true
+  - name: 'telemetryConfig'
+    type: NestedObject
     description: |
       The configuration specifying telemetry settings for the Dataproc Metastore service. If unspecified defaults to JSON.
     default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'logFormat'
-        default_value: :JSON
+      - name: 'logFormat'
+        type: Enum
         description: |
           The output format of the Dataproc Metastore service's logs.
-        values:
-          - :LEGACY
-          - :JSON
+        default_value: "JSON"
+        enum_values:
+          - 'LEGACY'
+          - 'JSON'
