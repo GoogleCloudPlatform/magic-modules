@@ -167,7 +167,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 `, context)
 }
 
-func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesUpdateExample(t *testing.T) {
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
