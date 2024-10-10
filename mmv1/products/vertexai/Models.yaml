@@ -48,6 +48,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+  encoder: templates/terraform/encoders/vertex_ai_models.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.tmpl
 examples:
