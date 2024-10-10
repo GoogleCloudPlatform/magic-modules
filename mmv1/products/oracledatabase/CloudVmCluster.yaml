@@ -15,6 +15,10 @@
 ---
 name: 'CloudVmCluster'
 description: A CloudVmCluster resource.
+references:
+  guides:
+    'Create VM clusters': 'https://cloud.google.com/oracle/database/docs/create-clusters'
+  api: 'https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/cloudVmClusters'

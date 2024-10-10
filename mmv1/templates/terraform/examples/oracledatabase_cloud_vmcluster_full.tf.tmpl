@@ -42,5 +42,6 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "cloudExadataInfr
 
 data "google_compute_network" "default" {
   name     = "new"
+  project = "{{index $.Vars "project"}}"
 }
 
