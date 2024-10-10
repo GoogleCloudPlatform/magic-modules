@@ -15,6 +15,7 @@
 name: 'Location'
 kind: 'compute#zone'
 description: 'Represents a Location resource.'
+exclude: true
 readonly: true
 docs:
 base_url: 'projects/{{project}}/locations'
