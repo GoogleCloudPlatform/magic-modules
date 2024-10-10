@@ -46,7 +46,7 @@ examples:
       time_zone: 'America/New_York'
   - name: 'healthcare_dataset_cmek'
     primary_resource_id: 'default'
-    skip_test: true
+    exclude_test: true
     vars:
       dataset_name: 'example-dataset'
       location: 'us-central1'
