@@ -128,7 +128,7 @@ properties:
     output: true
     description: |
       The formats in which this Model may be exported. If empty, this Model is not available for export.
-    item_type: 
+    item_type:
       type: NestedObject
       properties:
         - type: String
@@ -173,13 +173,13 @@ properties:
         name: 'args'
         immutable: true
         description: Specifies arguments for the command that runs when the container starts.
-        item_type: 
+        item_type:
           type: String
       - type: Array
         name: 'env'
         immutable: true
         description: List of environment variables to set in the container.
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: String
@@ -194,7 +194,7 @@ properties:
         name: 'ports'
         immutable: true
         description: List of ports to expose from the container.
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: Integer
@@ -213,7 +213,7 @@ properties:
         name: 'grpcPorts'
         immutable: true
         description: List of ports to expose from the container.
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: Integer
