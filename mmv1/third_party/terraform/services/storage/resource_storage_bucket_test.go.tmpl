@@ -59,7 +59,7 @@ func TestAccStorageBucket_basic_hns(t *testing.T) {
 
 // testcase to create bucket with HNS disabled and
 // forcenew to recreate the bucket if HNS set to true
-func TestAccStorageBucket_basic_forcenew(t *testing.T) {
+func TestAccStorageBucket_hns_forcenew(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
