@@ -1,0 +1,1273 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Job'
+description: "Transcoding Job Resource"
+references:
+  guides:
+    'Transcoder': 'https://cloud.google.com/transcoder/docs/'
+  api: 'https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobs'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/jobs'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/jobs'
+immutable: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+examples:
+  - name: 'transcoder_job_basic'
+    primary_resource_id: 'default'
+    vars:
+      job_template_id: 'example-job-template'
+      bucket_name: 'transcoder-job'
+    ignore_read_extra:
+      - 'state'
+      - 'end_time'
+  - name: 'transcoder_job_pubsub'
+    primary_resource_id: 'default'
+    vars:
+      job_template_id: 'example-job-template'
+      bucket_name: 'transcoder-job'
+      pub_sub_topic_name: 'transcoder-notifications'
+    ignore_read_extra:
+      - 'state'
+      - 'end_time'
+  - name: 'transcoder_job_encryptions'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      job_template_id: 'example-job-template'
+      bucket_name: 'transcoder-job'
+      secret_manager_secret_id: 'transcoder-encryption-key'
+    ignore_read_extra:
+      - 'state'
+      - 'end_time'
+  - name: 'transcoder_job_overlays'
+    primary_resource_id: 'default'
+    vars:
+      job_template_id: 'example-job-template'
+      bucket_name: 'transcoder-job'
+    ignore_read_extra:
+      - 'state'
+      - 'end_time'
+  - name: 'transcoder_job_manifests'
+    primary_resource_id: 'default'
+    vars:
+      job_template_id: 'example-job-template'
+      bucket_name: 'transcoder-job'
+    ignore_read_extra:
+      - 'state'
+      - 'end_time'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the transcoding job resource.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the job.
+    output: true
+  - name: 'inputUri'
+    type: String
+    description: |
+      URI of the media. For example, gs://bucket/inputs/file.mp4.
+  - name: 'outputUri'
+    type: String
+    description: |
+      URI for the output file(s). For example, gs://my-bucket/outputs/.
+  - name: 'createTime'
+    type: Time
+    description: |
+      The time the job was created.
+    output: true
+  - name: 'startTime'
+    type: Time
+    description: |
+      The time the transcoding started.
+    output: true
+  - name: 'endTime'
+    type: Time
+    description: |
+      The time the transcoding finished.
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the job.
+    output: true
+    enum_values:
+      - 'PROCESSING_STATE_UNSPECIFIED'
+      - 'PENDING'
+      - 'RUNNING'
+      - 'SUCCEEDED'
+      - 'FAILED'
+  - name: 'ttlAfterCompletionDays'
+    type: Integer
+    description: |
+      Job time to live value in days, which will be effective after job completion.
+      Job should be deleted automatically after the given TTL.
+      Enter a value between 1 and 90. The default is `30`.
+    default_from_api: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The labels associated with this job. You can use these to organize and group your jobs.
+  - name: 'error'
+    type: NestedObject
+    description: |
+      An error object that describes the reason for the failure.
+    output: true
+    properties:
+      - name: 'code'
+        type: Integer
+        description: |
+          The status code.
+      - name: 'message'
+        type: String
+        description: |
+          A developer-facing error message.
+      - name: 'details'
+        type: String
+        description: |
+          A list of messages that carry the error details.
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+  - name: 'mode'
+    type: Enum
+    description: |
+      The processing mode of the job.
+    default_from_api: true
+    enum_values:
+      - 'PROCESSING_MODE_UNSPECIFIED'
+      - 'PROCESSING_MODE_INTERACTIVE'
+      - 'PROCESSING_MODE_BATCH'
+  - name: 'batchModePriority'
+    type: Integer
+    description: |
+      The processing priority of a batch job. This field can only be set for batch mode jobs.
+      The default value is 0. This value cannot be negative. Higher values correspond to higher priorities for the job.
+    default_from_api: true
+  - name: 'optimization'
+    type: Enum
+    description: |
+      The optimization strategy of the job.
+    default_from_api: true
+    enum_values:
+      - 'OPTIMIZATION_STRATEGY_UNSPECIFIED'
+      - 'AUTODETECT'
+      - 'DISABLED'
+  - name: 'templateId'
+    type: String
+    description: |
+      Specify the templateId to use for populating Job.config.
+      The default is preset/web-hd, which is the only supported preset.
+    ignore_read: true
+    default_from_api: true
+  - name: 'config'
+    type: NestedObject
+    description: |
+      The configuration for this template.
+    default_from_api: true
+    properties:
+      - name: 'inputs'
+        type: Array
+        description: |
+          List of input assets stored in Cloud Storage.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                A unique key for this input. Must be specified when using advanced mapping and edit lists.
+              default_from_api: true
+            - name: 'uri'
+              type: String
+              description: |
+                URI of the media. Input files must be at least 5 seconds in duration and stored in Cloud Storage (for example, gs://bucket/inputs/file.mp4).
+                If empty, the value is populated from Job.input_uri.
+              default_from_api: true
+            - name: 'preprocessingConfig'
+              type: NestedObject
+              description: |
+                Preprocessing configurations.
+              default_from_api: true
+              properties:
+                - name: 'color'
+                  type: NestedObject
+                  description: |
+                    Color preprocessing configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'saturation'
+                      type: Integer
+                      description: |
+                        Control color saturation of the video
+                      default_from_api: true
+                    - name: 'contrast'
+                      type: Integer
+                      description: |
+                        Control black and white contrast of the video.
+                      default_from_api: true
+                    - name: 'brightness'
+                      type: Integer
+                      description: |
+                        Control brightness of the video.
+                      default_from_api: true
+                - name: 'denoise'
+                  type: NestedObject
+                  description: |
+                    Denoise preprocessing configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'strength'
+                      type: Integer
+                      description: |
+                        Set strength of the denoise.
+                      default_from_api: true
+                    - name: 'tune'
+                      type: String
+                      description: |
+                        Set the denoiser mode. The default is `standard``.
+                      default_from_api: true
+                - name: 'deblock'
+                  type: NestedObject
+                  description: |
+                    Deblock preprocessing configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'strength'
+                      type: Integer
+                      description: |
+                        Set strength of the deblocker.
+                      default_from_api: true
+                    - name: 'enabled'
+                      type: Boolean
+                      description: |
+                        Enable deblocker.
+                      default_from_api: true
+                - name: 'audio'
+                  type: NestedObject
+                  description: |
+                    Audio preprocessing configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'lufs'
+                      type: Integer
+                      description: |
+                        Specify audio loudness normalization in loudness units relative to full scale (LUFS).
+                      default_from_api: true
+                - name: 'crop'
+                  type: NestedObject
+                  description: |
+                    Specify the video cropping configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'topPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to crop from the top.
+                      default_from_api: true
+                    - name: 'bottomPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to crop from the bottom.
+                      default_from_api: true
+                    - name: 'leftPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to crop from the left.
+                      default_from_api: true
+                    - name: 'rightPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to crop from the right.
+                      default_from_api: true
+                - name: 'pad'
+                  type: NestedObject
+                  description: |
+                    Specify the video pad filter configuration.
+                  properties:
+                    - name: 'topPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to add to the top.
+                      default_from_api: true
+                    - name: 'bottomPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to add to the bottom.
+                      default_from_api: true
+                    - name: 'leftPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to add to the left.
+                      default_from_api: true
+                    - name: 'rightPixels'
+                      type: Integer
+                      description: |
+                        The number of pixels to add to the right.
+                      default_from_api: true
+                - name: 'deinterlace'
+                  type: NestedObject
+                  description: |
+                    Specify the video pad filter configuration.
+                  default_from_api: true
+                  properties:
+                    - name: 'yadif'
+                      type: NestedObject
+                      description: |
+                        Specifies the Yet Another Deinterlacing Filter Configuration.
+                      default_from_api: true
+                      properties:
+                        - name: 'mode'
+                          type: String
+                          description: |
+                            Specifies the deinterlacing mode to adopt. The default is `send_frame`.
+                          default_from_api: true
+                        - name: 'disableSpatialInterlacing'
+                          type: Boolean
+                          description: |
+                            Disable spacial interlacing.
+                        - name: 'parity'
+                          type: String
+                          description: |
+                            The picture field parity assumed for the input interlaced video. The default is `auto`.
+                          default_from_api: true
+                        - name: 'deinterlaceAllFrames'
+                          type: Boolean
+                          description: |
+                            Deinterlace all frames rather than just the frames identified as interlaced.
+                          default_from_api: true
+                    - name: 'bwdif'
+                      type: NestedObject
+                      description: |
+                        Bob Weaver Deinterlacing Filter Configuration.
+                      default_from_api: true
+                      properties:
+                        - name: 'mode'
+                          type: String
+                          description: |
+                            Specifies the deinterlacing mode to adopt. The default is `send_frame`.
+                          default_from_api: true
+                        - name: 'parity'
+                          type: String
+                          description: |
+                            The picture field parity assumed for the input interlaced video. The default is `auto`.
+                          default_from_api: true
+                        - name: 'deinterlaceAllFrames'
+                          type: Boolean
+                          description: |
+                            Deinterlace all frames rather than just the frames identified as interlaced.
+                          default_from_api: true
+      - name: 'editList'
+        type: Array
+        description: |
+          List of input assets stored in Cloud Storage.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                A unique key for this atom.
+              default_from_api: true
+            - name: 'inputs'
+              type: Array
+              description: |
+                List of values identifying files that should be used in this atom.
+              default_from_api: true
+              item_type:
+                type: String
+            - name: 'startTimeOffset'
+              type: Time
+              description: |
+                Start time in seconds for the atom, relative to the input file timeline. The default is `0s`.
+              default_from_api: true
+            - name: 'endTimeOffset'
+              type: Time
+              description: |
+                End time in seconds for the atom, relative to the input file timeline.
+              default_from_api: true
+      - name: 'elementaryStreams'
+        type: Array
+        description: |
+          List of input assets stored in Cloud Storage.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                A unique key for this atom.
+              default_from_api: true
+            - name: 'videoStream'
+              type: NestedObject
+              description: |
+                Encoding of a video stream.
+              default_from_api: true
+              properties:
+                - name: 'h264'
+                  type: NestedObject
+                  description: |
+                    H264 codec settings
+                  default_from_api: true
+                  properties:
+                    - name: 'widthPixels'
+                      type: Integer
+                      description: |
+                        The width of the video in pixels.
+                      default_from_api: true
+                    - name: 'heightPixels'
+                      type: Integer
+                      description: |
+                        The height of the video in pixels.
+                      default_from_api: true
+                    - name: 'frameRate'
+                      type: Integer
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - name: 'frameRateConversionStrategy'
+                      type: Enum
+                      description: |
+                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
+                      default_from_api: true
+                      enum_values:
+                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
+                        - 'DOWNSAMPLE'
+                        - 'DROP_DUPLICATE'
+                    - name: 'bitrateBps'
+                      type: Integer
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - name: 'pixelFormat'
+                      type: String
+                      description: Pixel format to use. The default is `yuv420p`.
+                      default_from_api: true
+                    - name: 'rateControlMode'
+                      type: String
+                      description: Specify the mode. The default is `vbr`.
+                      default_from_api: true
+                    - name: 'crfLevel'
+                      type: Integer
+                      description: Target CRF level. The default is `21`.
+                      default_from_api: true
+                    - name: 'allowOpenGop'
+                      type: Boolean
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                      default_from_api: true
+                    - name: 'enableTwoPass'
+                      type: Boolean
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                      default_from_api: true
+                    - name: 'vbvSizeBits'
+                      type: Integer
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - name: 'vbvFullnessBits'
+                      type: Integer
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - name: 'entropyCoder'
+                      type: String
+                      description: The entropy coder to use. The default is `cabac`.
+                      default_from_api: true
+                    - name: 'bPyramid'
+                      type: Boolean
+                      description: Allow B-pyramid for reference frame selection.
+                      default_from_api: true
+                    - name: 'bFrameCount'
+                      type: Integer
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - name: 'aqStrength'
+                      type: Integer
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - name: 'profile'
+                      type: String
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - name: 'tune'
+                      type: String
+                      description: Enforces the specified codec tune.
+                      default_from_api: true
+                    - name: 'preset'
+                      type: String
+                      description: Enforces the specified codec preset. The default is `veryfast`.
+                      default_from_api: true
+                    - name: 'gopFrameCount'
+                      type: Integer
+                      description: Select the GOP size based on the specified frame count.
+                    - name: 'gopDuration'
+                      type: Time
+                      description: Select the GOP size based on the specified duration. The default is `3s`.
+                      default_from_api: true
+                    - name: 'sdr'
+                      type: NestedObject
+                      description: SDR color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                    - name: 'hlg'
+                      type: NestedObject
+                      description: HLG color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                - name: 'h265'
+                  type: NestedObject
+                  description: |
+                    H265 codec settings
+                  default_from_api: true
+                  properties:
+                    - name: 'widthPixels'
+                      type: Integer
+                      description: |
+                        The width of the video in pixels.
+                      default_from_api: true
+                    - name: 'heightPixels'
+                      type: Integer
+                      description: |
+                        The height of the video in pixels.
+                      default_from_api: true
+                    - name: 'frameRate'
+                      type: Integer
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - name: 'frameRateConversionStrategy'
+                      type: Enum
+                      description: |
+                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
+                      default_from_api: true
+                      enum_values:
+                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
+                        - 'DOWNSAMPLE'
+                        - 'DROP_DUPLICATE'
+                    - name: 'bitrateBps'
+                      type: Integer
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - name: 'pixelFormat'
+                      type: String
+                      description: Pixel format to use. The default is `yuv420p`.
+                      default_from_api: true
+                    - name: 'rateControlMode'
+                      type: String
+                      description: Specify the mode. The default is `vbr`.
+                      default_from_api: true
+                    - name: 'crfLevel'
+                      type: Integer
+                      description: Target CRF level. The default is `21`.
+                      default_from_api: true
+                    - name: 'allowOpenGop'
+                      type: Boolean
+                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
+                      default_from_api: true
+                    - name: 'enableTwoPass'
+                      type: Boolean
+                      description: Use two-pass encoding strategy to achieve better video quality.
+                      default_from_api: true
+                    - name: 'vbvSizeBits'
+                      type: Integer
+                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - name: 'vbvFullnessBits'
+                      type: Integer
+                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
+                      default_from_api: true
+                    - name: 'entropyCoder'
+                      type: String
+                      description: The entropy coder to use.
+                      default_from_api: true
+                    - name: 'bPyramid'
+                      type: Boolean
+                      description: Allow B-pyramid for reference frame selection.
+                      default_from_api: true
+                    - name: 'bFrameCount'
+                      type: Integer
+                      description: The number of consecutive B-frames.
+                      default_from_api: true
+                    - name: 'aqStrength'
+                      type: Integer
+                      description: Specify the intensity of the adaptive quantizer (AQ).
+                      default_from_api: true
+                    - name: 'profile'
+                      type: String
+                      description: Enforces the specified codec profile.
+                      default_from_api: true
+                    - name: 'tune'
+                      type: String
+                      description: Enforces the specified codec tune.
+                      default_from_api: true
+                    - name: 'preset'
+                      type: String
+                      description: Enforces the specified codec preset. The default is `veryfast`.
+                      default_from_api: true
+                    - name: 'gopFrameCount'
+                      type: Integer
+                      description: Select the GOP size based on the specified frame count.
+                    - name: 'gopDuration'
+                      type: Time
+                      description: Select the GOP size based on the specified duration. The default is `3s`.
+                      default_from_api: true
+                    - name: 'sdr'
+                      type: NestedObject
+                      description: SDR color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                    - name: 'hlg'
+                      type: NestedObject
+                      description: HLG color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                    - name: 'hdr10'
+                      type: NestedObject
+                      description: HDR10 color format setting for H265.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                - name: 'vp9'
+                  type: NestedObject
+                  description: |
+                    VP9 codec settings
+                  default_from_api: true
+                  properties:
+                    - name: 'widthPixels'
+                      type: Integer
+                      description: |
+                        The width of the video in pixels.
+                      default_from_api: true
+                    - name: 'heightPixels'
+                      type: Integer
+                      description: |
+                        The height of the video in pixels.
+                      default_from_api: true
+                    - name: 'frameRate'
+                      type: Integer
+                      description: The target video frame rate in frames per second (FPS).
+                      required: true
+                    - name: 'frameRateConversionStrategy'
+                      type: Enum
+                      description: |
+                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
+                      default_from_api: true
+                      enum_values:
+                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
+                        - 'DOWNSAMPLE'
+                        - 'DROP_DUPLICATE'
+                    - name: 'bitrateBps'
+                      type: Integer
+                      description: The video bitrate in bits per second.
+                      required: true
+                    - name: 'pixelFormat'
+                      type: String
+                      description: Pixel format to use. The default is `yuv420p`.
+                      default_from_api: true
+                    - name: 'profile'
+                      type: String
+                      description: Enforces the specified codec profile. The default is `profile0`.
+                      default_from_api: true
+                    - name: 'gopFrameCount'
+                      type: Integer
+                      description: Select the GOP size based on the specified frame count.
+                    - name: 'gopDuration'
+                      type: Time
+                      description: Select the GOP size based on the specified duration. The default is `3s`.
+                    - name: 'rateControlMode'
+                      type: String
+                      description: Specify the mode. The default is `vbr`.
+                      default_from_api: true
+                    - name: 'sdr'
+                      type: NestedObject
+                      description: SDR color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+                    - name: 'hlg'
+                      type: NestedObject
+                      description: HLG color format setting for H264.
+                      send_empty_value: true
+                      allow_empty_object: true
+                      properties:
+                        []
+            - name: 'audioStream'
+              type: NestedObject
+              description: |
+                Encoding of an audio stream.
+              default_from_api: true
+              properties:
+                - name: 'codec'
+                  type: String
+                  description: The codec for this audio stream. The default is `aac`.
+                  default_from_api: true
+                - name: 'bitrateBps'
+                  type: Integer
+                  description: Audio bitrate in bits per second.
+                  required: true
+                - name: 'channelCount'
+                  type: Integer
+                  description: Number of audio channels. The default is `2`.
+                  default_from_api: true
+                - name: 'channelLayout'
+                  type: Array
+                  description: |
+                    A list of channel names specifying layout of the audio channels. The default is ["fl", "fr"].
+                  default_from_api: true
+                  item_type:
+                    type: String
+                - name: 'mapping'
+                  type: Array
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
+                  default_from_api: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'atomKey'
+                        type: String
+                        description: |
+                          The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
+                        required: true
+                      - name: 'inputKey'
+                        type: String
+                        description: |
+                          The Input.key that identifies the input file.
+                        required: true
+                      - name: 'inputTrack'
+                        type: Integer
+                        description: |
+                          The zero-based index of the track in the input file.
+                        required: true
+                        default_from_api: true
+                      - name: 'inputChannel'
+                        type: Integer
+                        description: |
+                          The zero-based index of the channel in the input audio stream.
+                        required: true
+                        default_from_api: true
+                      - name: 'outputChannel'
+                        type: Integer
+                        description: |
+                          The zero-based index of the channel in the output audio stream.
+                        required: true
+                        default_from_api: true
+                      - name: 'gainDb'
+                        type: Integer
+                        description: |
+                          Audio volume control in dB. Negative values decrease volume, positive values increase.
+                        default_from_api: true
+                - name: 'sampleRateHertz'
+                  type: Integer
+                  description: |
+                    The audio sample rate in Hertz. The default is `48000`.
+                  default_from_api: true
+                - name: 'languageCode'
+                  type: String
+                  description: |
+                    The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                  default_from_api: true
+                - name: 'displayName'
+                  type: String
+                  description: |
+                    The name for this particular audio stream that will be added to the HLS/DASH manifest.
+                  default_from_api: true
+            - name: 'textStream'
+              type: NestedObject
+              description: |
+                Encoding of a text stream.
+              default_from_api: true
+              properties:
+                - name: 'codec'
+                  type: String
+                  description: The codec for this text stream. The default is `webvtt`.
+                  default_from_api: true
+                - name: 'languageCode'
+                  type: String
+                  description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
+                  default_from_api: true
+                - name: 'mapping'
+                  type: NestedObject
+                  description: |
+                    The mapping for the JobConfig.edit_list atoms with text EditAtom.inputs.
+                  default_from_api: true
+                  properties:
+                    - name: 'atomKey'
+                      type: String
+                      description: |
+                        The EditAtom.key that references atom with text inputs in the JobConfig.edit_list.
+                      required: true
+                    - name: 'inputKey'
+                      type: String
+                      description: |
+                        The Input.key that identifies the input file.
+                      required: true
+                    - name: 'inputTrack'
+                      type: Integer
+                      description: |
+                        The zero-based index of the track in the input file.
+                      required: true
+                - name: 'displayName'
+                  type: String
+                  description: |
+                    The name for this particular text stream that will be added to the HLS/DASH manifest.
+                  default_from_api: true
+      - name: 'muxStreams'
+        type: Array
+        description: |
+          Multiplexing settings for output stream.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'key'
+              type: String
+              description: |
+                A unique key for this multiplexed stream.
+              default_from_api: true
+            - name: 'fileName'
+              type: String
+              description: |
+                The name of the generated file.
+              default_from_api: true
+            - name: 'container'
+              type: String
+              description: |
+                The container format. The default is `mp4`.
+              default_from_api: true
+            - name: 'elementaryStreams'
+              type: Array
+              description: |
+                List of ElementaryStream.key values multiplexed in this stream.
+              default_from_api: true
+              item_type:
+                type: String
+            - name: 'segmentSettings'
+              type: NestedObject
+              description: |
+                Segment settings for ts, fmp4 and vtt.
+              default_from_api: true
+              properties:
+                - name: 'segmentDuration'
+                  type: Time
+                  description: |
+                    Duration of the segments in seconds. The default is `6.0s`.
+                  default_from_api: true
+                - name: 'individualSegments'
+                  type: Boolean
+                  description: |
+                    Whether to create an individual segment file or not.
+                  default_from_api: true
+            - name: 'encryptionId'
+              type: String
+              description: |
+                Identifier of the encryption configuration to use.
+              default_from_api: true
+            - name: 'fmp4'
+              type: NestedObject
+              description: |
+                fmp4 container configuration.
+              default_from_api: true
+              properties:
+                - name: 'codecTag'
+                  type: String
+                  description: |
+                    Specify the codec tag string that will be used in the media bitstream.
+                  default_from_api: true
+      - name: 'manifests'
+        type: Array
+        description: |
+          Manifest configuration.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'fileName'
+              type: String
+              description: |
+                The name of the generated file. The default is `manifest`.
+              default_from_api: true
+            - name: 'type'
+              type: Enum
+              description: |
+                Type of the manifest.
+              required: true
+              default_from_api: true
+              enum_values:
+                - 'MANIFEST_TYPE_UNSPECIFIED'
+                - 'HLS'
+                - 'DASH'
+            - name: 'muxStreams'
+              type: Array
+              description: |
+                List of user supplied MuxStream.key values that should appear in this manifest.
+              default_from_api: true
+              item_type:
+                type: String
+            - name: 'dash'
+              type: NestedObject
+              description: |
+                DASH manifest configuration.
+              default_from_api: true
+              properties:
+                - name: 'segmentReferenceScheme'
+                  type: Enum
+                  description: |
+                    The segment reference scheme for a DASH manifest. The default is `SEGMENT_LIST`.
+                  default_from_api: true
+                  enum_values:
+                    - 'SEGMENT_REFERENCE_SCHEME_UNSPECIFIED'
+                    - 'SEGMENT_LIST'
+                    - 'SEGMENT_TEMPLATE_NUMBER'
+      - name: 'output'
+        type: NestedObject
+        description: |
+          Location of output file(s) in a Cloud Storage bucket.
+        default_from_api: true
+        properties:
+          - name: 'uri'
+            type: String
+            description: |
+              URI for the output file(s). For example, gs://my-bucket/outputs/.
+            default_from_api: true
+      - name: 'adBreaks'
+        type: Array
+        description: |
+          Ad break.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'startTimeOffset'
+              type: Time
+              description: |
+                Start time in seconds for the ad break, relative to the output file timeline
+              default_from_api: true
+      - name: 'pubsubDestination'
+        type: NestedObject
+        description: |
+          Pub/Sub destination.
+        default_from_api: true
+        properties:
+          - name: 'topic'
+            type: String
+            description: |
+              The name of the Pub/Sub topic to publish job completion notification to. For example: projects/{project}/topics/{topic}.
+      - name: 'spriteSheets'
+        type: Array
+        description: |
+          List of output sprite sheets. Spritesheets require at least one VideoStream in the Jobconfig.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'format'
+              type: String
+              description: |
+                Format type. The default is `jpeg`.
+              default_from_api: true
+            - name: 'filePrefix'
+              type: String
+              description: |
+                File name prefix for the generated sprite sheets.
+              required: true
+            - name: 'spriteWidthPixels'
+              type: Integer
+              description: |
+                The width of sprite in pixels.
+              required: true
+            - name: 'spriteHeightPixels'
+              type: Integer
+              description: |
+                The height of sprite in pixels.
+              required: true
+            - name: 'columnCount'
+              type: Integer
+              description: |
+                The maximum number of sprites per row in a sprite sheet.
+              default_from_api: true
+            - name: 'rowCount'
+              type: Integer
+              description: |
+                The maximum number of rows per sprite sheet.
+              default_from_api: true
+            - name: 'startTimeOffset'
+              type: Time
+              description: |
+                Start time in seconds, relative to the output file timeline.
+              default_from_api: true
+            - name: 'endTimeOffset'
+              type: Time
+              description: |
+                End time in seconds, relative to the output file timeline.
+              default_from_api: true
+            - name: 'quality'
+              type: Integer
+              description: |
+                The quality of the generated sprite sheet. The default is `100`.
+              default_from_api: true
+            - name: 'totalCount'
+              type: Integer
+              description: |
+                Total number of sprites. The default is `100`.
+              default_from_api: true
+            - name: 'interval'
+              type: Time
+              description: |
+                Starting from 0s, create sprites at regular intervals. Specify the interval value in seconds.
+              default_from_api: true
+      - name: 'overlays'
+        type: Array
+        description: |
+          List of overlays on the output video, in descending Z-order.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'image'
+              type: NestedObject
+              description: |
+                Image overlay.
+              default_from_api: true
+              properties:
+                - name: 'uri'
+                  type: String
+                  description: |
+                    URI of the image in Cloud Storage. For example, gs://bucket/inputs/image.png.
+                  required: true
+                - name: 'resolution'
+                  type: NestedObject
+                  description: |
+                    2D normalized coordinates.
+                  default_from_api: true
+                  properties:
+                    - name: 'x'
+                      type: Double
+                      description: |
+                        Normalized x coordinate.
+                      default_from_api: true
+                    - name: 'y'
+                      type: Double
+                      description: |
+                        Normalized y coordinate.
+                      default_from_api: true
+                - name: 'alpha'
+                  type: Integer
+                  description: |
+                    Target image opacity.
+                  default_from_api: true
+            - name: 'animations'
+              type: Array
+              description: |
+                List of animations. The list should be chronological, without any time overlap.
+              default_from_api: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'animationStatic'
+                    type: NestedObject
+                    description: |
+                      Display static overlay object.
+                    default_from_api: true
+                    properties:
+                      - name: 'xy'
+                        type: NestedObject
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        default_from_api: true
+                        properties:
+                          - name: 'x'
+                            type: Double
+                            description: |
+                              Normalized x coordinate.
+                            default_from_api: true
+                          - name: 'y'
+                            type: Double
+                            description: |
+                              Normalized y coordinate.
+                            default_from_api: true
+                      - name: 'startTimeOffset'
+                        type: Time
+                        description: |
+                          The time to start displaying the overlay object, in seconds
+                        default_from_api: true
+                  - name: 'animationFade'
+                    type: NestedObject
+                    description: |
+                      Display overlay object with fade animation.
+                    default_from_api: true
+                    properties:
+                      - name: 'xy'
+                        type: NestedObject
+                        description: |
+                          Normalized coordinates based on output video resolution.
+                        default_from_api: true
+                        properties:
+                          - name: 'x'
+                            type: Double
+                            description: |
+                              Normalized x coordinate.
+                            default_from_api: true
+                          - name: 'y'
+                            type: Double
+                            description: |
+                              Normalized y coordinate.
+                            default_from_api: true
+                      - name: 'startTimeOffset'
+                        type: Time
+                        description: |
+                          The time to start the fade animation, in seconds.
+                        default_from_api: true
+                      - name: 'endTimeOffset'
+                        type: Time
+                        description: |
+                          The time to end the fade animation, in seconds.
+                        default_from_api: true
+                      - name: 'fadeType'
+                        type: Enum
+                        description: |
+                          Required. Type of fade animation: `FADE_IN` or `FADE_OUT`.
+                          The possible values are:
+
+                          * `FADE_TYPE_UNSPECIFIED`: The fade type is not specified.
+
+                          * `FADE_IN`: Fade the overlay object into view.
+
+                          * `FADE_OUT`: Fade the overlay object out of view.
+                        required: true
+                        enum_values:
+                          - 'FADE_TYPE_UNSPECIFIED'
+                          - 'FADE_IN'
+                          - 'FADE_OUT'
+                  - name: 'animationEnd'
+                    type: NestedObject
+                    description: |
+                      End previous animation.
+                    default_from_api: true
+                    properties:
+                      - name: 'startTimeOffset'
+                        type: Time
+                        description: |
+                          The time to end overlay object, in seconds.
+                        default_from_api: true
+      - name: 'encryptions'
+        type: Array
+        description: |
+          List of encryption configurations for the content.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'id'
+              type: String
+              description: |
+                Identifier for this set of encryption options.
+              required: true
+            - name: 'drmSystems'
+              type: NestedObject
+              description: |
+                DRM system(s) to use; at least one must be specified. If a DRM system is omitted, it is considered disabled.
+              default_from_api: true
+              properties:
+                - name: 'widevine'
+                  type: NestedObject
+                  description: Widevine configuration.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+                - name: 'fairplay'
+                  type: NestedObject
+                  description: Fairplay configuration.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+                - name: 'playready'
+                  type: NestedObject
+                  description: Playready configuration.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+                - name: 'clearkey'
+                  type: NestedObject
+                  description: Clearkey configuration.
+                  send_empty_value: true
+                  allow_empty_object: true
+                  properties:
+                    []
+            - name: 'aes128'
+              type: NestedObject
+              description: |
+                Configuration for AES-128 encryption.
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+            - name: 'sampleAes'
+              type: NestedObject
+              description: |
+                Configuration for SAMPLE-AES encryption.
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                []
+            - name: 'mpegCenc'
+              type: NestedObject
+              description: |
+                Configuration for MPEG Common Encryption (MPEG-CENC).
+              default_from_api: true
+              properties:
+                - name: 'scheme'
+                  type: String
+                  description: |
+                    Specify the encryption scheme.
+                  required: true
+            - name: 'secretManagerKeySource'
+              type: NestedObject
+              description: |
+                Configuration for secrets stored in Google Secret Manager.
+              default_from_api: true
+              properties:
+                - name: 'secretVersion'
+                  type: String
+                  description: |
+                    The name of the Secret Version containing the encryption key in the following format: projects/{project}/secrets/{secret_id}/versions/{version_number}.
+                  required: true
