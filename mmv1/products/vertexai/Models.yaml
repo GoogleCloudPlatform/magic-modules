@@ -73,7 +73,7 @@ properties:
       valid characters are [a-z0-9_]. The first character cannot be a number.
     output: true
     # url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.erb
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.tmpl
   - type: String
     name: 'description'
     description: Description of the Model.
@@ -332,14 +332,14 @@ properties:
           Index field can be also updated as part of the same call.
           The expected structure and format of the files this URI points to is
           described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
-        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.tmpl
       - type: Boolean
         name: 'isCompleteOverwrite'
         description: |-
           If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
           then existing content of the Index will be replaced by the data from the contentsDeltaUri.
         default_value: false
-        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
+        custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.tmpl
       - type: NestedObject
         name: 'config'
         immutable: true
