@@ -150,8 +150,22 @@ properties:
         description: |
           Fully qualified name of the KMS key to use to encrypt this database. This key must exist
           in the same location as the Spanner Database.
-        required: true
         immutable: true
+        exactly_one_of:
+          - encryption_config.0.kms_key_name
+          - encryption_config.0.kms_key_names
+      - name: 'kmsKeyNames'
+        type: Array
+        description: |
+          Fully qualified name of the KMS key to use to encrypt this database. This key must exist
+          in the same location as the Spanner Database.
+        immutable: true
+        custom_flatten: templates/terraform/custom_flatten/spanner_database_kms_key_names.go.tmpl
+        item_type:
+          type: String
+        exactly_one_of:
+          - encryption_config.0.kms_key_name
+          - encryption_config.0.kms_key_names
   - name: 'databaseDialect'
     type: Enum
     description: |
