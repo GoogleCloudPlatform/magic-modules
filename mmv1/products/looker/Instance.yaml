@@ -24,7 +24,7 @@ docs:
 base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
 update_verb: 'PATCH'
-delete_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}?force=True'
+delete_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}?force={{force_delete}}'
 update_mask: true
 timeouts:
   insert_minutes: 90
@@ -107,6 +107,15 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+virtual_fields:
+  - !ruby/object:Api::Type::Boolean
+    name: force_delete
+    url_param_only: true
+    default_value: false
+    description: |
+      If true, the Looker instance will be deleted regardless
+      of its nested resources. If false, Looker instances that still
+      have nested resources will fail to be deleted in a delete operation.
 parameters:
   - name: 'region'
     type: String
