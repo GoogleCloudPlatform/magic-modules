@@ -560,6 +560,7 @@ func ResourceStorageBucket() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
+							ForceNew:    true,
 							Description: `Set this enabled flag to true when folders with logical files structure. Default value is false.`,
 						},
 					},

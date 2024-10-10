@@ -21,7 +21,6 @@ import (
 func TestAccStorageBucket_basic_hns(t *testing.T) {
 	t.Parallel()
 
-	// test case with hns enabled
 	bucketName := acctest.TestBucketName(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -41,11 +40,70 @@ func TestAccStorageBucket_basic_hns(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
+			{
+				Config: testAccStorageBucket_basic_hns(bucketName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
 		},
 	})
+}
+
+// testcase to create bucket with HNS disabled and
+// forcenew to recreate the bucket if HNS set to true
+func TestAccStorageBucket_basic_forcenew(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_basic_hns(bucketName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_basic_hns(bucketName, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "hierarchical_namespace.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+// testcase with HNS set to false
+func TestAccStorageBucket_hns_disabled(t *testing.T) {
+	t.Parallel()
 
 	// test case with hns disabled
-	bucketName = acctest.TestBucketName(t)
+	bucketName := acctest.TestBucketName(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -68,6 +126,7 @@ func TestAccStorageBucket_basic_hns(t *testing.T) {
 	})
 }
 
+// testcase to force_destroy HNS bucket
 func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 	t.Parallel()
 
