@@ -13,6 +13,10 @@
 ---
 name: 'AutonomousDatabase'
 description: An AutonomousDatabase resource.
+references:
+  guides:
+    'Create Autonomous databases': 'https://cloud.google.com/oracle/database/docs/create-databases'
+  api: 'https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.autonomousDatabases'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/autonomousDatabases'
