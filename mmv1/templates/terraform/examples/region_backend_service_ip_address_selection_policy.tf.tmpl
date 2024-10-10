@@ -1,0 +1,12 @@
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name                            = "{{index $.Vars "region_backend_service_name"}}"
+  region                          = "us-central1"
+  health_checks                   = [google_compute_region_health_check.default.id]
+
+  load_balancing_scheme = "EXTERNAL"
+  protocol              = "HTTP"
+  ip_address_selection_policy = "IPV6_ONLY"
+
+}
