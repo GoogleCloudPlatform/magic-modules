@@ -362,7 +362,7 @@ func TestAccSqlUser_instanceWithActivationPolicy(t *testing.T) {
 
 func testGoogleSqlUser_instanceWithActivationPolicy(instance, activationPolicy string) string {
 	return fmt.Sprintf(`
-resource "google_sql_database_instance" "test_instance" {
+resource "google_sql_database_instance" "instance" {
   name             = "%s"
   database_version = "MYSQL_5_7"
   region          = "us-central1"
