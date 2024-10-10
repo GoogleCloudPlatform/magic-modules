@@ -52,6 +52,8 @@ async:
   error:
     path: 'error/errors'
     message: 'message'
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
 examples:
   - name: 'region_network_firewall_policy_rule'
     primary_resource_id: 'primary'
@@ -73,7 +75,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
     resource: 'RegionNetworkFirewallPolicy'
     imports: 'name'
   - name: 'region'

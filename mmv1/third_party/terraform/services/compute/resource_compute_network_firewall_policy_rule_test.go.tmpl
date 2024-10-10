@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
@@ -174,6 +175,11 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+               PreApply: []plancheck.PlanCheck{
+                  plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
+               },
+            },
 			},
 			{
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
@@ -214,7 +220,7 @@ resource "google_compute_network_firewall_policy_rule" "primary" {
   priority        = 1000
   tls_inspect     = false
   rule_name       = "tf-test-rule-%{random_suffix}"
-  project         = "%{project_name}"
+  project         = "projects/%{project_name}"
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
