@@ -1,0 +1,41 @@
+resource "google_backup_dr_backup_vault" "my-backup-vault" {
+    provider = google-beta
+    project       = "<%= ctx[:vars]['project'] %>"
+    location = "<%= ctx[:vars]['location'] %>"
+    backup_vault_id    = "<%= ctx[:vars]['backup_vault_name'] %>"
+    description = "This is a second backup vault built by Terraform."
+    backup_minimum_enforced_retention_duration = "100000s"
+    labels = {
+      foo = "bar1"
+      bar = "baz1"
+    }
+    annotations = {
+      annotations1 = "bar1"
+      annotations2 = "baz1"
+    }
+    force_update = "true"
+    force_delete = "true"
+    allow_missing = "true" 
+}
+resource "google_backup_dr_backup_plan" "<%= ctx[:primary_resource_id] %>" {
+  provider = google-beta
+  project       = "<%= ctx[:vars]['project'] %>"
+  location      = "<%= ctx[:vars]['location'] %>"
+  name          = "<%= ctx[:vars]['backup_plan_name'] %>"
+  resource_type = "compute.googleapis.com/Instance"
+  backup_vault  = [google_backup_dr_backup_vault.my-backup-vault.name]
+  backup_rules {
+      rule_id = "<%= ctx[:vars]['backup_rule_name'] %>"
+
+      backup_retention_days = "<%= ctx[:vars]['backup_retention_days'] %>"
+      standard_schedule {
+        recurrence_type = "<%= ctx[:vars]['recurrence_type'] %>"
+        hourly_frequency = "<%= ctx[:vars]['hourly_frequency'] %>"
+        time_zone = "<%= ctx[:vars]['time_zone'] %>"
+        backup_window {
+          start_hour_of_day = "<%= ctx[:vars]['start_hour_of_day'] %>"
+          end_hour_of_day   = "<%= ctx[:vars]['end_hour_of_day'] %>"
+        }
+      }
+  }
+}
