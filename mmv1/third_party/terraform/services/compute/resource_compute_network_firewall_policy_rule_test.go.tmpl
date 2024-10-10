@@ -34,6 +34,11 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_update(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
@@ -44,6 +49,11 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_removeConfigs(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
@@ -54,6 +64,11 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_start(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
@@ -97,6 +112,11 @@ func TestAccComputeNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
       },
       {
         Config: testAccComputeNetworkFirewallPolicyRule_multipleAdd(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+					},
+				},
       },
       {
         ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule3",
@@ -107,6 +127,13 @@ func TestAccComputeNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
       },
       {
         Config: testAccComputeNetworkFirewallPolicyRule_multipleRemove(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule2", plancheck.ResourceActionDestroy),
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule3", plancheck.ResourceActionUpdate),
+					},
+				},
       },
     },
   })
@@ -136,6 +163,11 @@ func TestAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(t *test
       },
       {
         Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+					},
+				},
       },
       {
         ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
@@ -176,10 +208,10 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
-               PreApply: []plancheck.PlanCheck{
-                  plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
-               },
-            },
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
