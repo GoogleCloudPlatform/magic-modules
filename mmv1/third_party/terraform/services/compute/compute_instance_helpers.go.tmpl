@@ -707,6 +707,53 @@ func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
 	return displayDevice.EnableDisplay
 }
 
+func hasNetworkInterfaceChanged(d tpgresource.TerraformResourceDiff) bool {
+	oldCount, newCount := d.GetChange("network_interface.#")
+	if oldCount.(int) != newCount.(int) {
+		return true
+	}
+
+	for i := 0; i < newCount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		networkKey := prefix + ".network"
+		oldN, newN := d.GetChange(networkKey)
+		if !tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) {
+			return true
+		}
+
+		subnetworkKey := prefix + ".subnetwork"
+		oldS, newS := d.GetChange(subnetworkKey)
+		if !tpgresource.CompareSelfLinkOrResourceName("", oldS.(string), newS.(string), nil) {
+			return true
+		}
+
+		subnetworkProjectKey := prefix + ".subnetwork_project"
+		if d.HasChange(subnetworkProjectKey) {
+			return true
+		}
+
+		networkIPKey := prefix + ".network_ip"
+		if d.HasChange(networkIPKey) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasServiceAccountChanged(oServiceAccount, newServiceAccount []interface{}) bool {
+	if len(oServiceAccount) != len(newServiceAccount) {
+		return true
+	} else if len(oServiceAccount) == 1 {
+		// service_account has MaxItems: 1
+		// scopes is a required field and so will always be set
+		oScopes := oServiceAccount[0].(map[string]interface{})["scopes"].(*schema.Set)
+		nScopes := newServiceAccount[0].(map[string]interface{})["scopes"].(*schema.Set)
+		return !oScopes.Equal(nScopes)
+	}
+	return false
+}
+
 // Node affinity updates require a reboot
 func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	o, n := d.GetChange("scheduling")
