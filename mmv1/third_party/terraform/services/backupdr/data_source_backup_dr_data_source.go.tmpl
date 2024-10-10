@@ -72,9 +72,15 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
-    dataSourceId := d.Get("dataSourceId").(string)
+    dataSourceId := d.Get("dataSourceId")
+    if len(dataSourceId) == 0 {
+		return fmt.Errorf("Cannot determine dataSourceId: specify the id of the data source")
+	}
     
-    backupVaultId := d.Get("backupVaultId").(string)
+    backupVaultId := d.Get("backupVaultId")
+    if len(backupVaultId) == 0 {
+		return fmt.Errorf("Cannot determine backupVaultId: specify the id of the backup vault")
+	}
 
     billingProject := project
     url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}backupVaultId{{"}}"}}/dataSources/{{"{{"}}dataSourceId{{"}}"}}")
