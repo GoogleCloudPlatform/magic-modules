@@ -262,7 +262,8 @@ properties:
   - name: 'databaseVersion'
     type: String
     description: |
-      The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+      The database engine major version. This is an optional field and it's populated at the Cluster creation time.
+      Note: Changing this field to a higer version results in upgrading the AlloyDB cluster which is an irreversible change.
     default_from_api: true
   - name: 'pscConfig'
     type: NestedObject
