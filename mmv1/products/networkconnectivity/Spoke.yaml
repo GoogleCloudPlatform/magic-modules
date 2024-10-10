@@ -277,7 +277,7 @@ properties:
         immutable: true
       - name: producerNetwork
         type: String
-        description: ga
+        description: The URI of the Producer VPC.
         output: true
         immutable: true
       - name: includeExportRanges
