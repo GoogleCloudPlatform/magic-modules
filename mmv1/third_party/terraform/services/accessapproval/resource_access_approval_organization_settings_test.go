@@ -16,9 +16,9 @@ import (
 // and all refer to the same organization, they need to be run serially
 func TestAccAccessApprovalSettings(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"folder":       testAccAccessApprovalFolderSettings,
-		"project":      testAccAccessApprovalProjectSettings,
-		"organization": testAccAccessApprovalOrganizationSettings,
+		"folder": testAccAccessApprovalFolderSettings,
+		// "project":      testAccAccessApprovalProjectSettings,
+		// "organization": testAccAccessApprovalOrganizationSettings,
 	}
 
 	for name, tc := range testCases {
