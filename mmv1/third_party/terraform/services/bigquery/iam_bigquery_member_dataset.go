@@ -231,7 +231,7 @@ func policyToAccessForIamMember(policy *cloudresourcemanager.Policy) ([]map[stri
 		}
 		for _, member := range binding.Members {
 			// Do not append any deleted members
-			if strings.HasPrefix(member, "deleted:") {
+			if strings.HasPrefix(member, "iamMember:deleted:") {
 				continue
 			}
 			access := map[string]interface{}{
@@ -253,7 +253,7 @@ func policyToAccessForIamMember(policy *cloudresourcemanager.Policy) ([]map[stri
 // Dataset access uses different member types to identify groups, domains, etc.
 // these types are used as keys in the access JSON payload
 func iamMemberToAccessForIamMember(member string) (string, string, error) {
-	if strings.HasPrefix(member, "deleted:") {
+	if strings.HasPrefix(member, "iamMember:deleted:") {
 		return "", "", fmt.Errorf("BigQuery Dataset IAM member is deleted: %s", member)
 	}
 	pieces := strings.SplitN(member, ":", 2)
