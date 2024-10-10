@@ -48,8 +48,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  decoder: templates/terraform/decoders/vertex_ai_models.go.erb
-  pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
+  decoder: templates/terraform/decoders/vertex_ai_models.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_models.tmpl
 examples:
   - name: 'vertex_ai_model_source_basic'
     exclude_import_test: true
