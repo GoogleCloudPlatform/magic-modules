@@ -37,6 +37,9 @@ resource "covered_resource" "resource" {
 
 func testAccCoveredResource_update() string {
 	return `
+provider "google" {
+  region = "us-central1"
+}
 resource "covered_resource" "resource" {
   field_two {
     field_three = "value-two"
