@@ -52,7 +52,7 @@ custom_code:
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.erb
 examples:
   - name: 'vertex_ai_model_source_basic'
-    skip_import_test: true
+    exclude_import_test: true
     primary_resource_id: 'model'
     vars:
       name: 'test-model'
@@ -141,7 +141,7 @@ properties:
           immutable: true
           description: |
             The content of this Model that may be exported.
-          values:
+          enum_values:
             - :ARTIFACT
             - :IMAGE
   - type: String
@@ -167,12 +167,14 @@ properties:
         name: 'command'
         immutable: true
         description: Specifies the command that runs when the container starts. This overrides the container's ENTRYPOINT.
-        item_type: Api::Type::String
+        item_type:
+          type: String
       - type: Array
         name: 'args'
         immutable: true
         description: Specifies arguments for the command that runs when the container starts.
-        item_type: Api::Type::String
+        item_type: 
+          type: String
       - type: Array
         name: 'env'
         immutable: true
@@ -299,7 +301,8 @@ properties:
     name: 'versionAliases'
     description:
       user provided version aliases so that a model version can be referenced via alias.
-    item_type: Api::Type::String
+    item_type:
+      type: String
   - type: KeyValueLabels
     name: 'labels'
     description: The labels with user-defined metadata to organize your Models.
