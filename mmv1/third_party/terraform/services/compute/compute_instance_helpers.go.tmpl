@@ -709,6 +709,90 @@ func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
 	return displayDevice.EnableDisplay
 }
 
+func hasNetworkInterfaceChanged(d tpgresource.TerraformResourceDiff) bool {
+	oldCount, newCount := d.GetChange("network_interface.#")
+	if oldCount.(int) != newCount.(int) {
+		return true
+	}
+
+	//Check if force new is required for network IP
+	for i := 0; i < newCount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		networkKey := prefix + ".network"
+		oldN, newN := d.GetChange(networkKey)
+		subnetworkKey := prefix + ".subnetwork"
+		oldS, newS := d.GetChange(subnetworkKey)
+		subnetworkProjectKey := prefix + ".subnetwork_project"
+		networkIPKey := prefix + ".network_ip"
+		if d.HasChange(networkIPKey) && d.Get(networkIPKey).(string) != "" {
+			if tpgresource.CompareSelfLinkOrResourceName("", oldS.(string), newS.(string), nil) && !d.HasChange(subnetworkProjectKey) && tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) {
+				return false
+			}
+		}
+	}
+
+	for i := 0; i < newCount.(int); i++ {
+		prefix := fmt.Sprintf("network_interface.%d", i)
+		networkKey := prefix + ".network"
+		oldN, newN := d.GetChange(networkKey)
+		if !tpgresource.CompareSelfLinkOrResourceName("", oldN.(string), newN.(string), nil) {
+			return true
+		}
+
+		subnetworkKey := prefix + ".subnetwork"
+		oldS, newS := d.GetChange(subnetworkKey)
+		if !tpgresource.CompareSelfLinkOrResourceName("", oldS.(string), newS.(string), nil) {
+			return true
+		}
+
+		subnetworkProjectKey := prefix + ".subnetwork_project"
+		if d.HasChange(subnetworkProjectKey) {
+			return true
+		}
+
+		networkIPKey := prefix + ".network_ip"
+		if d.HasChange(networkIPKey) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasKeysInListChanged(d tpgresource.TerraformResourceDiff, keysList []string) bool {
+	for _, key := range keysList {
+		if d.HasChange(key) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasServiceAccountChanged(oServiceAccount, newServiceAccount []interface{}) bool {
+	if len(oServiceAccount) != len(newServiceAccount) {
+		return true
+	} else if len(oServiceAccount) == 1 {
+		// service_account has MaxItems: 1
+		// scopes is a required field and so will always be set
+		oScopes := oServiceAccount[0].(map[string]interface{})["scopes"].(*schema.Set)
+		nScopes := newServiceAccount[0].(map[string]interface{})["scopes"].(*schema.Set)
+		if oScopes.Equal(nScopes) {
+			return false
+		}
+
+		// new values might be aliases, so we need to check if canonicals are equal
+		if len(nScopes.List()) == 0 {
+			return true
+		}
+		for index, value := range nScopes.List() {
+			if tpgresource.CanonicalizeServiceScope(value.(string)) != oScopes.List()[index].(string) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // Node affinity updates require a reboot
 func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	o, n := d.GetChange("scheduling")

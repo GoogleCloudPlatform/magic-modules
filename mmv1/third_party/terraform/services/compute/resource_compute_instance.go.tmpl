@@ -106,6 +106,44 @@ var (
 		"shielded_instance_config.0.enable_vtpm",
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
+
+	forceNewKeys = []string{
+		"boot_disk.0.auto_delete",
+		"boot_disk.0.device_name",
+		"boot_disk.0.disk_encryption_key_raw",
+		"boot_disk.0.kms_key_self_link",
+		"boot_disk.0.mode",
+		"boot_disk.0.source",
+		"boot_disk.0.initialize_params.0.size",
+		"boot_disk.0.initialize_params.0.type",
+		"boot_disk.0.initialize_params.0.labels",
+		"boot_disk.0.initialize_params.0.resource_manager_tags",
+		"boot_disk.0.initialize_params.0.provisioned_iops",
+		"boot_disk.0.initialize_params.0.provisioned_throughput",
+		"boot_disk.0.initialize_params.0.enable_confidential_compute",
+		"boot_disk.0.initialize_params.0.storage_pool",
+		"boot_disk.0.initialize_params.0.resource_policies",
+		"name",
+		"network_interface.0.nic_type",
+		"network_interface.0.ipv6_access_config.external_ipv6",
+		"network_interface.0.ipv6_access_config.external_ipv6_prefix_length",
+		"network_interface.0.ipv6_access_config.name",
+		"network_interface.0.queue_count",
+		"network_performance_config.0.total_egress_bandwidth_tier",
+		"guest_accelerator.0.count",
+		"guest_accelerator.0.type",
+		"params",
+		"metadata_startup_script",
+		"project",
+		"scratch_disk",
+		"confidential_instance_config",
+		"zone",
+		"hostname",
+		"reservation_affinity.0.type",
+		"reservation_affinity.0.specific_reservation.key",
+		"reservation_affinity.0.specific_reservation.values",
+		"key_revocation_action_type",
+	}
 )
 
 // This checks if the project provided in subnetwork's self_link matches
@@ -167,6 +205,54 @@ func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) er
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+func validateStoppingForUpdate(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return validateStoppingForUpdateFunc(d)
+}
+
+// Validate if machine allows for stopping instance for update when it's needed
+func validateStoppingForUpdateFunc(d tpgresource.TerraformResourceDiff) error {
+	// Do not check StoppingForUpdate when force new is triggered
+	if hasKeysInListChanged(d, forceNewKeys) {
+		return nil
+	}
+
+	// d.HasChange("service_account") is oversensitive: see https://github.com/hashicorp/terraform/issues/17411
+	// Until that's fixed, manually check whether there is a change.
+	oServiceAccount, nServiceAccount := d.GetChange("service_account")
+	oList := oServiceAccount.([]interface{})
+	nList := nServiceAccount.([]interface{})
+	scopesChange := hasServiceAccountChanged(oList, nList)
+
+	schedulingChange := false
+	o, n := d.GetChange("scheduling")
+	oSlice, oOk := o.([]interface{})
+	nSlice, nOk := n.([]interface{})
+	if oOk && len(oSlice) > 0 && nOk && len(nSlice) > 0 {
+		oScheduling := oSlice[0].(map[string]interface{})
+		newScheduling := nSlice[0].(map[string]interface{})
+		schedulingChange = hasNodeAffinitiesChanged(oScheduling, newScheduling)
+	}
+
+	oType, nType := d.GetChange("machine_type")
+	machineTypeChange := !tpgresource.CompareResourceNames("", oType.(string), nType.(string), nil)
+
+	needToStopInstanceBeforeUpdating := scopesChange || schedulingChange || machineTypeChange || hasNetworkInterfaceChanged(d) || d.HasChange("service_account.0.email") || d.HasChange("min_cpu_platform") || d.HasChange("enable_display") || d.HasChange("shielded_instance_config") || d.HasChange("advanced_machine_features")
+
+	allowUpdate := d.Get("allow_stopping_for_update").(bool)
+	currentStatus := d.Get("current_status").(string)
+	desiredStatus := d.Get("desired_status").(string)
+
+	if !(allowUpdate) && needToStopInstanceBeforeUpdating && currentStatus == "RUNNING" && desiredStatus != "TERMINATED" {
+		return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities, scheduling.max_run_duration " +
+			"or network_interface.[#d].(network/subnetwork/subnetwork_project) or advanced_machine_features on a started instance requires stopping it. " +
+			"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
+			"You can also stop it by setting desiredStatus = \"TERMINATED\", but the instance will not be restarted after the update.")
 	}
 
 	return nil
@@ -1304,6 +1390,7 @@ be from 0 to 999,999,999 inclusive.`,
 			),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
+			validateStoppingForUpdate,
 			tpgresource.SetLabelsDiff,
 		),
 		UseJSONNumber: true,
@@ -2486,16 +2573,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	o, n := d.GetChange("service_account")
 	oList := o.([]interface{})
 	nList := n.([]interface{})
-	scopesChange := false
-	if len(oList) != len(nList) {
-		scopesChange = true
-	} else if len(oList) == 1 {
-		// service_account has MaxItems: 1
-		// scopes is a required field and so will always be set
-		oScopes := oList[0].(map[string]interface{})["scopes"].(*schema.Set)
-		nScopes := nList[0].(map[string]interface{})["scopes"].(*schema.Set)
-		scopesChange = !oScopes.Equal(nScopes)
-	}
+	scopesChange := hasServiceAccountChanged(oList, nList)
 
 	if d.HasChange("deletion_protection") {
 		nDeletionProtection := d.Get("deletion_protection").(bool)
@@ -2589,13 +2667,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if needToStopInstanceBeforeUpdating {
 		statusBeforeUpdate := instance.Status
 		desiredStatus := d.Get("desired_status").(string)
-
-		if statusBeforeUpdate == "RUNNING" && desiredStatus != "TERMINATED" && !d.Get("allow_stopping_for_update").(bool) {
-			return fmt.Errorf("Changing the machine_type, min_cpu_platform, service_account, enable_display, shielded_instance_config, scheduling.node_affinities, scheduling.max_run_duration " +
-				"or network_interface.[#d].(network/subnetwork/subnetwork_project) or advanced_machine_features on a started instance requires stopping it. " +
-				"To acknowledge this, please set allow_stopping_for_update = true in your config. " +
-				"You can also stop it by setting desired_status = \"TERMINATED\", but the instance will not be restarted after the update.")
-		}
 
 		if statusBeforeUpdate != "TERMINATED" {
 			op, err := config.NewComputeClient(userAgent).Instances.Stop(project, zone, instance.Name).Do()
