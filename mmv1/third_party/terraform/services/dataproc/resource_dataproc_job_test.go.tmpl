@@ -862,12 +862,11 @@ resource "google_dataproc_cluster" "basic" {
   cluster_config {
     # Keep the costs down with smallest config we can get away with
     software_config {
-      image_version = "2.0.35-debian10"
+      # 2.1 removes Presto in favor of Trino. So use 2.0 for the Presto test.
+      image_version = "2.0"
       override_properties = {
         "dataproc:dataproc.allow.zero.workers" = "true"
       }
-      # 2.1 removes Presto in favor of Trino. So use 2.0 for the Presto test.
-      image_version = "2.0"
       optional_components = ["PRESTO"]
     }
 
