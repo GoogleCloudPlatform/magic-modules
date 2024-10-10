@@ -135,8 +135,7 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
-	_, ok := vt.cassettePaths[version]
-	if ok {
+	if _, cassettesAlreadyFetched := vt.cassettePaths[version]; cassettesAlreadyFetched {
 		return nil
 	}
 	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
@@ -195,7 +194,7 @@ type RunOptions struct {
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
 func (vt *Tester) Run(opt RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
+	logPath, err := vt.makeLogPath(opt.Mode, opt.Version)
 	if err != nil {
 		return Result{}, err
 	}
@@ -299,7 +298,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 }
 
 func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
+	logPath, err := vt.makeLogPath(opt.Mode, opt.Version)
 	if err != nil {
 		return Result{}, err
 	}
@@ -427,7 +426,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	wg.Done()
 }
 
-func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error) {
+func (vt *Tester) makeLogPath(mode Mode, version provider.Version) (string, error) {
 	lgky := logKey{mode, version}
 	logPath, ok := vt.logPaths[lgky]
 	if !ok {

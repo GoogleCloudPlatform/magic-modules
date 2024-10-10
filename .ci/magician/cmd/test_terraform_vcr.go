@@ -72,7 +72,9 @@ type withReplayFailedTests struct {
 
 type withoutReplayFailedTests struct {
 	ReplayingErr error
-	PRNumber     string
+	LogBucket    string
+	Version      string
+	Head         string
 	BuildID      string
 }
 
@@ -82,14 +84,26 @@ type recordReplay struct {
 	HasTerminatedTests            bool
 	RecordingErr                  error
 	AllRecordingPassed            bool
-	PRNumber                      string
+	LogBucket                     string
+	Version                       string
+	Head                          string
 	BuildID                       string
 }
 
 var testTerraformVCRCmd = &cobra.Command{
 	Use:   "test-terraform-vcr",
 	Short: "Run vcr tests for affected packages",
-	Long:  `This command runs on new pull requests to replay VCR cassettes and re-record failing cassettes.`,
+	Long: `This command runs on new pull requests to replay VCR cassettes and re-record failing cassettes.
+
+It expects the following arguments:
+	1. PR number
+	2. SHA of the latest magic-modules commit
+	3. Build ID
+	4. Project ID where Cloud Builds are located
+	5. Build step number
+	
+The following environment variables are required:
+` + listTTVEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string, len(ttvEnvironmentVariables))
 		for _, ev := range ttvEnvironmentVariables {
@@ -133,6 +147,14 @@ var testTerraformVCRCmd = &cobra.Command{
 	},
 }
 
+func listTTVEnvironmentVariables() string {
+	var result string
+	for i, ev := range ttvEnvironmentVariables {
+		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
+	}
+	return result
+}
+
 func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
@@ -173,7 +195,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error changing to tpgbRepo dir: %w", err)
 	}
 
-	services, runFullVCR := modifiedPackages(tpgbRepo.ChangedFiles)
+	services, runFullVCR := modifiedPackages(tpgbRepo.ChangedFiles, provider.Beta)
 	if len(services) == 0 && !runFullVCR {
 		fmt.Println("Skipping tests: No go files or test fixtures changed")
 		return nil
@@ -189,7 +211,7 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
 
-	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, services, vt)
+	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Beta, services, vt)
 	testState := "success"
 	if replayingErr != nil {
 		testState = "failure"
@@ -316,7 +338,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
-			PRNumber:                      prNumber,
+			LogBucket:                     "ci-vcr-logs",
+			Version:                       provider.Beta.String(),
+			Head:                          newBranch,
 			BuildID:                       buildID,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
@@ -330,7 +354,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	} else { //  len(replayingResult.FailedTests) == 0
 		withoutReplayFailedTestsData := withoutReplayFailedTests{
 			ReplayingErr: replayingErr,
-			PRNumber:     prNumber,
+			Head:         newBranch,
+			LogBucket:    "ci-vcr-logs",
 			BuildID:      buildID,
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
@@ -393,7 +418,7 @@ func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string
 	return notRunBeta, notRunGa
 }
 
-func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
+func modifiedPackages(changedFiles []string, version provider.Version) (map[string]struct{}, bool) {
 	var goFiles []string
 	for _, line := range changedFiles {
 		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || strings.HasSuffix(line, "go.mod") || strings.HasSuffix(line, "go.sum") {
@@ -403,10 +428,10 @@ func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
 	services := make(map[string]struct{})
 	runFullVCR := false
 	for _, file := range goFiles {
-		if strings.HasPrefix(file, "google-beta/services/") {
+		if strings.HasPrefix(file, version.ProviderName()+"/services/") {
 			fileParts := strings.Split(file, "/")
 			services[fileParts[2]] = struct{}{}
-		} else if file == "google-beta/provider/provider_mmv1_resources.go" || file == "google-beta/provider/provider_dcl_resources.go" {
+		} else if file == version.ProviderName()+"/provider/provider_mmv1_resources.go" || file == version.ProviderName()+"/provider/provider_dcl_resources.go" {
 			fmt.Println("ignore changes in ", file)
 		} else {
 			fmt.Println("run full tests ", file)
@@ -417,7 +442,7 @@ func modifiedPackages(changedFiles []string) (map[string]struct{}, bool) {
 	return services, runFullVCR
 }
 
-func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
+func runReplaying(runFullVCR bool, version provider.Version, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
 	result := vcr.Result{}
 	var testDirs []string
 	var replayingErr error
@@ -425,17 +450,17 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 		fmt.Println("runReplaying: full VCR tests")
 		result, replayingErr = vt.Run(vcr.RunOptions{
 			Mode:    vcr.Replaying,
-			Version: provider.Beta,
+			Version: version,
 		})
 	} else if len(services) > 0 {
 		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {
-			servicePath := "./" + filepath.Join("google-beta", "services", service)
+			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
 			testDirs = append(testDirs, servicePath)
 			fmt.Println("run VCR tests in ", service)
 			serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
 				Mode:     vcr.Replaying,
-				Version:  provider.Beta,
+				Version:  version,
 				TestDirs: []string{servicePath},
 			})
 			if serviceReplayingErr != nil {
@@ -475,8 +500,8 @@ func init() {
 
 func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
-		"join": strings.Join,
-		"add":  func(i, j int) int { return i + j },
+		"join":  strings.Join,
+		"add":   func(i, j int) int { return i + j },
 		"color": color,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
