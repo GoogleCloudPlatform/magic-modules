@@ -412,4 +412,134 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(contex
 	`, context)
 }
 
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = "1000"
+				action          = "rate_based_ban"
+				rate_limit_options {
+					rate_limit_threshold {
+						count = 500
+						interval_sec = 10
+					}
+					conform_action = "allow"
+					exceed_action = "deny(404)"
+					enforce_on_key = "ALL"
+					ban_threshold {
+						count = 750
+						interval_sec = 180
+					}
+					ban_duration_sec = 180
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = "100"
+				action          = "rate_based_ban"
+				rate_limit_options {
+					rate_limit_threshold {
+						count = 100
+						interval_sec = 30
+					}
+					conform_action = "allow"
+					exceed_action = "deny(404)"
+					enforce_on_key = "ALL"
+					ban_threshold {
+						count = 1000
+						interval_sec = 300
+					}
+					ban_duration_sec = 300
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+		}
+	`, context)
+}
+
 {{- end }}
