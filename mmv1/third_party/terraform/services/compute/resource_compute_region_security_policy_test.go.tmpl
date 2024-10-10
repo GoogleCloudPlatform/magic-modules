@@ -542,4 +542,149 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[
 	`, context)
 }
 
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnforceOnKeyConfigs(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = "1000"
+				action          = "throttle"
+				rate_limit_options {
+					conform_action = "allow"
+					exceed_action = "deny(429)"
+
+					rate_limit_threshold {
+					count = 10
+					interval_sec = 60
+					}
+
+					enforce_on_key_configs {
+					enforce_on_key_type = "HTTP_PATH"
+					}
+
+					enforce_on_key_configs {
+					enforce_on_key_type = "HTTP_HEADER"
+					enforce_on_key_name = "user-agent"
+					}
+
+					enforce_on_key_configs {
+					enforce_on_key_type = "REGION_CODE"
+					}
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = "100"
+				action          = "throttle"
+				rate_limit_options {
+					conform_action = "allow"
+					exceed_action = "deny(429)"
+
+					rate_limit_threshold {
+						count = 10
+						interval_sec = 60
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "USER_IP"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "TLS_JA3_FINGERPRINT"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "REGION_CODE"
+					}
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+		}
+	`, context)
+}
+
 {{- end }}
