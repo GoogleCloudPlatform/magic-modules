@@ -17,10 +17,17 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
     db_workload = "OLTP"
     is_auto_scaling_enabled= "true"
     license_type = "LICENSE_INCLUDED"
+    backup_retention_period_days    = "60"
+    character_set                   = "AL32UTF8"
+    is_storage_auto_scaling_enabled = "false"
+    maintenance_schedule_type       = "REGULAR"
+    mtls_connection_required        = "false"
+    n_character_set                 = "AL16UTF16"
+    operations_insights_state       = "NOT_ENABLED"
     customer_contacts {
       email = "xyz@example.com"
     }
-    }
+  }
 }
 
 data "google_compute_network" "default" {

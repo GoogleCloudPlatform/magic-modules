@@ -238,7 +238,7 @@ properties:
       - name: 'state'
         type: String
         description: " \n Possible values:\n STATE_UNSPECIFIED\nPROVISIONING\nAVAILABLE\nSTOPPING\nSTOPPED\nSTARTING\nTERMINATING\nTERMINATED\nUNAVAILABLE\nRESTORE_IN_PROGRESS\nRESTORE_FAILED\nBACKUP_IN_PROGRESS\nSCALE_IN_PROGRESS\nAVAILABLE_NEEDS_ATTENTION\nUPDATING\nMAINTENANCE_IN_PROGRESS\nRESTARTING\nRECREATING\nROLE_CHANGE_IN_PROGRESS\nUPGRADING\nINACCESSIBLE\nSTANDBY"
-        default_from_api: true
+        output: true
       - name: 'autonomousContainerDatabaseId'
         type: String
         description: 'The Autonomous Container Database OCID. '
@@ -510,47 +510,58 @@ properties:
             - name: 'dayOfWeek'
               type: String
               description: " \n Possible values:\n DAY_OF_WEEK_UNSPECIFIED\nMONDAY\nTUESDAY\nWEDNESDAY\nTHURSDAY\nFRIDAY\nSATURDAY\nSUNDAY"
+              output: true
             - name: 'startTime'
               type: NestedObject
+              output: true
               description: "Represents a time of day. The date and time zone are either
           not significant\nor are specified elsewhere. An API may choose to allow
           leap seconds. Related\ntypes are google.type.Date and `google.protobuf.Timestamp`. "
               properties:
                 - name: 'hours'
                   type: Integer
+                  output: true
                   description: "Hours of day in 24 hour format. Should be from 0 to 23. An
             API may choose\nto allow the value \"24:00:00\" for scenarios like business
             closing time. "
                 - name: 'minutes'
                   type: Integer
+                  output: true
                   description: 'Minutes of hour of day. Must be from 0 to 59. '
                 - name: 'seconds'
                   type: Integer
+                  output: true
                   description: "Seconds of minutes of the time. Must normally be from 0 to
             59. An API may\nallow the value 60 if it allows leap-seconds. "
                 - name: 'nanos'
                   type: Integer
+                  output: true
                   description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999. '
             - name: 'stopTime'
               type: NestedObject
+              output: true
               description: "Represents a time of day. The date and time zone are either
           not significant\nor are specified elsewhere. An API may choose to allow
           leap seconds. Related\ntypes are google.type.Date and `google.protobuf.Timestamp`. "
               properties:
                 - name: 'hours'
                   type: Integer
+                  output: true
                   description: "Hours of day in 24 hour format. Should be from 0 to 23. An
             API may choose\nto allow the value \"24:00:00\" for scenarios like business
             closing time. "
                 - name: 'minutes'
                   type: Integer
+                  output: true
                   description: 'Minutes of hour of day. Must be from 0 to 59. '
                 - name: 'seconds'
                   type: Integer
+                  output: true
                   description: "Seconds of minutes of the time. Must normally be from 0 to
             59. An API may\nallow the value 60 if it allows leap-seconds. "
                 - name: 'nanos'
                   type: Integer
+                  output: true
                   description: 'Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999. '
       - name: 'sqlWebDeveloperUrl'
         type: String
