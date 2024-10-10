@@ -294,3 +294,48 @@ properties:
     type: String
     description: |
       The reason for enabling deletion protection.
+  - name: 'replication'
+    type: NestedObject
+    description: |
+      Replication configuration, once set, this cannot be updated or removed.
+    properties:
+      - name: 'role'
+        type: Enum
+        description: |
+          The replication role.
+        default_value: "STANDBY"
+        enum_values:
+          - 'ROLE_UNSPECIFIED'
+          - 'ACTIVE'
+          - 'STANDBY'
+      - name: 'replicas'
+        type: Array
+        description: |
+          The replication role.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'state'
+              type: Enum
+              description: |
+                Output only. The replica state
+              output: true
+            - name: 'stateReasons'
+              type: Array
+              description: |
+                Output only. Additional information about the replication state, if available.
+              output: true
+              item_type:
+                type: Enum
+            - name: 'peerInstance'
+              type: String
+              description: |
+                The peer instance.
+              required: true
+            - name: 'lastActiveSyncTime'
+              type: String
+              description: |
+                Output only. The timestamp of the latest replication snapshot taken on the active instance and is already replicated safely.
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+                Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
+              output: true
