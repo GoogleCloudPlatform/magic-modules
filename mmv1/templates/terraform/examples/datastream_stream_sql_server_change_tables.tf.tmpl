@@ -3,7 +3,7 @@ resource "google_sql_database_instance" "instance" {
     database_version    = "SQLSERVER_2019_STANDARD"
     region              = "us-central1"
     root_password       = "{{index $.Vars "sql_server_root_password"}}"
-    deletion_protection = "{{index $.Vars "deletion_protection"}}"
+    deletion_protection = {{index $.Vars "deletion_protection"}}
 
     settings {
         tier = "db-custom-2-4096"

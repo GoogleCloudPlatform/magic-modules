@@ -45,7 +45,7 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   pool = "{{index $.Vars "pool_name"}}"
   certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}-sub"
   location = "{{index $.Vars "pool_location"}}"
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
   subordinate_config {
     certificate_authority = google_privateca_certificate_authority.root-ca.name
   }

@@ -11,7 +11,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
       transaction_log_retention_days = "3"
     }
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_database_instance" "postgres_instance_pitr" {
@@ -27,5 +27,5 @@ resource "google_sql_database_instance" "postgres_instance_pitr" {
       transaction_log_retention_days = "3"
     }
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
