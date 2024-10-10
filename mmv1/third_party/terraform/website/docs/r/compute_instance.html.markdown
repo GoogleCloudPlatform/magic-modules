@@ -588,6 +588,8 @@ exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
 
+* `creation_timestamp` - Creation timestamp in RFC3339 text format.
+
 * `instance_id` - The server-assigned unique identifier of this instance.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
