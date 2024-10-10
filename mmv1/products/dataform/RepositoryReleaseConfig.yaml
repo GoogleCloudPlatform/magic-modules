@@ -42,6 +42,8 @@ examples:
       dataform_repository_name: 'dataform_repository'
       data: 'secret-data'
       secret_name: 'my_secret'
+    # These tests fail due to trying to use a KMS key set as the default key for Dataform in our test projects.
+    exclude_test: true
 parameters:
   - name: 'region'
     type: String
