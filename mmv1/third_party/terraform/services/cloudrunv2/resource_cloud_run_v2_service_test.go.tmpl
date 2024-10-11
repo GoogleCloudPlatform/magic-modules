@@ -1383,31 +1383,3 @@ resource "google_cloud_run_v2_service" "default" {
 `, context)
 }
 {{- end }}
-
-func testAccCloudRunV2Service_withInvokerIamDisabled(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_cloud_run_v2_service" "default" {
-  name     = "tf-test-cloudrun-service%{random_suffix}"
-  description = "publicly available service with no IAM check"
-  location = "us-central1"
-  deletion_protection = false
-  annotations = {
-    generated-by = "magic-modules"
-  }
-  ingress = "INGRESS_TRAFFIC_ALL"
-  labels = {
-    label-1 = "value-1"
-  }
-  client = "client-1"
-  client_version = "client-version-1"
-  invoker_iam_disabled = true
-  template {
-    containers {
-      name = "container-1"
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-    }
-  }
-}
-
-`, context)
-}
