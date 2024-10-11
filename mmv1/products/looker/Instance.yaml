@@ -115,7 +115,7 @@ virtual_fields:
       of its nested resources. If false, Looker instances that still
       have nested resources will fail to be deleted in a delete operation.
 custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
+  pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
 parameters:
   - name: 'region'
     type: String
