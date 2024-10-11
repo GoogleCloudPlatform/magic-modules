@@ -21,7 +21,7 @@ import (
 var ignoredReplicaConfigurationFields = []string{
 	"deletion_protection",
 	"root_password",
-	"replica_configuration.0.cascadable_replica",
+	// "replica_configuration.0.cascadable_replica",
 	"replica_configuration.0.ca_certificate",
 	"replica_configuration.0.client_certificate",
 	"replica_configuration.0.client_key",
@@ -2403,7 +2403,7 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 	t.Parallel()
 	primaryName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
-	replicaName := "tf-test-sql-instance-replica" + acctest.RandString(t, 10)
+	replicaName := "tf-test-sql-instance-replica-" + acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -2411,8 +2411,6 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName, replicaName),
-				// TODO: remove when API change is rolled out.
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-primary",
@@ -2427,15 +2425,15 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 			{
-				Config: googleSqlDatabaseInstance_switchover(primaryName, replicaName),
-				// TODO: remove when API change is rolled out.
-				ExpectNonEmptyPlan: true,
+				// Split into two configs because current TestStep implementation checks diff before refreshing.
+				Config: googleSqlDatabaseInstance_switchoverOnReplica(primaryName, replicaName),
+			},
+			{
+				Config: googleSqlDatabaseInstance_updatePrimaryAfterSwitchover(primaryName, replicaName),
 			},
 			{
 				RefreshState: true,
-				// TODO: remove when API change is rolled out.
-				ExpectNonEmptyPlan: true,
-				Check:              resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
+				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-primary",
@@ -3150,7 +3148,7 @@ func testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryN
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-east1"
   database_version    = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection = false
 
@@ -3163,7 +3161,7 @@ resource "google_sql_database_instance" "original-primary" {
 
 resource "google_sql_database_instance" "original-replica" {
   name                 = "%s"
-  region               = "us-east1"
+  region               = "us-west2"
   database_version     = "SQLSERVER_2019_ENTERPRISE"
   master_instance_name = google_sql_database_instance.original-primary.name
   deletion_protection  = false
@@ -3177,24 +3175,18 @@ resource "google_sql_database_instance" "original-replica" {
     edition           = "ENTERPRISE_PLUS"
   }
 }
-
 `, primaryName, replicaName)
 }
 
-func googleSqlDatabaseInstance_switchover(primaryName string, replicaName string) string {
+func googleSqlDatabaseInstance_switchoverOnReplica(primaryName string, replicaName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-east1"
   database_version    = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection = false
+
   root_password = "sqlserver1"
-  instance_type = "READ_REPLICA_INSTANCE"
-  master_instance_name = "%s"
-  replica_configuration {
-    cascadable_replica = true
-  }
-  replica_names = []
   settings {
     tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
@@ -3203,7 +3195,7 @@ resource "google_sql_database_instance" "original-primary" {
 
 resource "google_sql_database_instance" "original-replica" {
   name                 = "%s"
-  region               = "us-east1"
+  region               = "us-west2"
   database_version     = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection  = false
   root_password = "sqlserver1"
@@ -3214,7 +3206,42 @@ resource "google_sql_database_instance" "original-replica" {
     edition           = "ENTERPRISE_PLUS"
   }
 }
+`, primaryName, replicaName)
+}
 
+func googleSqlDatabaseInstance_updatePrimaryAfterSwitchover(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-east1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+  root_password = "sqlserver1"
+  instance_type = "READ_REPLICA_INSTANCE"
+  master_instance_name = "%s"
+  replica_configuration {
+	cascadable_replica = true
+  }
+  replica_names = []
+  settings {
+	tier              = "db-perf-optimized-N-2"
+	edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+  resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = [google_sql_database_instance.original-primary.name]
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
 `, primaryName, replicaName, replicaName)
 }
 
@@ -3223,7 +3250,7 @@ func googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replic
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-replica" {
   name                 = "%s"
-  region               = "us-east1"
+  region               = "us-west2"
   database_version     = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection  = false
   root_password = "sqlserver1"
@@ -3243,7 +3270,7 @@ func googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaNa
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-replica" {
   name                 = "%s"
-  region               = "us-east1"
+  region               = "us-west2"
   database_version     = "SQLSERVER_2019_ENTERPRISE"
   deletion_protection  = false
   root_password = "sqlserver1"
