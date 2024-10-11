@@ -780,7 +780,6 @@ properties:
     type: Enum
     description: |
       Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
-    min_version: beta
     enum_values:
       - 'IPV4_ONLY'
       - 'PREFER_IPV6'
