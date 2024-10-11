@@ -610,8 +610,17 @@ func TestAccSpannerDatabase_mrcmek(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
+	kms1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
+	kms2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-test-key-us-east1")
+	kms3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-test-key-us-east4")
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"key_ring1":      kms1.KeyRing.Name,
+		"key_name1":      kms1.CryptoKey.Name,
+		"key_ring2":      kms2.KeyRing.Name,
+		"key_name2":      kms2.CryptoKey.Name,
+		"key_ring3":      kms3.KeyRing.Name,
+		"key_name3":      kms3.CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -652,80 +661,41 @@ resource "google_spanner_database" "database" {
 
   encryption_config {
   	kms_key_names = [
-	  google_kms_crypto_key.example-key-us-central1.id,
-	  google_kms_crypto_key.example-key-us-east1.id,
-	  google_kms_crypto_key.example-key-us-east4.id,
+	  "%{key_name1}",
+	  "%{key_name2}",
+	  "%{key_name3}",
 	]
   }
 
   deletion_protection = false
 
-  depends_on = [google_kms_crypto_key_iam_member.crypto-key-binding-us-central1,
-		google_kms_crypto_key_iam_member.crypto-key-binding-us-east1,
-		google_kms_crypto_key_iam_member.crypto-key-binding-us-east4,]
+  depends_on = [google_kms_crypto_key_iam_binding.crypto_key1,
+		google_kms_crypto_key_iam_binding.crypto_key2,
+		google_kms_crypto_key_iam_binding.crypto_key3,]
 }
 
-resource "google_kms_key_ring" "keyring-us-central1" {
-  provider = google-beta
-  name     = "tf-test-ring%{random_suffix}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example-key-us-central1" {
-  provider        = google-beta
-  name            = "tf-test-key%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring-us-central1.id
-  rotation_period = "100000s"
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-central1" {
-  provider      = google-beta
-  crypto_key_id = google_kms_crypto_key.example-key-us-central1.id
+resource "google_kms_crypto_key_iam_binding" "crypto_key1" {
+  crypto_key_id = "%{key_name1}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = google_project_service_identity.ck_sa.member
+  members = [
+    google_project_service_identity.ck_sa.member,
+  ]
 }
 
-resource "google_kms_key_ring" "keyring-us-east1" {
-  provider = google-beta
-  name     = "tf-test-ring%{random_suffix}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "example-key-us-east1" {
-  provider        = google-beta
-  name            = "tf-test-key%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring-us-east1.id
-  rotation_period = "100000s"
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-east1" {
-  provider      = google-beta
-  crypto_key_id = google_kms_crypto_key.example-key-us-east1.id
+resource "google_kms_crypto_key_iam_binding" "crypto_key2" {
+  crypto_key_id = "%{key_name2}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = google_project_service_identity.ck_sa.member
+  members = [
+    google_project_service_identity.ck_sa.member,
+  ]
 }
 
-resource "google_kms_key_ring" "keyring-us-east4" {
-  provider = google-beta
-  name     = "tf-test-ring%{random_suffix}"
-  location = "us-east4"
-}
-
-resource "google_kms_crypto_key" "example-key-us-east4" {
-  provider        = google-beta
-  name            = "tf-test-key%{random_suffix}"
-  key_ring        = google_kms_key_ring.keyring-us-east4.id
-  rotation_period = "100000s"
-}
-
-resource "google_kms_crypto_key_iam_member" "crypto-key-binding-us-east4" {
-  provider      = google-beta
-  crypto_key_id = google_kms_crypto_key.example-key-us-east4.id
+resource "google_kms_crypto_key_iam_binding" "crypto_key3" {
+  crypto_key_id = "%{key_name3}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = google_project_service_identity.ck_sa.member
+  members = [
+    google_project_service_identity.ck_sa.member,
+  ]
 }
 
 data "google_project" "project" {
