@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"path"
 	"path/filepath"
 	"strings"
@@ -184,6 +185,22 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 	return productPath
 }
 
+func baseUrl(resourcePath string) string {
+	base := strings.ReplaceAll(resourcePath, "{", "{{")
+	base = strings.ReplaceAll(base, "}", "}}")
+	base = strings.ReplaceAll(base, "projectsId", "project")
+	base = strings.ReplaceAll(base, "locationsId", "location")
+	base = strings.ReplaceAll(base, "/v1/", "")
+	base = strings.ReplaceAll(base, "/v1alpha/", "project")
+	r := regexp.MustCompile(`\{\{(\w+)\}\}`)
+	matches := r.FindStringSubmatch(base)
+	for i := 0; i < len(matches); i++ {
+		match := matches[i]
+		base = strings.ReplaceAll(base, match, google.Underscore(match))
+	}
+	return base
+}
+
 func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
 	resource := api.Resource{}
 
@@ -193,14 +210,17 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	properties := parsedObjects[1].([]*api.Type)
 	queryParam := parsedObjects[2].(string)
 
-	// TODO base_url(resource_path)
-	baseUrl := resourcePath
-	selfLink := fmt.Sprintf("%s/%s", baseUrl, strings.ToLower(queryParam))
+	baseUrl := baseUrl(resourcePath)
+	selfLink := fmt.Sprintf("%s/{{%s}}", baseUrl, google.Underscore(queryParam))
 
 	resource.Name = resourceName
+	resource.BaseUrl = baseUrl
 	resource.Parameters = parameters
 	resource.Properties = properties
 	resource.SelfLink = selfLink
+	resource.IdFormat = selfLink
+	resource.CreateUrl = fmt.Sprintf("%s?%s={{%s}}", baseUrl, queryParam, google.Underscore(queryParam))
+	resource.Description = "Description"
 
 	return resource
 }
