@@ -13,6 +13,7 @@
 
 ---
 name: 'InstanceGroupMembership'
+api_resource_type_kind: InstanceGroup
 kind: 'compute#instanceGroup'
 description: |
   Represents the Instance membership to the Instance Group.

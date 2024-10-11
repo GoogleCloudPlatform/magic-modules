@@ -13,6 +13,7 @@
 
 ---
 name: 'Cluster'
+api_resource_type_kind: AttachedCluster
 description: |
   An Anthos cluster running on customer owned infrastructure.
 references:

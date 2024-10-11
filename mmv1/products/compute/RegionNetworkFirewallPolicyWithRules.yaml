@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionNetworkFirewallPolicyWithRules'
+api_resource_type_kind: FirewallPolicy
 description: "The Compute NetworkFirewallPolicy with rules resource"
 min_version: 'beta'
 docs:

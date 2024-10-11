@@ -13,6 +13,7 @@
 
 ---
 name: 'ProcessorDefaultVersion'
+api_resource_type_kind: Processor
 description: |
   The default version for the processor. Deleting this resource is a no-op, and does not unset the default version.
 docs:

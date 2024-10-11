@@ -13,6 +13,7 @@
 
 ---
 name: 'Instance'
+api_resource_type_kind: ExtensionInstance
 description: An Instance is an installation of an Extension into a user's project.
 min_version: 'beta'
 references:

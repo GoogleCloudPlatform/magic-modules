@@ -13,6 +13,7 @@
 
 ---
 name: 'Datascan'
+api_resource_type_kind: DataScan
 description: |
   Represents a user-visible job which provides the insights for the related data source.
 # User-provided label cannot start with goog-
