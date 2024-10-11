@@ -36,9 +36,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	{{- end }}
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_data_source":						backupdr.DataSourceBackupDRDataSource(),
-	{{- end }}
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 	"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),

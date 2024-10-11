@@ -1,5 +1,4 @@
 package backupdr
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -100,5 +99,3 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 func flattenBackupDRDataSourceName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     return v
 }
-
-{{- end }}
