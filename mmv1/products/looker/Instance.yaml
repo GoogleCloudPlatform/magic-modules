@@ -43,7 +43,6 @@ async:
   error:
     path: 'error'
     message: 'message'
-custom_code:
 exclude_sweeper: true
 error_abort_predicates:
 
@@ -114,7 +113,7 @@ virtual_fields:
       If true, the Looker instance will be deleted regardless
       of its nested resources. If false, Looker instances that still
       have nested resources will fail to be deleted in a delete operation.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
+custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
 parameters:
   - name: 'region'
