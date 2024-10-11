@@ -90,14 +90,14 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
         return fmt.Errorf("Error reading BackupVault: %s", err)
     }
 
-    if err := d.set("name", flattenBackupDRDataSourceName(res["name"], d, config)); err != nil {
+    if err := d.Set("name", flattenBackupDRDataSourceName(res["name"], d, config)); err != nil {
         return fmt.Errorf("Error reading DataSource: %s", err)
     }
 
     return nil
 }
 
-func flattenBackupDRDataSourceName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) map[string]interface{} {
+func flattenBackupDRDataSourceName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     return v
 }
 
