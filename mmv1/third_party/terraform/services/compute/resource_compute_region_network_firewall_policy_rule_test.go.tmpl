@@ -37,7 +37,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_update(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -52,7 +52,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_removeConfigs(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -67,7 +67,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_start(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -116,7 +116,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_multipleAdd(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -131,9 +131,9 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_multipleRemove(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule2", plancheck.ResourceActionDestroy),
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule3", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule2", plancheck.ResourceActionDestroy),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule3", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -171,7 +171,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_secureTagsUpdate(context),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -293,7 +293,7 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
   region          = "%{region}"
   tls_inspect     = false
   rule_name       = "tf-test-updated-rule-%{random_suffix}"
-  project         = "%{project_name}"
+  project         = "projects/%{project_name}"
 
   match {
     dest_ip_ranges = ["0.0.0.0/0"]
