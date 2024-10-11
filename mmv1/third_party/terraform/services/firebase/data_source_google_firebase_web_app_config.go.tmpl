@@ -87,17 +87,17 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 			},
 
 			"location_id": schema.StringAttribute{
-				Description:         "The ID of the project's default GCP resource location. The location is one of the available GCP resource locations. " +
-					"This field is omitted if the default GCP resource location has not been finalized yet. To set your project's "	+
+				Description: "The ID of the project's default GCP resource location. The location is one of the available GCP resource locations. " +
+					"This field is omitted if the default GCP resource location has not been finalized yet. To set your project's " +
 					"default GCP resource location, call defaultLocation.finalize after you add Firebase services to your project.",
 				MarkdownDescription: "The ID of the project's default GCP resource location. The location is one of the available GCP resource locations. " +
-					"This field is omitted if the default GCP resource location has not been finalized yet. To set your project's "	+
+					"This field is omitted if the default GCP resource location has not been finalized yet. To set your project's " +
 					"default GCP resource location, call defaultLocation.finalize after you add Firebase services to your project.",
-				Computed:            true,
+				Computed: true,
 			},
 
 			"measurement_id": schema.StringAttribute{
-				Description:         "The unique Google-assigned identifier of the Google Analytics web stream associated with the Firebase Web App. " +
+				Description: "The unique Google-assigned identifier of the Google Analytics web stream associated with the Firebase Web App. " +
 					"Firebase SDKs use this ID to interact with Google Analytics APIs. " +
 					"This field is only present if the App is linked to a web stream in a Google Analytics App + Web property. " +
 					"Learn more about this ID and Google Analytics web streams in the Analytics documentation. " +
@@ -107,7 +107,7 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 					"This field is only present if the App is linked to a web stream in a Google Analytics App + Web property. " +
 					"Learn more about this ID and Google Analytics web streams in the Analytics documentation. " +
 					"To generate a measurementId and link the Web App with a Google Analytics web stream, call projects.addGoogleAnalytics.",
-				Computed:            true,
+				Computed: true,
 			},
 
 			"messaging_sender_id": schema.StringAttribute{
@@ -122,6 +122,7 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Schema(ctx context.Context, req d
 				Computed:            true,
 			},
 
+			// This is included for backwards compatibility with the original, SDK-implemented data source.
 			"id": schema.StringAttribute{
 				Description:         "Firebase Web App Config identifier",
 				MarkdownDescription: "Firebase Web App Config identifier",
@@ -163,25 +164,24 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
-
-	client := firebase.NewProjectsWebAppsService(d.client)
-
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// Use provider_meta to set User-Agent
+	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
+
 	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// GET Request
+	service := firebase.NewProjectsWebAppsService(d.client)
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
-	data.Id = data.WebAppId
-
-	clientResp, err := client.GetConfig(appName).Do()
+	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
 		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseWebAppConfig %q", data.WebAppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
@@ -191,6 +191,8 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 
 	tflog.Trace(ctx, "read firebase web app config data source")
 
+	// Put data in model
+	data.Id = data.WebAppId
 	data.ApiKey = types.StringValue(clientResp.ApiKey)
 	data.AuthDomain = types.StringValue(clientResp.AuthDomain)
 	data.DatabaseUrl = types.StringValue(clientResp.DatabaseURL)
