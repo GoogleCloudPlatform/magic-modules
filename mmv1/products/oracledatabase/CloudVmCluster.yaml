@@ -124,6 +124,7 @@ properties:
           - name: 'version'
             type: String
             description: 'IANA Time Zone Database version number, e.g. "2019a". '
+            default_from_api: true
       - name: 'sshPublicKeys'
         type: Array
         description: 'SSH public keys to be stored with cluster. '
