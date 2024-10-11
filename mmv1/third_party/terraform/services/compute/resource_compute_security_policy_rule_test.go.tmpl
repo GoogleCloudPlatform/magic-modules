@@ -397,14 +397,14 @@ func TestAccComputeSecurityPolicyRule_withHeadAction(t *testing.T) {
 
 	context := map[string]interface{}{
 		"sp_name":      fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-    "header_name":  fmt.Sprintf("tf-test-header-name-%s", acctest.RandString(t, 10)),
-    "header_value": fmt.Sprintf("tf-test-header-value-%s", acctest.RandString(t, 10)),
+		"header_name":  fmt.Sprintf("tf-test-header-name-%s", acctest.RandString(t, 10)),
+		"header_value": fmt.Sprintf("tf-test-header-value-%s", acctest.RandString(t, 10)),
 	}
 
   contextUpdate := map[string]interface{}{
 		"sp_name":      context["sp_name"],
-    "header_name":  fmt.Sprintf("tf-test-header-name-update-%s", acctest.RandString(t, 10)),
-    "header_value": fmt.Sprintf("tf-test-header-value-update-%s", acctest.RandString(t, 10)),
+		"header_name":  fmt.Sprintf("tf-test-header-name-update-%s", acctest.RandString(t, 10)),
+		"header_value": fmt.Sprintf("tf-test-header-value-update-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
