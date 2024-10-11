@@ -267,27 +267,27 @@ Define resource-specific functions in your service package, for example at the t
 func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     rawConfigValue := d.Get("path.0.to.0.parent_field.0.nested_field")
 
-	// Convert config value to []string
-	configValue, err := tpgresource.InterfaceSliceToStringSlice(rawConfigValue)
-	if err != nil {
-		log.Printf("[ERROR] Failed to convert config value: %s", err)
-		return v
-	}
+    // Convert config value to []string
+    configValue, err := tpgresource.InterfaceSliceToStringSlice(rawConfigValue)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return v
+    }
 
-	// Convert v to []string
-	apiStringValue, err := tpgresource.InterfaceSliceToStringSlice(v)
-	if err != nil {
-		log.Printf("[ERROR] Failed to convert API value: %s", err)
-		return v
-	}
+    // Convert v to []string
+    apiStringValue, err := tpgresource.InterfaceSliceToStringSlice(v)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert API value: %s", err)
+        return v
+    }
 
-	sortedStrings, err := tpgresource.SortStringsByConfigOrder(configValue, apiStringValue)
-	if err != nil {
-		log.Printf("[ERROR] Could not sort API response value: %s", err)
-		return v
-	}
+    sortedStrings, err := tpgresource.SortStringsByConfigOrder(configValue, apiStringValue)
+    if err != nil {
+        log.Printf("[ERROR] Could not sort API response value: %s", err)
+        return v
+    }
 
-	return sortedStrings
+    return sortedStrings
 }
 ```
 {{< /tab >}}
