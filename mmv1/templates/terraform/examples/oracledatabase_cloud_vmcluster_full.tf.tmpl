@@ -20,11 +20,20 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
     }
     node_count = "2"
     ocpu_count = "4.0"
+    data_storage_size_tb    = 2
+    db_node_storage_size_gb = 120
+    db_server_ocids = [data.google_oracle_database_db_servers.mydbserver.db_servers.0.properties.0.ocid, data.google_oracle_database_db_servers.mydbserver.db_servers.1.properties.0.ocid]
     disk_redundancy = "HIGH"
     sparse_diskgroup_enabled = false
     local_backup_enabled = false
     cluster_name = "pq-ppat4"
     hostname_prefix = "hostname1"
+    diagnostics_data_collection_options {
+      diagnostics_events_enabled = true
+      health_monitoring_enabled  = true
+      incident_logs_enabled      = true
+    }
+    memory_size_gb = 60
   }
 }
 
@@ -43,5 +52,11 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "cloudExadataInfr
 data "google_compute_network" "default" {
   name     = "new"
   project = "{{index $.Vars "project"}}"
+}
+
+data "google_oracle_database_db_servers" "mydbserver" {
+  location = "us-east4"
+  project = "{{index $.Vars "project"}}"
+  cloud_exadata_infrastructure = google_oracle_database_cloud_exadata_infrastructure.cloudExadataInfrastructures.cloud_exadata_infrastructure_id
 }
 

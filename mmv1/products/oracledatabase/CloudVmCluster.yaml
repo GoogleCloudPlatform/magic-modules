@@ -30,7 +30,7 @@ import_format:
 timeouts:
   insert_minutes: 120
   update_minutes: 60
-  delete_minutes: 120
+  delete_minutes: 60
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -40,9 +40,9 @@ async:
     path: 'name'
     wait_ms: 1000
     timeouts:
-      insert_minutes: 240
-      update_minutes: 120
-      delete_minutes: 120
+      insert_minutes: 120
+      update_minutes: 60
+      delete_minutes: 60
   result:
     path: 'response'
     resource_inside_response: true
