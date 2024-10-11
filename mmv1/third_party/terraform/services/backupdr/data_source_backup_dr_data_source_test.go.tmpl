@@ -26,10 +26,12 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
         PreCheck:                 func() { acctest.AccTestPreCheck(t) },
         ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
         Steps: []resource.TestStep{
-            Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
-            Check:  resource.ComposeTestCheckFunc(
-                acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_data_source.foo", "google_backup_dr_backup_vault.foo"),
-            ),
+            {
+                Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
+                Check:  resource.ComposeTestCheckFunc(
+                    acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_data_source.foo", "google_backup_dr_backup_vault.foo"),
+                ),
+            },
         },
     })
 }
