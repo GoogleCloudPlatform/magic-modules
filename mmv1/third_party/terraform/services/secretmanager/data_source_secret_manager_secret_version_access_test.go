@@ -23,7 +23,7 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_basic(t *testing.T) {
 				Config: testAccDatasourceSecretManagerSecretVersionAccess_basic(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version_access.basic", "1"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version_access.basic", "google_secret_manager_secret_version.secret-version-basic"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version_access.basic", "google_secret_manager_secret_version.secret-version-basic"),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_latest(t *testing.T) {
 				Config: testAccDatasourceSecretManagerSecretVersionAccess_latest(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version_access.latest", "2"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version_access.latest", "google_secret_manager_secret_version.secret-version-basic-2"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version_access.latest", "google_secret_manager_secret_version.secret-version-basic-2"),
 				),
 			},
 		},
@@ -66,7 +66,7 @@ func TestAccDatasourceSecretManagerSecretVersionAccess_withBase64SecretData(t *t
 				Config: testAccDatasourceSecretManagerSecretVersionAccess_withBase64SecretData(randomString, data),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version_access.basic-base64", "1"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version_access.basic-base64", "google_secret_manager_secret_version.secret-version-basic-base64"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version_access.basic-base64", "google_secret_manager_secret_version.secret-version-basic-base64"),
 				),
 			},
 		},

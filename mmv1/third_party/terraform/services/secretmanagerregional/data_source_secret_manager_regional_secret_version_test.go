@@ -25,7 +25,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersion_basicWithResour
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersion_basicWithResourceReference(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version.basic-1", "1"),
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData("data.google_secret_manager_regional_secret_version.basic-1", "google_secret_manager_regional_secret_version.secret-version-basic"),
+					testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_regional_secret_version.basic-1", "google_secret_manager_regional_secret_version.secret-version-basic"),
 				),
 			},
 		},
@@ -46,7 +46,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersion_basicWithSecret
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersion_basicWithSecretName(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version.basic-2", "1"),
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData("data.google_secret_manager_regional_secret_version.basic-2", "google_secret_manager_regional_secret_version.secret-version-basic"),
+					testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_regional_secret_version.basic-2", "google_secret_manager_regional_secret_version.secret-version-basic"),
 				),
 			},
 		},
@@ -67,7 +67,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersion_latest(t *testi
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersion_latest(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version.latest", "2"),
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData("data.google_secret_manager_regional_secret_version.latest", "google_secret_manager_regional_secret_version.secret-version-basic-2"),
+					testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_regional_secret_version.latest", "google_secret_manager_regional_secret_version.secret-version-basic-2"),
 				),
 			},
 		},
@@ -88,7 +88,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersion_versionField(t 
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersion_versionField(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version.version", "1"),
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData("data.google_secret_manager_regional_secret_version.version", "google_secret_manager_regional_secret_version.secret-version-basic-1"),
+					testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_regional_secret_version.version", "google_secret_manager_regional_secret_version.secret-version-basic-1"),
 				),
 			},
 		},
@@ -110,7 +110,7 @@ func TestAccDataSourceSecretManagerRegionalRegionalSecretVersion_withBase64Secre
 				Config: testAccDataSourceSecretManagerRegionalRegionalSecretVersion_withBase64SecretData(randomString, data),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion("data.google_secret_manager_regional_secret_version.basic-base64", "1"),
-					testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData("data.google_secret_manager_regional_secret_version.basic-base64", "google_secret_manager_regional_secret_version.secret-version-basic-base64"),
+					testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_regional_secret_version.basic-base64", "google_secret_manager_regional_secret_version.secret-version-basic-base64"),
 				),
 			},
 		},
@@ -251,7 +251,7 @@ func testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersion(n, expecte
 	}
 }
 
-func testAccCheckDataSourceSecretManagerRegionalRegionalSecretVersionSecretData(datasource, resource string) resource.TestCheckFunc {
+func testAccCheckSecretManagerRegionalRegionalSecretVersionSecretDataDatasourceMatchesResource(datasource, resource string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {

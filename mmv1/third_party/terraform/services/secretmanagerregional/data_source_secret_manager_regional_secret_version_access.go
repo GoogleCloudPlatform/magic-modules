@@ -154,11 +154,7 @@ func dataSourceSecretManagerRegionalRegionalSecretVersionAccessRead(d *schema.Re
 
 	data := resp["payload"].(map[string]interface{})
 	var secretData string
-	dIsSecretDataBase64, ok := d.Get("is_secret_data_base64").(bool)
-	if !ok {
-		return fmt.Errorf("wrong type for is_secret_data_base64 field (%T), expected bool", d.Get("is_secret_data_base64"))
-	}
-	if dIsSecretDataBase64 {
+	if d.Get("is_secret_data_base64").(bool) {
 		secretData = data["data"].(string)
 	} else {
 		payloadData, err := base64.StdEncoding.DecodeString(data["data"].(string))

@@ -25,7 +25,7 @@ func TestAccDatasourceSecretManagerSecretVersion_basic(t *testing.T) {
 				Config: testAccDatasourceSecretManagerSecretVersion_basic(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version.basic", "1"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version.basic", "google_secret_manager_secret_version.secret-version-basic"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version.basic", "google_secret_manager_secret_version.secret-version-basic"),
 				),
 			},
 		},
@@ -46,7 +46,7 @@ func TestAccDatasourceSecretManagerSecretVersion_latest(t *testing.T) {
 				Config: testAccDatasourceSecretManagerSecretVersion_latest(randomString),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version.latest", "2"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version.latest", "google_secret_manager_secret_version.secret-version-basic-2"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version.latest", "google_secret_manager_secret_version.secret-version-basic-2"),
 				),
 			},
 		},
@@ -68,7 +68,7 @@ func TestAccDatasourceSecretManagerSecretVersion_withBase64SecretData(t *testing
 				Config: testAccDatasourceSecretManagerSecretVersion_withBase64SecretData(randomString, data),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatasourceSecretManagerSecretVersion("data.google_secret_manager_secret_version.basic-base64", "1"),
-					testAccCheckDatasourceSecretManagerSecretVersionSecretData("data.google_secret_manager_secret_version.basic-base64", "google_secret_manager_secret_version.secret-version-basic-base64"),
+					testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource("data.google_secret_manager_secret_version.basic-base64", "google_secret_manager_secret_version.secret-version-basic-base64"),
 				),
 			},
 		},
@@ -98,7 +98,7 @@ func testAccCheckDatasourceSecretManagerSecretVersion(n, expected string) resour
 	}
 }
 
-func testAccCheckDatasourceSecretManagerSecretVersionSecretData(datasource, resource string) resource.TestCheckFunc {
+func testAccCheckSecretManagerSecretVersionSecretDataDatasourceMatchesResource(datasource, resource string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
