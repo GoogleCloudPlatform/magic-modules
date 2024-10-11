@@ -2,7 +2,7 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
   location = "us-east4"
   display_name = "OFake vmcluster displayname"
   cloud_vm_cluster_id = "ofake-vmcluster-id"
-  exadata_infrastructure = google_oracle_database_cloud_exadata_infrastructure.cloudExadataInfrastructures.id
+  exadata_infrastructure = projects/oci-terraform-testing/locations/us-east4/cloudExadataInfrastructures/ofake-do-not-delete-tf-exadata
   network = data.google_compute_network.default.id
   cidr = "10.5.0.0/24"
   backup_subnet_cidr = "10.6.0.0/24"
@@ -24,19 +24,18 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
     local_backup_enabled = false
     cluster_name = "pq-ppat4"
     hostname_prefix = "hostname1"
+    data_storage_size_tb    = 2
+    db_node_storage_size_gb = 120
+    db_server_ocids         = ["ocid1.dbserver.oc1.iad.anuwcljrwvkaqeqa3jwm3ziwcozzv2kjzuefrd5jiyea65ghwp2pqesbehaa","ocid1.dbserver.oc1.iad.anuwcljrwvkaqeqaekrgqwt4skasapevaolkbwtwytr3d7gq2p3dxtl3oppa"]
+    diagnostics_data_collection_options {
+      diagnostics_events_enabled = true
+      health_monitoring_enabled  = true
+      incident_logs_enabled      = true
+    }
+    memory_size_gb = 60
   }
 }
 
-resource "google_oracle_database_cloud_exadata_infrastructure" "cloudExadataInfrastructures"{
-  display_name = "OFake exadata for vm display_name"
-  cloud_exadata_infrastructure_id = "ofake-exadata-for-vm-id"
-  location = "us-east4"
-  properties {
-    shape = "Exadata.X9M"
-    compute_count= "2"
-    storage_count= "3"
-  }
-}
 
 data "google_compute_network" "default" {
   name     = "new"
