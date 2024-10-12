@@ -112,7 +112,7 @@ virtual_fields:
     description: |
       Policy to determine if the cluster should be deleted forcefully.
       If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
-      of its nested resources. If set to "DEFAULT", Looker instances that still have 
+      of its nested resources. If set to "DEFAULT", Looker instances that still have
       nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
