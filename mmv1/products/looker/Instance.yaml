@@ -106,13 +106,14 @@ examples:
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: force_delete
-    default_value: false
+  - name: 'deletion_policy'
+    default_value: "DEFAULT"
+    type: String
     description: |
-      If true, the Looker instance will be deleted regardless
-      of its nested resources. If false, Looker instances that still
-      have nested resources will fail to be deleted in a delete operation.
+      Policy to determine if the cluster should be deleted forcefully.
+      If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
+      of its nested resources. If set to "DEFAULT", Looker instances that still have 
+      nested resources will return an error. Possible values: DEFAULT, FORCE
 custom_code:
   pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
 parameters:

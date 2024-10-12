@@ -1,4 +1,4 @@
 // Forcefully delete the Looker instance
-if forceDelete := d.Get("force_delete"); forceDelete == true {
-    url = url + "?force=True"
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
+    url = url + "?force=true"
 }
