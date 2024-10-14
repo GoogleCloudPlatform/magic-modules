@@ -53,14 +53,18 @@ examples:
     primary_resource_id: 'my-cloud-exadata'
     vars:
       project: 'my-project'
+      cloud_exadata_infrastructure_id: 'my-instance'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'cloud_exadata_infrastructure_id': '"ofake-exadata-basic"'
   - name: 'oracledatabase_cloud_exadata_infrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
     vars:
       project: 'my-project'
+      cloud_exadata_infrastructure_id: 'my-instance'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'cloud_exadata_infrastructure_id': '"ofake-exadata-full"'
 parameters:
   - name: 'location'
     type: String
