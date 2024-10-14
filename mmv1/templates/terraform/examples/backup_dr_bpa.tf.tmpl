@@ -1,7 +1,7 @@
 resource "google_backup_dr_backup_vault" "bv1" {
     provider = google-beta
     project       = "<%= ctx[:vars]['project'] %>"
-    location = "<%= ctx[:vars]['location'] %>"
+    location = "us-central1"
     backup_vault_id    = "<%= ctx[:vars]['backup_vault_name'] %>"
     description = "This is a second backup vault built by Terraform."
     backup_minimum_enforced_retention_duration = "100000s"
@@ -19,30 +19,28 @@ resource "google_backup_dr_backup_vault" "bv1" {
 }
 resource "google_backup_dr_backup_plan" "bp1" {
   provider = google-beta
-  project       = "<%= ctx[:vars]['project'] %>"
-  location = "<%= ctx[:vars]['location'] %>"
-  name          = "<%= ctx[:vars]['backup_plan_name'] %>"
+  location = "us-central1"
+  name          = "bp1"
   resource_type = "compute.googleapis.com/Instance"
   backup_vault  = [ google_backup_dr_backup_vault.bv1.name ]
   backup_rules {
-      rule_id = "<%= ctx[:vars]['backup_rule_name'] %>"
-      backup_retention_days = "<%= ctx[:vars]['backup_retention_days'] %>"
+      rule_id = "rule-1"
+      backup_retention_days = "10"
       standard_schedule {
-        recurrence_type = "<%= ctx[:vars]['recurrence_type'] %>"
-        hourly_frequency = "<%= ctx[:vars]['hourly_frequency'] %>"
-        time_zone = "<%= ctx[:vars]['time_zone'] %>"
+        recurrence_type = "HOURLY
+        hourly_frequency = "8"
+        time_zone = UTC"
         backup_window {
-          start_hour_of_day = "<%= ctx[:vars]['start_hour_of_day'] %>"
-          end_hour_of_day   = "<%= ctx[:vars]['end_hour_of_day'] %>"
+          start_hour_of_day = "0"
+          end_hour_of_day   = "24"
         }
       }
   }
 }
 resource "google_backup_dr_backup_plan_association" "bpa1" {
   provider = google-beta
-  project       = "<%= ctx[:vars]['project'] %>"
-  location = "<%= ctx[:vars]['location'] %>"
-  name          = "<%= ctx[:vars]['backup_plan_association_name'] %>"
-  resource      = "<%= ctx[:vars]['resource_name'] %>"
+  location = "us-central1"
+  name          = "bpa1"
+  resource      = "projects/my-project/locations/us-central1/instances/{instance_id}"
   backup_plan  = [ google_backup_dr_backup_plan.bp1.name ]
 }

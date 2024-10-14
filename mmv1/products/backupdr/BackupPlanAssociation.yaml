@@ -12,8 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Resource
-name: 'BackupPlanAssociation'
-# Remove this towards GA. b/371938375
 min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
 create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
@@ -27,26 +25,12 @@ references:
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
 autogen_async: true
 timeouts:
-  insert_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 60
+  delete_minutes: 60
 examples:
   - min_version: beta
     name: 'backup_dr_bpa'
     primary_resource_id: 'my-backup-plan'
-    vars:
-      project: 'my-project'
-      location: 'us-central1'
-      backup_vault_name: 'bv1'
-      backup_plan_name: 'my-backup-plan'
-      backup_rule_name: 'rule-1'
-      backup_retention_days: 5
-      recurrence_type: 'HOURLY'
-      hourly_frequency: 6
-      time_zone: "UTC"
-      start_hour_of_day: 5
-      end_hour_of_day: 20
-      backup_plan_association_name: 'bpa1'
-      resource_name: 'projects/gcp-project/locations/us-central1/{instance_id}'
     test_env_vars:
       project: :PROJECT_NAME
     exclude_test: true

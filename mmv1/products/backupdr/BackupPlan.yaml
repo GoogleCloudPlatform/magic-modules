@@ -13,8 +13,6 @@
 
 --- !ruby/object:Api::Resource
 name: 'BackupPlan'
-# Remove this towards GA. b/371938375
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlans
 create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
 self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
@@ -27,24 +25,12 @@ references:
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
 autogen_async: true
 timeouts:
-  insert_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 60
+  delete_minutes: 60
 examples:
   - min_version: beta
     name: 'backup_dr_backup_plan'
     primary_resource_id: 'my-backup-plan'
-    vars:
-      project: 'my-project'
-      location: 'us-central1'
-      backup_vault_name: 'bv1'
-      backup_plan_name: 'my-backup-plan'
-      backup_rule_name: 'rule-1'
-      backup_retention_days: 5
-      recurrence_type: 'HOURLY'
-      hourly_frequency: 6
-      time_zone: "UTC"
-      start_hour_of_day: 5
-      end_hour_of_day: 20
     test_env_vars:
       project: :PROJECT_NAME
     exclude_test: true
