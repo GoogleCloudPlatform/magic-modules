@@ -16,23 +16,28 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Required: true,
 		},
 		"createTime": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"updateTime": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"backupCount": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"etag": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"state": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
 		"totalStoredBytes": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"dataSourceBackupApplianceApplication": {
 			Type:     schema.TypeMap,
