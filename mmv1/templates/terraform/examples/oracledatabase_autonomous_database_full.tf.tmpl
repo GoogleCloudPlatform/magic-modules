@@ -1,9 +1,9 @@
 resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
-  display_name = "autonomousDatabase displayname"
-  autonomous_database_id = "my-adb-instance-id"
+  autonomous_database_id = "{{index $.Vars "autonomous_database_id"}}"
   location = "us-east4"
   project = "{{index $.Vars "project"}}"
-  database = "testADBdatabase"
+  display_name = "autonomousDatabase displayname"
+  database = "testdatabase"
   admin_password = "123Abpassword"
   network = data.google_compute_network.default.id
   cidr = "10.5.0.0/24"
@@ -29,7 +29,7 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
       email = "xyz@example.com"
     }
     private_endpoint_ip    = "10.5.0.11"
-    private_endpoint_label = "ojhsitgy"
+    private_endpoint_label = "testhost"
   }
 }
 

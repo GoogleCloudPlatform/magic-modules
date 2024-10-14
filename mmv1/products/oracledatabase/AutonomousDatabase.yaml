@@ -53,14 +53,18 @@ examples:
     primary_resource_id: 'myADB'
     vars:
       project: 'my-project'
+      autonomous_database_id: 'my-instance'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'autonomous_database_id': '"my-adb-instance-id"'
   - name: 'oracledatabase_autonomous_database_full'
     primary_resource_id: 'myADB'
     vars:
       project: 'my-project'
+      autonomous_database_id: 'my-instance'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'autonomous_database_id': '"my-adb-instance-id-2"'
 parameters:
   - name: 'location'
     type: String
@@ -89,10 +93,12 @@ properties:
     description: "The name of the Autonomous Database. The database name must
     be unique in\nthe project. The name must begin with a letter and can\ncontain
     a maximum of 30 alphanumeric characters. "
+    required: true
   - name: 'displayName'
     type: String
     description: "The display name for the Autonomous Database. The name does
     not have to\nbe unique within your project. "
+    default_from_api: true
   - name: 'entitlementId'
     type: String
     description: "The ID of the subscription entitlement associated with
