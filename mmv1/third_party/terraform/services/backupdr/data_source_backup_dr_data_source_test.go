@@ -36,7 +36,7 @@ resource "google_backup_dr_backup_vault" "foo" {
   backup_vault_id = "%{backup_vault_id}"
   backup_minimum_enforced_retention_duration = "100000s"
   location = "us-central1"
-  provider = google-beta
+  provider = google
 }
 
 data "google_backup_dr_data_source" "foo" {
