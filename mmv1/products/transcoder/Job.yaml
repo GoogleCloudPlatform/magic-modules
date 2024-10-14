@@ -89,14 +89,6 @@ properties:
     description: |
       The resource name of the job.
     output: true
-  - name: 'inputUri'
-    type: String
-    description: |
-      URI of the media. For example, gs://bucket/inputs/file.mp4.
-  - name: 'outputUri'
-    type: String
-    description: |
-      URI for the output file(s). For example, gs://my-bucket/outputs/.
   - name: 'createTime'
     type: Time
     description: |
@@ -123,13 +115,6 @@ properties:
       - 'RUNNING'
       - 'SUCCEEDED'
       - 'FAILED'
-  - name: 'ttlAfterCompletionDays'
-    type: Integer
-    description: |
-      Job time to live value in days, which will be effective after job completion.
-      Job should be deleted automatically after the given TTL.
-      Enter a value between 1 and 90. The default is `30`.
-    default_from_api: true
   - name: 'labels'
     type: KeyValueLabels
     description: |
@@ -157,30 +142,6 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
         validation:
           function: 'validation.StringIsJSON'
-  - name: 'mode'
-    type: Enum
-    description: |
-      The processing mode of the job.
-    default_from_api: true
-    enum_values:
-      - 'PROCESSING_MODE_UNSPECIFIED'
-      - 'PROCESSING_MODE_INTERACTIVE'
-      - 'PROCESSING_MODE_BATCH'
-  - name: 'batchModePriority'
-    type: Integer
-    description: |
-      The processing priority of a batch job. This field can only be set for batch mode jobs.
-      The default value is 0. This value cannot be negative. Higher values correspond to higher priorities for the job.
-    default_from_api: true
-  - name: 'optimization'
-    type: Enum
-    description: |
-      The optimization strategy of the job.
-    default_from_api: true
-    enum_values:
-      - 'OPTIMIZATION_STRATEGY_UNSPECIFIED'
-      - 'AUTODETECT'
-      - 'DISABLED'
   - name: 'templateId'
     type: String
     description: |
@@ -213,179 +174,6 @@ properties:
                 URI of the media. Input files must be at least 5 seconds in duration and stored in Cloud Storage (for example, gs://bucket/inputs/file.mp4).
                 If empty, the value is populated from Job.input_uri.
               default_from_api: true
-            - name: 'preprocessingConfig'
-              type: NestedObject
-              description: |
-                Preprocessing configurations.
-              default_from_api: true
-              properties:
-                - name: 'color'
-                  type: NestedObject
-                  description: |
-                    Color preprocessing configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'saturation'
-                      type: Integer
-                      description: |
-                        Control color saturation of the video
-                      default_from_api: true
-                    - name: 'contrast'
-                      type: Integer
-                      description: |
-                        Control black and white contrast of the video.
-                      default_from_api: true
-                    - name: 'brightness'
-                      type: Integer
-                      description: |
-                        Control brightness of the video.
-                      default_from_api: true
-                - name: 'denoise'
-                  type: NestedObject
-                  description: |
-                    Denoise preprocessing configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'strength'
-                      type: Integer
-                      description: |
-                        Set strength of the denoise.
-                      default_from_api: true
-                    - name: 'tune'
-                      type: String
-                      description: |
-                        Set the denoiser mode. The default is `standard``.
-                      default_from_api: true
-                - name: 'deblock'
-                  type: NestedObject
-                  description: |
-                    Deblock preprocessing configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'strength'
-                      type: Integer
-                      description: |
-                        Set strength of the deblocker.
-                      default_from_api: true
-                    - name: 'enabled'
-                      type: Boolean
-                      description: |
-                        Enable deblocker.
-                      default_from_api: true
-                - name: 'audio'
-                  type: NestedObject
-                  description: |
-                    Audio preprocessing configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'lufs'
-                      type: Integer
-                      description: |
-                        Specify audio loudness normalization in loudness units relative to full scale (LUFS).
-                      default_from_api: true
-                - name: 'crop'
-                  type: NestedObject
-                  description: |
-                    Specify the video cropping configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'topPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to crop from the top.
-                      default_from_api: true
-                    - name: 'bottomPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to crop from the bottom.
-                      default_from_api: true
-                    - name: 'leftPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to crop from the left.
-                      default_from_api: true
-                    - name: 'rightPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to crop from the right.
-                      default_from_api: true
-                - name: 'pad'
-                  type: NestedObject
-                  description: |
-                    Specify the video pad filter configuration.
-                  properties:
-                    - name: 'topPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to add to the top.
-                      default_from_api: true
-                    - name: 'bottomPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to add to the bottom.
-                      default_from_api: true
-                    - name: 'leftPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to add to the left.
-                      default_from_api: true
-                    - name: 'rightPixels'
-                      type: Integer
-                      description: |
-                        The number of pixels to add to the right.
-                      default_from_api: true
-                - name: 'deinterlace'
-                  type: NestedObject
-                  description: |
-                    Specify the video pad filter configuration.
-                  default_from_api: true
-                  properties:
-                    - name: 'yadif'
-                      type: NestedObject
-                      description: |
-                        Specifies the Yet Another Deinterlacing Filter Configuration.
-                      default_from_api: true
-                      properties:
-                        - name: 'mode'
-                          type: String
-                          description: |
-                            Specifies the deinterlacing mode to adopt. The default is `send_frame`.
-                          default_from_api: true
-                        - name: 'disableSpatialInterlacing'
-                          type: Boolean
-                          description: |
-                            Disable spacial interlacing.
-                        - name: 'parity'
-                          type: String
-                          description: |
-                            The picture field parity assumed for the input interlaced video. The default is `auto`.
-                          default_from_api: true
-                        - name: 'deinterlaceAllFrames'
-                          type: Boolean
-                          description: |
-                            Deinterlace all frames rather than just the frames identified as interlaced.
-                          default_from_api: true
-                    - name: 'bwdif'
-                      type: NestedObject
-                      description: |
-                        Bob Weaver Deinterlacing Filter Configuration.
-                      default_from_api: true
-                      properties:
-                        - name: 'mode'
-                          type: String
-                          description: |
-                            Specifies the deinterlacing mode to adopt. The default is `send_frame`.
-                          default_from_api: true
-                        - name: 'parity'
-                          type: String
-                          description: |
-                            The picture field parity assumed for the input interlaced video. The default is `auto`.
-                          default_from_api: true
-                        - name: 'deinterlaceAllFrames'
-                          type: Boolean
-                          description: |
-                            Deinterlace all frames rather than just the frames identified as interlaced.
-                          default_from_api: true
       - name: 'editList'
         type: Array
         description: |
@@ -410,11 +198,6 @@ properties:
               type: Time
               description: |
                 Start time in seconds for the atom, relative to the input file timeline. The default is `0s`.
-              default_from_api: true
-            - name: 'endTimeOffset'
-              type: Time
-              description: |
-                End time in seconds for the atom, relative to the input file timeline.
               default_from_api: true
       - name: 'elementaryStreams'
         type: Array
@@ -455,15 +238,6 @@ properties:
                       type: Integer
                       description: The target video frame rate in frames per second (FPS).
                       required: true
-                    - name: 'frameRateConversionStrategy'
-                      type: Enum
-                      description: |
-                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
-                      default_from_api: true
-                      enum_values:
-                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
-                        - 'DOWNSAMPLE'
-                        - 'DROP_DUPLICATE'
                     - name: 'bitrateBps'
                       type: Integer
                       description: The video bitrate in bits per second.
@@ -479,14 +253,6 @@ properties:
                     - name: 'crfLevel'
                       type: Integer
                       description: Target CRF level. The default is `21`.
-                      default_from_api: true
-                    - name: 'allowOpenGop'
-                      type: Boolean
-                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
-                      default_from_api: true
-                    - name: 'enableTwoPass'
-                      type: Boolean
-                      description: Use two-pass encoding strategy to achieve better video quality.
                       default_from_api: true
                     - name: 'vbvSizeBits'
                       type: Integer
@@ -500,218 +266,17 @@ properties:
                       type: String
                       description: The entropy coder to use. The default is `cabac`.
                       default_from_api: true
-                    - name: 'bPyramid'
-                      type: Boolean
-                      description: Allow B-pyramid for reference frame selection.
-                      default_from_api: true
-                    - name: 'bFrameCount'
-                      type: Integer
-                      description: The number of consecutive B-frames.
-                      default_from_api: true
-                    - name: 'aqStrength'
-                      type: Integer
-                      description: Specify the intensity of the adaptive quantizer (AQ).
-                      default_from_api: true
                     - name: 'profile'
                       type: String
                       description: Enforces the specified codec profile.
-                      default_from_api: true
-                    - name: 'tune'
-                      type: String
-                      description: Enforces the specified codec tune.
                       default_from_api: true
                     - name: 'preset'
                       type: String
                       description: Enforces the specified codec preset. The default is `veryfast`.
                       default_from_api: true
-                    - name: 'gopFrameCount'
-                      type: Integer
-                      description: Select the GOP size based on the specified frame count.
                     - name: 'gopDuration'
                       type: Time
                       description: Select the GOP size based on the specified duration. The default is `3s`.
-                      default_from_api: true
-                    - name: 'sdr'
-                      type: NestedObject
-                      description: SDR color format setting for H264.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      properties:
-                        []
-                    - name: 'hlg'
-                      type: NestedObject
-                      description: HLG color format setting for H264.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      properties:
-                        []
-                - name: 'h265'
-                  type: NestedObject
-                  description: |
-                    H265 codec settings
-                  default_from_api: true
-                  properties:
-                    - name: 'widthPixels'
-                      type: Integer
-                      description: |
-                        The width of the video in pixels.
-                      default_from_api: true
-                    - name: 'heightPixels'
-                      type: Integer
-                      description: |
-                        The height of the video in pixels.
-                      default_from_api: true
-                    - name: 'frameRate'
-                      type: Integer
-                      description: The target video frame rate in frames per second (FPS).
-                      required: true
-                    - name: 'frameRateConversionStrategy'
-                      type: Enum
-                      description: |
-                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
-                      default_from_api: true
-                      enum_values:
-                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
-                        - 'DOWNSAMPLE'
-                        - 'DROP_DUPLICATE'
-                    - name: 'bitrateBps'
-                      type: Integer
-                      description: The video bitrate in bits per second.
-                      required: true
-                    - name: 'pixelFormat'
-                      type: String
-                      description: Pixel format to use. The default is `yuv420p`.
-                      default_from_api: true
-                    - name: 'rateControlMode'
-                      type: String
-                      description: Specify the mode. The default is `vbr`.
-                      default_from_api: true
-                    - name: 'crfLevel'
-                      type: Integer
-                      description: Target CRF level. The default is `21`.
-                      default_from_api: true
-                    - name: 'allowOpenGop'
-                      type: Boolean
-                      description: Specifies whether an open Group of Pictures (GOP) structure should be allowed or not.
-                      default_from_api: true
-                    - name: 'enableTwoPass'
-                      type: Boolean
-                      description: Use two-pass encoding strategy to achieve better video quality.
-                      default_from_api: true
-                    - name: 'vbvSizeBits'
-                      type: Integer
-                      description: Size of the Video Buffering Verifier (VBV) buffer in bits.
-                      default_from_api: true
-                    - name: 'vbvFullnessBits'
-                      type: Integer
-                      description: Initial fullness of the Video Buffering Verifier (VBV) buffer in bits.
-                      default_from_api: true
-                    - name: 'entropyCoder'
-                      type: String
-                      description: The entropy coder to use.
-                      default_from_api: true
-                    - name: 'bPyramid'
-                      type: Boolean
-                      description: Allow B-pyramid for reference frame selection.
-                      default_from_api: true
-                    - name: 'bFrameCount'
-                      type: Integer
-                      description: The number of consecutive B-frames.
-                      default_from_api: true
-                    - name: 'aqStrength'
-                      type: Integer
-                      description: Specify the intensity of the adaptive quantizer (AQ).
-                      default_from_api: true
-                    - name: 'profile'
-                      type: String
-                      description: Enforces the specified codec profile.
-                      default_from_api: true
-                    - name: 'tune'
-                      type: String
-                      description: Enforces the specified codec tune.
-                      default_from_api: true
-                    - name: 'preset'
-                      type: String
-                      description: Enforces the specified codec preset. The default is `veryfast`.
-                      default_from_api: true
-                    - name: 'gopFrameCount'
-                      type: Integer
-                      description: Select the GOP size based on the specified frame count.
-                    - name: 'gopDuration'
-                      type: Time
-                      description: Select the GOP size based on the specified duration. The default is `3s`.
-                      default_from_api: true
-                    - name: 'sdr'
-                      type: NestedObject
-                      description: SDR color format setting for H264.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      properties:
-                        []
-                    - name: 'hlg'
-                      type: NestedObject
-                      description: HLG color format setting for H264.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      properties:
-                        []
-                    - name: 'hdr10'
-                      type: NestedObject
-                      description: HDR10 color format setting for H265.
-                      send_empty_value: true
-                      allow_empty_object: true
-                      properties:
-                        []
-                - name: 'vp9'
-                  type: NestedObject
-                  description: |
-                    VP9 codec settings
-                  default_from_api: true
-                  properties:
-                    - name: 'widthPixels'
-                      type: Integer
-                      description: |
-                        The width of the video in pixels.
-                      default_from_api: true
-                    - name: 'heightPixels'
-                      type: Integer
-                      description: |
-                        The height of the video in pixels.
-                      default_from_api: true
-                    - name: 'frameRate'
-                      type: Integer
-                      description: The target video frame rate in frames per second (FPS).
-                      required: true
-                    - name: 'frameRateConversionStrategy'
-                      type: Enum
-                      description: |
-                        Frame rate conversion strategy for desired frame rate. The default is `DOWNSAMPLE`.
-                      default_from_api: true
-                      enum_values:
-                        - 'FRAME_RATE_CONVERSION_STRATEGY_UNSPECIFIED'
-                        - 'DOWNSAMPLE'
-                        - 'DROP_DUPLICATE'
-                    - name: 'bitrateBps'
-                      type: Integer
-                      description: The video bitrate in bits per second.
-                      required: true
-                    - name: 'pixelFormat'
-                      type: String
-                      description: Pixel format to use. The default is `yuv420p`.
-                      default_from_api: true
-                    - name: 'profile'
-                      type: String
-                      description: Enforces the specified codec profile. The default is `profile0`.
-                      default_from_api: true
-                    - name: 'gopFrameCount'
-                      type: Integer
-                      description: Select the GOP size based on the specified frame count.
-                    - name: 'gopDuration'
-                      type: Time
-                      description: Select the GOP size based on the specified duration. The default is `3s`.
-                    - name: 'rateControlMode'
-                      type: String
-                      description: Specify the mode. The default is `vbr`.
                       default_from_api: true
                     - name: 'sdr'
                       type: NestedObject
@@ -752,61 +317,10 @@ properties:
                   default_from_api: true
                   item_type:
                     type: String
-                - name: 'mapping'
-                  type: Array
-                  description: |
-                    The mapping for the JobConfig.edit_list atoms with audio EditAtom.inputs.
-                  default_from_api: true
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: 'atomKey'
-                        type: String
-                        description: |
-                          The EditAtom.key that references the atom with audio inputs in the JobConfig.edit_list.
-                        required: true
-                      - name: 'inputKey'
-                        type: String
-                        description: |
-                          The Input.key that identifies the input file.
-                        required: true
-                      - name: 'inputTrack'
-                        type: Integer
-                        description: |
-                          The zero-based index of the track in the input file.
-                        required: true
-                        default_from_api: true
-                      - name: 'inputChannel'
-                        type: Integer
-                        description: |
-                          The zero-based index of the channel in the input audio stream.
-                        required: true
-                        default_from_api: true
-                      - name: 'outputChannel'
-                        type: Integer
-                        description: |
-                          The zero-based index of the channel in the output audio stream.
-                        required: true
-                        default_from_api: true
-                      - name: 'gainDb'
-                        type: Integer
-                        description: |
-                          Audio volume control in dB. Negative values decrease volume, positive values increase.
-                        default_from_api: true
                 - name: 'sampleRateHertz'
                   type: Integer
                   description: |
                     The audio sample rate in Hertz. The default is `48000`.
-                  default_from_api: true
-                - name: 'languageCode'
-                  type: String
-                  description: |
-                    The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
-                  default_from_api: true
-                - name: 'displayName'
-                  type: String
-                  description: |
-                    The name for this particular audio stream that will be added to the HLS/DASH manifest.
                   default_from_api: true
             - name: 'textStream'
               type: NestedObject
@@ -814,14 +328,6 @@ properties:
                 Encoding of a text stream.
               default_from_api: true
               properties:
-                - name: 'codec'
-                  type: String
-                  description: The codec for this text stream. The default is `webvtt`.
-                  default_from_api: true
-                - name: 'languageCode'
-                  type: String
-                  description: The BCP-47 language code, such as en-US or sr-Latn. For more information, see https://www.unicode.org/reports/tr35/#Unicode_locale_identifier.
-                  default_from_api: true
                 - name: 'mapping'
                   type: NestedObject
                   description: |
@@ -838,16 +344,6 @@ properties:
                       description: |
                         The Input.key that identifies the input file.
                       required: true
-                    - name: 'inputTrack'
-                      type: Integer
-                      description: |
-                        The zero-based index of the track in the input file.
-                      required: true
-                - name: 'displayName'
-                  type: String
-                  description: |
-                    The name for this particular text stream that will be added to the HLS/DASH manifest.
-                  default_from_api: true
       - name: 'muxStreams'
         type: Array
         description: |
@@ -889,27 +385,11 @@ properties:
                   description: |
                     Duration of the segments in seconds. The default is `6.0s`.
                   default_from_api: true
-                - name: 'individualSegments'
-                  type: Boolean
-                  description: |
-                    Whether to create an individual segment file or not.
-                  default_from_api: true
             - name: 'encryptionId'
               type: String
               description: |
                 Identifier of the encryption configuration to use.
               default_from_api: true
-            - name: 'fmp4'
-              type: NestedObject
-              description: |
-                fmp4 container configuration.
-              default_from_api: true
-              properties:
-                - name: 'codecTag'
-                  type: String
-                  description: |
-                    Specify the codec tag string that will be used in the media bitstream.
-                  default_from_api: true
       - name: 'manifests'
         type: Array
         description: |
@@ -940,21 +420,6 @@ properties:
               default_from_api: true
               item_type:
                 type: String
-            - name: 'dash'
-              type: NestedObject
-              description: |
-                DASH manifest configuration.
-              default_from_api: true
-              properties:
-                - name: 'segmentReferenceScheme'
-                  type: Enum
-                  description: |
-                    The segment reference scheme for a DASH manifest. The default is `SEGMENT_LIST`.
-                  default_from_api: true
-                  enum_values:
-                    - 'SEGMENT_REFERENCE_SCHEME_UNSPECIFIED'
-                    - 'SEGMENT_LIST'
-                    - 'SEGMENT_TEMPLATE_NUMBER'
       - name: 'output'
         type: NestedObject
         description: |
