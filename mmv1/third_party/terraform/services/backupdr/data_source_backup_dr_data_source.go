@@ -15,15 +15,15 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"createTime": {
+		"create_time": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"updateTime": {
+		"update_time": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"backupCount": {
+		"backup_count": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
@@ -33,15 +33,95 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 		},
 		"state": {
 			Type:     schema.TypeString,
-			Required: true,
+			Computed: true,
 		},
-		"totalStoredBytes": {
+		"total_stored_bytes": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"dataSourceBackupApplianceApplication": {
-			Type:     schema.TypeMap,
-			Required: true,
+		"data_source_backup_appliance_application": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"application_name": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"backup_appliance": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"appliance_id": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+					"type": {
+						Type:    schema.TypeString,
+						Require: true,
+					},
+					"application_id": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+					"hostname": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"host_id": {
+						Type:     schema.TypeInt,
+						Required: true,
+					},
+				},
+			},
+		},
+		"data_source_gcp_resource": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"gcp_resourcename": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"location": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"type": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"ComputeInstanceDataSourceProperties": {
+						Type:     schema.TypeList,
+						Computed: true,
+						Elem: &schema.Resouce{
+							Schema: map[string]*schema.Schema{
+								"name": {
+									Type:     schema.TypeString,
+									Required: true,
+								},
+								"description": {
+									Type:     schema.TypeString,
+									Required: true,
+								},
+								"machine_type": {
+									Type:     schema.TypeString,
+									Required: true,
+								},
+								"total_disk_count": {
+									Type:     schema.TypeInt,
+									Required: true,
+								},
+								"total_disk_size_gb": {
+									Type:     schema.TypeInt,
+									Required: true,
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 		"location": {
 			Type:     schema.TypeString,
@@ -51,11 +131,11 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"dataSourceId": {
+		"data_source_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"backupVaultId": {
+		"backup_vault_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},

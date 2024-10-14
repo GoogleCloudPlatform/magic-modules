@@ -14,6 +14,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"data_source_id":  acctest.RandString(t, 10),
 		"backup_vault_id": acctest.RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -40,6 +41,7 @@ resource "google_backup_dr_backup_vault" "foo" {
 }
 
 data "google_backup_dr_data_source" "foo" {
+  name = "tf-test-data-source%{random_suffix}"
   location      = "us-central1"
   project = 1234
   backup_vault_id = "%{backup_vault_id}"
