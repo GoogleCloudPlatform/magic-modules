@@ -471,17 +471,6 @@ properties:
                           - 'FADE_TYPE_UNSPECIFIED'
                           - 'FADE_IN'
                           - 'FADE_OUT'
-                  - name: 'animationEnd'
-                    type: NestedObject
-                    description: |
-                      End previous animation.
-                    default_from_api: true
-                    properties:
-                      - name: 'startTimeOffset'
-                        type: Time
-                        description: |
-                          The time to end overlay object, in seconds.
-                        default_from_api: true
       - name: 'encryptions'
         type: Array
         description: |
