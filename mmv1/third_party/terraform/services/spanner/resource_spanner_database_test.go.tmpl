@@ -671,15 +671,6 @@ resource "google_spanner_database" "database" {
 
 }
 
-data "google_project" "project" {
-  provider = google-beta
-}
-
-resource "google_project_service_identity" "ck_sa" {
-  provider = google-beta
-  project  = data.google_project.project.project_id
-  service  = "spanner.googleapis.com"
-}
 
 `, context)
 }
