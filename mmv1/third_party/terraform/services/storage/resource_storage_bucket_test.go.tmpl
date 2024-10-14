@@ -1659,7 +1659,7 @@ func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) res
 		data := bytes.NewBufferString("test")
 		dataReader := bytes.NewReader(data.Bytes())
 		folderName := fmt.Sprintf("tf-test/tf-test-folder-%d/", acctest.RandInt(t))
-		object := &storage.Object{Name: folderName + "/" + "bucketDestroyTestFile"}
+		object := &storage.Object{Name: folderName + "bucketDestroyTestFile"}
 
 		folder := storage.Folder{
 			Bucket: bucketName,
