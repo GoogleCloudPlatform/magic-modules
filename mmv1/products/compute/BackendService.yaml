@@ -106,6 +106,12 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+  - name: 'backend_service_stateful_session_affinity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
   - name: 'backend_service_network_endpoint'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -748,6 +754,7 @@ properties:
         type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
         required: true
+        send_empty_value: true
       - name: 'oauth2ClientId'
         type: String
         description: |
@@ -1295,6 +1302,50 @@ properties:
       - 'GENERATED_COOKIE'
       - 'HEADER_FIELD'
       - 'HTTP_COOKIE'
+      - 'STRONG_COOKIE_AFFINITY'
+  - name: 'strongSessionAffinityCookie'
+    type: NestedObject
+    description: |
+      Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
+    properties:
+      - name: 'ttl'
+        type: NestedObject
+        description: |
+          Lifetime of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Span of time at a resolution of a second.
+              Must be from 0 to 315,576,000,000 inclusive.
+            required: true
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond
+              resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must
+              be from 0 to 999,999,999 inclusive.
+      - name: 'name'
+        type: String
+        description: |
+          Name of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+      - name: 'path'
+        type: String
+        description: |
+          Path to set for the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
   - name: 'timeoutSec'
     type: Integer
     description: |

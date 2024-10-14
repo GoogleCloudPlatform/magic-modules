@@ -34,12 +34,12 @@ type Product struct {
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
-	ApiName string `yaml:"api_name"`
+	ApiName string `yaml:"api_name,omitempty"`
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
-	DisplayName string `yaml:"display_name"`
+	DisplayName string `yaml:"display_name,omitempty"`
 
-	Objects []*Resource
+	Objects []*Resource `yaml:"objects,omitempty"`
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
@@ -50,19 +50,19 @@ type Product struct {
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
-	BaseUrl string `yaml:"base_url"`
+	BaseUrl string `yaml:"base_url,omitempty"`
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
 	// failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
-	OperationRetry string `yaml:"operation_retry"`
+	OperationRetry string `yaml:"operation_retry,omitempty"`
 
-	Async *Async
+	Async *Async `yaml:"async,omitempty"`
 
-	LegacyName string `yaml:"legacy_name"`
+	LegacyName string `yaml:"legacy_name,omitempty"`
 
-	ClientName string `yaml:"client_name"`
+	ClientName string `yaml:"client_name,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
@@ -240,7 +240,8 @@ func Merge(self, otherObj reflect.Value) {
 
 		// skip if the override is the "empty" value
 		emptyOverrideValue := reflect.DeepEqual(reflect.Zero(otherObj.Field(i).Type()).Interface(), otherObj.Field(i).Interface())
-		if emptyOverrideValue {
+
+		if emptyOverrideValue && selfObj.Type().Field(i).Name != "Required" {
 			continue
 		}
 
