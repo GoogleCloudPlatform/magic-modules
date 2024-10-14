@@ -26,7 +26,7 @@ var ORDER = []string{"ga", "beta", "alpha", "private"}
 // a superset of beta, and beta a superset of GA. Each version will have a
 // different version url.
 type Version struct {
-	CaiBaseUrl string `yaml:"cai_base_url"`
+	CaiBaseUrl string `yaml:"cai_base_url,omitempty"`
 	BaseUrl    string `yaml:"base_url"`
 	Name       string
 }
