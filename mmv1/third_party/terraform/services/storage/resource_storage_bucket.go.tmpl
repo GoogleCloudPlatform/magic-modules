@@ -1058,19 +1058,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		// Wait for everything to finish.
 		wp.StopWait()
 	}
-	// get all folders and subfolders using List API folder
-	folder, _ := config.NewStorageClient(userAgent).Folders.List(bucket).Do()
-	var folderItems []*storage.Folder
-	if folder.Items != nil && len(folder.Items) > 0 {
-		folderItems = folder.Items
-	}
-	// delete folders from bottom to top to avoid no empty folder error
-	for j := len(folderItems) - 1; j >= 0; j-- {
-		if err := config.NewStorageClient(userAgent).Folders.Delete(bucket, folderItems[j].Name).Do(); err != nil {
-			log.Printf("Unable to delete folder listing contents of bucket %s and folder %s: %v", bucket, folderItems[j].Name, err)
-			deleteObjectError = err
-		}
-	}
 
 	// remove empty bucket
 	err = retry.Retry(1*time.Minute, func() *retry.RetryError {

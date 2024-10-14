@@ -1645,11 +1645,42 @@ func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 			{
 				Config: testAccStorageBucket_basic_hns_with_data(bucketName, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketPutItem(t, bucketName),
+					testAccCheckStorageBucketPutFolderItem(t, bucketName),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		data := bytes.NewBufferString("test")
+		dataReader := bytes.NewReader(data.Bytes())
+		folderName := "test-folder"
+		object := &storage.Object{Name: folderName + "/" + "bucketDestroyTestFile"}
+
+		folder := storage.Folder{
+			Bucket: bucketName,
+			Name:   folderName,
+		}
+
+		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, &folder).Do(); err == nil {
+			log.Printf("[INFO] Created folder %v at location %v\n\n", res.Name, res.SelfLink)
+		} else {
+			return fmt.Errorf("Folders.Insert failed: %v", err)
+		}
+
+		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
+		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
+		} else {
+			return fmt.Errorf("Objects.Insert failed: %v", err)
+		}
+
+		return nil
+	}
 }
 
 func testAccStorageBucket_basic_hns(bucketName string, enabled bool) string {
