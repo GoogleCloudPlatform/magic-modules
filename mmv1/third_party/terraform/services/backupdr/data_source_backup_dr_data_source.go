@@ -44,19 +44,19 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Required: true,
 		},
 		"location": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeString,
 			Required: true,
 		},
 		"project": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeString,
 			Required: true,
 		},
 		"dataSourceId": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeString,
 			Required: true,
 		},
 		"backupVaultId": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeString,
 			Required: true,
 		},
 	}
