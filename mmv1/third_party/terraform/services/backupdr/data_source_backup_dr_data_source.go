@@ -2,6 +2,7 @@ package backupdr
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -43,8 +44,9 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Required: true,
 		},
 	}
+	log.Printf("Schema declared")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "project", "dataSourceId", "backupVaultId")
-
+	log.Printf("schema fields added")
 	return &schema.Resource{
 		Read:   DataSourceBackupDRDataSourceRead,
 		Schema: dsSchema,
@@ -73,12 +75,14 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 
 	billingProject := project
 	url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/dataSources/{{dataSourceId}}")
+	log.Printf("url retrieved")
 	if err != nil {
 		return err
 	}
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
+	log.Printf("project got... going to send request")
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -86,6 +90,9 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 		RawURL:    url,
 		UserAgent: userAgent,
 	})
+
+	log.Printf("get request initiated")
+
 	if err != nil {
 		return fmt.Errorf("Error reading BackupVault: %s", err)
 	}
