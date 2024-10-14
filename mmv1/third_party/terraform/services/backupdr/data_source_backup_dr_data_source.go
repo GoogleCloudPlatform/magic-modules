@@ -43,12 +43,24 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 			Type:     schema.TypeMap,
 			Required: true,
 		},
+		"location": {
+			Type:     schema.TypeMap,
+			Required: true,
+		},
+		"project": {
+			Type:     schema.TypeMap,
+			Required: true,
+		},
+		"dataSourceId": {
+			Type:     schema.TypeMap,
+			Required: true,
+		},
+		"backupVaultId": {
+			Type:     schema.TypeMap,
+			Required: true,
+		},
 	}
 	log.Printf("Schema declared")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "project")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "dataSourceId")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "backupVaultId")
 	log.Printf("schema fields added")
 	return &schema.Resource{
 		Read:   DataSourceBackupDRDataSourceRead,
