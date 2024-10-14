@@ -57,8 +57,8 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 						Required: true,
 					},
 					"type": {
-						Type:    schema.TypeString,
-						Require: true,
+						Type:     schema.TypeString,
+						Required: true,
 					},
 					"application_id": {
 						Type:     schema.TypeInt,
@@ -95,7 +95,7 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 					"ComputeInstanceDataSourceProperties": {
 						Type:     schema.TypeList,
 						Computed: true,
-						Elem: &schema.Resouce{
+						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"name": {
 									Type:     schema.TypeString,
