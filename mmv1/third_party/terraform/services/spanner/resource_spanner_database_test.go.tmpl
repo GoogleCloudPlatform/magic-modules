@@ -669,9 +669,6 @@ resource "google_spanner_database" "database" {
 
   deletion_protection = false
 
-  depends_on = [google_kms_crypto_key_iam_binding.crypto_key1,
-		google_kms_crypto_key_iam_binding.crypto_key2,
-		google_kms_crypto_key_iam_binding.crypto_key3,]
 }
 
 data "google_project" "project" {
