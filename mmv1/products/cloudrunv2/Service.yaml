@@ -160,6 +160,14 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
     external_providers: ["time"]
+  - name: 'cloudrunv2_service_invokeriam'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -950,6 +958,10 @@ properties:
           type: String
           description: |
             Indicates a string to be part of the URI to exclusively reference this target.
+  - name: 'invokerIamDisabled'
+    type: Boolean
+    description: |
+      Disables IAM permission check for run.routes.invoke for callers of this service. This feature is available by invitation only. For more information, visit https://cloud.google.com/run/docs/securing/managing-access#invoker_check.
   - name: 'observedGeneration'
     type: String
     description: |
