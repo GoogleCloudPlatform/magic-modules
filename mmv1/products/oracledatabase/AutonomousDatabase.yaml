@@ -120,10 +120,6 @@ properties:
         type: Double
         description: 'The number of compute servers for the Autonomous Database. '
         default_from_api: true
-      - name: 'cpuCoreCount'
-        type: Integer
-        description: 'The number of CPU cores to be made available to the database. '
-        default_from_api: true
       - name: 'dataStorageSizeTb'
         type: Integer
         description: 'The size of the data stored in the database, in terabytes. '
@@ -186,12 +182,6 @@ properties:
               description: "The email address used by Oracle to send notifications
                 regarding databases\nand infrastructure. "
               required: true
-      - name: 'secretId'
-        type: String
-        description: 'The ID of the Oracle Cloud Infrastructure vault secret. '
-      - name: 'vaultId'
-        type: String
-        description: 'The ID of the Oracle Cloud Infrastructure vault. '
       - name: 'maintenanceScheduleType'
         type: String
         description: "The maintenance schedule of the Autonomous Database. \n
