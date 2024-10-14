@@ -1658,7 +1658,7 @@ func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) res
 
 		data := bytes.NewBufferString("test")
 		dataReader := bytes.NewReader(data.Bytes())
-		folderName := "test-folder"
+		folderName := fmt.Sprintf("tf-test/tf-test-folder-%d", acctest.RandInt(t))
 		object := &storage.Object{Name: folderName + "/" + "bucketDestroyTestFile"}
 
 		folder := storage.Folder{
@@ -1666,7 +1666,7 @@ func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) res
 			Name:   folderName,
 		}
 
-		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, &folder).Do(); err == nil {
+		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, &folder).Recursive(true).Do(); err == nil {
 			log.Printf("[INFO] Created folder %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Folders.Insert failed: %v", err)
