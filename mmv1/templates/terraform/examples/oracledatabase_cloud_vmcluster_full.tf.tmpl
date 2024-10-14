@@ -1,6 +1,6 @@
 resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
-  display_name = "OFake vmcluster displayname"
-  cloud_vm_cluster_id = "ofake-vmcluster-id"
+  cloud_vm_cluster_id = "{{index $.Vars "cloud_vm_cluster_id"}}"
+  display_name = "{{index $.Vars "cloud_vm_cluster_id"}} displayname"
   location = "us-east4"
   project = "{{index $.Vars "project"}}"
   exadata_infrastructure = google_oracle_database_cloud_exadata_infrastructure.cloudExadataInfrastructures.id
@@ -38,8 +38,8 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
 }
 
 resource "google_oracle_database_cloud_exadata_infrastructure" "cloudExadataInfrastructures"{
-  display_name = "OFake exadata for vm display_name"
-  cloud_exadata_infrastructure_id = "ofake-exadata-for-vm-id"
+  cloud_exadata_infrastructure_id = "{{index $.Vars "cloud_exadata_infrastructure_id"}}"
+  display_name = "{{index $.Vars "cloud_exadata_infrastructure_id"}} displayname"
   location = "us-east4"
   project = "{{index $.Vars "project"}}"
   properties {

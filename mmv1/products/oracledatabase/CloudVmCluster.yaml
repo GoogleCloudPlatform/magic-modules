@@ -54,14 +54,22 @@ examples:
     primary_resource_id: 'my_vmcluster'
     vars:
       project: 'my-project'
+      cloud_vm_cluster_id: 'my-instance'
+      cloud_exadata_infrastructure_id: 'my-exadata'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'cloud_vm_cluster_id': '"ofake-vmcluster-basic"'
+      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-basic"'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
       project: 'my-project'
+      cloud_vm_cluster_id: 'my-instance'
+      cloud_exadata_infrastructure_id: 'my-exadata'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
+      'cloud_vm_cluster_id': '"ofake-vmcluster-full"'
+      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-full"'
 parameters:
   - name: 'location'
     type: String
@@ -121,10 +129,6 @@ properties:
             type: String
             description: 'IANA Time Zone Database time zone, e.g. "America/New_York". '
             default_from_api: true
-          - name: 'version'
-            type: String
-            description: 'IANA Time Zone Database version number, e.g. "2019a". '
-            ignore_read: true
       - name: 'sshPublicKeys'
         type: Array
         description: 'SSH public keys to be stored with cluster. '
