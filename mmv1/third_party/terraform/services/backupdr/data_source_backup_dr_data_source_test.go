@@ -12,9 +12,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"data_source_id":  acctest.RandString(t, 10),
-		"backup_vault_id": acctest.RandString(t, 10),
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -36,20 +34,19 @@ func testAccDataSourceGoogleBackupDRDataSource_basic(context map[string]interfac
 data "google_project" "project" {
 }
 
-
 resource "google_backup_dr_backup_vault" "foo" {
-  backup_vault_id = "%{backup_vault_id}"
+  backup_vault_id = "bv-test"
   backup_minimum_enforced_retention_duration = "100000s"
   location = "us-central1"
   provider = google
 }
 
 data "google_backup_dr_data_source" "foo" {
-  name = "tf-test-data-source%{random_suffix}"
+  name = "tf-test-data-source-%{random_suffix}"
   project = data.google_project.project.project_id
   location      = "us-central1"
-  backup_vault_id = "%{backup_vault_id}"
-  data_source_id = "%{data_source_id}"
+  backup_vault_id = "bv-test"
+  data_source_id = "ds-test"
 }
 
 `, context)
