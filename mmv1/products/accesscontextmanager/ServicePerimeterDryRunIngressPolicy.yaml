@@ -109,6 +109,7 @@ properties:
           - 'ANY_SERVICE_ACCOUNT'
       - name: 'identities'
         type: Array
+        unordered_list: true
         description: |
           A list of identities that are allowed access through this ingress policy.
           Should be in the format of email address. The email address should represent
@@ -117,6 +118,7 @@ properties:
           type: String
       - name: 'sources'
         type: Array
+        unordered_list: true
         description: |
           Sources that this `IngressPolicy` authorizes access from.
         item_type:
@@ -150,6 +152,7 @@ properties:
     properties:
       - name: 'resources'
         type: Array
+        unordered_list: true
         description: |
           A list of resources, currently only projects in the form
           `projects/<projectnumber>`, protected by this `ServicePerimeter`
@@ -163,6 +166,7 @@ properties:
           type: String
       - name: 'operations'
         type: Array
+        unordered_list: true
         description: |
           A list of `ApiOperations` the sources specified in corresponding `IngressFrom`
           are allowed to perform in this `ServicePerimeter`.
@@ -177,6 +181,7 @@ properties:
                 field set to `*` will allow all methods AND permissions for all services.
             - name: 'methodSelectors'
               type: Array
+              unordered_list: true
               description: |
                 API methods or permissions to allow. Method or permission must belong to
                 the service specified by serviceName field. A single `MethodSelector` entry
