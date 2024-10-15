@@ -141,7 +141,7 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 		},
 	}
 	log.Printf("Schema declared")
-	log.Printf("schema fields added")
+
 	return &schema.Resource{
 		Read:   DataSourceBackupDRDataSourceRead,
 		Schema: dsSchema,
