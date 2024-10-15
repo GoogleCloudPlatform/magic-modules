@@ -110,6 +110,7 @@ properties:
     ignore_read: true
   - name: 'properties'
     type: NestedObject
+    required: true
     description: 'The properties of an Autonomous Database. '
     properties:
       - name: 'ocid'
