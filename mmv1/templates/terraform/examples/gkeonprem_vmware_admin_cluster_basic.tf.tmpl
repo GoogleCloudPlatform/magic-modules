@@ -1,8 +1,9 @@
 
-resource "google_gkeonprem_vmware_admin_cluster" "<%= ctx[:primary_resource_id] %>" {
-  name = "cluster-<%= ctx[:vars]['name'] %>"
-  location = local.region
+resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "name"}}"
+  location = "us-west1"
   description = "test admin cluster"
+  bootstrap_cluster_membership = "projects/870316890899/locations/global/memberships/gkeonprem-terraform-test"
   on_prem_version = "1.31.0-gke.35"
   image_type = "ubuntu_containerd"
   vcenter {
