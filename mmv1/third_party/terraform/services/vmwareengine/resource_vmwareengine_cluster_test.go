@@ -129,7 +129,7 @@ data "google_vmwareengine_cluster" "ds" {
 `, context)
 }
 
-func testVmwareEngineClusterConfigWithAutoscaleSettings(context map[string]interface{}, nodeCount int) string {
+func testVmwareEngineClusterUpdateConfig(context map[string]interface{}, nodeCount int) string {
 	context["node_count"] = nodeCount
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "cluster-nw" {

@@ -225,7 +225,7 @@ properties:
             - name: 'consumedMemoryThresholds'
               type: NestedObject
               description: |
-                Utilization thresholds pertaining to amount of consumed memory. 
+                Utilization thresholds pertaining to amount of consumed memory.
               properties:
                 - name: 'scaleOut'
                   type: Integer
@@ -234,7 +234,7 @@ properties:
                 - name: 'scaleIn'
                   type: Integer
                   description: |
-                    The utilization triggering the scale-in operation in percent.                 
+                    The utilization triggering the scale-in operation in percent.
             - name: 'storageThresholds'
               type: NestedObject
               description: |
@@ -263,5 +263,5 @@ properties:
         description: |
           The minimum duration between consecutive autoscale operations.
           It starts once addition or removal of nodes is fully completed.
-          Defaults to 30m if not specified. 
+          Defaults to 30m if not specified.
           Cool down period must be in whole minutes (for example, 30m, 31m, 50m).
