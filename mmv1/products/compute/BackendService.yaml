@@ -754,6 +754,7 @@ properties:
         type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
         required: true
+        send_empty_value: true
       - name: 'oauth2ClientId'
         type: String
         description: |
