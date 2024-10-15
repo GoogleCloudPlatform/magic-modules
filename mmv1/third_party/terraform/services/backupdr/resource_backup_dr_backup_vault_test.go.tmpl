@@ -66,7 +66,7 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
   }
   force_update = "true"
   ignore_inactive_datasources = "true"
-  ignore_backup_plan_reference = "true"
+  ignore_backup_plan_references = "true"
   allow_missing = "true"
 }
 `, context)
@@ -91,7 +91,7 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
   }
   force_update = "true"
   ignore_inactive_datasources = "true"
-  ignore_backup_plan_reference = "true"
+  ignore_backup_plan_references = "true"
   allow_missing = "true"
 }
 `, context)
