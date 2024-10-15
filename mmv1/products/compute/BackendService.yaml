@@ -123,6 +123,10 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+  - name: 'backend_service_ip_address_selection_policy'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
