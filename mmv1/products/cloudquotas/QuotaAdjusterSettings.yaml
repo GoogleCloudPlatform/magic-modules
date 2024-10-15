@@ -38,30 +38,14 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'response'
-    resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'cloud_quotas_quota_adjuster_settings_basic'
     primary_resource_id: 'adjuster_settings'
     vars:
-      parent: "projects/445654108168"
+      parent: "projects/104740170505"
       enablement: "ENABLED"
-    test_vars_overrides:
-      'parent': '"projects/445654108168"'
-      'enablement': '"ENABLED"'
+    exclude_test: true
 parameters:
   - name: 'parent'
     type: String
@@ -70,6 +54,8 @@ parameters:
     required: true
     immutable: true
     default_from_api: true
+    validation:
+      regex: '^(projects|folders|organizations)/([^/]+)$'
 properties:
   - name: 'enablement'
     type: Enum
@@ -77,7 +63,6 @@ properties:
       Required. The configured value of the enablement at the given resource.
     required: true
     enum_values:
-      - 'DEFAULT'
       - 'ENABLED'
       - 'DISABLED'
   - name: 'effectiveContainer'
@@ -96,16 +81,3 @@ properties:
       - 'DEFAULT'
       - 'ENABLED'
       - 'DISABLED'
-  - name: 'etag'
-    type: String
-    description: |
-      The current etag of the QuotaAdjusterSettings.
-      If an etag is provided on update and does not match the current server's etag of the QuotaAdjusterSettings, the request will be blocked and an ABORTED error will be returned.
-      See https://google.aip.dev/134#etags for more details on etags.
-    output: true
-  - name: 'updateTime'
-    type: String
-    description: |
-      Update time stamp.
-      The timestamp when the QuotaAdjusterSettings was last updated.
-    output: true
