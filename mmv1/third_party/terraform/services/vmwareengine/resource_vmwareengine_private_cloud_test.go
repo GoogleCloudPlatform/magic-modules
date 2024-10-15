@@ -270,6 +270,14 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
           scale_out = 80
           scale_in = 20
         }
+        consumed_memory_thresholds {
+          scale_in  = 75
+          scale_out = 20
+        }
+        granted_memory_thresholds {
+          scale_in  = 80
+          scale_out = 25
+        }
       }
       min_cluster_node_count = 3
       max_cluster_node_count = 8
