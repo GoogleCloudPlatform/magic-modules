@@ -43,7 +43,6 @@ resource "google_backup_dr_backup_vault" "foo" {
 data "google_backup_dr_data_source" "foo" {
   name = "tf-test-data-source%{random_suffix}"
   location      = "us-central1"
-  project = 1234
   backup_vault_id = "%{backup_vault_id}"
   data_source_id = "%{data_source_id}"
 }
