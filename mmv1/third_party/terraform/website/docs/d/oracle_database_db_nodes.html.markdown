@@ -8,6 +8,9 @@ description: |-
 
 List all DbNodes of a Cloud VmCluster.
 
+For more information see the
+and [API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters.dbNodes).
+
 ## Example Usage
 
 ```hcl
@@ -29,13 +32,13 @@ The following arguments are supported:
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `db_nodes` - (Output) List of dbNodes.
+* `db_nodes` - (Output) List of dbNodes. Structure is [documented below](#nested_dbnodes).
 
-<a name="nested_properties"></a> The `db_nodes` block supports:
+<a name="nested_dbnodes"></a> The `db_nodes` block supports:
 
 * `name` - User friendly name for the resource.
 
-* `properties` - Various properties of the databse node.
+* `properties` - Various properties of the database node. Structure is [documented below](#nested_properties).
 
 <a name="nested_properties"></a> The `properties` block supports:
 
