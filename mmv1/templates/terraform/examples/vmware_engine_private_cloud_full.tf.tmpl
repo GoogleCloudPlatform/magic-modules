@@ -14,6 +14,30 @@ resource "google_vmwareengine_private_cloud" "{{$.PrimaryResourceId}}" {
       node_count   = 1
       custom_core_count = 32
     }
+    autoscaling_settings {
+      autoscaling_policies {
+        autoscale_policy_id = "autoscaling-policy"
+        node_type_id = "standard-72"
+        scale_out_size = 1
+        min_node_count = 3 
+        max_node_count = 8
+        cpu_thresholds {
+          scale_out = 80
+          scale_in = 10
+        }
+        consumed_memory_thresholds {
+          scale_out = 90
+          scale_in = 10
+        }
+        storage_thresholds {
+          scale_out = 80
+          scale_in = 20
+        }
+      }
+      min_cluster_node_count = 3
+      max_cluster_node_count = 8
+      cool_down_period = "1800s"
+    }
   }
   deletion_delay_hours = 0
   send_deletion_delay_hours_if_zero = true
