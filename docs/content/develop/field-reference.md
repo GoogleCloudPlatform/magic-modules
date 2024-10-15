@@ -149,13 +149,16 @@ default_from_api: true
 
 ### `send_empty_value`
 If true, the provider sends "empty" values (such as zero, false, or empty
-strings) to the API; this will happen if the field is unset or if it is
-explicitly set to an "empty" value by the user. If false,
+strings) to the API if set explicitly in the user's configuration. If false,
 "empty" values cause the field to be omitted entirely from the API request.
 This attribute is useful for fields where the API would behave differently
 for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
 `send_empty_value` and `default_from_api` cannot both be true on the same field.
+
+Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
+NestedObject fields will currently be sent as `null` if unset (rather than being
+omitted.)
 
 Example:
 
