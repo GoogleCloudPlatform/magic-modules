@@ -115,6 +115,10 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ip_address_selection_policy'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
 parameters:
   - name: 'region'
     type: ResourceRef
