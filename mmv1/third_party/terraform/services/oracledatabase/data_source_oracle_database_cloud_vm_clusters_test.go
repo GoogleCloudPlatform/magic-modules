@@ -16,7 +16,7 @@ func TestAccOracleDatabaseCloudVmClusters_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOracleDatabaseCloudVmClusters_basic(),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_clusters.my_vmclusters", "cloud_vm_clusters.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_clusters.my_vmclusters", "cloud_vm_clusters.0.display_name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_vm_clusters.my_vmclusters", "cloud_vm_clusters.0.properties.#"),
