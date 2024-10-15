@@ -16,6 +16,7 @@ func TestAccVertexAIEndpointIamBinding(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
 	}
@@ -51,6 +52,7 @@ func TestAccVertexAIEndpointIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
 	}
@@ -77,6 +79,7 @@ func TestAccVertexAIEndpointIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-1"),
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
 	}
@@ -140,7 +143,7 @@ resource "google_compute_global_address" "vertex_range" {
 }
 
 resource "google_compute_network" "vertex_network" {
-  name       = "tf-test-network-name%{random_suffix}"
+  name       = "%{network_name}"
 }
 
 data "google_project" "project" {}
@@ -187,7 +190,7 @@ resource "google_compute_global_address" "vertex_range" {
 }
 
 resource "google_compute_network" "vertex_network" {
-  name       = "tf-test-network-name%{random_suffix}"
+  name       = "%{network_name}"
 }
 
 data "google_project" "project" {}
@@ -249,7 +252,7 @@ resource "google_compute_global_address" "vertex_range" {
 }
 
 resource "google_compute_network" "vertex_network" {
-  name       = "tf-test-network-name%{random_suffix}"
+  name       = "%{network_name}"
 }
 
 data "google_project" "project" {}
@@ -298,7 +301,7 @@ resource "google_compute_global_address" "vertex_range" {
 }
 
 resource "google_compute_network" "vertex_network" {
-  name       = "tf-test-network-name%{random_suffix}"
+  name       = "%{network_name}"
 }
 
 data "google_project" "project" {}
@@ -345,7 +348,7 @@ resource "google_compute_global_address" "vertex_range" {
 }
 
 resource "google_compute_network" "vertex_network" {
-  name       = "tf-test-network-name%{random_suffix}"
+  name       = "%{network_name}"
 }
 
 data "google_project" "project" {}
