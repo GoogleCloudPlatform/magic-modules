@@ -114,7 +114,7 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
 validate_environment:

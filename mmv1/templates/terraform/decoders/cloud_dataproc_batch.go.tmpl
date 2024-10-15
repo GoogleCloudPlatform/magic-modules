@@ -1,0 +1,37 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+if obj1, ok := res["runtimeConfig"]; ok {
+    if rconfig, ok :=  obj1.(map[string]interface{}); ok {
+       if obj2, ok := rconfig["properties"]; ok {
+           if properties, ok :=  obj2.(map[string]interface{}); ok {
+               // Update effective_properties to include both server set and client set properties
+               propertiesCopy := make(map[string]interface{})
+               for k, v := range properties {
+                  propertiesCopy[k] = v
+               }
+               rconfig["effectiveProperties"] = propertiesCopy
+
+               // Update properties back to original client set properties
+               originalPropertiesCopy := make(map[string]interface{})
+               originalProperties := d.Get("runtime_config.0.properties").(interface{}).(map[string]interface{})
+               for k, v := range originalProperties {
+                   originalPropertiesCopy[k] = v
+               }
+               rconfig["properties"] = originalPropertiesCopy
+               return res, nil
+           }
+        }
+    }
+}
+
+return res, nil
