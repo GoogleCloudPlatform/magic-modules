@@ -6,6 +6,34 @@ resource "google_vmwareengine_cluster" "{{$.PrimaryResourceId}}" {
     node_count   = 3
     custom_core_count = 32
   }
+  autoscaling_settings {
+    autoscaling_policies {
+      autoscale_policy_id = "autoscaling-policy"
+      node_type_id = "standard-72"
+      scale_out_size = 1
+      min_node_count = 3 
+      max_node_count = 8
+      cpu_thresholds {
+        scale_out = 80
+        scale_in = 10
+      }
+      storage_thresholds {
+        scale_out = 80
+        scale_in = 20
+      }
+      consumed_memory_thresholds {
+        scale_in  = 75
+        scale_out = 20
+      }
+      granted_memory_thresholds {
+        scale_in  = 80
+        scale_out = 25
+      }
+    }
+    min_cluster_node_count = 3
+    max_cluster_node_count = 8
+    cool_down_period = "1800s"
+  }
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
@@ -16,37 +44,12 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
     management_cidr       = "192.168.30.0/24"
     vmware_engine_network = google_vmwareengine_network.cluster-nw.id
   }
-
   management_cluster {
     cluster_id = "{{index $.Vars "management_cluster_id"}}"
     node_type_configs {
       node_type_id = "standard-72"
       node_count   = 3
       custom_core_count = 32
-    }
-    autoscaling_settings {
-      autoscaling_policies {
-        autoscale_policy_id = "autoscaling-policy"
-        node_type_id = "standard-72"
-        scale_out_size = 1
-        min_node_count = 3 
-        max_node_count = 8
-        cpu_thresholds {
-          scale_out = 75
-          scale_in = 15
-        }
-        consumed_memory_thresholds {
-          scale_out = 85
-          scale_in = 10
-        }
-        storage_thresholds {
-          scale_out = 79
-          scale_in = 20
-        }
-      }
-      min_cluster_node_count = 3
-      max_cluster_node_count = 8
-      cool_down_period = "1800s"
     }
   }
 }
