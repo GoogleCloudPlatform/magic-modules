@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- 
+---
 name: "VmwareAdminCluster"
 min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
@@ -129,7 +129,7 @@ properties:
             description:
               Represents the configuration values for static IP allocation to
               nodes.
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: String
@@ -147,7 +147,7 @@ properties:
                     The node's network configurations used by the VMware Admin
                     Cluster.
                   required: true
-                  item_type: 
+                  item_type:
                     type: NestedObject
                     properties:
                       - type: String
@@ -226,7 +226,7 @@ properties:
                   The node's network configurations used by the VMware Admin
                   Cluster.
                 required: true
-                item_type: 
+                item_type:
                   type: NestedObject
                   properties:
                     - type: String
@@ -426,7 +426,7 @@ properties:
         description: |
           Users that will be granted the cluster-admin role on the cluster, providing
           full access to the cluster.
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: String
@@ -435,8 +435,8 @@ properties:
               description: The name of the user, e.g. `my-gcp-id@gmail.com`.
   - type: NestedObject
     name: preparedSecrets
-    description: | 
-      The VMware admin cluster prepared secrets configuration. It should always be 
+    description: |
+      The VMware admin cluster prepared secrets configuration. It should always be
       enabled by the Central API, instead of letting users set it.
     default_from_api: true
     properties:
@@ -468,7 +468,7 @@ properties:
         description: |
           The list of bundles installed in the admin cluster.
         output: true
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: String
@@ -495,7 +495,7 @@ properties:
                   description: |
                     ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
                   output: true
-                  item_type: 
+                  item_type:
                     type: NestedObject
                     properties:
                       - type: String
@@ -547,7 +547,7 @@ properties:
             description: |
               ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
             output: true
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: String
