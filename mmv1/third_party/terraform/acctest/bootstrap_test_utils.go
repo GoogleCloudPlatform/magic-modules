@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"strings"
 	"testing"
@@ -551,7 +552,7 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 		}
 
 		log.Printf("[DEBUG] Waiting for service networking connection creation to finish")
-		if err := tpgservicenetworking.ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", config.UserAgent, projectId, 4*time.Minute); err != nil {
+		if err := tpgservicenetworking.ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", config.UserAgent, projectId, 4*time.Minute); err != nil {
 			t.Fatalf("Error bootstrapping shared test service networking connection: %s", err)
 		}
 	}
@@ -910,7 +911,25 @@ func BootstrapSharedCaPoolInLocation(t *testing.T, location string) string {
 	return poolName
 }
 
+func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkName string) string {
+	subnetOptions := map[string]interface{}{
+		"privateIpGoogleAccess": true,
+	}
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, subnetOptions)
+}
+
 func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string {
+	return BootstrapSubnetWithOverrides(t, subnetName, networkName, make(map[string]interface{}))
+}
+
+func BootstrapSubnetWithFirewallForDataprocBatches(t *testing.T, testId string, subnetName string) string {
+	networkName := BootstrapSharedTestNetwork(t, testId)
+	subnetworkName := BootstrapSubnetForDataprocBatches(t, subnetName, networkName)
+	BootstrapFirewallForDataprocSharedNetwork(t, subnetName, networkName)
+	return subnetworkName
+}
+
+func BootstrapSubnetWithOverrides(t *testing.T, subnetName string, networkName string, subnetOptions map[string]interface{}) string {
 	projectID := envvar.GetTestProjectFromEnv()
 	region := envvar.GetTestRegionFromEnv()
 
@@ -932,11 +951,15 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 		networkUrl := fmt.Sprintf("%sprojects/%s/global/networks/%s", config.ComputeBasePath, projectID, networkName)
 		url := fmt.Sprintf("%sprojects/%s/regions/%s/subnetworks", config.ComputeBasePath, projectID, region)
 
-		subnetObj := map[string]interface{}{
+		defaultSubnetObj := map[string]interface{}{
 			"name":        subnetName,
 			"region ":     region,
 			"network":     networkUrl,
 			"ipCidrRange": "10.77.0.0/20",
+		}
+
+		if len(subnetOptions) != 0 {
+			maps.Copy(defaultSubnetObj, subnetOptions)
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -945,7 +968,7 @@ func BootstrapSubnet(t *testing.T, subnetName string, networkName string) string
 			Project:   projectID,
 			RawURL:    url,
 			UserAgent: config.UserAgent,
-			Body:      subnetObj,
+			Body:      defaultSubnetObj,
 			Timeout:   4 * time.Minute,
 		})
 
@@ -1105,6 +1128,85 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 		t.Fatalf("Error getting Firewall %q: is nil", firewallName)
 	}
 	return firewall.Name
+}
+
+const SharedStoragePoolPrefix = "tf-bootstrap-storage-pool-"
+
+func BootstrapComputeStoragePool(t *testing.T, storagePoolName, storagePoolType string) string {
+	projectID := envvar.GetTestProjectFromEnv()
+	zone := envvar.GetTestZoneFromEnv()
+
+	storagePoolName = SharedStoragePoolPrefix + storagePoolType + "-" + storagePoolName
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	computeService := config.NewComputeClient(config.UserAgent)
+	if computeService == nil {
+		t.Fatal("Could not create compute client.")
+	}
+
+	_, err := computeService.StoragePools.Get(projectID, zone, storagePoolName).Do()
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Storage pool %q not found, bootstrapping", storagePoolName)
+
+		url := fmt.Sprintf("%sprojects/%s/zones/%s/storagePools", config.ComputeBasePath, projectID, zone)
+		storagePoolTypeUrl := fmt.Sprintf("/projects/%s/zones/%s/storagePoolTypes/%s", projectID, zone, storagePoolType)
+
+		storagePoolObj := map[string]interface{}{
+			"name":                      storagePoolName,
+			"poolProvisionedCapacityGb": 10240,
+			"poolProvisionedThroughput": 180,
+			"storagePoolType":           storagePoolTypeUrl,
+			"capacityProvisioningType":  "ADVANCED",
+		}
+
+		if storagePoolType == "hyperdisk-balanced" {
+			storagePoolObj["poolProvisionedIops"] = 10000
+			storagePoolObj["poolProvisionedThroughput"] = 1024
+		}
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   projectID,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      storagePoolObj,
+			Timeout:   20 * time.Minute,
+		})
+
+		log.Printf("Response is, %s", res)
+		if err != nil {
+			t.Fatalf("Error bootstrapping storage pool %s: %s", storagePoolName, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for storage pool creation to finish")
+		err = tpgcompute.ComputeOperationWaitTime(config, res, projectID, "Error bootstrapping storage pool", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping test storage pool %s: %s", storagePoolName, err)
+		}
+	}
+
+	storagePool, err := computeService.StoragePools.Get(projectID, zone, storagePoolName).Do()
+
+	if storagePool == nil {
+		t.Fatalf("Error getting storage pool %s: is nil", storagePoolName)
+	}
+
+	if err != nil {
+		t.Fatalf("Error getting storage pool %s: %s", storagePoolName, err)
+	}
+
+	storagePoolResourceName, err := tpgresource.GetRelativePath(storagePool.SelfLink)
+
+	if err != nil {
+		t.Fatal("Failed to extract Storage Pool resource name from URL.")
+	}
+
+	return storagePoolResourceName
 }
 
 func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *transport_tpg.Config) (string, error) {
@@ -1303,4 +1405,142 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	accessToken := atResp.AccessToken
 
 	return accessToken, nil
+}
+
+const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
+
+func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
+	org := envvar.GetTestOrgFromEnv(t)
+	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
+	tagKeyName := fmt.Sprintf("%s/%s", org, sharedTagKey)
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting shared test tag key %q", sharedTagKey)
+	getURL := fmt.Sprintf("%stagKeys/namespaced?name=%s", config.TagsBasePath, tagKeyName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+		log.Printf("[DEBUG] TagKey %q not found, bootstrapping", sharedTagKey)
+		tagKeyObj := map[string]interface{}{
+			"parent":      "organizations/" + org,
+			"shortName":   sharedTagKey,
+			"description": "Bootstrapped tag key for Terraform Acceptance testing",
+		}
+
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    config.TagsBasePath + "tagKeys/",
+			UserAgent: config.UserAgent,
+			Body:      tagKeyObj,
+			Timeout:   10 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared tag key %q: %s", sharedTagKey, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for shared tag key creation to finish")
+	}
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+
+	if err != nil {
+		t.Fatalf("Error getting shared tag key %q: %s", sharedTagKey, err)
+	}
+
+	return sharedTagKey
+}
+
+const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
+
+func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) string {
+	org := envvar.GetTestOrgFromEnv(t)
+	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
+	tagKeyName := fmt.Sprintf("%s/%s", org, tagKey)
+	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+
+	log.Printf("[DEBUG] Getting shared test tag value %q", sharedTagValue)
+	getURL := fmt.Sprintf("%stagValues/namespaced?name=%s", config.TagsBasePath, tagValueName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+		log.Printf("[DEBUG] TagValue %q not found, bootstrapping", sharedTagValue)
+		log.Printf("[DEBUG] Fetching permanent id for tagkey %s", tagKeyName)
+		tagKeyGetURL := fmt.Sprintf("%stagKeys/namespaced?name=%s", config.TagsBasePath, tagKeyName)
+		tagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    tagKeyGetURL,
+			UserAgent: config.UserAgent,
+			Timeout:   2 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error getting tag key id for %s : %s", tagKeyName, err)
+		}
+		tagKeyObj := map[string]interface{}{
+			"parent":      tagKeyResponse["name"].(string),
+			"shortName":   sharedTagValue,
+			"description": "Bootstrapped tag value for Terraform Acceptance testing",
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    config.TagsBasePath + "tagValues/",
+			UserAgent: config.UserAgent,
+			Body:      tagKeyObj,
+			Timeout:   10 * time.Minute,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared tag value %q: %s", sharedTagValue, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for shared tag value creation to finish")
+	}
+
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+
+	if err != nil {
+		t.Fatalf("Error getting shared tag value %q: %s", sharedTagValue, err)
+	}
+
+	return sharedTagValue
 }

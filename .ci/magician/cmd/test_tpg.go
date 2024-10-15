@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/github"
 	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -37,42 +36,60 @@ var testTPGCmd = &cobra.Command{
         2. COMMIT_SHA
         3. PR_NUMBER
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		version := os.Getenv("VERSION")
 		commit := os.Getenv("COMMIT_SHA")
 		pr := os.Getenv("PR_NUMBER")
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
 		}
 		gh := github.NewClient(githubToken)
 
-		execTestTPG(version, commit, pr, gh)
+		return execTestTPG(version, commit, pr, gh)
 	},
 }
 
-func execTestTPG(version, commit, pr string, gh ttGithub) {
+func execTestTPG(version, commit, pr string, gh ttGithub) error {
 	var repo string
+	var content []byte
+	var err error
 	if version == "ga" {
 		repo = "terraform-provider-google"
+		content, err = os.ReadFile("/workspace/commitSHA_modular-magician_terraform-provider-google.txt")
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	} else if version == "beta" {
 		repo = "terraform-provider-google-beta"
+		content, err = os.ReadFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt")
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	} else {
-		fmt.Println("invalid version specified")
-		os.Exit(1)
+		return fmt.Errorf("invalid version specified")
 	}
 
-	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
-		"owner":  "modular-magician",
-		"repo":   repo,
-		"branch": "auto-pr-" + pr,
-		"sha":    commit,
-	}); err != nil {
-		fmt.Printf("Error creating workflow dispatch event: %v\n", err)
-		os.Exit(1)
+	commitShaOrBranchUpstream := string(content)
+
+	if commitShaOrBranchUpstream == ""{
+		// fall back to branch if commit SHA can't be found
+		commitShaOrBranchUpstream = "auto-pr-" + pr
 	}
+
+	fmt.Println("commitShaOrBranchUpstream: ", commitShaOrBranchUpstream)
+
+	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
+		"owner":     "modular-magician",
+		"repo":      repo,
+		"branch":    commitShaOrBranchUpstream,
+		"pr-number": pr,
+		"sha":       commit,
+	}); err != nil {
+		return fmt.Errorf("error creating workflow dispatch event: %w", err)
+	}
+	return nil
 }
 
 func init() {

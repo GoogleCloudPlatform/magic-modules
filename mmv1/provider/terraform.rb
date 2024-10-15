@@ -23,6 +23,7 @@ require 'provider/terraform/custom_code'
 require 'provider/terraform/docs'
 require 'provider/terraform/examples'
 require 'provider/terraform/sub_template'
+require 'provider/terraform/sweeper'
 require 'google/golang_utils'
 
 module Provider
@@ -37,6 +38,7 @@ module Provider
     attr_accessor :resource_count
     attr_accessor :iam_resource_count
     attr_accessor :resources_for_version
+    attr_accessor :go_yaml_files
 
     TERRAFORM_PROVIDER_GA = 'github.com/hashicorp/terraform-provider-google'.freeze
     TERRAFORM_PROVIDER_BETA = 'github.com/hashicorp/terraform-provider-google-beta'.freeze
@@ -70,6 +72,7 @@ module Provider
       @resource_count = 0
       @iam_resource_count = 0
       @resources_for_version = []
+      @go_yaml_files = []
     end
 
     # This provides the ProductFileTemplate class with access to a provider.
@@ -88,8 +91,9 @@ module Provider
     end
 
     # Main entry point for generation.
-    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs)
-      generate_objects(output_folder, types, generate_code, generate_docs)
+    def generate(output_folder, types, product_path, dump_yaml, generate_code, generate_docs, \
+                 go_yaml)
+      generate_objects(output_folder, types, generate_code, generate_docs, product_path, go_yaml)
 
       FileUtils.mkpath output_folder
       pwd = Dir.pwd
@@ -357,7 +361,8 @@ module Provider
       services
     end
 
-    def generate_objects(output_folder, types, generate_code, generate_docs)
+    def generate_objects(output_folder, types, generate_code, generate_docs, product_path, \
+                         go_yaml)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -377,8 +382,7 @@ module Provider
 
           generate_object object, output_folder, @target_version_name, generate_code, generate_docs
         end
-        # Uncomment for go YAML
-        # generate_object_modified object, output_folder, @target_version_name
+        generate_object_modified object, product_path, @target_version_name if go_yaml
       end
     end
 
@@ -408,29 +412,61 @@ module Provider
     end
 
     def generate_object_modified(object, output_folder, version_name)
+      # skip healthcare - exceptional case will be done manually
+      return if (output_folder.include? 'healthcare') || (output_folder.include? 'memorystore')
+
+      generate_product = false
+
+      unless @go_yaml_files.empty?
+        found = false
+        @go_yaml_files.each do |f|
+          no_ext = Pathname.new(f).sub_ext ''
+          parts = no_ext.each_filename.to_a
+          target_product = "#{parts[-3]}/#{parts[-2]}"
+          target_resource = parts[-1]
+          generate_product = true if target_resource == 'product'
+          found = true if output_folder == target_product && object.name == target_resource
+        end
+        return unless found
+      end
+
       pwd = Dir.pwd
       data = build_object_data(pwd, object, output_folder, version_name)
-      FileUtils.mkpath output_folder
       Dir.chdir output_folder
-      Google::LOGGER.debug "Generating #{object.name} rewrite yaml"
-      generate_newyaml(pwd, data.clone)
+      Google::LOGGER.info "Generating #{object.name} rewrite yaml"
+      # rubocop:disable Style/UnlessElse
+      unless @go_yaml_files.empty?
+        generate_newyaml_temp(pwd, data.clone, generate_product)
+      else
+        generate_newyaml(pwd, data.clone)
+      end
+      # rubocop:enable Style/UnlessElse
       Dir.chdir pwd
     end
 
     def generate_newyaml(pwd, data)
-      # @api.api_name is the service folder name
-      product_name = @api.api_name
-      target_folder = File.join(folder_name(data.version), 'services', product_name)
-      FileUtils.mkpath target_folder
       data.generate(pwd,
                     '/templates/terraform/yaml_conversion.erb',
-                    "#{target_folder}/go_#{data.object.name}.yaml",
+                    "go_#{data.object.name}.yaml",
                     self)
-      return if File.exist?("#{target_folder}/go_product.yaml")
+      unless File.exist?('go_product.yaml') && File.mtime('go_product.yaml') > data.env[:start_time]
+        data.generate(pwd,
+                      '/templates/terraform/product_yaml_conversion.erb',
+                      'go_product.yaml',
+                      self)
+      end
+    end
+
+    def generate_newyaml_temp(pwd, data, generate_product)
+      data.generate(pwd,
+                    '/templates/terraform/yaml_conversion.erb',
+                    "#{data.object.name}.yaml.temp",
+                    self)
+      return unless generate_product
 
       data.generate(pwd,
                     '/templates/terraform/product_yaml_conversion.erb',
-                    "#{target_folder}/go_product.yaml",
+                    'product.yaml.temp',
                     self)
     end
 
@@ -565,6 +601,9 @@ module Provider
     end
 
     def force_new?(property, resource)
+      # Client-side fields don't inherit immutability
+      return property.immutable if property.client_side
+
       (
         (!property.output || property.is_a?(Api::Type::KeyValueEffectiveLabels)) &&
         (property.immutable ||
@@ -576,10 +615,10 @@ module Provider
             )
           )
         )
-      ) ||
-        (property.is_a?(Api::Type::KeyValueTerraformLabels) &&
-          !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
-        )
+      ) || (
+        property.is_a?(Api::Type::KeyValueTerraformLabels) &&
+        !updatable?(resource, resource.all_user_properties) && !resource.root_labels?
+      )
     end
 
     # Returns tuples of (fieldName, list of update masks) for

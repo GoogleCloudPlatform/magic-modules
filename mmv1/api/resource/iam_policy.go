@@ -14,7 +14,8 @@
 package resource
 
 import (
-	"gopkg.in/yaml.v3"
+	"log"
+	"slices"
 )
 
 // Information about the IAM policy for this resource
@@ -22,8 +23,6 @@ import (
 // and accessed via their parent resource
 // See: https://cloud.google.com/iam/docs/overview
 type IamPolicy struct {
-	// google.YamlValidator
-
 	// boolean of if this binding should be generated
 	Exclude bool
 
@@ -33,16 +32,16 @@ type IamPolicy struct {
 	// Boolean of if tests for IAM resources should exclude import test steps
 	// Used to handle situations where typical generated IAM tests cannot import
 	// due to the parent resource having an API-generated id
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test"`
 
 	// Character that separates resource identifier from method call in URL
 	// For example, PubSub subscription uses {resource}:getIamPolicy
 	// While Compute subnetwork uses {resource}/getIamPolicy
 	MethodNameSeparator string `yaml:"method_name_separator"`
 
-	// The terraform type of the parent resource if it is not the same as the
-	// IAM resource. The IAP product needs these as its IAM policies refer
-	// to compute resources
+	// The terraform type (e.g. 'google_endpoints_service') of the parent resource
+	// if it is not the same as the IAM resource. The IAP product needs these
+	// as its IAM policies refer to compute resources.
 	ParentResourceType string `yaml:"parent_resource_type"`
 
 	// Some resources allow retrieving the IAM policy with GET requests,
@@ -84,7 +83,7 @@ type IamPolicy struct {
 
 	// Some resources (IAP) use fields named differently from the parent resource.
 	// We need to use the parent's attributes to create an IAM policy, but they may not be
-	// named as the IAM IAM resource expects.
+	// named as the IAM resource expects.
 	// This allows us to specify a file (relative to MM root) containing a partial terraform
 	// config with the test/example attributes of the IAM resource.
 	ExampleConfigBody string `yaml:"example_config_body"`
@@ -117,7 +116,7 @@ type IamPolicy struct {
 	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
 }
 
-func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
+func (p *IamPolicy) UnmarshalYAML(unmarshal func(any) error) error {
 	p.MethodNameSeparator = "/"
 	p.FetchIamPolicyVerb = "GET"
 	p.FetchIamPolicyMethod = "getIamPolicy"
@@ -126,13 +125,13 @@ func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
 	p.WrappedPolicyObj = true
 	p.AllowedIamRole = "roles/viewer"
 	p.ParentResourceAttribute = "id"
-	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.tf.erb"
+	p.ExampleConfigBody = "templates/terraform/iam/iam_attributes.go.tmpl"
 	p.SubstituteZoneValue = true
 
 	type iamPolicyAlias IamPolicy
 	aliasObj := (*iamPolicyAlias)(p)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
@@ -140,6 +139,19 @@ func (p *IamPolicy) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-// func (p *IamPolicy) validate() {
+func (p *IamPolicy) Validate(rName string) {
+	allowed := []string{"GET", "POST"}
+	if !slices.Contains(allowed, p.FetchIamPolicyVerb) {
+		log.Fatalf("Value on `fetch_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
 
-// }
+	allowed = []string{"POST", "PUT"}
+	if !slices.Contains(allowed, p.SetIamPolicyVerb) {
+		log.Fatalf("Value on `set_iam_policy_verb` should be one of %#v in resource %s", allowed, rName)
+	}
+
+	allowed = []string{"REQUEST_BODY", "QUERY_PARAM", "QUERY_PARAM_NESTED"}
+	if p.IamConditionsRequestType != "" && !slices.Contains(allowed, p.IamConditionsRequestType) {
+		log.Fatalf("Value on `iam_conditions_request_type` should be one of %#v in resource %s", allowed, rName)
+	}
+}

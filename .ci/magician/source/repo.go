@@ -8,14 +8,15 @@ import (
 )
 
 type Repo struct {
-	Name         string // Name in GitHub (e.g. magic-modules)
-	Title        string // Title for display (e.g. Magic Modules)
-	Branch       string // Branch to clone, optional
-	Owner        string // Owner of repo, optional
-	Path         string // local Path once cloned, including Name
-	Version      provider.Version
-	Cloned       bool
-	ChangedFiles []string
+	Name            string // Name in GitHub (e.g. magic-modules)
+	Title           string // Title for display (e.g. Magic Modules)
+	Branch          string // Branch to clone, optional
+	Owner           string // Owner of repo, optional
+	Path            string // local Path once cloned, including Name
+	Version         provider.Version
+	Cloned          bool
+	ChangedFiles    []string
+	UnifiedZeroDiff string
 }
 
 type Controller struct {
@@ -112,6 +113,17 @@ func (gc Controller) DiffNameOnly(repo *Repo, oldBranch, newBranch string) ([]st
 		return nil, fmt.Errorf("error diffing %s and %s: %v", oldBranch, newBranch, err)
 	}
 	return strings.Split(strings.TrimSuffix(nameOnly, "\n"), "\n"), gc.rnr.PopDir()
+}
+
+func (gc Controller) DiffUnifiedZero(repo *Repo, oldBranch, newBranch string) (string, error) {
+	if err := gc.rnr.PushDir(repo.Path); err != nil {
+		return "", err
+	}
+	unifiedZero, err := gc.rnr.Run("git", []string{"diff", "origin/" + oldBranch, "origin/" + newBranch, "--unified=0"}, nil)
+	if err != nil {
+		return "", fmt.Errorf("error diffing %s and %s: %v", oldBranch, newBranch, err)
+	}
+	return unifiedZero, gc.rnr.PopDir()
 }
 
 func (gc Controller) Cleanup(repo *Repo) error {

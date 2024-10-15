@@ -1,0 +1,149 @@
+[
+  {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/vpnTunnels/tunnel-1",
+      "asset_type":"compute.googleapis.com/VpnTunnel",
+      "resource":{
+         "version":"v1",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"VpnTunnel",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "ikeVersion":2,
+            "labels":{
+               "foo":"bar",
+               "goog-terraform-provisioned": "true"
+            },
+            "name":"tunnel-1",
+            "peerExternalGatewayInterface":0,
+            "peerIp":"15.0.0.120",
+            "region":"projects/{{.Provider.project}}/global/regions/us-central1",
+            "sharedSecret":"a secret message",
+            "vpnGatewayInterface":0
+         }
+      },
+      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+      "ancestors": ["organizations/{{.OrgID}}"]
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/network-1",
+      "asset_type":"compute.googleapis.com/Network",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"Network",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "autoCreateSubnetworks":true,
+            "name":"network-1",
+            "networkFirewallPolicyEnforcementOrder":"AFTER_CLASSIC_FIREWALL"
+         }
+      },
+      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+      "ancestors": ["organizations/{{.OrgID}}"]
+
+      
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/global/routes/route1",
+      "asset_type":"compute.googleapis.com/Route",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"Route",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "destRange":"15.0.0.0/24",
+            "name":"route1",
+            "network":"projects/{{.Provider.project}}/global/networks/network-1",
+            "priority":1000
+         }
+      },
+      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+      "ancestors": ["organizations/{{.OrgID}}"]
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/addresses/vpn-static-ip",
+      "asset_type":"compute.googleapis.com/Address",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"Address",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "addressType":"EXTERNAL",
+            "name":"vpn-static-ip",
+            "labels": {
+              "goog-terraform-provisioned": "true"
+            },
+            "region":"projects/{{.Provider.project}}/global/regions/us-central1"
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/forwardingRules/fr-esp",
+      "asset_type":"compute.googleapis.com/ForwardingRule",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"ForwardingRule",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "IPProtocol":"ESP",
+            "allowGlobalAccess":false,
+            "allowPscGlobalAccess":false,
+            "loadBalancingScheme":"EXTERNAL",
+            "name":"fr-esp",
+            "noAutomateDnsZone":false,
+            "region":"projects/{{.Provider.project}}/global/regions/us-central1"
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/forwardingRules/fr-udp4500",
+      "asset_type":"compute.googleapis.com/ForwardingRule",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"ForwardingRule",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "IPProtocol":"UDP",
+            "allowGlobalAccess":false,
+            "allowPscGlobalAccess":false,
+            "loadBalancingScheme":"EXTERNAL",
+            "name":"fr-udp4500",
+            "noAutomateDnsZone":false,
+            "portRange":"4500",
+            "region":"projects/{{.Provider.project}}/global/regions/us-central1"
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   },
+   {
+      "name":"//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/forwardingRules/fr-udp500",
+      "asset_type":"compute.googleapis.com/ForwardingRule",
+      "resource":{
+         "version":"beta",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+         "discovery_name":"ForwardingRule",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "IPProtocol":"UDP",
+            "allowGlobalAccess":false,
+            "allowPscGlobalAccess":false,
+            "loadBalancingScheme":"EXTERNAL",
+            "name":"fr-udp500",
+            "noAutomateDnsZone":false,
+            "portRange":"500",
+            "region":"projects/{{.Provider.project}}/global/regions/us-central1"
+         }
+      },
+     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+     "ancestors": ["organizations/{{.OrgID}}"]
+   }
+]

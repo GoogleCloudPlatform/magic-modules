@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -34,11 +34,19 @@ func TestAccSqlUser_mysql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
+					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user3"),
 				),
 			},
 			{
 				ResourceName:            "google_sql_user.user2",
 				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+			{
+				ResourceName:            "google_sql_user.user3",
+				ImportStateId:           fmt.Sprintf("%s/%s/10.0.0.0/24/admin", envvar.GetTestProjectFromEnv(), instance),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -136,10 +144,10 @@ func TestAccSqlUser_postgres(t *testing.T) {
 }
 
 func TestAccSqlUser_postgresIAM(t *testing.T) {
-	t.Skipf("Skipping test %s due to https://github.com/hashicorp/terraform-provider-google/issues/16704", t.Name())
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	const iamUser = "admin@hashicorptest.com"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -149,14 +157,14 @@ func TestAccSqlUser_postgresIAM(t *testing.T) {
 		CheckDestroy: testAccSqlUserDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlUser_postgresIAM(instance),
+				Config: testGoogleSqlUser_postgresIAM(instance, iamUser),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user"),
 				),
 			},
 			{
 				ResourceName:            "google_sql_user.user",
-				ImportStateId:           fmt.Sprintf("%s/%s/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportStateId:           fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), instance, iamUser),
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -341,6 +349,13 @@ resource "google_sql_user" "user2" {
   host     = "gmail.com"
   password = "hunter2"
 }
+
+resource "google_sql_user" "user3" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "10.0.0.0/24"
+  password = "hunter3"
+}
 `, instance, password)
 }
 
@@ -404,7 +419,7 @@ resource "google_sql_user" "user" {
 `, instance, password)
 }
 
-func testGoogleSqlUser_postgresIAM(instance string) string {
+func testGoogleSqlUser_postgresIAM(instance, iamUser string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "%s"
@@ -422,19 +437,19 @@ resource "google_sql_database_instance" "instance" {
 }
 
 # TODO: Remove with resolution of https://github.com/hashicorp/terraform-provider-google/issues/14233
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_60_seconds" {
   depends_on = [google_sql_database_instance.instance]
 
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 resource "google_sql_user" "user" {
-  depends_on = [time_sleep.wait_30_seconds]
-  name     = "admin"
+  depends_on = [time_sleep.wait_60_seconds]
+  name     = "%s"
   instance = google_sql_database_instance.instance.name
   type     = "CLOUD_IAM_USER"
 }
-`, instance)
+`, instance, iamUser)
 }
 
 func testGoogleSqlUser_postgresAbandon(instance, name string) string {

@@ -18,7 +18,7 @@
 package {{ $.Res.PackageName }}_test
 
 import (
-{{- if not $.Res.SkipDelete }}
+{{- if not $.Res.ExcludeDelete }}
 	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
 	{{- end }}
@@ -26,9 +26,9 @@ import (
 {{- end }}
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-{{- if not $.Res.SkipDelete }}
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if not $.Res.ExcludeDelete }}
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
 
 	"{{ $.ImportPath }}/acctest"
@@ -36,7 +36,7 @@ import (
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 )
-{{ range $e := $.Res.Examples }}
+{{ range $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
@@ -44,39 +44,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-	{{- range $varKey, $varVal := $e.TestEnvVars }}
-		{{- if eq $varVal $.ORGID }}
-		"{{$varKey}}": envvar.GetTestOrgFromEnv(t),
-		{{- else if eq $varVal $.ORG_DOMAIN }}
-		"{{$varKey}}": envvar.GetTestOrgDomainFromEnv(t),
-		{{- else if eq $varVal $.CREDENTIALS }}
-		"{{$varKey}}": envvar.GetTestCredsFromEnv(t),
-		{{- else if eq $varVal $.REGION }}
-		"{{$varKey}}": envvar.GetTestRegionFromEnv(),
-		{{- else if eq $varVal $.ORG_TARGET }}
-		"{{$varKey}}": envvar.GetTestOrgTargetFromEnv(t),
-		{{- else if eq $varVal $.BILLING_ACCT }}
-		"{{$varKey}}": envvar.GetTestBillingAccountFromEnv(t),
-		{{- else if eq $varVal $.MASTER_BILLING_ACCT }}
-		"{{$varKey}}": envvar.GetTestMasterBillingAccountFromEnv(t),
-		{{- else if eq $varVal $.SERVICE_ACCT }}
-		"{{$varKey}}": envvar.GetTestServiceAccountFromEnv(t),
-		{{- else if eq $varVal $.PROJECT_NAME }}
-		"{{$varKey}}": envvar.GetTestProjectFromEnv(),
-		{{- else if eq $varVal $.PROJECT_NUMBER }}
-		"{{$varKey}}": envvar.GetTestProjectNumberFromEnv(),
-		{{- else if eq $varVal $.FIRESTORE_PROJECT_NAME }}
-		"{{$varKey}}": envvar.GetTestFirestoreProjectFromEnv(t),
-		{{- else if eq $varVal $.CUST_ID }}
-		"{{$varKey}}": envvar.GetTestCustIdFromEnv(t),
-		{{- else if eq $varVal $.IDENTITY_USER }}
-		"{{$varKey}}": envvar.GetTestIdentityUserFromEnv(t),
-		{{- else if eq $varVal $.PAP_DESCRIPTION }}
-		"{{$varKey}}": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
-		{{- else if eq $varVal $.ZONE }}
-		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
-		{{- end }}
-	{{- end }}
+	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
 	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
 	{{- end }}
@@ -85,25 +53,26 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-	{{- if not (and $e.MinVersion (not (eq $e.MinVersion "ga"))) }}
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-	{{- else }}
+	{{- if $.Res.VersionedProvider $e.MinVersion }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+	{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 	{{- end }}
-	{{- if $e.PullExternal }}
+	{{- if $e.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
-			"time": {},
+		{{- range $provider := $e.ExternalProviders }}
+			"{{$provider}}": {},
+		{{- end }}
 		},
 	{{- end }}
-	{{- if not $.Res.SkipDelete }}
+	{{- if not $.Res.ExcludeDelete }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
 	{{- end }}
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 			},
-	{{- if not $e.SkipImportTest }}
+	{{- if not $e.ExcludeImportTest }}
 			{
 				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				ImportState:       true,
@@ -125,7 +94,7 @@ func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context map[
 
 {{ end }}
 
-{{ if not $.Res.SkipDelete }}
+{{ if not $.Res.ExcludeDelete }}
 func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -135,8 +104,8 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 			if strings.HasPrefix(name, "data.") {
 				continue
 			}
-	{{- if $.Res.CustomCode.TestCheckDestroy }}
-{{/*TODO Q2: Custom template for TestCheckDestroy */}}
+	{{ if $.Res.CustomCode.TestCheckDestroy }}
+	{{ $.Res.CustomTemplate $.Res.CustomCode.TestCheckDestroy false -}}
 	{{- else }}
 
 		config := acctest.GoogleProviderConfig(t)

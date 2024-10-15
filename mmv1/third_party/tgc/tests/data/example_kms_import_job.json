@@ -1,0 +1,18 @@
+[
+    {
+        "name": "//cloudkms.googleapis.com/placeholder-CTVJTU1w",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "cloudkms.googleapis.com/KeyRingImportJob",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/cloudkms/v1/rest",
+            "discovery_name": "KeyRingImportJob",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "importMethod": "RSA_OAEP_3072_SHA1_AES_256",
+                "protectionLevel": "SOFTWARE"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

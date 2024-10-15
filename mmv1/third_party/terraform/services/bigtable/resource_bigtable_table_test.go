@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccBigtableTable_basic(t *testing.T) {
@@ -85,6 +85,63 @@ func TestAccBigtableTable_family(t *testing.T) {
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigtableTable_familyType(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intmax"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, `{
+					"aggregateType": {
+						"max": {},
+						"inputType": {
+							"int64Type": {
+								"encoding": {
+									"bigEndianBytes": {}
+								}
+							}
+						}
+					}
+				}`),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableTable_familyType(instanceName, tableName, family, "intmax"),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccBigtableTable_familyType(instanceName, tableName, family, "intmin"),
+				ExpectError: regexp.MustCompile(".*Immutable fields 'value_type' cannot be updated.*"),
 			},
 		},
 	})
@@ -272,6 +329,84 @@ func TestAccBigtableTable_change_stream_enable(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Creating a table with automated backups enabled
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Changing automated backup retention period value
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Changing automated backup frequency value
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "", "24h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Changing both automated backup retention period and frequency values
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Disable automated backups
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsDisabled(t)),
+			},
+			// Renable automated backups
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// it is possible to delete the table when automated backups is enabled
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_familyMany(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
@@ -379,7 +514,11 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		for _, data := range bigtable.FlattenColumnFamily(table.Families) {
+		families, err := bigtable.FlattenColumnFamily(table.FamilyInfos)
+		if err != nil {
+			return fmt.Errorf("Error flattening column families: %v", err)
+		}
+		for _, data := range families {
 			if data["family"] != family {
 				return fmt.Errorf("Error checking column family. Could not find column family %s in %s.", family, rs.Primary.Attributes["name"])
 			}
@@ -412,6 +551,34 @@ func testAccBigtableChangeStreamDisabled(t *testing.T) resource.TestCheckFunc {
 
 		if table.ChangeStreamRetention != nil {
 			return fmt.Errorf("Change Stream is expected to be disabled but it's not: %v", table)
+		}
+
+		return nil
+	}
+}
+
+func verifyBigtableAutomatedBackupsDisabled(t *testing.T) resource.TestCheckFunc {
+	var ctx = context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources["google_bigtable_table.table"]
+		if !ok {
+			return fmt.Errorf("Table not found: %s", "google_bigtable_table.table")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client. %s", err)
+		}
+
+		defer c.Close()
+
+		table, err := c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
+		}
+		if table.AutomatedBackupConfig != nil {
+			return fmt.Errorf("Automated Backups are expected to be disabled but they are not: %v", table)
 		}
 
 		return nil
@@ -484,6 +651,34 @@ resource "google_bigtable_table" "table" {
 `, instanceName, instanceName, tableName, family)
 }
 
+func testAccBigtableTable_familyType(instanceName, tableName, family, familyType string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+	type =  <<EOF
+%s
+EOF
+  }
+}
+`, instanceName, instanceName, tableName, family, familyType)
+}
+
 func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
@@ -534,6 +729,61 @@ resource "google_bigtable_table" "table" {
   }
 }
 `, instanceName, instanceName, tableName, changeStreamRetention, family)
+}
+
+func testAccBigtableTable_automated_backups(instanceName, tableName, automatedBackupsRetentionPeriod, automatedBackupsFrequency, family string) string {
+	var retentionPeriod string
+	if automatedBackupsRetentionPeriod != "" {
+		retentionPeriod = fmt.Sprintf(`retention_period = "%s"`, automatedBackupsRetentionPeriod)
+	}
+	var frequency string
+	if automatedBackupsFrequency != "" {
+		frequency = fmt.Sprintf(`frequency = "%s"`, automatedBackupsFrequency)
+	}
+	config := fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+  automated_backup_policy {
+	%s
+	%s
+  }
+  column_family {
+    family = "%s"
+  }
+}
+`, instanceName, instanceName, tableName, retentionPeriod, frequency, family)
+	return config
+}
+
+func testAccBigtableTable_disable_automated_backups(instanceName, tableName, family string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+	name = "%s"
+	cluster {
+	cluster_id = "%s"
+	zone       = "us-central1-b"
+	}
+	instance_type = "DEVELOPMENT"
+	deletion_protection = false
+}
+resource "google_bigtable_table" "table" {
+	name          = "%s"
+	instance_name = google_bigtable_instance.instance.name
+	column_family {
+	family = "%s"
+	}
+}
+`, instanceName, instanceName, tableName, family)
 }
 
 func testAccBigtableTable_familyMany(instanceName, tableName, family string) string {

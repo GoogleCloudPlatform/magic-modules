@@ -136,10 +136,10 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Read:   schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -296,6 +296,13 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: ` If provided, the self-provided service account to run the function with.`,
+			},
+
+			"build_service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The fully-qualified name of the service account to be used for the build step of deploying this function`,
 			},
 
 			"vpc_connector": {
@@ -627,6 +634,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.MinInstances = int64(v.(int))
 	}
 
+	if v, ok := d.GetOk("build_service_account"); ok {
+		function.BuildServiceAccount = v.(string)
+	}
+
 	log.Printf("[DEBUG] Creating cloud function: %s", function.Name)
 
 	// We retry the whole create-and-wait because Cloud Functions
@@ -713,6 +724,9 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	if err := d.Set("service_account_email", function.ServiceAccountEmail); err != nil {
 		return fmt.Errorf("Error setting service_account_email: %s", err)
+	}
+	if err := d.Set("build_service_account", function.BuildServiceAccount); err != nil {
+		return fmt.Errorf("Error setting build_service_account: %s", err)
 	}
 	if err := d.Set("environment_variables", function.EnvironmentVariables); err != nil {
 		return fmt.Errorf("Error setting environment_variables: %s", err)
@@ -943,6 +957,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("min_instances") {
 		function.MinInstances = int64(d.Get("min_instances").(int))
 		updateMaskArr = append(updateMaskArr, "minInstances")
+	}
+
+	if d.HasChange("build_service_account") {
+		function.BuildServiceAccount = d.Get("build_service_account").(string)
+		updateMaskArr = append(updateMaskArr, "buildServiceAccount")
 	}
 
 	if len(updateMaskArr) > 0 {

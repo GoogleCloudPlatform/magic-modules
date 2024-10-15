@@ -26,9 +26,6 @@
 <% if property.default_from_api -%>
 	Computed: true,
 	Optional: true,
-	<% if property.schema_config_mode_attr -%>
-	ConfigMode: schema.SchemaConfigModeAttr,
-	<% end -%>
 <% elsif property.required -%>
   Required: true,
 <% elsif property.output -%>
@@ -152,7 +149,7 @@
 			"<%= property.key_name -%>": {
 				Type:     schema.TypeString,
 				Required: true,
-				<% if !property.diff_suppress_func.nil? -%>
+				<% if !property.key_diff_suppress_func.nil? -%>
 					DiffSuppressFunc: <%= property.key_diff_suppress_func %>,
 				<% end -%>
 				<% if force_new?(property, object) -%>

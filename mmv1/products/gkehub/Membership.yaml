@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,69 +11,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Membership'
-base_url: 'projects/{{project}}/locations/{{location}}/memberships'
-create_url: 'projects/{{project}}/locations/{{location}}/memberships?membershipId={{membership_id}}'
-update_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Membership contains information about a member cluster.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.memberships'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/memberships'
+self_link: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/memberships?membershipId={{membership_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'gkehub#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: 'true'
-    allowed:
-      - 'true'
-      - 'false'
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error/errors'
     message: 'message'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: membership_id
+iam_policy:
   method_name_separator: ':'
+  parent_resource_attribute: 'membership_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}',
-      '{{membership_id}}',
-    ]
-autogen_async: true
+    - 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
+    - '{{membership_id}}'
+custom_code:
+  constants: 'templates/terraform/constants/gke_hub_membership_diff.go.tmpl'
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 schema_version: 1
 state_upgraders: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_regional'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+  - name: 'gkehub_membership_regional'
     primary_resource_id: 'membership'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     test_env_vars:
-      project: :PROJECT_NAME
-      location: :REGION
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_basic'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+      project: 'PROJECT_NAME'
+      location: 'REGION'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+  - name: 'gkehub_membership_basic'
     primary_resource_id: 'membership'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     vars:
       name: 'basic'
       cluster_name: 'basic-cluster'
@@ -81,13 +86,12 @@ examples:
       network_name: 'default'
       subnetwork_name: 'default'
     test_vars_overrides:
-      deletion_protection: 'false'
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
-      deletion_protection: 'false'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_membership_issuer'
+      'deletion_protection': 'false'
+  - name: 'gkehub_membership_issuer'
     primary_resource_id: 'membership'
     vars:
       name: 'basic'
@@ -95,89 +99,81 @@ examples:
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
-    test_vars_overrides:
-      deletion_protection: 'false'
-      network_name: 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
-      subnetwork_name: 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
-    oics_vars_overrides:
-      deletion_protection: 'false'
     test_env_vars:
-      project: :PROJECT_NAME
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: 'projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}'
-import_format:
-  ['projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: templates/terraform/constants/gke_hub_membership_diff.go
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    immutable: true
-    default_value: global
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       Location of the membership.
       The default value is `global`.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'membershipId'
+  - name: 'membershipId'
+    type: String
     description: |
       The client-provided identifier of the membership.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the membership.
-  - !ruby/object:Api::Type::String
-    name: 'description'
-    deprecation_message: >-
-      `description` is deprecated and will be removed in a future major release.
-    min_version: beta
+    output: true
+  - name: 'description'
+    type: String
     description: |
       The name of this entity type to be displayed on the console. This field is unavailable in v1 of the API.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    min_version: 'beta'
+    deprecation_message: '`description` is deprecated and will be removed in a future major release.'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels to apply to this membership.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'endpoint'
-    immutable: true
+  - name: 'endpoint'
+    type: NestedObject
     description: |
       If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'gkeCluster'
-        immutable: true
+      - name: 'gkeCluster'
+        type: NestedObject
         description: |
           If this Membership is a Kubernetes API server hosted on GKE, this is a self link to its GCP resource.
+        immutable: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'resourceLink'
+          - name: 'resourceLink'
+            type: String
             description: |
               Self-link of the GCP resource for the GKE cluster.
               For example: `//container.googleapis.com/projects/my-project/zones/us-west1-a/clusters/my-cluster`.
               It can be at the most 1000 characters in length. If the cluster is provisioned with Terraform,
               this can be `"//container.googleapis.com/${google_container_cluster.my-cluster.id}"` or
               `google_container_cluster.my-cluster.id`.
-            immutable: true
             required: true
-            diff_suppress_func: suppressGkeHubEndpointSelfLinkDiff
-            custom_expand: 'templates/terraform/custom_expand/gke_hub_membership.erb'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'authority'
+            immutable: true
+            diff_suppress_func: 'suppressGkeHubEndpointSelfLinkDiff'
+            custom_expand: 'templates/terraform/custom_expand/gke_hub_membership.tmpl'
+  - name: 'authority'
+    type: NestedObject
     description: |
       Authority encodes how Google will recognize identities from this Membership.
       See the workload identity documentation for more details:
       https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'issuer'
-        immutable: true
-        required: true
+      - name: 'issuer'
+        type: String
         description: |
           A JSON Web Token (JWT) issuer URI. `issuer` must start with `https://` and // be a valid
           with length <2000 characters. For example: `https://container.googleapis.com/v1/projects/my-project/locations/us-west1/clusters/my-cluster` (must be `locations` rather than `zones`). If the cluster is provisioned with Terraform, this is `"https://container.googleapis.com/v1/${google_container_cluster.my-cluster.id}"`.
+        required: true
+        immutable: true

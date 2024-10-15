@@ -21,18 +21,28 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
+	"golang.org/x/exp/slices"
 )
 
 // Represents a property type
 type Type struct {
-	NamedObject `yaml:",inline"`
+	Name string
 
-	// TODO: improve the parsing of properties based on type in resource yaml files.
+	// original value of :name before the provider override happens
+	// same as :name if not overridden in provider
+	ApiName string `yaml:"api_name"`
+
+	// TODO rewrite: improve the parsing of properties based on type in resource yaml files.
 	Type string
 
-	// TODO: set a specific type intead of interface{}
 	DefaultValue interface{} `yaml:"default_value"`
 
+	// Expected to follow the format as follows:
+	//
+	//	description: |
+	//		This is a description of a field.
+	//		If it comprises multiple lines, it must continue to be indented.
+	//
 	Description string
 
 	Exclude bool
@@ -58,6 +68,9 @@ type Type struct {
 	// it should be explicitly added to each field that needs the ForceNew
 	// behavior.
 	Immutable bool
+
+	// Indicates that this field is client-side only (aka virtual.)
+	ClientSide bool `yaml:"client_side"`
 
 	// url_param_only will not send the field in the resource body and will
 	// not attempt to read the field from the API response.
@@ -124,23 +137,21 @@ type Type struct {
 	// Can only be overridden - we should never set this ourselves.
 	NewType string
 
-	// A pattern that maps expected user input to expected API input.
-	// TODO: remove?
-	Pattern string
-
 	Properties []*Type
 
 	EnumValues []string `yaml:"enum_values"`
 
-	SkipDocsValues bool `yaml:"skip_docs_values"`
+	ExcludeDocsValues bool `yaml:"exclude_docs_values"`
 
 	// ====================
 	// Array Fields
 	// ====================
-	ItemType *Type `yaml:"item_type"`
-	MinSize  int   `yaml:"min_size"`
-	MaxSize  int   `yaml:"max_size"`
-	// __name
+	ItemType *Type  `yaml:"item_type"`
+	MinSize  string `yaml:"min_size"`
+	MaxSize  string `yaml:"max_size"`
+	// Adds a ValidateFunc to the item schema
+	ItemValidation resource.Validation `yaml:"item_validation"`
+
 	ParentName string
 
 	// ====================
@@ -210,16 +221,17 @@ type Type struct {
 	// because in Terraform the key has to be a property of the object.
 	//
 	// The name of the key. Used in the Terraform schema as a field name.
-	KeyName string `yaml:"key_name`
+	KeyName string `yaml:"key_name"`
 
 	// A description of the key's format. Used in Terraform to describe
 	// the field in documentation.
-	KeyDescription string `yaml:"key_description`
+	KeyDescription string `yaml:"key_description"`
 
 	// ====================
 	// KeyValuePairs Fields
 	// ====================
-	IgnoreWrite bool `yaml:"ignore_write`
+	// Ignore writing the "effective_labels" and "effective_annotations" fields to API.
+	IgnoreWrite bool `yaml:"ignore_write"`
 
 	// ====================
 	// Schema Modifications
@@ -291,13 +303,16 @@ func (t *Type) SetDefault(r *Resource) {
 
 	switch {
 	case t.IsA("Array"):
+		t.ItemType.Name = t.Name
 		t.ItemType.ParentName = t.Name
-		t.ItemType.ParentMetadata = t.ParentMetadata
+		t.ItemType.ParentMetadata = t
 		t.ItemType.SetDefault(r)
 	case t.IsA("Map"):
-		t.KeyExpander = "tpgresource.ExpandString"
+		if t.KeyExpander == "" {
+			t.KeyExpander = "tpgresource.ExpandString"
+		}
 		t.ValueType.ParentName = t.Name
-		t.ValueType.ParentMetadata = t.ParentMetadata
+		t.ValueType.ParentMetadata = t
 		t.ValueType.SetDefault(r)
 	case t.IsA("NestedObject"):
 		if t.Name == "" {
@@ -320,6 +335,11 @@ func (t *Type) SetDefault(r *Resource) {
 		if t.Description == "" {
 			t.Description = fmt.Sprintf("A reference to %s resource", t.Resource)
 		}
+	case t.IsA("Fingerprint"):
+		// Represents a fingerprint.  A fingerprint is an output-only
+		// field used for optimistic locking during updates.
+		// They are fetched from the GCP response.
+		t.Output = true
 	default:
 	}
 
@@ -328,70 +348,49 @@ func (t *Type) SetDefault(r *Resource) {
 	}
 }
 
-// super
-// check :description, type: ::String, required: true
-// check :exclude, type: :boolean, default: false, required: true
-// check :deprecation_message, type: ::String
-// check :removed_message, type: ::String
-// check :min_version, type: ::String
-// check :exact_version, type: ::String
-// check :output, type: :boolean
-// check :required, type: :boolean
-// check :send_empty_value, type: :boolean
-// check :allow_empty_object, type: :boolean
-// check :url_param_only, type: :boolean
-// check :read_query_params, type: ::String
-// check :immutable, type: :boolean
+func (t *Type) Validate(rName string) {
+	if t.Name == "" {
+		log.Fatalf("Missing `name` for proprty with type %s in resource %s", t.Type, rName)
+	}
 
-// raise 'Property cannot be output and required at the same time.' \
-//   if @output && @required
+	if t.Output && t.Required {
+		log.Fatalf("Property %s cannot be output and required at the same time in resource %s.", t.Name, rName)
+	}
 
-// check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE],
-//                     default: @__resource&.update_verb
+	if t.DefaultFromApi && t.DefaultValue != nil {
+		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
+	}
 
-// check :update_url, type: ::String
-// check :update_id, type: ::String
-// check :fingerprint_name, type: ::String
-// check :pattern, type: ::String
+	t.validateLabelsField()
 
+	switch {
+	case t.IsA("Array"):
+		t.ItemType.Validate(rName)
+	case t.IsA("Map"):
+		t.ValueType.Validate(rName)
+	case t.IsA("NestedObject"):
+		for _, p := range t.Properties {
+			p.Validate(rName)
+		}
+	default:
+	}
+}
+
+// TODO rewrite: add validations
+// check :description, required: true
+// check :update_verb, allowed: %i[POST PUT PATCH NONE],
 // check_default_value_property
 // check_conflicts
 // check_at_least_one_of
 // check_exactly_one_of
 // check_required_with
-
-// check :sensitive, type: :boolean, default: false
-// check :is_set, type: :boolean, default: false
-// check :default_from_api, type: :boolean, default: false
-// check :unordered_list, type: :boolean, default: false
-// check :schema_config_mode_attr, type: :boolean, default: false
-
-// // technically set as a default everywhere, but only maps will use this.
-// check :key_expander, type: ::String, default: 'tpgresource.ExpandString'
-// check :key_diff_suppress_func, type: ::String
-
-// check :diff_suppress_func, type: ::String
-// check :state_func, type: ::String
-// check :validation, type: Provider::Terraform::Validation
-// check :set_hash_func, type: ::String
-
-// check :custom_flatten, type: ::String
-// check :custom_expand, type: ::String
-
-// raise "'default_value' and 'default_from_api' cannot be both set" \
-//   if @default_from_api && !@default_value.nil?
-// }
-
-// func (t *Type) to_s() {
-// JSON.pretty_generate(self)
-// }
+// check the allowed types for Type field
+// check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Prints a dot notation path to where the field is nested within the parent
 // object. eg: parent.meta.label.foo
 // The only intended purpose is to allow better error messages. Some objects
 // and at some points in the build this doesn't output a valid output.
-
-// def lineage
 func (t Type) Lineage() string {
 	if t.ParentMetadata == nil {
 		return google.Underscore(t.Name)
@@ -402,7 +401,6 @@ func (t Type) Lineage() string {
 
 // Prints the access path of the field in the configration eg: metadata.0.labels
 // The only intended purpose is to get the value of the labes field by calling d.Get().
-// func (t *Type) terraform_lineage() {
 func (t Type) TerraformLineage() string {
 	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
@@ -411,17 +409,20 @@ func (t Type) TerraformLineage() string {
 	return fmt.Sprintf("%s.0.%s", t.ParentMetadata.TerraformLineage(), google.Underscore(t.Name))
 }
 
-func (t Type) EnumValuesToString() string {
+func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 	var values []string
 
 	for _, val := range t.EnumValues {
-		values = append(values, fmt.Sprintf("`%s`", val))
+		values = append(values, fmt.Sprintf("%s%s%s", quoteSeperator, val, quoteSeperator))
+	}
+
+	if addEmpty && !slices.Contains(values, "\"\"") && !t.Required {
+		values = append(values, "\"\"")
 	}
 
 	return strings.Join(values, ", ")
 }
 
-// def titlelize_property(property)
 func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
@@ -432,13 +433,22 @@ func (t *Type) GetPrefix() string {
 	if t.Prefix == "" {
 		if t.ParentMetadata == nil {
 			nestedPrefix := ""
-			if t.ResourceMetadata.NestedQuery != nil {
+			// TODO: Use the nestedPrefix for tgc provider to be consistent with terraform provider
+			if t.ResourceMetadata.NestedQuery != nil && t.ResourceMetadata.Compiler != "terraformgoogleconversion-codegen" {
 				nestedPrefix = "Nested"
 			}
 
 			t.Prefix = fmt.Sprintf("%s%s", nestedPrefix, t.ResourceMetadata.ResourceName())
 		} else {
-			t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+			if t.ParentMetadata != nil && (t.ParentMetadata.IsA("Array") || t.ParentMetadata.IsA("Map")) {
+				t.Prefix = t.ParentMetadata.GetPrefix()
+			} else {
+				if t.ParentMetadata != nil && t.ParentMetadata.ParentMetadata != nil && t.ParentMetadata.ParentMetadata.IsA("Map") {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.ParentMetadata.TitlelizeProperty())
+				} else {
+					t.Prefix = fmt.Sprintf("%s%s", t.ParentMetadata.GetPrefix(), t.ParentMetadata.TitlelizeProperty())
+				}
+			}
 		}
 	}
 	return t.Prefix
@@ -453,36 +463,7 @@ func (t Type) ResourceType() string {
 	return path[len(path)-1]
 }
 
-// func (t *Type) to_json(opts) {
-// ignore fields that will contain references to parent resources and
-// those which will be added later
-// ignored_fields = %i[@resource @__parent @__resource @api_name @update_verb
-//                     @__name @name @properties]
-// json_out = {}
-
-// instance_variables.each do |v|
-//   if v == :@conflicts && instance_variable_get(v).empty?
-//     // ignore empty conflict arrays
-//   elsif v == :@at_least_one_of && instance_variable_get(v).empty?
-//     // ignore empty at_least_one_of arrays
-//   elsif v == :@exactly_one_of && instance_variable_get(v).empty?
-//     // ignore empty exactly_one_of arrays
-//   elsif v == :@required_with && instance_variable_get(v).empty?
-//     // ignore empty required_with arrays
-//   elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
-//     // ignore false booleans as non-existence indicates falsey
-//   elsif !ignored_fields.include? v
-//     json_out[v] = instance_variable_get(v)
-//   end
-// end
-
-// // convert properties to a hash based on name for nested readability
-// json_out.merge!(properties&.map { |p| [p.name, p] }.to_h) \
-//   if respond_to? 'properties'
-
-// JSON.generate(json_out, opts)
-// }
-
+// TODO rewrite: validation
 // func (t *Type) check_default_value_property() {
 // return if @default_value.nil?
 
@@ -526,6 +507,7 @@ func (t Type) Conflicting() []string {
 	return t.Conflicts
 }
 
+// TODO rewrite: validation
 // Checks that all properties that needs at least one of their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
 // this list will have a full path for nested attributes.
@@ -545,6 +527,7 @@ func (t Type) AtLeastOneOfList() []string {
 	return t.AtLeastOneOf
 }
 
+// TODO rewrite: validation
 // Checks that all properties that needs exactly one of their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
 // this list will have a full path for nested attributes.
@@ -564,6 +547,7 @@ func (t Type) ExactlyOneOfList() []string {
 	return t.ExactlyOneOf
 }
 
+// TODO rewrite: validation
 // Checks that all properties that needs required with their fields actually exist.
 // This currently just returns if empty, because we don't want to do the check, since
 // this list will have a full path for nested attributes.
@@ -574,7 +558,6 @@ func (t Type) ExactlyOneOfList() []string {
 // }
 
 // Returns list of properties that needs required with their fields set.
-// func (t *Type) required_with_list() {
 func (t Type) RequiredWithList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
@@ -587,7 +570,6 @@ func (t Type) Parent() *Type {
 	return t.ParentMetadata
 }
 
-// def min_version
 func (t Type) MinVersionObj() *product.Version {
 	if t.MinVersion != "" {
 		return t.ResourceMetadata.ProductMetadata.versionObj(t.MinVersion)
@@ -596,7 +578,6 @@ func (t Type) MinVersionObj() *product.Version {
 	}
 }
 
-// def exact_version
 func (t *Type) exactVersionObj() *product.Version {
 	if t.ExactVersion == "" {
 		return nil
@@ -605,7 +586,6 @@ func (t *Type) exactVersionObj() *product.Version {
 	return t.ResourceMetadata.ProductMetadata.versionObj(t.ExactVersion)
 }
 
-// def exclude_if_not_in_version!(version)
 func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 	if !t.Exclude {
 		if versionObj := t.exactVersionObj(); versionObj != nil {
@@ -626,12 +606,6 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 	}
 }
 
-// Overriding is_a? to enable class overrides.
-// Ruby does not let you natively change types, so this is the next best
-// thing.
-
-// TODO Q1: check the type of superclasses of property t
-// func (t *Type) is_a?(clazz) {
 func (t Type) IsA(clazz string) bool {
 	if clazz == "" {
 		log.Fatalf("class cannot be empty")
@@ -642,20 +616,9 @@ func (t Type) IsA(clazz string) bool {
 	}
 
 	return t.Type == clazz
-	// super(clazz)
 }
 
-// // Overriding class to enable class overrides.
-// // Ruby does not let you natively change types, so this is the next best
-// // thing.
-// func (t *Type) class() {
-//   // return Module.const_get(@new_type) if @new_type
-
-//   // super
-// }
-
 // Returns nested properties for this property.
-// def nested_properties
 func (t Type) NestedProperties() []*Type {
 	props := make([]*Type, 0)
 
@@ -677,115 +640,20 @@ func (t Type) NestedProperties() []*Type {
 	return props
 }
 
-// def removed?
 func (t Type) Removed() bool {
 	return t.RemovedMessage != ""
 }
 
-// def deprecated?
 func (t Type) Deprecated() bool {
 	return t.DeprecationMessage != ""
 }
 
-// // private
+func (t *Type) GetDescription() string {
+	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
+}
 
-// // A constant value to be provided as field
-// type Constant struct {
-// // < Type
-//   value
-
-//   func (t *Type) validate
-//     @description = "This is always //{value}."
-//     super
-//   end
-// }
-
-// // Represents a primitive (non-composite) type.
-// class Primitive < Type
-// end
-
-// // Represents a boolean
-// class Boolean < Primitive
-// end
-
-// // Represents an integer
-// class Integer < Primitive
-// end
-
-// // Represents a double
-// class Double < Primitive
-// end
-
-// // Represents a string
-// class String < Primitive
-//   func (t *Type) initialize(name = nil)
-//     super()
-
-//     @name = name
-//   end
-
-//   PROJECT = Api::Type::String.new('project')
-//   NAME = Api::Type::String.new('name')
-// end
-
-// // Properties that are fetched externally
-// class FetchedExternal < Type
-
-//   func (t *Type) validate
-//     @conflicts ||= []
-//     @at_least_one_of ||= []
-//     @exactly_one_of ||= []
-//     @required_with ||= []
-//   end
-
-//   func (t *Type) api_name
-//     name
-//   end
-// end
-
-// class Path < Primitive
-// end
-
-// // Represents a fingerprint.  A fingerprint is an output-only
-// // field used for optimistic locking during updates.
-// // They are fetched from the GCP response.
-// class Fingerprint < FetchedExternal
-//   func (t *Type) validate
-//     super
-//     @output = true if @output.nil?
-//   end
-// end
-
-// // Represents a timestamp
-// class Time < Primitive
-// end
-
-// // A base class to tag objects that are composed by other objects (arrays,
-// // nested objects, etc)
-// class Composite < Type
-// end
-
-// // Forwarding declaration to allow defining Array::NESTED_ARRAY_TYPE
-// class NestedObject < Composite
-// end
-
-// // Forwarding declaration to allow defining Array::RREF_ARRAY_TYPE
-// class ResourceRef < Type
-// end
-
-// // Represents an array, and stores its items' type
+// TODO rewrite: validation
 // class Array < Composite
-//   item_type
-//   min_size
-//   max_size
-
-//   func (t *Type) validate
-//     super
-//     if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
-//       @item_type.set_variable(@name, :__name)
-//       @item_type.set_variable(@__resource, :__resource)
-//       @item_type.set_variable(self, :__parent)
-//     end
 //     check :item_type, type: [::String, NestedObject, ResourceRef, Enum], required: true
 
 //     unless @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef) \
@@ -793,25 +661,7 @@ func (t Type) Deprecated() bool {
 //       raise "Invalid type //{@item_type}"
 //     end
 
-//     check :min_size, type: ::Integer
-//     check :max_size, type: ::Integer
-//   end
-
-//   func (t *Type) exclude_if_not_in_version!(version)
-//     super
-//     @item_type.exclude_if_not_in_version!(version) \
-//       if @item_type.is_a? NestedObject
-//   end
-
-// func (t *Type) nested_properties
-// return @item_type.nested_properties.reject(&:exclude) \
-// 	if @item_type.is_a?(Api::Type::NestedObject)
-
-// super
-// end
-
 // This function is for array field
-// def item_type_class
 func (t Type) ItemTypeClass() string {
 	if !t.IsA("Array") {
 		return ""
@@ -820,6 +670,46 @@ func (t Type) ItemTypeClass() string {
 	return t.ItemType.Type
 }
 
+func (t Type) TFType(s string) string {
+	switch s {
+	case "Boolean":
+		return "schema.TypeBool"
+	case "Double":
+		return "schema.TypeFloat"
+	case "Integer":
+		return "schema.TypeInt"
+	case "String":
+		return "schema.TypeString"
+	case "Time":
+		return "schema.TypeString"
+	case "Enum":
+		return "schema.TypeString"
+	case "ResourceRef":
+		return "schema.TypeString"
+	case "NestedObject":
+		return "schema.TypeList"
+	case "Array":
+		return "schema.TypeList"
+	case "KeyValuePairs":
+		return "schema.TypeMap"
+	case "KeyValueLabels":
+		return "schema.TypeMap"
+	case "KeyValueTerraformLabels":
+		return "schema.TypeMap"
+	case "KeyValueEffectiveLabels":
+		return "schema.TypeMap"
+	case "KeyValueAnnotations":
+		return "schema.TypeMap"
+	case "Map":
+		return "schema.TypeSet"
+	case "Fingerprint":
+		return "schema.TypeString"
+	}
+
+	return "schema.TypeString"
+}
+
+// TODO rewrite: validation
 // // Represents an enum, and store is valid values
 // class Enum < Primitive
 //   values
@@ -830,40 +720,6 @@ func (t Type) ItemTypeClass() string {
 //     check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
 //     check :skip_docs_values, type: :boolean
 //   end
-
-//   func (t *Type) merge(other)
-//     result = self.class.new
-//     instance_variables.each do |v|
-//       result.instance_variable_set(v, instance_variable_get(v))
-//     end
-
-//     other.instance_variables.each do |v|
-//       if other.instance_variable_get(v).instance_of?(Array)
-//         result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
-//                                                     other.instance_variable_get(v)))
-//       else
-//         result.instance_variable_set(v, other.instance_variable_get(v))
-//       end
-//     end
-
-//     result
-//   end
-// end
-
-// // Represents a 'selfLink' property, which returns the URI of the resource.
-// class SelfLink < FetchedExternal
-//   EXPORT_KEY = 'selfLink'.freeze
-
-//   resource
-
-//   func (t *Type) name
-//     EXPORT_KEY
-//   end
-
-//   func (t *Type) out_name
-//     EXPORT_KEY.underscore
-//   end
-// end
 
 // // Represents a reference to another resource
 // class ResourceRef < Type
@@ -891,7 +747,6 @@ func (t Type) ItemTypeClass() string {
 //     check_resource_ref_property_exists
 //   end
 
-// func (t *Type) resource_ref
 func (t Type) ResourceRef() *Resource {
 	if !t.IsA("ResourceRef") {
 		return nil
@@ -905,8 +760,7 @@ func (t Type) ResourceRef() *Resource {
 	return resources[0]
 }
 
-//   private
-
+// TODO rewrite: validation
 //   func (t *Type) check_resource_ref_property_exists
 //     return unless defined?(resource_ref.all_user_properties)
 
@@ -937,12 +791,10 @@ func (t Type) ResourceRef() *Resource {
 
 // Returns all properties including the ones that are excluded
 // This is used for PropertyOverride validation
-// def all_properties
 func (t Type) AllProperties() []*Type {
 	return t.Properties
 }
 
-// func (t *Type) properties
 func (t Type) UserProperties() []*Type {
 	if t.IsA("NestedObject") {
 		if t.Properties == nil {
@@ -958,8 +810,6 @@ func (t Type) UserProperties() []*Type {
 
 // Returns the list of top-level properties once any nested objects with
 // flatten_object set to true have been collapsed
-//
-//	func (t *Type) root_properties
 func (t *Type) RootProperties() []*Type {
 	props := make([]*Type, 0)
 	for _, p := range t.UserProperties() {
@@ -972,23 +822,14 @@ func (t *Type) RootProperties() []*Type {
 	return props
 }
 
-//   func (t *Type) exclude_if_not_in_version!(version)
-//     super
-//     @properties.each { |p| p.exclude_if_not_in_version!(version) }
-//   end
-// end
-
 // An array of string -> string key -> value pairs, such as labels.
 // While this is technically a map, it's split out because it's a much
 // simpler property to generate and means we can avoid conditional logic
 // in Map.
-
 func NewProperty(name, apiName string, options []func(*Type)) *Type {
 	p := &Type{
-		NamedObject: NamedObject{
-			Name:    name,
-			ApiName: apiName,
-		},
+		Name:    name,
+		ApiName: apiName,
 	}
 
 	for _, option := range options {
@@ -1039,86 +880,63 @@ func propertyWithImmutable(immutable bool) func(*Type) {
 	}
 }
 
+func propertyWithClientSide(clientSide bool) func(*Type) {
+	return func(p *Type) {
+		p.ClientSide = clientSide
+	}
+}
+
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
 	}
 }
 
-// class KeyValuePairs < Composite
-//   // Ignore writing the "effective_labels" and "effective_annotations" fields to API.
-//   ignore_write
+func (t *Type) validateLabelsField() {
+	productName := t.ResourceMetadata.ProductMetadata.Name
+	resourceName := t.ResourceMetadata.Name
+	lineage := t.Lineage()
+	if lineage == "labels" || lineage == "metadata.labels" || lineage == "configuration.labels" {
+		if !t.IsA("KeyValueLabels") &&
+			// The label value must be empty string, so skip this resource
+			!(productName == "CloudIdentity" && resourceName == "Group") &&
 
-//   func (t *Type) initialize(name: nil, output: nil, api_name: nil, description: nil, min_version: nil,
-//                   ignore_write: nil, update_verb: nil, update_url: nil, immutable: nil)
-//     super()
+			// The "labels" field has type Array, so skip this resource
+			!(productName == "DeploymentManager" && resourceName == "Deployment") &&
 
-//     @name = name
-//     @output = output
-//     @api_name = api_name
-//     @description = description
-//     @min_version = min_version
-//     @ignore_write = ignore_write
-//     @update_verb = update_verb
-//     @update_url = update_url
-//     @immutable = immutable
-//   end
+			// https://github.com/hashicorp/terraform-provider-google/issues/16219
+			!(productName == "Edgenetwork" && resourceName == "Network") &&
 
-//   func (t *Type) validate
-//     super
-//     check :ignore_write, type: :boolean, default: false
+			// https://github.com/hashicorp/terraform-provider-google/issues/16219
+			!(productName == "Edgenetwork" && resourceName == "Subnet") &&
 
-//     return if @__resource.__product.nil?
+			// "userLabels" is the resource labels field
+			!(productName == "Monitoring" && resourceName == "NotificationChannel") &&
 
-//     product_name = @__resource.__product.name
-//     resource_name = @__resource.name
+			// The "labels" field has type Array, so skip this resource
+			!(productName == "Monitoring" && resourceName == "MetricDescriptor") {
+			log.Fatalf("Please use type KeyValueLabels for field %s in resource %s/%s", lineage, productName, resourceName)
+		}
+	} else if t.IsA("KeyValueLabels") {
+		log.Fatalf("Please don't use type KeyValueLabels for field %s in resource %s/%s", lineage, productName, resourceName)
+	}
 
-//     if lineage == 'labels' || lineage == 'metadata.labels' ||
-//         lineage == 'configuration.labels'
-//       if !(is_a? Api::Type::KeyValueLabels) &&
-//           // The label value must be empty string, so skip this resource
-//           !(product_name == 'CloudIdentity' && resource_name == 'Group') &&
+	if lineage == "annotations" || lineage == "metadata.annotations" {
+		if !t.IsA("KeyValueAnnotations") &&
+			// The "annotations" field has "ouput: true", so skip this eap resource
+			!(productName == "Gkeonprem" && resourceName == "BareMetalAdminClusterEnrollment") {
+			log.Fatalf("Please use type KeyValueAnnotations for field %s in resource %s/%s", lineage, productName, resourceName)
+		}
+	} else if t.IsA("KeyValueAnnotations") {
+		log.Fatalf("Please don't use type KeyValueAnnotations for field %s in resource %s/%s", lineage, productName, resourceName)
+	}
+}
 
-//           // The "labels" field has type Array, so skip this resource
-//           !(product_name == 'DeploymentManager' && resource_name == 'Deployment') &&
-
-//           // https://github.com/hashicorp/terraform-provider-google/issues/16219
-//           !(product_name == 'Edgenetwork' && resource_name == 'Network') &&
-
-//           // https://github.com/hashicorp/terraform-provider-google/issues/16219
-//           !(product_name == 'Edgenetwork' && resource_name == 'Subnet') &&
-
-//           // "userLabels" is the resource labels field
-//           !(product_name == 'Monitoring' && resource_name == 'NotificationChannel') &&
-
-//           // The "labels" field has type Array, so skip this resource
-//           !(product_name == 'Monitoring' && resource_name == 'MetricDescriptor')
-//         raise "Please use type KeyValueLabels for field //{lineage} " \
-//               "in resource //{product_name}///{resource_name}"
-//       end
-//     elsif is_a? Api::Type::KeyValueLabels
-//       raise "Please don't use type KeyValueLabels for field //{lineage} " \
-//             "in resource //{product_name}///{resource_name}"
-//     end
-
-//     if lineage == 'annotations' || lineage == 'metadata.annotations'
-//       if !(is_a? Api::Type::KeyValueAnnotations) &&
-//           // The "annotations" field has "ouput: true", so skip this eap resource
-//           !(product_name == 'Gkeonprem' && resource_name == 'BareMetalAdminClusterEnrollment')
-//         raise "Please use type KeyValueAnnotations for field //{lineage} " \
-//               "in resource //{product_name}///{resource_name}"
-//       end
-//     elsif is_a? Api::Type::KeyValueAnnotations
-//       raise "Please don't use type KeyValueAnnotations for field //{lineage} " \
-//             "in resource //{product_name}///{resource_name}"
-//     end
-//   end
-
-// def field_min_version
 func (t Type) fieldMinVersion() string {
 	return t.MinVersion
 }
 
+// TODO rewrite: validation
 // // An array of string -> string key -> value pairs used specifically for the "labels" field.
 // // The field name with this type should be "labels" literally.
 // class KeyValueLabels < KeyValuePairs
@@ -1151,69 +969,147 @@ func (t Type) fieldMinVersion() string {
 //   end
 // end
 
+// TODO rewrite: validation
 // // Map from string keys -> nested object entries
 // class Map < Composite
-//   // <provider>.yaml.
-//   module Fields
-//     // The type definition of the contents of the map.
-//     value_type
-
-//     // While the API doesn't give keys an explicit name, we specify one
-//     // because in Terraform the key has to be a property of the object.
-//     //
-//     // The name of the key. Used in the Terraform schema as a field name.
-//     key_name
-
-//     // A description of the key's format. Used in Terraform to describe
-//     // the field in documentation.
-//     key_description
-//   end
-//   include Fields
-
 //   func (t *Type) validate
 //     super
 //     check :key_name, type: ::String, required: true
 //     check :key_description, type: ::String
-
-//     @value_type.set_variable(@name, :__name)
-//     @value_type.set_variable(@__resource, :__resource)
-//     @value_type.set_variable(self, :__parent)
 //     check :value_type, type: Api::Type::NestedObject, required: true
 //     raise "Invalid type //{@value_type}" unless type?(@value_type)
 //   end
 
-//   func (t *Type) nested_properties
-//     @value_type.nested_properties.reject(&:exclude)
-//   end
-// end
-
-// // Support for schema ValidateFunc functionality.
-// class Validation < Object
-//   // Ensures the value matches this regex
-//   regex
-//   function
-
-//   func (t *Type) validate
-//     super
-
-//     check :regex, type: String
-//     check :function, type: String
-//   end
-// end
-
-// func (t *Type) type?(type)
-//   type.is_a?(Type) || !get_type(type).nil?
-// end
-
-// func (t *Type) get_type(type)
-//   Module.const_get(type)
-// end
-
-// def property_ns_prefix
 func (t Type) PropertyNsPrefix() []string {
 	return []string{
 		"Google",
 		google.Camelize(t.ResourceMetadata.ProductMetadata.Name, "upper"),
 		"Property",
 	}
+}
+
+// "Namespace" - prefix with product and resource - a property with
+// information from the "object" variable
+func (t Type) NamespaceProperty() string {
+	name := google.Camelize(t.Name, "upper")
+	p := t
+	for p.Parent() != nil {
+		p = *p.Parent()
+		name = fmt.Sprintf("%s%s", google.Camelize(p.Name, "upper"), name)
+	}
+
+	return fmt.Sprintf("%s%s%s", google.Camelize(t.ResourceMetadata.ProductMetadata.ApiName, "lower"), t.ResourceMetadata.Name, name)
+}
+
+func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
+	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+}
+
+func (t *Type) GetIdFormat() string {
+	return t.ResourceMetadata.GetIdFormat()
+}
+
+func (t *Type) GoLiteral(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%.1f", v)
+	case bool:
+		return fmt.Sprintf("%v", v)
+	case string:
+		if !strings.HasPrefix(v, "\"") {
+			return fmt.Sprintf("\"%s\"", v)
+		}
+		return v
+	case []string:
+		for i, val := range v {
+			v[i] = fmt.Sprintf("\"%v\"", val)
+		}
+		return fmt.Sprintf("[]string{%s}", strings.Join(v, ","))
+
+	default:
+		panic(fmt.Errorf("unknown go literal type %+v", value))
+	}
+}
+
+func (t *Type) IsForceNew() bool {
+	if t.IsA("KeyValueLabels") && t.ResourceMetadata.RootLabels() {
+		return false
+	}
+
+	if t.IsA("KeyValueTerraformLabels") && !t.ResourceMetadata.Updatable() && !t.ResourceMetadata.RootLabels() {
+		return true
+	}
+
+	// Client-side fields don't inherit immutability
+	if t.ClientSide {
+		return t.Immutable
+	}
+
+	parent := t.Parent()
+	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+		(t.Immutable ||
+			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
+				(parent == nil ||
+					(parent.IsForceNew() &&
+						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+}
+
+// Returns an updated path for a given Terraform field path (e.g.
+// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
+// is not included in the resource's properties and removes keys that have
+// been flattened
+// FYI: Fields that have been renamed should use the new name, however, flattened
+// fields still need to be included, ie:
+// flattenedField > newParent > renameMe should be passed to this function as
+// flattened_field.0.new_parent.0.im_renamed
+// TODO(emilymye): Change format of input for
+// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
+// convert to snake in this method
+func (t *Type) GetPropertySchemaPath(schemaPath string) string {
+	nestedProps := t.ResourceMetadata.UserProperites()
+
+	var pathTkns []string
+	for _, pname := range strings.Split(schemaPath, ".0.") {
+		camelPname := google.Camelize(pname, "lower")
+		index := slices.IndexFunc(nestedProps, func(p *Type) bool {
+			return p.Name == camelPname
+		})
+
+		// if we couldn't find it, see if it was renamed at the top level
+		if index == -1 {
+			index = slices.IndexFunc(nestedProps, func(p *Type) bool {
+				return p.Name == schemaPath
+			})
+		}
+
+		if index == -1 {
+			return ""
+		}
+
+		prop := nestedProps[index]
+
+		nestedProps = prop.NestedProperties()
+		if !prop.FlattenObject {
+			pathTkns = append(pathTkns, google.Underscore(pname))
+		}
+	}
+
+	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
+		return ""
+	}
+
+	return strings.Join(pathTkns[:], ".0.")
+}
+
+func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
+	var list []string
+	for _, path := range propertyList {
+		path = t.GetPropertySchemaPath(path)
+		if path != "" {
+			list = append(list, path)
+		}
+	}
+	return list
 }

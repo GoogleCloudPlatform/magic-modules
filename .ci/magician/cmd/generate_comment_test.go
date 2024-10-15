@@ -68,8 +68,14 @@ func TestExecGenerateComment(t *testing.T) {
 		"Run": {
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
 			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "make", []string{"build"}, map[string]string(nil)},
+			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "make", []string{"build"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
 			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
@@ -105,7 +111,7 @@ func TestExecGenerateComment(t *testing.T) {
 
 	for method, expectedCalls := range map[string][][]any{
 		"PostBuildStatus": {{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"}},
-		"PostComment":     {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n"}},
+		"PostComment":     {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n"}},
 		"AddLabels":       {{"123456", []string{"service/alloydb"}}},
 	} {
 		if actualCalls, ok := gh.calledMethods[method]; !ok {
@@ -188,9 +194,15 @@ func TestFormatDiffComment(t *testing.T) {
 		},
 		"breaking changes are displayed": {
 			data: diffCommentData{
-				BreakingChanges: []string{
-					"Breaking change 1",
-					"Breaking change 2",
+				BreakingChanges: []BreakingChange{
+					{
+						Message:                "Breaking change 1",
+						DocumentationReference: "doc1",
+					},
+					{
+						Message:                "Breaking change 2",
+						DocumentationReference: "doc2",
+					},
 				},
 			},
 			expectedStrings: []string{
@@ -198,7 +210,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"major release",
 				"`override-breaking-change`",
-				"- Breaking change 1\n- Breaking change 2\n",
+				"- Breaking change 1 - [reference](doc1)\n- Breaking change 2 - [reference](doc2)\n",
 			},
 			notExpectedStrings: []string{
 				"generated some diffs",
@@ -208,7 +220,12 @@ func TestFormatDiffComment(t *testing.T) {
 		},
 		"missing tests are displayed": {
 			data: diffCommentData{
-				MissingTests: "## Missing test report",
+				MissingTests: map[string]*MissingTestInfo{
+					"resource": {
+						Tests:         []string{"test-a", "test-b"},
+						SuggestedTest: "x",
+					},
+				},
 			},
 			expectedStrings: []string{
 				"## Diff report",

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/cloudbuild"
 	"magician/github"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -45,7 +44,7 @@ var membershipCheckerCmd = &cobra.Command{
 	`,
 	// This can change to cobra.ExactArgs(2) after at least a 2-week soak
 	Args: cobra.RangeArgs(2, 6),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
@@ -54,20 +53,18 @@ var membershipCheckerCmd = &cobra.Command{
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variables")
 		}
 		gh := github.NewClient(githubToken)
 		cb := cloudbuild.NewClient()
-		execMembershipChecker(prNumber, commitSha, gh, cb)
+		return execMembershipChecker(prNumber, commitSha, gh, cb)
 	},
 }
 
-func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb CloudbuildClient) {
+func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb CloudbuildClient) error {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	author := pullRequest.User.Login
@@ -77,14 +74,14 @@ func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb Cloud
 	// 1. auto approve community-checker run for trusted users
 	// 2. add awaiting-approval label to external contributor PRs
 	if trusted {
-		err = cb.ApproveCommunityChecker(prNumber, commitSha)
+		err = cb.ApproveDownstreamGenAndTest(prNumber, commitSha)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return err
 		}
 	} else {
 		gh.AddLabels(prNumber, []string{"awaiting-approval"})
 	}
+	return nil
 }
 
 func init() {

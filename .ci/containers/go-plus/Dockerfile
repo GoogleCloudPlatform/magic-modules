@@ -29,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_amd64.zip \
-    && unzip terraform_1.2.5_linux_amd64.zip \
-    && rm terraform_1.2.5_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip \
+    && unzip terraform_1.8.3_linux_amd64.zip \
+    && rm terraform_1.8.3_linux_amd64.zip \
     && mv ./terraform /bin/terraform

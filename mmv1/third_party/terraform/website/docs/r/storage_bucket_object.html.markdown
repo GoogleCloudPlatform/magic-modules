@@ -4,7 +4,7 @@ description: |-
   Creates a new object inside a specified bucket
 ---
 
-# google\_storage\_bucket\_object
+# google_storage_bucket_object
 
 Creates a new object inside an existing bucket in Google cloud storage service (GCS). 
 [ACLs](https://cloud.google.com/storage/docs/access-control/lists) can be applied using the `google_storage_object_acl` resource.
@@ -103,6 +103,8 @@ One of the following is required:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `generation` - (Computed) The content generation of this object. Used for object [versioning](https://cloud.google.com/storage/docs/object-versioning) and [soft delete](https://cloud.google.com/storage/docs/soft-delete).
 
 * `crc32c` - (Computed) Base 64 CRC32 hash of the uploaded data.
 

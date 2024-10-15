@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/bigtable"
@@ -15,6 +16,24 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
+
+func familyHash(v interface{}) int {
+	m := v.(map[string]interface{})
+	cf := m["family"].(string)
+	t, err := getType(m["type"])
+	if err != nil {
+		panic(err)
+	}
+	if t == nil {
+		// no specified type.
+		return tpgresource.Hashcode(cf)
+	}
+	b, err := bigtable.MarshalJSON(t)
+	if err != nil {
+		panic(err)
+	}
+	return tpgresource.Hashcode(cf + string(b))
+}
 
 func ResourceBigtableTable() *schema.Resource {
 	return &schema.Resource{
@@ -59,8 +78,15 @@ func ResourceBigtableTable() *schema.Resource {
 							Required:    true,
 							Description: `The name of the column family.`,
 						},
+						"type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      `The type of the column family.`,
+							DiffSuppressFunc: typeDiffFunc,
+						},
 					},
 				},
+				Set: familyHash,
 			},
 
 			"instance_name": {
@@ -103,9 +129,46 @@ func ResourceBigtableTable() *schema.Resource {
 				ValidateFunc: verify.ValidateDuration(),
 				Description:  `Duration to retain change stream data for the table. Set to 0 to disable. Must be between 1 and 7 days.`,
 			},
+
+			"automated_backup_policy": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"retention_period": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: verify.ValidateDuration(),
+							Description:  `How long the automated backups should be retained.`,
+						},
+						"frequency": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: verify.ValidateDuration(),
+							Description:  `How frequently automated backups should occur.`,
+						},
+					},
+				},
+				Description: `Defines an automated backup policy for a table, specified by Retention Period and Frequency. To disable, set both Retention Period and Frequency to 0.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
+}
+
+func typeDiffFunc(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	old, err := getType(oldValue)
+	if err != nil {
+		panic(fmt.Sprintf("old error: %v", err))
+	}
+	new, err := getType(newValue)
+	if err != nil {
+		panic(fmt.Sprintf("new error: %v", err))
+	}
+	return bigtable.Equal(old, new)
 }
 
 func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error {
@@ -152,13 +215,42 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	if automatedBackupPolicyField, ok := d.GetOk("automated_backup_policy"); ok {
+		automatedBackupPolicyElements := automatedBackupPolicyField.(*schema.Set).List()
+		if len(automatedBackupPolicyElements) == 0 {
+			return fmt.Errorf("Incomplete automated_backup_policy")
+		} else {
+			automatedBackupPolicy := automatedBackupPolicyElements[0].(map[string]interface{})
+			abpRetentionPeriodField, retentionPeriodExists := automatedBackupPolicy["retention_period"]
+			if !retentionPeriodExists {
+				return fmt.Errorf("Automated backup policy retention period must be specified")
+			}
+			abpFrequencyField, frequencyExists := automatedBackupPolicy["frequency"]
+			if !frequencyExists {
+				return fmt.Errorf("Automated backup policy frequency must be specified")
+			}
+			abpRetentionPeriod, err := ParseDuration(abpRetentionPeriodField.(string))
+			if err != nil {
+				return fmt.Errorf("Error parsing automated backup policy retention period: %s", err)
+			}
+			abpFrequency, err := ParseDuration(abpFrequencyField.(string))
+			if err != nil {
+				return fmt.Errorf("Error parsing automated backup policy frequency: %s", err)
+			}
+			tblConf.AutomatedBackupConfig = &bigtable.TableAutomatedBackupPolicy{
+				RetentionPeriod: abpRetentionPeriod,
+				Frequency:       abpFrequency,
+			}
+		}
+	}
+
 	// Set the split keys if given.
 	if v, ok := d.GetOk("split_keys"); ok {
 		tblConf.SplitKeys = tpgresource.ConvertStringArr(v.([]interface{}))
 	}
 
 	// Set the column families if given.
-	columnFamilies := make(map[string]bigtable.GCPolicy)
+	columnFamilies := make(map[string]bigtable.Family)
 	if d.Get("column_family.#").(int) > 0 {
 		columns := d.Get("column_family").(*schema.Set).List()
 
@@ -166,12 +258,19 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 			column := co.(map[string]interface{})
 
 			if v, ok := column["family"]; ok {
-				// By default, there is no GC rules.
-				columnFamilies[v.(string)] = bigtable.NoGcPolicy()
+				valueType, err := getType(column["type"])
+				if err != nil {
+					return err
+				}
+				columnFamilies[v.(string)] = bigtable.Family{
+					// By default, there is no GC rules.
+					GCPolicy:  bigtable.NoGcPolicy(),
+					ValueType: valueType,
+				}
 			}
 		}
 	}
-	tblConf.Families = columnFamilies
+	tblConf.ColumnFamilies = columnFamilies
 
 	// This method may return before the table's creation is complete - we may need to wait until
 	// it exists in the future.
@@ -227,7 +326,11 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
-	if err := d.Set("column_family", FlattenColumnFamily(table.Families)); err != nil {
+	families, err := FlattenColumnFamily(table.FamilyInfos)
+	if err != nil {
+		return fmt.Errorf("Error flatenning column families: %v", err)
+	}
+	if err := d.Set("column_family", families); err != nil {
 		return fmt.Errorf("Error setting column_family: %s", err)
 	}
 
@@ -251,7 +354,69 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if table.AutomatedBackupConfig != nil {
+		switch automatedBackupConfig := table.AutomatedBackupConfig.(type) {
+		case *bigtable.TableAutomatedBackupPolicy:
+			var tableAbp bigtable.TableAutomatedBackupPolicy = *automatedBackupConfig
+			abpRetentionPeriod := tableAbp.RetentionPeriod.(time.Duration).String()
+			abpFrequency := tableAbp.Frequency.(time.Duration).String()
+			abp := []interface{}{
+				map[string]interface{}{
+					"retention_period": abpRetentionPeriod,
+					"frequency":        abpFrequency,
+				},
+			}
+			if err := d.Set("automated_backup_policy", abp); err != nil {
+				return fmt.Errorf("Error setting automated_backup_policy: %s", err)
+			}
+		default:
+			return fmt.Errorf("error: Unknown type of automated backup configuration")
+		}
+	}
+
 	return nil
+}
+
+func toFamilyMap(set *schema.Set) (map[string]bigtable.Family, error) {
+	result := map[string]bigtable.Family{}
+	for _, item := range set.List() {
+		column := item.(map[string]interface{})
+
+		if v, ok := column["family"]; ok && v != "" {
+			valueType, err := getType(column["type"])
+			if err != nil {
+				return nil, err
+			}
+			result[v.(string)] = bigtable.Family{
+				ValueType: valueType,
+			}
+		}
+	}
+	return result, nil
+}
+
+// familyMapDiffKeys returns a new map that is the result of a-b, comparing keys
+func familyMapDiffKeys(a, b map[string]bigtable.Family) map[string]bigtable.Family {
+	result := map[string]bigtable.Family{}
+	for k, v := range a {
+		if _, ok := b[k]; !ok {
+			result[k] = v
+		}
+	}
+	return result
+}
+
+// familyMapDiffValueTypes returns a new map that is the result of a-b, where a and b share keys but have different value types
+func familyMapDiffValueTypes(a, b map[string]bigtable.Family) map[string]bigtable.Family {
+	result := map[string]bigtable.Family{}
+	for k, va := range a {
+		if vb, ok := b[k]; ok {
+			if !bigtable.Equal(va.ValueType, vb.ValueType) {
+				result[k] = va
+			}
+		}
+	}
+	return result
 }
 
 func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -275,31 +440,33 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 	defer c.Close()
 
 	o, n := d.GetChange("column_family")
-	oSet := o.(*schema.Set)
-	nSet := n.(*schema.Set)
 	name := d.Get("name").(string)
 
-	// Add column families that are in new but not in old
-	for _, new := range nSet.Difference(oSet).List() {
-		column := new.(map[string]interface{})
-
-		if v, ok := column["family"]; ok {
-			log.Printf("[DEBUG] adding column family %q", v)
-			if err := c.CreateColumnFamily(ctx, name, v.(string)); err != nil {
-				return fmt.Errorf("Error creating column family %q: %s", v, err)
-			}
-		}
+	oMap, err := toFamilyMap(o.(*schema.Set))
+	if err != nil {
+		return err
+	}
+	nMap, err := toFamilyMap(n.(*schema.Set))
+	if err != nil {
+		return err
 	}
 
-	// Remove column families that are in old but not in new
-	for _, old := range oSet.Difference(nSet).List() {
-		column := old.(map[string]interface{})
-
-		if v, ok := column["family"]; ok {
-			log.Printf("[DEBUG] removing column family %q", v)
-			if err := c.DeleteColumnFamily(ctx, name, v.(string)); err != nil {
-				return fmt.Errorf("Error deleting column family %q: %s", v, err)
-			}
+	for cfn, cf := range familyMapDiffKeys(nMap, oMap) {
+		log.Printf("[DEBUG] adding column family %q", cfn)
+		if err := c.CreateColumnFamilyWithConfig(ctx, name, cfn, cf); err != nil {
+			return fmt.Errorf("Error creating column family %q: %s", cfn, err)
+		}
+	}
+	for cfn, _ := range familyMapDiffKeys(oMap, nMap) {
+		log.Printf("[DEBUG] removing column family %q", cfn)
+		if err := c.DeleteColumnFamily(ctx, name, cfn); err != nil {
+			return fmt.Errorf("Error deleting column family %q: %s", cfn, err)
+		}
+	}
+	for cfn, cf := range familyMapDiffValueTypes(nMap, oMap) {
+		log.Printf("[DEBUG] updating column family: %q", cfn)
+		if err := c.UpdateFamily(ctx, name, cfn, cf); err != nil {
+			return fmt.Errorf("Error update column family %q: %s", cfn, err)
 		}
 	}
 
@@ -331,6 +498,46 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		} else {
 			if err := c.UpdateTableWithChangeStream(ctxWithTimeout, name, changeStream); err != nil {
 				return fmt.Errorf("Error updating change stream retention in table %v: %s", name, err)
+			}
+		}
+	}
+
+	if d.HasChange("automated_backup_policy") {
+		automatedBackupPolicyField := d.Get("automated_backup_policy").(*schema.Set)
+		automatedBackupPolicyElements := automatedBackupPolicyField.List()
+		if len(automatedBackupPolicyElements) == 0 {
+			return fmt.Errorf("Incomplete automated_backup_policy")
+		}
+		automatedBackupPolicy := automatedBackupPolicyElements[0].(map[string]interface{})
+		abp := bigtable.TableAutomatedBackupPolicy{}
+
+		abpRetentionPeriodField, retentionPeriodExists := automatedBackupPolicy["retention_period"]
+		if retentionPeriodExists && abpRetentionPeriodField != "" {
+			abpRetentionPeriod, err := ParseDuration(abpRetentionPeriodField.(string))
+			if err != nil {
+				return fmt.Errorf("Error parsing automated backup policy retention period: %s", err)
+			}
+			abp.RetentionPeriod = abpRetentionPeriod
+		}
+
+		abpFrequencyField, frequencyExists := automatedBackupPolicy["frequency"]
+		if frequencyExists && abpFrequencyField != "" {
+			abpFrequency, err := ParseDuration(abpFrequencyField.(string))
+			if err != nil {
+				return fmt.Errorf("Error parsing automated backup policy frequency: %s", err)
+			}
+			abp.Frequency = abpFrequency
+		}
+
+		if abp.RetentionPeriod != nil && abp.RetentionPeriod.(time.Duration) == 0 && abp.Frequency != nil && abp.Frequency.(time.Duration) == 0 {
+			// Disable Automated Backups
+			if err := c.UpdateTableDisableAutomatedBackupPolicy(ctxWithTimeout, name); err != nil {
+				return fmt.Errorf("Error disabling automated backup configuration on table %v: %s", name, err)
+			}
+		} else {
+			// Update Automated Backups config
+			if err := c.UpdateTableWithAutomatedBackupPolicy(ctxWithTimeout, name, abp); err != nil {
+				return fmt.Errorf("Error updating automated backup configuration on table %v: %s", name, err)
 			}
 		}
 	}
@@ -371,16 +578,23 @@ func resourceBigtableTableDestroy(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func FlattenColumnFamily(families []string) []map[string]interface{} {
+func FlattenColumnFamily(families []bigtable.FamilyInfo) ([]map[string]interface{}, error) {
 	result := make([]map[string]interface{}, 0, len(families))
 
 	for _, f := range families {
 		data := make(map[string]interface{})
-		data["family"] = f
+		data["family"] = f.Name
+		if _, ok := f.ValueType.(bigtable.AggregateType); ok {
+			marshalled, err := bigtable.MarshalJSON(f.ValueType)
+			if err != nil {
+				return nil, err
+			}
+			data["type"] = string(marshalled)
+		}
 		result = append(result, data)
 	}
 
-	return result
+	return result, nil
 }
 
 // TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
@@ -402,4 +616,39 @@ func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*s
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func getType(input interface{}) (bigtable.Type, error) {
+	if input == nil || input.(string) == "" {
+		return nil, nil
+	}
+	inputType := strings.TrimSuffix(input.(string), "\n")
+	switch inputType {
+	case "intsum":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.SumAggregator{},
+		}, nil
+	case "intmin":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MinAggregator{},
+		}, nil
+	case "intmax":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.MaxAggregator{},
+		}, nil
+	case "inthll":
+		return bigtable.AggregateType{
+			Input:      bigtable.Int64Type{},
+			Aggregator: bigtable.HllppUniqueCountAggregator{},
+		}, nil
+	}
+
+	output, err := bigtable.UnmarshalJSON([]byte(inputType))
+	if err != nil {
+		return nil, err
+	}
+	return output, nil
 }

@@ -36,6 +36,7 @@ require 'provider/terraform_tgc_cai2hcl'
 products_to_generate = nil
 all_products = false
 yaml_dump = false
+go_yaml = false
 generate_code = true
 generate_docs = true
 output_path = nil
@@ -45,6 +46,7 @@ types_to_generate = []
 version = 'ga'
 override_dir = nil
 openapi_generate = false
+go_yaml_files = []
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -94,6 +96,13 @@ OptionParser.new do |opt|
   opt.on('--openapi-generate', 'Generate MMv1 YAML from openapi directory (Experimental)') do
     openapi_generate = true
   end
+  opt.on('--go-yaml', 'Generate MMv1 Go YAML from Ruby YAML') do
+    go_yaml = true
+  end
+  opt.on('--go-yaml-files FILE[,FILE...]', Array, 'Generate temp Go YAML from files') do |f|
+    go_yaml = true
+    go_yaml_files = f
+  end
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
@@ -101,7 +110,8 @@ raise 'Cannot use -p/--products and -a/--all simultaneously' \
   if products_to_generate && all_products
 raise 'Either -p/--products OR -a/--all must be present' \
   if products_to_generate.nil? && !all_products
-raise 'Option -o/--output is a required parameter' if output_path.nil?
+raise 'Option -o/--output is a required parameter' \
+  if output_path.nil? && !openapi_generate
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if openapi_generate
@@ -119,6 +129,14 @@ end
 
 if override_dir
   Google::LOGGER.info "Using override directory '#{override_dir}'"
+
+  # Normalize override dir to a path that is relative to the magic-modules directory
+  # This is needed for templates that concatenate pwd + override dir + path
+  if Pathname.new(override_dir).absolute?
+    override_dir = Pathname.new(override_dir).relative_path_from(__dir__).to_s
+    Google::LOGGER.info "Override directory normalized to relative path '#{override_dir}'"
+  end
+
   Dir["#{override_dir}/products/**/product.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
     all_product_files.push(product) unless all_product_files.include? product
@@ -257,6 +275,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
       override_providers[force_provider].new(product_api, version, start_time)
   end
 
+  provider.go_yaml_files = go_yaml_files if go_yaml_files
+
   unless products_to_generate.include?(product_name)
     Google::LOGGER.info "#{product_name}: Not specified, skipping generation"
     next { definitions: product_api, provider: provider } # rubocop:disable Style/HashSyntax
@@ -270,7 +290,8 @@ products_for_version = Parallel.map(all_product_files, in_processes: 8) do |prod
     product_name,
     yaml_dump,
     generate_code,
-    generate_docs
+    generate_docs,
+    go_yaml
   )
 
   # we need to preserve a single provider instance to use outside of this loop.

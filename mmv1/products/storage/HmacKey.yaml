@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,82 +11,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'HmacKey'
 kind: 'storage#hmacKey'
-base_url: projects/{{project}}/hmacKeys
-create_url: projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}
-self_link: projects/{{project}}/hmacKeys/{{access_id}}
-# technically updatable, but implemented as custom update for new fingerprint support
-immutable: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
-  api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
 description: |
   The hmacKeys resource represents an HMAC key within Cloud Storage. The resource
   consists of a secret and HMAC key metadata. HMAC keys can be used as credentials
   for service accounts.
-id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
-import_format: ['projects/{{project}}/hmacKeys/{{access_id}}']
-async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: transport_tpg.PollCheckForExistence
-  actions: ['create']
-skip_sweeper: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'storage_hmac_key'
-    primary_resource_id: 'key'
-    vars:
-      account_id: 'my-svc-acc'
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/storage/docs/authentication/managing-hmackeys'
+  api: 'https://cloud.google.com/storage/docs/json_api/v1/projects/hmacKeys'
+docs:
   warning: |
     All arguments including the `secret` value will be stored in the raw
     state as plain-text. [Read more about sensitive data in state](https://www.terraform.io/language/state/sensitive-data).
     On import, the `secret` value will not be retrieved.
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/treat_deleted_state_as_gone.go.erb
-  pre_delete: templates/terraform/pre_delete/storage_hmac_key.go.erb
-  post_create: templates/terraform/post_create/storage_hmac_key.go.erb
-  test_check_destroy: templates/terraform/custom_check_destroy/storage_hmac_key.go.erb
+id_format: 'projects/{{project}}/hmacKeys/{{access_id}}'
+base_url: 'projects/{{project}}/hmacKeys'
+self_link: 'projects/{{project}}/hmacKeys/{{access_id}}'
+create_url: 'projects/{{project}}/hmacKeys?serviceAccountEmail={{service_account_email}}'
+# technically updatable, but implemented as custom update for new fingerprint support
+immutable: true
+import_format:
+  - 'projects/{{project}}/hmacKeys/{{access_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 1
+  actions: ['create']
+custom_code:
+  decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/storage_hmac_key.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/storage_hmac_key.go.tmpl'
+  test_check_destroy: 'templates/terraform/custom_check_destroy/storage_hmac_key.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'storage_hmac_key'
+    primary_resource_id: 'key'
+    vars:
+      account_id: 'my-svc-acc'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'serviceAccountEmail'
+  - name: 'serviceAccountEmail'
+    type: String
     description: |
       The email address of the key's associated service account.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: |
       The state of the key. Can be set to one of ACTIVE, INACTIVE.
-    default_value: :ACTIVE
-    values:
-      - :ACTIVE
-      - :INACTIVE
-      # - :DELETED (not directly settable)
-    update_verb: :PUT
-    update_url: projects/{{project}}/hmacKeys/{{access_id}}
+    update_url: 'projects/{{project}}/hmacKeys/{{access_id}}'
     update_id: 'state'
     fingerprint_name: 'etag'
-  - !ruby/object:Api::Type::String
-    name: 'secret'
-    output: true
+    default_value: "ACTIVE"
+    enum_values:
+    # - :DELETED (not directly settable)
+      - 'ACTIVE'
+      - 'INACTIVE'
+  - name: 'secret'
+    type: String
     description: |
       HMAC secret key material.
     ignore_read: true
     sensitive: true
-  - !ruby/object:Api::Type::String
-    name: 'accessId'
     output: true
+  - name: 'accessId'
+    type: String
     description: |
       The access ID of the HMAC Key.
-  - !ruby/object:Api::Type::Time
-    name: 'timeCreated'
     output: true
+  - name: 'timeCreated'
+    type: Time
     description: |
       'The creation time of the HMAC key in RFC 3339 format. '
-  - !ruby/object:Api::Type::Time
-    name: 'updated'
     output: true
+  - name: 'updated'
+    type: Time
     description: |
       'The last modification time of the HMAC key metadata in RFC 3339 format.'
+    output: true

@@ -10,9 +10,7 @@ import (
 func TestResourceMinVersionObj(t *testing.T) {
 	t.Parallel()
 	p := Product{
-		NamedObject: NamedObject{
-			Name: "test",
-		},
+		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
 				Name:    "beta",
@@ -37,9 +35,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 		{
 			description: "resource minVersion is empty",
 			obj: Resource{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
 			},
@@ -48,9 +44,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 		{
 			description: "resource minVersion is not empty",
 			obj: Resource{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
 			},
@@ -76,9 +70,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 func TestResourceNotInVersion(t *testing.T) {
 	t.Parallel()
 	p := Product{
-		NamedObject: NamedObject{
-			Name: "test",
-		},
+		Name: "test",
 		Versions: []*product.Version{
 			&product.Version{
 				Name:    "beta",
@@ -104,9 +96,7 @@ func TestResourceNotInVersion(t *testing.T) {
 		{
 			description: "ga is in version if MinVersion is empty",
 			obj: Resource{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:            "test",
 				MinVersion:      "",
 				ProductMetadata: &p,
 			},
@@ -118,9 +108,7 @@ func TestResourceNotInVersion(t *testing.T) {
 		{
 			description: "ga is not in version if MinVersion is beta",
 			obj: Resource{
-				NamedObject: NamedObject{
-					Name: "test",
-				},
+				Name:            "test",
 				MinVersion:      "beta",
 				ProductMetadata: &p,
 			},

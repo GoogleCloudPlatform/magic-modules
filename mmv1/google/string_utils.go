@@ -49,8 +49,7 @@ func SpaceSeparated(source string) string {
 	return tmp
 }
 
-// // Converts a string to space-separated capitalized words
-// def self.title(source)
+// Converts a string to space-separated capitalized words
 func SpaceSeparatedTitle(source string) string {
 	ss := SpaceSeparated(source)
 	return strings.Title(ss)
@@ -58,8 +57,6 @@ func SpaceSeparatedTitle(source string) string {
 
 // Returns all the characters up until the period (.) or returns text
 // unchanged if there is no period.
-//
-//	def self.first_sentence(text)
 func FirstSentence(text string) string {
 	re := regexp.MustCompile(`[.?!]`)
 	periodPos := re.FindStringIndex(text)
@@ -117,11 +114,6 @@ func Camelize(term string, firstLetter string) string {
 			return strings.Title(match)
 		})
 	} else {
-		// TODO: rewrite with the regular expression. Lookahead(?=) is not supported in Go
-		// 	acronymsCamelizeRegex := regexp.MustCompile(`^(?:(?=a)b(?=\b|[A-Z_])|\w)`)
-		// 	res = acronymsCamelizeRegex.ReplaceAllStringFunc(res, func(match string) string {
-		// 		return strings.ToLower(match)
-		// 	})
 		if len(res) != 0 {
 			r := []rune(res)
 			r[0] = unicode.ToLower(r[0])
@@ -136,4 +128,36 @@ func Camelize(term string, firstLetter string) string {
 		return word
 	})
 	return res
+}
+
+/*
+Transforms a format string with field markers to a regex string with capture groups.
+For instance,
+
+	projects/{{project}}/global/networks/{{name}}
+
+is transformed to
+
+	projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+
+Values marked with % are URL-encoded, and will match any number of /'s.
+Note: ?P indicates a Python-compatible named capture group. Named groups
+aren't common in JS-based regex flavours, but are in Perl-based ones
+*/
+func Format2Regex(format string) string {
+	re := regexp.MustCompile(`\{\{%([[:word:]]+)\}\}`)
+	result := re.ReplaceAllStringFunc(format, func(match string) string {
+		// TODO rewrite: the trims may not be needed with more effecient regex
+		word := strings.TrimPrefix(match, "{{")
+		word = strings.TrimSuffix(word, "}}")
+		word = strings.ReplaceAll(word, "%", "")
+		return fmt.Sprintf("(?P<%s>.+)", word)
+	})
+	re = regexp.MustCompile(`\{\{([[:word:]]+)\}\}`)
+	result = re.ReplaceAllStringFunc(result, func(match string) string {
+		word := strings.TrimPrefix(match, "{{")
+		word = strings.TrimSuffix(word, "}}")
+		return fmt.Sprintf("(?P<%s>[^/]+)", word)
+	})
+	return result
 }

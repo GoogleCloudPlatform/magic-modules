@@ -1,0 +1,269 @@
+{{- define "NestedQuery" }}
+func flattenNested{{ $.ResourceName }}(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+  var v interface{}
+  var ok bool
+
+{{ range $i, $k := $.NestedQuery.Keys }}
+{{-   if ne $i (sub (len $.NestedQuery.Keys) 1) }} 
+  v, ok = res["{{ $k }}"]
+  if !ok || v == nil {
+    return nil, nil
+  }
+  res = v.(map[string]interface{})
+{{-   end }}
+{{ end }}
+  v, ok = res["{{ $.LastNestedQueryKey }}"]
+  if !ok || v == nil {
+    return nil,nil
+  }
+
+  switch v.(type) {
+  case []interface{}:
+    break
+  case map[string]interface{}:
+    // Construct list out of single nested resource
+    v = []interface{}{v}
+  default:
+    return nil, fmt.Errorf("expected list or map for value {{ join $.NestedQuery.Keys "." }}. Actual value: %v", v)
+  }
+
+  _, item, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, v.([]interface{}))
+  if err != nil {
+    return nil, err
+  }
+  return item, nil
+}
+
+func resource{{ $.ResourceName }}FindNestedObjectInList(d *schema.ResourceData, meta interface{}, items []interface{}) (index int, item map[string]interface{}, err error) {
+  {{- range $idProp := $.GetIdentity }}
+  {{-   if $.IsSettableProperty $idProp }}
+  expected{{ $idProp.TitlelizeProperty }}, err := expandNested{{ $.ResourceName }}{{ $idProp.TitlelizeProperty }}(d.Get("{{ underscore $idProp.Name }}"), d, meta.(*transport_tpg.Config))
+  if err != nil {
+    return -1, nil, err
+  }
+  {{-  else }}
+  expected{{ $idProp.TitlelizeProperty }} := d.Get("{{ underscore $idProp.Name }}")
+  {{-  end }}{{/* if $.IsSettableProperty $idProp */}}
+  expectedFlattened{{ $idProp.TitlelizeProperty }} := flattenNested{{ $.ResourceName }}{{ $idProp.TitlelizeProperty }}(expected{{ $idProp.TitlelizeProperty }}, d, meta.(*transport_tpg.Config))
+  {{- end }}{{/* range $idProp := $.GetIdentity  */}}
+
+  // Search list for this resource.
+  for idx, itemRaw := range items {
+    if itemRaw == nil {
+      continue
+    }
+    {{- if $.NestedQuery.IsListOfIds }}
+    // List response only contains the ID - construct a response object.
+    item := map[string]interface{}{
+      "{{ $.FirstIdentityProp.ApiName }}": itemRaw,
+    }
+    {{- else }}
+    item := itemRaw.(map[string]interface{})
+    {{- end }}
+    {{ if $.CustomCode.Decoder }}
+    // Decode list item before comparing.
+    item, err := resource{{ $.ResourceName }}Decoder(d, meta, item)
+    if err != nil {
+        return -1, nil, err
+    }
+    {{- end }}
+  {{ range $prop := $.GetIdentity }}
+    item{{ $prop.TitlelizeProperty }} := flattenNested{{ $.ResourceName }}{{ $prop.TitlelizeProperty }}(item["{{ $prop.ApiName }}"], d, meta.(*transport_tpg.Config))
+    // IsEmptyValue check so that if one is nil and the other is "", that's considered a match
+    if !(tpgresource.IsEmptyValue(reflect.ValueOf(item{{ $prop.TitlelizeProperty }})) && tpgresource.IsEmptyValue(reflect.ValueOf(expectedFlattened{{ $prop.TitlelizeProperty }}))) && !reflect.DeepEqual(item{{ $prop.TitlelizeProperty }}, expectedFlattened{{ $prop.TitlelizeProperty }}) {
+      log.Printf("[DEBUG] Skipping item with {{ $prop.ApiName }}= %#v, looking for %#v)", item{{ $prop.TitlelizeProperty }}, expectedFlattened{{ $prop.TitlelizeProperty }})
+      continue
+    }
+  {{- end }}
+    log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), item)
+    return idx, item, nil
+  }
+  return -1, nil, nil
+}
+{{- if $.NestedQuery.ModifyByPatch }}
+// PatchCreateEncoder handles creating request data to PATCH parent resource
+// with list including new object.
+func resource{{ $.ResourceName }}PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  _, found, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, currItems)
+  if err != nil {
+    return nil, err
+  }
+
+  // Return error if item already created.
+  if found != nil {
+    return nil, fmt.Errorf("Unable to create {{ $.Name }}, existing object already found: %+v", found)
+  }
+
+  // Return list with the resource to create appended
+  {{- if $.NestedQuery.IsListOfIds }}
+  res := map[string]interface{}{
+    "{{ $.LastNestedQueryKey }}": append(currItems, obj["{{ $.FirstIdentityProp.ApiName }}"]),
+  }
+  {{- else }}
+  res := map[string]interface{}{
+    "{{ $.LastNestedQueryKey }}": append(currItems, obj),
+  }
+{{- end }}
+{{- range $i, $k := $.NestedQuery.Keys }}
+  {{- if ne $i 0 }}
+  wrapped := map[string]interface{}{
+    "{{ index $.NestedQuery.Keys (sub (sub (len $.NestedQuery.Keys) $i) 1) }}": res,
+  }
+  res = wrapped
+  {{- end }}
+{{- end }}
+
+  return res, nil
+}
+
+{{- if $.Updatable }}
+// PatchUpdateEncoder handles creating request data to PATCH parent resource
+// with list including updated object.
+func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  items, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  idx, item, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, items)
+  if err != nil {
+    return nil, err
+  }
+
+  // Return error if item to update does not exist.
+  if item == nil {
+    return nil, fmt.Errorf("Unable to update {{ $.Name }} %q - not found in list", d.Id())
+  }
+
+  // Merge new object into old.
+  for k, v := range obj {
+    item[k] = v
+  }
+  items[idx] = item
+
+  // Return list with new item added
+  res := map[string]interface{}{
+    "{{ $.LastNestedQueryKey }}": items,
+  }
+  {{/* see comments in PatchCreateEncoder for details */}}
+{{- range $i, $k := $.NestedQuery.Keys }}
+  {{- if ne $i 0 }}
+  wrapped := map[string]interface{}{
+    "{{ $k }}": res,
+  }
+  res = wrapped
+  {{- end }}
+{{- end }}
+
+  return res, nil
+}
+{{- end }}
+
+// PatchDeleteEncoder handles creating request data to PATCH parent resource
+// with list excluding object to delete.
+func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+  currItems, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+  if err != nil {
+    return nil, err
+  }
+
+  idx, item, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, currItems)
+  if err != nil {
+    return nil, err
+  }
+  if item == nil {
+    // Spoof 404 error for proper handling by Delete (i.e. no-op)
+    return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
+  }
+
+  updatedItems := append(currItems[:idx], currItems[idx+1:]...)
+  res := map[string]interface{}{
+    "{{ $.LastNestedQueryKey }}": updatedItems,
+  }
+  {{- range $i, $k := $.NestedQuery.Keys }}
+  {{- if ne $i (sub (len $.NestedQuery.Keys) 1) }}
+  wrapped := map[string]interface{}{
+    "{{ $k }}": res,
+  }
+  res = wrapped
+  {{- end }}
+{{- end }}
+
+  return res, nil
+}
+
+// ListForPatch handles making API request to get parent resource and
+// extracting list of objects.
+{{- /* This function is similar to flattenNested...() but
+  # 1) does an API request to read the parent resource from API (flatten
+       takes in list from top-level Read() method, whereas this method
+       is called in Create/Update/Delete)
+  # 2) returns the full list of other resources, rather than just the
+  #    matching resource
+*/}}
+func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
+  config := meta.(*transport_tpg.Config)
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+  if err != nil {
+      return nil, err
+  }
+  {{- if $.HasProject }}
+  project, err := tpgresource.GetProject(d, config)
+  if err != nil {
+      return nil, err
+  }
+  {{- end }}
+
+  userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+  if err != nil {
+    return nil, err
+  }
+
+  res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config: config,
+    Method: "{{ $.ReadVerb }}",
+    {{- if $.HasProject }}
+    Project: project,
+    {{- end }}
+    RawURL: url,
+    UserAgent: userAgent,
+    {{- if $.ErrorRetryPredicates }}
+    ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorRetryPredicates "," -}} },
+    {{- end }}
+    {{- if $.ErrorAbortPredicates }}
+    ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
+    {{- end }}
+  })
+  if err != nil {
+    return nil, err
+  }
+
+  var v interface{}
+  var ok bool
+{{- range $i, $k := $.NestedQuery.Keys }}
+  {{- if not (eq $i (sub (len $.NestedQuery.Keys) 1)) }}
+  if v, ok = res["{{ $k }}"]; ok && v != nil {
+    res = v.(map[string]interface{})
+  } else {
+    return nil, nil
+  }
+  {{- end }}
+{{- end }}
+
+  v, ok = res["{{ $.LastNestedQueryKey }}"]
+  if ok && v != nil {
+    ls, lsOk := v.([]interface{})
+    if !lsOk {
+      return nil, fmt.Errorf(`expected list for nested field "{{ $.LastNestedQueryKey }}"`)
+    }
+    return ls, nil
+  }
+  return nil, nil
+}
+{{- end }}{{/* if $.NestedQuery.ModifyByPatch */}}
+{{- end }}

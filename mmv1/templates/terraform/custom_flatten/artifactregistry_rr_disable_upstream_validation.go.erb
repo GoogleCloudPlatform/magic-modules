@@ -1,3 +1,0 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  return d.Get("remote_repository_config.0.disable_upstream_validation")
-}

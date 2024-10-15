@@ -104,6 +104,8 @@ The following arguments are supported:
     By defining these properties, the data source can then be queried as
     if it were a standard BigQuery table. Structure is [documented below](#nested_external_data_configuration).
 
+* `biglake_configuration` - (Optional) Specifies the configuration of a BigLake managed table. Structure is [documented below](#nested_biglake_configuration)
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
 * `max_staleness`: (Optional) The maximum staleness of data that could be
@@ -161,11 +163,32 @@ The following arguments are supported:
 * `materialized_view` - (Optional) If specified, configures this table as a materialized view.
     Structure is [documented below](#nested_materialized_view).
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from destroying the table.
+    When the field is set to true or unset in Terraform state, a `terraform apply`
+    or `terraform destroy` that would delete the table will fail.
+    When the field is set to false, deleting the table is allowed..
 
 * `table_constraints` - (Optional) Defines the primary key and foreign keys. 
     Structure is [documented below](#nested_table_constraints).
+
+* `table_replication_info` - (Optional) Replication info of a table created
+    using "AS REPLICA" DDL like:
+    `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+    Structure is [documented below](#nested_table_replication_info).
+
+* `resource_tags` - (Optional) The tags attached to this table. Tag keys are
+    globally unique. Tag key is expected to be in the namespaced format, for
+    example "123456789012/environment" where 123456789012 is the ID of the
+    parent organization or project resource for this tag key. Tag value is
+    expected to be the short name, for example "Production".
+
+* `allow_resource_tags_on_deletion` - (Optional) If set to true, it allows table
+    deletion when there are still resource tags attached. The default value is
+    false.
+
+    ~>**Warning:** `allow_resource_tags_on_deletion` is deprecated and will be
+      removed in a future major release. The default behavior will be allowing
+      the presence of resource tags on deletion after the next major release.
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
@@ -186,6 +209,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `csv_options` (Optional) - Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
+
+* `bigtable_options` (Optional) - Additional properties to set if
+    `source_format` is set to "BIGTABLE". Structure is [documented below](#nested_bigtable_options).
 
 * `json_options` (Optional) - Additional properties to set if
     `source_format` is set to "JSON". Structure is [documented below](#nested_json_options).
@@ -275,6 +301,30 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
+
+<a name="nested_bigtable_options"></a>The `bigtable_options` block supports:
+
+* `column_family` (Optional) - A list of column families to expose in the table schema along with their types. This list restricts the column families that can be referenced in queries and specifies their value types. You can use this list to do type conversions - see the 'type' field for more details. If you leave this list empty, all column families are present in the table schema and their values are read as BYTES. During a query only the column families referenced in that query are read from Bigtable.  Structure is [documented below](#nested_column_family).
+* `ignore_unspecified_column_families` (Optional) - If field is true, then the column families that are not specified in columnFamilies list are not exposed in the table schema. Otherwise, they are read with BYTES type values. The default value is false.
+* `read_rowkey_as_string` (Optional) - If field is true, then the rowkey column families will be read and converted to string. Otherwise they are read with BYTES type values and users need to manually cast them with CAST if necessary. The default value is false.
+* `output_column_families_as_json` (Optional) - If field is true, then each column family will be read as a single JSON column. Otherwise they are read as a repeated cell structure containing timestamp/value tuples. The default value is false.
+
+<a name="nested_column_family"></a>The `column_family` block supports:
+
+* `column` (Optional) - A List of columns that should be exposed as individual fields as opposed to a list of (column name, value) pairs. All columns whose qualifier matches a qualifier in this list can be accessed as Other columns can be accessed as a list through column field.  Structure is [documented below](#nested_column).
+* `family_id` (Optional) - Identifier of the column family.
+* `type` (Optional) - The type to convert the value in cells of this column family. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON". Default type is BYTES. This can be overridden for a specific column by listing that column in 'columns' and specifying a type for it.
+* `encoding` (Optional) - The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. This can be overridden for a specific column by listing that column in 'columns' and specifying an encoding for it.
+* `only_read_latest` (Optional) - If this is set only the latest version of value are exposed for all columns in this column family. This can be overridden for a specific column by listing that column in 'columns' and specifying a different setting for that column.
+
+<a name="nested_column"></a>The `column` block supports:
+
+* `qualifier_encoded` (Optional) - Qualifier of the column. Columns in the parent column family that has this exact qualifier are exposed as . field. If the qualifier is valid UTF-8 string, it can be specified in the qualifierString field. Otherwise, a base-64 encoded value must be set to qualifierEncoded. The column field name is the same as the column qualifier. However, if the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as fieldName.
+* `qualifier_string` (Optional) - Qualifier string.
+* `field_name` (Optional) - If the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as the column field name and is used as field name in queries.
+* `type` (Optional) - The type to convert the value in cells of this column. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON", Default type is "BYTES". 'type' can also be set at the column family level. However, the setting at this level takes precedence if 'type' is set at both levels.
+* `encoding` (Optional) - The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. 'encoding' can also be set at the column family level. However, the setting at this level takes precedence if 'encoding' is set at both levels.
+* `only_read_latest` (Optional) - If this is set, only the latest version of value in this column are exposed. 'onlyReadLatest' can also be set at the column family level. However, the setting at this level takes precedence if 'onlyReadLatest' is set at both levels.
 
 <a name="nested_json_options"></a>The `json_options` block supports:
 
@@ -432,6 +482,31 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `referenced_column`: (Required) The column in the primary key that are
     referenced by the referencingColumn
+
+<a name="nested_table_replication_info"></a>The `table_replication_info` block supports:
+
+* `source_project_id` (Required) - The ID of the source project.
+
+* `source_dataset_id` (Required) - The ID of the source dataset.
+
+* `source_table_id` (Required) - The ID of the source materialized view.
+
+* `replication_interval_ms` (Optional) - The interval at which the source
+    materialized view is polled for updates. The default is 300000.
+
+<a name="nested_biglake_configuration"></a>The `biglake_configuration` block supports:
+
+* `connection_id` - (Required) The connection specifying the credentials to be used to
+    read and write to external storage, such as Cloud Storage. The connection_id can
+    have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+    projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+
+* `storage_uri` - (Required) The fully qualified location prefix of the external folder where table data
+  is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"
+
+* `file_format` - (Required) The file format the table data is stored in.
+
+* `table_format` - (Required) The table format the metadata only snapshots are stored in.
 
 ## Attributes Reference
 

@@ -21,58 +21,7 @@ import (
 	"math/rand"
 	"time"
 
-	"golang.org/x/exp/slices"
-)
-
-var (
-	// This is for the random-assignee rotation.
-	reviewerRotation = []string{
-		"slevenick",
-		"c2thorn",
-		"rileykarson",
-		"melinath",
-		"ScottSuarez",
-		"shuyama1",
-		"SarahFrench",
-		"roaks3",
-		"zli82016",
-		"trodge",
-		"hao-nan-li",
-		"NickElliot",
-		"BBBmau",
-	}
-
-	// This is for new team members who are onboarding
-	trustedContributors = []string{}
-
-	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	// User can specify the time zone like this, and following the example below:
-	pdtLoc, _           = time.LoadLocation("America/Los_Angeles")
-	bstLoc, _           = time.LoadLocation("Europe/London")
-	onVacationReviewers = []onVacationReviewer{
-		// Example: taking vacation from 2024-03-28 to 2024-04-02 in pdt time zone.
-		// both ends are inclusive:
-		// {
-		// 	id:        "xyz",
-		// 	startDate: newDate(2024, 3, 28, pdtLoc),
-		// 	endDate:   newDate(2024, 4, 2, pdtLoc),
-		// },
-		{
-			id:        "hao-nan-li",
-			startDate: newDate(2024, 4, 11, pdtLoc),
-			endDate:   newDate(2024, 6, 14, pdtLoc),
-		},
-		{
-			id:        "SarahFrench",
-			startDate: newDate(2024, 4, 20, bstLoc),
-			endDate:   newDate(2024, 4, 23, bstLoc),
-    },
-    {
-	  		id: "slevenick",
-	 	  	startDate: newDate(2024, 4, 20, pdtLoc),
-	  		endDate: newDate(2024, 4, 27, pdtLoc),
-		},
-	}
+	"golang.org/x/exp/maps"
 )
 
 type UserType int64
@@ -137,11 +86,13 @@ func (gh *Client) GetUserType(user string) UserType {
 
 // Check if a user is team member to not request a random reviewer
 func IsCoreContributor(user string) bool {
-	return slices.Contains(reviewerRotation, user) || slices.Contains(trustedContributors, user)
+	_, isTrustedContributor := trustedContributors[user]
+	return IsCoreReviewer(user) || isTrustedContributor
 }
 
-func IsCoreReviewer(reviewer string) bool {
-	return slices.Contains(reviewerRotation, reviewer)
+func IsCoreReviewer(user string) bool {
+	_, isCoreReviewer := reviewerRotation[user]
+	return isCoreReviewer
 }
 
 func isOrgMember(author, org, githubToken string) bool {
@@ -158,7 +109,7 @@ func GetRandomReviewer() string {
 }
 
 func AvailableReviewers() []string {
-	return available(time.Now(), reviewerRotation, onVacationReviewers)
+	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers)
 }
 
 func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer) []string {

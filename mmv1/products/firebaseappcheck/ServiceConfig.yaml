@@ -12,77 +12,76 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "ServiceConfig"
-base_url: projects/{{project}}/services/
-self_link: projects/{{project}}/services/{{service_id}}
-create_url: projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode
-create_verb: :PATCH
-update_verb: :PATCH
-update_mask: true
-delete_url: projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode
-delete_verb: :PATCH
+name: 'ServiceConfig'
 description: The enforcement configuration for a service supported by App Check.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/app-check"
-  api: "https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.services"
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.services'
+docs:
+base_url: 'projects/{{project}}/services/'
+self_link: 'projects/{{project}}/services/{{service_id}}'
+create_url: 'projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/services/{{service_id}}?updateMask=enforcementMode'
+delete_verb: 'PATCH'
 import_format:
-  [
-    "projects/{{project}}/services/{{service_id}}",
-    "{{project}}/{{service_id}}",
-    "{{service_id}}",
-  ]
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  test_check_destroy: templates/terraform/custom_check_destroy/firebase_app_check_service_config.go
+  - 'projects/{{project}}/services/{{service_id}}'
+  - '{{project}}/{{service_id}}'
+  - '{{service_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/firebase_app_check_service_config.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_service_config_off"
-    primary_resource_id: "default"
+  - name: 'firebase_app_check_service_config_off'
+    primary_resource_id: 'default'
     vars:
-      service_id: "firestore.googleapis.com"
-    test_vars_overrides:
-      service_id: '"firestore.googleapis.com"'
+      service_id: 'firestore.googleapis.com'
     test_env_vars:
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_service_config_enforced"
-    primary_resource_id: "default"
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"firestore.googleapis.com"'
+  - name: 'firebase_app_check_service_config_enforced'
+    primary_resource_id: 'default'
     vars:
-      service_id: "firebasestorage.googleapis.com"
-    test_vars_overrides:
-      service_id: '"firebasestorage.googleapis.com"'
+      service_id: 'firebasestorage.googleapis.com'
     test_env_vars:
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_service_config_unenforced"
-    primary_resource_id: "default"
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"firebasestorage.googleapis.com"'
+  - name: 'firebase_app_check_service_config_unenforced'
+    primary_resource_id: 'default'
     vars:
-      service_id: "identitytoolkit.googleapis.com"
-    test_vars_overrides:
-      service_id: '"identitytoolkit.googleapis.com"'
+      service_id: 'identitytoolkit.googleapis.com'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'service_id': '"identitytoolkit.googleapis.com"'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: service_id
+  - name: 'service_id'
+    type: String
     description: |
       The identifier of the service to configure enforcement. Currently, the following service IDs are supported:
         firebasestorage.googleapis.com (Cloud Storage for Firebase)
         firebasedatabase.googleapis.com (Firebase Realtime Database)
         firestore.googleapis.com (Cloud Firestore)
         identitytoolkit.googleapis.com (Authentication)
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The fully-qualified resource name of the service enforcement configuration.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: enforcementMode
+  - name: 'enforcementMode'
+    type: Enum
     description: |
       The App Check enforcement mode for a service supported by App Check. Valid values are
 
@@ -114,6 +113,6 @@ properties:
 
       If your app has not launched yet, you should enable enforcement immediately, since there are no outdated
       clients in use.
-    values:
-      - :UNENFORCED
-      - :ENFORCED
+    enum_values:
+      - 'UNENFORCED'
+      - 'ENFORCED'

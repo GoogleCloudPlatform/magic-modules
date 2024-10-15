@@ -1,0 +1,36 @@
+{{- define "EnvVarContext" }}
+	{{- range $varKey, $varVal := $.TestEnvVars }}
+		{{- if eq $varVal "ORG_ID" }}
+		"{{$varKey}}": envvar.GetTestOrgFromEnv(t),
+		{{- else if eq $varVal "ORG_DOMAIN" }}
+		"{{$varKey}}": envvar.GetTestOrgDomainFromEnv(t),
+		{{- else if eq $varVal "CREDENTIALS" }}
+		"{{$varKey}}": envvar.GetTestCredsFromEnv(t),
+		{{- else if eq $varVal "REGION" }}
+		"{{$varKey}}": envvar.GetTestRegionFromEnv(),
+		{{- else if eq $varVal "ORG_TARGET" }}
+		"{{$varKey}}": envvar.GetTestOrgTargetFromEnv(t),
+		{{- else if eq $varVal "BILLING_ACCT" }}
+		"{{$varKey}}": envvar.GetTestBillingAccountFromEnv(t),
+		{{- else if eq $varVal "MASTER_BILLING_ACCT" }}
+		"{{$varKey}}": envvar.GetTestMasterBillingAccountFromEnv(t),
+		{{- else if eq $varVal "SERVICE_ACCT" }}
+		"{{$varKey}}": envvar.GetTestServiceAccountFromEnv(t),
+		{{- else if eq $varVal "PROJECT_NAME" }}
+		"{{$varKey}}": envvar.GetTestProjectFromEnv(),
+		{{- else if eq $varVal "PROJECT_NUMBER" }}
+		"{{$varKey}}": envvar.GetTestProjectNumberFromEnv(),
+		{{- else if eq $varVal "CUST_ID" }}
+		"{{$varKey}}": envvar.GetTestCustIdFromEnv(t),
+		{{- else if eq $varVal "IDENTITY_USER" }}
+		"{{$varKey}}": envvar.GetTestIdentityUserFromEnv(t),
+		{{- else if eq $varVal "PAP_DESCRIPTION" }}
+		"{{$varKey}}": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		{{- else if eq $varVal "ZONE" }}
+		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
+		{{- end }}
+	{{- end }}
+	{{- if and $.HasNewLine (gt (len $.TestEnvVars) 0)}}
+	{{""}}
+	{{- end}}
+{{- end }}

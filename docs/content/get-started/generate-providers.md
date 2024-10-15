@@ -30,11 +30,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 {{< /hint >}}
 
 1. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-1. [Install rbenv](https://github.com/rbenv/rbenv#installation), ensuring you follow **both** steps 1 and 2. 
-1. Use rbenv to install ruby 3.1.0
-   ```bash
-   rbenv install 3.1.0
-   ```
 1. [Install go](https://go.dev/doc/install)
 1. Add the following values to your environment settings such as `.bashrc`:
    ```bash
@@ -63,8 +58,6 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    Expected output if everything is installed properly:
  
    ```
-   Check for ruby in path...
-      found!
    Check for go in path...
       found!
    Check for goimports in path...
@@ -79,10 +72,10 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 
 ## Generate a provider change
 
-1. In your cloned magic-modules repository, edit `mmv1/products/pubsub/Topic.yaml` to change the description for the schemaSettings field:
+1. In your cloned magic-modules repository, edit `mmv1/products/bigqueryanalyticshub/DataExchange.yaml` to change the description for the `displayName` field:
    ```yaml
-   - !ruby/object:Api::Type::NestedObject
-     name: 'schemaSettings'
+   - name: 'displayName'
+     type: NestedObject
      description: |
        UPDATED_DESCRIPTION
    ```
@@ -94,11 +87,11 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    ```
 1. Generate changes for the `google` provider
    ```bash
-   make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=pubsub
+   make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=bigqueryanalyticshub
    ```
 1. Generate changes for the `google-beta` provider
    ```bash
-   make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" PRODUCT=pubsub
+   make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" PRODUCT=bigqueryanalyticshub
    ```
 1. Confirm that the expected changes were generated
    ```bash
@@ -111,17 +104,17 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    In both cases, the changes should include:
 
    ```diff
-   diff --git a/google-beta/resource_pubsub_topic.go b/google-beta/resource_pubsub_topic.go
-   --- a/google-beta/resource_pubsub_topic.go
-   +++ b/google-beta/resource_pubsub_topic.go
-   @@ -115 +115 @@ and is not a valid configuration.`,
-   -                               Description: `Settings for validating messages published against a schema.`,
+   diff --git a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hudiff --git a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go b/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
+   --- a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
+   +++ b/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
+   @@ -66 +66 @@ func ResourceBigqueryAnalyticsHubDataExchange() *schema.Resource {
+   -                               Description: `Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.`,
    +                               Description: `UPDATED_DESCRIPTION`,
-   diff --git a/website/docs/r/pubsub_topic.html.markdown b/website/docs/r/pubsub_topic.html.markdown
-   --- a/website/docs/r/pubsub_topic.html.markdown
-   +++ b/website/docs/r/pubsub_topic.html.markdown
-   @@ -146 +146 @@ The following arguments are supported:
-   -  Settings for validating messages published against a schema.
+   diff --git a/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown b/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
+   --- a/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
+   +++ b/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
+   @@ -63 +63 @@ The following arguments are supported:
+   -  Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.
    +  UPDATED_DESCRIPTION
    ```
 
@@ -148,8 +141,7 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
 1. Enable required APIs
    ```bash
    gcloud config set project $GOOGLE_PROJECT
-   gcloud services enable pubsub.googleapis.com
-   gcloud services enable cloudkms.googleapis.com
+   gcloud services enable analyticshub.googleapis.com
    ```
 1. Run all linters
    ```bash
@@ -165,13 +157,13 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
    make test
    ```
-1. Run acceptance tests for Pub/Sub Topic
+1. Run acceptance tests for BigqueryAnalyticsHub DataExchange
 
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   make testacc TEST=./google/services/pubsub TESTARGS='-run=TestAccPubsubTopic_'
+   make testacc TEST=./google/services/bigqueryanalyticshub TESTARGS='-run=TestAccBigqueryAnalyticsHubDataExchange_'
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   make testacc TEST=./google-beta/services/pubsub TESTARGS='-run=TestAccPubsubTopic_'
+   make testacc TEST=./google-beta/services/bigqueryanalyticshub TESTARGS='-run=TestAccBigqueryAnalyticsHubDataExchange_'
    ```
 
 ## Troubleshoot

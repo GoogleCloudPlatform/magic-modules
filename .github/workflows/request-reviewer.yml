@@ -15,7 +15,7 @@ on:
 
 jobs:
   request-review:
-    if: github.event.pull_request && github.event.pull_request.draft == false && (github.event.sender.login == github.event.pull_request.user.login || github.event.action != 'created')
+    if: (github.event.action == 'created' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          ref: main
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
@@ -35,5 +37,5 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number }}
+        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
 

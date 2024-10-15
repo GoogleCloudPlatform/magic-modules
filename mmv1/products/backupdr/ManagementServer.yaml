@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,96 +11,121 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ManagementServer'
-min_version: beta
-base_url: projects/{{project}}/locations/{{location}}/managementServers
-create_url: projects/{{project}}/locations/{{location}}/managementServers/?management_server_id={{name}}
-self_link: projects/{{project}}/locations/{{location}}/managementServers/{{name}}
-create_verb: :POST
-immutable: true
-delete_url: projects/{{project}}/locations/{{location}}/managementServers/{{name}}
 description: A Backup and DR Management Server (Also referred as Management Console)
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/deployment/deployment-plan'
-autogen_async: true
-timeouts: !ruby/object:Api::Timeouts
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/managementServers'
+self_link: 'projects/{{project}}/locations/{{location}}/managementServers/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/managementServers/?management_server_id={{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/managementServers/{{name}}'
+immutable: true
+timeouts:
   insert_minutes: 40
+  update_minutes: 20
   delete_minutes: 40
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'backup_dr_management_server'
+  - name: 'backup_dr_management_server'
     primary_resource_id: 'ms-console'
+    min_version: 'beta'
     vars:
       network_name: 'vpc-network'
       managementserver_name: 'ms-console'
     test_env_vars:
-      project: :PROJECT_NAME
-    skip_test: true
+      project: 'PROJECT_NAME'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    required: true
-    url_param_only: true
+  - name: 'location'
+    type: String
     description: |
       The location for the management server (management console)
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
+    min_version: 'beta'
     url_param_only: true
+    required: true
+  - name: 'name'
+    type: String
     description: |-
       The name of management server (management console)
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.erb'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
 properties:
-  - !ruby/object:Api::Type::Enum
-    name: 'type'
-    values:
-      - :BACKUP_RESTORE
-    default_value: :BACKUP_RESTORE
+  - name: 'type'
+    type: Enum
     description: |
       The type of management server (management console).
-  - !ruby/object:Api::Type::Array
-    name: 'networks'
+    min_version: 'beta'
+    default_value: "BACKUP_RESTORE"
+    enum_values:
+      - 'BACKUP_RESTORE'
+  - name: 'networks'
+    type: Array
     description: |
       Network details to create management server (management console).
+    min_version: 'beta'
     required: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
+          min_version: 'beta'
           required: true
-        - !ruby/object:Api::Type::Enum
-          name: 'peeringMode'
+        - name: 'peeringMode'
+          type: Enum
           description: |
             Type of Network peeringMode
-          values:
-            - :PRIVATE_SERVICE_ACCESS
-          default_value: :PRIVATE_SERVICE_ACCESS
+          min_version: 'beta'
+          default_value: "PRIVATE_SERVICE_ACCESS"
+          enum_values:
+            - 'PRIVATE_SERVICE_ACCESS'
   ## outputs
-  - !ruby/object:Api::Type::String
-    name: 'oauth2ClientId'
+  - name: 'oauth2ClientId'
+    type: String
     description: |
       The oauth2ClientId of management console.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'managementUri'
+  - name: 'managementUri'
+    type: NestedObject
     description: |-
       The management console URI
+    min_version: 'beta'
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'webUi'
+      - name: 'webUi'
+        type: String
         description: |-
           The management console webUi.
+        min_version: 'beta'
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'api'
+      - name: 'api'
+        type: String
         description: |-
           The management console api endpoint.
+        min_version: 'beta'
         output: true

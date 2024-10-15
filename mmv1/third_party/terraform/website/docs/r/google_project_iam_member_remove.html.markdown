@@ -4,7 +4,7 @@ description: |-
   Ensures that a member:role pairing does not exist in a project's IAM policy.
 ---
 
-# google\_project\_iam\member\_remove
+# google_project_iam_member_remove
 
 Ensures that a member:role pairing does not exist in a project's IAM policy. 
 
@@ -29,7 +29,7 @@ and
 ## Example Usage
 
 ```hcl
-data "google_project" "target_project {}
+data "google_project" "target_project" {}
 
 resource "google_project_iam_member_remove" "foo" {
   role     = "roles/editor"

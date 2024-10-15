@@ -37,7 +37,8 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -130,18 +131,8 @@ func Resource<%= object.resource_name -%>() *schema.Resource {
 <%=       lines(build_schema_property(prop, object, pwd)) -%>
 <%  end -%>
 <%- unless object.virtual_fields.empty? -%>
-<%-   object.virtual_fields.each do |field| -%>
-            "<%= field.name -%>": {
-                Type: <%= tf_type(field) -%>,
-                Optional: true,
-<%       if field.immutable -%>
-                ForceNew: true,
-<%       end -%>
-<%       unless field.default_value.nil? -%>
-                Default:  <%= go_literal(field.default_value) -%>,
-<%       end -%>
-                Description: `<%= field.description.strip.gsub("`", "'") -%>`,
-            },
+<%-   object.virtual_fields.each do |prop| -%>
+<%=       lines(build_schema_property(prop, object, pwd)) -%>
 <%     end -%>
 <%   end -%>
 <%= lines(compile(pwd + '/' + object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
