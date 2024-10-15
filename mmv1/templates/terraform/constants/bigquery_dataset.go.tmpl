@@ -23,3 +23,49 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 
     return
 }
+
+// The CustomizeDiff func to use legacy roles for access field in bigquery_dataset
+// because the API returns that.
+func SetAccessDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setAccessFields("access", d, meta, false)
+}
+
+func setAccessFields(accessField string, d *schema.ResourceDiff, meta interface{}, skipAttribution bool) error {
+	raw := d.Get(accessField)
+	fmt.Printf("setAccessFields raw:: %v\n", raw)
+	if raw == nil {
+		return nil
+	}
+
+	access, ok := raw.(*schema.Set)
+	if !ok {
+		return fmt.Errorf("access field %q is not a set", accessField)
+	}
+
+	var newAccess []interface{}
+	for _, v := range access.List() {
+		m, ok := v.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("access element is not a map: %v", v)
+		}
+
+		if role, ok := m["role"]; ok {
+			switch role {
+			case "roles/bigquery.dataOwner":
+				m["role"] = "OWNER"
+			case "roles/bigquery.dataEditor":
+				m["role"] = "WRITER"
+			case "roles/bigquery.dataViewer":
+				m["role"] = "READER"
+			}
+		}
+
+		newAccess = append(newAccess, m)
+	}
+
+	if err := d.SetNew(accessField, newAccess); err != nil {
+		return fmt.Errorf("error setting new access diff: %w", err)
+	}
+
+	return nil
+}

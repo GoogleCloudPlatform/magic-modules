@@ -21,10 +21,6 @@ references:
     'Datasets Intro': 'https://cloud.google.com/bigquery/docs/datasets-intro'
   api: 'https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets'
 docs:
-  warning: |
-    You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
-    The API does accept both formats but it will always return the legacy format which results in Terraform
-    showing permanent diff on each plan and apply operation.
 base_url: 'projects/{{project}}/datasets'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
 has_self_link: true
@@ -37,6 +33,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
+custom_diff:
+  - 'SetAccessDiff'
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
