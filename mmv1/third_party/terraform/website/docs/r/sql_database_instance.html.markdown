@@ -377,7 +377,7 @@ Specifying a network enables private IP.
 At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1beta4/instances#ipconfiguration) for details.
+* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
 * `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
 
