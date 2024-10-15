@@ -24,6 +24,30 @@ resource "google_vmwareengine_private_cloud" "cluster-pc" {
       node_count   = 3
       custom_core_count = 32
     }
+    autoscaling_settings {
+      autoscaling_policies {
+        autoscale_policy_id = "autoscaling-policy"
+        node_type_id = "standard-72"
+        scale_out_size = 1
+        min_node_count = 3 
+        max_node_count = 8
+        cpu_thresholds {
+          scale_out = 75
+          scale_in = 15
+        }
+        consumed_memory_thresholds {
+          scale_out = 85
+          scale_in = 10
+        }
+        storage_thresholds {
+          scale_out = 79
+          scale_in = 20
+        }
+      }
+      min_cluster_node_count = 3
+      max_cluster_node_count = 8
+      cool_down_period = "1800s"
+    }
   }
 }
 
