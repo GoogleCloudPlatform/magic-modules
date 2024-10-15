@@ -169,7 +169,7 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/dataSources/{{dataSourceId}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}/dataSources/{{data_source_id}}")
 	log.Printf("url retrieved")
 	if err != nil {
 		return err
