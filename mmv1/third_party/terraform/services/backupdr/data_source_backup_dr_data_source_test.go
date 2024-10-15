@@ -33,6 +33,10 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 
 func testAccDataSourceGoogleBackupDRDataSource_basic(context map[string]interface{}) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+}
+
+
 resource "google_backup_dr_backup_vault" "foo" {
   backup_vault_id = "%{backup_vault_id}"
   backup_minimum_enforced_retention_duration = "100000s"
