@@ -1,0 +1,36 @@
+
+resource "google_gkeonprem_vmware_admin_cluster" "<%= ctx[:primary_resource_id] %>" {
+  name = "cluster-<%= ctx[:vars]['name'] %>"
+  location = local.region
+  description = "test admin cluster"
+  on_prem_version = "1.31.0-gke.35"
+  image_type = "ubuntu_containerd"
+  vcenter {
+    resource_pool = "test resource pool"
+    datastore = "test data store"
+    datacenter = "test data center"
+    cluster = "test cluster"
+    folder = "test folder"
+    ca_cert_data = "test ca cert data"
+    adderess = "10.0.0.1"
+    data_disk = "test data disk"
+  }
+  network_config {
+    service_address_cidr_blocks = ["10.96.0.0/12"]
+    pod_address_cidr_blocks = ["192.168.0.0/16"]
+  }
+  control_plane_node {
+     cpus = 4
+     memory = 8192
+  }
+  load_balancer {
+    vip_config {
+      control_plane_vip = "10.251.133.5"
+      ingress_vip = "10.251.135.19"
+    }
+    f5_config {
+      address = "10.251.135.22"
+      partition = "test-parition"
+    }
+  }
+}
