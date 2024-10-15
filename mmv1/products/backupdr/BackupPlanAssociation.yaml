@@ -110,7 +110,7 @@ properties:
           output: true
           properties:
             - name: 'code'
-              type: String
+              type: Double
               description: The status code, which should be an enum value of [google.rpc.Code]
             - name: 'message'
               type: String
