@@ -471,6 +471,8 @@ properties:
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         default_from_api: true
         diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+    send_empty_value: true
+    allow_empty_object: true
   - name: 'enableMessageOrdering'
     type: Boolean
     description: |
