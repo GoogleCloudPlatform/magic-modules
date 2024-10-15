@@ -386,6 +386,19 @@ properties:
             description: |
               URI for the output file(s). For example, gs://my-bucket/outputs/.
             default_from_api: true
+      - name: 'adBreaks'
+        type: Array
+        description: |
+          Ad break.
+        default_from_api: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'startTimeOffset'
+              type: Time
+              description: |
+                Start time in seconds for the ad break, relative to the output file timeline
+              default_from_api: true
       - name: 'pubsubDestination'
         type: NestedObject
         description: |
