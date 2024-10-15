@@ -9,7 +9,7 @@ description: |-
 List all DbNodes of a Cloud VmCluster.
 
 For more information see the
-and [API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters.dbNodes).
+[API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters.dbNodes).
 
 ## Example Usage
 
