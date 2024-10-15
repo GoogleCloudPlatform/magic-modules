@@ -52,7 +52,7 @@ func TestAccVertexAIEndpointIamMember(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-1"),
+    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-2"),
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
 	}
@@ -79,7 +79,7 @@ func TestAccVertexAIEndpointIamPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-1"),
+    "network_name": acctest.BootstrapSharedServiceNetworkingConnection(t, "vertex-ai-endpoint-iam-3"),
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "roles/viewer",
 	}
