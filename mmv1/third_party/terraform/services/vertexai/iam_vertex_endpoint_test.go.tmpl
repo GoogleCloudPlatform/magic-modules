@@ -14,6 +14,7 @@ import (
 
 func TestAccVertexAIEndpointIamBinding(t *testing.T) {
 	// t.Parallel()
+	// See https://github.com/hashicorp/terraform-provider-google/issues/18932
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
