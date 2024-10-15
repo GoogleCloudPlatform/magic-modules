@@ -28,15 +28,18 @@ The following arguments are supported:
 
 * `location` - (Required) The location of the resource.
 
-- - -
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `db_nodes` - (Output) List of dbNodes. Structure is [documented below](#nested_dbnodes).
+## Attributes reference
+
+The following attributes are exported:
+
+* `db_nodes` - List of dbNodes. Structure is [documented below](#nested_dbnodes).
 
 <a name="nested_dbnodes"></a> The `db_nodes` block supports:
 
-* `name` - User friendly name for the resource.
+* `name` - The name of the database node resource in the following format: projects/{project}/locations/{location}/cloudVmClusters/{cloudVmCluster}/dbNodes/{db_node}
 
 * `properties` - Various properties of the database node. Structure is [documented below](#nested_properties).
 
@@ -55,8 +58,7 @@ The following arguments are supported:
 * `hostname` - The host name for the database node.
 
 * `state` - State of the database node.
-<a name="nested_states"></a>Allowed values for `state` are:<br>
-`STATE_UNSPECIFIED` - Default unspecified value.<br>
+<a name="nested_states"></a>Possible values for `state` are:<br>
 `PROVISIONING` - Indicates that the resource is being provisioned.<br>
 `AVAILABLE` - Indicates that the resource is available.<br>
 `UPDATING` - Indicates that the resource is being updated.<br>

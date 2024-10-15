@@ -32,12 +32,12 @@ func DataSourceOracleDatabaseDbNodes() *schema.Resource {
 				Schema: map[string]*schema.Schema{
 					"name": {
 						Type:        schema.TypeString,
-						Optional:    true,
+						Computed:    true,
 						Description: "The dbnode name",
 					},
 					"properties": {
 						Type:     schema.TypeList,
-						Optional: true,
+						Computed: true,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"ocid": {
@@ -47,7 +47,7 @@ func DataSourceOracleDatabaseDbNodes() *schema.Resource {
 								},
 								"ocpu_count": {
 									Type:        schema.TypeInt,
-									Optional:    true,
+									Computed:    true,
 									Description: "Output only",
 								},
 								"memory_size_gb": {
