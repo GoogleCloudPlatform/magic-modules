@@ -6,14 +6,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":      envvar.GetTestProjectFromEnv(),
 		"data_source_id":  acctest.RandString(t, 10),
 		"backup_vault_id": acctest.RandString(t, 10),
 		"random_suffix":   acctest.RandString(t, 10),
@@ -44,7 +42,7 @@ resource "google_backup_dr_backup_vault" "foo" {
 
 data "google_backup_dr_data_source" "foo" {
   name = "tf-test-data-source%{random_suffix}"
-  project = "%{project_id}"
+  project = data.google_project.project.project_id
   location      = "us-central1"
   backup_vault_id = "%{backup_vault_id}"
   data_source_id = "%{data_source_id}"
