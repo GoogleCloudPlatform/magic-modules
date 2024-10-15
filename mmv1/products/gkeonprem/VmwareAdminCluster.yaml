@@ -1,4 +1,3 @@
-
 # Copyright 2023 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the License);
 # you may not use this file except in compliance with the License.
@@ -12,29 +11,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+--- 
 name: "VmwareAdminCluster"
 min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
-delete_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}:unenroll"
 self_link: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 update_verb: "PATCH"
 update_mask: true
 description: "A Google VMware Admin Cluster."
-autogen_async: false
 exclude_delete: true
-taint_resource_on_failed_create: true
 id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
 timeouts: !ruby/object:Api::Timeouts
   insert_minutes: 60
   delete_minutes: 60
   update_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkeonprem#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+taint_resource_on_failed_create: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkeonprem_vmware_admin_cluster_basic"
+  - name: "gkeonprem_vmware_admin_cluster_basic"
     primary_resource_id: "admin-cluster-basic"
     min_version: beta
     vars:
