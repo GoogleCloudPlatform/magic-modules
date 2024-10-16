@@ -260,7 +260,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
         autoscale_policy_id = "autoscaling-policy"
         node_type_id = "standard-72"
         scale_out_size = 1
-        min_node_count = 3 
+        min_node_count = 3
         max_node_count = 8
         cpu_thresholds {
           scale_out = 80
