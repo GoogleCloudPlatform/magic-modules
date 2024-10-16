@@ -44,8 +44,8 @@ func resourceComputeSubnetworkSecondaryIpRangeSetStyleDiff(diff *schema.Resource
 	if count < 1 {
 		return nil
 	}
-	old := make([]interface{}, count)
-	new := make([]interface{}, count)
+	old := make([]interface{}, 0, count)
+	new := make([]interface{}, 0, count)
 	for i := 0; i < count; i++ {
 		o, n := diff.GetChange(fmt.Sprintf("secondary_ip_range.%d", i))
 

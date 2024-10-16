@@ -17,5 +17,6 @@ display_name: 'Cloud Deployment Manager'
 versions:
   - name: 'ga'
     base_url: 'https://www.googleapis.com/deploymentmanager/v2/'
+    cai_base_url: 'https://deploymentmanager.googleapis.com/v2/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'

@@ -546,6 +546,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Notebooks",
         "path" to "./google-beta/services/notebooks"
     ),
+    "oracledatabase" to mapOf(
+        "name" to "oracledatabase",
+        "displayName" to "OracleDatabase",
+        "path" to "./google-beta/services/oracledatabase"
+    ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
         "displayName" to "Orgpolicy",
@@ -725,6 +730,11 @@ var ServicesListBeta = mapOf(
         "name" to "tpuv2",
         "displayName" to "Tpuv2",
         "path" to "./google-beta/services/tpuv2"
+    ),
+     "transcoder" to mapOf(
+        "name" to "transcoder",
+        "displayName" to "Transcoder",
+        "path" to "./google-beta/services/transcoder"
     ),
     "vertexai" to mapOf(
         "name" to "vertexai",
