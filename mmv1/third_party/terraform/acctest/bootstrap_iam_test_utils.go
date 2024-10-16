@@ -1,7 +1,5 @@
 package acctest
 
-// Test change.
-
 import (
 	"fmt"
 	"log"
