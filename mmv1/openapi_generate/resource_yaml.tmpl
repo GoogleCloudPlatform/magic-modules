@@ -46,5 +46,11 @@ examples:
     primary_resource_id: 'example'
     vars:
       resource_id: 'my-resource'
+parameters:
+{{- range $prop := $.Parameters }}
+  {{template "PropertyYaml" $prop}}
+{{- end}}
 properties:
-paramteres:
+{{- range $prop := $.Properties }}
+  {{template "PropertyYaml" $prop}}
+{{- end}}

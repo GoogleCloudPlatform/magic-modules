@@ -236,6 +236,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 			idParam = param.Value.Name
 		}
 		paramObj := writeObject(param.Value.Name, param.Value.Schema, *param.Value.Schema.Value.Type, true)
+		paramObj.Description = param.Value.Description
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
 			continue
@@ -246,8 +247,19 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		parameters = append(parameters, &paramObj)
 	}
 
-	// TODO build_properties
+	log.Print("properties")
 	properties := []*api.Type{}
+	log.Print(path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties)
+	for k, prop := range path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties {
+		log.Print(prop.Value.Type)
+		log.Print(k)
+		// TODO handle nested object
+		if prop.Value.Type != nil {
+			propObj := writeObject(k, prop, *prop.Value.Type, false)
+			properties = append(properties, &propObj)
+		}
+		
+	}
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
@@ -276,9 +288,10 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		objType = *obj.Value.Type
 	}
 
-	if objType.Is("string") {
+	field.Name = name
+	switch objType[0] {
+	case "string":
 		field.Type = "string"
-		field.Name = name
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
@@ -286,12 +299,27 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
 		}
+	case "object":
+		if field.Name == "labels" {
+			field.Type = "KeyValueLabels"
+			break
+		}
+		if obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
+			// AdditionalProperties with type string is a string -> string map
+			field.Type = "KeyValuePairs"
+			log.Print(obj.Value.AdditionalProperties.Schema.Value.Type.Is("string"))
+			break
+		}
+
+		field.Type = "NestedObject"
+	default:
 	}
 
 	description := fmt.Sprintf("%s %s", obj.Value.Description, additionalDescription)
 	if strings.TrimSpace(description) == "" {
 		description = "No description"
 	}
+	field.Description = description
 
 	if urlParam {
 		field.UrlParamOnly = true
@@ -324,6 +352,8 @@ func WriteGoTemplate(templatePath, filePath string, input any) {
 	templateFileName := filepath.Base(templatePath)
 	templates := []string{
 		templatePath,
+		"openapi_generate/property_yaml.tmpl",
+		"openapi_generate/description_yaml.tmpl",
 	}
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
