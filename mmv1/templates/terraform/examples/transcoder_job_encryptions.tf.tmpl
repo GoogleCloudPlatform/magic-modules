@@ -1,0 +1,181 @@
+resource "google_storage_bucket" "default" {
+  name          = "{{index $.Vars "bucket_name"}}"
+  location      = "US"
+  force_destroy = true
+
+  uniform_bucket_level_access = true
+  public_access_prevention = "enforced"
+  provider = google-beta
+}
+
+resource "google_storage_bucket_object" "example_mp4" {
+  name   = "example.mp4"
+  source = "./test-fixtures/example.mp4"
+  bucket = google_storage_bucket.default.name
+  provider = google-beta
+}
+
+resource "google_secret_manager_secret" "encryption_key" {
+  secret_id = "{{index $.Vars "secret_manager_secret_id"}}"
+  replication {
+    auto {}
+  }
+  provider = google-beta
+}
+
+resource "google_secret_manager_secret_version" "encryption_key" {
+  secret     = google_secret_manager_secret.encryption_key.name
+  secret_data = "4A67F2C1B8E93A4F6D3E7890A1BC23DF"
+  provider = google-beta
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+# this is required to allow the transcoder service identity to access the secret
+resource "google_project_service_identity" "transcoder" {
+  project = data.google_project.project.project_id
+  service = "transcoder.googleapis.com"
+  provider = google-beta
+}
+
+resource "google_secret_manager_secret_iam_member" "transcoder_encryption_key_accessor" {
+  secret_id = google_secret_manager_secret.encryption_key.secret_id
+  project = google_secret_manager_secret.encryption_key.project
+  role = "roles/secretmanager.secretAccessor"
+  member = "serviceAccount:${google_project_service_identity.transcoder.email}"
+  provider = google-beta
+}
+
+resource "google_transcoder_job" "{{$.PrimaryResourceId}}" {
+  location    = "us-central1"
+
+  config {
+    inputs {
+      key = "input0"
+      uri = "gs://${google_storage_bucket.default.name}/${google_storage_bucket_object.example_mp4.name}"
+    }
+    elementary_streams {
+      key = "es_video"
+      video_stream {
+        h264 {
+          profile      = "main"
+          height_pixels = 600
+          width_pixels  = 800
+          bitrate_bps  = 1000000
+          frame_rate   = 60
+        }
+      }
+    }
+    elementary_streams {
+      key = "es_audio"
+      audio_stream {
+        codec        = "aac"
+        channel_count = 2
+        bitrate_bps  = 160000
+      }
+    }
+    encryptions {
+      id = "aes-128"
+      secret_manager_key_source {
+        secret_version = google_secret_manager_secret_version.encryption_key.name
+      }
+      drm_systems {
+        clearkey {}
+      }
+      aes128 {}
+    }
+    encryptions {
+      id = "cenc"
+      secret_manager_key_source {
+        secret_version = google_secret_manager_secret_version.encryption_key.name
+      }
+      drm_systems {
+        widevine {}
+      }
+      mpeg_cenc {
+        scheme = "cenc"
+      }
+    }
+    encryptions {
+      id = "cbcs"
+      secret_manager_key_source {
+        secret_version = google_secret_manager_secret_version.encryption_key.name
+      }
+      drm_systems {
+        widevine {}
+      }
+      mpeg_cenc {
+        scheme = "cbcs"
+      }
+    }
+    mux_streams {
+      key                 = "ts_aes128"
+      container           = "ts"
+      elementary_streams  = ["es_video", "es_audio"]
+      segment_settings {
+        segment_duration = "6s"
+      }
+      encryption_id = "aes-128"
+    }
+    mux_streams {
+      key                 = "fmp4_cenc_video"
+      container           = "fmp4"
+      elementary_streams  = ["es_video"]
+      segment_settings {
+        segment_duration = "6s"
+      }
+      encryption_id = "cenc"
+    }
+    mux_streams {
+      key                 = "fmp4_cenc_audio"
+      container           = "fmp4"
+      elementary_streams  = ["es_audio"]
+      segment_settings {
+        segment_duration = "6s"
+      }
+      encryption_id = "cenc"
+    }
+    mux_streams {
+      key                 = "fmp4_cbcs_video"
+      container           = "fmp4"
+      elementary_streams  = ["es_video"]
+      segment_settings {
+        segment_duration = "6s"
+      }
+      encryption_id = "cbcs"
+    }
+    mux_streams {
+      key                 = "fmp4_cbcs_audio"
+      container           = "fmp4"
+      elementary_streams  = ["es_audio"]
+      segment_settings {
+        segment_duration = "6s"
+      }
+      encryption_id = "cbcs"
+    }
+    manifests {
+      file_name = "manifest_aes128.m3u8"
+      type      = "HLS"
+      mux_streams = ["ts_aes128"]
+    }
+    manifests {
+      file_name = "manifest_cenc.mpd"
+      type      = "DASH"
+      mux_streams = ["fmp4_cenc_video", "fmp4_cenc_audio"]
+    }
+    manifests {
+      file_name = "manifest_cbcs.mpd"
+      type      = "DASH"
+      mux_streams = ["fmp4_cbcs_video", "fmp4_cbcs_audio"]
+    }
+    output {
+      uri = "gs://${google_storage_bucket.default.name}/outputs/"
+    }
+  }
+  labels = {
+    "label" = "key"
+  }
+  provider = google-beta
+}

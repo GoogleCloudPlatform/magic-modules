@@ -1,0 +1,305 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionNetworkFirewallPolicyRule'
+kind: 'compute#firewallPolicyRule'
+description: |
+  Represents a rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (allow or deny).
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addRule'
+docs:
+id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addRule'
+update_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
+update_verb: 'POST'
+delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
+delete_verb: 'POST'
+legacy_long_form_project: true
+import_format:
+  - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/{{priority}}'
+  - '{{project}}/{{region}}/{{firewall_policy}}/{{priority}}'
+  - '{{region}}/{{firewall_policy}}/{{priority}}'
+  - '{{firewall_policy}}/{{priority}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
+examples:
+  - name: 'region_network_firewall_policy_rule'
+    primary_resource_id: 'primary'
+    vars:
+      tag_key: 'tagkey'
+      network: 'network'
+      fw_policy: 'policy'
+      address: 'address'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      region: 'REGION'
+      service_acct: 'SERVICE_ACCT'
+parameters:
+  - name: 'firewallPolicy'
+    type: ResourceRef
+    description: |
+      The firewall policy of the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    resource: 'RegionNetworkFirewallPolicy'
+    imports: 'name'
+  - name: 'region'
+    type: String
+    description: 'The location of this resource.'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'creationTimestamp'
+    type: String
+    description: |
+      Creation timestamp in RFC3339 text format.
+    output: true
+  - name: 'kind'
+    type: String
+    description: |
+      Type of the resource. Always `compute#firewallPolicyRule` for firewall policy rules
+    output: true
+  - name: 'ruleName'
+    type: String
+    description: |
+      An optional name for the rule. This field is not a unique identifier and can be updated.
+  - name: 'description'
+    type: String
+    description: 'An optional description for this resource.'
+  - name: 'priority'
+    type: Integer
+    immutable: true
+    description: |
+      An integer indicating the priority of a rule in the list.
+      The priority must be a positive value between 0 and 2147483647.
+      Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest prority.
+    required: true
+  - name: 'match'
+    type: NestedObject
+    description: |
+      A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding 'action' is enforced.
+    required: true
+    properties:
+      - name: 'srcIpRanges'
+        type: Array
+        send_empty_value: true
+        description: |
+          CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
+        item_type:
+          type: String
+      - name: 'destIpRanges'
+        type: Array
+        send_empty_value: true
+        description: |
+          CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
+        item_type:
+          type: String
+      - name: 'layer4Configs'
+        type: Array
+        send_empty_value: true
+        description: |
+          Pairs of IP protocols and ports that the rule should match.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'ipProtocol'
+              type: String
+              description: |
+                The IP protocol to which this rule applies. The protocol type is required when creating a firewall rule.
+                This value can either be one of the following well known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp), or the IP protocol number.
+              required: true
+            - name: 'ports'
+              type: Array
+              description: |
+                An optional list of ports to which this rule applies. This field is only applicable for UDP or TCP protocol. Each entry must be either an integer or a range. If not specified, this rule applies to connections through any port.
+                Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
+              item_type:
+                type: String
+      - name: 'srcSecureTags'
+        type: Array
+        send_empty_value: true
+        description: |
+          List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                Name of the secure tag, created with TagManager's TagValue API.
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+            - name: 'state'
+              type: Enum
+              description: |
+                State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+              output: true
+              enum_values:
+                - 'EFFECTIVE'
+                - 'INEFFECTIVE'
+      - name: 'destAddressGroups'
+        type: Array
+        send_empty_value: true
+        description: |
+          Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
+        item_type:
+          type: String
+      - name: 'srcAddressGroups'
+        type: Array
+        send_empty_value: true
+        description: |
+          Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
+        item_type:
+          type: String
+      - name: 'srcFqdns'
+        type: Array
+        send_empty_value: true
+        description: |
+          Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
+        item_type:
+          type: String
+      - name: 'destFqdns'
+        type: Array
+        send_empty_value: true
+        description: |
+          Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
+        item_type:
+          type: String
+      - name: 'srcRegionCodes'
+        type: Array
+        send_empty_value: true
+        description: |
+          Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
+        item_type:
+          type: String
+      - name: 'destRegionCodes'
+        type: Array
+        send_empty_value: true
+        description: |
+          Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
+        item_type:
+          type: String
+      - name: 'destThreatIntelligences'
+        type: Array
+        send_empty_value: true
+        description: |
+          Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
+        item_type:
+          type: String
+      - name: 'srcThreatIntelligences'
+        type: Array
+        send_empty_value: true
+        description: |
+          Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
+        item_type:
+          type: String
+  - name: 'action'
+    type: String
+    description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
+    required: true
+  - name: 'securityProfileGroup'
+    type: String
+    description: |
+      A fully-qualified URL of a SecurityProfile resource instance.
+      Example: https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
+      Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
+
+      Security Profile Group and Firewall Policy Rule must be in the same scope.
+  - name: 'tlsInspect'
+    type: Boolean
+    description: |
+      Boolean flag indicating if the traffic should be TLS decrypted.
+      Can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
+  - name: 'direction'
+    type: Enum
+    description: |
+      The direction in which this rule applies.
+    required: true
+    enum_values:
+      - 'INGRESS'
+      - 'EGRESS'
+  - name: 'enableLogging'
+    type: Boolean
+    send_empty_value: true
+    description: |
+      Denotes whether to enable logging for a particular rule.
+      If logging is enabled, logs will be exported to the configured export destination in Stackdriver.
+      Logs may be exported to BigQuery or Pub/Sub.
+      Note: you cannot enable logging on "goto_next" rules.
+  - name: 'ruleTupleCount'
+    type: Integer
+    description: |
+      Calculation of the complexity of a single firewall policy rule.
+    output: true
+  - name: 'targetServiceAccounts'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of service accounts indicating the sets of instances that are applied with this rule.
+    item_type:
+      type: String
+  - name: 'targetSecureTags'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of secure tags that controls which instances the firewall rule applies to.
+      If targetSecureTag are specified, then the firewall rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target label tags allowed is 256.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'state'
+          type: Enum
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          output: true
+          enum_values:
+            - 'EFFECTIVE'
+            - 'INEFFECTIVE'
+  - name: 'disabled'
+    type: Boolean
+    description: |
+      Denotes whether the firewall policy rule is disabled.
+      When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
+      If this is unspecified, the firewall policy rule will be enabled.
