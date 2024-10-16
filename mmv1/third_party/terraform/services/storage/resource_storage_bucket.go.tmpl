@@ -550,19 +550,19 @@ func ResourceStorageBucket() *schema.Resource {
 				},
 			},
 			"hierarchical_namespace": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				ForceNew:    true,
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				ForceNew:         true,
 				DiffSuppressFunc: hierachicalNamespaceDiffSuppress,
-				Description: `The bucket's HNS support, which defines bucket can organize folders in logical file system structure`,
-				Elem : &schema.Resource{
+				Description:      `The bucket's HNS support, which defines bucket can organize folders in logical file system structure`,
+				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
 							ForceNew:    true,
-							Description: `When this flag to true, you can store your data in a logical file system structure.This feature simplifies data organization on storage buckets`,
+							Description: `Set this enabled flag to true when folders with logical files structure. Default value is false.`,
 						},
 					},
 				},
@@ -1973,8 +1973,8 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 }
 
 func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
-	if k == "hierachical_namespace.#" && old == "1" && new == "0" {
-		o, _ := r.GetChange("hierachical_namespace.0.enabled")
+	if k == "hierarchical_namespace.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("hierarchical_namespace.0.enabled")
 		if !o.(bool) {
 			return true
 		}
