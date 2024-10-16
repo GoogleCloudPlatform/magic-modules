@@ -113,19 +113,19 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
 			max_node_count = 8
 			cpu_thresholds {
 				scale_out = 80
-				scale_in = 10
+				scale_in  = 15
+			}
+			granted_memory_thresholds {
+				scale_out = 80
+				scale_in  = 25
+			}
+			consumed_memory_thresholds {
+				scale_out = 75
+				scale_in  = 20
 			}
 			storage_thresholds {
 				scale_out = 80
-				scale_in = 20
-			}
-			consumed_memory_thresholds {
-				scale_in  = 75
-				scale_out = 20
-			}
-			granted_memory_thresholds {
-				scale_in  = 80
-				scale_out = 25
+				scale_in  = 20
 			}
 		}
 		min_cluster_node_count = 3
