@@ -156,6 +156,10 @@ for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
 `send_empty_value` and `default_from_api` cannot both be true on the same field.
 
+Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
+NestedObject fields will currently be sent as `null` if unset (rather than being
+omitted.)
+
 Example:
 
 ```yaml
