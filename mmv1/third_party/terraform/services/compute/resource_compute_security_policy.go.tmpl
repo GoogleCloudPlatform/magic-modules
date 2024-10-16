@@ -24,6 +24,7 @@ import (
 {{- end }}
 )
 
+// IsEmptyValue does not consider a empty PreconfiguredWafConfig object as empty so we check it's nested values
 func preconfiguredWafConfigIsEmptyValue(config *compute.SecurityPolicyRulePreconfiguredWafConfig) bool {
 	if (tpgresource.IsEmptyValue(reflect.ValueOf(config.Exclusions)) &&
 			tpgresource.IsEmptyValue(reflect.ValueOf(config.ForceSendFields)) &&
@@ -1270,6 +1271,7 @@ func flattenPreconfiguredWafConfig(config *compute.SecurityPolicyRulePreconfigur
 		return nil
 	}
 
+	// We find the current value for this field in the config and check if its empty, then check if the API is returning a empty non-null value
 	if schemaRules, ok := d.GetOk("rule"); ok {
 		for _, itemRaw := range schemaRules.(*schema.Set).List() {
 			if itemRaw == nil {
