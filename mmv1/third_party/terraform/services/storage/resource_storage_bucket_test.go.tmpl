@@ -1579,7 +1579,12 @@ func TestAccStorageBucket_basic_hns(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_uniformBucketAccessOnly(bucketName, true),
+				Config: testAccStorageBucket_no_hns(bucketName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -1679,6 +1684,16 @@ resource "google_storage_bucket" "bucket" {
   force_destroy= true
 }
 `, bucketName, enabled)
+}
+
+func testAccStorageBucket_no_hns(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+`, bucketName)
 }
 
 func testAccCheckStorageBucketExists(t *testing.T, n string, bucketName string, bucket *storage.Bucket) resource.TestCheckFunc {
