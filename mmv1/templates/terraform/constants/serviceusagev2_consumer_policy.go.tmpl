@@ -1,0 +1,319 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+const (
+	dependentServiceWorkers int = 4
+)
+
+type ApiError = string
+
+const (
+	ApiErrorSuConflictingConcurrentModification   = "SU_CONFLICTING_CONCURRENT_MODIFICATION"
+	ApiErrorCommonSuServicesHaveUsage             = "COMMON_SU_SERVICES_HAVE_USAGE"
+	ApiErrorCommonSuServicesHaveHierarchicalUsage = "COMMON_SU_SERVICES_HAVE_HIERARCHICAL_USAGE"
+	ApiErrorSuGroupNotFound                       = "SU_GROUP_NOT_FOUND"
+)
+
+type ApiCallFn = func(url string) (map[string]interface{}, error)
+
+type EnableRules struct {
+	Services []string
+}
+
+type DependentService struct {
+	ServiceName string
+}
+type Dependencies struct {
+	Services      []DependentService
+	NextPageToken string
+}
+
+var urlRegexp = regexp.MustCompile(`(.*)/consumerPolicies/.*$`)
+var servicesRegexp = regexp.MustCompile(`([^(\s|,)]+\.googleapis.com)`)
+
+func parseObject(obj any, resp interface{}) error {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, resp); err != nil {
+		return err
+	}
+	return nil
+}
+func removeDuplicateElementsWithDuplicates[T any](strSlice []T) ([]T, []T) {
+	allKeys := make(map[interface{}]bool)
+	duplicateKeys := make(map[interface{}]bool)
+
+	var uniqueList, duplicates []T
+	for _, item := range strSlice {
+		if _, value := allKeys[item]; !value {
+			allKeys[item] = true
+			uniqueList = append(uniqueList, item)
+		} else if _, value := duplicateKeys[item]; !value {
+			duplicateKeys[item] = true
+			duplicates = append(duplicates, item)
+		}
+	}
+	return uniqueList, duplicates
+}
+
+func removeDuplicateElements[T any](strSlice []T) []T {
+	response, _ := removeDuplicateElementsWithDuplicates(strSlice)
+	return response
+}
+
+func getServices(rules interface{}, output []string) ([]string, error) {
+	var enableRules []EnableRules
+	if err := parseObject(rules, &enableRules); err != nil {
+		return nil, err
+	}
+	for _, rule := range enableRules {
+		output = append(output, rule.Services...)
+	}
+	return output, nil
+}
+
+type DependentServicesResult struct {
+	service     string
+	descendants []string
+	error       error
+}
+
+func getDescendantsForService(url, service string, apiDependenciesFunc ApiCallFn) ([]string, error) {
+	var dependentServices []string
+	var nextPageToken string
+
+	dependenciesUrl := urlRegexp.ReplaceAllString(url, fmt.Sprintf(`${1}/%s/groups/dependencies/descendantServices`, service))
+
+	for i := 0; i < 1000; i++ {
+		if nextPageToken != "" {
+			dependenciesUrl = fmt.Sprintf("%s?pageToken=%s", dependenciesUrl, nextPageToken)
+		}
+		resp, err := apiDependenciesFunc(dependenciesUrl)
+
+		if err != nil {
+			if isError(err, ApiErrorSuGroupNotFound) {
+				return nil, nil
+			}
+			return nil, err
+		}
+		dependencies := Dependencies{}
+		if err := parseObject(resp, &dependencies); err != nil {
+			return nil, err
+		}
+
+		for _, responseService := range dependencies.Services {
+			dependentServices = append(dependentServices, responseService.ServiceName)
+		}
+
+		if nextPageToken = dependencies.NextPageToken; nextPageToken == "" {
+			break
+		}
+	}
+	log.Printf("[DEBUG] Dependent services for service '%v': %v", service, dependentServices)
+	return dependentServices, nil
+}
+func dependentServicesWorker(ctx context.Context, cancel context.CancelFunc, url string, apiDependenciesFunc ApiCallFn, services <-chan string, result chan<- DependentServicesResult) {
+
+	for {
+		select {
+		case service, ok := <-services:
+			if !ok {
+				return
+			}
+
+			dependentServices, err := getDescendantsForService(url, service, apiDependenciesFunc)
+			result <- DependentServicesResult{service, dependentServices, err}
+			if err != nil {
+				cancel()
+			}
+
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func getDependentServicesMap(url string, services []string, apiDependenciesFunc ApiCallFn) (map[string][]string, error) {
+	jobs := make(chan string, len(services))
+	results := make(chan DependentServicesResult, len(services))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for w := 0; w < dependentServiceWorkers; w++ {
+		go dependentServicesWorker(ctx, cancel, url, apiDependenciesFunc, jobs, results)
+	}
+	for _, service := range services {
+		jobs <- service
+	}
+	close(jobs)
+
+	resultMap := make(map[string][]string)
+	for range services {
+		result := <-results
+		if result.error != nil {
+			return nil, result.error
+		}
+		resultMap[result.service] = result.descendants
+	}
+
+	return resultMap, nil
+}
+
+func reverseDependencyMap(dependencies map[string][]string) map[string][]string {
+	result := make(map[string][]string)
+	for svc, deps := range dependencies {
+		for _, rsvc := range deps {
+			rdeps := []string{svc}
+			if rdepsExisting, ok := result[rsvc]; ok {
+				rdeps = append(rdeps, rdepsExisting...)
+			}
+			result[rsvc] = rdeps
+		}
+	}
+	return result
+}
+
+func getTransitiveDependents(dependents map[string][]string, service string) []string {
+	var result, services []string
+	initServices := []string{service}
+	circular := make(map[string]bool)
+
+	for i := 0; i < 1000; i++ {
+		services = slices.Clone(initServices)
+		initServices = nil
+		for _, svc := range services {
+
+			if deps, ok := dependents[svc]; ok {
+				for _, dep := range deps {
+					if _, ok := circular[dep]; ok {
+						continue
+					}
+					circular[svc] = true
+					result = append(result, dep)
+					initServices = append(initServices, dep)
+				}
+			}
+		}
+		if len(initServices) == 0 {
+			break
+		}
+
+	}
+	return removeDuplicateElements(result)
+}
+
+func validateDependencies(oldServices, newServices []string, dependentServicesMap map[string][]string) error {
+
+	missingDependenciesMap := make(map[string][]string)
+
+	for _, service := range newServices {
+		dependencies, ok := dependentServicesMap[service]
+		if !ok {
+			return fmt.Errorf("Something went wrong, couldn't find dependencies for service: %v\n", service)
+		}
+		notDefinedDependencies := slices.DeleteFunc(dependencies, func(svc string) bool { return slices.Contains(newServices, svc) })
+
+		if len(notDefinedDependencies) > 0 {
+			missingDependenciesMap[service] = notDefinedDependencies
+		}
+	}
+
+	// check dependencies for removal
+
+	servicesToRemove := slices.DeleteFunc(slices.Clone(oldServices), func(svc string) bool { return slices.Contains(newServices, svc) })
+	existingDependentsMap := make(map[string][]string)
+
+	if len(servicesToRemove) > 0 {
+		reverseDependencies := reverseDependencyMap(dependentServicesMap)
+		existingServices := slices.DeleteFunc(slices.Clone(newServices), func(svc string) bool {
+			return !slices.Contains(oldServices, svc)
+		})
+		for _, svc := range servicesToRemove {
+			// looking for existing dependents in terraform configuration - remove the ones which are not in the previous terraform config (ignore the new ones)
+			existingDependents := slices.DeleteFunc(getTransitiveDependents(reverseDependencies, svc), func(svc string) bool { return !slices.Contains(existingServices, svc) })
+			if len(existingDependents) > 0 {
+				existingDependentsMap[svc] = existingDependents
+				// remove existing missing dependencies for removed dependant
+				for k, v := range missingDependenciesMap {
+					if slices.Contains(v, svc) {
+						delete(missingDependenciesMap, k)
+					}
+				}
+			}
+		}
+	}
+
+	if len(missingDependenciesMap) > 0 || len(existingDependentsMap) > 0 {
+		var sb strings.Builder
+		if len(missingDependenciesMap) > 0 {
+			sb.WriteString("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n\n")
+			for svc, deps := range missingDependenciesMap {
+				depsString := "\"" + strings.Join(deps, "\", \"") + "\""
+				sb.WriteString(fmt.Sprintf("Added service: [\"%v\"]\nMissing dependencies: [%v]\n", svc, depsString))
+			}
+			sb.WriteString("\n")
+		}
+		if len(existingDependentsMap) > 0 {
+			sb.WriteString("There are existing services in configuration which depend on the services to be removed. Please remove existing dependent services:\n\n")
+			for svc, deps := range existingDependentsMap {
+				depsString := "\"" + strings.Join(deps, "\", \"") + "\""
+				sb.WriteString(fmt.Sprintf("Removed service: [\"%v\"]\nExisting dependents: [%v]\n", svc, depsString))
+			}
+		}
+		return fmt.Errorf("%v\nIf you don't want to validate dependencies, set validate_dependencies to false to override.\n", sb.String())
+	}
+	return nil
+}
+
+func isError(err error, apiError ApiError) bool {
+	if errInfo, ok := err.(*googleapi.Error); ok {
+		for _, detail := range errInfo.Details {
+			if errInfo, ok := detail.(map[string]interface{}); ok {
+				if errInfo["reason"] == apiError {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func isCommonOpError(err error, apiError ApiError) (bool, string) {
+	if opError, ok := errors.Unwrap(err).(*tpgresource.CommonOpError); ok {
+		for _, detail := range opError.Details {
+			errInfo := make(map[string]interface{})
+			if err := json.Unmarshal(detail, &errInfo); err != nil {
+				return false, ""
+			}
+			if errInfo["reason"] == apiError {
+				return true, opError.Message
+			}
+		}
+	}
+	return false, ""
+}
+
+func isTimeoutError(err error) bool {
+	_, ok := errors.Unwrap(err).(*retry.TimeoutError)
+	return ok
+}
+
+func getServicesFromString(msg string) []string {
+	return servicesRegexp.FindAllString(msg, -1)
+}
+
+func getErrorMessageForServicesInUse(msg string) string {
+	services := getServicesFromString(msg)
+	return fmt.Sprintf("The service{s} %v has been used in the last 30 days or was enabled in the past 3 days. If you still wish to remove the service{s}, please set the check_usage_on_remove flag to false to proceed.", strings.Join(services, ", "))
+}
