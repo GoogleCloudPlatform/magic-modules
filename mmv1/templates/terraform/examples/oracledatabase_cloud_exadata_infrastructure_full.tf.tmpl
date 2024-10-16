@@ -1,6 +1,6 @@
 resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResourceId}}"{
-  display_name = "OFake exadata displayname"
-  cloud_exadata_infrastructure_id = "ofake-exadata-id"
+  cloud_exadata_infrastructure_id = "{{index $.Vars "cloud_exadata_infrastructure_id"}}"
+  display_name = "{{index $.Vars "cloud_exadata_infrastructure_id"}} displayname"
   location = "us-east4"
   project = "{{index $.Vars "project"}}"
   gcp_oracle_zone = "us-east4-b-r1"
