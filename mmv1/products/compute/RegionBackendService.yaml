@@ -115,6 +115,11 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ip_address_selection_policy'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -777,6 +782,14 @@ properties:
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
         output: true
+  - name: 'ipAddressSelectionPolicy'
+    type: Enum
+    description: |
+      Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
+    enum_values:
+      - 'IPV4_ONLY'
+      - 'PREFER_IPV6'
+      - 'IPV6_ONLY'
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
