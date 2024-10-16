@@ -226,7 +226,6 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 	cases := map[string]struct {
 		httpRequest     requestDescription
 		cassetteRequest requestDescription
-		expectMatch     bool
 	}{
 		"GET requests with different useragents are matched": {
 			httpRequest: requestDescription{
@@ -247,7 +246,6 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 					"User-Agent": "user-agent-CASSETTE",
 				},
 			},
-			expectMatch: true,
 		},
 		"POST requests with identical bodies and different useragents are matched": {
 			httpRequest: requestDescription{
@@ -270,7 +268,6 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 					"User-Agent": "user-agent-CASSETTE",
 				},
 			},
-			expectMatch: true,
 		},
 		"POST requests with reordered but matching bodies and different useragents are matched if Content-Type contains 'application/json'": {
 			httpRequest: requestDescription{
@@ -295,7 +292,6 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 					"Content-Type": "application/json",
 				},
 			},
-			expectMatch: true,
 		},
 	}
 
@@ -311,7 +307,7 @@ func TestNewVcrMatcherFunc_ignoresDifferentUserAgents(t *testing.T) {
 			matchDetected := matcher(req, cassetteReq)
 
 			// Assert match
-			if matchDetected != tc.expectMatch {
+			if !matchDetected {
 				t.Fatalf("expected matcher to match the requests")
 			}
 		})
