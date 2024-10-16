@@ -19,6 +19,8 @@ func TestAccOracleDatabaseCloudExadataInfrastructures_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.display_name"),
+					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.gcp_oracle_zone"),
+					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.properties.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.properties.0.cpu_count"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_cloud_exadata_infrastructures.my_cloud_exadatas", "cloud_exadata_infrastructures.0.properties.0.compute_count"),
