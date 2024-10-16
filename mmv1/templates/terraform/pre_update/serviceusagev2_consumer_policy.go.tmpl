@@ -1,0 +1,73 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+newRules := d.Get("enable_rules")
+newServices := getServices(newRules)
+
+// check dependencies if the "respect_dependencies" flag is enabled
+validateDependenciesEnabled := d.Get("validate_dependencies").(bool)
+
+if validateDependenciesEnabled {
+    name := fmt.Sprintf("%s/consumerPolicies/%s", d.Get("parent"), d.Get("name"))
+    analysisRequest := NewAnalysisRequest(name, newServices)
+    req := transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "POST",
+        Project:   billingProject,
+        RawURL:    fmt.Sprintf("%s:analyze", url),
+        UserAgent: userAgent,
+        Timeout:   d.Timeout(schema.TimeoutUpdate),
+        Body:      analysisRequest,
+        Headers:   make(http.Header),
+    }
+    resp, err := transport_tpg.SendRequest(req)
+
+    if err != nil {
+        return err
+    }
+
+    timeout := d.Timeout(schema.TimeoutCreate)
+    var opRes map[string]interface{}
+    err = ServiceUsageV2OperationWaitTimeWithResponse(
+        config, resp, &opRes, "Updating ConsumerPolicy", config.UserAgent, timeout)
+
+    if err != nil {
+        return err
+    }
+    var analysisResponse AnalysisResponse
+    err = parseObject(opRes, &analysisResponse)
+    if err != nil {
+        return err
+    }
+    if len(analysisResponse.Analysis) > 0 {
+        var sb strings.Builder
+        for _, analysis := range analysisResponse.Analysis {
+            if len(analysis.AnalysisResult.Warnings) > 0 && hasImpactType(analysis.AnalysisResult, ImpactTypeDepenencyMissing) {
+                sb.WriteString(fmt.Sprintf("\n *** [ %v ] ***\n", analysis.Service))
+                for _, warning := range analysis.AnalysisResult.Warnings {
+                    sb.WriteString(fmt.Sprintf(" - %v\n", warning.Detail))
+                }
+            }
+        }
+        if sb.Len() > 0 {
+            return fmt.Errorf("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n%s", sb.String())
+        }
+    }
+}
+
+if !d.Get("check_usage_on_remove").(bool) {
+    if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
+        return err
+    }
+}
+
+log.Printf("[DEBUG] Update policy request: %v", obj)

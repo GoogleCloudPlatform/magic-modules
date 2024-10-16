@@ -1,0 +1,132 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+import "errors"
+
+type ApiError = string
+
+const (
+	ApiErrorSuConflictingConcurrentModification   = "SU_CONFLICTING_CONCURRENT_MODIFICATION"
+	ApiErrorCommonSuServicesHaveUsage             = "COMMON_SU_SERVICES_HAVE_USAGE"
+	ApiErrorCommonSuServicesHaveHierarchicalUsage = "COMMON_SU_SERVICES_HAVE_HIERARCHICAL_USAGE"
+)
+
+type ImpactType = string
+
+const (
+	ImpactTypeDepenencyMissing = "DEPENDENCY_MISSING_DEPENDENCIES"
+)
+
+const (
+	AnalysisTypeDependency = "ANALYSIS_TYPE_DEPENDENCY"
+)
+
+type ProposedPolicy struct {
+	Name        string                `json:"name"`
+	EnableRules []map[string][]string `json:"enableRules"`
+}
+
+func NewAnalysisRequest(name string, services []string) map[string]any {
+	enableRules := []map[string][]string{
+		{"services": services},
+	}
+	return map[string]any{
+		"proposedPolicy": ProposedPolicy{Name: name, EnableRules: enableRules},
+		"analysisTypes":  AnalysisTypeDependency}
+}
+
+type AnalysisWarning struct {
+	Detail     string
+	ImpactType ImpactType
+}
+
+type AnalysisResult struct {
+	Warnings []AnalysisWarning
+}
+
+type AnalysisReportDetails struct {
+	AnalysisResult AnalysisResult
+	DisplayName    string
+	Service        string
+}
+type AnalysisResponse struct {
+	Analysis []AnalysisReportDetails
+}
+
+var servicesRegexp = regexp.MustCompile(`([^(\s|,)]+\.googleapis.com)`)
+
+func parseObject(obj any, resp interface{}) error {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, resp); err != nil {
+		return err
+	}
+	return nil
+}
+
+func hasImpactType(result AnalysisResult, impactType ImpactType) bool {
+	return slices.ContainsFunc(result.Warnings, func(warning AnalysisWarning) bool {
+		return warning.ImpactType == impactType
+	})
+}
+
+func getServices(rules interface{}) []string {
+	var output []string
+	for _, enableRules := range rules.([]interface{}) {
+		if enableRules == nil {
+			continue
+		}
+		if services, ok := enableRules.(map[string]interface{})["services"]; ok {
+			if servicesSet, ok := services.(*schema.Set); ok {
+				for _, service := range servicesSet.List() {
+					output = append(output, service.(string))
+				}
+			} else if servicesSlice, ok := services.([]interface{}); ok {
+				for _, service := range servicesSlice {
+					output = append(output, service.(string))
+				}
+			}
+		}
+	}
+	return output
+}
+
+func isCommonOpError(err error, apiError ApiError) (bool, string) {
+	if opError, ok := errors.Unwrap(err).(*tpgresource.CommonOpError); ok {
+		for _, detail := range opError.Details {
+			errInfo := make(map[string]interface{})
+			if err := json.Unmarshal(detail, &errInfo); err != nil {
+				return false, ""
+			}
+			if errInfo["reason"] == apiError {
+				return true, opError.Message
+			}
+		}
+	}
+	return false, ""
+}
+
+func isTimeoutError(err error) bool {
+	_, ok := errors.Unwrap(err).(*retry.TimeoutError)
+	return ok
+}
+
+func getServicesFromString(msg string) []string {
+	return servicesRegexp.FindAllString(msg, -1)
+}
+
+func getErrorMessageForServicesInUse(msg string) string {
+	services := getServicesFromString(msg)
+	return fmt.Sprintf("The service{s} %v has been used in the last 30 days or was enabled in the past 3 days. If you still wish to remove the service{s}, please set the check_usage_on_remove flag to false to proceed.", strings.Join(services, ", "))
+}
