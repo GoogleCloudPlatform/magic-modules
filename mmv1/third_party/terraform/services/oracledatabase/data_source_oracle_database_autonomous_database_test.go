@@ -1,10 +1,10 @@
 package oracledatabase_test
 
 import (
-    "fmt"
+	"fmt"
 
-    "testing"
-    "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"testing"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 

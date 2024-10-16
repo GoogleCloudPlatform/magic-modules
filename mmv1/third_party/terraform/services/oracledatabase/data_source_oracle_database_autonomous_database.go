@@ -1,7 +1,6 @@
 package oracledatabase
 
 import (
-
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,7 +11,7 @@ import (
 func DataSourceOracleDatabaseAutonomousDatabase() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceOracleDatabaseAutonomousDatabase().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location", "autonomous_database_id")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema,"project")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	return &schema.Resource{
 		Read: dataSourceOracleDatabaseAutonomousDatabaseRead,
 		Schema: dsSchema,
@@ -27,7 +26,7 @@ func dataSourceOracleDatabaseAutonomousDatabaseRead(d *schema.ResourceData, meta
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
-	err = resourceOracleDatabaseAutonomousDatabaseRead(d,meta)
+	err = resourceOracleDatabaseAutonomousDatabaseRead(d, meta)
 	if err !=nil {
 		return err
 	}
