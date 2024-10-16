@@ -1,0 +1,168 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+  return err
+}
+
+obj := make(map[string]interface{})
+d.SetId("")
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ServiceUsageV2BasePath{{"}}"}}{{"{{"}}parent{{"}}"}}/consumerPolicies/{{"{{"}}name{{"}}"}}")
+if err != nil {
+  return err
+}
+
+log.Printf("[DEBUG] Creating new ConsumerPolicy: %#v", obj)
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+  return fmt.Errorf("Couldn't find project id: %s", err)
+}
+billingProject := project
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+  billingProject = bp
+}
+
+headers := make(http.Header)
+
+parent := d.Get("parent").(string)
+name := d.Get("name").(string)
+consumerPolicyName := fmt.Sprintf("%v/consumerPolicies/%v", parent, name)
+
+oldRules, newRules := d.GetChange("enable_rules")
+
+// check state with API
+oldServices, err := getServices(oldRules, []string{})
+if err != nil {
+  return err
+}
+newServices, err := getServices(newRules, []string{})
+if err != nil {
+  return err
+}
+
+newServices, duplicates := removeDuplicateElementsWithDuplicates(newServices)
+if len(duplicates) > 0 {
+  return fmt.Errorf("The services (%v) are listed multiple times in the consumer policy %v. "+
+    "Please remove duplicate entries and try again.\n", strings.Join(duplicates, ", "), consumerPolicyName)
+}
+resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+  Config:    config,
+  Method:    "GET",
+  Project:   billingProject,
+  RawURL:    url,
+  UserAgent: userAgent,
+  Timeout:   d.Timeout(schema.TimeoutUpdate),
+  Headers:   headers,
+})
+
+if err != nil {
+  return err
+}
+
+// checking already enabled apis on the api side and filtering services for a removal
+var apiServices []string
+if rules, ok := resp["enableRules"]; ok {
+  if apiServices, err = getServices(rules, apiServices); err != nil {
+    return err
+  }
+}
+
+oldAndNewServices := removeDuplicateElements(slices.Concat(oldServices, newServices))
+apiExtraServices := slices.DeleteFunc(apiServices, func(svc string) bool { return slices.Contains(oldAndNewServices, svc) })
+
+if len(apiExtraServices) > 0 {
+  return fmt.Errorf("Found services (%v) in consumer policy %v/consumerPolicies/%v but don't exist in terraform config. "+
+    "It may be due to policy change via other toolings like gcloud and causes policy out of sync. You can either add these services "+
+    "to terraform config (recommended) to make it up to date or you can remove these services via other toolings.\n", strings.Join(apiExtraServices, ", "), parent, name)
+}
+
+// check dependencies if the "respect_dependencies" flag is enabled
+validateDependenciesEnabled := d.Get("validate_dependencies").(bool)
+
+if validateDependenciesEnabled {
+  dependentServicesMap, err := getDependentServicesMap(url, oldAndNewServices, func(dependenciesUrl string) (map[string]interface{}, error) {
+    return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+      Config:    config,
+      Method:    "GET",
+      Project:   billingProject,
+      RawURL:    dependenciesUrl,
+      UserAgent: userAgent,
+      Timeout:   d.Timeout(schema.TimeoutUpdate),
+      Headers:   make(http.Header),
+    })
+  })
+  if err != nil {
+    return err
+  }
+  if err := validateDependencies(oldServices, newServices, dependentServicesMap); err != nil {
+    return err
+  }
+}
+
+if !d.Get("check_usage_on_remove").(bool) {
+  url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
+}
+
+newObj := make(map[string]interface{})
+newObj["enableRules"] = []map[string][]string{
+  {"services": removeDuplicateElements(newServices)},
+}
+obj = newObj
+obj["etag"] = resp["etag"]
+log.Printf("[DEBUG] Update policy request: %v", obj)
+
+resp, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+  Config:    config,
+  Method:    "PATCH",
+  Project:   billingProject,
+  RawURL:    url,
+  UserAgent: userAgent,
+  Body:      obj,
+  Timeout:   d.Timeout(schema.TimeoutUpdate),
+  Headers:   headers,
+})
+
+if err != nil {
+  return fmt.Errorf("Error updating ConsumerPolicy: %s", err)
+}
+
+// Store the ID now
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}parent{{"}}"}}/consumerPolicies/{{"{{"}}name{{"}}"}}")
+if err != nil {
+  return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+timeout := d.Timeout(schema.TimeoutCreate)
+var opRes map[string]interface{}
+err = ServiceUsageV2OperationWaitTimeWithResponse(
+  config, resp, &opRes, "Updating ConsumerPolicy", config.UserAgent,
+  timeout)
+if err != nil {
+  // The resource wasn't actually created
+  d.SetId("")
+  usageError := ApiErrorCommonSuServicesHaveHierarchicalUsage
+  if strings.Contains(parent, "projects/") {
+    usageError = ApiErrorCommonSuServicesHaveUsage
+  }
+  if ok, _ := isCommonOpError(err, ApiErrorSuConflictingConcurrentModification); ok || isTimeoutError(err) {
+    return errors.New("The consumer policy might have been changed from other toolings. Please try again.")
+  } else if ok, msg := isCommonOpError(err, usageError); ok {
+    return errors.New(getErrorMessageForServicesInUse(msg))
+  }
+  return fmt.Errorf("Error while waiting to update ConsumerPolicy: %s", err)
+}
+log.Printf("[DEBUG] Finished updating ConsumerPolicy %q: %#v", d.Id(), opRes)
+return resourceServiceUsageV2ConsumerPolicyRead(d, meta)
