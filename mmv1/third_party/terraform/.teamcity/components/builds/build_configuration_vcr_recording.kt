@@ -80,6 +80,15 @@ class VcrDetails(private val providerName: String, private val buildId: String, 
             failureConditions {
                 errorMessage = true
                 executionTimeoutMin = buildTimeout
+
+                // Stop builds if the branch does not exist
+                failOnText {
+                  conditionType = BuildFailureOnText.ConditionType.CONTAINS
+                  pattern = "which does not correspond to any branch monitored by the build VCS roots"
+                  failureMessage = "Error: The branch %teamcity.build.branch% does not exist"
+                  reverse = false
+                  stopBuildOnFailure = true
+                }
             }
 
         }
