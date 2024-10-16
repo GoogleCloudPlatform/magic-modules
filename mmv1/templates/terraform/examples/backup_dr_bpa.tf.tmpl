@@ -1,0 +1,46 @@
+resource "google_backup_dr_backup_vault" "bv1" {
+    provider = google-beta
+    project       = "<%= ctx[:vars]['project'] %>"
+    location = "us-central1"
+    backup_vault_id    = "<%= ctx[:vars]['backup_vault_name'] %>"
+    description = "This is a second backup vault built by Terraform."
+    backup_minimum_enforced_retention_duration = "100000s"
+    labels = {
+      foo = "bar1"
+      bar = "baz1"
+    }
+    annotations = {
+      annotations1 = "bar1"
+      annotations2 = "baz1"
+    }
+    force_update = "true"
+    force_delete = "true"
+    allow_missing = "true" 
+}
+resource "google_backup_dr_backup_plan" "bp1" {
+  provider = google-beta
+  location = "us-central1"
+  name          = "bp1"
+  resource_type = "compute.googleapis.com/Instance"
+  backup_vault  = [ google_backup_dr_backup_vault.bv1.name ]
+  backup_rules {
+      rule_id = "rule-1"
+      backup_retention_days = "10"
+      standard_schedule {
+        recurrence_type = "HOURLY
+        hourly_frequency = "8"
+        time_zone = UTC"
+        backup_window {
+          start_hour_of_day = "0"
+          end_hour_of_day   = "24"
+        }
+      }
+  }
+}
+resource "google_backup_dr_backup_plan_association" "bpa1" {
+  provider = google-beta
+  location = "us-central1"
+  name          = "bpa1"
+  resource      = "projects/my-project/locations/us-central1/instances/{instance_id}"
+  backup_plan  = [ google_backup_dr_backup_plan.bp1.name ]
+}

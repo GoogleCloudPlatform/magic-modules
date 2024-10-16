@@ -1,0 +1,121 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'BackupPlanAssociation'
+min_version: beta
+base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
+create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
+self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
+immutable: true
+delete_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
+description: A Backup and DR BackupPlanAssociation.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
+  api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
+autogen_async: true
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+examples:
+  - min_version: beta
+    name: 'backup_dr_bpa'
+    primary_resource_id: 'my-backup-plan'
+    test_env_vars:
+      project: :PROJECT_NAME
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The location for the backupplan association
+  - name: 'backup_plan_association_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: |-
+      The id of backupplan association
+properties:
+  - name: 'resource'
+    type: String
+    description: |
+      The resource for which BPA needs to be created
+    required: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of backup plan association resource created
+    output: true
+  - name: 'backupPlan'
+    type: String
+    description: |
+      The BP with which resource needs to be created
+    required: true
+  - name: 'resourceType'
+    type: String
+    description: |
+      The resource type of workload on which backupplan is applied
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time when the instance was created
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+     The time when the instance was updated.
+    output: true
+  - name: 'dataSource'
+    type: String
+    description: |
+      Resource name of data source which will be used as storage location for backups taken
+    output: true
+  - name: 'rulesConfigInfo'
+    type: Array
+    description: |
+       Message for rules config info
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'ruleId'
+          type: String
+          description: Backup Rule id fetched from backup plan.
+          output: true
+        - name: 'lastBackupState'
+          type: Enum
+          description: State of last backup taken.
+          enum_values:
+            - :LAST_BACKUP_STATE_UNSPECIFIED
+            - :FIRST_BACKUP_PENDING
+            - :PERMISSION_DENIED
+            - :SUCCEEDED
+            - :FAILED
+          default_value: :LAST_BACKUP_STATE_UNSPECIFIED
+        - name: 'lastBackupError'
+          type: NestedObject
+          description: google.rpc.Status object to store the last backup error
+          output: true
+          properties:
+            - name: 'code'
+              type: String
+              description: The status code, which should be an enum value of [google.rpc.Code]
+            - name: 'message'
+              type: String
+              description: A developer-facing error message, which should be in English.
+  - name: 'lastSuccessfulBackupConsistencyTime'
+    type: String
+    description: The point in time when the last successful backup was captured from the source
+    output: true
