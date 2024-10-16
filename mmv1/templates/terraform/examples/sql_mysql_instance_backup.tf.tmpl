@@ -10,5 +10,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
       start_time                     = "20:55"
     }
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
