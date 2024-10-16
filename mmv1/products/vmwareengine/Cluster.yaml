@@ -186,33 +186,10 @@ properties:
               description: |
                 Number of nodes to add to a cluster during a scale-out operation.
                 Must be divisible by 2 for stretched clusters.
-            - name: 'minNodeCount'
-              type: Integer
-              description: |
-                Minimum number of nodes of the given type in a cluster.
-                The number is coerced to the minimum number of nodes of any type in the cluster.
-            - name: 'maxNodeCount'
-              type: Integer
-              description: |
-                Maximum number of nodes of the given type in a cluster.
-                The number is coerced to the maximum number of nodes of any type in the cluster.
             - name: 'cpuThresholds'
               type: NestedObject
               description: |
                 Utilization thresholds pertaining to CPU utilization.
-              properties:
-                - name: 'scaleOut'
-                  type: Integer
-                  description: |
-                    The utilization triggering the scale-out operation in percent.
-                - name: 'scaleIn'
-                  type: Integer
-                  description: |
-                    The utilization triggering the scale-in operation in percent.
-            - name: 'grantedMemoryThresholds'
-              type: NestedObject
-              description: |
-                Utilization thresholds pertaining to amount of granted memory.
               properties:
                 - name: 'scaleOut'
                   type: Integer
