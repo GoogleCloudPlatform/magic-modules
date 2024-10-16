@@ -105,6 +105,12 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+  - name: 'looker_instance_force_delete'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
 virtual_fields:
   - name: 'deletion_policy'
     default_value: "DEFAULT"
