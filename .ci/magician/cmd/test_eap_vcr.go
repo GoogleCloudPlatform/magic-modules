@@ -76,7 +76,7 @@ func listTEVEnvironmentVariables() string {
 }
 
 func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath string, rnr ExecRunner, vt *vcr.Tester) error {
-	vt.SetRepoPath(provider.Alpha, genPath)
+	vt.SetRepoPath(provider.Private, genPath)
 	if err := rnr.PushDir(genPath); err != nil {
 		return fmt.Errorf("error changing to gen path: %w", err)
 	}
@@ -86,7 +86,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		return fmt.Errorf("error diffing gen path: %w", err)
 	}
 
-	services, runFullVCR := modifiedPackages(strings.Split(changedFiles, "\n"), provider.Alpha)
+	services, runFullVCR := modifiedPackages(strings.Split(changedFiles, "\n"), provider.Private)
 	if len(services) == 0 && !runFullVCR {
 		fmt.Println("Skipping tests: No go files or test fixtures changed")
 		return nil
@@ -94,14 +94,14 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 	fmt.Println("Running tests: Go files or test fixtures changed")
 
 	head := "auto-cl-" + changeNumber
-	if err := vt.FetchCassettes(provider.Alpha, "main", head); err != nil {
+	if err := vt.FetchCassettes(provider.Private, "main", head); err != nil {
 		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
-	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Alpha, services, vt)
+	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Private, services, vt)
 	if err := vt.UploadLogs(vcr.UploadLogsOptions{
 		Head:    head,
 		Mode:    vcr.Replaying,
-		Version: provider.Alpha,
+		Version: provider.Private,
 	}); err != nil {
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
@@ -157,7 +157,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		if len(recordingResult.PassedTests) > 0 {
 			replayingAfterRecordingResult, _ = vt.RunParallel(vcr.RunOptions{
 				Mode:     vcr.Replaying,
-				Version:  provider.Alpha,
+				Version:  provider.Private,
 				TestDirs: testDirs,
 				Tests:    recordingResult.PassedTests,
 			})
@@ -166,7 +166,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 				Parallel:       true,
 				AfterRecording: true,
 				Mode:           vcr.Recording,
-				Version:        provider.Alpha,
+				Version:        provider.Private,
 			}); err != nil {
 				return fmt.Errorf("error uploading recording logs: %w", err)
 			}
