@@ -554,6 +554,7 @@ func ResourceStorageBucket() *schema.Resource {
 				MaxItems:    1,
 				Optional:    true,
 				ForceNew:    true,
+				DiffSuppressFunc: hierachicalNamespaceDiffSuppress,
 				Description: `The bucket's HNS support, which defines bucket can organize folders in logical file system structure`,
 				Elem : &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1969,4 +1970,15 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 
 	d.SetId(res.Id)
 	return nil
+}
+
+func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData) bool {
+	if k == "hierachical_namespace.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("hierachical_namespace.0.enabled")
+		if !o.(bool) {
+			return true
+		}
+	}
+	
+	return false
 }
