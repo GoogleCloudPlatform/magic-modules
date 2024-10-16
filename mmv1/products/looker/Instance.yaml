@@ -111,6 +111,8 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+    ignore_read_extra:
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     default_value: "DEFAULT"
