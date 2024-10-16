@@ -1331,6 +1331,13 @@ func expandBucketHierachicalNamespace(configured interface{}) *storage.BucketHie
 func flattenBucketHierarchicalNamespacePolicy(hierachicalNamespacePolicy *storage.BucketHierarchicalNamespace) []map[string]interface{} {
 	policies := make([]map[string]interface{}, 0, 1)
 	if hierachicalNamespacePolicy == nil {
+		// a null object returned from the API is equivalent to a block with enabled = false
+		// to handle this consistently, always write a null response as a hydrated block with false
+		defaultPolicy :=map[string]interface{}{
+			"enabled": false,
+		}
+		
+		policies = append(policies, defaultPolicy)
 		return policies
 	}
 	policy := map[string]interface{}{
