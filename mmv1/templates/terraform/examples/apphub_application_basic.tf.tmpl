@@ -1,7 +1,7 @@
 resource "google_apphub_application" "{{$.PrimaryResourceId}}" {
-  location = "us-east1"
+  location = "{{index $.Vars "location"}}"
   application_id = "{{index $.Vars "application_id"}}"
   scope {
-    type = "REGIONAL"
+    type = "{{index $.Vars "scope_type"}}"
   }
 }
