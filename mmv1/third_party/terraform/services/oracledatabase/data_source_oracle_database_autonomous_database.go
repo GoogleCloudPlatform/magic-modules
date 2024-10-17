@@ -26,11 +26,16 @@ func dataSourceOracleDatabaseAutonomousDatabaseRead(d *schema.ResourceData, meta
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
+
+	d.SetId(id)
+
 	err = resourceOracleDatabaseAutonomousDatabaseRead(d, meta)
 	if err != nil {
 		return err
 	}
-	d.SetId(id)
 
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
 	return nil
 }
