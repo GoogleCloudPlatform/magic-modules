@@ -40,7 +40,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
 examples:
-  - name: 'cloud_quotas_quota_adjuster_settings_basic'
+  - name: 'cloudquotas_quota_adjuster_settings_basic'
     primary_resource_id: 'adjuster_settings'
     vars:
       parent: "projects/104740170505"
