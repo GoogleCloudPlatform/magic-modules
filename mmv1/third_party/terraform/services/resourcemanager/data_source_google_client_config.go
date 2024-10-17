@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the data source satisfies the expected interfaces.
@@ -24,7 +24,7 @@ func NewGoogleClientConfigDataSource() datasource.DataSource {
 }
 
 type GoogleClientConfigDataSource struct {
-	providerConfig *fwtransport.FrameworkProviderConfig
+	fwresource.DataSourceWithConfigure
 }
 
 type GoogleClientConfigModel struct {
@@ -38,14 +38,14 @@ type GoogleClientConfigModel struct {
 	DefaultLabels types.Map    `tfsdk:"default_labels"`
 }
 
-func (m *GoogleClientConfigModel) GetLocationDescription(providerConfig *fwtransport.FrameworkProviderConfig) fwresource.LocationDescription {
+func (m *GoogleClientConfigModel) GetLocationDescription(providerConfig *transport_tpg.Config) fwresource.LocationDescription {
 	return fwresource.LocationDescription{
 		RegionSchemaField: types.StringValue("region"),
 		ZoneSchemaField:   types.StringValue("zone"),
 		ResourceRegion:    m.Region,
 		ResourceZone:      m.Zone,
-		ProviderRegion:    providerConfig.Region,
-		ProviderZone:      providerConfig.Zone,
+		ProviderRegion:    types.StringValue(providerConfig.Region),
+		ProviderZone:      types.StringValue(providerConfig.Zone),
 	}
 }
 
@@ -96,25 +96,6 @@ func (d *GoogleClientConfigDataSource) Schema(ctx context.Context, req datasourc
 	}
 }
 
-func (d *GoogleClientConfigDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
-		return
-	}
-
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	// Required for accessing project, region, zone and tokenSource
-	d.providerConfig = p
-}
-
 func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data GoogleClientConfigModel
 	var metaData *fwmodels.ProviderMetaModel
@@ -131,17 +112,31 @@ func (d *GoogleClientConfigDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	locationInfo := data.GetLocationDescription(d.providerConfig)
+	locationInfo := data.GetLocationDescription(d.Config)
 	region, _ := locationInfo.GetRegion()
 	zone, _ := locationInfo.GetZone()
 
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.providerConfig.Project.String(), region.String(), zone.String()))
-	data.Project = d.providerConfig.Project
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/regions/%s/zones/%s", d.Config.Project, region.String(), zone.String()))
+	data.Project = types.StringValue(d.Config.Project)
 	data.Region = region
 	data.Zone = zone
-	data.DefaultLabels = d.providerConfig.DefaultLabels
 
-	token, err := d.providerConfig.TokenSource.Token()
+	// Convert default labels from SDK type system to plugin-framework data type
+	m := map[string]*string{}
+	for k, v := range d.Config.DefaultLabels {
+		// m[k] = types.StringValue(v)
+		val := v
+		m[k] = &val
+	}
+	dls, diags := types.MapValueFrom(ctx, types.StringType, m)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	data.DefaultLabels = dls
+
+	token, err := d.Config.TokenSource.Token()
 	if err != nil {
 		resp.Diagnostics.AddError("Error setting access_token", err.Error())
 		return
