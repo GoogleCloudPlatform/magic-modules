@@ -360,7 +360,7 @@ properties:
     description: |
       Enable/Disable Security Posture API features for the cluster.
     default_from_api: true
-    deprecation_message: '`security_posture_config` is deprecated and will be removed in a future release.'
+    deprecation_message: '`security_posture_config` is deprecated and will be removed in a future major release.'
     properties:
       - name: 'vulnerabilityMode'
         type: Enum
