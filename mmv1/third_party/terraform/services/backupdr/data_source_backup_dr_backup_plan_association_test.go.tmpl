@@ -80,7 +80,7 @@ func testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context map[stri
 }
 
 resource "google_compute_instance" "default" {
-  name         = "my-instance"
+  name         = "test"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"
   tags = ["foo", "bar"]
