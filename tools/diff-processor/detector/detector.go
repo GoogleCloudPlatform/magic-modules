@@ -38,8 +38,9 @@ type Field struct {
 }
 
 type MissingDocField struct {
-	Field   string
-	Section string
+	Field    string
+	Section  string
+	FilePath string
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -188,10 +189,10 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 			}
 			if isAttribute(fieldDiff) {
 				if !attributesInDoc[field] {
-					missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Attributes Reference"})
+					missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Attributes Reference", FilePath: strings.ReplaceAll(docFilePath, repoPath, "")})
 				}
 			} else if !argumentsInDoc[field] {
-				missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Arguments Reference"})
+				missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Arguments Reference", FilePath: strings.ReplaceAll(docFilePath, repoPath, "")})
 			}
 		}
 	}

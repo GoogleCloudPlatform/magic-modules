@@ -241,16 +241,19 @@ func TestDetectMissingDocs(t *testing.T) {
 			want: map[string][]MissingDocField{
 				"a_resource": {
 					{
-						Field:   "field_one",
-						Section: "Arguments Reference",
+						Field:    "field_one",
+						Section:  "Arguments Reference",
+						FilePath: "/website/docs/r/a_resource.html.markdown",
 					},
 					{
-						Field:   "field_four",
-						Section: "Arguments Reference",
+						Field:    "field_four",
+						Section:  "Arguments Reference",
+						FilePath: "/website/docs/r/a_resource.html.markdown",
 					},
 					{
-						Field:   "field_five",
-						Section: "Attributes Reference",
+						Field:    "field_five",
+						Section:  "Attributes Reference",
+						FilePath: "/website/docs/r/a_resource.html.markdown",
 					},
 				},
 			},
@@ -285,12 +288,14 @@ func TestDetectMissingDocs(t *testing.T) {
 			want: map[string][]MissingDocField{
 				"a_resource": {
 					{
-						Field:   "field_five",
-						Section: "Attributes Reference",
+						Field:    "field_five",
+						Section:  "Attributes Reference",
+						FilePath: "/website/docs/r/a_resource.html.markdown",
 					},
 					{
-						Field:   "field_one",
-						Section: "Arguments Reference",
+						Field:    "field_one",
+						Section:  "Arguments Reference",
+						FilePath: "/website/docs/r/a_resource.html.markdown",
 					},
 				},
 			},
