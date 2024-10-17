@@ -78,17 +78,10 @@ properties:
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       The state of the backup policy.
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'CREATING'
-      - 'READY'
-      - 'UPDATING'
-      - 'DELETING'
-      - 'ERROR'
   - name: 'dailyBackupLimit'
     type: Integer
     description: |

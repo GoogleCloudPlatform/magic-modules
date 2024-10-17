@@ -151,14 +151,10 @@ properties:
       using security identifiers for NFSv4.1 or principal names for kerberized NFSv4.1.
     immutable: true
   - name: 'encryptionType'
-    type: Enum
+    type: String
     description: |
       Reports if volumes in the pool are encrypted using a Google-managed encryption key or CMEK.
     output: true
-    enum_values:
-      - 'ENCRYPTION_TYPE_UNSPECIFIED'
-      - 'SERVICE_MANAGED'
-      - 'CLOUD_KMS'
   - name: 'zone'
     type: String
     description: |
