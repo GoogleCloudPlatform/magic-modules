@@ -38,6 +38,12 @@ type PullRequest struct {
 	MergeCommitSha string  `json:"merge_commit_sha"`
 }
 
+type PullRequestComment struct {
+	User User   `json:"user"`
+	Body string `json:"body"`
+	ID   int    `json:"id"`
+}
+
 func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
 
@@ -96,6 +102,33 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 	}
 
 	return result, nil
+}
+
+func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
+
+	var comments []PullRequestComment
+	err := utils.RequestCall(url, "GET", gh.token, &comments, nil)
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func (gh *Client) GetPullRequestCommentsByUser(prNumber, login string) ([]PullRequestComment, error) {
+	comments, err := gh.GetPullRequestComments(prNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	var filteredComments []PullRequestComment
+	for _, comment := range comments {
+		if comment.User.Login == login {
+			filteredComments = append(filteredComments, comment)
+		}
+	}
+
+	return filteredComments, nil
 }
 
 func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
