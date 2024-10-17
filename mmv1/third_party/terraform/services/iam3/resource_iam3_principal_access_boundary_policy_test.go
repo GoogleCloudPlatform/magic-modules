@@ -64,15 +64,15 @@ resource "google_project" "project" {
 }
 
 resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
-  organization   = "${org_id}"
+  organization   = "%{org_id}"
   location       = "global"
   display_name   = "test pab policy%{random_suffix}"
   principal_access_boundary_policy_id = "test-pab-policy%{random_suffix}"
   details {
     rules {
       description = "PAB rule%{random_suffix}"
-      effect      = allow
-      resources   = [//cloudresourcemanager.googleapis.com/projects/${google_project.project.project_id}"]
+      effect      = "ALLOW"
+      resources   = ["//cloudresourcemanager.googleapis.com/projects/${google_project.project.project_id}"]
     }
     enforcement_version = "1"
   }
