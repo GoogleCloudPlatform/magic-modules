@@ -1,0 +1,6 @@
+resource "google_iam3_principal_access_boundary_policy" "{{$.PrimaryResourceId}}" {
+  organization   = "{{index $.TestEnvVars "org_id"}}"
+  location       = "global"
+  display_name   = "{{index $.Vars "display_name"}}"
+  principal_access_boundary_policy_id = "{{index $.Vars "pab_id"}}"
+}

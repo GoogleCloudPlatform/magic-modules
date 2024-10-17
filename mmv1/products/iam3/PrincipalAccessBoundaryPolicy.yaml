@@ -1,0 +1,157 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'PrincipalAccessBoundaryPolicy'
+description: Description
+id_format: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
+base_url: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies'
+self_link: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
+create_url: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies?principalAccessBoundaryPolicyId={{principal_access_boundary_policy_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+examples:
+  - name: 'iam3_principal_access_boundary_policy'
+    primary_resource_id: 'my-pab-policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    vars:
+      organization: 'ORG_ID'
+      location: 'global'
+      display_name: 'test pab policy'
+      pab_id: 'test-pab-policy'
+parameters:
+  - name: 'organization'
+    type: String
+    description: |
+      The parent organization of the principal access boundary policy.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location the principal access boundary policy is in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'principalAccessBoundaryPolicyId'
+    type: String
+    description: |
+      The ID to use to create the principal access boundary policy.
+      This value must start with a lowercase letter followed by up to 62 lowercase letters, numbers, hyphens, or dots. Pattern, /a-z{2,62}/.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the principal access boundary policy.  The following format is supported:
+       `organizations/{organization_id}/locations/{location}/principalAccessBoundaryPolicies/{policy_id}`
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Output only. The globally unique ID of the principal access boundary policy.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      Optional. The etag for the principal access boundary. If this is provided on update, it must match the server's etag.
+    default_from_api: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Optional. The description of the principal access boundary policy. Must be less than or equal to 63 characters.
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Optional. User defined annotations. See https://google.aip.dev/148#annotations
+      for more details such as format and size limitations
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. The time when the principal access boundary policy was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Output only. The time when the principal access boundary policy was most recently updated.
+    output: true
+  - name: 'details'
+    type: NestedObject
+    description: |
+      Principal access boundary policy details
+    default_from_api: true
+    properties:
+      - name: 'rules'
+        type: Array
+        description: |
+          Required. A list of principal access boundary policy rules. The number of rules in a policy is limited to 500.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'description'
+              type: String
+              description: |
+                Optional. The description of the principal access boundary policy rule. Must be less than or equal to 256 characters.
+            - name: 'resources'
+              type: Array
+              description: |
+                Required. A list of Cloud Resource Manager resources. The resource
+                and all the descendants are included. The number of resources in a policy
+                is limited to 500 across all rules.  
+                The following resource types are supported:  
+                * Organizations, such as `//cloudresourcemanager.googleapis.com/organizations/123`. 
+                * Folders, such as `//cloudresourcemanager.googleapis.com/folders/123`.
+                * Projects, such as `//cloudresourcemanager.googleapis.com/projects/123`
+                or `//cloudresourcemanager.googleapis.com/projects/my-project-id`.
+              required: true
+              item_type:
+                type: String
+            - name: 'effect'
+              type: String
+              description: |
+                Required. The access relationship of principals to the resources in this rule.   
+                Possible values:  EFFECT_UNSPECIFIED ALLOW
+              required: true
+      - name: 'enforcementVersion'
+        type: String
+        description: |
+          Optional. The version number that indicates which Google Cloud services
+          are included in the enforcement (e.g. \"latest\", \"1\", ...). If empty, the
+          PAB policy version will be set to the current latest version, and this version
+          won't get updated when new versions are released.
+        default_from_api: true
