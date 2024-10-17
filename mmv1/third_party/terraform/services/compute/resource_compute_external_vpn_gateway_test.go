@@ -98,7 +98,7 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
   interface {
-    id         = 0
+    id           = 0
     ipv6_address = "%s"
   }
 }
