@@ -1,4 +1,5 @@
 package backupdr
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -169,7 +170,7 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, "{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}/dataSources/{{data_source_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}backup_vault_id{{"}}"}}/dataSources/{{"{{"}}data_source_id{{"}}"}}")
 	log.Printf("url retrieved")
 	if err != nil {
 		return err
@@ -224,3 +225,4 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 
 	return nil
 }
+{{- end }}
