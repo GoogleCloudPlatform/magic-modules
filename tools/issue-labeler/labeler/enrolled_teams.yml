@@ -66,6 +66,7 @@ service/bigquery:
   - google_biglake_.*
   - google_bigquery_.*
 service/bigtableadmin:
+  team: bigtable-terraform-team
   resources:
   - google_bigtable_.*
 service/billingbudgets:
