@@ -1,10 +1,12 @@
 package backupdr_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
@@ -14,15 +16,16 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	stepChecks := func(wantName string, wantState string) []resource.TestCheckFunc {
+	stepChecks := func(wantName string, wantState string, wantBackupCount string) []resource.TestCheckFunc {
 		stepCheck := []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "name", wantName),
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "state", wantState),
+			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "backup_count", wantBackupCount),
 		}
 		return stepCheck
 	}
-
-	expectedName := "projects/liyunhuang-consumer/locations/us-central1/backupVaults/bv-test/dataSources/ds-test"
+	project := envvar.GetTestProjectFromEnv()
+	expectedName := fmt.Sprintf("projects/%s/locations/us-central1/backupVaults/bv-test/dataSources/ds-test", project)
 	expectedState := "ACTIVE"
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -31,7 +34,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
-				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState)...),
+				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, "0")...),
 			},
 		},
 	})

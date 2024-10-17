@@ -17,19 +17,19 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 		},
 		"create_time": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"update_time": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"backup_count": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"etag": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"state": {
 			Type:     schema.TypeString,
@@ -37,7 +37,7 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 		},
 		"total_stored_bytes": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Computed: true,
 		},
 		"data_source_backup_appliance_application": {
 			Type:     schema.TypeList,
@@ -192,13 +192,35 @@ func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error reading BackupVault: %s", err)
 	}
 
-	if err := d.Set("name", flattenBackupDRDataSourceName(res["name"], d, config)); err != nil {
+	if err := d.Set("name", res["name"]); err != nil {
 		return fmt.Errorf("Error reading DataSource: %s", err)
 	}
 
-	return nil
-}
+	if err := d.Set("create_time", res["create_time"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
 
-func flattenBackupDRDataSourceName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
+	if err := d.Set("update_time", res["update_time"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
+
+	if err := d.Set("backup_count", res["backup_count"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
+
+	if err := d.Set("etag", res["etag"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
+
+	if err := d.Set("state", res["state"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
+
+	if err := d.Set("total_stored_bytes", res["total_stored_bytes"]); err != nil {
+		return fmt.Errorf("Error reading DataSource: %s", err)
+	}
+
+	d.SetId(res["name"].(string))
+
+	return nil
 }
