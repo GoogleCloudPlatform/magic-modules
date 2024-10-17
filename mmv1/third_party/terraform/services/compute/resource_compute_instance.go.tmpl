@@ -171,6 +171,11 @@ func validateStoppingForUpdate(_ context.Context, d *schema.ResourceDiff, meta i
 
 // Validate if machine allows for stopping instance for update when it's needed
 func validateStoppingForUpdateFunc(d tpgresource.TerraformResourceDiff) error {
+	// Do not check StoppingForUpdate when force new is triggered by name
+	// or boot_disk.
+	if d.HasChange("name") || d.HasChange("boot_disk") {
+		return nil
+	}
 
 	// d.HasChange("service_account") is oversensitive: see https://github.com/hashicorp/terraform/issues/17411
 	// Until that's fixed, manually check whether there is a change.
