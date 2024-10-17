@@ -83,10 +83,6 @@ func dataSourceOracleDatabaseCloudVmClustersRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error setting cloudVmClusters: %s", err)
 	}
 
-	if d.Id() == "" {
-		return fmt.Errorf("%s not found", id)
-	}
-
 	return nil
 }
 
