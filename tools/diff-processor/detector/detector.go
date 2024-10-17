@@ -38,6 +38,7 @@ type Field struct {
 }
 
 type MissingDocDetails struct {
+	Name     string
 	FilePath string
 	Fields   []MissingDocField
 }
@@ -209,6 +210,35 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 	return ret, nil
 }
 
+func DetectMissingDocsForDatasource(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
+	for resource, resourceDiff := range schemaDiff {
+		docFilePath := dataSourceToDocFile(resource, repoPath)
+		details := MissingDocDetails{
+			FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+		}
+		_, err := os.ReadFile(docFilePath)
+		if err == nil {
+			continue
+		}
+		// only check whether file exists
+		if !os.IsNotExist(err) {
+			return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+		} else {
+			for field, fieldDiff := range resourceDiff.Fields {
+				if !isNewField(fieldDiff) {
+					continue
+				}
+				details.Fields = append(details.Fields, MissingDocField{Field: field})
+			}
+		}
+		if len(details.Fields) > 0 {
+			ret[resource] = details
+		}
+	}
+	return ret, nil
+}
+
 func isAttribute(fieldDiff diff.FieldDiff) bool {
 	// for compute_instance, some attributes are not only on top level
 	return fieldDiff.New.Computed && !fieldDiff.New.Optional
@@ -221,6 +251,11 @@ func isNewField(fieldDiff diff.FieldDiff) bool {
 func resourceToDocFile(resource string, repoPath string) string {
 	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
 	return filepath.Join(repoPath, "website", "docs", "r", fileBaseName)
+}
+
+func dataSourceToDocFile(resource string, repoPath string) string {
+	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
+	return filepath.Join(repoPath, "website", "docs", "d", fileBaseName)
 }
 
 func listToMap(items []string) map[string]bool {

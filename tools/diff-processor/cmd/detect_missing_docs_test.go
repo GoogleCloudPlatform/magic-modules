@@ -17,7 +17,7 @@ func TestDetectMissingDocs(t *testing.T) {
 		name           string
 		oldResourceMap map[string]*schema.Resource
 		newResourceMap map[string]*schema.Resource
-		want           []MissingDocsInfo
+		want           MissingDocsSummary
 	}{
 		{
 			name: "no new fields",
@@ -37,10 +37,13 @@ func TestDetectMissingDocs(t *testing.T) {
 					},
 				},
 			},
-			want: []MissingDocsInfo{},
+			want: MissingDocsSummary{
+				Resource:   []detector.MissingDocDetails{},
+				DataSource: []detector.MissingDocDetails{},
+			},
 		},
 		{
-			name: "multiple new fields missing doc",
+			name: "doc not exist - multiple new fields missing doc",
 			newResourceMap: map[string]*schema.Resource{
 				"google_x": {
 					Schema: map[string]*schema.Schema{
@@ -50,18 +53,34 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 			},
 			oldResourceMap: map[string]*schema.Resource{},
-			want: []MissingDocsInfo{
-				{
-					Name:     "google_x",
-					FilePath: "/website/docs/r/x.html.markdown",
-					Fields: []detector.MissingDocField{
-						{
-							Field:   "field-a",
-							Section: "Arguments Reference",
+			want: MissingDocsSummary{
+				Resource: []detector.MissingDocDetails{
+					{
+						Name:     "google_x",
+						FilePath: "/website/docs/r/x.html.markdown",
+						Fields: []detector.MissingDocField{
+							{
+								Field:   "field-a",
+								Section: "Arguments Reference",
+							},
+							{
+								Field:   "field-b",
+								Section: "Arguments Reference",
+							},
 						},
-						{
-							Field:   "field-b",
-							Section: "Arguments Reference",
+					},
+				},
+				DataSource: []detector.MissingDocDetails{
+					{
+						Name:     "google_x",
+						FilePath: "/website/docs/d/x.html.markdown",
+						Fields: []detector.MissingDocField{
+							{
+								Field: "field-a",
+							},
+							{
+								Field: "field-b",
+							},
 						},
 					},
 				},
@@ -76,6 +95,9 @@ func TestDetectMissingDocs(t *testing.T) {
 				computeSchemaDiff: func() diff.SchemaDiff {
 					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 				},
+				computeDatasourceSchemaDiff: func() diff.SchemaDiff {
+					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
+				},
 				stdout: &buf,
 			}
 
@@ -87,13 +109,13 @@ func TestDetectMissingDocs(t *testing.T) {
 			out := make([]byte, buf.Len())
 			buf.Read(out)
 
-			var got []MissingDocsInfo
+			var got MissingDocsSummary
 			if err = json.Unmarshal(out, &got); err != nil {
 				t.Fatalf("Failed to unmarshall output: %s", err)
 			}
 
 			if diff := cmp.Diff(tc.want, got); diff != "" {
-				t.Errorf("Unexpected result. Want %+v, got %+v. ", tc.want, got)
+				t.Errorf("Unexpected result, diff(-want, got) = %s", diff)
 			}
 		})
 	}

@@ -323,3 +323,106 @@ func TestDetectMissingDocs(t *testing.T) {
 		})
 	}
 }
+
+func TestDetectMissingDocsForDatasource(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		schemaDiff diff.SchemaDiff
+		repo       string
+		want       map[string]MissingDocDetails
+	}{
+		{
+			name: "doc file not exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: t.TempDir(),
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/d/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field: "field_five",
+						},
+						{
+							Field: "field_one",
+						},
+						{
+							Field: "field_four",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "doc file exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingDocsForDatasource(test.schemaDiff, test.repo)
+			if err != nil {
+				t.Fatalf("DetectMissingDocsForDatasource = %v, want = nil", err)
+			}
+			for r := range test.want {
+				sort.Slice(test.want[r].Fields, func(i, j int) bool {
+					return test.want[r].Fields[i].Field < test.want[r].Fields[j].Field
+				})
+			}
+			for r := range got {
+				sort.Slice(got[r].Fields, func(i, j int) bool {
+					return got[r].Fields[i].Field < got[r].Fields[j].Field
+				})
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
+			}
+		})
+	}
+}

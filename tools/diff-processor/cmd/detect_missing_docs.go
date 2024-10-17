@@ -19,16 +19,16 @@ import (
 
 const detectMissingDocDesc = `Compute list of fields missing documents`
 
-type MissingDocsInfo struct {
-	Name     string
-	FilePath string
-	Fields   []detector.MissingDocField
+type MissingDocsSummary struct {
+	Resource   []detector.MissingDocDetails
+	DataSource []detector.MissingDocDetails
 }
 
 type detectMissingDocsOptions struct {
-	rootOptions       *rootOptions
-	computeSchemaDiff func() diff.SchemaDiff
-	stdout            io.Writer
+	rootOptions                 *rootOptions
+	computeSchemaDiff           func() diff.SchemaDiff // resource schema diff
+	computeDatasourceSchemaDiff func() diff.SchemaDiff // data source schema diff
+	stdout                      io.Writer
 }
 
 func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
@@ -36,6 +36,9 @@ func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 		rootOptions: rootOptions,
 		computeSchemaDiff: func() diff.SchemaDiff {
 			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
+		},
+		computeDatasourceSchemaDiff: func() diff.SchemaDiff {
+			return diff.ComputeSchemaDiff(oldProvider.DatasourceMap(), newProvider.DatasourceMap())
 		},
 		stdout: os.Stdout,
 	}
@@ -58,20 +61,45 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 	}
 	resources := maps.Keys(detectedResources)
 	slices.Sort(resources)
-	info := []MissingDocsInfo{}
+	resourceInfo := []detector.MissingDocDetails{}
 	for _, r := range resources {
 		details := detectedResources[r]
 		sort.Slice(details.Fields, func(i, j int) bool {
 			return details.Fields[i].Field < details.Fields[j].Field
 		})
-		info = append(info, MissingDocsInfo{
+		resourceInfo = append(resourceInfo, detector.MissingDocDetails{
 			Name:     r,
 			FilePath: details.FilePath,
 			Fields:   details.Fields,
 		})
 	}
 
-	if err := json.NewEncoder(o.stdout).Encode(info); err != nil {
+	datasourceSchemaDiff := o.computeDatasourceSchemaDiff()
+	detectedDataSources, err := detector.DetectMissingDocsForDatasource(datasourceSchemaDiff, args[0])
+	if err != nil {
+		return err
+	}
+	dataSources := maps.Keys(detectedDataSources)
+	slices.Sort(dataSources)
+	dataSourceInfo := []detector.MissingDocDetails{}
+	for _, r := range resources {
+		details := detectedDataSources[r]
+		sort.Slice(details.Fields, func(i, j int) bool {
+			return details.Fields[i].Field < details.Fields[j].Field
+		})
+		dataSourceInfo = append(dataSourceInfo, detector.MissingDocDetails{
+			Name:     r,
+			FilePath: details.FilePath,
+			Fields:   details.Fields,
+		})
+	}
+
+	sum := MissingDocsSummary{
+		Resource:   resourceInfo,
+		DataSource: dataSourceInfo,
+	}
+
+	if err := json.NewEncoder(o.stdout).Encode(sum); err != nil {
 		return fmt.Errorf("error encoding json: %w", err)
 	}
 
