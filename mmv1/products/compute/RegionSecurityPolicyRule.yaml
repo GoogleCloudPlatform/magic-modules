@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionSecurityPolicyRule'
+api_resource_type_kind: SecurityPolicy
 description: |
   A rule for the RegionSecurityPolicy.
 min_version: 'beta'

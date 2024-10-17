@@ -13,6 +13,7 @@
 
 ---
 name: 'GuestPolicies'
+api_resource_type_kind: GuestPolicy
 description: |
   An OS Config resource representing a guest configuration policy. These policies represent
   the desired state for VM instance guest environments including packages to install or remove,
