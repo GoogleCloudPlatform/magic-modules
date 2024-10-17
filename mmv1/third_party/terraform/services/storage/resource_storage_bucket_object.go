@@ -138,6 +138,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 					localMd5Hash := ""
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
+						if localMd5Hash == "" && old != "" {
+							localMd5Hash = old
+						}
 					}
 
 					if content, ok := d.GetOkExists("content"); ok {
