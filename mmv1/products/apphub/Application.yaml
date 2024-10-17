@@ -47,8 +47,7 @@ custom_code:
 custom_diff:
   - 'apphubApplicationCustomizeDiff'
 examples:
-  - name: 'application_basic'
-    config_path: 'templates/terraform/examples/apphub_application_basic.tf.tmpl'
+  - name: 'apphub_application_basic'
     primary_resource_id: 'example'
     vars:
       application_id: 'example-application'
@@ -57,7 +56,7 @@ examples:
     test_vars_overrides:
       'location': '"us-east1"'
       'scope_type': '"REGIONAL"'
-  - name: 'application_global_basic'
+  - name: 'apphub_application_global_basic'
     config_path: 'templates/terraform/examples/apphub_application_basic.tf.tmpl'
     primary_resource_id: 'example'
     vars:
@@ -67,8 +66,7 @@ examples:
     test_vars_overrides:
       'location': '"global"'
       'scope_type': '"GLOBAL"'
-  - name: 'application_full'
-    config_path: 'templates/terraform/examples/apphub_application_full.tf.tmpl'
+  - name: 'apphub_application_full'
     primary_resource_id: 'example2'
     vars:
       application_id: 'example-application'

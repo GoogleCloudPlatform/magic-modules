@@ -21,7 +21,7 @@ func TestAccApphubApplication_applicationUpdateFull(t *testing.T) {
 		CheckDestroy:             testAccCheckApphubApplicationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApphubApplication_applicationFullExample(context),
+				Config: testAccApphubApplication_apphubApplicationFullExample(context),
 			},
 			{
 				ResourceName:            "google_apphub_application.example2",
