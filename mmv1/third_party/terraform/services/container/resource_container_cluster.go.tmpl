@@ -2264,11 +2264,11 @@ func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.Res
 		}
 		if nAccel["count"].(int) == 0 {
 			hasAcceleratorWithEmptyCount = true
-			// Ignore any 'empty' nAccelerators because they aren't sent to the API
+			// Ignore any 'empty' accelerators because they aren't sent to the API
 			continue
 		}
 		if index >= len(oList) {
-			// Return early if there are more positive count nAccelerator blocks in the desired state
+			// Return early if there are more positive count accelerator blocks in the desired state
 			// than the current state since a difference in 'legit' blocks is a valid diff.
 			// This will prevent array index overruns
 			return nil
