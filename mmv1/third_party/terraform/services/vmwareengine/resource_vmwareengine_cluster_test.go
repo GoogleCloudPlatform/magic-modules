@@ -109,10 +109,6 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
 			autoscale_policy_id = "autoscaling-policy"
 			node_type_id = "standard-72"
 			scale_out_size = 1
-			cpu_thresholds {
-				scale_out = 80
-				scale_in  = 15
-			}
 			consumed_memory_thresholds {
 				scale_out = 75
 				scale_in  = 20
@@ -177,8 +173,10 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
 			autoscale_policy_id = "autoscaling-policy"
 			node_type_id = "standard-72"
 			scale_out_size = 2
-			min_node_count = 3 
-			max_node_count = 10
+			cpu_thresholds {
+				scale_out = 80
+				scale_in  = 15
+			}
 			storage_thresholds {
 				scale_out = 79
 				scale_in = 15
