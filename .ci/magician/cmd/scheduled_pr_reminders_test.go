@@ -805,7 +805,7 @@ func TestFormatReminderComment(t *testing.T) {
 					&github.User{Login: github.String("other-reviewer")},
 				},
 			},
-			state: waitingForMerge,
+			state:     waitingForMerge,
 			sinceDays: 5,
 			expectedStrings: []string{
 				"waiting for merge for 1 week",
