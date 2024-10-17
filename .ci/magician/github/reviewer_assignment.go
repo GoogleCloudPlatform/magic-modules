@@ -17,6 +17,7 @@ package github
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -65,4 +66,22 @@ func FormatReviewerComment(newPrimaryReviewer string) string {
 		"reviewer": newPrimaryReviewer,
 	})
 	return sb.String()
+}
+
+var reviewerCommentRegex = regexp.MustCompile("@(?P<reviewer>[^,]*), a repository maintainer, has been assigned to review your changes.")
+
+// FindReviewerComment returns the comment which mentions the current primary reviewer and the reviewer's login,
+// or an empty comment and empty string if no such comment is found.
+// comments should only include comments by the magician in the current PR.
+func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, string) {
+	for _, comment := range comments {
+		names := reviewerCommentRegex.SubexpNames()
+		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
+		for i, name := range names {
+			if name == "reviewer" {
+				return comment, matches[i]
+			}
+		}
+	}
+	return PullRequestComment{}, ""
 }

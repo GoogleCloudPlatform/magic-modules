@@ -31,11 +31,6 @@ var requestReviewerCmd = &cobra.Command{
 
 	The command expects the following pull request details as arguments:
 	1. PR Number
-	2. Commit SHA
-	3. Branch Name
-	4. Head Repo URL
-	5. Head Branch
-	6. Base Branch
 
 	It then performs the following operations:
 	1. Determines the author of the pull request
