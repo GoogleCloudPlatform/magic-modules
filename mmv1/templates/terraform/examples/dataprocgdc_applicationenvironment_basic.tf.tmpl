@@ -1,0 +1,6 @@
+resource "google_dataproc_gdc_application_environment" "<%= ctx[:primary_resource_id] %>" {
+  application_environment_id = "<%= ctx[:vars]['application_environment_id'] %>"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  location        = "us-west2"
+  namespace = "default"
+}

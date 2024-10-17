@@ -1,0 +1,9 @@
+--- !ruby/object:Api::Product
+versions:
+  - !ruby/object:Api::Product::Version
+    base_url: https://dataprocgdc.googleapis.com/v1/
+    name: ga
+name: DataprocGdc
+display_name: Dataproc on GDC
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
