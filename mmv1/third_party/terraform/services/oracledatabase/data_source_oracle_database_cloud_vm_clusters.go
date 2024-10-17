@@ -47,6 +47,12 @@ func dataSourceOracleDatabaseCloudVmClustersRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/cloudVmClusters")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
 	billingProject := ""
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -77,11 +83,9 @@ func dataSourceOracleDatabaseCloudVmClustersRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("Error setting cloudVmClusters: %s", err)
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/cloudVmClusters")
-	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
 	}
-	d.SetId(id)
 
 	return nil
 }
