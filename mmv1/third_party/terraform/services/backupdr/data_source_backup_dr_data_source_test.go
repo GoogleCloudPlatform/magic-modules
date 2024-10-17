@@ -1,7 +1,6 @@
 package backupdr_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,34 +14,35 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
+	stepChecks := func(wantName string, wantState string) []resource.TestCheckFunc {
+		stepCheck := []resource.TestCheckFunc{
+			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "name", wantName),
+			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "state", wantState),
+		}
+		return stepCheck
+	}
+
+	expectedName := "projects/liyunhuang-consumer/locations/us-central1/backupVaults/bv-test/dataSources/ds-test"
+	expectedState := "ACTIVE"
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_data_source.foo", "google_backup_dr_backup_vault.foo"),
-				),
+				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState)...),
 			},
 		},
 	})
 }
 
 func testAccDataSourceGoogleBackupDRDataSource_basic(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
-resource "google_backup_dr_backup_vault" "foo" {
-  backup_vault_id = "bv-test"
-  backup_minimum_enforced_retention_duration = "100000s"
-  location = "us-central1"
-  provider = google
-}
-
 data "google_backup_dr_data_source" "foo" {
-  name = "tf-test-data-source-%{random_suffix}"
   project = data.google_project.project.project_id
   location      = "us-central1"
   backup_vault_id = "bv-test"

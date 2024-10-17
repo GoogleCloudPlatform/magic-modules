@@ -13,7 +13,7 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 	dsSchema := map[string]*schema.Schema{
 		"name": {
 			Type:     schema.TypeString,
-			Required: true,
+			Computed: true,
 		},
 		"create_time": {
 			Type:     schema.TypeString,
