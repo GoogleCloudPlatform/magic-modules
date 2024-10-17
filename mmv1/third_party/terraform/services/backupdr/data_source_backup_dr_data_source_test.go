@@ -34,7 +34,7 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
-				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, "0")...),
+				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, "")...),
 			},
 		},
 	})
