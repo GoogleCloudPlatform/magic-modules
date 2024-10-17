@@ -29,6 +29,11 @@ resource "google_logging_organization_bucket_config" "basic" {
     field_path = "jsonPayload.request.status"
     type       = "INDEX_TYPE_STRING"
   }
+
+  restricted_fields = [
+    "jsonPayload.url",
+    "jsonPayload.data"
+  ]
 }
 ```
 
@@ -54,6 +59,8 @@ The following arguments are supported:
   Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation](https://cloud.google.com/logging/docs/analyze/custom-index) for details.
 
 * `type` - The type of data in this index. Allowed types include `INDEX_TYPE_UNSPECIFIED`, `INDEX_TYPE_STRING` and `INDEX_TYPE_INTEGER`.
+
+* `restricted_fields` - (Optional) A list of restricted fields requiring `logging.fields.access` permission to view. See [field-level access documentation](https://cloud.google.com/logging/docs/field-level-acl)
 
 ## Attributes Reference
 
