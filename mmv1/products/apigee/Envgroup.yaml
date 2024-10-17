@@ -13,6 +13,7 @@
 
 ---
 name: 'Envgroup'
+api_resource_type_kind: EnvironmentGroup
 description: |
   An `Environment group` in Apigee.
 references:

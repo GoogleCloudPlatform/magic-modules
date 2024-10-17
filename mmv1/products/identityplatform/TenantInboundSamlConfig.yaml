@@ -13,6 +13,7 @@
 
 ---
 name: 'TenantInboundSamlConfig'
+api_resource_type_kind: InboundSamlConfig
 description: |
   Inbound SAML configuration for a Identity Toolkit tenant.
 

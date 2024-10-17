@@ -17,6 +17,7 @@
 # other fields may have different defaults.  However, some fields are the same.  If fixing a bug
 # in one, please check the other for the same fix.
 name: 'StandardAppVersion'
+api_resource_type_kind: Version
 description: |
   Standard App Version resource to create a new version of standard GAE Application.
   Learn about the differences between the standard environment and the flexible environment

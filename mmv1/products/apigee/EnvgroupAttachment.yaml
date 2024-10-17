@@ -13,6 +13,7 @@
 
 ---
 name: 'EnvgroupAttachment'
+api_resource_type_kind: EnvironmentGroupAttachment
 description: |
   An `Environment Group attachment` in Apigee.
 references:

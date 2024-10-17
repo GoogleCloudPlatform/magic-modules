@@ -13,6 +13,7 @@
 
 ---
 name: 'Repository'
+api_resource_type_kind: Repo
 description: |
   A repository (or repo) is a Git repository storing versioned source content.
 references:

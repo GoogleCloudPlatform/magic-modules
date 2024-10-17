@@ -13,6 +13,7 @@
 
 ---
 name: 'ServiceNetworkSettings'
+api_resource_type_kind: Service
 description: |
   A NetworkSettings resource is a container for ingress settings for a version or service.
 references:
