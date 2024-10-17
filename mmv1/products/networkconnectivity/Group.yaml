@@ -15,10 +15,10 @@ name: Group
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
 create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
+update_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
 self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
 create_verb: 'PATCH'
 update_verb: 'PATCH'
-update_mask: true
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
@@ -96,13 +96,11 @@ properties:
   - name: autoAccept
     type: NestedObject
     description: Optional. The auto-accept setting for this group.
-    immutable: true
     properties:
       - name: autoAcceptProjects
         type: Array
         description: 'A list of project ids or project numbers for which you want to enable auto-accept. The auto-accept setting is applied to spokes being created or updated in these projects.'
         required: true
-        immutable: true
         item_type:
           type: String
   - name: routeTable
