@@ -61,6 +61,7 @@ resource "google_project" "project" {
   project_id     = "tf-test%{random_suffix}"
   name           = "tf-test%{random_suffix}"
   org_id         = "%{org_id}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
@@ -79,43 +80,3 @@ resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
 }
 `, context)
 }
-
-/*
-func testAccCheckIAM3PrincipalAccessBoundaryPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_iam3_principal_access_boundary_policy" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{IAM3BasePath}}organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("IAM3PrincipalAccessBoundaryPolicy still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
-}
-*/
