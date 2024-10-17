@@ -97,10 +97,10 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
   name            = "tf-test-external-gateway-%s"
   redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
   description     = "An externally managed VPN gateway"
-  interface = [{
+  interface {
     id         = 0
     ipv6_address = "%s"
-  }]
+  }
 }
 `, suffix, ipv6_address)
 }
