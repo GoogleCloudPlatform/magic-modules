@@ -17,7 +17,7 @@ func TestDetectMissingDocs(t *testing.T) {
 		name           string
 		oldResourceMap map[string]*schema.Resource
 		newResourceMap map[string]*schema.Resource
-		want           []MissingDocsResource
+		want           []MissingDocsInfo
 	}{
 		{
 			name: "no new fields",
@@ -37,7 +37,7 @@ func TestDetectMissingDocs(t *testing.T) {
 					},
 				},
 			},
-			want: []MissingDocsResource{},
+			want: []MissingDocsInfo{},
 		},
 		{
 			name: "multiple new fields missing doc",
@@ -50,9 +50,10 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 			},
 			oldResourceMap: map[string]*schema.Resource{},
-			want: []MissingDocsResource{
+			want: []MissingDocsInfo{
 				{
-					Resource: "google_x",
+					Name:     "google_x",
+					FilePath: "/website/docs/r/x.html.markdown",
 					Fields: []detector.MissingDocField{
 						{
 							Field:   "field-a",
@@ -86,7 +87,7 @@ func TestDetectMissingDocs(t *testing.T) {
 			out := make([]byte, buf.Len())
 			buf.Read(out)
 
-			var got []MissingDocsResource
+			var got []MissingDocsInfo
 			if err = json.Unmarshal(out, &got); err != nil {
 				t.Fatalf("Failed to unmarshall output: %s", err)
 			}

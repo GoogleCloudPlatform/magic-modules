@@ -209,7 +209,7 @@ func TestDetectMissingDocs(t *testing.T) {
 		name       string
 		schemaDiff diff.SchemaDiff
 		repo       string
-		want       map[string][]MissingDocField
+		want       map[string]MissingDocDetails
 	}{
 		{
 			name: "doc file not exist",
@@ -238,22 +238,22 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 			},
 			repo: t.TempDir(),
-			want: map[string][]MissingDocField{
+			want: map[string]MissingDocDetails{
 				"a_resource": {
-					{
-						Field:    "field_one",
-						Section:  "Arguments Reference",
-						FilePath: "/website/docs/r/a_resource.html.markdown",
-					},
-					{
-						Field:    "field_four",
-						Section:  "Arguments Reference",
-						FilePath: "/website/docs/r/a_resource.html.markdown",
-					},
-					{
-						Field:    "field_five",
-						Section:  "Attributes Reference",
-						FilePath: "/website/docs/r/a_resource.html.markdown",
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_one",
+							Section: "Arguments Reference",
+						},
+						{
+							Field:   "field_four",
+							Section: "Arguments Reference",
+						},
+						{
+							Field:   "field_five",
+							Section: "Attributes Reference",
+						},
 					},
 				},
 			},
@@ -285,17 +285,18 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 			},
 			repo: "../testdata",
-			want: map[string][]MissingDocField{
+			want: map[string]MissingDocDetails{
 				"a_resource": {
-					{
-						Field:    "field_five",
-						Section:  "Attributes Reference",
-						FilePath: "/website/docs/r/a_resource.html.markdown",
-					},
-					{
-						Field:    "field_one",
-						Section:  "Arguments Reference",
-						FilePath: "/website/docs/r/a_resource.html.markdown",
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_five",
+							Section: "Attributes Reference",
+						},
+						{
+							Field:   "field_one",
+							Section: "Arguments Reference",
+						},
 					},
 				},
 			},
@@ -307,13 +308,13 @@ func TestDetectMissingDocs(t *testing.T) {
 				t.Fatalf("DetectMissingDocs = %v, want = nil", err)
 			}
 			for r := range test.want {
-				sort.Slice(test.want[r], func(i, j int) bool {
-					return test.want[r][i].Field < test.want[r][j].Field
+				sort.Slice(test.want[r].Fields, func(i, j int) bool {
+					return test.want[r].Fields[i].Field < test.want[r].Fields[j].Field
 				})
 			}
 			for r := range got {
-				sort.Slice(got[r], func(i, j int) bool {
-					return got[r][i].Field < got[r][j].Field
+				sort.Slice(got[r].Fields, func(i, j int) bool {
+					return got[r].Fields[i].Field < got[r].Fields[j].Field
 				})
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {

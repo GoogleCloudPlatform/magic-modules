@@ -19,8 +19,9 @@ import (
 
 const detectMissingDocDesc = `Compute list of fields missing documents`
 
-type MissingDocsResource struct {
-	Resource string
+type MissingDocsInfo struct {
+	Name     string
+	FilePath string
 	Fields   []detector.MissingDocField
 }
 
@@ -40,8 +41,8 @@ func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 	}
 	cmd := &cobra.Command{
 		Use:   "detect-missing-docs",
-		Short: changedSchemaResourcesDesc,
-		Long:  changedSchemaResourcesDesc,
+		Short: detectMissingDocDesc,
+		Long:  detectMissingDocDesc,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			return o.run(args)
@@ -57,15 +58,16 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 	}
 	resources := maps.Keys(detectedResources)
 	slices.Sort(resources)
-	info := []MissingDocsResource{}
+	info := []MissingDocsInfo{}
 	for _, r := range resources {
-		fields := detectedResources[r]
-		sort.Slice(fields, func(i, j int) bool {
-			return fields[i].Field < fields[j].Field
+		details := detectedResources[r]
+		sort.Slice(details.Fields, func(i, j int) bool {
+			return details.Fields[i].Field < details.Fields[j].Field
 		})
-		info = append(info, MissingDocsResource{
-			Resource: r,
-			Fields:   fields,
+		info = append(info, MissingDocsInfo{
+			Name:     r,
+			FilePath: details.FilePath,
+			Fields:   details.Fields,
 		})
 	}
 

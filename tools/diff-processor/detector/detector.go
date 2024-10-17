@@ -37,10 +37,14 @@ type Field struct {
 	Tested bool
 }
 
-type MissingDocField struct {
-	Field    string
-	Section  string
+type MissingDocDetails struct {
 	FilePath string
+	Fields   []MissingDocField
+}
+
+type MissingDocField struct {
+	Field   string
+	Section string
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -163,12 +167,15 @@ func suggestedTest(resourceName string, untested []string) string {
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
 }
 
-func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string][]MissingDocField, error) {
-	missingDocFields := make(map[string][]MissingDocField)
+func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
 		docFilePath := resourceToDocFile(resource, repoPath)
 		var argumentsInDoc, attributesInDoc map[string]bool
 
+		details := MissingDocDetails{
+			FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+		}
 		content, err := os.ReadFile(docFilePath)
 		if err != nil && !os.IsNotExist(err) {
 			return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
@@ -189,14 +196,17 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 			}
 			if isAttribute(fieldDiff) {
 				if !attributesInDoc[field] {
-					missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Attributes Reference", FilePath: strings.ReplaceAll(docFilePath, repoPath, "")})
+					details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Attributes Reference"})
 				}
 			} else if !argumentsInDoc[field] {
-				missingDocFields[resource] = append(missingDocFields[resource], MissingDocField{Field: field, Section: "Arguments Reference", FilePath: strings.ReplaceAll(docFilePath, repoPath, "")})
+				details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Arguments Reference"})
 			}
 		}
+		if len(details.Fields) > 0 {
+			ret[resource] = details
+		}
 	}
-	return missingDocFields, nil
+	return ret, nil
 }
 
 func isAttribute(fieldDiff diff.FieldDiff) bool {
