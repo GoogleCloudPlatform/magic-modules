@@ -13,6 +13,7 @@
 
 ---
 name: 'FolderCustomModule'
+api_resource_type_kind: SecurityHealthAnalyticsCustomModule
 description: |
   Represents an instance of a Security Health Analytics custom module, including
   its full module name, display name, enablement state, and last updated time.
