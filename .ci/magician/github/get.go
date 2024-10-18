@@ -18,6 +18,7 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
+	"time"
 )
 
 type User struct {
@@ -39,9 +40,10 @@ type PullRequest struct {
 }
 
 type PullRequestComment struct {
-	User User   `json:"user"`
-	Body string `json:"body"`
-	ID   int    `json:"id"`
+	User      User      `json:"user"`
+	Body      string    `json:"body"`
+	ID        int       `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {

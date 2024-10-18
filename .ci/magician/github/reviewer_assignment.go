@@ -74,7 +74,13 @@ var reviewerCommentRegex = regexp.MustCompile("@(?P<reviewer>[^,]*), a repositor
 // or an empty comment and empty string if no such comment is found.
 // comments should only include comments by the magician in the current PR.
 func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, string) {
+	var newestComment PullRequestComment
+	var currentReviewer string
 	for _, comment := range comments {
+		if newestComment.CreatedAt.Before(comment.CreatedAt) {
+			// Skip comments created before the newest
+			continue
+		}
 		names := reviewerCommentRegex.SubexpNames()
 		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
 		if len(matches) < len(names) {
@@ -82,9 +88,10 @@ func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, str
 		}
 		for i, name := range names {
 			if name == "reviewer" {
-				return comment, matches[i]
+				newestComment = comment
+				currentReviewer = matches[i]
 			}
 		}
 	}
-	return PullRequestComment{}, ""
+	return newestComment, currentReviewer
 }
