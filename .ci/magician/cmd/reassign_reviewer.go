@@ -69,14 +69,14 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 		if err != nil {
 			return err
 		}
-		fmt.Println("New primary reviewer is ", newPrimaryReviewer)
 	} else {
 		newPrimaryReviewer, err = updateReviewComment(prNumber, currentReviewer, newPrimaryReviewer, reviewerComment.ID, gh)
 		if err != nil {
 			return err
 		}
-		fmt.Println("New primary reviewer is ", newPrimaryReviewer)
 	}
+
+	fmt.Println("New primary reviewer is ", newPrimaryReviewer)
 
 	err = gh.RequestPullRequestReviewers(prNumber, []string{newPrimaryReviewer})
 	if err != nil {
