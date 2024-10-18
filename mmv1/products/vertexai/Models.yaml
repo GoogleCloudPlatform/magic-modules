@@ -58,7 +58,7 @@ examples:
     vars:
       model_id: 'test-model'
     test_env_vars:
-      project_name: :PROJECT_NAME
+      project_name: 'PROJECT_NAME'
 parameters:
   - type: String
     name: region
