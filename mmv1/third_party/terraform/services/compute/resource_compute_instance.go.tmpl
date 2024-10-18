@@ -1464,9 +1464,7 @@ func getAllStatusBut(status string) []string {
 func changeInstanceStatusOnCreation(config *transport_tpg.Config, d *schema.ResourceData, project, zone, status, userAgent string) error {
 	var op *compute.Operation
 	var err error
-	if status == "RUNNING" {
-		return nil
-	} else if status == "TERMINATED" {
+	if status == "TERMINATED" {
 		op, err = config.NewComputeClient(userAgent).Instances.Stop(project, zone, d.Get("name").(string)).Do()
 	} else if status == "SUSPENDED" {
 		op, err = config.NewComputeClient(userAgent).Instances.Suspend(project, zone, d.Get("name").(string)).Do()
@@ -1583,9 +1581,13 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error waiting for status: %s", err)
 	}
 
-	err = changeInstanceStatusOnCreation(config, d, project, zone.Name, d.Get("desired_status").(string), userAgent)
-	if err != nil {
-		return fmt.Errorf("Error changing instance status after creation: %s", err)
+	if val, ok := d.GetOk("desired_status"); ok {
+		if val.(string) != "RUNNING" {
+			err = changeInstanceStatusOnCreation(config, d, project, zone.Name, d.Get("desired_status").(string), userAgent)
+			if err != nil {
+				return fmt.Errorf("Error changing instance status after creation: %s", err)
+			}
+		}
 	}
 
 	return resourceComputeInstanceRead(d, meta)
