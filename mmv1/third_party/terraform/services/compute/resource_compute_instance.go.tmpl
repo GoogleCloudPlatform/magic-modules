@@ -2414,7 +2414,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("boot_disk.0.auto_delete") {
 		op, err := config.NewComputeClient(userAgent).Instances.SetDiskAutoDelete(project, zone, instance.Name, d.Get("boot_disk.0.auto_delete").(bool), d.Get("boot_disk.0.device_name").(string)).Do()
 		if err != nil {
-			return errwrap.Wrapf("Error setting auto_delete : {{"{{"}}err{{"}}"}}", err)
+			return fmt.Errorf("Error changing auto_delete: %s", err)
 		}
 		opErr := ComputeOperationWaitTime(config, op, project, "changing auto_delete", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if opErr != nil {
