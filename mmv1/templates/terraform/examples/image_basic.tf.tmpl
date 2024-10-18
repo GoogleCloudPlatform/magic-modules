@@ -4,7 +4,7 @@ data "google_compute_image" "debian" {
 }
 
 resource "google_compute_disk" "persistent" {
-  name  = "debian-disk"
+  name  = "{{index $.Vars "disk_name"}}"
   image = data.google_compute_image.debian.self_link
   size  = 10
   type  = "pd-ssd"
