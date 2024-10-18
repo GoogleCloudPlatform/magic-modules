@@ -37,6 +37,9 @@ func TestAccSdkProvider_request_timeout(t *testing.T) {
 	}
 }
 
+// In the SDK version of the provider config code request_timeout has a zero value of "0s" and no default.
+// The final 'effective' value is "120s", matching the default used in the plugin-framework version of the provider config code.
+// See : https://github.com/hashicorp/terraform-provider-google/blob/09cb850ee64bcd78e4457df70905530c1ed75f19/google/transport/config.go#L1228-L1233
 func testAccSdkProvider_request_timeout_providerDefault(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
