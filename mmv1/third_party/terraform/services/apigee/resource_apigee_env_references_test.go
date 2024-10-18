@@ -111,15 +111,22 @@ resource "google_apigee_environment" "apigee_environment" {
 }
 
 resource "google_apigee_env_keystore" "apigee_environment_keystore_1" {
-  name       = "tf-test-keystore%{random_suffix}"
+  name       = "tf-test-keystore1%{random_suffix}"
   env_id     = google_apigee_environment.apigee_environment.id
 }
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
   env_id         = google_apigee_environment.apigee_environment.id
-  name           = "tf-test-reference%{random_suffix}"
+  name           = "tf-test-reference"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_1.name
+  depends_on = [google_apigee_env_keystore.apigee_environment_keystore_1]
+}
+
+resource "google_apigee_env_keystore" "apigee_environment_keystore_2" {
+  name       = "tf-test-keystore2%{random_suffix}"
+  env_id     = google_apigee_environment.apigee_environment.id
+  depends_on = [google_apigee_env_references.apigee_environment_reference]
 }
 `, context)
 }
@@ -190,15 +197,22 @@ resource "google_apigee_environment" "apigee_environment" {
 }
 
 resource "google_apigee_env_keystore" "apigee_environment_keystore_2" {
-  name       = "tf-test-keystore%{random_suffix}"
+  name       = "tf-test-keystore2%{random_suffix}"
   env_id     = google_apigee_environment.apigee_environment.id
 }
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
   env_id         = google_apigee_environment.apigee_environment.id
-  name           = "tf-test-reference%{random_suffix}"
+  name           = "tf-test-reference"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_2.name
+  depends_on = [google_apigee_env_keystore.apigee_environment_keystore_2]
+}
+
+resource "google_apigee_env_keystore" "apigee_environment_keystore_1" {
+  name       = "tf-test-keystore1%{random_suffix}"
+  env_id     = google_apigee_environment.apigee_environment.id
+  depends_on = [google_apigee_env_references.apigee_environment_reference]
 }
 `, context)
 }
