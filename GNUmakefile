@@ -70,7 +70,11 @@ mmv1:
 tpgtools:
 	make serialize
 	cd tpgtools;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
+		if [ "$(VERSION)" = "private" ]; then \
+			go run . --output $(OUTPUT_PATH) --version alpha $(tpgtools_compile); \
+		else \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile); \
+		fi
 
 clean-provider:
 	cd $(OUTPUT_PATH);\
