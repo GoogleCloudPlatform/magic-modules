@@ -1164,7 +1164,7 @@ func expandDistributionPolicy(d *schema.ResourceData) *compute.DistributionPolic
     }
 	  return &compute.DistributionPolicy{Zones: distributionPolicyZoneConfigs, TargetShape: dpts}
 	}
-	return &compute.DistributionPolicy{TargetShape: dpts}
+    return &compute.DistributionPolicy{TargetShape: dpts}
 }
 
 func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) []string {
