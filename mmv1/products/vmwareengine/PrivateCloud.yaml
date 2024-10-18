@@ -236,7 +236,7 @@ properties:
                * Not formatted as a UUID
                * Complies with [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034) (section 3.5)
 
-              Currently there map must contain only one element
+              Currently the map must contain only one element
               that describes the autoscaling policy for compute nodes.
             key_name: 'autoscale_policy_id'
             key_description: 'The key is the identifier of the policy.'
