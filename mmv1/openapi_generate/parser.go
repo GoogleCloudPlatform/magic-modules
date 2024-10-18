@@ -19,9 +19,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
 	"path"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -351,7 +351,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			field.Type = "KeyValueLabels"
 			break
 		}
-		
+
 		if obj.Value.AdditionalProperties.Schema != nil && obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
 			// AdditionalProperties with type string is a string -> string map
 			field.Type = "KeyValuePairs"
@@ -359,7 +359,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 
 		field.Type = "NestedObject"
-		
+
 		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
 	case "array":
 		field.Type = "Array"
