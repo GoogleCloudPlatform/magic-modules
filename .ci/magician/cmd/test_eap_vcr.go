@@ -231,7 +231,8 @@ func handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath string, resul
 	if len(result.Panics) > 0 {
 		comment := fmt.Sprintf(`The provider crashed while running the VCR tests in %s mode.
 Please fix it to complete your CL
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/alpha/refs/heads/%s/build-log/%s_test.log)`, mode.Upper(), head, mode.Lower())
+View the [build log](https://storage.cloud.google.com/ci-vcr-logs/%s/refs/heads/%s/build-log/%s_test.log)`,
+			provider.Private.String(), mode.Upper(), head, mode.Lower())
 		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
 			return true, fmt.Errorf("error posting comment: %v", err)
 		}
