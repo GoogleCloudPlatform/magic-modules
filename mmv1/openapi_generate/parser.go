@@ -16,7 +16,6 @@
 package openapi_generate
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -28,14 +27,11 @@ import (
 
 	"log"
 
-	"text/template"
-
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -88,8 +84,13 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
+	header, err := os.ReadFile("openapi_generate/header.txt")
+	if err != nil {
+		log.Fatalf("error reading header %v", err)
+	}
+
 	resourcePaths := findResources(doc)
-	productPath := buildProduct(filePath, parser.Output, doc)
+	productPath := buildProduct(filePath, parser.Output, doc, header)
 
 	// Disables line wrap for long strings
 	yaml.FutureLineWrap()
@@ -98,14 +99,27 @@ func (parser Parser) WriteYaml(filePath string) {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
 
 		// marshal method
-		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s_marshal.yaml", resource.Name))
+		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
 		bytes, err := yaml.Marshal(resource)
 		if err != nil {
 			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
 		}
-		err = os.WriteFile(resourceOutPathMarshal, bytes, 0644)
+
+		f, err := os.Create(resourceOutPathMarshal)
 		if err != nil {
-			log.Fatalf("error writing product to path %v: %v", resourceOutPathMarshal, err)
+			log.Fatalf("error creating resource file %v", err)
+		}
+		_, err = f.Write(header)
+		if err != nil {
+			log.Fatalf("error writing resource file header %v", err)
+		}
+		_, err = f.Write(bytes)
+		if err != nil {
+			log.Fatalf("error writing resource file %v", err)
+		}
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error closing resource file %v", err)
 		}
 		log.Printf("Generated resource %s", resourceOutPathMarshal)
 	}
@@ -131,7 +145,7 @@ func findResources(doc *openapi3.T) [][]string {
 	return resourcePaths
 }
 
-func buildProduct(filePath, output string, root *openapi3.T) string {
+func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
 
 	version := root.Info.Version
 	server := root.Servers[0].URL
@@ -159,13 +173,7 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 	//Scopes should be added soon to OpenAPI, until then use global scope
 	apiProduct.Scopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
 
-	// productOutPath := filepath.Join(output, fmt.Sprintf("/%s/product.yaml", productName))
-	templatePath := "openapi_generate/product_yaml.tmpl"
-
-	productOutPathTemplate := filepath.Join(output, fmt.Sprintf("/%s/product_template.yaml", productName))
-	WriteGoTemplate(templatePath, productOutPathTemplate, apiProduct)
-
-	productOutPathMarshal := filepath.Join(output, fmt.Sprintf("/%s/product_marshal.yaml", productName))
+	productOutPathMarshal := filepath.Join(output, fmt.Sprintf("/%s/product.yaml", productName))
 
 	// Default yaml marshaller
 	bytes, err := yaml.Marshal(apiProduct)
@@ -173,21 +181,32 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 		log.Fatalf("error marshalling yaml %v: %v", productOutPathMarshal, err)
 	}
 
-	err = os.WriteFile(productOutPathMarshal, bytes, 0644)
+	f, err := os.Create(productOutPathMarshal)
 	if err != nil {
-		log.Fatalf("error writing product to path %v: %v", productOutPathMarshal, err)
+		log.Fatalf("error creating product file %v", err)
 	}
-
+	_, err = f.Write(header)
+	if err != nil {
+		log.Fatalf("error writing product file header %v", err)
+	}
+	_, err = f.Write(bytes)
+	if err != nil {
+		log.Fatalf("error writing product file %v", err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatalf("error closing product file %v", err)
+	}
 	return productPath
 }
 
 func baseUrl(resourcePath string) string {
 	base := strings.ReplaceAll(resourcePath, "{", "{{")
 	base = strings.ReplaceAll(base, "}", "}}")
+	// Some APIs use projectsId and locationsId, but we have standardized on these
 	base = strings.ReplaceAll(base, "projectsId", "project")
 	base = strings.ReplaceAll(base, "locationsId", "location")
-	base = strings.ReplaceAll(base, "/v1/", "")
-	base = strings.ReplaceAll(base, "/v1alpha/", "project")
+	base = stripVersion(base)
 	r := regexp.MustCompile(`\{\{(\w+)\}\}`)
 	matches := r.FindStringSubmatch(base)
 	for i := 0; i < len(matches); i++ {
@@ -195,6 +214,14 @@ func baseUrl(resourcePath string) string {
 		base = strings.ReplaceAll(base, match, google.Underscore(match))
 	}
 	return base
+}
+
+// OpenAPI paths are prefixed with the version of the API, which already exists
+// in the product. Strip it out here
+func stripVersion(path string) string {
+	pattern := `^(/.*v\d[^/]*/)`
+	re := regexp.MustCompile(pattern)
+	return re.ReplaceAllString(path, "")
 }
 
 func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
@@ -314,6 +341,10 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		}
 	case "integer":
 		field.Type = "Integer"
+	case "number":
+		field.Type = "Double"
+	case "boolean":
+		field.Type = "Boolean"
 	case "object":
 		if field.Name == "labels" {
 			// Standard labels implementation
@@ -339,6 +370,10 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			subField.Type = "String"
 		case "integer":
 			subField.Type = "Integer"
+		case "number":
+			subField.Type = "Double"
+		case "boolean":
+			subField.Type = "Boolean"
 		case "object":
 			subField.Type = "NestedObject"
 			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required)
