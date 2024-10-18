@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	cloudresourcemanager "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager"
-	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
 	cloudresourcemanagerAlpha "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/alpha"
+	cloudresourcemanagerBeta "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudresourcemanager/beta"
 )
 
 func serializeAlphaProjectToHCL(r cloudresourcemanagerAlpha.Project, hasGAEquivalent bool) (string, error) {
