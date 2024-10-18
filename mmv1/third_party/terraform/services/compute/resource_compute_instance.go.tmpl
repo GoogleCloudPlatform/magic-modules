@@ -2420,7 +2420,6 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		if opErr != nil {
 			return opErr
 		}
-		log.Printf("[DEBUG] Successfully changed auto_delete on disk %s", instance.Disks[0].DeviceName)
 	}
 
 	// d.HasChange("service_account") is oversensitive: see https://github.com/hashicorp/terraform/issues/17411
