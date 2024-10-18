@@ -4,15 +4,10 @@ resource "google_compute_security_policy" "default" {
   type        = "CLOUD_ARMOR"
 }
 
-# A default rule is generated when creating the security_policy resource, import is needed to patch it
-# import {
-#   id = "projects/{{index $.TestEnvVars "project_id"}}/global/securityPolicies/{{index $.Vars "sec_policy_name"}}/priority/2147483647"
-#   to = google_compute_security_policy_rule.default_rule
-# }
 resource "google_compute_security_policy_rule" "default_rule" {
   security_policy = google_compute_security_policy.default.name
   description     = "default rule"
-  action          = "allow"
+  action          = "deny"
   priority        = "2147483647"
   match {
     versioned_expr = "SRC_IPS_V1"
