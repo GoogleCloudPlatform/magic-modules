@@ -13,6 +13,9 @@
     "nextRotationTime": "9999-10-02T15:01:23Z",
     "rotationPeriod": "10368000s"
   },
+  "workloadOptions": {
+    "kajEnrollmentType": "KEY_ACCESS_TRANSPARENCY_OFF"
+  },
   "resourceSettings": [
     {
       "resourceType": "CONSUMER_FOLDER",
