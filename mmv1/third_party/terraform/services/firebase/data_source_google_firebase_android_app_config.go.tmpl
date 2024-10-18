@@ -75,6 +75,7 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Schema(ctx context.Context, r
 				Computed:            true,
 			},
 
+			// This is included for backwards compatibility with the original, SDK-implemented data source.
 			"id": schema.StringAttribute{
 				Description:         "Firebase Android App Config identifier",
 				MarkdownDescription: "Firebase Android App Config identifier",
@@ -116,25 +117,26 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 		return
 	}
 
-	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
-
-	client := firebase.NewProjectsAndroidAppsService(d.client)
-
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// Use provider_meta to set User-Agent
+	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
+
 	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	appName := fmt.Sprintf("projects/%s/androidApps/%s/config", data.Project.ValueString(), data.AppId.ValueString())
-	data.Id = types.StringValue(appName)
 
-	clientResp, err := client.GetConfig(appName).Do()
+
+	// GET Request
+	service := firebase.NewProjectsAndroidAppsService(d.client)
+	appName := fmt.Sprintf("projects/%s/androidApps/%s/config", data.Project.ValueString(), data.AppId.ValueString())
+	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
 		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAndroidAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
@@ -144,6 +146,8 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 
 	tflog.Trace(ctx, "read firebase android app config data source")
 
+	// Put data in model
+	data.Id = types.StringValue(appName)
 	data.ConfigFilename = types.StringValue(clientResp.ConfigFilename)
 	data.ConfigFileContents = types.StringValue(clientResp.ConfigFileContents)
 

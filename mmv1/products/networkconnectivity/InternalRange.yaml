@@ -71,6 +71,12 @@ examples:
     vars:
       internal_range_name: 'overlap-range'
       network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_migration'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'migration'
+      network_name: 'internal-ranges'
+      source_subnet_name: 'source-subnet'
 parameters:
 properties:
   - name: 'name'
@@ -108,6 +114,7 @@ properties:
     enum_values:
       - 'FOR_VPC'
       - 'EXTERNAL_TO_VPC'
+      - 'FOR_MIGRATION'
   - name: 'peering'
     type: Enum
     description: |
@@ -149,3 +156,25 @@ properties:
       enum_values:
         - 'OVERLAP_ROUTE_RANGE'
         - 'OVERLAP_EXISTING_SUBNET_RANGE'
+  - name: 'migration'
+    type: NestedObject
+    description: |
+      Specification for migration with source and target resource names.
+    immutable: true
+    properties:
+      - name: 'source'
+        type: String
+        description: |
+          Resource path as an URI of the source resource, for example a subnet.
+          The project for the source resource should match the project for the
+          InternalRange.
+          An example /projects/{project}/regions/{region}/subnetworks/{subnet}
+        required: true
+      - name: 'target'
+        type: String
+        description: |
+          Resource path of the target resource. The target project can be
+          different, as in the cases when migrating to peer networks. The resource
+          may not exist yet.
+          For example /projects/{project}/regions/{region}/subnetworks/{subnet}
+        required: true

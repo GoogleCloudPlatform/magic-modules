@@ -118,9 +118,6 @@ resource "google_container_attached_cluster" "primary" {
       namespace = "default"
     }
   }
-  security_posture_config {
-    vulnerability_mode = "VULNERABILITY_ENTERPRISE"
-  }
 }
 `, context)
 }
@@ -168,9 +165,6 @@ resource "google_container_attached_cluster" "primary" {
       name = "new-proxy-config"
       namespace = "custom-ns"
     }
-  }
-  security_posture_config {
-    vulnerability_mode = "VULNERABILITY_DISABLED"
   }
   lifecycle {
     prevent_destroy = true
@@ -317,9 +311,6 @@ resource "google_container_attached_cluster" "primary" {
       name = "new-proxy-config"
       namespace = "custom-ns"
     }
-  }
-  security_posture_config {
-    vulnerability_mode = "VULNERABILITY_DISABLED"
   }
 }
 `, context)
