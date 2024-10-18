@@ -241,7 +241,7 @@ resource "google_sql_database" "database" {
 	name     = "%s"
 	instance = google_sql_database_instance.instance.name
   }
-`, instance_name, activationPolicy, database_name)
+`, instance_name, activationPolicy, database_name,)
 }
 
 var testGoogleSqlDatabase_basic = `
