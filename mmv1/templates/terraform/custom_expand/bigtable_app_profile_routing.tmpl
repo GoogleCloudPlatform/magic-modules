@@ -23,5 +23,9 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 		obj.ClusterIds = append(obj.ClusterIds, id.(string))
 	}
 
+	if _, ok := d.GetOkExists("row_affinity"); ok {
+		obj.RowAffinity = &bigtableadmin.RowAffinity{}
+	}
+
 	return obj, nil
 }
