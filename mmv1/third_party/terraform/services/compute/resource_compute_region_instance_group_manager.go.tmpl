@@ -1152,17 +1152,19 @@ func expandDistributionPolicy(d *schema.ResourceData) *compute.DistributionPolic
 		return nil
 	}
 
-	distributionPolicyZoneConfigs := make([]*compute.DistributionPolicyZoneConfiguration, 0, dpz.Len())
-	for _, raw := range dpz.List() {
-		data := raw.(string)
-		distributionPolicyZoneConfig := compute.DistributionPolicyZoneConfiguration{
-			Zone: "zones/" + data,
-		}
+  if d.HasChange("distribution_policy_zones") {
+    distributionPolicyZoneConfigs := make([]*compute.DistributionPolicyZoneConfiguration, 0, dpz.Len())
+    for _, raw := range dpz.List() {
+      data := raw.(string)
+      distributionPolicyZoneConfig := compute.DistributionPolicyZoneConfiguration{
+        Zone: "zones/" + data,
+      }
 
-		distributionPolicyZoneConfigs = append(distributionPolicyZoneConfigs, &distributionPolicyZoneConfig)
+      distributionPolicyZoneConfigs = append(distributionPolicyZoneConfigs, &distributionPolicyZoneConfig)
+    }
+	  return &compute.DistributionPolicy{Zones: distributionPolicyZoneConfigs, TargetShape: dpts}
 	}
-
-	return &compute.DistributionPolicy{Zones: distributionPolicyZoneConfigs, TargetShape: dpts}
+	return &compute.DistributionPolicy{TargetShape: dpts}
 }
 
 func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) []string {
