@@ -12,14 +12,22 @@ jobs:
   run_gofmt:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-
+      - name: Checkout Repository
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          fetch-depth: 0
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
           cache: false
           go-version: '^1.21'
-
       - name: gofmt
         run: |
           GOFMT_OUTPUT="$(gofmt -l .)"
