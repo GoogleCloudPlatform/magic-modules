@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"magician/github"
 
@@ -24,7 +25,7 @@ import (
 
 // reassignReviewerCmd represents the reassignReviewer command
 var reassignReviewerCmd = &cobra.Command{
-	Use:   "reassign-reviewer PR_NUMBER",
+	Use:   "reassign-reviewer PR_NUMBER [REVIEWER]",
 	Short: "Reassigns primary reviewer to the given reviewer or a random reviewer if none given",
 	Long: `This command reassigns reviewers when invoked via a comment on a pull request.
 
@@ -35,6 +36,7 @@ var reassignReviewerCmd = &cobra.Command{
 
 	It then performs the following operations:
 	1. Updates the reviewer comment to reflect the new primary reviewer.
+	2. Requests a review from the new primary reviewer.
 	`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,20 +65,17 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 	reviewerComment, currentReviewer := github.FindReviewerComment(comments)
 
 	if currentReviewer == "" {
-		return fmt.Errorf("no reviewer comment found in PR %s", prNumber)
-	}
-
-	if newPrimaryReviewer == "" {
-		newPrimaryReviewer = github.GetNewRandomReviewer(currentReviewer)
-	}
-
-	if currentReviewer == newPrimaryReviewer {
-		return fmt.Errorf("primary reviewer is already %s", newPrimaryReviewer)
-	}
-
-	err = gh.UpdateComment(prNumber, github.FormatReviewerComment(newPrimaryReviewer), reviewerComment.ID)
-	if err != nil {
-		return err
+		newPrimaryReviewer, err = createReviewComment(prNumber, newPrimaryReviewer, gh)
+		if err != nil {
+			return err
+		}
+		fmt.Println("New primary reviewer is ", newPrimaryReviewer)
+	} else {
+		newPrimaryReviewer, err = updateReviewComment(prNumber, currentReviewer, newPrimaryReviewer, reviewerComment.ID, gh)
+		if err != nil {
+			return err
+		}
+		fmt.Println("New primary reviewer is ", newPrimaryReviewer)
 	}
 
 	err = gh.RequestPullRequestReviewers(prNumber, []string{newPrimaryReviewer})
@@ -85,6 +84,40 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 	}
 
 	return nil
+}
+
+func createReviewComment(prNumber, newPrimaryReviewer string, gh GithubClient) (string, error) {
+	fmt.Println("No reviewer comment found, creating one")
+	if newPrimaryReviewer == "" {
+		newPrimaryReviewer = github.GetRandomReviewer()
+	}
+
+	if newPrimaryReviewer == "" {
+		return "", errors.New("no primary reviewer found")
+	}
+
+	err := gh.PostComment(prNumber, github.FormatReviewerComment(newPrimaryReviewer))
+	if err != nil {
+		return "", err
+	}
+	return newPrimaryReviewer, nil
+}
+
+func updateReviewComment(prNumber, currentReviewer, newPrimaryReviewer string, reviewerCommentID int, gh GithubClient) (string, error) {
+	fmt.Println("Reassigning to random reviewer")
+	if newPrimaryReviewer == "" {
+		newPrimaryReviewer = github.GetNewRandomReviewer(currentReviewer)
+	}
+
+	if currentReviewer == newPrimaryReviewer {
+		return newPrimaryReviewer, fmt.Errorf("primary reviewer is already %s", newPrimaryReviewer)
+	}
+
+	err := gh.UpdateComment(prNumber, github.FormatReviewerComment(newPrimaryReviewer), reviewerCommentID)
+	if err != nil {
+		return "", err
+	}
+	return newPrimaryReviewer, nil
 }
 
 func init() {

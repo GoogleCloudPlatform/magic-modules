@@ -77,6 +77,9 @@ func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, str
 	for _, comment := range comments {
 		names := reviewerCommentRegex.SubexpNames()
 		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
+		if len(matches) < len(names) {
+			continue
+		}
 		for i, name := range names {
 			if name == "reviewer" {
 				return comment, matches[i]
