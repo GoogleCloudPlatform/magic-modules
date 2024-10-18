@@ -2,10 +2,12 @@ package detector
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -199,5 +201,228 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 				t.Errorf("found unexpected number of missing tests in %s: %d", test.name, len(missingTests))
 			}
 		}
+	}
+}
+
+func TestDetectMissingDocs(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		schemaDiff diff.SchemaDiff
+		repo       string
+		want       map[string]MissingDocDetails
+	}{
+		{
+			name: "doc file not exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: t.TempDir(),
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_one",
+							Section: "Arguments Reference",
+						},
+						{
+							Field:   "field_four",
+							Section: "Arguments Reference",
+						},
+						{
+							Field:   "field_five",
+							Section: "Attributes Reference",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "doc file exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_five",
+							Section: "Attributes Reference",
+						},
+						{
+							Field:   "field_one",
+							Section: "Arguments Reference",
+						},
+					},
+				},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingDocs(test.schemaDiff, test.repo)
+			if err != nil {
+				t.Fatalf("DetectMissingDocs = %v, want = nil", err)
+			}
+			for r := range test.want {
+				sort.Slice(test.want[r].Fields, func(i, j int) bool {
+					return test.want[r].Fields[i].Field < test.want[r].Fields[j].Field
+				})
+			}
+			for r := range got {
+				sort.Slice(got[r].Fields, func(i, j int) bool {
+					return got[r].Fields[i].Field < got[r].Fields[j].Field
+				})
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDetectMissingDocsForDatasource(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		schemaDiff diff.SchemaDiff
+		repo       string
+		want       map[string]MissingDocDetails
+	}{
+		{
+			name: "doc file not exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: t.TempDir(),
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/d/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field: "field_five",
+						},
+						{
+							Field: "field_one",
+						},
+						{
+							Field: "field_four",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "doc file exist",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one": {
+							New: &schema.Schema{},
+						},
+						"field_two.field_three": {
+							New: &schema.Schema{},
+							Old: &schema.Schema{},
+						},
+						"field_four": {
+							New: &schema.Schema{
+								Computed: true,
+								Optional: true,
+							},
+						},
+						"field_five": {
+							New: &schema.Schema{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingDocsForDatasource(test.schemaDiff, test.repo)
+			if err != nil {
+				t.Fatalf("DetectMissingDocsForDatasource = %v, want = nil", err)
+			}
+			for r := range test.want {
+				sort.Slice(test.want[r].Fields, func(i, j int) bool {
+					return test.want[r].Fields[i].Field < test.want[r].Fields[j].Field
+				})
+			}
+			for r := range got {
+				sort.Slice(got[r].Fields, func(i, j int) bool {
+					return got[r].Fields[i].Field < got[r].Fields[j].Field
+				})
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
+			}
+		})
 	}
 }
