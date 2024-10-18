@@ -177,19 +177,19 @@ func TestAccComputeSecurityPolicyRule_securityPolicyDefaultRule(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_securityPolicyDefaultRuleDeny(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule_default",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_securityPolicyDefaultRuleAllow(context),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule_default",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_securityPolicyDefaultRuleAllow(context),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

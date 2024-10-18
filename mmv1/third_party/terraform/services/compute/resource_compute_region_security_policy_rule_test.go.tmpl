@@ -82,19 +82,19 @@ func TestAccComputeRegionSecurityPolicyRule_securityPolicyDefaultRule(t *testing
 			{
 				Config: testAccComputeRegionSecurityPolicyRule_securityPolicyDefaultRuleDeny(context),
 			},
-      {
-        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_default",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeRegionSecurityPolicyRule_securityPolicyDefaultRuleAllow(context),
-      },
-      {
-        ResourceName:      "google_compute_region_security_policy_rule.policy_rule_default",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+			{
+				ResourceName:      "google_compute_region_security_policy_rule.policy_rule_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicyRule_securityPolicyDefaultRuleAllow(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy_rule.policy_rule_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
