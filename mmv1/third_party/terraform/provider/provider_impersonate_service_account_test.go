@@ -127,9 +127,15 @@ func testAccSdkProvider_impersonate_service_account_usage(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		// No PreCheck for checking ENVs
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccSdkProvider_impersonate_service_account_testViaFailure(context),
+				Config: testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context),
+			},
+			{
+				Config:      testAccSdkProvider_impersonate_service_account_testViaFailure_scenario(context),
 				ExpectError: regexp.MustCompile("Error creating Topic: googleapi: Error 403: User not authorized"),
 			},
 		},
@@ -156,7 +162,8 @@ data "google_provider_config_sdk" "default" {}
 `, context)
 }
 
-func testAccSdkProvider_impersonate_service_account_testViaFailure(context map[string]interface{}) string {
+func testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context map[string]interface{}) string {
+	// Setup where we make resources we'll use for testing impersonation in the next step
 	return acctest.Nprintf(`
 // This will succeed due to the Terraform identity having necessary permissions
 resource "google_pubsub_topic" "ok" {
@@ -178,6 +185,19 @@ resource "google_service_account_iam_member" "token" {
   member             = "serviceAccount:${data.google_client_openid_userinfo.me.email}"
 }
 
+# To ensure that all permissions have propagated before the next test step, we add this sleep
+resource "time_sleep" "wait_5_minutes" {
+  depends_on = [
+    google_service_account_iam_member.token
+  ]
+  create_duration = "300s"	
+}
+`, context)
+}
+
+func testAccSdkProvider_impersonate_service_account_testViaFailure_scenario(context map[string]interface{}) string {
+	// Setup plus config where we test impersonation
+	return testAccSdkProvider_impersonate_service_account_testViaFailure_setup(context) + acctest.Nprintf(`
 // Impersonate the created service account
 provider "google" {
   alias = "impersonation"
