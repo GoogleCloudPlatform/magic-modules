@@ -406,6 +406,11 @@ properties:
     description: |
       Whether private IP is enabled on the Looker instance.
     default_value: false
+  - name: 'geminiEnabled'
+    type: Boolean
+    description: |
+      Whether Gemini is enabled on the Looker instance.
+    default_value: false
   # PscConfig Object
   - name: 'pscConfig'
     type: NestedObject
