@@ -12,15 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'ResizeRequest'
-api_resource_type_kind: InstanceGroupManagerResizeRequest
-kind: 'compute#instanceGroupManagerResizeRequest'
+name: 'RegionResizeRequest'
+kind: 'compute#regionInstanceGroupManagerResizeRequest'
+min_version: beta
 description: |
-  Represents a Managed Instance Group Resize Request
+  Represents a Regional Managed Instance Group Resize Request
 
   Resize Requests are the Managed Instance Group implementation of Dynamic Workload Scheduler Flex Start.
 
-  With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred zone. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
+  With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
 references:
   guides:
     # Link to quickstart in the API's Guides section. For example:
@@ -31,9 +31,9 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceGroupManagerResizeRequests'
 docs:
 ### List Method ###
-base_url: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
+base_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
 ### Get Method
-self_link: 'projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}'
+self_link: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}'
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -62,30 +62,31 @@ async:
 
 ### Delete Method ###
 # Custom delete method to handle resize request cancellations vs. deletions.
-# If a resize request is in the ACCEPTED state, it must be canceled before it can be
-# deleted. If a resize request is NOT in the ACCEPTED state, it can be directly deleted.
+# If a resize request is in the CREATING or ACCEPTED state, it must be canceled before it can be
+# deleted. If a resize request is NOT in any of the mentioned state, it can be directly deleted.
 custom_code:
-  custom_delete: 'templates/terraform/custom_delete/compute_mig_resize_request_delete.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/compute_rmig_resize_request_delete.go.tmpl'
 # Examples for testing
 examples:
-  - name: 'compute_mig_resize_request'
+  - name: 'compute_rmig_resize_request'
+    min_version: beta
     primary_resource_id: 'a3_resize_request'
     vars:
       resize_request_name: 'a3-dws'
 # Resize request parameters injected via URL
 parameters:
-  - name: 'zone'
+  - name: 'region'
     type: ResourceRef
     description: |
-      Name of the compute zone scoping this request. Name should conform to RFC1035.
+      Name of the compute region scoping this request. Name should conform to RFC1035.
     url_param_only: true
     required: true
-    resource: 'Zone'
+    resource: 'Region'
     imports: 'name'
   - name: 'instanceGroupManager'
     type: ResourceRef
     description: |
-      The name of the managed instance group. The name should conform to RFC1035 or be a resource ID.
+      The name of the regional managed instance group. The name should conform to RFC1035 or be a resource ID.
       Authorization requires the following IAM permission on the specified resource instanceGroupManager:
       *compute.instanceGroupManagers.update
     url_param_only: true
@@ -127,7 +128,7 @@ properties:
   - name: 'requestedRunDuration'
     type: NestedObject
     description: |
-      Requested run duration for instances that will be created by this request. At the end of the run duration instance will be deleted.
+      Requested run duration for instances that will be created by this request. At the end of the run duration instances will be deleted.
     properties:
       - name: 'seconds'
         type: String
