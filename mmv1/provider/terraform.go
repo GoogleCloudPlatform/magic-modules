@@ -105,6 +105,8 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
+			// log.Printf("Generating %s metadata", object.Name)
+			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
 	}
 
@@ -135,6 +137,16 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s.html.markdown", t.FullResourceName(object)))
 		templateData.GenerateDocumentationFile(targetFilePath, object)
 	}
+}
+
+func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData TemplateData, outputFolder string) {
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_meta.yaml", t.FullResourceName(object)))
+	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
