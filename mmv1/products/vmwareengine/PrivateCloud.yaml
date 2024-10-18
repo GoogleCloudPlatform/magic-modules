@@ -262,10 +262,12 @@ properties:
                   properties:
                     - name: 'scaleOut'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-out operation in percent.
                     - name: 'scaleIn'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-in operation in percent.
                 - name: 'consumedMemoryThresholds'
@@ -275,10 +277,12 @@ properties:
                   properties:
                     - name: 'scaleOut'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-out operation in percent.
                     - name: 'scaleIn'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-in operation in percent.
                 - name: 'storageThresholds'
@@ -288,10 +292,12 @@ properties:
                   properties:
                     - name: 'scaleOut'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-out operation in percent.
                     - name: 'scaleIn'
                       type: Integer
+                      required: true
                       description: |
                         The utilization triggering the scale-in operation in percent.
           - name: 'minClusterNodeCount'
