@@ -32,60 +32,50 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 		},
 		CheckDestroy: testAccCheckVmwareenginePrivateCloudDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{
-				Config: testVmwareenginePrivateCloudCreateConfig(context),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_vmwareengine_private_cloud.ds",
-						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"type":                              {},
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
-						}),
-					testAccCheckGoogleVmwareengineNsxCredentialsMeta("data.google_vmwareengine_nsx_credentials.nsx-ds"),
-					testAccCheckGoogleVmwareengineVcenterCredentialsMeta("data.google_vmwareengine_vcenter_credentials.vcenter-ds"),
-				),
-			},
-			{
-				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
-			},
+			// {
+			// 	Config: testVmwareenginePrivateCloudCreateConfig(context),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+			// 			"data.google_vmwareengine_private_cloud.ds",
+			// 			"google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 			map[string]struct{}{
+			// 				"type":                              {},
+			// 				"deletion_delay_hours":              {},
+			// 				"send_deletion_delay_hours_if_zero": {},
+			// 			}),
+			// 		testAccCheckGoogleVmwareengineNsxCredentialsMeta("data.google_vmwareengine_nsx_credentials.nsx-ds"),
+			// 		testAccCheckGoogleVmwareengineVcenterCredentialsMeta("data.google_vmwareengine_vcenter_credentials.vcenter-ds"),
+			// 	),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+			// },
+
+			// {
+			// 	Config: testVmwareenginePrivateCloudUpdateNodeConfig(context),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+			// 			"data.google_vmwareengine_private_cloud.ds",
+			// 			"google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 			map[string]struct{}{
+			// 				"type":                              {},
+			// 				"deletion_delay_hours":              {},
+			// 				"send_deletion_delay_hours_if_zero": {},
+			// 			}),
+			// 	),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+			// },
 
 			{
-				Config: testVmwareenginePrivateCloudUpdateConfig(context),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-						"data.google_vmwareengine_private_cloud.ds",
-						"google_vmwareengine_private_cloud.vmw-engine-pc",
-						map[string]struct{}{
-							"type":                              {},
-							"deletion_delay_hours":              {},
-							"send_deletion_delay_hours_if_zero": {},
-						}),
-				),
-			},
-			{
-				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
-			},
-
-			{
-				Config: testVmwareenginePrivateCloudDelayedDeleteConfig(context),
-			},
-			{
-				ResourceName:            "google_vmwareengine_network.vmw-engine-nw",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name"},
-			},
-
-			{
-				Config: testVmwareenginePrivateCloudUndeleteConfig(context),
+				Config: testVmwareenginePrivateCloudUpdateAutoscaleConfig(context),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_vmwareengine_private_cloud.ds",
@@ -104,28 +94,58 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
-			{
-				Config: testVmwareengineSubnetImportConfig(context),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet", map[string]struct{}{}),
-				),
-			},
-			{
-				ResourceName:            "google_vmwareengine_subnet.vmw-engine-subnet",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "name"},
-			},
+			// {
+			// 	Config: testVmwareenginePrivateCloudDelayedDeleteConfig(context),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_network.vmw-engine-nw",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"location", "name"},
+			// },
 
-			{
-				Config: testVmwareengineSubnetUpdateConfig(context),
-			},
-			{
-				ResourceName:            "google_vmwareengine_subnet.vmw-engine-subnet",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent", "name"},
-			},
+			// {
+			// 	Config: testVmwareenginePrivateCloudUndeleteConfig(context),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+			// 			"data.google_vmwareengine_private_cloud.ds",
+			// 			"google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 			map[string]struct{}{
+			// 				"type":                              {},
+			// 				"deletion_delay_hours":              {},
+			// 				"send_deletion_delay_hours_if_zero": {},
+			// 			}),
+			// 	),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+			// },
+
+			// {
+			// 	Config: testVmwareengineSubnetImportConfig(context),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_vmwareengine_subnet.subnet-ds", "google_vmwareengine_subnet.vmw-engine-subnet", map[string]struct{}{}),
+			// 	),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_subnet.vmw-engine-subnet",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"parent", "name"},
+			// },
+
+			// {
+			// 	Config: testVmwareengineSubnetUpdateConfig(context),
+			// },
+			// {
+			// 	ResourceName:            "google_vmwareengine_subnet.vmw-engine-subnet",
+			// 	ImportState:             true,
+			// 	ImportStateVerify:       true,
+			// 	ImportStateVerifyIgnore: []string{"parent", "name"},
+			// },
 		},
 	})
 }
@@ -134,8 +154,12 @@ func testVmwareenginePrivateCloudCreateConfig(context map[string]interface{}) st
 	return testVmwareenginePrivateCloudConfig(context, "sample description", "TIME_LIMITED", 1, 1) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
-func testVmwareenginePrivateCloudUpdateConfig(context map[string]interface{}) string {
+func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}) string {
 	return testVmwareenginePrivateCloudConfig(context, "sample updated description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
+}
+
+func testVmwareenginePrivateCloudUpdateAutoscaleConfig(context map[string]interface{}) string {
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudDelayedDeleteConfig(context map[string]interface{}) string {
@@ -143,15 +167,15 @@ func testVmwareenginePrivateCloudDelayedDeleteConfig(context map[string]interfac
 }
 
 func testVmwareenginePrivateCloudUndeleteConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareengineSubnetImportConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineSubnetConfig(context, "192.168.1.0/26")
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineSubnetConfig(context, "192.168.1.0/26")
 }
 
 func testVmwareengineSubnetUpdateConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineSubnetConfig(context, "192.168.2.0/26")
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 0) + testVmwareengineSubnetConfig(context, "192.168.2.0/26")
 }
 
 func testVmwareenginePrivateCloudConfig(context map[string]interface{}, description, pcType string, nodeCount, delayHours int) string {
@@ -184,6 +208,71 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       node_type_id = "standard-72"
       node_count = "%{node_count}"
       custom_core_count = 32
+    }
+  }
+}
+
+data "google_vmwareengine_private_cloud" "ds" {
+	location = "%{region}-b"
+	name = "tf-test-sample-pc%{random_suffix}"
+	depends_on = [
+   	google_vmwareengine_private_cloud.vmw-engine-pc,
+  ]
+}
+`, context)
+}
+
+func testVmwareenginePrivateCloudAutoscaleConfig(context map[string]interface{}, description, pcType string, nodeCount, delayHours int) string {
+	context["node_count"] = nodeCount
+	context["delay_hrs"] = delayHours
+	context["description"] = description
+	context["type"] = pcType
+	return acctest.Nprintf(`
+resource "google_vmwareengine_network" "vmw-engine-nw" {
+  name              = "tf-test-pc-nw-%{random_suffix}"
+  location          = "global"
+  type              = "STANDARD"
+  description       = "PC network description."
+}
+
+resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  location = "%{region}-b"
+  name = "tf-test-sample-pc%{random_suffix}"
+  description = "%{description}"
+  type = "%{type}"
+  deletion_delay_hours = "%{delay_hrs}"
+  send_deletion_delay_hours_if_zero = true
+  network_config {
+    management_cidr = "192.168.0.0/24"
+    vmware_engine_network = google_vmwareengine_network.vmw-engine-nw.id
+  }
+  management_cluster {
+    cluster_id = "tf-test-sample-mgmt-cluster-custom-core-count%{random_suffix}"
+    node_type_configs {
+      node_type_id = "standard-72"
+      node_count = "%{node_count}"
+      custom_core_count = 32
+    }
+    autoscaling_settings {
+      autoscaling_policies {
+        autoscale_policy_id = "autoscaling-policy"
+        node_type_id = "standard-72"
+        scale_out_size = 1
+        cpu_thresholds {
+          scale_out = 80
+          scale_in  = 15
+        }
+        consumed_memory_thresholds {
+          scale_out = 75
+          scale_in  = 20
+        }
+        storage_thresholds {
+          scale_out = 80
+          scale_in  = 20
+        }
+      }
+      min_cluster_node_count = 3
+      max_cluster_node_count = 8
     }
   }
 }

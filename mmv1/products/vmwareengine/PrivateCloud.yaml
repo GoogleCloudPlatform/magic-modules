@@ -67,7 +67,7 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
- # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+      # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     exclude_test: true
   - name: 'vmware_engine_private_cloud_full'
     primary_resource_id: 'vmw-engine-pc'
@@ -77,7 +77,7 @@ examples:
       management_cluster_id: 'sample-mgmt-cluster'
     test_env_vars:
       region: 'REGION'
- # update tests will take care of create and update. PC creation is expensive and node reservation is required.
+    # update tests will take care of create and update. PC creation is expensive and node reservation is required.
     exclude_test: true
 virtual_fields:
   - name: 'deletion_delay_hours'
@@ -218,6 +218,105 @@ properties:
             type: String
             description: |
               Additional zone for a higher level of availability and load balancing.
+      - name: 'autoscalingSettings'
+        type: NestedObject
+        description: |
+          Configuration of the autoscaling applied to this cluster
+        properties:
+          - name: 'autoscalingPolicies'
+            type: Map
+            required: true
+            description: |
+              The map with autoscaling policies applied to the cluster.
+              The key is the identifier of the policy.
+              It must meet the following requirements:
+               * Only contains 1-63 alphanumeric characters and hyphens
+               * Begins with an alphabetical character
+               * Ends with a non-hyphen character
+               * Not formatted as a UUID
+               * Complies with [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034) (section 3.5)
+
+              Currently the map must contain only one element
+              that describes the autoscaling policy for compute nodes.
+            key_name: 'autoscale_policy_id'
+            key_description: 'The key is the identifier of the policy.'
+            value_type:
+              name: AutoscalingPolicy
+              type: NestedObject
+              properties:
+                - name: 'nodeTypeId'
+                  type: String
+                  required: true
+                  description: |
+                    The canonical identifier of the node type to add or remove.
+                - name: 'scaleOutSize'
+                  type: Integer
+                  required: true
+                  description: |
+                    Number of nodes to add to a cluster during a scale-out operation.
+                    Must be divisible by 2 for stretched clusters.
+                - name: 'cpuThresholds'
+                  type: NestedObject
+                  description: |
+                    Utilization thresholds pertaining to CPU utilization.
+                  properties:
+                    - name: 'scaleOut'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-out operation in percent.
+                    - name: 'scaleIn'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-in operation in percent.
+                - name: 'consumedMemoryThresholds'
+                  type: NestedObject
+                  description: |
+                    Utilization thresholds pertaining to amount of consumed memory.
+                  properties:
+                    - name: 'scaleOut'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-out operation in percent.
+                    - name: 'scaleIn'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-in operation in percent.
+                - name: 'storageThresholds'
+                  type: NestedObject
+                  description: |
+                    Utilization thresholds pertaining to amount of consumed storage.
+                  properties:
+                    - name: 'scaleOut'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-out operation in percent.
+                    - name: 'scaleIn'
+                      type: Integer
+                      required: true
+                      description: |
+                        The utilization triggering the scale-in operation in percent.
+          - name: 'minClusterNodeCount'
+            type: Integer
+            description: |
+              Minimum number of nodes of any type in a cluster.
+              If not specified the default limits apply.
+          - name: 'maxClusterNodeCount'
+            type: Integer
+            description: |
+              Maximum number of nodes of any type in a cluster.
+              If not specified the default limits apply.
+          - name: 'coolDownPeriod'
+            type: String
+            description: |
+              The minimum duration between consecutive autoscale operations.
+              It starts once addition or removal of nodes is fully completed.
+              Defaults to 30m if not specified.
+              Cool down period must be in whole minutes (for example, 30m, 31m, 50m).
   - name: 'hcx'
     type: NestedObject
     description: |
