@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionBackendService'
+api_resource_type_kind: BackendService
 kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
