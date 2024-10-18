@@ -12,7 +12,7 @@ resource "google_container_cluster" "primary" {
       enabled = true
     }
   }
-  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection  = {{index $.Vars "deletion_protection"}}
   network       = "{{index $.Vars "network_name"}}"
   subnetwork    = "{{index $.Vars "subnetwork_name"}}"
 }
