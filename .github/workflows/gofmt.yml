@@ -9,7 +9,7 @@ on:
       - "**/*.go"
 
 jobs:
-  run_gofmt:
+  run-gofmt:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repository
