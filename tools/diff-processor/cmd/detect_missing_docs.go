@@ -59,44 +59,16 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 	if err != nil {
 		return err
 	}
-	resources := maps.Keys(detectedResources)
-	slices.Sort(resources)
-	resourceInfo := []detector.MissingDocDetails{}
-	for _, r := range resources {
-		details := detectedResources[r]
-		sort.Slice(details.Fields, func(i, j int) bool {
-			return details.Fields[i].Field < details.Fields[j].Field
-		})
-		resourceInfo = append(resourceInfo, detector.MissingDocDetails{
-			Name:     r,
-			FilePath: details.FilePath,
-			Fields:   details.Fields,
-		})
-	}
 
 	datasourceSchemaDiff := o.computeDatasourceSchemaDiff()
 	detectedDataSources, err := detector.DetectMissingDocsForDatasource(datasourceSchemaDiff, args[0])
 	if err != nil {
 		return err
 	}
-	dataSources := maps.Keys(detectedDataSources)
-	slices.Sort(dataSources)
-	dataSourceInfo := []detector.MissingDocDetails{}
-	for _, r := range resources {
-		details := detectedDataSources[r]
-		sort.Slice(details.Fields, func(i, j int) bool {
-			return details.Fields[i].Field < details.Fields[j].Field
-		})
-		dataSourceInfo = append(dataSourceInfo, detector.MissingDocDetails{
-			Name:     r,
-			FilePath: details.FilePath,
-			Fields:   details.Fields,
-		})
-	}
 
 	sum := MissingDocsSummary{
-		Resource:   resourceInfo,
-		DataSource: dataSourceInfo,
+		Resource:   sortMissingDocDetails(detectedResources),
+		DataSource: sortMissingDocDetails(detectedDataSources),
 	}
 
 	if err := json.NewEncoder(o.stdout).Encode(sum); err != nil {
@@ -104,4 +76,22 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 	}
 
 	return nil
+}
+
+func sortMissingDocDetails(m map[string]detector.MissingDocDetails) []detector.MissingDocDetails {
+	itemNames := maps.Keys(m)
+	slices.Sort(itemNames)
+	arr := []detector.MissingDocDetails{}
+	for _, itemName := range itemNames {
+		details := m[itemName]
+		sort.Slice(details.Fields, func(i, j int) bool {
+			return details.Fields[i].Field < details.Fields[j].Field
+		})
+		arr = append(arr, detector.MissingDocDetails{
+			Name:     itemName,
+			FilePath: details.FilePath,
+			Fields:   details.Fields,
+		})
+	}
+	return arr
 }

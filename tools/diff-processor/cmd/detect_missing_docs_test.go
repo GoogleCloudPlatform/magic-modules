@@ -14,10 +14,12 @@ import (
 
 func TestDetectMissingDocs(t *testing.T) {
 	cases := []struct {
-		name           string
-		oldResourceMap map[string]*schema.Resource
-		newResourceMap map[string]*schema.Resource
-		want           MissingDocsSummary
+		name             string
+		oldResourceMap   map[string]*schema.Resource
+		newResourceMap   map[string]*schema.Resource
+		oldDataSourceMap map[string]*schema.Resource
+		newDataSourceMap map[string]*schema.Resource
+		want             MissingDocsSummary
 	}{
 		{
 			name: "no new fields",
@@ -53,6 +55,14 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 			},
 			oldResourceMap: map[string]*schema.Resource{},
+			newDataSourceMap: map[string]*schema.Resource{
+				"google_data_y": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep"},
+					},
+				},
+			},
+			oldDataSourceMap: map[string]*schema.Resource{},
 			want: MissingDocsSummary{
 				Resource: []detector.MissingDocDetails{
 					{
@@ -72,14 +82,11 @@ func TestDetectMissingDocs(t *testing.T) {
 				},
 				DataSource: []detector.MissingDocDetails{
 					{
-						Name:     "google_x",
-						FilePath: "/website/docs/d/x.html.markdown",
+						Name:     "google_data_y",
+						FilePath: "/website/docs/d/data_y.html.markdown",
 						Fields: []detector.MissingDocField{
 							{
 								Field: "field-a",
-							},
-							{
-								Field: "field-b",
 							},
 						},
 					},
@@ -96,7 +103,7 @@ func TestDetectMissingDocs(t *testing.T) {
 					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 				},
 				computeDatasourceSchemaDiff: func() diff.SchemaDiff {
-					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
+					return diff.ComputeSchemaDiff(tc.oldDataSourceMap, tc.newDataSourceMap)
 				},
 				stdout: &buf,
 			}
