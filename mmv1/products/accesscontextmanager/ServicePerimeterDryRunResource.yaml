@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunResource'
+api_resource_type_kind: ServicePerimeter
 description: |
   Allows configuring a single GCP resource that should be inside of the `spec` block of a dry run service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list

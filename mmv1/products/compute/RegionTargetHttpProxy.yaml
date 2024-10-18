@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionTargetHttpProxy'
+api_resource_type_kind: TargetHttpProxy
 description: |
   Represents a RegionTargetHttpProxy resource, which is used by one or more
   forwarding rules to route incoming HTTP requests to a URL map.
