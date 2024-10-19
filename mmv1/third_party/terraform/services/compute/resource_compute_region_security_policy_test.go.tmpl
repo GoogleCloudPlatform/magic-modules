@@ -522,7 +522,8 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[
 					}
 					conform_action = "allow"
 					exceed_action = "deny(404)"
-					enforce_on_key = "ALL"
+					enforce_on_key = "HTTP_HEADER"
+					enforce_on_key_name = "user-agent"
 					ban_threshold {
 						count = 1000
 						interval_sec = 300
