@@ -602,21 +602,21 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context 
 					exceed_action = "deny(429)"
 
 					rate_limit_threshold {
-					count = 10
-					interval_sec = 60
+						count = 10
+						interval_sec = 60
 					}
 
 					enforce_on_key_configs {
-					enforce_on_key_type = "HTTP_PATH"
+						enforce_on_key_type = "HTTP_PATH"
 					}
 
 					enforce_on_key_configs {
-					enforce_on_key_type = "HTTP_HEADER"
-					enforce_on_key_name = "user-agent"
+						enforce_on_key_type = "HTTP_HEADER"
+						enforce_on_key_name = "user-agent"
 					}
 
 					enforce_on_key_configs {
-					enforce_on_key_type = "REGION_CODE"
+						enforce_on_key_type = "REGION_CODE"
 					}
 				}
 				match {
