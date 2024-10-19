@@ -692,4 +692,118 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(c
 	`, context)
 }
 
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatch(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_network_match",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy_network_match",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_network_match" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = 100
+				network_match {
+					src_ip_ranges    = ["10.10.0.0/24"]
+					src_asns         = [6939]
+					src_ports        = [80]
+					src_region_codes = ["US"]
+					ip_protocols     = ["UDP"]
+					dest_ip_ranges   = ["10.0.0.0/10"]
+					dest_ports       = [80]
+					user_defined_fields {
+						name = "SIG1_AT_0"
+						values = ["0x8700"]
+					}
+				}
+				action = "allow"
+				preview = true
+			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_network_match" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+			rules {
+				priority = 100
+				network_match {
+				src_ip_ranges    = ["10.10.0.0/16"]
+				src_asns         = [6939]
+				src_ports        = [443]
+				src_region_codes = ["US"]
+				ip_protocols     = ["UDP"]
+				dest_ip_ranges   = ["10.0.0.0/8"]
+				dest_ports       = [80]
+				user_defined_fields {
+					name = "SIG1_AT_0"
+					values = ["0x8700"]
+					}
+				}
+				action = "allow"
+				preview = false
+			}
+		}
+	`, context)
+}
+
 {{- end }}
