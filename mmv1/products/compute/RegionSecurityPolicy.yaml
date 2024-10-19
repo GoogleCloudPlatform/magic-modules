@@ -204,7 +204,6 @@ properties:
     min_version: 'beta'
     required: false
     immutable: false
-    is_set: true
     default_from_api: true
     item_type:
       type: NestedObject
