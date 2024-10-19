@@ -208,6 +208,17 @@ func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}
 
 		rules {
 			action   = "deny"
+			priority = "1000"
+			match {
+				expr {
+					expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
+				}
+			}
+		}
+
+
+		rules {
+			action   = "deny"
 			priority = "2147483647"
 			match {
 				versioned_expr = "SRC_IPS_V1"
@@ -218,15 +229,6 @@ func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}
 			description = "default rule"
 		}
 
-		rules {
-			action   = "deny"
-			priority = "1000"
-			match {
-				expr {
-					expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
-				}
-			}
-		}
 	}
 	`, context)
 }
@@ -292,18 +294,6 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig(context map[s
 			type	= "CLOUD_ARMOR"
 
 			rules {
-				action   = "allow"
-				priority = "2147483647"
-				match {
-					versioned_expr = "SRC_IPS_V1"
-					config {
-						src_ip_ranges = ["*"]
-					}
-				}
-				description = "default rule"
-			}
-
-			rules {
 				action   = "deny"
 				priority = "1000"
 				match {
@@ -348,16 +338,7 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig(context map[s
 				}
 				preview = false
 			}
-		}
-	`, context)
-}
-
-func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy" {
-			name	= "tf-test%{random_suffix}"
-			type	= "CLOUD_ARMOR"
-
+	
 			rules {
 				action   = "allow"
 				priority = "2147483647"
@@ -369,6 +350,16 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(contex
 				}
 				description = "default rule"
 			}
+
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
 
 			rules {
 				action   = "deny"
@@ -412,6 +403,19 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(contex
 				}
 				preview = false
 			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+
 		}
 	`, context)
 }
@@ -456,18 +460,6 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]
 			region  = "us-west2"
 
 			rules {
-				action   = "allow"
-				priority = "2147483647"
-				preview 	= false
-				match {
-					versioned_expr = "SRC_IPS_V1"
-					config {
-						src_ip_ranges = ["*"]
-					}
-				}
-				description = "default rule"
-			}
-			rules {
 				priority = "1000"
 				action          = "rate_based_ban"
 				rate_limit_options {
@@ -493,16 +485,6 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]
 					versioned_expr = "SRC_IPS_V1"
 				}
 			}
-		}
-	`, context)
-}
-
-func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
-			name	= "tf-test%{random_suffix}"
-			type	= "CLOUD_ARMOR"
-			region  = "us-west2"
 
 			rules {
 				action   = "allow"
@@ -516,6 +498,17 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[
 				}
 				description = "default rule"
 			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
 			rules {
 				priority = "100"
 				action          = "rate_based_ban"
@@ -542,6 +535,19 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[
 					}
 					versioned_expr = "SRC_IPS_V1"
 				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
 			}
 		}
 	`, context)
@@ -587,18 +593,6 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context 
 			region  = "us-west2"
 
 			rules {
-				action   = "allow"
-				priority = "2147483647"
-				preview 	= false
-				match {
-					versioned_expr = "SRC_IPS_V1"
-					config {
-						src_ip_ranges = ["*"]
-					}
-				}
-				description = "default rule"
-			}
-			rules {
 				priority = "1000"
 				action          = "throttle"
 				rate_limit_options {
@@ -632,16 +626,6 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context 
 					versioned_expr = "SRC_IPS_V1"
 				}
 			}
-		}
-	`, context)
-}
-
-func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
-			name	= "tf-test%{random_suffix}"
-			type	= "CLOUD_ARMOR"
-			region  = "us-west2"
 
 			rules {
 				action   = "allow"
@@ -655,6 +639,17 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(c
 				}
 				description = "default rule"
 			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy_rate_limit" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
 			rules {
 				priority = "100"
 				action          = "throttle"
@@ -687,6 +682,19 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(c
 					}
 					versioned_expr = "SRC_IPS_V1"
 				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
 			}
 		}
 	`, context)
