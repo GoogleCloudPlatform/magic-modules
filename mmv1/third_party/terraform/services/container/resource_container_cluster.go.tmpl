@@ -104,12 +104,6 @@ var (
 		"private_cluster_config.0.master_global_access_config",
 	}
 
-	forceNewClusterNodeConfigFields = []string{
-		"labels",
-		"workload_metadata_config",
-		"resource_manager_tags",
-	}
-
 	suppressDiffForAutopilot = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		if v, _ := d.Get("enable_autopilot").(bool); v {
 			return true
@@ -125,19 +119,6 @@ var (
 		return false
 	})
 )
-
-// This uses the node pool nodeConfig schema but sets
-// node-pool-only updatable fields to ForceNew
-func clusterSchemaNodeConfig() *schema.Schema {
-	nodeConfigSch := schemaNodeConfig()
-	schemaMap := nodeConfigSch.Elem.(*schema.Resource).Schema
-	for _, k := range forceNewClusterNodeConfigFields {
-		if sch, ok := schemaMap[k]; ok {
-			tpgresource.ChangeFieldSchemaToForceNew(sch)
-		}
-	}
-	return nodeConfigSch
-}
 
 // Defines default nodel pool settings for the entire cluster. These settings are
 // overridden if specified on the specific NodePool object.
@@ -1477,7 +1458,7 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-			"node_config": clusterSchemaNodeConfig(),
+			"node_config": schemaNodeConfig(),
 
 			"node_pool": {
 				Type:     schema.TypeList,
