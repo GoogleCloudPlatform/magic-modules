@@ -1569,6 +1569,60 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withNodeConfigFastSocket(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withNodeConfigFastSocket(clusterName, networkName, subnetworkName, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_fast_socket",
+						"node_config.0.fast_socket.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_fast_socket",
+						"node_config.0.gvnic.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_fast_socket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withNodeConfigFastSocket(clusterName, networkName, subnetworkName, true),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_fast_socket",
+						"node_config.0.fast_socket.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_fast_socket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withNodeConfigGcfsConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -6809,6 +6863,29 @@ resource "google_container_cluster" "with_node_config" {
   subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodeConfigFastSocket(clusterName, networkName, subnetworkName string, fastSocket bool) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_fast_socket" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+
+  node_config {
+    gvnic {
+      enabled = true
+    }
+    fast_socket {
+      enabled = %t
+    }
+  }
+
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+`, clusterName, fastSocket, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withNodeConfigGcfsConfig(clusterName, networkName, subnetworkName string, enabled bool) string {
