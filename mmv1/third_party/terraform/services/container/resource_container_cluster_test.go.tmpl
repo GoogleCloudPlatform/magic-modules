@@ -83,7 +83,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 						acctest.ExpectNoDelete(),
 					},
 				},
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "self_link"),
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.resource_manager_tags.%"),
 				),
@@ -102,7 +102,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 						acctest.ExpectNoDelete(),
 					},
 				},
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "self_link"),
 					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_config.0.resource_manager_tags.%"),
 				),
@@ -1499,26 +1499,26 @@ func TestAccContainerCluster_updateVersion(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withLowerVersion(clusterName, networkName, subnetworkName),
 			},
 			{
-				ResourceName:			 "google_container_cluster.with_version",
-				ImportState:			 true,
-				ImportStateVerify:		 true,
+				ResourceName:            "google_container_cluster.with_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_updateVersion(clusterName, networkName, subnetworkName),
 			},
 			{
-				ResourceName:			 "google_container_cluster.with_version",
-				ImportState:			 true,
-				ImportStateVerify:		 true,
+				ResourceName:            "google_container_cluster.with_version",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 		},
@@ -1533,9 +1533,9 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withNodeConfig(clusterName, networkName, subnetworkName),
