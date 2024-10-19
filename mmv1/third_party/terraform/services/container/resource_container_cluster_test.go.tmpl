@@ -6767,7 +6767,7 @@ resource "google_container_cluster" "with_node_config" {
   initial_node_count = 1
 
   node_config {
-    machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
+    machine_type    = "n1-standard-1" // can't be e2 because of local-ssd
     disk_size_gb    = 15
     disk_type       = "pd-ssd"
     local_ssd_count = 1
@@ -6805,8 +6805,8 @@ resource "google_container_cluster" "with_node_config" {
     image_type = "COS_CONTAINERD"
   }
   deletion_protection = false
-  network    = "%s"
-  subnetwork = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7039,9 +7039,9 @@ resource "google_container_cluster" "with_node_config" {
 
   node_config {
     // Test updates for these fields as well
-    machine_type    = "n1-standard-2"  // can't be e2 because of local-ssd
-    disk_size_gb    = 20
-    disk_type       = "pd-balanced"
+    machine_type = "n1-standard-2" // can't be e2 because of local-ssd
+    disk_size_gb = 20
+    disk_type    = "pd-balanced"
 
     local_ssd_count = 1
     oauth_scopes = [
@@ -7079,8 +7079,8 @@ resource "google_container_cluster" "with_node_config" {
     image_type = "UBUNTU_CONTAINERD"
   }
   deletion_protection = false
-  network    = "%s"
-  subnetwork = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7292,8 +7292,8 @@ resource "google_container_cluster" "with_workload_metadata_config" {
     }
   }
   deletion_protection = false
-  network    = "%s"
-  subnetwork = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 `, clusterName, workloadMetadataConfigMode, networkName, subnetworkName)
 }
@@ -10873,7 +10873,6 @@ resource "google_tags_tag_value" "value2" {
   short_name  = "qux-%[2]s"
   description = "For qux resources"
 }
-
 
 data "google_container_engine_versions" "uscentral1a" {
   location = "us-central1-a"
