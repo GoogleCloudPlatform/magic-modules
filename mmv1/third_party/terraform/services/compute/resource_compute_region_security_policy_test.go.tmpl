@@ -384,6 +384,10 @@ func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(contex
 							operator = "STARTS_WITH"
 							value    = "/admin"
 						}
+						request_cookie {
+							operator = "EQUALS"
+							value    = "Referer"
+						}
 						target_rule_set = "rce-stable"
 					}
 					exclusion {
