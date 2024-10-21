@@ -16,23 +16,22 @@
 package openapi_generate
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 
 	"log"
 
-	"text/template"
-
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	r "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/golang/glog"
 	"gopkg.in/yaml.v2"
 )
 
@@ -42,7 +41,6 @@ type Parser struct {
 }
 
 func NewOpenapiParser(folder, output string) Parser {
-
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -57,7 +55,6 @@ func NewOpenapiParser(folder, output string) Parser {
 }
 
 func (parser Parser) Run() {
-
 	f, err := os.Open(parser.Folder)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -87,28 +84,42 @@ func (parser Parser) WriteYaml(filePath string) {
 	doc, _ := loader.LoadFromFile(filePath)
 	_ = doc.Validate(ctx)
 
-	resourcePaths := findResources(doc)
-	productPath := buildProduct(filePath, parser.Output, doc)
+	header, err := os.ReadFile("openapi_generate/header.txt")
+	if err != nil {
+		log.Fatalf("error reading header %v", err)
+	}
 
+	resourcePaths := findResources(doc)
+	productPath := buildProduct(filePath, parser.Output, doc, header)
+
+	// Disables line wrap for long strings
+	yaml.FutureLineWrap()
 	log.Printf("Generated product %+v/product.yaml", productPath)
 	for _, pathArray := range resourcePaths {
 		resource := buildResource(filePath, pathArray[0], pathArray[1], doc)
 
-		// template method
-		resourceOutPathTemplate := filepath.Join(productPath, fmt.Sprintf("%s_template.yaml", resource.Name))
-		templatePath := "openapi_generate/resource_yaml.tmpl"
-		WriteGoTemplate(templatePath, resourceOutPathTemplate, resource)
-		log.Printf("Generated resource %s", resourceOutPathTemplate)
-
 		// marshal method
-		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s_marshal.yaml", resource.Name))
+		resourceOutPathMarshal := filepath.Join(productPath, fmt.Sprintf("%s.yaml", resource.Name))
 		bytes, err := yaml.Marshal(resource)
 		if err != nil {
 			log.Fatalf("error marshalling yaml %v: %v", resourceOutPathMarshal, err)
 		}
-		err = os.WriteFile(resourceOutPathMarshal, bytes, 0644)
+
+		f, err := os.Create(resourceOutPathMarshal)
 		if err != nil {
-			log.Fatalf("error writing product to path %v: %v", resourceOutPathMarshal, err)
+			log.Fatalf("error creating resource file %v", err)
+		}
+		_, err = f.Write(header)
+		if err != nil {
+			log.Fatalf("error writing resource file header %v", err)
+		}
+		_, err = f.Write(bytes)
+		if err != nil {
+			log.Fatalf("error writing resource file %v", err)
+		}
+		err = f.Close()
+		if err != nil {
+			log.Fatalf("error closing resource file %v", err)
 		}
 		log.Printf("Generated resource %s", resourceOutPathMarshal)
 	}
@@ -134,7 +145,7 @@ func findResources(doc *openapi3.T) [][]string {
 	return resourcePaths
 }
 
-func buildProduct(filePath, output string, root *openapi3.T) string {
+func buildProduct(filePath, output string, root *openapi3.T, header []byte) string {
 
 	version := root.Info.Version
 	server := root.Servers[0].URL
@@ -162,13 +173,7 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 	//Scopes should be added soon to OpenAPI, until then use global scope
 	apiProduct.Scopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
 
-	// productOutPath := filepath.Join(output, fmt.Sprintf("/%s/product.yaml", productName))
-	templatePath := "openapi_generate/product_yaml.tmpl"
-
-	productOutPathTemplate := filepath.Join(output, fmt.Sprintf("/%s/product_template.yaml", productName))
-	WriteGoTemplate(templatePath, productOutPathTemplate, apiProduct)
-
-	productOutPathMarshal := filepath.Join(output, fmt.Sprintf("/%s/product_marshal.yaml", productName))
+	productOutPathMarshal := filepath.Join(output, fmt.Sprintf("/%s/product.yaml", productName))
 
 	// Default yaml marshaller
 	bytes, err := yaml.Marshal(apiProduct)
@@ -176,12 +181,47 @@ func buildProduct(filePath, output string, root *openapi3.T) string {
 		log.Fatalf("error marshalling yaml %v: %v", productOutPathMarshal, err)
 	}
 
-	err = os.WriteFile(productOutPathMarshal, bytes, 0644)
+	f, err := os.Create(productOutPathMarshal)
 	if err != nil {
-		log.Fatalf("error writing product to path %v: %v", productOutPathMarshal, err)
+		log.Fatalf("error creating product file %v", err)
 	}
-
+	_, err = f.Write(header)
+	if err != nil {
+		log.Fatalf("error writing product file header %v", err)
+	}
+	_, err = f.Write(bytes)
+	if err != nil {
+		log.Fatalf("error writing product file %v", err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatalf("error closing product file %v", err)
+	}
 	return productPath
+}
+
+func baseUrl(resourcePath string) string {
+	base := strings.ReplaceAll(resourcePath, "{", "{{")
+	base = strings.ReplaceAll(base, "}", "}}")
+	// Some APIs use projectsId and locationsId, but we have standardized on these
+	base = strings.ReplaceAll(base, "projectsId", "project")
+	base = strings.ReplaceAll(base, "locationsId", "location")
+	base = stripVersion(base)
+	r := regexp.MustCompile(`\{\{(\w+)\}\}`)
+	matches := r.FindStringSubmatch(base)
+	for i := 0; i < len(matches); i++ {
+		match := matches[i]
+		base = strings.ReplaceAll(base, match, google.Underscore(match))
+	}
+	return base
+}
+
+// OpenAPI paths are prefixed with the version of the API, which already exists
+// in the product. Strip it out here
+func stripVersion(path string) string {
+	pattern := `^(/.*v\d[^/]*/)`
+	re := regexp.MustCompile(pattern)
+	return re.ReplaceAllString(path, "")
 }
 
 func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T) api.Resource {
@@ -193,14 +233,36 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	properties := parsedObjects[1].([]*api.Type)
 	queryParam := parsedObjects[2].(string)
 
-	// TODO base_url(resource_path)
-	baseUrl := resourcePath
-	selfLink := fmt.Sprintf("%s/%s", baseUrl, strings.ToLower(queryParam))
+	baseUrl := baseUrl(resourcePath)
+	selfLink := fmt.Sprintf("%s/{{%s}}", baseUrl, google.Underscore(queryParam))
 
 	resource.Name = resourceName
+	resource.BaseUrl = baseUrl
 	resource.Parameters = parameters
 	resource.Properties = properties
 	resource.SelfLink = selfLink
+	resource.IdFormat = selfLink
+	resource.ImportFormat = []string{selfLink}
+	resource.CreateUrl = fmt.Sprintf("%s?%s={{%s}}", baseUrl, queryParam, google.Underscore(queryParam))
+	resource.Description = "Description"
+
+	resource.AutogenAsync = true
+	async := api.NewAsync()
+	async.Operation.WaitMs = 1000
+	async.Operation.Path = "name"
+	async.Operation.BaseUrl = "{{op_id}}"
+	async.Result.Path = "response"
+	async.Result.ResourceInsideResponse = true
+	async.Error.Path = "error"
+	async.Error.Message = "message"
+	resource.Async = async
+
+	example := r.Examples{}
+	example.Name = "name_of_example_file"
+	example.PrimaryResourceId = "example"
+	example.Vars = map[string]string{"resource_name": "test-resource"}
+
+	resource.Examples = []r.Examples{example}
 
 	return resource
 }
@@ -215,7 +277,12 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.Contains(strings.ToLower(param.Value.Name), strings.ToLower(resourceName)) {
 			idParam = param.Value.Name
 		}
-		paramObj := writeObject(param.Value.Name, param.Value.Schema, *param.Value.Schema.Value.Type, true)
+		paramObj := writeObject(param.Value.Name, param.Value.Schema, propType(param.Value.Schema), true)
+		description := param.Value.Description
+		if strings.TrimSpace(description) == "" {
+			description = "No description"
+		}
+		paramObj.Description = trimSpacesFromDescription(description)
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
 			continue
@@ -226,14 +293,21 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		parameters = append(parameters, &paramObj)
 	}
 
-	// TODO build_properties
-	properties := []*api.Type{}
+	properties := buildProperties(path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties, path.Post.RequestBody.Value.Content["application/json"].Schema.Value.Required)
 
 	returnArray = append(returnArray, parameters)
 	returnArray = append(returnArray, properties)
 	returnArray = append(returnArray, idParam)
 
 	return returnArray
+}
+
+func propType(prop *openapi3.SchemaRef) openapi3.Types {
+	if len(prop.Value.AllOf) > 0 {
+		return *prop.Value.AllOf[0].Value.Type
+	} else {
+		return *prop.Value.Type
+	}
 }
 
 func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, urlParam bool) api.Type {
@@ -249,16 +323,15 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 	}
 	additionalDescription := ""
 
-	// log.Printf("%s %+v", name, obj.Value.AllOf)
-
 	if len(obj.Value.AllOf) > 0 {
 		obj = obj.Value.AllOf[0]
 		objType = *obj.Value.Type
 	}
 
-	if objType.Is("string") {
-		field.Type = "string"
-		field.Name = name
+	field.Name = name
+	switch objType[0] {
+	case "string":
+		field.Type = "String"
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
@@ -266,12 +339,56 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
 		}
+	case "integer":
+		field.Type = "Integer"
+	case "number":
+		field.Type = "Double"
+	case "boolean":
+		field.Type = "Boolean"
+	case "object":
+		if field.Name == "labels" {
+			// Standard labels implementation
+			field.Type = "KeyValueLabels"
+			break
+		}
+
+		if obj.Value.AdditionalProperties.Schema != nil && obj.Value.AdditionalProperties.Schema.Value.Type.Is("string") {
+			// AdditionalProperties with type string is a string -> string map
+			field.Type = "KeyValuePairs"
+			break
+		}
+
+		field.Type = "NestedObject"
+
+		field.Properties = buildProperties(obj.Value.Properties, obj.Value.Required)
+	case "array":
+		field.Type = "Array"
+		var subField api.Type
+		typ := *obj.Value.Items.Value.Type
+		switch typ[0] {
+		case "string":
+			subField.Type = "String"
+		case "integer":
+			subField.Type = "Integer"
+		case "number":
+			subField.Type = "Double"
+		case "boolean":
+			subField.Type = "Boolean"
+		case "object":
+			subField.Type = "NestedObject"
+			subField.Properties = buildProperties(obj.Value.Items.Value.Properties, obj.Value.Items.Value.Required)
+		}
+		field.ItemType = &subField
+	default:
+		panic(fmt.Sprintf("Failed to identify field type for %s %s", field.Name, objType[0]))
 	}
 
 	description := fmt.Sprintf("%s %s", obj.Value.Description, additionalDescription)
 	if strings.TrimSpace(description) == "" {
 		description = "No description"
 	}
+
+	field.Description = trimSpacesFromDescription(description)
 
 	if urlParam {
 		field.UrlParamOnly = true
@@ -291,34 +408,32 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 	}
 
 	xGoogleImmutable, err := obj.JSONLookup("x-google-immutable")
-	if obj.Value.ReadOnly || (err == nil && xGoogleImmutable != nil) {
+	if err == nil && xGoogleImmutable != nil {
 		field.Immutable = true
 	}
 
 	return field
 }
 
-func WriteGoTemplate(templatePath, filePath string, input any) {
-	contents := bytes.Buffer{}
-
-	templateFileName := filepath.Base(templatePath)
-	templates := []string{
-		templatePath,
+func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
+	properties := []*api.Type{}
+	for k, prop := range props {
+		propObj := writeObject(k, prop, propType(prop), false)
+		if slices.Contains(required, k) {
+			propObj.Required = true
+		}
+		properties = append(properties, &propObj)
 	}
+	return properties
+}
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
-	if err != nil {
-		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templatePath, filePath), err)
+// Trims whitespace from the ends of lines in a description to force multiline
+// formatting for strings with newlines present
+func trimSpacesFromDescription(description string) string {
+	lines := strings.Split(description, "\n")
+	var trimmedDescription []string
+	for _, line := range lines {
+		trimmedDescription = append(trimmedDescription, strings.Trim(line, " "))
 	}
-	if err = tmpl.ExecuteTemplate(&contents, templateFileName, input); err != nil {
-		glog.Exit(fmt.Sprintf("error executing %s for filepath %s ", templatePath, filePath), err)
-	}
-
-	bytes := contents.Bytes()
-
-	err = os.WriteFile(filePath, bytes, 0644)
-	if err != nil {
-		log.Fatalf("error writing product to path %v: %v", filePath, err)
-	}
-
+	return strings.Join(trimmedDescription, "\n")
 }

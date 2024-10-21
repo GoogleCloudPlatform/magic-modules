@@ -13,6 +13,7 @@
 
 ---
 name: 'TenantDefaultSupportedIdpConfig'
+api_resource_type_kind: DefaultSupportedIdpConfig
 description: |
   Configurations options for the tenant for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 
