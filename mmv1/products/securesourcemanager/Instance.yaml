@@ -133,6 +133,16 @@ examples:
     oics_vars_overrides:
       'prevent_destroy': 'false'
     external_providers: ["time"]
+  - name: 'secure_source_manager_instance_workforce_identity_federation'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+    vars:
+      instance_id: 'my-instance'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      'prevent_destroy': 'false'
+    oics_vars_overrides:
+      'prevent_destroy': 'false'
 parameters:
   - name: 'location'
     type: String
@@ -244,3 +254,16 @@ properties:
         description: |
           Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
         output: true
+  - name: 'workforceIdentityFederationConfig'
+    type: NestedObject
+    description: |
+      Configuration for Workforce Identity Federation to support third party identity provider.
+      If unset, defaults to the Google OIDC IdP.
+    immutable: true
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          'Whether Workforce Identity Federation is enabled.'
+        required: true
+        immutable: true
