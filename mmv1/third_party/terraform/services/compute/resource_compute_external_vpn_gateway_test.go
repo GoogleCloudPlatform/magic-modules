@@ -79,7 +79,7 @@ func TestAccComputeExternalVPNGateway_insertIpv6Address(t *testing.T) {
 			{
 				Config: computeExternalVPNGatewayIpv6AddressConfig(rnd, "2001:db8:abcd:1234:5678:90ab:cdef:1234"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "interface[0].ipv6_address", "2001:db8:abcd:1234:5678:90ab:cdef:1234"),
+					resource.TestCheckResourceAttr(resourceName, "interface.ipv6_address", "2001:db8:abcd:1234:5678:90ab:cdef:1234"),
 				),
 			},
 			{
