@@ -273,7 +273,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       }
       min_cluster_node_count = 3
       max_cluster_node_count = 8
-	  cool_down_period = "1800s"
+	  cool_down_period = "3600s"
     }
   }
 }
