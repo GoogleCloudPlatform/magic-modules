@@ -13,6 +13,7 @@
 
 ---
 name: 'ProjectInfo'
+api_resource_type_kind: ProjectBillingInfo
 description: |
   Billing information for a project.
 references:

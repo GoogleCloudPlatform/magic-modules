@@ -13,6 +13,7 @@
 
 ---
 name: 'VPCSCConfig'
+api_resource_type_kind: VpcscConfig
 description: |-
   The Artifact Registry VPC SC config that applies to a Project.
 min_version: 'beta'

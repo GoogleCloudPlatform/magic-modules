@@ -133,33 +133,22 @@ parameters:
     immutable: true
 properties:
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       Indicates the state of replication resource. State of the mirror itself is indicated in mirrorState.
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'CREATING'
-      - 'READY'
-      - 'UPDATING'
-      - 'DELETING'
-      - 'ERROR'
   - name: 'stateDetails'
     type: String
     description: |
       State details of the replication resource.
     output: true
   - name: 'role'
-    type: Enum
+    type: String
     description: |
       Reverting a replication can swap source and destination volume roles. This field indicates if the `location` hosts
       the source or destination volume. For resume and revert and resume operations it is critical to understand
       which volume is the source volume, since it will overwrite changes done to the destination volume.
     output: true
-    enum_values:
-      - 'REPLICATION_ROLE_UNSPECIFIED'
-      - 'SOURCE'
-      - 'DESTINATION'
   - name: 'replicationSchedule'
     type: Enum
     description: |
@@ -170,7 +159,7 @@ properties:
       - 'HOURLY'
       - 'DAILY'
   - name: 'mirrorState'
-    type: Enum
+    type: String
     description: |
       Indicates the state of the mirror between source and destination volumes. Depending on the amount of data
       in your source volume, PREPARING phase can take hours or days. mirrorState = MIRRORED indicates your baseline
@@ -178,12 +167,6 @@ properties:
       currently receives an update. Updated every 5 minutes.
     output: true
     custom_flatten: 'templates/terraform/custom_flatten/netapp_volume_replicaton_mirror_state.go.tmpl'
-    enum_values:
-      - 'MIRROR_STATE_UNSPECIFIED'
-      - 'PREPARING'
-      - 'MIRRORED'
-      - 'STOPPED'
-      - 'TRANSFERRING'
   - name: 'createTime'
     type: String
     description: |
