@@ -1,0 +1,114 @@
+base_url: projects/{{project}}/locations/{{location}}/serviceInstances
+create_url: projects/{{project}}/locations/{{location}}/serviceInstances?serviceInstanceId={{service_instance_id}}
+self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+name: ServiceInstance
+description: A service instance is an instance of the Dataproc operator running on a GDC cluster.
+autogen_async: true
+properties:
+  - name: gdceCluster
+    type: NestedObject
+    properties:
+      - name: gdceCluster
+        type: String
+        description: 'Required. Gdce cluster resource id. '
+        required: true
+    description: 'Gdce cluster information. '
+  - name: name
+    type: String
+    description: 'Identifier. The name of the service instance. '
+    output: true
+  - name: uid
+    type: String
+    description: "System generated unique identifier for this service instance,
+      formatted as\nUUID4. "
+    output: true
+  - name: displayName
+    type: String
+    description: 'User-provided human-readable name to be used in user interfaces. '
+  - name: createTime
+    type: String
+    description: 'The timestamp when the resource was created. '
+    output: true
+  - name: updateTime
+    type: String
+    description: 'The timestamp when the resource was most recently updated. '
+    output: true
+  - name: requestedState
+    type: String
+    description: "The intended state to which the service instance is reconciling.
+      \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDISCONNECTED\nDELETING\nSTOPPING\nSTOPPED\nSTARTING\nUPDATING\nFAILED"
+    output: true
+  - name: state
+    type: String
+    description: "The current state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDISCONNECTED\nDELETING\nSTOPPING\nSTOPPED\nSTARTING\nUPDATING\nFAILED"
+    output: true
+  - name: reconciling
+    type: Boolean
+    description: "Whether the service instance is currently reconciling.\nTrue
+      if the current state of the resource does not match the\nintended state, and the
+      system is working to reconcile them, whether\nor not the change was user initiated.\nRequired
+      by aip.dev/128#reconciliation "
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    output:
+    api_name:
+    description: "The labels to associate with this service instance. Labels
+      may be used for\nfiltering and billing tracking. "
+    min_version:
+    ignore_write:
+    update_verb:
+    update_url:
+    immutable:
+  - name: sparkServiceInstanceConfig
+    type: NestedObject
+    properties: []
+    description: 'Spark-specific service instance configuration. '
+  - name: stateMessage
+    type: String
+    description: 'A message explaining the current state. '
+    output: true
+  - name: serviceAccount
+    type: String
+    description: 'Requested service account to associate with ServiceInstance. '
+  - name: effectiveServiceAccount
+    type: String
+    description: "Effective service account associated with ServiceInstance.
+      This will be\nthe service_account if specified. Otherwise, it will be an automatically\ncreated
+      per-resource P4SA that also automatically has Fleet Workload\nIdentity bindings
+      applied. "
+    output: true
+parameters:
+  - name: location
+    type: String
+    description: 'Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `dataprocgdc.googleapis.com/SparkApplication`. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: serviceInstanceId
+    type: String
+    description: "Required. Id of the requesting object\nIf auto-generating Id server-side,
+      remove this field and\nservice_instance_id from the method_signature of Create
+      RPC "
+    url_param_only: true
+    required: true
+    immutable: true
+async:
+  actions: ['create', 'delete']
+  type: OpAsync
+  operation:
+    base_url: "{{op_id}}"
+immutable: true
+examples:
+  - name: "dataprocgdc_serviceinstance"
+    primary_resource_id: "service-instance"
+    vars:
+      service_instance_id: "tf-e2e-service-instance"
+      project: "my-project"
+    test_vars_overrides:
+      'project': '"gdce-cluster-monitoring"'
