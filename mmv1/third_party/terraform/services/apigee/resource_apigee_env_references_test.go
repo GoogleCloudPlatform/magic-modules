@@ -117,7 +117,7 @@ resource "google_apigee_env_keystore" "apigee_environment_keystore_1" {
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
   env_id         = google_apigee_environment.apigee_environment.id
-  name           = "tf-test-reference"
+  name           = "tf-test-reference%{random_suffix}"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_1.name
   depends_on = [google_apigee_env_keystore.apigee_environment_keystore_1]
@@ -203,7 +203,7 @@ resource "google_apigee_env_keystore" "apigee_environment_keystore_2" {
 
 resource "google_apigee_env_references" "apigee_environment_reference" {
   env_id         = google_apigee_environment.apigee_environment.id
-  name           = "tf-test-reference"
+  name           = "tf-test-reference%{random_suffix}"
   resource_type  = "KeyStore"
   refers         = google_apigee_env_keystore.apigee_environment_keystore_2.name
   depends_on = [google_apigee_env_keystore.apigee_environment_keystore_2]
