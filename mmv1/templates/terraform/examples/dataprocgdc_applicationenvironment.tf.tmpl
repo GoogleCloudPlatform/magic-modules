@@ -1,0 +1,20 @@
+resource "google_dataproc_gdc_application_environment" "{{$.PrimaryResourceId}}" {
+  application_environment_id = "{{index $.Vars "application_environment_id"}}"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  project         = "{{index $.Vars "project"}}"
+  location        = "us-west2"
+  namespace = "default"
+  display_name = "An application environment"
+  labels = {
+    "test-label": "label-value"
+  }
+  annotations = {
+    "an_annotation": "annotation_value"
+  }
+  spark_application_environment_config {
+    default_properties = {
+      "spark.executor.memory": "4g"
+    }
+    default_version = "1.2"
+  }
+}
