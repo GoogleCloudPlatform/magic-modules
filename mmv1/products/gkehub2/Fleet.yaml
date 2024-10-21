@@ -53,6 +53,9 @@ examples:
   - name: 'gkehub_fleet_basic'
     primary_resource_id: 'default'
     exclude_test: true
+  - name: 'gkehub_fleet_compliance_enabled_by_default'
+    primary_resource_id: 'default'
+    exclude_test: true
 parameters:
 properties:
   - name: 'displayName'
@@ -141,3 +144,26 @@ properties:
               - 'VULNERABILITY_DISABLED'
               - 'VULNERABILITY_BASIC'
               - 'VULNERABILITY_ENTERPRISE'
+      - name: 'complianceConfig'
+        type: NestedObject
+        description: Defines the config needed to enable/disable features for Compliance Posture.
+        api_name: compliancePostureConfig
+        properties:
+          - name: 'mode'
+            type: Enum
+            description: Sets which mode to use for Security Posture features.
+            required: true
+            enum_values:
+              - 'DISABLED'
+              - 'ENABLED'
+          - name: 'complianceStandards'
+            type: Array
+            description: List of enabled compliance standards.
+            default_from_api: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'standard'
+                  type: String
+                  description: Name of the compliance standard.
+                  required: true
