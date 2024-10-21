@@ -401,7 +401,7 @@ func TestAccComputeSecurityPolicyRule_withHeadAction(t *testing.T) {
 		"header_value": fmt.Sprintf("tf-test-header-value-%s", acctest.RandString(t, 10)),
 	}
 
-  contextUpdate := map[string]interface{}{
+	contextUpdate := map[string]interface{}{
 		"sp_name":      context["sp_name"],
 		"header_name":  fmt.Sprintf("tf-test-header-name-update-%s", acctest.RandString(t, 10)),
 		"header_value": fmt.Sprintf("tf-test-header-value-update-%s", acctest.RandString(t, 10)),
