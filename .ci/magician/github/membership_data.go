@@ -18,7 +18,7 @@ var (
 		"hao-nan-li":  {},
 		"NickElliot":  {},
 		"BBBmau":      {},
-		"SirGitsalot"  {},
+		"SirGitsalot": {},
 	}
 
 	// This is for new team members who are onboarding
