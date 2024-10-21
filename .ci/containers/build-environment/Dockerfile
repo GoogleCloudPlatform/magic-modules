@@ -11,9 +11,6 @@ ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/main/tp
 # Install the go dependencies
 RUN go mod download
 
-# Stage 2: Creating the final imag
-FROM ruby:3.1-bullseye
-
 # golang
 COPY --from=golang:1.21-bullseye /usr/local/go /usr/local/go
 ENV GOPATH /go
@@ -38,11 +35,6 @@ RUN git config --global user.email "magic-modules@google.com"
 
 RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go install github.com/github/hub@v2.11.2+incompatible
-
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/refs/heads/legacy-ruby/mmv1/Gemfile" Gemfile
-ADD "https://raw.githubusercontent.com/GoogleCloudPlatform/magic-modules/refs/heads/legacy-ruby/mmv1/Gemfile.lock" Gemfile.lock
-RUN bundle install
-RUN rm Gemfile Gemfile.lock
 
 # Copy Go dependencies from builder stage
 COPY --from=builder /go/pkg /go/pkg

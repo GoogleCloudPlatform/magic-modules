@@ -245,7 +245,7 @@ async:
 
 Allows configuration of generated IAM resources. Supports the following common
 attributes – for a full reference, see
-[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb):
+[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.go):
 
 - `parent_resource_attribute`: Name of the field on the terraform IAM resources
   which references the parent resource.
