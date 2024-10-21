@@ -159,16 +159,9 @@ resource "google_organization_iam_member" "sa_securitycenter_bigquery_exports_ed
   member = google_service_account.sa.member
 }
 
-
 resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/iam.principalAccessBoundaryAdmin"
-  member = google_service_account.sa.member
-}
-
-resource "google_organization_iam_member" "sa_principal_access_boundary_user" {
-  org_id = data.google_organization.org.org_id
-  role   = "roles/iam.principalAccessBoundaryUser"
   member = google_service_account.sa.member
 }
 
