@@ -439,6 +439,6 @@ properties:
     description: |
       The Model to create.
   - type: String
-    name: 'modelID'
+    name: 'modelId'
     description: |
       Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
