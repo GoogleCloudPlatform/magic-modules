@@ -57,7 +57,7 @@ var reassignReviewerCmd = &cobra.Command{
 }
 
 func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) error {
-	comments, err := gh.GetPullRequestCommentsByUser(prNumber, "modular-magician")
+	comments, err := gh.GetPullRequestComments(prNumber)
 	if err != nil {
 		return err
 	}

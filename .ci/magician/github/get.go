@@ -115,22 +115,6 @@ func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment,
 	return comments, nil
 }
 
-func (gh *Client) GetPullRequestCommentsByUser(prNumber, login string) ([]PullRequestComment, error) {
-	comments, err := gh.GetPullRequestComments(prNumber)
-	if err != nil {
-		return nil, err
-	}
-
-	var filteredComments []PullRequestComment
-	for _, comment := range comments {
-		if comment.User.Login == login {
-			filteredComments = append(filteredComments, comment)
-		}
-	}
-
-	return filteredComments, nil
-}
-
 func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
 
