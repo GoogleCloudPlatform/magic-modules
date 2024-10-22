@@ -1,4 +1,4 @@
-package ruby
+package gotemplate
 
 import (
 	"strings"
