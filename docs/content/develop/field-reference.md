@@ -184,7 +184,8 @@ Example:
 
 ### `required_with`
 Specifies a list of fields (excluding the current field) that must all be specified
-if at least one is specified. Must be set separately on all listed fields.
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
 
 Example:
 
