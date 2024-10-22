@@ -114,7 +114,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 
 	var servicesArr []string
 	for s := range services {
-		if _, ok := allowedAlphaServices[s]; ok {
+		if _, ok := allowedPrivateServices[s]; ok {
 			servicesArr = append(servicesArr, s)
 		}
 	}
@@ -208,28 +208,31 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 	return nil
 }
 
-var allowedAlphaServices = map[string]struct{}{
+var allowedPrivateServices = map[string]struct{}{
 	"accesscontextmanager":      {},
-	"cloudbuild":                {},
-	"compute":                   {},
-	"dataprocgdc":               {},
-	"healthcare":                {},
-	"looker":                    {},
-	"osconfig":                  {},
-	"saasmanagement":            {},
-	"stackdriver":               {},
-	"tpuv2":                     {},
-	"workstations":              {},
-	"bigquery":                  {},
+	"chronicle":                 {},
 	"cloudbuildv2":              {},
 	"contactcenteraiplatform":   {},
 	"gkeonprem":                 {},
 	"kms":                       {},
 	"netapp":                    {},
+	"oracledatabase":            {},
 	"remotebuildexecutionadmin": {},
 	"spanner":                   {},
 	"storageinsights":           {},
 	"vmwareengine":              {},
+	"bigquery":                  {},
+	"cloudbuild":                {},
+	"compute":                   {},
+	"dataprocgdc":               {},
+	"healthcare":                {},
+	"managedkafka":              {},
+	"networksecurity":           {},
+	"osconfig":                  {},
+	"saasmanagement":            {},
+	"stackdriver":               {},
+	"tpuv2":                     {},
+	"workstations":              {},
 }
 
 func handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath string, result vcr.Result, mode vcr.Mode, rnr ExecRunner) (bool, error) {
