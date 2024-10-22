@@ -20,6 +20,7 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
   }
   engine_version              = "VALKEY_7_2"
   deletion_protection_enabled = false
+  mode = "STANDALONE"
   persistence_config {
     mode = "RDB"
     rdb_config {

@@ -350,148 +350,79 @@ properties:
       description: "A group of PSC connections. They are created in the same VPC network, one for each service attachment in the cluster."
       item_type:
         type: NestedObject
-        exactly_one_of:
-          properties:
-            - name: 'pscConnectionId'
-              type: String
-              description:
-                "Output only. The PSC connection id of the forwarding rule connected
-                to the\nservice attachment. "
-              min_version: 'beta'
-              output: true
-            - name: 'ipAddress'
-              type: String
-              description:
-                "Output only. The IP allocated on the consumer network for the
-                PSC forwarding rule. "
-              min_version: 'beta'
-              output: true
-            - name: 'forwardingRule'
-              type: String
-              description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-              min_version: 'beta'
-              output: true
-            - name: 'projectId'
-              type: String
-              description:
-                "Output only. The consumer project_id where the forwarding rule is
-                created from. "
-              min_version: 'beta'
-              output: true
-            - name: 'network'
-              type: String
-              description:
-                "Output only. The consumer network where the IP address resides, in
-                the form of\nprojects/{project_id}/global/networks/{network_id}. "
-              min_version: 'beta'
-              output: true
-            - name: 'serviceAttachment'
-              type: String
-              description:
-                "Output only. The service attachment which is the target of the PSC connection, in the form of
-                projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-              min_version: 'beta'
-              output: true
-            - name: 'pscConnectionStatus'
-              type: Enum
-              description:
-                "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
-                \n Possible values:\n ACTIVE \n NOT_FOUND"
-              min_version: 'beta'
-              output: true
-              enum_values:
-                - 'ACTIVE'
-                - 'NOT_FOUND'
-            - name: 'connectionType'
-              type: Enum
-              description:
-                "Output Only. Type of a PSC Connection.
-                \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-              min_version: 'beta'
-              output: true
-              enum_values:
-                - 'CONNECTION_TYPE_READER'
-                - 'CONNECTION_TYPE_PRIMARY'
-                - 'CONNECTION_TYPE_DISCOVERY'
-            - name: 'port'
-              type: Integer
-              description:
-                "Output only. Ports of the exposed endpoint."
-              output: true
-              min_version: 'beta'
-           properties:
-            - name: 'pscConnectionId'
-              type: String
-              description:
-                "Output only. The PSC connection id of the forwarding rule connected
-                to the\nservice attachment. "
-              min_version: 'beta'
-              output: true
-            - name: 'ipAddress'
-              type: String
-              description:
-                "Output only. The IP allocated on the consumer network for the
-                PSC forwarding rule. "
-              min_version: 'beta'
-              output: true
-            - name: 'forwardingRule'
-              type: String
-              description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-              min_version: 'beta'
-              output: true
-            - name: 'projectId'
-              type: String
-              description:
-                "Output only. The consumer project_id where the forwarding rule is
-                created from. "
-              min_version: 'beta'
-              output: true
-            - name: 'network'
-              type: String
-              description:
-                "Output only. The consumer network where the IP address resides, in
-                the form of\nprojects/{project_id}/global/networks/{network_id}. "
-              min_version: 'beta'
-              output: true
-            - name: 'serviceAttachment'
-              type: String
-              description:
-                "Output only. The service attachment which is the target of the PSC connection, in the form of
-                projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-              min_version: 'beta'
-              output: true
-            - name: 'pscConnectionStatus'
-              type: Enum
-              description:
-                "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
-                \n Possible values:\n ACTIVE \n NOT_FOUND"
-              min_version: 'beta'
-              output: true
-              enum_values:
-                - 'ACTIVE'
-                - 'NOT_FOUND'
-            - name: 'connectionType'
-              type: Enum
-              description:
-                "Output Only. Type of a PSC Connection.
-                \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-              min_version: 'beta'
-              output: true
-              enum_values:
-                - 'CONNECTION_TYPE_READER'
-                - 'CONNECTION_TYPE_PRIMARY'
-                - 'CONNECTION_TYPE_DISCOVERY'
+        properties:
+          - name: 'pscConnectionId'
+            type: String
+            description:
+              "Output only. The PSC connection id of the forwarding rule connected
+              to the\nservice attachment. "
+            min_version: 'beta'
+            output: true
+          - name: 'ipAddress'
+            type: String
+            description:
+              "Output only. The IP allocated on the consumer network for the
+              PSC forwarding rule. "
+            min_version: 'beta'
+            output: true
+          - name: 'forwardingRule'
+            type: String
+            description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+            min_version: 'beta'
+            output: true
+          - name: 'projectId'
+            type: String
+            description:
+              "Output only. The consumer project_id where the forwarding rule is
+              created from. "
+            min_version: 'beta'
+            output: true
+          - name: 'network'
+            type: String
+            description:
+              "Output only. The consumer network where the IP address resides, in
+              the form of\nprojects/{project_id}/global/networks/{network_id}. "
+            min_version: 'beta'
+            output: true
+          - name: 'serviceAttachment'
+            type: String
+            description:
+              "Output only. The service attachment which is the target of the PSC connection, in the form of
+              projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
+            min_version: 'beta'
+            output: true
+          - name: 'pscConnectionStatus'
+            type: Enum
+            description:
+              "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
+              \n Possible values:\n ACTIVE \n NOT_FOUND"
+            min_version: 'beta'
+            output: true
+            enum_values:
+              - 'ACTIVE'
+              - 'NOT_FOUND'
+          - name: 'connectionType'
+            type: Enum
+            description:
+              "Output Only. Type of a PSC Connection.
+              \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
+            min_version: 'beta'
+            output: true
+            enum_values:
+              - 'CONNECTION_TYPE_READER'
+              - 'CONNECTION_TYPE_PRIMARY'
+              - 'CONNECTION_TYPE_DISCOVERY'
   - name: 'mode'
-          type: Enum
-          description:
-            "Optional. Standalone or cluster.
-            \n Possible values:\n CLUSTER\nSTANDALONE"
-          min_version: 'beta'
-          default_from_api: true
-          immutable: true
-          enum_values:
-            - 'CLUSTER'
-            - 'STANDALONE'
+    type: Enum
+    description:
+      "Optional. Standalone or cluster.
+      \n Possible values:\n CLUSTER\nSTANDALONE"
+    min_version: 'beta'
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'CLUSTER'
+      - 'STANDALONE'
   - name: 'pscAutoConnections'
     type: Array
     description:
