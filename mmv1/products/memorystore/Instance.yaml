@@ -500,5 +500,4 @@ properties:
             "Output only. Ports of the exposed endpoint."
           output: true
           min_version: 'beta'
-
-
+          
