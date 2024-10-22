@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"magician/github"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -43,9 +44,9 @@ var reassignReviewerCmd = &cobra.Command{
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
-		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variable")
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
 		}
 		gh := github.NewClient(githubToken)
 		var newPrimaryReviewer string
