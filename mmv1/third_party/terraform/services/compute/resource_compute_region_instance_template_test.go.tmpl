@@ -47,6 +47,7 @@ func TestAccComputeRegionInstanceTemplate_basic(t *testing.T) {
 					testAccCheckComputeRegionInstanceTemplateMetadata(&instanceTemplate, "foo", "bar"),
 					testAccCheckComputeRegionInstanceTemplateContainsLabel(&instanceTemplate, "my_label", "foobar"),
 					testAccCheckComputeRegionInstanceTemplateLacksShieldedVmConfig(&instanceTemplate),
+					resource.TestCheckResourceAttrSet("google_compute_region_instance_template.foobar", "creation_timestamp"),
 				),
 			},
 			{
@@ -293,6 +294,26 @@ func TestAccComputeRegionInstanceTemplate_diskIops(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRegionInstanceTemplate_diskIops(acctest.RandString(t, 10)),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceTemplate_diskIopsThroughput(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_diskIopsThroughput(acctest.RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_region_instance_template.foobar",
@@ -714,7 +735,6 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(acctest.RandString(t, 10), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -722,7 +742,6 @@ func TestAccComputeRegionInstanceTemplate_ConfidentialInstanceConfigMain(t *test
 					testAccCheckComputeRegionInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "TDX"),
 				),
 			},
-			{{- end }}
 		},
 	})
 }
@@ -1258,6 +1277,56 @@ func TestAccComputeRegionInstanceTemplate_resourceManagerTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate)),
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceTemplate_keyRevocationActionType(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	context_1 := map[string]interface{}{
+		"instance_name":              fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"key_revocation_action_type": `"NONE"`,
+	}
+	context_2 := map[string]interface{}{
+		"instance_name":              context_1["instance_name"].(string),
+		"key_revocation_action_type": `"STOP"`,
+	}
+	context_3 := map[string]interface{}{
+		"instance_name":              context_1["instance_name"].(string),
+		"key_revocation_action_type": `""`,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_keyRevocationActionType(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "key_revocation_action_type", "NONE"),
+				),
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_keyRevocationActionType(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "key_revocation_action_type", "STOP"),
+				),
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_keyRevocationActionType(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "key_revocation_action_type", ""),
+				),
 			},
 		},
 	})
@@ -2281,6 +2350,35 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
+func testAccComputeRegionInstanceTemplate_diskIopsThroughput(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "e2-medium"
+  region      = "us-central1"
+
+  disk {
+    source_image           = data.google_compute_image.my_image.self_link
+    auto_delete            = true
+    disk_size_gb           = 100
+    boot                   = true
+    disk_type              = "hyperdisk-balanced"
+    provisioned_iops       = 10000
+    provisioned_throughput = 1024
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, suffix)
+}
+
 func testAccComputeRegionInstanceTemplate_subnet_auto(network, suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2982,7 +3080,6 @@ resource "google_compute_region_instance_template" "foobar4" {
 `, suffix, minCpuPlatform, confidentialInstanceType, suffix, minCpuPlatform, confidentialInstanceType)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
@@ -3016,7 +3113,6 @@ resource "google_compute_region_instance_template" "foobar5" {
 }
 `, suffix, confidentialInstanceType)
 }
-{{- end }}
 
 func testAccComputeRegionInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
@@ -3769,6 +3865,34 @@ resource "google_compute_region_instance_template" "foobar" {
   network_interface {
     network = "default"
   }
+}
+`, context)
+}
+
+func testAccComputeRegionInstanceTemplate_keyRevocationActionType(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "e2-medium"
+  region       = "us-central1"
+
+  disk {
+	source_image = data.google_compute_image.my_image.self_link
+	auto_delete  = true
+	disk_size_gb = 10
+	boot         = true
+  }
+
+  network_interface {
+	network = "default"
+  }
+
+  key_revocation_action_type = %{key_revocation_action_type}
 }
 `, context)
 }

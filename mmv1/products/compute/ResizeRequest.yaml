@@ -13,6 +13,7 @@
 
 ---
 name: 'ResizeRequest'
+api_resource_type_kind: InstanceGroupManagerResizeRequest
 kind: 'compute#instanceGroupManagerResizeRequest'
 description: |
   Represents a Managed Instance Group Resize Request
