@@ -11,9 +11,9 @@ Get information about a VM instance resource within GCE. For more information se
 and
 [API](https://cloud.google.com/compute/docs/reference/latest/instances).
 
-Get information about VM's guest attrubutes. For more information see [the official documentation]()
+Get information about VM's guest attrubutes. For more information see [the official documentation](https://cloud.google.com/compute/docs/metadata/manage-guest-attributes)
 and
-[API]()
+[API](https://cloud.google.com/compute/docs/reference/rest/v1/instances/getGuestAttributes).
 
 ## Example Usage - get all attributes from a single namespace
 
@@ -39,9 +39,7 @@ data "google_compute_instance_guest_attributes" "appserver_ga" {
 
 The following arguments are supported:
 
-* `self_link` - (Optional) The self link of the instance. One of `name` or `self_link` must be provided.
-
-* `name` - (Optional) The name of the instance. One of `name` or `self_link` must be provided.
+* `name` - (Optional) The name or self_link of the instance.
 
 ---
 
@@ -53,22 +51,24 @@ The following arguments are supported:
     value is ignored.  If neither `self_link` nor `zone` are provided, the
     provider zone is used.
 
-* `query_path` -
+* `query_path` - (Optional) Path to query for the guest attributes. Consists of
+  `namespace` name for the attributes followed with a `/`.
 
-* `variable_key` -
+* `variable_key` - (Optional) Key of a variable to get the value of. Consists of
+  `namespace` name and `key` name for the variable separated by a `/`.
 
 ## Attributes Reference
 
 * `query_value` - Structure is [documented below](#nested_query_value).
 
-* `variable_value` -
+* `variable_value` - Value of the queried guest_attribute.
 
 ---
 
 <a name="nested_query_value"></a>The `query_value` block supports:
 
-* `key` -
+* `key` - Key of the guest_attribute.
 
-* `namespace` -
+* `namespace` - Namespace of the guest_attribute.
 
-* `value` -
+* `value` - Value of the guest_attribute.
