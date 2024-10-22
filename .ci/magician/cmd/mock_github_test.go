@@ -57,7 +57,7 @@ func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.
 }
 
 func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error) {
-	m.calledMethods["GetPullRequestComments"] = append(m.calledMethods["GetPullRequestComments"], []any{prNumber, login})
+	m.calledMethods["GetPullRequestComments"] = append(m.calledMethods["GetPullRequestComments"], []any{prNumber})
 	return m.pullRequestComments, nil
 }
 

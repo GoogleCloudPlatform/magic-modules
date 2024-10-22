@@ -77,13 +77,15 @@ func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, str
 	var newestComment PullRequestComment
 	var currentReviewer string
 	for _, comment := range comments {
-		if newestComment.CreatedAt.Before(comment.CreatedAt) {
-			// Skip comments created before the newest
+		if !newestComment.CreatedAt.IsZero() && comment.CreatedAt.Before(newestComment.CreatedAt) {
+			// Skip comments older than the newest comment.
 			continue
 		}
 		names := reviewerCommentRegex.SubexpNames()
 		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
+		fmt.Println(comment, matches)
 		if len(matches) < len(names) {
+			// Skip comments that don't match regex.
 			continue
 		}
 		for i, name := range names {

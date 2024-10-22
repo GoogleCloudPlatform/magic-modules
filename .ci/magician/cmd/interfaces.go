@@ -24,7 +24,7 @@ type GithubClient interface {
 	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
-	GetPullRequestComments(prNumber) ([]github.PullRequestComment, error)
+	GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error)
 	GetUserType(user string) github.UserType
 	GetTeamMembers(organization, team string) ([]github.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
