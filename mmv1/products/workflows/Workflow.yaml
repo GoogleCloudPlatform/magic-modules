@@ -63,6 +63,16 @@ examples:
     exclude_import_test: true
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'workflow_tags'
+    primary_resource_id: 'example'
+    vars:
+      name: 'workflow'
+      account_id: 'my-account'
+      tag_key: 'tag_key'
+      tag_value: 'tag_value'
+    exclude_import_test: true
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -152,3 +162,11 @@ properties:
     type: KeyValuePairs
     description: |
       User-defined environment variables associated with this workflow revision. This map has a maximum length of 20. Each string can take up to 4KiB. Keys cannot be empty strings and cannot start with “GOOGLE” or “WORKFLOWS".
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags. Resource manager tag keys and values have the same definition
+      as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in
+      the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.
+    immutable: true
+    ignore_read: true
