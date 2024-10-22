@@ -345,6 +345,8 @@ properties:
   - name: 'endpoints'
     type: Array
     description: "Endpoints for the instance."
+    min_version: 'beta'
+    output: true
     item_type:
       type: Array
       description: "A group of PSC connections. They are created in the same VPC network, one for each service attachment in the cluster."
