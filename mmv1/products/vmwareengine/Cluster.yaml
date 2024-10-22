@@ -235,16 +235,17 @@ properties:
         type: Integer
         description: |
           Minimum number of nodes of any type in a cluster.
-          If not specified the default limits apply.
+          Mandatory for successful addition of autoscaling settings in cluster.
       - name: 'maxClusterNodeCount'
         type: Integer
         description: |
           Maximum number of nodes of any type in a cluster.
-          If not specified the default limits apply.
+          Mandatory for successful addition of autoscaling settings in cluster.
       - name: 'coolDownPeriod'
         type: String
         description: |
           The minimum duration between consecutive autoscale operations.
           It starts once addition or removal of nodes is fully completed.
-          Defaults to 30m if not specified.
+          Minimum cool down period is 30m.
           Cool down period must be in whole minutes (for example, 30m, 31m, 50m).
+          Mandatory for successful addition of autoscaling settings in cluster.
