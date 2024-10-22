@@ -199,11 +199,11 @@ fun BuildSteps.archiveArtifactsIfOverLimit() {
             # Name should look similar to: debug-google-d2503f7-253644-TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS_GOOGLE_PACKAGE_ACCESSAPPROVAL.tar.gz
             cd %teamcity.build.checkoutDir%
             ARCHIVE_NAME=debug-%PROVIDER_NAME%-%env.BUILD_NUMBER%-%system.teamcity.buildType.id%-archive.tar.gz
-            tar -cf $ARCHIVE_NAME ./debug*
+            tar -cf ${'$'}ARCHIVE_NAME ./debug*
 
             # Fail loudly if archive not made as expected
-            if [ ! -f $ARCHIVE_NAME ]; then
-                echo "Archive file $ARCHIVE_NAME not found!"
+            if [ ! -f ${'$'}ARCHIVE_NAME ]; then
+                echo "Archive file ${'$'}ARCHIVE_NAME not found!"
 
                 # Allow sanity checking
                 echo "Listing contents of %teamcity.build.checkoutDir%"
