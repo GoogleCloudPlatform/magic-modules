@@ -62,3 +62,61 @@ resource "google_compute_firewall_policy_association" "default" {
 }
 `, context)
 }
+
+func TestAccComputeFirewallPolicyAssociation_organization(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewallPolicyAssociation_organization(context),
+			},
+			{
+				ResourceName:            "google_compute_firewall_policy_association.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+		},
+	})
+}
+
+func testAccComputeFirewallPolicyAssociation_organization(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "time_sleep" "wait_180s" {
+  destroy_duration = "180s"
+}
+
+resource "google_folder" "folder" {
+  display_name = "tf-test-my-folder-%{random_suffix}"
+  parent       = "%{org_name}"
+}
+
+resource "google_compute_firewall_policy" "policy" {
+  parent      = "%{org_name}"
+  short_name  = "tf-test-my-policy-%{random_suffix}"
+  description = "Example Resource"
+}
+
+resource "google_compute_firewall_policy_association" "default" {
+  firewall_policy = google_compute_firewall_policy.policy.id
+  attachment_target = google_folder.folder.name
+  name = "tf-test-my-association-%{random_suffix}"
+  depends_on = [
+	time_sleep.wait_180s,
+	google_folder.folder,
+	google_compute_firewall_policy.policy
+  ]
+}
+`, context)
+}
