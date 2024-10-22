@@ -10307,7 +10307,7 @@ resource "google_container_cluster" "primary" {
 
   deletion_protection = false
 }
-`, name, enabled, networkName, subnetworkName)
+`, name, networkName, subnetworkName, enabled)
 }
 
 
