@@ -137,7 +137,7 @@ fun BuildSteps.saveArtifactsToGCS() {
         name = "Tasks after running nightly tests: push artifacts(debug logs) to GCS"
         scriptContent = """
             #!/bin/bash
-            echo "Post-test step - storge artifacts(debug logs) to GCS"
+            echo "Post-test step - storage artifacts(debug logs) to GCS"
 
             # Authenticate gcloud CLI
             echo "${'$'}{GOOGLE_CREDENTIALS_GCS}" > google-account.json
