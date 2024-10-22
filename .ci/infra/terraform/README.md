@@ -48,6 +48,7 @@ After applying this configuration:
 - Enroll in Cloud Armor Managed Protection Plus tier
 - Add Cloud Identity Premium Plan to the Google Workspace domain
 - Perform the Privileged Access Manager set-up https://pantheon.corp.google.com/iam-admin/pam/setup
+- (Org only) Enroll the org in the Premium tier of Security Control Center
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account
