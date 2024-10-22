@@ -238,6 +238,10 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 
+	if acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"}) {
+		t.Fatal("Stopping the test because roles were added to IAM policy.")
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
