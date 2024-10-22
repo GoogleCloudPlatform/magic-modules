@@ -13,6 +13,7 @@
 
 ---
 name: 'TenantOauthIdpConfig'
+api_resource_type_kind: OauthIdpConfig
 description: |
   OIDC IdP configuration for a Identity Toolkit project within a tenant.
 

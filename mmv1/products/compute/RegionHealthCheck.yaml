@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionHealthCheck'
+api_resource_type_kind: HealthCheck
 kind: 'compute#healthCheck'
 description: |
   Health Checks determine whether instances are responsive and able to do work.

@@ -13,6 +13,7 @@
 
 ---
 name: 'ProjectFeed'
+api_resource_type_kind: Feed
 description: |
   Describes a Cloud Asset Inventory feed used to to listen to asset updates.
 references:

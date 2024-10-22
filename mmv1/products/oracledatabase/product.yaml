@@ -12,7 +12,7 @@
 # limitations under the License.
 ---
 name: 'OracleDatabase'
-display_name: 'OracleDatabase'
+display_name: 'Oracle Database'
 versions:
   - name: 'ga'
     base_url: 'https://oracledatabase.googleapis.com/v1/'

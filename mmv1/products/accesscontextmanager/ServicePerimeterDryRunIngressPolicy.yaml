@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunIngressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single IngressPolicy in the spec (dry-run) configuration for a service perimeter.
   IngressPolicies match requests based on ingressFrom and ingressTo stanzas. For an ingress policy to match,

@@ -18,6 +18,7 @@ var (
 		"hao-nan-li":  {},
 		"NickElliot":  {},
 		"BBBmau":      {},
+		"SirGitsalot": {},
 	}
 
 	// This is for new team members who are onboarding
@@ -87,8 +88,8 @@ var (
 		},
 		{
 			id:        "trodge",
-			startDate: newDate(2024, 8, 24, pdtLoc),
-			endDate:   newDate(2024, 9, 2, pdtLoc),
+			startDate: newDate(2024, 10, 23, pdtLoc),
+			endDate:   newDate(2024, 10, 25, pdtLoc),
 		},
 		{
 			id:        "roaks3",
