@@ -148,11 +148,16 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 			Tests:    replayingResult.FailedTests,
 		})
 
+		if err := vt.UploadCassettes(head, provider.Private); err != nil {
+			return fmt.Errorf("error uploading cassettes: %w", err)
+		}
+
 		if hasPanics, err := handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath, recordingResult, vcr.Recording, rnr); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
 		}
+
 		replayingAfterRecordingResult := vcr.Result{}
 		if len(recordingResult.PassedTests) > 0 {
 			replayingAfterRecordingResult, _ = vt.RunParallel(vcr.RunOptions{
