@@ -270,7 +270,6 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "SEV_SNP"),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(fmt.Sprintf("tf-test-tdx-%s", acctest.RandString(t, 10)), fmt.Sprintf("tf-test-tdx-generated-%s", acctest.RandString(t, 10)), "TDX"),
 				Check: resource.ComposeTestCheckFunc(
@@ -282,7 +281,6 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 				),
 
 			},
-			{{- end }}
 		},
 	})
 }
@@ -594,7 +592,6 @@ resource "google_compute_instance_from_machine_image" "foobar4" {
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImage_ConfidentialInstanceConfigTdx(instance string, newInstance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm5" {
@@ -651,7 +648,6 @@ resource "google_compute_instance_from_machine_image" "foobar5" {
 }
 `, instance, confidentialInstanceType, instance, newInstance, confidentialInstanceType)
 }
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstanceFromMachineImage_maxRunDuration(instance, newInstance string) string {

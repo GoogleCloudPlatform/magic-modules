@@ -15,6 +15,13 @@ aliases:
 
 This page describes how to add tests to a new resource in the `google` or `google-beta` Terraform provider.
 
+The providers have two basic types of tests:
+
+- Unit tests: test specific functions thoroughly. Unit tests do not interact with GCP APIs.
+- Acceptance tests (aka VCR tests, or create and update tests): test that resources interact as expected with the APIs. Acceptance tests interact with GCP APIs, but should only test the provider's behavior in constructing the API requests and parsing the responses.
+
+Acceptance tests are also called "VCR tests" because they use [`go-vcr`](https://github.com/dnaeon/go-vcr) to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don't actually need to be created, updated, or destroyed by the live API.
+
 For more information about testing, see the [official Terraform documentation](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests).
 
 ## Before you begin

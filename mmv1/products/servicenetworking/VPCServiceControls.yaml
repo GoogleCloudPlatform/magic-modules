@@ -13,6 +13,7 @@
 
 ---
 name: 'VPCServiceControls'
+api_resource_type_kind: VpcServiceControls
 description: |
   Manages the VPC Service Controls configuration for a service
   networking connection

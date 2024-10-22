@@ -1,0 +1,9 @@
+resource "google_compute_network" "{{$.PrimaryResourceId}}" {
+  provider                                  = google-beta
+  project                                   = "{{index $.TestEnvVars "project"}}"
+  name                                      = "{{index $.Vars "network_name"}}"
+  routing_mode                              = "GLOBAL"
+  bgp_best_path_selection_mode              = "STANDARD"
+  bgp_always_compare_med                    = true
+  bgp_inter_region_cost                     = "ADD_COST_TO_MED"
+}

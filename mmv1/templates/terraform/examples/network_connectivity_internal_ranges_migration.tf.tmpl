@@ -1,0 +1,27 @@
+resource "google_network_connectivity_internal_range" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "internal_range_name"}}"
+  description   = "Test internal range"
+  network       = google_compute_network.default.self_link
+  usage         = "FOR_MIGRATION"
+  peering       = "FOR_SELF"
+  ip_cidr_range = "10.1.0.0/16"
+  migration {
+    source = google_compute_subnetwork.source.self_link
+    target = "projects/${data.google_project.target_project.project_id}/regions/us-central1/subnetworks/target-subnet"
+  }
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "source" {
+  name          = "{{index $.Vars "source_subnet_name"}}"
+  ip_cidr_range = "10.1.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+data "google_project" "target_project" {
+}

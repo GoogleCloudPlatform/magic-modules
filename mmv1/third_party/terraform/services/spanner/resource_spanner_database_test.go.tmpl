@@ -539,7 +539,7 @@ func TestAccSpannerDatabase_cmek(t *testing.T) {
 				ResourceName:            "google_spanner_database.database",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection", "encryption_config.0.kms_key_names"},
 			},
 		},
 	})
@@ -605,4 +605,74 @@ resource "google_project_service_identity" "ck_sa" {
 
 `, context)
 }
+
+func TestAccSpannerDatabase_mrcmek(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	kms1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
+	kms2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-test-key-us-east1")
+	kms3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-test-key-us-east4")
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"key_ring1":      kms1.KeyRing.Name,
+		"key_name1":      kms1.CryptoKey.Name,
+		"key_ring2":      kms2.KeyRing.Name,
+		"key_name2":      kms2.CryptoKey.Name,
+		"key_ring3":      kms3.KeyRing.Name,
+		"key_name3":      kms3.CryptoKey.Name,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckSpannerDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerDatabase_mrcmek(context),
+			},
+			{
+				ResourceName:            "google_spanner_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ddl", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccSpannerDatabase_mrcmek(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  provider     = google-beta
+  config       = "nam3"
+  display_name = "main-instance1"
+  num_nodes    = 1
+}
+
+resource "google_spanner_database" "database" {
+  provider = google-beta
+  instance = google_spanner_instance.main.name
+  name     = "tf-test-mrcmek-db%{random_suffix}"
+  ddl = [
+    "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
+    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
+  ]
+
+  encryption_config {
+  	kms_key_names = [
+	  "%{key_name1}",
+	  "%{key_name2}",
+	  "%{key_name3}",
+	]
+  }
+
+  deletion_protection = false
+
+}
+
+
+`, context)
+}
+
 {{- end }}
