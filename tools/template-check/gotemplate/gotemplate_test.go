@@ -20,14 +20,14 @@ func TestCheckVersionGuards(t *testing.T) {
 			fileText:        `some text
 							{{- if ne $.TargetVersionName "beta" }}
 							more text`,
-			expectedResults: []string{"2: {{- if ne $.TargetVersionName "beta" }}"},
+			expectedResults: []string{`2: {{- if ne $.TargetVersionName "beta" }}`},
 		},
 		"one valid, one invalid": {
 			fileText:        `some text
 							{{- if ne $.TargetVersionName "beta" }}
 							more text
 							{{- if ne $.TargetVersionName "ga" }}`,
-			expectedResults: []string{"2: {{- if ne $.TargetVersionName "beta" }}"},
+			expectedResults: []string{`2: {{- if ne $.TargetVersionName "beta" }}`},
 		},
 		"multiple invalid": {
 			fileText:        `some text

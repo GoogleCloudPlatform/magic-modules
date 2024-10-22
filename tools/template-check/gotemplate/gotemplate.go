@@ -22,7 +22,7 @@ var allowedGuards = []string{
 // the goal is to capture (and validate) all "standard" version guards that would be added for new
 // resources/fields.
 func isVersionGuard(line string) bool {
-	re := regexp.MustCompile("{{-? if (eq|ne) \$\.TargetVersionName")
+	re := regexp.MustCompile("{{-? if (eq|ne) $.TargetVersionName")
 	return re.MatchString(line)
 }
 
