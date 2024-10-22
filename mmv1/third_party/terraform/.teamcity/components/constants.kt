@@ -43,3 +43,7 @@ const val ProjectSweeperName = "Project Sweeper"
 const val NightlyTestsProjectId = "NightlyTests"
 const val MMUpstreamProjectId = "MMUpstreamTests"
 const val VcrRecordingProjectId = "VCRRecording"
+
+// Artifact rules controls which artifacts are uploaded to S3
+// https://www.jetbrains.com/help/teamcity/2024.07/configuring-general-settings.html#Artifact+Paths
+const val ArtifactRules = "%teamcity.build.checkoutDir%/debug*.txt"
