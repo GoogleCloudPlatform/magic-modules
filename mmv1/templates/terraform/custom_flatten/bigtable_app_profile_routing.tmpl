@@ -25,5 +25,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		}
 	}
 
+	if v.(map[string]interface{})["rowAffinity"] != nil {
+                d.Set("row_affinity", true)
+        }
+
 	return true
 }
