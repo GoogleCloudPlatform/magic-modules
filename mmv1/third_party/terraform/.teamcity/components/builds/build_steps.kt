@@ -228,7 +228,7 @@ fun BuildSteps.archiveArtifactsIfOverLimit() {
 }
 
 // Part of testing my PR - not to be merged!
-fun BuildSteps.make1020DebugLogs() {
+fun BuildSteps.makeDebugLogs() {
     step(ScriptBuildStep {
         name = "Tasks after running nightly tests: archive artifacts(debug logs) if there are >=1000 before S3 upload"
         scriptContent = """
@@ -239,7 +239,7 @@ fun BuildSteps.make1020DebugLogs() {
             cd %teamcity.build.checkoutDir%
 
             // >1000 files that match the %teamcity.build.checkoutDir%/debug* pattern
-            touch debug-{0..1050}}.txt
+            touch debug-{0..10}}.txt
 
             # Allow sanity checking
             echo "Listing files matching the artifact rule value %teamcity.build.checkoutDir%/debug*"
