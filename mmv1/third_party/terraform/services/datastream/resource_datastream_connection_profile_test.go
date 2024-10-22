@@ -19,6 +19,9 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 	random_pass_1 := acctest.RandString(t, 10)
 	random_pass_2 := acctest.RandString(t, 10)
 
+	random_key_1 := acctest.RandString(t, 10)
+	random_key_2 := acctest.RandString(t, 10)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -71,6 +74,28 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 			{
 				// Disable prevent_destroy
 				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, false, random_pass_2),
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_SSHKey_Update(context, true, random_key_1),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.ssh_connectivity_profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "forward_ssh_connectivity.0.private_key"},
+			},
+			{
+
+				Config: testAccDatastreamConnectionProfile_SSHKey_Update(context, true, random_key_2),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.ssh_connectivity_profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "forward_ssh_connectivity.0.private_key"},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_SSHKey_Update(context, false, random_key_2),
 			},
 		},
 	})
@@ -244,6 +269,91 @@ resource "google_datastream_connection_profile" "mysql_con_profile" {
 		password = google_sql_user.mysql_user.password
 	}
 	%{lifecycle_block}
+}
+`, context)
+}
+
+func testAccDatastreamConnectionProfile_SSHKey_Update(context map[string]interface{}, preventDestroy bool, private_key string) string {
+	context["lifecycle_block"] = ""
+	if preventDestroy {
+		context["lifecycle_block"] = `
+        lifecycle {
+            prevent_destroy = true
+        }`
+	}
+
+	context["private_key"] = private_key
+
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+        name             = "tf-test-my-database-instance%{random_suffix}"
+        database_version = "POSTGRES_14"
+        region           = "us-central1"
+        settings {
+            tier = "db-f1-micro"
+            ip_configuration {
+    
+            // Datastream IPs will vary by region.
+            authorized_networks {
+                value = "34.71.242.81"
+            }
+    
+            authorized_networks {
+                value = "34.72.28.29"
+            }
+    
+            authorized_networks {
+                value = "34.67.6.157"
+            }
+    
+            authorized_networks {
+                value = "34.67.234.134"
+            }
+    
+            authorized_networks {
+                value = "34.72.239.218"
+            }
+        }
+    }
+    
+        deletion_protection  = "false"
+    }
+    
+    resource "google_sql_database" "db" {
+        instance = google_sql_database_instance.instance.name
+        name     = "db"
+    }
+    
+    resource "random_password" "pwd" {
+        length = 16
+        special = false
+    }
+    
+    resource "google_sql_user" "user" {
+        name = "user"
+        instance = google_sql_database_instance.instance.name
+        password = random_password.pwd.result
+    }
+
+resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
+    display_name          = "Source connection profile"
+    location              = "us-central1"
+    connection_profile_id = "tf-test-mysql-profile%{random_suffix}"
+
+    postgresql_profile {
+        hostname = google_sql_database_instance.instance.public_ip_address
+        username = google_sql_user.user.name
+        password = google_sql_user.user.password
+        database = google_sql_database.db.name
+    }
+
+    forward_ssh_connectivity {
+        hostname = google_sql_database_instance.instance.public_ip_address
+        username = google_sql_user.user.name
+        port     = 22
+        private_key = "%{private_key}"
+    }
+    %{lifecycle_block}
 }
 `, context)
 }
