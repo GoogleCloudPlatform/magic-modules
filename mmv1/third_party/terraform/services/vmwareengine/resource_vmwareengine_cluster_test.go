@@ -104,24 +104,24 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
     node_count   = %{node_count}
     custom_core_count = 32
   }
-	autoscaling_settings {
-		autoscaling_policies {
-			autoscale_policy_id = "autoscaling-policy"
-			node_type_id = "standard-72"
-			scale_out_size = 1
-			consumed_memory_thresholds {
-				scale_out = 75
-				scale_in  = 20
-			}
-			storage_thresholds {
-				scale_out = 80
-				scale_in  = 20
-			}
-		}
-		min_cluster_node_count = 3
-		max_cluster_node_count = 8
-		cool_down_period = "1800s"
-	}
+  autoscaling_settings {
+    autoscaling_policies {
+      autoscale_policy_id = "autoscaling-policy"
+      node_type_id = "standard-72"
+      scale_out_size = 1
+      consumed_memory_thresholds {
+        scale_out = 75
+        scale_in  = 20
+      }
+      storage_thresholds {
+        scale_out = 80
+        scale_in  = 20
+      }
+    }
+    min_cluster_node_count = 3
+    max_cluster_node_count = 8
+    cool_down_period = "1800s"
+  }
 }
 
 data "google_vmwareengine_cluster" "ds" {
@@ -168,24 +168,24 @@ resource "google_vmwareengine_cluster" "vmw-engine-ext-cluster" {
     node_count   = %{node_count}
     custom_core_count = 32
   }
-	autoscaling_settings {
-		autoscaling_policies {
-			autoscale_policy_id = "autoscaling-policy"
-			node_type_id = "standard-72"
-			scale_out_size = 2
-			cpu_thresholds {
-				scale_out = 80
-				scale_in  = 15
-			}
-			storage_thresholds {
-				scale_out = 79
-				scale_in = 15
+  autoscaling_settings {
+    autoscaling_policies {
+      autoscale_policy_id = "autoscaling-policy"
+      node_type_id = "standard-72"
+      scale_out_size = 2
+      cpu_thresholds {
+        scale_out = 80
+        scale_in  = 15
       }
-		}
-		min_cluster_node_count = 3
-		max_cluster_node_count = 10
-		cool_down_period = "3600s"
-	}
+      storage_thresholds {
+        scale_out = 79
+        scale_in = 15
+      }
+    }
+    min_cluster_node_count = 3
+    max_cluster_node_count = 10
+    cool_down_period = "3600s"
+  }
 }
 
 data "google_vmwareengine_cluster" "ds" {
