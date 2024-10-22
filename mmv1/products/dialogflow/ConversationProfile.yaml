@@ -1,0 +1,722 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless #required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ConvesationProfile'
+description: |
+  desc
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
+  api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/conversationProfiles'
+docs:
+# Only one agent per project, API does not have an agent ID
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/conversationProfiles'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'dialogflow_agent_full'
+    primary_resource_id: 'full_agent'
+    vars:
+      agent_name: 'dialogflow-agent'
+parameters:
+  - name: 'location'
+    type: String
+    url_param_only: true
+    description: |
+      desc
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      name
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Required. Human readable name for this profile. Max length 1024 bytes.
+    required: true
+  - type: NestedObject
+    name: 'automatedAgentConfig'
+    ##required: true
+    description: |
+      Configuration for an automated agent to use with this profile
+    properties:
+      - type: String
+        name: 'agent'
+        description: |
+          ID of the Dialogflow agent environment to use.
+          Expects the format "projects/<Project ID>/locations/<Location ID>/agent/environments/<EnvironmentID>"
+        required: true
+      - type: String
+        name: 'sessionTtl'
+        description: |
+          Configure lifetime of the Dialogflow session.
+  - type: NestedObject
+    name: 'humanAgentAssistantConfig'
+    description: |
+      Configuration for connecting to a live agent
+    properties:
+      - type: NestedObject
+        name: 'notificationConfig'
+        description: |
+          Pub/Sub topic on which to publish new agent assistant events.
+          Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
+        properties: 
+          - type: String
+            name: 'topic'
+            description: |
+              Name of the Pub/Sub topic to publish conversation events
+          - type: Enum
+            name: 'messageFormat'
+            description: |
+              Format of the message
+            enum_values:
+              - MESSAGE_FORMAT_UNSPECIFIED
+              - PROTO
+              - JSON
+      - type: NestedObject
+        name: 'humanAgentSuggestionConfig'
+        description: |
+          Configuration for agent assistance of human agent participant.
+        properties:
+          - type: Array
+            name: 'featureConfigs'
+            description: |
+              Configuration of different suggestion features. One feature can have only one config.
+            item_type: 
+              type: NestedObject
+              properties:
+                - type: NestedObject
+                  name: 'suggestionFeature'
+                  description: |
+                    The suggestion feature.
+                  properties:
+                    - type: Enum
+                      name: 'type'
+                      description: |
+                        Type of Human Agent Assistant API feature to request.
+                      enum_values:
+                        - TYPE_UNSPECIFIED
+                        - ARTICLE_SUGGESTION
+                        - FAQ
+                        - SMART_REPLY
+                        - KNOWLEDGE_SEARCH
+                        - KNOWLEDGE_ASSIST
+                        - DIALOGFLOW_ASSIST
+                - type: Boolean
+                  name: 'enableEventBasedSuggestion'
+                  description: |
+                    Automatically iterates all participants and tries to compile suggestions.
+                    This feature is only supported for types: ARTICLE_SUGGESTION, FAQ, DIALOGFLOW_ASSIST, KNOWLEDGE_ASSIST.
+                - type: Boolean
+                  name: 'disableAgentQueryLogging'
+                  description: |
+                    Disable the logging of search queries sent by human agents. It can prevent those queries from being stored at answer records.
+                    This feature is only supported for types: KNOWLEDGE_SEARCH.
+                - type: Boolean
+                  name: 'enableQuerySuggestionWhenNoAnswer'
+                  description: |
+                    Enable query suggestion even if we can't find its answer. By default, queries are suggested only if we find its answer.
+                    This feature is only supported for types: KNOWLEDGE_ASSIST.
+                - type: Boolean
+                  name: 'enableConversationAugmentedQuery'
+                  description: |
+                    Enable including conversation context during query answer generation.
+                    This feature is only supported for types: KNOWLEDGE_SEARCH.
+                - type: Boolean
+                  name: 'enableQuerySuggetioOnly'
+                  description: |
+                    Enable query suggestion only.
+                    This feature is only supported for types: KNOWLEDGE_ASSIST
+                - type: NestedObject
+                  name: 'suggestionTriggerSettings'
+                  description: |
+                    Settings of suggestion trigger.
+                    This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                  properties:
+                    - type: Boolean
+                      name: 'noSmallTalk'
+                      description: |
+                        Do not trigger if last utterance is small talk.
+                    - type: Boolean
+                      name: 'onlyEndUser'
+                      description: |
+                        Only trigger suggestion if participant role of last utterance is END_USER.
+                - type: NestedObject
+                  name: queryConfig
+                  description: |
+                    Configs of query.
+                  properties:
+                    - type: Integer
+                      name: maxResults
+                      default_value: 10
+                      description: |
+                        Maximum number of results to return.
+                    - type: Double
+                      name: confidenceThreshold
+                      description: |
+                        Confidence threshold of query result.
+                        This feature is only supported for types: ARTICLE_SUGGESTION, FAQ, SMART_REPLY, SMART_COMPOSE, KNOWLEDGE_SEARCH, KNOWLEDGE_ASSIST, ENTITY_EXTRACTION.
+                    - type: NestedObject
+                      name: contextFilterSettings
+                      description: |
+                        Determines how recent conversation context is filtered when generating suggestions. If unspecified, no messages will be dropped.
+                      properties:
+                        - type: Boolean
+                          name: 'dropHandoffMessages'
+                          description: |
+                            If set to true, the last message from virtual agent (hand off message) and the message before it (trigger message of hand off) are dropped.
+                        - type: Boolean
+                          name: 'dropVirtualAgentMessages'
+                          description: |
+                            If set to true, all messages from virtual agent are dropped.
+                        - type: Boolean
+                          name: 'dropIvrMessages'
+                          description: |
+                            If set to true, all messages from ivr stage are dropped.
+                    - type: NestedObject
+                      name: 'sections'
+                      description: |
+                        he customized sections chosen to return when requesting a summary of a conversation.
+                      properties:
+                        - type: Array
+                          name: 'sectionTypes'
+                          description: |
+                            The selected sections chosen to return when requesting a summary of a conversation
+                            If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
+                          item_type: 
+                            type: Enum
+                            name: 'whatshouldthisbe'
+                            description: |
+                                desc
+                            enum_values:
+                              - SECTION_TYPE_UNSPECIFIED
+                              - SITUATION
+                              - ACTION
+                              - RESOLUTION
+                              - REASON_FOR_CANCELLATION
+                              - CUSTOMER_SATISFACTION
+                              - ENTITIES
+                    - type: NestedObject
+                      name: 'knowledgeBaseQuerySource'
+                      description: |
+                        Query from knowledgebase.
+                        This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                      properties:
+                        - type: Array
+                          name: 'knowledgeBases'
+                          required: true
+                          description: |
+                            Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
+                          item_type: 
+                            type: String
+                    - type: NestedObject
+                      name: 'documentQuerySource'
+                      description: |
+                        Query from knowledge base document.
+                        This feature is supported for types: SMART_REPLY, SMART_COMPOSE.
+                      properties:
+                        - type: Array
+                          name: 'documents'
+                          required: true
+                          description: |
+                            Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
+                          item_type: 
+                            type: String
+                    - type: NestedObject
+                      name: 'dialogflowQuerySource'
+                      description: |
+                        Query from Dialogflow agent.
+                        This feature is supported for types: DIALOGFLOW_ASSIST.
+                      properties:
+                        - type: String
+                          name: 'agent'
+                          required: true
+                          description: |
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                        - type: NestedObject
+                          name: 'humanAgentSideConfig'
+                          description: |
+                            The Dialogflow assist configuration for human agent.
+                          properties:
+                            - type: String
+                              name: 'agent'
+                              description: |
+                                The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
+                - type: NestedObject  
+                  name: conversationModelConfig
+                  description: |
+                    Configs of custom conversation model.
+                  properties:
+                    - type: String
+                      name: 'model'
+                      description: |
+                        Conversation model resource name. Format: projects/<Project ID>/conversationModels/<Model ID>.
+                    - type: String
+                      name: 'baselineModelVersion'
+                      description: |
+                        Version of current baseline model. It will be ignored if model is set. Valid versions are: Article Suggestion baseline model: - 0.9 - 1.0 (default) Summarization baseline model: - 1.0
+                - type: NestedObject
+                  name: 'conversationProcessConfig'
+                  description: |
+                    Config to process conversation.
+                  properties:
+                    - type: Integer
+                      name: 'recentSentencesCount'
+                      description: |
+                        Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
+          - type: Boolean
+            name: 'groupSuggestionsResponses'
+            description: |
+              If groupSuggestionResponses is false, and there are multiple featureConfigs in event based suggestion or StreamingAnalyzeContent, we will try to deliver suggestions to customers as soon as we get new suggestion. Different type of suggestions based on the same context will be in separate Pub/Sub event or StreamingAnalyzeContentResponse.
+
+              If groupSuggestionResponses set to true. All the suggestions to the same participant based on the same context will be grouped into a single Pub/Sub event or StreamingAnalyzeContentResponse.
+          - type: Array
+            name: 'generators'
+            description: |
+              List of various generator resource names used in the conversation profile.
+            item_type: 
+              type: String
+          - type: Boolean
+            name: 'disableHighLatencyFeaturesSyncDelivery'
+            description: |
+              When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
+      - type: NestedObject
+        name: 'endUserSuggestionConfig'
+        description: |
+          Configuration for agent assistance of end user participant.
+        properties:
+          - type: Array
+            name: 'featureConfigs'
+            description: |
+              Configuration of different suggestion features. One feature can have only one config.
+            item_type: 
+              type: NestedObject
+              properties:
+                - type: NestedObject
+                  name: 'suggestionFeature'
+                  description: |
+                    The suggestion feature.
+                  properties:
+                    - type: Enum
+                      name: 'type'
+                      description: |
+                        Type of Human Agent Assistant API feature to request.
+                      enum_values:
+                        - TYPE_UNSPECIFIED
+                        - ARTICLE_SUGGESTION
+                        - FAQ
+                        - SMART_REPLY
+                        - KNOWLEDGE_SEARCH
+                        - KNOWLEDGE_ASSIST
+                        - DIALOGFLOW_ASSIST
+                - type: Boolean
+                  name: 'enableEventBasedSuggestion'
+                  description: |
+                    Automatically iterates all participants and tries to compile suggestions.
+                    This feature is only supported for types: ARTICLE_SUGGESTION, FAQ, DIALOGFLOW_ASSIST, KNOWLEDGE_ASSIST.
+                - type: Boolean
+                  name: 'disableAgentQueryLogging'
+                  description: |
+                    Disable the logging of search queries sent by human agents. It can prevent those queries from being stored at answer records.
+                    This feature is only supported for types: KNOWLEDGE_SEARCH.
+                - type: Boolean
+                  name: 'enableQuerySuggestionWhenNoAnswer'
+                  description: |
+                    Enable query suggestion even if we can't find its answer. By default, queries are suggested only if we find its answer.
+                    This feature is only supported for types: KNOWLEDGE_ASSIST.
+                - type: Boolean
+                  name: 'enableConversationAugmentedQuery'
+                  description: |
+                    Enable including conversation context during query answer generation.
+                    This feature is only supported for types: KNOWLEDGE_SEARCH.
+                - type: Boolean
+                  name: 'enableQuerySuggetioOnly'
+                  description: |
+                    Enable query suggestion only.
+                    This feature is only supported for types: KNOWLEDGE_ASSIST
+                - type: NestedObject
+                  name: 'suggestionTriggerSettings'
+                  description: |
+                    Settings of suggestion trigger.
+                    This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                  properties:
+                    - type: Boolean
+                      name: 'noSmallTalk'
+                      description: |
+                        Do not trigger if last utterance is small talk.
+                    - type: Boolean
+                      name: 'onlyEndUser'
+                      description: |
+                        Only trigger suggestion if participant role of last utterance is END_USER.
+                - type: NestedObject
+                  name: queryConfig
+                  description: |
+                    Configs of query.
+                  properties:
+                    - type: Integer
+                      name: maxResults
+                      default_value: 10
+                      description: |
+                        Maximum number of results to return.
+                    - type: Double
+                      name: confidenceThreshold
+                      description: |
+                        Confidence threshold of query result.
+                        This feature is only supported for types: ARTICLE_SUGGESTION, FAQ, SMART_REPLY, SMART_COMPOSE, KNOWLEDGE_SEARCH, KNOWLEDGE_ASSIST, ENTITY_EXTRACTION.
+                    - type: NestedObject
+                      name: contextFilterSettings
+                      description: |
+                        Determines how recent conversation context is filtered when generating suggestions. If unspecified, no messages will be dropped.
+                      properties:
+                        - type: Boolean
+                          name: 'dropHandoffMessages'
+                          description: |
+                            If set to true, the last message from virtual agent (hand off message) and the message before it (trigger message of hand off) are dropped.
+                        - type: Boolean
+                          name: 'dropVirtualAgentMessages'
+                          description: |
+                            If set to true, all messages from virtual agent are dropped.
+                        - type: Boolean
+                          name: 'dropIvrMessages'
+                          description: |
+                            If set to true, all messages from ivr stage are dropped.
+                    - type: NestedObject
+                      name: 'sections'
+                      description: |
+                        he customized sections chosen to return when requesting a summary of a conversation.
+                      properties:
+                        - type: Array
+                          name: 'sectionTypes'
+                          description: |
+                            The selected sections chosen to return when requesting a summary of a conversation
+                            If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
+                          item_type: 
+                            type: Enum
+                            name: 'whatshouldthisbe'
+                            description: |
+                                desc
+                            enum_values:
+                              - SECTION_TYPE_UNSPECIFIED
+                              - SITUATION
+                              - ACTION
+                              - RESOLUTION
+                              - REASON_FOR_CANCELLATION
+                              - CUSTOMER_SATISFACTION
+                              - ENTITIES
+                    - type: NestedObject
+                      name: 'knowledgeBaseQuerySource'
+                      description: |
+                        Query from knowledgebase.
+                        This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                      properties:
+                        - type: Array
+                          name: 'knowledgeBases'
+                          required: true
+                          description: |
+                            Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
+                          item_type: 
+                            type: String
+                    - type: NestedObject
+                      name: 'documentQuerySource'
+                      description: |
+                        Query from knowledge base document.
+                        This feature is supported for types: SMART_REPLY, SMART_COMPOSE.
+                      properties:
+                        - type: Array
+                          name: 'documents'
+                          required: true
+                          description: |
+                            Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
+                          item_type: 
+                            type: String
+                    - type: NestedObject
+                      name: 'dialogflowQuerySource'
+                      description: |
+                        Query from Dialogflow agent.
+                        This feature is supported for types: DIALOGFLOW_ASSIST.
+                      properties:
+                        - type: String
+                          name: 'agent'
+                          required: true
+                          description: |
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                        - type: NestedObject
+                          name: 'humanAgentSideConfig'
+                          description: |
+                            The Dialogflow assist configuration for human agent.
+                          properties:
+                            - type: String
+                              name: 'agent'
+                              description: |
+                                The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
+                - type: NestedObject  
+                  name: conversationModelConfig
+                  description: |
+                    Configs of custom conversation model.
+                  properties:
+                    - type: String
+                      name: 'model'
+                      description: |
+                        Conversation model resource name. Format: projects/<Project ID>/conversationModels/<Model ID>.
+                    - type: String
+                      name: 'baselineModelVersion'
+                      description: |
+                        Version of current baseline model. It will be ignored if model is set. Valid versions are: Article Suggestion baseline model: - 0.9 - 1.0 (default) Summarization baseline model: - 1.0
+                - type: NestedObject
+                  name: 'conversationProcessConfig'
+                  description: |
+                    Config to process conversation.
+                  properties:
+                    - type: Integer
+                      name: 'recentSentencesCount'
+                      description: |
+                        Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
+          - type: Boolean
+            name: 'groupSuggestionsResponses'
+            description: |
+              If groupSuggestionResponses is false, and there are multiple featureConfigs in event based suggestion or StreamingAnalyzeContent, we will try to deliver suggestions to customers as soon as we get new suggestion. Different type of suggestions based on the same context will be in separate Pub/Sub event or StreamingAnalyzeContentResponse.
+
+              If groupSuggestionResponses set to true. All the suggestions to the same participant based on the same context will be grouped into a single Pub/Sub event or StreamingAnalyzeContentResponse.
+          - type: Array
+            name: 'generators'
+            description: |
+              List of various generator resource names used in the conversation profile.
+            item_type: 
+              type: String
+          - type: Boolean
+            name: 'disableHighLatencyFeaturesSyncDelivery'
+            description: |
+              When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
+      - type: NestedObject
+        name: 'messageAnalysisConfig'
+        #required: true
+        description: |
+          desc
+        properties:
+          - type: Boolean
+            name: 'enableEntityExtraction'
+            default_value: false
+            description: |
+              Enable entity extraction in conversation messages on agent assist stage.
+          - type: Boolean
+            name: 'enableSentimentAnalysis'
+            default_value: false
+            description: |
+              Enable sentiment analysis in conversation messages on agent assist stage. Sentiment analysis inspects user input and identifies the prevailing subjective opinion, especially to determine a user's attitude as positive, negative, or neutral.
+  - type: NestedObject
+    name: 'humanAgentHandoffConfig'
+    description: |
+      Defines the hand off to a live agent, typically on which external agent service provider to connect to a conversation.
+    properties:
+      - type: NestedObject
+        name: livePersonConfig
+        description: |
+          Config for using LivePerson.
+        exactly_one_of:
+          - humanAgentHandoffConfig.livePersonConfig
+          - humanAgentHandoffConfig.salesforceLiveAgentConfig
+        properties:
+          - type: String
+            name: 'accountNumber'
+            required: true
+            description: |
+              Account number of the LivePerson account to connect.
+      - type: NestedObject
+        name: salesforceLiveAgentConfig
+        description: |
+          Config for using a Salesforce Live agent
+        exactly_one_of:
+          - humanAgentHandoffConfig.livePersonConfig
+          - humanAgentHandoffConfig.salesforceLiveAgentConfig
+        properties:
+          - type: String
+            name: 'organizationId'
+            required: true
+            description: |
+              The organization ID of the Salesforce account.
+          - type: String
+            name: 'deploymentId'
+            required: true
+            description: |
+              Live Agent deployment ID.
+          - type: String
+            name: 'buttonId'
+            required: true
+            description: |
+              Live Agent chat button ID.
+          - type: String
+            name: 'endpointDomain'
+            required: true
+            description: |
+              Domain of the Live Agent endpoint for this agent.
+  - type: NestedObject
+    name: 'notificationConfig'
+    description: |
+      Pub/Sub topic on which to publish new agent assistant events.
+      Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
+    properties: 
+      - type: String
+        name: 'topic'
+        description: |
+          Name of the Pub/Sub topic to publish conversation events
+      - type: Enum
+        name: 'messageFormat'
+        description: |
+          Format of the message
+        enum_values:
+          - MESSAGE_FORMAT_UNSPECIFIED
+          - PROTO
+          - JSON
+  - type: NestedObject
+    name: 'loggingConfig'
+    description: |
+      Defines logging behavior for conversation lifecycle events.
+    properties:
+      - type: Boolean
+        name: enableStackdriverLogging
+        description: |
+          Whether to log conversation events
+  - type: NestedObject
+    name: newMessageEventNotificationConfig
+    description: |
+      Pub/Sub topic on which to publish new agent assistant events.
+      Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
+    properties: 
+      - type: String
+        name: 'topic'
+        description: |
+          Name of the Pub/Sub topic to publish conversation events
+      - type: Enum
+        name: 'messageFormat'
+        description: |
+          Format of the message
+        enum_values:
+          - MESSAGE_FORMAT_UNSPECIFIED
+          - PROTO
+          - JSON
+  - type: NestedObject
+    name: sttConfig
+    description: | 
+      Settings for speech transcription.
+    properties:
+      - type: Enum
+        name: speechModelVariant
+        description: |
+          The speech model used in speech to text.
+        enum_values:
+          - SPEECH_MODEL_VARIANT_UNSPECIFIED
+          - USE_BEST_AVAILABLE
+          - USE_STANDARD
+          - USE_ENHANCED
+      - type: String
+        name: 'model'
+        description: |
+          Which Speech model to select.
+          Leave this field unspecified to use Agent Speech settings for model selection.
+      - type: Enum
+        name: 'audoEncoding'
+        description: |
+          Audio encoding of the audio content to process.
+        enum_values:
+          - AUDIO_ENCODING_UNSPECIFIED
+          - AUDIO_ENCODING_LINEAR_16
+          - AUDIO_ENCODING_FLAC
+          - AUDIO_ENCODING_MULAW
+          - AUDIO_ENCODING_AMR
+          - AUDIO_ENCODING_AMR_WB
+          - AUDIO_ENCODING_OGG_OPUS
+          - AUDIOENCODING_SPEEX_WITH_HEADER_BYTE
+      - type: Integer
+        name: 'sampleRateHertz'
+        description: |
+          Sample rate (in Hertz) of the audio content sent in the query.
+      - type: String
+        name: 'languageCode'
+        description: |
+          The language of the supplied audio.
+      - type: Boolean
+        name: 'enableWordInfo'
+        description: |
+          If true, Dialogflow returns SpeechWordInfo in StreamingRecognitionResult with information about the recognized speech words.
+      - type: Boolean
+        name: 'useTimeoutBasedEndpointing'
+        description: |
+          Use timeout based endpointing, interpreting endpointer sensitivy as seconds of timeout value.
+  - type: String
+    name: 'languageCode'
+    description: |
+      Language code for the conversation profile. This should be a BCP-47 language tag.
+  - type: String
+    name: 'timeZone'
+    description: |
+      The time zone of this conversational profile.
+  - type: String
+    name: 'securitySettings'
+    description: |
+      Name of the CX SecuritySettings reference for the agent.
+  - type: NestedObject
+    name: 'ttsConfig'
+    description: |
+      Configuration for Text-to-Speech synthesization. If agent defines synthesization options as well, agent settings overrides the option here.
+    properties:
+      - type: Double
+        name: 'speakingRate'
+        description: |
+          Speaking rate/speed, in the range [0.25, 4.0]. 
+      - type: Double
+        name: 'pitch'
+        description: |
+          Speaking pitch, in the range [-20.0, 20.0]. 20 means increase 20 semitones from the original pitch. -20 means decrease 20 semitones from the original pitch.
+      - type: Double
+        name: 'volumeGainDb'
+        description: |
+          Volume gain (in dB) of the normal native volume supported by the specific voice.
+      - type: Array
+        name: 'effectsProfileId'
+        description: |
+          An identifier which selects 'audio effects' profiles that are applied on (post synthesized) text to speech. Effects are applied on top of each other in the order they are given.
+        item_type: 
+          type: String
+      - type: NestedObject
+        name: voice
+        description: |
+          The desired voice of the synthesized audio.
+        properties:
+          - type: String
+            name: 'name'
+            description: |
+              The name of the voice.
+          - type: Enum
+            name: 'ssmlGender'
+            description: |
+              The preferred gender of the voice.
+            enum_values:
+              - SSML_VOICE_GENDER_UNSPECIFIED
+              - SSML_VOICE_GENDER_MALE
+              - SSML_VOICE_GENDER_FEMALE
+              - SSML_VOICE_GENDER_NEUTRAL
