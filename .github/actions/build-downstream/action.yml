@@ -28,7 +28,7 @@ runs:
           key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
-            
+
       - name: Install Ruby dependencies
         shell: bash
         run: |
