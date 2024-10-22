@@ -83,7 +83,6 @@ func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, str
 		}
 		names := reviewerCommentRegex.SubexpNames()
 		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
-		fmt.Println(comment, matches)
 		if len(matches) < len(names) {
 			// Skip comments that don't match regex.
 			continue

@@ -44,9 +44,9 @@ var reassignReviewerCmd = &cobra.Command{
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
-		githubToken, ok := os.LookupEnv("GITHUB_TOKEN_MAGIC_MODULES")
+		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES environment variable")
+			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(githubToken)
 		var newPrimaryReviewer string
@@ -66,11 +66,13 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 	reviewerComment, currentReviewer := github.FindReviewerComment(comments)
 
 	if currentReviewer == "" {
+		fmt.Println("No reviewer comment found, creating one")
 		newPrimaryReviewer, err = createReviewComment(prNumber, newPrimaryReviewer, gh)
 		if err != nil {
 			return err
 		}
 	} else {
+		fmt.Println("Reassigning to random reviewer")
 		newPrimaryReviewer, err = updateReviewComment(prNumber, currentReviewer, newPrimaryReviewer, reviewerComment.ID, gh)
 		if err != nil {
 			return err
@@ -88,7 +90,6 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 }
 
 func createReviewComment(prNumber, newPrimaryReviewer string, gh GithubClient) (string, error) {
-	fmt.Println("No reviewer comment found, creating one")
 	if newPrimaryReviewer == "" {
 		newPrimaryReviewer = github.GetRandomReviewer()
 	}
@@ -105,7 +106,6 @@ func createReviewComment(prNumber, newPrimaryReviewer string, gh GithubClient) (
 }
 
 func updateReviewComment(prNumber, currentReviewer, newPrimaryReviewer string, reviewerCommentID int, gh GithubClient) (string, error) {
-	fmt.Println("Reassigning to random reviewer")
 	if newPrimaryReviewer == "" {
 		newPrimaryReviewer = github.GetNewRandomReviewer(currentReviewer)
 	}
