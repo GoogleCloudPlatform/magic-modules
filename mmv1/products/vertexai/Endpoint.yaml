@@ -502,4 +502,4 @@ properties:
     type: String
     description:
       'Output only. DNS of the dedicated endpoint. Will only be populated if dedicatedEndpointEnabled is true. Format: `https://{endpointId}.{region}-{projectNumber}.prediction.vertexai.goog`.'
-    output: truee
+    output: true
