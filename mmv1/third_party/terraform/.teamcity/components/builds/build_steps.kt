@@ -226,27 +226,3 @@ fun BuildSteps.archiveArtifactsIfOverLimit() {
         // https://youtrack.jetbrains.com/issue/KT-2425/Provide-a-way-for-escaping-the-dollar-sign-symbol-in-multiline-strings-and-string-templates
     })
 }
-
-// Part of testing my PR - not to be merged!
-fun BuildSteps.makeDebugLogs() {
-    step(ScriptBuildStep {
-        name = "Tasks after running nightly tests: archive artifacts(debug logs) if there are >=1000 before S3 upload"
-        scriptContent = """
-            #!/bin/bash
-            echo "Making a build look like it's run >1000 tests and created >1000 debug logs"
-
-            // Folder where debug logs are made
-            cd %teamcity.build.checkoutDir%
-
-            // >1000 files that match the %teamcity.build.checkoutDir%/debug* pattern
-            touch debug-{0..10}}.txt
-
-            # Allow sanity checking
-            echo "Listing files matching the artifact rule value %teamcity.build.checkoutDir%/debug*"
-            ls debug*
-        """.trimIndent()
-        // ${'$'} is required to allow creating a script in TeamCity that contains
-        // parts like ${GIT_HASH_SHORT} without having Kotlin syntax issues. For more info see:
-        // https://youtrack.jetbrains.com/issue/KT-2425/Provide-a-way-for-escaping-the-dollar-sign-symbol-in-multiline-strings-and-string-templates
-    })
-}

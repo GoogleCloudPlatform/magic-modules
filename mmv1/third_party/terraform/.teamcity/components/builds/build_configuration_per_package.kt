@@ -67,13 +67,12 @@ class PackageDetails(private val packageName: String, private val displayName: S
             }
 
             steps {
-            //    setGitCommitBuildId()
-            //    tagBuildToIndicateTriggerMethod()
-            //    configureGoEnv()
-            //    downloadTerraformBinary()
-            //    runAcceptanceTests()
-            //    saveArtifactsToGCS()
-                makeDebugLogs() // Make build look like lots of tests have run, without needing to actually run tests
+                setGitCommitBuildId()
+                tagBuildToIndicateTriggerMethod()
+                configureGoEnv()
+                downloadTerraformBinary()
+                runAcceptanceTests()
+                saveArtifactsToGCS()
                 archiveArtifactsIfOverLimit() // Must be after push to GCS step, as this step impacts debug log files
             }
 
