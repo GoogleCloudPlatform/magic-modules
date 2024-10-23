@@ -140,6 +140,9 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 }
 
 func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *testing.T) {
+	// Test does interact with APIs but experienced errors when run in VCR mode
+	// See: https://github.com/GoogleCloudPlatform/magic-modules/pull/11610#discussion_r1783271457
+	acctest.SkipIfVcr(t)
 
 	randomString := acctest.RandString(t, 10)
 	contextUserProjectOverrideFalse := map[string]interface{}{
