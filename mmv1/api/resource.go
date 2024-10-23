@@ -492,6 +492,24 @@ func (r Resource) UserParameters() []*Type {
 	})
 }
 
+func (r Resource) ServiceVersion() string {
+	if r.CaiBaseUrl != "" {
+		return extractVersionFromBaseUrl(r.CaiBaseUrl)
+	}
+	return extractVersionFromBaseUrl(r.BaseUrl)
+}
+
+func extractVersionFromBaseUrl(baseUrl string) string {
+	parts := strings.Split(baseUrl, "/")
+	if parts[0][0] == 'v' {
+		return parts[0]
+	}
+	if parts[0] == "" && parts[1][0] == 'v' {
+		return parts[1]
+	}
+	return ""
+}
+
 // Return the user-facing properties in client tools; this ends up meaning
 // both properties and parameters but without any that are excluded due to
 // version mismatches or manual exclusion
