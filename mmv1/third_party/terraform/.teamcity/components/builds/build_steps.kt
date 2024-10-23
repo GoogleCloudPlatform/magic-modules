@@ -177,7 +177,7 @@ fun BuildSteps.saveArtifactsToGCS() {
 
 // The S3 plugin we use to upload artifacts to S3 (enabling them to be accessed via the TeamCity UI later) has a limit of
 // 1000 artifacts to be uploaded at a time. To avoid a situation where no artifacts are uploaded as a result of exceeding this
-// limit we archive all the debug logs if they exceed 1000 for a given build.
+// limit we archive all the debug logs if they equal or exceed 1000 for a given build.
 fun BuildSteps.archiveArtifactsIfOverLimit() {
     step(ScriptBuildStep {
         name = "Tasks after running nightly tests: archive artifacts(debug logs) if there are >=1000 before S3 upload"
