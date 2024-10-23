@@ -359,7 +359,6 @@ func TestAccSpannerInstance_basicWithAsymmetricAutoscalingConfigsUpdate(t *testi
 	})
 }
 
-
 func testAccSpannerInstance_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
@@ -367,7 +366,7 @@ resource "google_spanner_instance" "basic" {
   config       = "regional-us-central1"
   display_name = "%s-dname"
   num_nodes    = 1
-  edition      = "ENTERPRISE" 
+  edition      = "ENTERPRISE"
 }
 `, name, name)
 }
@@ -507,15 +506,27 @@ resource "google_spanner_instance" "basic" {
 `, name, name, maxNodes, minNodes, cupUtilizationPercent, storageUtilizationPercent)
 }
 
+func testAccSpannerInstance_main(name string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "%s"
+  config       = "custom-kenhibino-nam3-hubble"
+  display_name = "main-instance"
+  num_nodes    = 1
+  edition      = "ENTERPRISE_PLUS"
+}
+`, name)
+}
+
 func testAccSpannerInstance_basicWithAsymmetricAutoscalingConfigsUpdate(name string, minNodes, maxNodes int) string {
 	return fmt.Sprintf(`
 provider "google" {
-    project     = "span-cloud-testing"
-    region      = "us-central1"
-    user_project_override = true
+  alias                 = "user-project-override"
+  user_project_override = true
 }
 
 resource "google_spanner_instance" "main" {
+  provider           = google.user-project-override
   config       = "custom-kenhibino-nam3-hubble"
   display_name =  "%s"
   autoscaling_config {
