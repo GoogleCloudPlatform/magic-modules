@@ -71,6 +71,11 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
   location                = "global"
   vpn_tunnel              = "projects/${data.google_project.project.number}/regions/us-central1/vpnTunnels/${google_compute_vpn_tunnel.tunnel.name}"
   state                   = "DISABLED"
+  aggregation_interval    = "INTERVAL_30_SEC"
+  description             = "This is an updated description"
+  filter_expr             = ".*tcp.*"
+  flow_sampling           = 0.5
+  metadata                = "EXCLUDE_ALL_METADATA"
 }
 `, context)
   return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
