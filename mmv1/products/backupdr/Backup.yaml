@@ -1,0 +1,734 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Backup'
+description: A Backup object nested under DataSource
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
+  api: 'API_REFERENCE_URL'
+min_version: beta
+
+base_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backupvault}}/dataSources/{{datasource}}/backups/{{backup}}'
+self_link: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backupvault}}/dataSources/{{datasource}}/backups/{{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backupvault}}/dataSources/{{datasource}}/backups/{{name}}'
+
+immutable: true
+
+timeouts:
+  delete_minutes: 20
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+autogen_async: true
+# Sets parameters for handling operations returned by the API.
+async:
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  actions: ['delete']
+  operation:
+    base_url: '{{op_id}}'
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Location of the resource
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the Backup
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+  - name: 'backupvault'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the Backup Vault
+  - name: 'datasource'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Name of the Data Source
+
+
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the backup.
+    min_version: 'beta'
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      The description of the Backup instance (2048 characters or less).
+    min_version: 'beta'
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time when the instance was created.
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time when the instance was updated.
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Resource labels to represent user provided metadata.
+    min_version: 'beta'
+  - name: 'enforcedRetentionEndTime'
+    type: String
+    description: |
+      The backup can not be deleted before this time.
+    min_version: 'beta'
+  - name: 'consistencyTime'
+    type: String
+    description: |
+      The point in time when this backup was captured from the source.
+    min_version: 'beta'
+    output: true
+  - name: 'eTag'
+    type: String
+    description: |
+      Server specified ETag to prevent updates from overwriting each other.
+    min_version: 'beta'
+  - name: 'state'
+    type: Enum
+    description: |
+      The Backup resource instance state.
+    min_version: 'beta'
+    output: true
+    default_value: "STATE_UNSPECIFIED"
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'CREATING'
+      - 'ACTIVE'
+      - 'DELETING'
+      - 'ERROR'
+  - name: 'serviceLocks'
+    type: Array
+    description: |
+      The list of BackupLocks taken by the service to prevent the deletion of the backup.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'lockUntilTime'
+          type: String
+          description: |
+            The time after which this lock is not considered valid and will no longer protect the Backup from deletion.
+          min_version: 'beta'
+          required: true
+        - name: 'backupApplianceLockInfo'
+          type: NestedObject
+          min_version: 'beta'
+          properties:
+            - name: 'backupApplianceId'
+              type: String
+              description: |
+                The ID of the backup/recovery appliance that created this lock.
+              required: true
+              min_version: 'beta'
+            - name: 'backupApplianceName'
+              type: String
+              description: |
+                The name of the backup/recovery appliance that created this lock.
+              min_version: 'beta'
+              required: true
+            - name: 'lockReason'
+              type: String
+              description: |
+                The reason for the lock: e.g. MOUNT/RESTORE/BACKUP/etc. The value of this string is only meaningful to the client and it is not interpreted by the BackupVault service.
+              min_version: 'beta'
+              required: true
+            - name: 'jobName'
+              type: String
+              description: |
+                The job name on the backup/recovery appliance that created this lock.
+              min_version: 'beta'
+            - name: 'backupImage'
+              type: String
+              description: |
+                The image name that depends on this Backup.
+              min_version: 'beta'
+            - name: 'slaId'
+              type: Integer
+              description: |
+                The SLA on the backup/recovery appliance that owns the lock.
+              min_version: 'beta'
+        - name: 'serviceLockInfo'
+          type: NestedObject
+          output: true
+          min_version: 'beta'
+          properties:
+            - name: 'operation'
+              output: true
+              description: |
+                The name of the operation that created this lock. The lock will automatically be released when the operation completes.
+              min_version: 'beta'
+  - name: 'backupApplianceLocks'
+    type: Array
+    description: |
+      The list of BackupLocks taken by the accessor Backup Appliance.
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'lockUntilTime'
+          type: String
+          description: |
+            The time after which this lock is not considered valid and will no longer protect the Backup from deletion.
+          min_version: 'beta'
+          required: true
+        - name: 'backupApplianceLockInfo'
+          type: NestedObject
+          min_version: 'beta'
+          properties:
+            - name: 'backupApplianceId'
+              type: String
+              description: |
+                The ID of the backup/recovery appliance that created this lock.
+              required: true
+              min_version: 'beta'
+            - name: 'backupApplianceName'
+              type: String
+              description: |
+                The name of the backup/recovery appliance that created this lock.
+              min_version: 'beta'
+              required: true
+            - name: 'lockReason'
+              type: String
+              description: |
+                The reason for the lock: e.g. MOUNT/RESTORE/BACKUP/etc. The value of this string is only meaningful to the client and it is not interpreted by the BackupVault service.
+              min_version: 'beta'
+              required: true
+            - name: 'jobName'
+              type: String
+              description: |
+                The job name on the backup/recovery appliance that created this lock.
+              min_version: 'beta'
+            - name: 'backupImage'
+              type: String
+              description: |
+                The image name that depends on this Backup.
+              min_version: 'beta'
+            - name: 'slaId'
+              type: Integer
+              description: |
+                The SLA on the backup/recovery appliance that owns the lock.
+              min_version: 'beta'
+        - name: 'serviceLockInfo'
+          type: NestedObject
+          output: true
+          min_version: 'beta'
+          properties:
+            - name: 'operation'
+              type: String
+              output: true
+              description: |
+                The name of the operation that created this lock. The lock will automatically be released when the operation completes.
+              min_version: 'beta'
+  - name: 'computeInstanceBackupProperties'
+    type: NestedObject
+    description: |
+      Compute Engine specific backup properties.
+    output: true
+    min_version: 'beta'
+    properties:
+      - name: 'description'
+        type: String
+        description: |
+          An optional text description for the instances that are created from these properties.
+        min_version: 'beta'
+      - name: 'tags'
+        type: NestedObject
+        min_version: 'beta'
+        description: |
+          A list of tags to apply to the instances that are created from these properties. The tags identify valid sources or targets for network firewalls. The setTags method can modify this list of tags. Each tag within the list must comply with RFC1035 (https://www.ietf.org/rfc/rfc1035.txt).
+        properties:
+          - name: 'items'
+            type: Array
+            description: |
+              An array of tags. Each tag must be 1-63 characters long, and comply with RFC1035.
+            item_type:
+              type: String
+      - name: 'machineType'
+        type: String
+        description: |
+          The machine type to use for instances that are created from these properties.
+        min_version: 'beta'
+      - name: 'canIpForward'
+        type: Boolean
+        description: |
+          Enables instances created based on these properties to send packets with source IP addresses other than their own and receive packets with destination IP addresses other than their own. If these instances will be used as an IP gateway or it will be set as the next-hop in a Route resource, specify `true`. If unsure, leave this set to `false`. See the https://cloud.google.com/vpc/docs/using-routes#canipforward documentation for more information.
+        min_version: 'beta'
+      - name: 'networkInterface'
+        type: Array
+        description: |
+          An array of network access configurations for this interface.
+        min_version: 'beta'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'network'
+              type: String
+              description: |
+                URL of the VPC network resource for this instance.
+              min_version: 'beta'
+            - name: 'subnetwork'
+              type: String
+              description: |
+                The URL of the Subnetwork resource for this instance.
+              min_version: 'beta'
+            - name: 'ipAddress'
+              type: String
+              description: |
+                An IPv4 internal IP address to assign to the instance for this network interface. If not specified by the user, an unused internal IP is assigned by the system.
+              min_version: 'beta'
+            - name: 'ipv6Address'
+              type: String
+              description: |
+                An IPv6 internal network address for this network interface. To use a static internal IP address, it must be unused and in the same region as the instance's zone. If not specified, Google Cloud will automatically assign an internal IPv6 address from the instance's subnetwork.
+              min_version: 'beta'
+            - name: 'internalIpv6PrefixLength'
+              type: Integer
+              description: |
+                The prefix length of the primary internal IPv6 range.
+              min_version: 'beta'
+            - name: 'name'
+              type: String
+              output: true
+              description: |
+                The name of the network interface, which is generated by the server.
+              min_version: 'beta'
+            - name: 'accessConfigs'
+              type: Array
+              description: |
+                An array of configurations for this interface. Currently, only one access config,ONE_TO_ONE_NAT is supported. If there are no accessConfigs specified, then this instance will have no external internet access.
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'type'
+                    type: Enum
+                    description: |
+                      In accessConfigs (IPv4), the default and only option is ONE_TO_ONE_NAT. In ipv6AccessConfigs, the default and only option is DIRECT_IPV6.
+                    default_value: "ACCESS_TYPE_UNSPECIFIED"
+                    enum_values:
+                      - 'ACCESS_TYPE_UNSPECIFIED'
+                      - 'ONE_TO_ONE_NAT'
+                      - 'DIRECT_IPV6'
+                    min_version: 'beta'
+                  - name: 'name'
+                    type: String
+                    description: |
+                      The name of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIp'
+                    type: String
+                    description: |
+                      The external IP address of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIpv6'
+                    type: String
+                    description: |
+                      The external IPv6 address of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIpv6PrefixLength'
+                    type: Integer
+                    description: |
+                      The prefix length of the external IPv6 range.
+                    min_version: 'beta'
+                  - name: 'setPublicPtr'
+                    type: Boolean
+                    description: |
+                      Specifies whether a public DNS 'PTR' record should be created to map the external IP address of the instance to a DNS domain name.
+                    min_version: 'beta'
+                  - name: 'publicPtrDomainName'
+                    type: String
+                    description: |
+                      The DNS domain name for the public PTR record.
+                    min_version: 'beta'
+                  - name: 'networkTier'
+                    type: Enum
+                    description: |
+                      This signifies the networking tier used for configuring this access
+                    min_version: 'beta'
+                    default_value: "NETWORK_TIER_UNSPECIFIED"
+                    enum_values:
+                      - 'NETWORK_TIER_UNSPECIFIED'
+                      - 'PREMIUM'
+                      - 'STANDARD'
+            - name: 'ipv6AccessConfigs'
+              type: Array
+              description: |
+                An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'type'
+                    type: Enum
+                    description: |
+                      In accessConfigs (IPv4), the default and only option is ONE_TO_ONE_NAT. In ipv6AccessConfigs, the default and only option is DIRECT_IPV6.
+                    default_value: "ACCESS_TYPE_UNSPECIFIED"
+                    enum_values:
+                      - 'ACCESS_TYPE_UNSPECIFIED'
+                      - 'ONE_TO_ONE_NAT'
+                      - 'DIRECT_IPV6'
+                    min_version: 'beta'
+                  - name: 'name'
+                    type: String
+                    description: |
+                      The name of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIp'
+                    type: String
+                    description: |
+                      The external IP address of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIpv6'
+                    type: String
+                    description: |
+                      The external IPv6 address of this access configuration.
+                    min_version: 'beta'
+                  - name: 'externalIpv6PrefixLength'
+                    type: Integer
+                    description: |
+                      The prefix length of the external IPv6 range.
+                    min_version: 'beta'
+                  - name: 'setPublicPtr'
+                    type: Boolean
+                    description: |
+                      Specifies whether a public DNS 'PTR' record should be created to map the external IP address of the instance to a DNS domain name.
+                    min_version: 'beta'
+                  - name: 'publicPtrDomainName'
+                    type: String
+                    description: |
+                      The DNS domain name for the public PTR record.
+                    min_version: 'beta'
+                  - name: 'networkTier'
+                    type: Enum
+                    description: |
+                      This signifies the networking tier used for configuring this access
+                    min_version: 'beta'
+                    default_value: "NETWORK_TIER_UNSPECIFIED"
+                    enum_values:
+                      - 'NETWORK_TIER_UNSPECIFIED'
+                      - 'PREMIUM'
+                      - 'STANDARD'
+            - name: 'aliasIpRanges'
+              type: Array
+              description: |
+                An array of alias IP ranges for this network interface. You can only specify this field for network interfaces in VPC networks.
+              min_version: 'beta'
+              item_type:
+                - type: NestedObject
+                - properties:
+                  - name: 'ipCidrRange'
+                    type: String
+                    min_version: 'beta'
+                    description: |
+                      The IP alias ranges to allocate for this interface.
+                  - name: 'subnetworkRangeName'
+                    type: String
+                    min_version: 'beta'
+                    description: |
+                      The name of a subnetwork secondary IP range from which to allocate an IP alias range. If not specified, the primary range of the subnetwork is used.
+            - name: 'stackType'
+              type: Enum
+              description: |
+                The stack type for this network interface.
+              min_version: 'beta'
+              default_value: "STACK_TYPE_UNSPECIFIED"
+              enum_values:
+                - 'STACK_TYPE_UNSPECIFIED'
+                - 'IPV4_ONLY'
+                - 'IPV4_IPV6'
+            - name: 'ipv6AccessType'
+              type: Enum
+              description: |
+                One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet. This field is always inherited from its subnetwork.
+              min_version: 'beta'
+              default_value: "UNSPECIFIED_IPV6_ACCESS_TYPE"
+              enum_values:
+                - 'UNSPECIFIED_IPV6_ACCESS_TYPE'
+                - 'INTERNAL'
+                - 'EXTERNAL'
+            - name: 'queueCount'
+              type: Integer
+              description: |
+                The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It'll be empty if not specified by the users.
+              min_version: 'beta'
+            - name: 'nicType'
+              type: Enum
+              description: |
+                The type of vNIC to be used on this interface. This may be gVNIC or VirtioNet.
+              min_version: 'beta'
+              default_value: "NIC_TYPE_UNSPECIFIED"
+              enum_values:
+                - 'NIC_TYPE_UNSPECIFIED'
+                - 'VIRTIO_NET'
+                - 'GVNIC'
+            - name: 'networkAttachment'
+              type: String
+              description: |
+                The URL of the network attachment that this interface should connect to in the following format: projects/{project_number}/regions/{region_name}/networkAttachments/{network_attachment_name}.
+              min_version: 'beta'
+      - name: 'disk'
+        type: NestedObject
+        min_version: 'beta'
+        description: |
+          An array of disks that are associated with the instances that are created from these properties.
+        properties:
+          - name: 'initializeParams'
+            type: NestedObject
+            min_version: 'beta'
+            description: |
+              Specifies the parameters to initialize this disk.
+            properties:
+              - name: 'diskName'
+                type: String
+                min_version: 'beta'
+                description: |
+                  Specifies the disk name. If not specified, the default is to use the name of the instance.
+              - name: 'replicaZones'
+                type: Array
+                min_version: 'beta'
+                description: |
+                  URL of the zone where the disk should be created. Required for each regional disk associated with the instance.
+                item_type:
+                  type: String
+          - name: 'deviceName'
+            type: String
+            min_version: 'beta'
+            description: |
+              This is used as an identifier for the disks. This is the unique name has to provided to modify disk parameters like disk_name and replica_zones (in case of RePDs)
+          - name: 'kind'
+            type: String
+            min_version: 'beta'
+            description: |
+              Type of the resource.
+          - name: 'mode'
+            type: Enum
+            min_version: 'beta'
+            description: |
+              The mode in which to attach this disk.
+            default_value: "DISK_MODE_UNSPECIFIED"
+            enum_values:
+              - 'DISK_MODE_UNSPECIFIED'
+              - 'READ_WRITE'
+              - 'READ_ONLY'
+              - 'LOCKED'
+          - name: 'source'
+            type: String
+            min_version: 'beta'
+            description: |
+              Specifies a valid partial or full URL to an existing Persistent Disk resource.
+          - name: 'index'
+            type: Integer
+            min_version: 'beta'
+            description: |
+              A zero-based index to this disk, where 0 is reserved for the boot disk.
+          - name: 'boot'
+            type: Boolean
+            min_version: 'beta'
+            description: |
+              Indicates that this is a boot disk. The virtual machine will use the first partition of the disk for its root filesystem.
+          - name: 'autoDelete'
+            type: Boolean
+            min_version: 'beta'
+            description: |
+              Specifies whether the disk will be auto-deleted when the instance is deleted (but not when the disk is detached from the instance).
+          - name: 'license'
+            type: String
+            min_version: 'beta'
+            description: |
+              Any valid publicly visible licenses.
+          - name: 'diskInterface'
+            type: Enum
+            min_version: 'beta'
+            description: |
+              Specifies the disk interface to use for attaching this disk.
+            default_value: "DISK_INTERFACE_UNSPECIFIED"
+            enum_values:
+              - 'DISK_INTERFACE_UNSPECIFIED'
+              - 'SCSI'
+              - 'NVME'
+              - 'NVDIMM'
+              - 'ISCSI'
+          - name: 'guestOsFeature'
+            type: Array
+            description: |
+              A list of features to enable on the guest operating system. Applicable only for bootable images.
+            min_version: 'beta'
+            item_type:
+              type: NestedObject
+              properties:
+                - name: "type"
+                  type: Enum
+                  description: |
+                    The ID of a supported feature.
+                  min_version: 'beta'
+                  default_value: "FEATURE_TYPE_UNSPECIFIED"
+                  enum_values:
+                    - 'FEATURE_TYPE_UNSPECIFIED'
+                    - 'VIRTIO_SCSI_MULTIQUEUE'
+                    - 'WINDOWS'
+                    - 'MULTI_IP_SUBNET'
+                    - 'UEFI_COMPATIBLE'
+                    - 'SECURE_BOOT'
+                    - 'GVNIC'
+                    - 'SEV_CAPABLE'
+                    - 'BARE_METAL_LINUX_COMPATIBLE'
+                    - 'SUSPEND_RESUME_COMPATIBLE'
+                    - 'SEV_LIVE_MIGRATABLE'
+                    - 'SEV_SNP_CAPABLE'
+                    - 'TDX_CAPABLE'
+                    - 'IDPF'
+                    - 'SEV_LIVE_MIGRATABLE_V2'
+          - name: 'diskEncryptionKey'
+            type: NestedObject
+            description: |
+              Encrypts or decrypts a disk using a customer-supplied encryption key.
+            properties:
+              - name: 'rawKey'
+                type: String
+                min_version: 'beta'
+                description: |
+                  Specifies a 256-bit customer-supplied encryption key.
+              - name: 'rsaEncryptedKey'
+                type: String
+                min_version: 'beta'
+                description: |
+                  RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource.
+              - name: 'kmsKeyName'
+                type: String
+                min_version: 'beta'
+                description: |
+                  The name of the encryption key that is stored in Google Cloud KMS.
+              - name: 'kmsKeyServiceAccount'
+                type: String
+                min_version: 'beta'
+                description: |
+                  The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+          - name: 'diskSizeGb'
+            type: Integer
+            min_version: 'beta'
+            description: |
+              The size of the disk in GB.
+          - name: 'savedState'
+            type: Enum
+            min_version: 'beta'
+            output: true
+            description: |
+              The state of the disk.
+            default_value: "DISK_SAVED_STATE_UNSPECIFIED"
+            enum_values:
+              - 'DISK_SAVED_STATE_UNSPECIFIED'
+              - 'PRESERVED'
+          - name: 'diskType'
+            type: String
+            min_version: 'beta'
+            output: true
+            description: |
+              The URI of the disk type resource. For example: projects/project/zones/zone/diskTypes/pd-standard or pd-ssd
+          - name: type
+            type: Enum
+            min_version: 'beta'
+            description: |
+              Specifies the type of the disk.
+            default_value: "DISK_TYPE_UNSPECIFIED"
+            enum_values:
+              - 'DISK_TYPE_UNSPECIFIED'
+              - 'SCRATCH'
+              - 'PERSISTENT'
+  - name: 'backupApplianceBackupProperties'
+    type: NestedObject
+    output: true
+    min_version: 'beta'
+    properties:
+      - name: 'generationId'
+        type: Integer
+        min_version: 'beta'
+        description: |
+          The numeric generation ID of the backup (monotonically increasing).
+        output: true
+      - name: 'finalizeTime'
+        type: String
+        min_version: 'beta'
+        description: |
+          The time when this backup object was finalized (if none, backup is not finalized).
+        output: true
+      - name: 'recoveryRangeStartTime'
+        type: String
+        min_version: 'beta'
+        description: |
+          The earliest timestamp of data available in this Backup.
+      - name: 'recoveryRangeEndTime'
+        type: String
+        min_version: 'beta'
+        description: |
+          The latest timestamp of data available in this Backup.
+  - name: 'backupType'
+    type: Enum
+    output: true
+    min_version: 'beta'
+    description: |
+      Type of the backup, unspecified, scheduled or ondemand.
+    default_value: "BACKUP_TYPE_UNSPECIFIED"
+    enum_value:
+      - 'BACKUP_TYPE_UNSPECIFIED'
+      - 'SCHEDULED'
+      - 'ON_DEMAND'
+  - name: 'gcpBackupPlanInfo'
+    type: NestedObject
+    output: true
+    min_version: 'beta'
+    description: |
+      Configuration for a Google Cloud resource.
+    properties:
+      - name: 'backupPlan'
+        type: String
+        min_version: 'beta'
+        description: |
+           Resource name of backup plan by which workload is protected at the time of the backup. Format: projects/{project}/locations/{location}/backupPlans/{backupPlanId}
+      - name: 'backupPlanRuleId'
+        type: String
+        min_version: 'beta'
+        description: |
+          The rule id of the backup plan which triggered this backup in case of scheduled backup or used for
+  - name: 'resourceSizeBytes'
+    type: Integer
+    output: true
+    min_version: 'beta'
+    description: |
+      Source resource size in bytes at the time of the backup.
