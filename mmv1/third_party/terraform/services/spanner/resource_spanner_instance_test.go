@@ -510,12 +510,12 @@ func testAccSpannerInstance_main(name string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "main" {
   name         = "%s"
-  config       = "custom-kenhibino-nam3-hubble"
-  display_name = "main-instance"
+  config       = "nam-eur-asia3"
+  display_name = "%s"
   num_nodes    = 1
   edition      = "ENTERPRISE_PLUS"
 }
-`, name)
+`, name, name)
 }
 
 func testAccSpannerInstance_basicWithAsymmetricAutoscalingConfigsUpdate(name string, minNodes, maxNodes int) string {
@@ -526,8 +526,9 @@ provider "google" {
 }
 
 resource "google_spanner_instance" "main" {
-  provider           = google.user-project-override
-  config       = "custom-kenhibino-nam3-hubble"
+  provider     = google.user-project-override
+  name         = "%s"
+  config       = "nam-eur-asia3"
   display_name =  "%s"
   autoscaling_config {
     autoscaling_limits {
@@ -551,7 +552,7 @@ resource "google_spanner_instance" "main" {
     }
     asymmetric_autoscaling_options {
       replica_selection {
-        location = "asia-south1"
+        location = "asia-east1"
       }
       overrides {
         autoscaling_limits {
@@ -562,6 +563,5 @@ resource "google_spanner_instance" "main" {
     }
   }
   edition = "ENTERPRISE_PLUS"
-  name = "%s"
 }`, name, name, minNodes, maxNodes)
 }
