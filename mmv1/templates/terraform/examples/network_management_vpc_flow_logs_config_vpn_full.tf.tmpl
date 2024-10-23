@@ -1,0 +1,81 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_management_vpc_flow_logs_config" "{{$.PrimaryResourceId}}" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
+  location                = "global"
+  vpn_tunnel              = "projects/${data.google_project.project.number}/regions/us-central1/vpnTunnels/${google_compute_vpn_tunnel.tunnel.name}"
+  state                   = "ENABLED"
+  aggregation_interval    = "INTERVAL_5_SEC"
+  description             = "VPC Flow Logs over a VPN Gateway."
+  flow_sampling           = 0.5
+  metadata                = "INCLUDE_ALL_METADATA"
+}
+
+resource "google_compute_vpn_tunnel" "tunnel" {
+  provider           = google-beta
+  name               = "{{index $.Vars "vpn_tunnel_name"}}"
+  peer_ip            = "15.0.0.120"
+  shared_secret      = "a secret message"
+  target_vpn_gateway = google_compute_vpn_gateway.target_gateway.id
+
+  depends_on = [
+    google_compute_forwarding_rule.fr_esp,
+    google_compute_forwarding_rule.fr_udp500,
+    google_compute_forwarding_rule.fr_udp4500,
+  ]
+}
+
+resource "google_compute_vpn_gateway" "target_gateway" {
+  provider = google-beta
+  name     = "{{index $.Vars "target_vpn_gateway_name"}}"
+  network  = google_compute_network.network.id
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+  name     = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_compute_address" "vpn_static_ip" {
+  provider = google-beta
+  name     = "{{index $.Vars "address_name"}}"
+}
+
+resource "google_compute_forwarding_rule" "fr_esp" {
+  provider    = google-beta
+  name        = "{{index $.Vars "esp_forwarding_rule_name"}}"
+  ip_protocol = "ESP"
+  ip_address  = google_compute_address.vpn_static_ip.address
+  target      = google_compute_vpn_gateway.target_gateway.id
+}
+
+resource "google_compute_forwarding_rule" "fr_udp500" {
+  provider    = google-beta
+  name        = "{{index $.Vars "udp500_forwarding_rule_name"}}"
+  ip_protocol = "UDP"
+  port_range  = "500"
+  ip_address  = google_compute_address.vpn_static_ip.address
+  target      = google_compute_vpn_gateway.target_gateway.id
+}
+
+resource "google_compute_forwarding_rule" "fr_udp4500" {
+  provider    = google-beta
+  name        = "{{index $.Vars "udp4500_forwarding_rule_name"}}"
+  ip_protocol = "UDP"
+  port_range  = "4500"
+  ip_address  = google_compute_address.vpn_static_ip.address
+  target      = google_compute_vpn_gateway.target_gateway.id
+}
+
+resource "google_compute_route" "route" {
+  provider            = google-beta
+  name                = "{{index $.Vars "route_name"}}"
+  network             = google_compute_network.network.name
+  dest_range          = "15.0.0.0/24"
+  priority            = 1000
+  next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel.id
+}
+
