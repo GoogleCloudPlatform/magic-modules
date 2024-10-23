@@ -208,9 +208,9 @@ properties:
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
                           item_type: 
                             type: Enum
-                            name: 'whatshouldthisbe'
+                            name: 'sectionType'
                             description: |
-                                desc
+                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -415,9 +415,9 @@ properties:
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
                           item_type: 
                             type: Enum
-                            name: 'whatshouldthisbe'
+                            name: 'sectionType'
                             description: |
-                                desc
+                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
