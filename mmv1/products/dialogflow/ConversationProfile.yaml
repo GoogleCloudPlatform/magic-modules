@@ -5,22 +5,21 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless #required by applicable law or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
 ---
-name: 'ConvesationProfile'
+name: 'ConversationProfile'
 description: |
-  desc
+  A conversation profile configures a set of parameters that control the suggestions made to an agent. These parameters control the suggestions that are surfaced during runtime. Each profile configures either a Dialogflow virtual agent or a human agent for a conversation.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
   api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/conversationProfiles'
 docs:
-# Only one agent per project, API does not have an agent ID
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/conversationProfiles'
 self_link: '{{name}}'
@@ -37,10 +36,10 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 exclude_sweeper: true
 examples:
-  - name: 'dialogflow_agent_full'
-    primary_resource_id: 'full_agent'
+  - name: 'dialogflow_conversation_profile_basic'
+    primary_resource_id: 'basic_profile'
     vars:
-      agent_name: 'dialogflow-agent'
+      profile_name: 'dialogflow-profile'
 parameters:
   - name: 'location'
     type: String
@@ -61,7 +60,6 @@ properties:
     required: true
   - type: NestedObject
     name: 'automatedAgentConfig'
-    ##required: true
     description: |
       Configuration for an automated agent to use with this profile
     properties:
@@ -85,7 +83,7 @@ properties:
         description: |
           Pub/Sub topic on which to publish new agent assistant events.
           Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-        properties: 
+        properties:
           - type: String
             name: 'topic'
             description: |
@@ -107,7 +105,7 @@ properties:
             name: 'featureConfigs'
             description: |
               Configuration of different suggestion features. One feature can have only one config.
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: NestedObject
@@ -208,11 +206,11 @@ properties:
                           description: |
                             The selected sections chosen to return when requesting a summary of a conversation
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
-                          item_type: 
+                          item_type:
                             type: Enum
-                            name: 'whatshouldthisbe'
+                            name: 'sectionType'
                             description: |
-                                desc
+                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -232,7 +230,7 @@ properties:
                           required: true
                           description: |
                             Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'documentQuerySource'
@@ -245,7 +243,7 @@ properties:
                           required: true
                           description: |
                             Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'dialogflowQuerySource'
@@ -257,7 +255,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -267,7 +265,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject  
+                - type: NestedObject
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
@@ -299,7 +297,7 @@ properties:
             name: 'generators'
             description: |
               List of various generator resource names used in the conversation profile.
-            item_type: 
+            item_type:
               type: String
           - type: Boolean
             name: 'disableHighLatencyFeaturesSyncDelivery'
@@ -314,7 +312,7 @@ properties:
             name: 'featureConfigs'
             description: |
               Configuration of different suggestion features. One feature can have only one config.
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: NestedObject
@@ -415,11 +413,11 @@ properties:
                           description: |
                             The selected sections chosen to return when requesting a summary of a conversation
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
-                          item_type: 
+                          item_type:
                             type: Enum
-                            name: 'whatshouldthisbe'
+                            name: 'sectionType'
                             description: |
-                                desc
+                                The selected sections chosen to return when requesting a summary of a conversation. A duplicate selected section will be treated as a single selected section.
                             enum_values:
                               - SECTION_TYPE_UNSPECIFIED
                               - SITUATION
@@ -439,7 +437,7 @@ properties:
                           required: true
                           description: |
                             Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'documentQuerySource'
@@ -452,7 +450,7 @@ properties:
                           required: true
                           description: |
                             Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'dialogflowQuerySource'
@@ -464,7 +462,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -474,7 +472,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject  
+                - type: NestedObject
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
@@ -506,7 +504,7 @@ properties:
             name: 'generators'
             description: |
               List of various generator resource names used in the conversation profile.
-            item_type: 
+            item_type:
               type: String
           - type: Boolean
             name: 'disableHighLatencyFeaturesSyncDelivery'
@@ -514,7 +512,6 @@ properties:
               When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
       - type: NestedObject
         name: 'messageAnalysisConfig'
-        #required: true
         description: |
           desc
         properties:
@@ -579,7 +576,7 @@ properties:
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-    properties: 
+    properties:
       - type: String
         name: 'topic'
         description: |
@@ -606,7 +603,7 @@ properties:
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-    properties: 
+    properties:
       - type: String
         name: 'topic'
         description: |
@@ -621,7 +618,7 @@ properties:
           - JSON
   - type: NestedObject
     name: sttConfig
-    description: | 
+    description: |
       Settings for speech transcription.
     properties:
       - type: Enum
@@ -687,7 +684,7 @@ properties:
       - type: Double
         name: 'speakingRate'
         description: |
-          Speaking rate/speed, in the range [0.25, 4.0]. 
+          Speaking rate/speed, in the range [0.25, 4.0].
       - type: Double
         name: 'pitch'
         description: |
@@ -700,7 +697,7 @@ properties:
         name: 'effectsProfileId'
         description: |
           An identifier which selects 'audio effects' profiles that are applied on (post synthesized) text to speech. Effects are applied on top of each other in the order they are given.
-        item_type: 
+        item_type:
           type: String
       - type: NestedObject
         name: voice

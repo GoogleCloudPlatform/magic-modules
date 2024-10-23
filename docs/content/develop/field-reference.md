@@ -182,6 +182,21 @@ Example:
     - nested_object.0.nested_field
 ```
 
+### `required_with`
+Specifies a list of fields (excluding the current field) that must all be specified
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: String
+  required_with:
+    - field_two
+    - nested_object.0.nested_field
+```
+
 ### `exactly_one_of`
 Specifies a list of fields (including the current field) of which exactly one
 must be set. Must be set separately on all listed fields. Not supported within
