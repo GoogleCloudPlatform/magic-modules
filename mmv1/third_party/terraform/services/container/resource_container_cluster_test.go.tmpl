@@ -1569,6 +1569,79 @@ func TestAccContainerCluster_withNodeConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// First test with empty `node_config.linux_node_config`
+			{
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_linux_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Then add a config and make sure it updates.
+			{
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, "CGROUP_MODE_V2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_linux_node_config",
+						"node_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_V2",
+					),
+				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_linux_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Lastly, update the setting in-place.
+			{
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, "CGROUP_MODE_UNSPECIFIED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_linux_node_config",
+						"node_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_UNSPECIFIED",
+					),
+				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						acctest.ExpectNoDelete(),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_linux_node_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withNodeConfigFastSocket(t *testing.T) {
 	t.Parallel()
 
@@ -7160,6 +7233,38 @@ resource "google_container_cluster" "with_node_config" {
   subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, cgroupMode string) string {
+	// Empty block inside node_config if cgroupMode is empty
+	linuxNodeConfig := ""
+
+	if cgroupMode != "" {
+		linuxNodeConfig = fmt.Sprintf(`
+    linux_node_config {
+      cgroup_mode = "%s"
+    }
+`, cgroupMode)
+	}
+
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_linux_node_config" {
+  name               = "%s"
+  location           = "us-central1-f"
+  initial_node_count = 1
+
+  node_config {
+    disk_size_gb = 15
+
+    %s
+  }
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, clusterName, linuxNodeConfig, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withNodeConfigScopeAlias(clusterName, networkName, subnetworkName string) string {
