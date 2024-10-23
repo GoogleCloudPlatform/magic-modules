@@ -20,15 +20,14 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addRule'
 docs:
-id_format: '{{firewall_policy}}/rules/{{priority}}'
-base_url: '{{firewall_policy}}'
-self_link: '{{firewall_policy}}/getRule?priority={{priority}}'
-create_url: '{{firewall_policy}}/addRule'
-update_url: '{{firewall_policy}}/patchRule?priority={{priority}}'
+id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
+base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
+self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getRule?priority={{priority}}'
+create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addRule'
+update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?priority={{priority}}'
 update_verb: 'POST'
-delete_url: '{{firewall_policy}}/removeRule?priority={{priority}}'
+delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
 delete_verb: 'POST'
-immutable: true
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
   - '{{firewall_policy}}/{{priority}}'
@@ -40,7 +39,6 @@ custom_code:
   post_create: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
   post_delete: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
   post_update: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
-  custom_import: 'templates/terraform/custom_import/firewall_policy_rule_import.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
   - name: 'firewall_policy_rule'
@@ -54,13 +52,15 @@ examples:
       service_account: 'SERVICE_ACCT'
 parameters:
   - name: 'firewallPolicy'
-    type: String
+    type: ResourceRef
     description: |
       The firewall policy of the resource.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    resource: 'FirewallPolicy'
+    imports: 'name'
 properties:
   - name: 'creationTimestamp'
     type: String
@@ -77,6 +77,7 @@ properties:
     description: 'An optional description for this resource.'
   - name: 'priority'
     type: Integer
+    immutable: true
     description: |
       An integer indicating the priority of a rule in the list.
       The priority must be a positive value between 0 and 2147483647.
@@ -90,18 +91,21 @@ properties:
     properties:
       - name: 'srcIpRanges'
         type: Array
+        send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of source CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'destIpRanges'
         type: Array
+        send_empty_value: true
         description: |
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
       - name: 'layer4Configs'
         type: Array
+        send_empty_value: true
         description: |
           Pairs of IP protocols and ports that the rule should match.
         required: true
@@ -123,48 +127,56 @@ properties:
                 type: String
       - name: 'destAddressGroups'
         type: Array
+        send_empty_value: true
         description: |
           Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
         item_type:
           type: String
       - name: 'srcAddressGroups'
         type: Array
+        send_empty_value: true
         description: |
           Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
         item_type:
           type: String
       - name: 'srcFqdns'
         type: Array
+        send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic source. Maximum number of source fqdn allowed is 100.
         item_type:
           type: String
       - name: 'destFqdns'
         type: Array
+        send_empty_value: true
         description: |
           Fully Qualified Domain Name (FQDN) which should be matched against traffic destination. Maximum number of destination fqdn allowed is 100.
         item_type:
           type: String
       - name: 'srcRegionCodes'
         type: Array
+        send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for source of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of source region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destRegionCodes'
         type: Array
+        send_empty_value: true
         description: |
           Region codes whose IP addresses will be used to match for destination of traffic. Should be specified as 2 letter country code defined as per ISO 3166 alpha-2 country codes. ex."US" Maximum number of dest region codes allowed is 5000.
         item_type:
           type: String
       - name: 'destThreatIntelligences'
         type: Array
+        send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic destination.
         item_type:
           type: String
       - name: 'srcThreatIntelligences'
         type: Array
+        send_empty_value: true
         description: |
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
@@ -203,6 +215,7 @@ properties:
       type: String
   - name: 'enableLogging'
     type: Boolean
+    send_empty_value: true
     description: |
       Denotes whether to enable logging for a particular rule.
       If logging is enabled, logs will be exported to the configured export destination in Stackdriver.
