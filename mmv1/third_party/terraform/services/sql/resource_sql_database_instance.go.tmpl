@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -2090,7 +2091,7 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 	data := map[string]interface{}{
 		"version":                     settings.SettingsVersion,
 		"tier":                        settings.Tier,
-		"edition":                     settings.Edition,
+		"edition":                     flattenEdition(settings.Edition),
 		"activation_policy":           settings.ActivationPolicy,
 		"availability_type":           settings.AvailabilityType,
 		"collation":                   settings.Collation,
@@ -2420,6 +2421,14 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 		"enable_password_policy":      passwordValidationPolicy.EnablePasswordPolicy,
 	}
 	return []map[string]interface{}{data}
+}
+
+func flattenEdition(v interface{}) string {
+	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+		return "ENTERPRISE"
+	}
+
+	return v.(string)
 }
 
 func instanceMutexKey(project, instance_name string) string {
