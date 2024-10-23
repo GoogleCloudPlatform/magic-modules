@@ -73,7 +73,6 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
   state                   = "DISABLED"
   aggregation_interval    = "INTERVAL_30_SEC"
   description             = "This is an updated description"
-  filter_expr             = ".*tcp.*"
   flow_sampling           = 0.5
   metadata                = "EXCLUDE_ALL_METADATA"
 }
