@@ -23,3 +23,95 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 
     return
 }
+
+// The CustomizeDiff func to use legacy roles for access field in bigquery_dataset
+// because the API returns that.
+func SetAccessDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setAccessFields("access", d, meta, false)
+}
+
+func setAccessFields(accessField string, d *schema.ResourceDiff, meta interface{}, skipAttribution bool) error {
+	raw := d.Get(accessField)
+
+	if raw == nil {
+		return nil
+	}
+
+	access, ok := raw.(*schema.Set)
+	if !ok {
+		return nil
+	}
+	accessList := access.List()
+	fmt.Printf("setAccessFields accessList:: %v\n", accessList)
+
+	// Create a new slice to store the filtered and modified access objects
+	filteredAccessList := make([]interface{}, 0, len(accessList))
+
+	// Iterate over the slice and modify the access objects in place
+	for _, v := range accessList {
+		m, ok := v.(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		fmt.Printf("setAccessFields m:: %v\n", m)
+
+		// Check if the map has "role" key and it's not an empty string
+		roleValue := m["role"]
+		var roleNotEmpty bool = false
+		if roleStr, ok := roleValue.(string); ok {
+			roleNotEmpty = roleStr != ""
+		}
+		// Apply role mapping if role key exists
+		if roleNotEmpty {
+			switch roleValue {
+			case "roles/bigquery.dataOwner":
+				m["role"] = "OWNER"
+			case "roles/bigquery.dataEditor":
+				m["role"] = "WRITER"
+			case "roles/bigquery.dataViewer":
+				m["role"] = "READER"
+			}
+		}
+
+		// Check if the map has "dataset" key and if it's a non-empty list
+		datasetValue := m["dataset"]
+		fmt.Printf("setAccessFields datasetValue:: %v\n", datasetValue)
+		fmt.Printf("setAccessFields (datasetValue != nil):: %v\n", (datasetValue != nil))
+		var datasetNotEmpty bool = false
+		if datasetList, ok := datasetValue.([]interface{}); ok {
+			fmt.Printf("setAccessFields datasetList:: %v\n", datasetList)
+			fmt.Printf("setAccessFields (datasetList != nil):: %v\n", (datasetList != nil))
+			fmt.Printf("setAccessFields cap(datasetList):: %v\n", cap(datasetList))
+			fmt.Printf("setAccessFields reflect.ValueOf(datasetList).IsNil():: %v\n", reflect.ValueOf(datasetList).IsNil())
+			if len(datasetList) > 0 {
+				fmt.Printf("setAccessFields datasetList[0]:: %v\n", datasetList[0])
+				fmt.Printf("setAccessFields datasetList[0] == nil:: %v\n", datasetList[0] == nil)
+			}
+
+			datasetNotEmpty = (len(datasetList) > 0) && (datasetList != nil) && datasetList[0] != nil
+		}
+
+		viewValue := m["view"]
+		var viewNotEmpty bool = false
+		if viewList, ok := viewValue.([]interface{}); ok {
+			viewNotEmpty = (len(viewList) > 0) && (viewList != nil) && viewList[0] != nil
+		}
+		fmt.Printf("setAccessFields viewNotEmpty:: %v\n", viewNotEmpty)
+
+		// If role, view and dataset values are empty, we assume that the access entry is empty
+		if roleNotEmpty || datasetNotEmpty || viewNotEmpty {
+			// Add the filtered and modified object to the new list
+			filteredAccessList = append(filteredAccessList, m)
+		}
+	}
+
+	fmt.Printf("setAccessFields filteredAccessList:: %v\n", filteredAccessList)
+
+	// Create a new set with the filtered list
+	filteredAccess := schema.NewSet(access.F, filteredAccessList)
+	if err := d.SetNew(accessField, filteredAccess); err != nil {
+		return fmt.Errorf("error setting new access diff: %w", err)
+	}
+
+	return nil
+}
