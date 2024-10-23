@@ -5,7 +5,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless #required by applicable law or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
@@ -20,7 +20,6 @@ references:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
   api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects/conversationProfiles'
 docs:
-# Only one agent per project, API does not have an agent ID
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/conversationProfiles'
 self_link: '{{name}}'
@@ -61,7 +60,6 @@ properties:
     required: true
   - type: NestedObject
     name: 'automatedAgentConfig'
-    ##required: true
     description: |
       Configuration for an automated agent to use with this profile
     properties:
@@ -514,7 +512,6 @@ properties:
               When disableHighLatencyFeaturesSyncDelivery is true and using the AnalyzeContent API, we will not deliver the responses from high latency features in the API response. The humanAgentAssistantConfig.notification_config must be configured and enableEventBasedSuggestion must be set to true to receive the responses from high latency features in Pub/Sub. High latency feature(s): KNOWLEDGE_ASSIST
       - type: NestedObject
         name: 'messageAnalysisConfig'
-        #required: true
         description: |
           desc
         properties:
