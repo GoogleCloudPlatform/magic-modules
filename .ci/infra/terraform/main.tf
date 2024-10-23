@@ -159,6 +159,12 @@ resource "google_organization_iam_member" "sa_securitycenter_bigquery_exports_ed
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/iam.principalAccessBoundaryAdmin"
+  member = google_service_account.sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
