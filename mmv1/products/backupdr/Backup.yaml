@@ -48,30 +48,29 @@ parameters:
     url_param_only: true
     description: |
       Location of the resource
-  - name: 'name'
+  - name: 'backupId'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      Name of the Backup
+      Id of the requesting object, Backup
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
-  - name: 'backupvault'
+  - name: 'backupVaultId'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      Name of the Backup Vault
-  - name: 'datasource'
+      Name of the Backup Vault associated with Backup
+  - name: 'dataSourceId'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      Name of the Data Source
-
+      Name of the Data Source associated with Backup
 
 properties:
   - name: 'name'
@@ -451,8 +450,8 @@ properties:
                 An array of alias IP ranges for this network interface. You can only specify this field for network interfaces in VPC networks.
               min_version: 'beta'
               item_type:
-                - type: NestedObject
-                - properties:
+                type: NestedObject
+                properties:
                   - name: 'ipCidrRange'
                     type: String
                     min_version: 'beta'
@@ -504,173 +503,175 @@ properties:
                 The URL of the network attachment that this interface should connect to in the following format: projects/{project_number}/regions/{region_name}/networkAttachments/{network_attachment_name}.
               min_version: 'beta'
       - name: 'disk'
-        type: NestedObject
+        type: Array
         min_version: 'beta'
         description: |
           An array of disks that are associated with the instances that are created from these properties.
-        properties:
-          - name: 'initializeParams'
-            type: NestedObject
-            min_version: 'beta'
-            description: |
-              Specifies the parameters to initialize this disk.
-            properties:
-              - name: 'diskName'
-                type: String
-                min_version: 'beta'
-                description: |
-                  Specifies the disk name. If not specified, the default is to use the name of the instance.
-              - name: 'replicaZones'
-                type: Array
-                min_version: 'beta'
-                description: |
-                  URL of the zone where the disk should be created. Required for each regional disk associated with the instance.
-                item_type:
-                  type: String
-          - name: 'deviceName'
-            type: String
-            min_version: 'beta'
-            description: |
-              This is used as an identifier for the disks. This is the unique name has to provided to modify disk parameters like disk_name and replica_zones (in case of RePDs)
-          - name: 'kind'
-            type: String
-            min_version: 'beta'
-            description: |
-              Type of the resource.
-          - name: 'mode'
-            type: Enum
-            min_version: 'beta'
-            description: |
-              The mode in which to attach this disk.
-            default_value: "DISK_MODE_UNSPECIFIED"
-            enum_values:
-              - 'DISK_MODE_UNSPECIFIED'
-              - 'READ_WRITE'
-              - 'READ_ONLY'
-              - 'LOCKED'
-          - name: 'source'
-            type: String
-            min_version: 'beta'
-            description: |
-              Specifies a valid partial or full URL to an existing Persistent Disk resource.
-          - name: 'index'
-            type: Integer
-            min_version: 'beta'
-            description: |
-              A zero-based index to this disk, where 0 is reserved for the boot disk.
-          - name: 'boot'
-            type: Boolean
-            min_version: 'beta'
-            description: |
-              Indicates that this is a boot disk. The virtual machine will use the first partition of the disk for its root filesystem.
-          - name: 'autoDelete'
-            type: Boolean
-            min_version: 'beta'
-            description: |
-              Specifies whether the disk will be auto-deleted when the instance is deleted (but not when the disk is detached from the instance).
-          - name: 'license'
-            type: String
-            min_version: 'beta'
-            description: |
-              Any valid publicly visible licenses.
-          - name: 'diskInterface'
-            type: Enum
-            min_version: 'beta'
-            description: |
-              Specifies the disk interface to use for attaching this disk.
-            default_value: "DISK_INTERFACE_UNSPECIFIED"
-            enum_values:
-              - 'DISK_INTERFACE_UNSPECIFIED'
-              - 'SCSI'
-              - 'NVME'
-              - 'NVDIMM'
-              - 'ISCSI'
-          - name: 'guestOsFeature'
-            type: Array
-            description: |
-              A list of features to enable on the guest operating system. Applicable only for bootable images.
-            min_version: 'beta'
-            item_type:
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'initializeParams'
               type: NestedObject
+              min_version: 'beta'
+              description: |
+                Specifies the parameters to initialize this disk.
               properties:
-                - name: "type"
-                  type: Enum
-                  description: |
-                    The ID of a supported feature.
+                - name: 'diskName'
+                  type: String
                   min_version: 'beta'
-                  default_value: "FEATURE_TYPE_UNSPECIFIED"
-                  enum_values:
-                    - 'FEATURE_TYPE_UNSPECIFIED'
-                    - 'VIRTIO_SCSI_MULTIQUEUE'
-                    - 'WINDOWS'
-                    - 'MULTI_IP_SUBNET'
-                    - 'UEFI_COMPATIBLE'
-                    - 'SECURE_BOOT'
-                    - 'GVNIC'
-                    - 'SEV_CAPABLE'
-                    - 'BARE_METAL_LINUX_COMPATIBLE'
-                    - 'SUSPEND_RESUME_COMPATIBLE'
-                    - 'SEV_LIVE_MIGRATABLE'
-                    - 'SEV_SNP_CAPABLE'
-                    - 'TDX_CAPABLE'
-                    - 'IDPF'
-                    - 'SEV_LIVE_MIGRATABLE_V2'
-          - name: 'diskEncryptionKey'
-            type: NestedObject
-            description: |
-              Encrypts or decrypts a disk using a customer-supplied encryption key.
-            properties:
-              - name: 'rawKey'
-                type: String
-                min_version: 'beta'
-                description: |
-                  Specifies a 256-bit customer-supplied encryption key.
-              - name: 'rsaEncryptedKey'
-                type: String
-                min_version: 'beta'
-                description: |
-                  RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource.
-              - name: 'kmsKeyName'
-                type: String
-                min_version: 'beta'
-                description: |
-                  The name of the encryption key that is stored in Google Cloud KMS.
-              - name: 'kmsKeyServiceAccount'
-                type: String
-                min_version: 'beta'
-                description: |
-                  The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
-          - name: 'diskSizeGb'
-            type: Integer
-            min_version: 'beta'
-            description: |
-              The size of the disk in GB.
-          - name: 'savedState'
-            type: Enum
-            min_version: 'beta'
-            output: true
-            description: |
-              The state of the disk.
-            default_value: "DISK_SAVED_STATE_UNSPECIFIED"
-            enum_values:
-              - 'DISK_SAVED_STATE_UNSPECIFIED'
-              - 'PRESERVED'
-          - name: 'diskType'
-            type: String
-            min_version: 'beta'
-            output: true
-            description: |
-              The URI of the disk type resource. For example: projects/project/zones/zone/diskTypes/pd-standard or pd-ssd
-          - name: type
-            type: Enum
-            min_version: 'beta'
-            description: |
-              Specifies the type of the disk.
-            default_value: "DISK_TYPE_UNSPECIFIED"
-            enum_values:
-              - 'DISK_TYPE_UNSPECIFIED'
-              - 'SCRATCH'
-              - 'PERSISTENT'
+                  description: |
+                    Specifies the disk name. If not specified, the default is to use the name of the instance.
+                - name: 'replicaZones'
+                  type: Array
+                  min_version: 'beta'
+                  description: |
+                    URL of the zone where the disk should be created. Required for each regional disk associated with the instance.
+                  item_type:
+                    type: String
+            - name: 'deviceName'
+              type: String
+              min_version: 'beta'
+              description: |
+                This is used as an identifier for the disks. This is the unique name has to provided to modify disk parameters like disk_name and replica_zones (in case of RePDs)
+            - name: 'kind'
+              type: String
+              min_version: 'beta'
+              description: |
+                Type of the resource.
+            - name: 'mode'
+              type: Enum
+              min_version: 'beta'
+              description: |
+                The mode in which to attach this disk.
+              default_value: "DISK_MODE_UNSPECIFIED"
+              enum_values:
+                - 'DISK_MODE_UNSPECIFIED'
+                - 'READ_WRITE'
+                - 'READ_ONLY'
+                - 'LOCKED'
+            - name: 'source'
+              type: String
+              min_version: 'beta'
+              description: |
+                Specifies a valid partial or full URL to an existing Persistent Disk resource.
+            - name: 'index'
+              type: Integer
+              min_version: 'beta'
+              description: |
+                A zero-based index to this disk, where 0 is reserved for the boot disk.
+            - name: 'boot'
+              type: Boolean
+              min_version: 'beta'
+              description: |
+                Indicates that this is a boot disk. The virtual machine will use the first partition of the disk for its root filesystem.
+            - name: 'autoDelete'
+              type: Boolean
+              min_version: 'beta'
+              description: |
+                Specifies whether the disk will be auto-deleted when the instance is deleted (but not when the disk is detached from the instance).
+            - name: 'license'
+              type: String
+              min_version: 'beta'
+              description: |
+                Any valid publicly visible licenses.
+            - name: 'diskInterface'
+              type: Enum
+              min_version: 'beta'
+              description: |
+                Specifies the disk interface to use for attaching this disk.
+              default_value: "DISK_INTERFACE_UNSPECIFIED"
+              enum_values:
+                - 'DISK_INTERFACE_UNSPECIFIED'
+                - 'SCSI'
+                - 'NVME'
+                - 'NVDIMM'
+                - 'ISCSI'
+            - name: 'guestOsFeature'
+              type: Array
+              description: |
+                A list of features to enable on the guest operating system. Applicable only for bootable images.
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: "type"
+                    type: Enum
+                    description: |
+                      The ID of a supported feature.
+                    min_version: 'beta'
+                    default_value: "FEATURE_TYPE_UNSPECIFIED"
+                    enum_values:
+                      - 'FEATURE_TYPE_UNSPECIFIED'
+                      - 'VIRTIO_SCSI_MULTIQUEUE'
+                      - 'WINDOWS'
+                      - 'MULTI_IP_SUBNET'
+                      - 'UEFI_COMPATIBLE'
+                      - 'SECURE_BOOT'
+                      - 'GVNIC'
+                      - 'SEV_CAPABLE'
+                      - 'BARE_METAL_LINUX_COMPATIBLE'
+                      - 'SUSPEND_RESUME_COMPATIBLE'
+                      - 'SEV_LIVE_MIGRATABLE'
+                      - 'SEV_SNP_CAPABLE'
+                      - 'TDX_CAPABLE'
+                      - 'IDPF'
+                      - 'SEV_LIVE_MIGRATABLE_V2'
+            - name: 'diskEncryptionKey'
+              type: NestedObject
+              description: |
+                Encrypts or decrypts a disk using a customer-supplied encryption key.
+              properties:
+                - name: 'rawKey'
+                  type: String
+                  min_version: 'beta'
+                  description: |
+                    Specifies a 256-bit customer-supplied encryption key.
+                - name: 'rsaEncryptedKey'
+                  type: String
+                  min_version: 'beta'
+                  description: |
+                    RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource.
+                - name: 'kmsKeyName'
+                  type: String
+                  min_version: 'beta'
+                  description: |
+                    The name of the encryption key that is stored in Google Cloud KMS.
+                - name: 'kmsKeyServiceAccount'
+                  type: String
+                  min_version: 'beta'
+                  description: |
+                    The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
+            - name: 'diskSizeGb'
+              type: Integer
+              min_version: 'beta'
+              description: |
+                The size of the disk in GB.
+            - name: 'savedState'
+              type: Enum
+              min_version: 'beta'
+              output: true
+              description: |
+                The state of the disk.
+              default_value: "DISK_SAVED_STATE_UNSPECIFIED"
+              enum_values:
+                - 'DISK_SAVED_STATE_UNSPECIFIED'
+                - 'PRESERVED'
+            - name: 'diskType'
+              type: String
+              min_version: 'beta'
+              output: true
+              description: |
+                The URI of the disk type resource. For example: projects/project/zones/zone/diskTypes/pd-standard or pd-ssd
+            - name: type
+              type: Enum
+              min_version: 'beta'
+              description: |
+                Specifies the type of the disk.
+              default_value: "DISK_TYPE_UNSPECIFIED"
+              enum_values:
+                - 'DISK_TYPE_UNSPECIFIED'
+                - 'SCRATCH'
+                - 'PERSISTENT'
   - name: 'backupApplianceBackupProperties'
     type: NestedObject
     output: true
@@ -705,7 +706,7 @@ properties:
     description: |
       Type of the backup, unspecified, scheduled or ondemand.
     default_value: "BACKUP_TYPE_UNSPECIFIED"
-    enum_value:
+    enum_values:
       - 'BACKUP_TYPE_UNSPECIFIED'
       - 'SCHEDULED'
       - 'ON_DEMAND'
@@ -732,3 +733,14 @@ properties:
     min_version: 'beta'
     description: |
       Source resource size in bytes at the time of the backup.
+
+examples:
+  - name: "backup_dr_backup_basic"
+    primary_resource_id: "b-test"
+    min_version: 'beta'
+    vars:
+      backup_id: "b-test"
+      backup_vault_id: "bv-test"
+      data_source_id: "ds-test"
+    test_env_vars:
+      project: 'PROJECT_NAME'
