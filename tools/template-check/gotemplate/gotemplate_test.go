@@ -11,31 +11,19 @@ func TestCheckVersionGuards(t *testing.T) {
 		expectedResults []string
 	}{
 		"allow standard format targeting ga": {
-			fileText: `some text
-							{{- if ne $.TargetVersionName "ga" }}
-							more text`,
+			fileText: "some text\n{{- if ne $.TargetVersionName \"ga\" }}\nmore text",
 			expectedResults: nil,
 		},
 		"disallow targeting beta": {
-			fileText: `some text
-							{{- if ne $.TargetVersionName "beta" }}
-							more text`,
+			fileText: "some text\n{{- if ne $.TargetVersionName \"beta\" }}\nmore text",
 			expectedResults: []string{`2: {{- if ne $.TargetVersionName "beta" }}`},
 		},
 		"one valid, one invalid": {
-			fileText: `some text
-							{{- if ne $.TargetVersionName "beta" }}
-							more text
-							{{- if ne $.TargetVersionName "ga" }}`,
+			fileText: "some text\n{{- if ne $.TargetVersionName \"beta\" }}\nmore text\n{{- if ne $.TargetVersionName \"ga\" }}",
 			expectedResults: []string{`2: {{- if ne $.TargetVersionName "beta" }}`},
 		},
 		"multiple invalid": {
-			fileText: `some text
-							{{- if ne $.TargetVersionName "beta" }}
-							more text
-							
-							
-							{{- if eq $.TargetVersionName "beta" }}`,
+			fileText: "some text\n{{- if ne $.TargetVersionName \"beta\" }}\nmore text\n\n\n{{- if eq $.TargetVersionName \"beta\" }}",
 			expectedResults: []string{`2: {{- if ne $.TargetVersionName "beta" }}`, `6: {{- if eq $.TargetVersionName "beta" }}`},
 		},
 	}

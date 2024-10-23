@@ -14,7 +14,9 @@ import (
 // prevent is targeting `beta` in version guards, because it mishandles either `ga` or `private`.
 var allowedGuards = []string{
 	`{{- if ne $.TargetVersionName "ga" }}`,
-	`{{- if eq $.TargetVersionName "ga" }}`,
+	`{{- if ne $.TargetVersionName "ga" }}`,
+	`{{ if eq $.TargetVersionName "ga" }}`,
+	`{{ if eq $.TargetVersionName "ga" }}`,
 }
 
 // Note: this does not account for _every_ possible use of a version guard (for example, those
@@ -22,7 +24,7 @@ var allowedGuards = []string{
 // the goal is to capture (and validate) all "standard" version guards that would be added for new
 // resources/fields.
 func isVersionGuard(line string) bool {
-	re := regexp.MustCompile("{{-? if (eq|ne) $.TargetVersionName")
+	re := regexp.MustCompile(`{{-? if (eq|ne) \$\.TargetVersionName`)
 	return re.MatchString(line)
 }
 
