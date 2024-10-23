@@ -529,20 +529,6 @@ func RemoveBasePathVersion(url string) string {
 	return re.ReplaceAllString(url, "$1/")
 }
 
-func (p *FrameworkProviderConfig) NewIamCredentialsClient(userAgent string) *iamcredentials.Service {
-	iamCredentialsClientBasePath := RemoveBasePathVersion(p.IAMCredentialsBasePath)
-	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
-	clientIamCredentials, err := iamcredentials.NewService(p.Context, option.WithHTTPClient(p.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client iam credentials: %s", err)
-		return nil
-	}
-	clientIamCredentials.UserAgent = userAgent
-	clientIamCredentials.BasePath = iamCredentialsClientBasePath
-
-	return clientIamCredentials
-}
-
 func (p *FrameworkProviderConfig) logGoogleIdentities(ctx context.Context, data fwmodels.ProviderModel, diags *diag.Diagnostics) {
 	// GetCurrentUserEmailFramework doesn't pass an error back from logGoogleIdentities, so we want
 	// a separate diagnostics here
