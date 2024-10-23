@@ -21,7 +21,7 @@ resource "google_compute_firewall_policy" "default" {
 }
 
 resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
-  firewall_policy = google_compute_firewall_policy.default.id
+  firewall_policy = google_compute_firewall_policy.default.name
   description     = "Resource created for Terraform acceptance testing"
   priority        = 9000
   enable_logging  = true
