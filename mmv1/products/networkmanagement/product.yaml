@@ -17,6 +17,8 @@ display_name: 'NetworkManagement'
 versions:
   - name: 'ga'
     base_url: 'https://networkmanagement.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://networkmanagement.googleapis.com/v1beta1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
 async:
