@@ -56,6 +56,23 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 	return nil
 }
 
+func (gh *Client) UpdateComment(prNumber, comment string, id int) error {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/comments/%d", id)
+
+	body := map[string]string{
+		"body": comment,
+	}
+
+	err := utils.RequestCall(url, "PATCH", gh.token, nil, body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully updated comment %d in pull request %s\n", id, prNumber)
+
+	return nil
+}
+
 func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
