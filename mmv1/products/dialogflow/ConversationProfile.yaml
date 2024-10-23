@@ -83,7 +83,7 @@ properties:
         description: |
           Pub/Sub topic on which to publish new agent assistant events.
           Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-        properties: 
+        properties:
           - type: String
             name: 'topic'
             description: |
@@ -105,7 +105,7 @@ properties:
             name: 'featureConfigs'
             description: |
               Configuration of different suggestion features. One feature can have only one config.
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: NestedObject
@@ -206,7 +206,7 @@ properties:
                           description: |
                             The selected sections chosen to return when requesting a summary of a conversation
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
-                          item_type: 
+                          item_type:
                             type: Enum
                             name: 'sectionType'
                             description: |
@@ -230,7 +230,7 @@ properties:
                           required: true
                           description: |
                             Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'documentQuerySource'
@@ -243,7 +243,7 @@ properties:
                           required: true
                           description: |
                             Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'dialogflowQuerySource'
@@ -255,7 +255,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -265,7 +265,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject  
+                - type: NestedObject 
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
@@ -297,7 +297,7 @@ properties:
             name: 'generators'
             description: |
               List of various generator resource names used in the conversation profile.
-            item_type: 
+            item_type:
               type: String
           - type: Boolean
             name: 'disableHighLatencyFeaturesSyncDelivery'
@@ -312,7 +312,7 @@ properties:
             name: 'featureConfigs'
             description: |
               Configuration of different suggestion features. One feature can have only one config.
-            item_type: 
+            item_type:
               type: NestedObject
               properties:
                 - type: NestedObject
@@ -413,7 +413,7 @@ properties:
                           description: |
                             The selected sections chosen to return when requesting a summary of a conversation
                             If not provided the default selection will be "{SITUATION, ACTION, RESULT}".
-                          item_type: 
+                          item_type:
                             type: Enum
                             name: 'sectionType'
                             description: |
@@ -437,7 +437,7 @@ properties:
                           required: true
                           description: |
                             Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'documentQuerySource'
@@ -450,7 +450,7 @@ properties:
                           required: true
                           description: |
                             Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
-                          item_type: 
+                          item_type:
                             type: String
                     - type: NestedObject
                       name: 'dialogflowQuerySource'
@@ -462,7 +462,7 @@ properties:
                           name: 'agent'
                           required: true
                           description: |
-                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent. 
+                            he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
                         - type: NestedObject
                           name: 'humanAgentSideConfig'
                           description: |
@@ -472,7 +472,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject  
+                - type: NestedObject 
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
@@ -504,7 +504,7 @@ properties:
             name: 'generators'
             description: |
               List of various generator resource names used in the conversation profile.
-            item_type: 
+            item_type:
               type: String
           - type: Boolean
             name: 'disableHighLatencyFeaturesSyncDelivery'
@@ -576,7 +576,7 @@ properties:
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-    properties: 
+    properties:
       - type: String
         name: 'topic'
         description: |
@@ -603,7 +603,7 @@ properties:
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
-    properties: 
+    properties:
       - type: String
         name: 'topic'
         description: |
@@ -618,7 +618,7 @@ properties:
           - JSON
   - type: NestedObject
     name: sttConfig
-    description: | 
+    description: |
       Settings for speech transcription.
     properties:
       - type: Enum
@@ -684,7 +684,7 @@ properties:
       - type: Double
         name: 'speakingRate'
         description: |
-          Speaking rate/speed, in the range [0.25, 4.0]. 
+          Speaking rate/speed, in the range [0.25, 4.0].
       - type: Double
         name: 'pitch'
         description: |
@@ -697,7 +697,7 @@ properties:
         name: 'effectsProfileId'
         description: |
           An identifier which selects 'audio effects' profiles that are applied on (post synthesized) text to speech. Effects are applied on top of each other in the order they are given.
-        item_type: 
+        item_type:
           type: String
       - type: NestedObject
         name: voice
