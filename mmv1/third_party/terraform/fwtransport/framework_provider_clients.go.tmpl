@@ -2,6 +2,7 @@ package fwtransport
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"google.golang.org/api/dns/v1"
@@ -9,6 +10,7 @@ import (
 	firebase "google.golang.org/api/firebase/v1beta1"
 {{- end }}
 	"google.golang.org/api/option"
+	iamcredentials "google.golang.org/api/iamcredentials/v1"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -38,7 +40,7 @@ func (p *FrameworkProviderConfig) NewDnsClient(userAgent string, diags *diag.Dia
 }
 
 func (p *FrameworkProviderConfig) NewIamCredentialsClient(userAgent string) *iamcredentials.Service {
-	iamCredentialsClientBasePath := RemoveBasePathVersion(p.IAMCredentialsBasePath)
+	iamCredentialsClientBasePath := transport_tpg.RemoveBasePathVersion(p.IAMCredentialsBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud IAMCredentials client for path %s", iamCredentialsClientBasePath)
 	clientIamCredentials, err := iamcredentials.NewService(p.Context, option.WithHTTPClient(p.Client))
 	if err != nil {

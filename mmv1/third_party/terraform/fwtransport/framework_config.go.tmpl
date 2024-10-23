@@ -24,7 +24,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
-	iamcredentials "google.golang.org/api/iamcredentials/v1"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
@@ -521,12 +520,6 @@ func (p *FrameworkProviderConfig) SetupGrpcLogging() {
 		option.WithGRPCDialOption(grpc.WithStreamInterceptor(
 			grpc_logrus.PayloadStreamClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
 	)
-}
-
-// Remove the `/{{version}}/` from a base path if present.
-func RemoveBasePathVersion(url string) string {
-	re := regexp.MustCompile(`(?P<base>http[s]://.*)(?P<version>/[^/]+?/$)`)
-	return re.ReplaceAllString(url, "$1/")
 }
 
 func (p *FrameworkProviderConfig) logGoogleIdentities(ctx context.Context, data fwmodels.ProviderModel, diags *diag.Diagnostics) {
