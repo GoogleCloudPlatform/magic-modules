@@ -103,6 +103,9 @@ func (ar *Runner) ReadFile(name string) (string, error) {
 // Note: This is not used yet.
 func (ar *Runner) AppendFile(name, data string) error {
 	f, err := os.OpenFile(ar.abs(name), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err == os.ErrNotExist {
+		return ar.WriteFile(name, data)
+	}
 	if err != nil {
 		return fmt.Errorf("error opening file %s: %v", name, err)
 	}

@@ -85,19 +85,10 @@ parameters:
     immutable: true
 properties:
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       State of the volume.
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'READY'
-      - 'CREATING'
-      - 'DELETING'
-      - 'UPDATING'
-      - 'RESTORING'
-      - 'DISABLED'
-      - 'ERROR'
   - name: 'stateDetails'
     type: String
     description: |
@@ -315,14 +306,10 @@ properties:
       Reports the CMEK policy resurce name being used for volume encryption. Inherited from storage pool.
     output: true
   - name: 'encryptionType'
-    type: Enum
+    type: String
     description: |
       Reports the data-at-rest encryption type of the volume. Inherited from storage pool.
     output: true
-    enum_values:
-      - 'ENCRYPTION_TYPE_UNSPECIFIED'
-      - 'SERVICE_MANAGED'
-      - 'CLOUD_KMS'
   - name: 'hasReplication'
     type: Boolean
     description: |
@@ -363,15 +350,10 @@ properties:
           description: Human-readable mount instructions.
           output: true
         - name: 'protocol'
-          type: Enum
+          type: String
           description: |
               Protocol to mount with.
           output: true
-          enum_values:
-            - 'PROTOCOLS_UNSPECIFIED'
-            - 'NFSV3'
-            - 'NFSV4'
-            - 'SMB'
   - name: 'snapshotPolicy'
     type: NestedObject
     description: |-

@@ -13,6 +13,7 @@
 
 ---
 name: 'BlockchainNodes'
+api_resource_type_kind: BlockchainNode
 description: |
   A representation of a blockchain node.
 references:

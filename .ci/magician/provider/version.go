@@ -6,7 +6,7 @@ const (
 	None Version = iota
 	GA
 	Beta
-	Alpha
+	Private
 )
 
 const NumVersions = 3
@@ -17,8 +17,20 @@ func (v Version) String() string {
 		return "ga"
 	case Beta:
 		return "beta"
-	case Alpha:
+	case Private:
 		return "alpha"
+	}
+	return "unknown"
+}
+
+func (v Version) ProviderName() string {
+	switch v {
+	case GA:
+		return "google"
+	case Beta:
+		return "google-beta"
+	case Private:
+		return "google-private"
 	}
 	return "unknown"
 }
@@ -36,7 +48,7 @@ func (v Version) RepoName() string {
 		return "terraform-provider-google"
 	case Beta:
 		return "terraform-provider-google-beta"
-	case Alpha:
+	case Private:
 		return "terraform-next"
 	}
 	return "unknown"

@@ -1,0 +1,31 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    // Ignore `kms_key_names` if `kms_key_name` is set, because that field takes precedence. 
+    _, kmsNameSet := d.GetOk("encryption_config.0.kms_key_name")
+    if kmsNameSet {
+        return nil
+    }
+
+    rawConfigValue := d.Get("encryption_config.0.kms_key_names")
+
+    // Convert config value to []string
+    configValue, err := tpgresource.InterfaceSliceToStringSlice(rawConfigValue)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return v
+    }
+
+    // Convert v to []string
+    apiStringValue, err := tpgresource.InterfaceSliceToStringSlice(v)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert API value: %s", err)
+        return v
+    }
+
+    sortedStrings, err := tpgresource.SortStringsByConfigOrder(configValue, apiStringValue)
+    if err != nil {
+        log.Printf("[ERROR] Could not sort API response value: %s", err)
+        return v
+    }
+
+    return sortedStrings
+}
