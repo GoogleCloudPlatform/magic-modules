@@ -265,7 +265,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject 
+                - type: NestedObject
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
@@ -472,7 +472,7 @@ properties:
                               name: 'agent'
                               description: |
                                 The name of a dialogflow virtual agent used for intent detection and suggestion triggered by human agent. Format: projects/<Project ID>/locations/<Location ID>/agent.
-                - type: NestedObject 
+                - type: NestedObject
                   name: conversationModelConfig
                   description: |
                     Configs of custom conversation model.
