@@ -1,8 +1,6 @@
 resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
-  display_name = "<%= ctx[:vars]['display_name'] %>"
+  model_name = "<%= ctx[:vars]['display_name'] %>"
   description  = "basic upload model"
-
-  metadata_schema_uri   = "gs://cloud-ai-platform-d357fffa-aab0-409b-8e4e-3af03de82d76/instance_schemas/job-5547038670390820864/analysis"
 
   version_aliases = ["v2beta1"]
   model_id = "id_upload_test"

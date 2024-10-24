@@ -1,5 +1,9 @@
-if res["model"] != "" {
-    res["name"] = res["model"]
+if res["model"] != nil {
+    newObj := make(map[string]interface{})
+    newObj = res["model"]
+    newObj["modelName"] = res["displayName"]
+    delete(res, "displayName")
+    return newObj, nil
 }
 
 return res, nil

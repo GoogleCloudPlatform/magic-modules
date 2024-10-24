@@ -132,6 +132,7 @@ properties:
             The ID of the export format.
         - type: Enum
           name: exportableContent
+          default_from_api: true
           immutable: true
           description: |
             The content of this Model that may be exported.
@@ -284,8 +285,10 @@ properties:
     description: |
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - type: String
-    name: 'displayName'
-    default_from_api: true
+    name: 'modelName'
+    at_least_one_of:
+      - modelName
+      - sourceModel
     description:
       The display name of the Model. The name can be up to 128 characters long
       and can consist of any UTF-8 characters.
@@ -296,7 +299,7 @@ properties:
     ignore_read: true
   - type: Array
     name: 'versionAliases'
-    default_from_api: true
+    ignore_read: true
     description:
       user provided version aliases so that a model version can be referenced via alias.
     item_type:
@@ -318,6 +321,7 @@ properties:
         immutable: true
   - type: NestedObject
     name: 'metadata'
+    ignore_read: true
     description: An additional information about the Index
     properties:
       - type: NestedObject
@@ -405,19 +409,10 @@ properties:
     name: 'sourceModel'
     default_from_api: true
     at_least_one_of:
-      - model
+      - modelName
       - sourceModel
     description: |
       The resource name of the Model to copy. That Model must be in the same Project
-  - type: ResourceRef
-    name: 'model'
-    resource: 'Model'
-    imports: 'displayName'
-    at_least_one_of:
-      - sourceModel
-      - model
-    description: |
-      The Model to create.
   - type: String
     name: 'modelId'
     default_from_api: true
