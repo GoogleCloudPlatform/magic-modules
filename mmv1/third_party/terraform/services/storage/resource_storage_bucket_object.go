@@ -3,6 +3,7 @@ package storage
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"crypto/sha256"
@@ -34,6 +36,8 @@ func ResourceStorageBucketObject() *schema.Resource {
 			Update: schema.DefaultTimeout(4 * time.Minute),
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.ComputedIf("md5hash", detectmd5HashUpdate),
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -605,4 +609,8 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 	retentions = append(retentions, retention)
 	return retentions
+}
+
+func detectmd5HashUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
+	return diff.HasChange("source") || diff.HasChange("detect_md5hash")
 }
