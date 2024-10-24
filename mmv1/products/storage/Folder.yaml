@@ -60,7 +60,7 @@ parameters:
       regex: '/$'
   - name: 'recursive'
     description: 'Set to true if parent folder and child folders need to be created'
-    type: Boolean 
+    type: Boolean
 properties:
   - name: createTime
     type: String
