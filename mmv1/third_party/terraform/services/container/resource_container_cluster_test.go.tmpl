@@ -6111,6 +6111,9 @@ resource "google_container_cluster" "primary" {
     ray_operator_config {
       enabled = false
     }
+	parallelstore_csi_driver_config {
+      enabled = false
+    }
 {{- if ne $.TargetVersionName "ga" }}
     istio_config {
       disabled = true
@@ -6190,6 +6193,9 @@ resource "google_container_cluster" "primary" {
       ray_cluster_monitoring_config {
         enabled = true
       }
+    }
+	parallelstore_csi_driver_config {
+      enabled = true
     }
 {{- if ne $.TargetVersionName "ga" }}
     istio_config {
