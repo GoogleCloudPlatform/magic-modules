@@ -65,6 +65,12 @@ examples:
       network_name: 'network-name'
       # Test is covered by handwritten test to include an update.
     exclude_test: true
+  - name: 'vertex_ai_endpoint_private_service_connect'
+    primary_resource_id: 'endpoint'
+    vars:
+      name: 'vertex_ai_endpoint'
+      project: 'vertex-ai'
+      endpoint_name: 'endpoint-name'
 parameters:
   - name: 'location'
     type: String
