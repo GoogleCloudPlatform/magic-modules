@@ -37,7 +37,7 @@ func MetadataUpdate(oldMDMapA map[string]interface{}, newMDMap map[string]interf
 	for _, kv := range serverMD.Items {
 		// If the server state has a key that we had in our old
 		// state, but not in our new state, we should delete it
-		_, okOld := oldMDMapA[kv.Key]
+		_, okOld := oldMDMap[kv.Key]
 		_, okNew := newMDMap[kv.Key]
 		if okOld && !okNew {
 			continue

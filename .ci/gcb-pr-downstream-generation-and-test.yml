@@ -48,12 +48,12 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: build-magician-binary
       waitFor: ["merged"]
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: remove-label
       secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]
@@ -65,7 +65,7 @@ steps:
           - $_PR_NUMBER
           - 'awaiting-approval'
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-head
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -79,7 +79,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpg-base
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -93,7 +93,7 @@ steps:
           - 'ga'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
       id: tpgb-head
@@ -107,7 +107,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tpgb-base
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -121,7 +121,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-head
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -135,7 +135,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tgc-base
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -149,7 +149,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-head
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
@@ -163,7 +163,7 @@ steps:
           - 'beta'
           - $_PR_NUMBER
 
-    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
+    - name: 'gcr.io/graphite-docker-images/build-environment'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: tf-oics-base
       secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS"]
