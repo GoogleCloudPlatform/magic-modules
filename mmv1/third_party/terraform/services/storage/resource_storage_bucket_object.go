@@ -141,10 +141,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
 					if source, ok := d.GetOkExists("source"); ok {
-						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
-						if localMd5Hash == "" && old != "" {
-							localMd5Hash = old
+						var err error
+						_, err = os.Open(source.(string))
+						if err != nil {
+							return true
 						}
+						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
 
 					if content, ok := d.GetOkExists("content"); ok {
@@ -612,5 +614,5 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func detectmd5HashUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
-	return diff.HasChange("source") || diff.HasChange("detect_md5hash")
+	return diff.HasChange("source") || diff.HasChange("content")
 }
