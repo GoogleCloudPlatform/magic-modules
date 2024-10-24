@@ -231,15 +231,18 @@ properties:
           - 'NOT_FOUND'
       - name: 'avroConfig'
         type: NestedObject
+        send_empty_value: true
         description: |
           If set, message data will be written to Cloud Storage in Avro format.
         properties:
           - name: 'writeMetadata'
             type: Boolean
+            send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
           - name: 'useTopicSchema'
             type: Boolean
+            send_empty_value: true
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
       - name: 'serviceAccountEmail'
