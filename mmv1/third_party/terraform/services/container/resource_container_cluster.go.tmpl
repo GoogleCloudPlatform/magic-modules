@@ -6673,18 +6673,21 @@ func flattenUserManagedKeysConfig(c *container.UserManagedKeysConfig) []map[stri
 	if c == nil {
 		return nil
 	}
-	return []map[string]interface{}{
-		{
-			"cluster_ca": c.ClusterCa,
-			"etcd_api_ca": c.EtcdApiCa,
-			"etcd_peer_ca": c.EtcdPeerCa,
-			"aggregation_ca": c.AggregationCa,
-			"control_plane_disk_encryption_key": c.ControlPlaneDiskEncryptionKey,
-			"gkeops_etcd_backup_encryption_key": c.GkeopsEtcdBackupEncryptionKey,
-			"service_account_signing_keys": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountSigningKeys)),
-			"service_account_verification_keys": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountVerificationKeys)),
-		},
+	f := map[string]interface{}{
+		"cluster_ca": c.ClusterCa,
+		"etcd_api_ca": c.EtcdApiCa,
+		"etcd_peer_ca": c.EtcdPeerCa,
+		"aggregation_ca": c.AggregationCa,
+		"control_plane_disk_encryption_key": c.ControlPlaneDiskEncryptionKey,
+		"gkeops_etcd_backup_encryption_key": c.GkeopsEtcdBackupEncryptionKey,
+	},
+	if len(c.ServiceAccountSigningKeys) != 0 {
+		f["service_account_signing_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountSigningKeys))
 	}
+	if len(c.ServiceAccountVerificationKeys) != 0 {
+		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountVerificationKeys))
+	}
+	return []map[string]interface{}{f}
 }
 
 func flattenEnableK8sBetaApis(c *container.K8sBetaAPIConfig) []map[string]interface{} {
