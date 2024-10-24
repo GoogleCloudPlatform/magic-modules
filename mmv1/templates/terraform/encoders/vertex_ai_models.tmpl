@@ -1,4 +1,12 @@
-if obj["sourceModel"] != nil {
+if obj["modelName"] != nil {
+    newObj := make(map[string]interface{})
+    obj["displayName"] = obj["modelName"]
+    delete(obj, "modelName")
+    newObj["model"] = obj
+    newObj["modelId"] = obj["modelId"]
+    delete(obj, "modelId")
+    return newObj, nil
+} else if obj["sourceModel"] != nil {
     delete(obj, "labels")
     delete(obj, "metadata")
 }
