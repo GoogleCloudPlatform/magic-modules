@@ -14,9 +14,13 @@ import (
 // prevent is targeting `beta` in version guards, because it mishandles either `ga` or `private`.
 var allowedGuards = []string{
 	`{{- if ne $.TargetVersionName "ga" }}`,
-	`{{- if ne $.TargetVersionName "ga" }}`,
+	`{{ if ne $.TargetVersionName "ga" }}`,
+	`{{ if ne $.TargetVersionName "ga" -}}`,
+	`{{- if ne $.TargetVersionName "ga" -}}`,
+	`{{- if eq $.TargetVersionName "ga" }}`,
 	`{{ if eq $.TargetVersionName "ga" }}`,
-	`{{ if eq $.TargetVersionName "ga" }}`,
+	`{{ if eq $.TargetVersionName "ga" -}}`,
+	`{{- if eq $.TargetVersionName "ga" -}}`,
 }
 
 // Note: this does not account for _every_ possible use of a version guard (for example, those
