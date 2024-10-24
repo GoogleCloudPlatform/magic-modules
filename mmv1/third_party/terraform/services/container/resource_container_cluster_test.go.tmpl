@@ -8667,7 +8667,6 @@ resource "google_container_cluster" "with_pco_disabled" {
     network    = google_compute_network.container_network.name
     subnetwork = google_compute_subnetwork.container_subnetwork.name
 
-    min_master_version = "1.27"
     initial_node_count = 1
     datapath_provider = "ADVANCED_DATAPATH"
 
@@ -9470,11 +9469,6 @@ resource "google_container_cluster" "with_autopilot" {
   datapath_provider = "ADVANCED_DATAPATH"
 
   deletion_protection = false
-
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -9534,11 +9528,6 @@ resource "google_container_cluster" "with_autopilot" {
   enable_cilium_clusterwide_network_policy = true
 
   deletion_protection = false
-
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -10299,14 +10288,16 @@ func testAccContainerCluster_autopilot_net_admin(name, networkName, subnetworkNa
 resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
+
+  network          = "%s"
+  subnetwork       = "%s"
+
   enable_autopilot = true
   allow_net_admin  = %t
-  min_master_version = 1.27
+
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
 }
-`, name, enabled, networkName, subnetworkName)
+`, name, networkName, subnetworkName, enabled)
 }
 
 
@@ -10823,11 +10814,6 @@ resource "google_container_cluster" "primary" {
   network    = "%[4]s"
   subnetwork    = "%[5]s"
 
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
-
   depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
@@ -10964,11 +10950,6 @@ resource "google_container_cluster" "with_autopilot" {
   }
   vertical_pod_autoscaling {
     enabled = true
-  }
-
-  timeouts {
-	create = "30m"
-	update = "40m"
   }
 
   depends_on = [time_sleep.wait_120_seconds]
@@ -11110,11 +11091,6 @@ resource "google_container_cluster" "with_autopilot" {
     enabled = true
   }
 
-  timeouts {
-	create = "30m"
-	update = "40m"
-  }
-
   depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
@@ -11245,11 +11221,6 @@ resource "google_container_cluster" "with_autopilot" {
   }
   vertical_pod_autoscaling {
     enabled = true
-  }
-
-  timeouts {
-	create = "30m"
-	update = "40m"
   }
 
   depends_on = [time_sleep.wait_120_seconds]

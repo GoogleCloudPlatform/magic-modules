@@ -13,6 +13,7 @@
 
 ---
 name: 'EnvReferences'
+api_resource_type_kind: Reference
 description: |
   An `Environment Reference` in Apigee.
 references:

@@ -12,14 +12,3 @@
 # limitations under the License.
 
 ---
-name: '{{$.Name}}'
-display_name: '{{$.DisplayName}}'
-versions:
-{{- range $version := $.Versions }}
-  - name: '{{$version.Name}}'
-    base_url: {{$version.BaseUrl}}'
-{{- end }}
-scopes:
-{{- range $scope := $.Scopes }}
-  - '{{$scope}}'
-{{- end }}

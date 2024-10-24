@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunEgressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single EgressPolicy in the spec (dry-run) configuration for a service perimeter.
   EgressPolicies match requests based on egressFrom and egressTo stanzas.

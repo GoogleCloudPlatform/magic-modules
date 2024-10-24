@@ -117,7 +117,7 @@ examples:
     region_override: 'US'
     vars:
       connection_id: 'my-connection'
-  - name: 'bigquery_connection_kms'
+  - name: 'bigquery_connection_sql_with_cmek'
     primary_resource_id: 'bq-connection-cmek'
     vars:
       database_instance_name: 'my-database-instance'
@@ -127,7 +127,6 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
-      'policyChanged': 'acctest.BootstrapPSARole(t, "bq-", "bigquery-encryption", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
     oics_vars_overrides:
       'deletion_protection': 'false'
     ignore_read_extra:
