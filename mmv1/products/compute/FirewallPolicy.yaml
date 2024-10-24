@@ -36,9 +36,11 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+import_format:
+  - 'locations/global/firewallPolicies/{{name}}'
+  - '{{name}}'
 custom_code:
   post_create: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 examples:
