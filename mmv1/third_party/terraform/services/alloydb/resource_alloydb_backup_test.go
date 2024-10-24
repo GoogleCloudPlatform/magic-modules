@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAlloydbBackup_update(t *testing.T) {
@@ -247,4 +248,74 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 `, context)
+}
+
+func TestAccAlloydbBackup_tags(t *testing.T) {
+	t.Parallel()
+	
+	org := envvar.GetTestOrgFromEnv(t)
+	random_suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-backup-update-1"),
+		"random_suffix": random_suffix,
+	}
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "alloydb-backups-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "alloydb-backups-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbBackupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbBackupTags(context, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_alloydb_backup.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"backup_id", "location", "reconciling", "update_time", "labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbBackupTags(context map[string]interface{}, tags map[string]string) string {
+
+	r := acctest.Nprintf(`
+
+resource "google_alloydb_cluster" "default" {
+  location = "us-central1"
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+}
+
+data "google_project" "project" { }
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+
+resource "google_alloydb_backup" "default" {
+  backup_id    = "tf-test-alloydb-backup%{random_suffix}"
+  location = "us-central1"
+  cluster_name = google_alloydb_cluster.default.name
+  depends_on = [google_alloydb_instance.default]
+  tags = {`, context)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }
