@@ -4245,10 +4245,10 @@ func TestAccContainerCluster_autoprovisioningLocations(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.enabled", "true"),
-					
+
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.auto_provisioning_locations.0", "us-central1-a"),
-					
+
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.auto_provisioning_locations.1", "us-central1-f"),
 				),
@@ -4264,10 +4264,10 @@ func TestAccContainerCluster_autoprovisioningLocations(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.enabled", "true"),
-					
+
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.auto_provisioning_locations.0", "us-central1-b"),
-					
+
 					resource.TestCheckResourceAttr("google_container_cluster.with_autoprovisioning_locations",
 						"cluster_autoscaling.0.auto_provisioning_locations.1", "us-central1-c"),
 				),
@@ -4583,6 +4583,18 @@ func TestAccContainerCluster_enableCiliumPolicies(t *testing.T) {
 				Config: testAccContainerCluster_enableCiliumPolicies(clusterName, networkName, subnetworkName, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "enable_cilium_clusterwide_network_policy", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_enableCiliumPolicies(clusterName, networkName, subnetworkName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "enable_cilium_clusterwide_network_policy", "false"),
 				),
 			},
 			{
@@ -8769,7 +8781,6 @@ resource "google_container_cluster" "with_pco_disabled" {
     network    = google_compute_network.container_network.name
     subnetwork = google_compute_subnetwork.container_subnetwork.name
 
-    min_master_version = "1.27"
     initial_node_count = 1
     datapath_provider = "ADVANCED_DATAPATH"
 
@@ -9572,11 +9583,6 @@ resource "google_container_cluster" "with_autopilot" {
   datapath_provider = "ADVANCED_DATAPATH"
 
   deletion_protection = false
-
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -9636,11 +9642,6 @@ resource "google_container_cluster" "with_autopilot" {
   enable_cilium_clusterwide_network_policy = true
 
   deletion_protection = false
-
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -10030,7 +10031,7 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-a"
   initial_node_count = 1
   logging_config {
-    enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER"]
+    enable_components = [ "SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER", "KCP_CONNECTION", "KCP_SSHD"]
   }
   monitoring_config {
     enable_components = [ "SYSTEM_COMPONENTS" ]
@@ -10401,14 +10402,16 @@ func testAccContainerCluster_autopilot_net_admin(name, networkName, subnetworkNa
 resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
+
+  network          = "%s"
+  subnetwork       = "%s"
+
   enable_autopilot = true
   allow_net_admin  = %t
-  min_master_version = 1.27
+
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
 }
-`, name, enabled, networkName, subnetworkName)
+`, name, networkName, subnetworkName, enabled)
 }
 
 
@@ -10925,11 +10928,6 @@ resource "google_container_cluster" "primary" {
   network    = "%[4]s"
   subnetwork    = "%[5]s"
 
-  timeouts {
-    create = "30m"
-    update = "40m"
-  }
-
   depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
@@ -11066,11 +11064,6 @@ resource "google_container_cluster" "with_autopilot" {
   }
   vertical_pod_autoscaling {
     enabled = true
-  }
-
-  timeouts {
-	create = "30m"
-	update = "40m"
   }
 
   depends_on = [time_sleep.wait_120_seconds]
@@ -11212,11 +11205,6 @@ resource "google_container_cluster" "with_autopilot" {
     enabled = true
   }
 
-  timeouts {
-	create = "30m"
-	update = "40m"
-  }
-
   depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
@@ -11349,11 +11337,6 @@ resource "google_container_cluster" "with_autopilot" {
     enabled = true
   }
 
-  timeouts {
-	create = "30m"
-	update = "40m"
-  }
-
   depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
@@ -11445,30 +11428,30 @@ func TestAccContainerCluster_privateRegistry(t *testing.T) {
 
 func testAccContainerCluster_privateRegistryEnabled(secretID, clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-data "google_project" "test_project" { 
+data "google_project" "test_project" {
 	}
 
-resource "google_secret_manager_secret" "secret-basic" { 
+resource "google_secret_manager_secret" "secret-basic" {
 	secret_id     = "%s"
-	replication { 
-		user_managed { 
-		replicas { 
-			location = "us-central1" 
-		} 
-		} 
-	} 
+	replication {
+		user_managed {
+		replicas {
+			location = "us-central1"
+		}
+		}
+	}
 }
 
-resource "google_secret_manager_secret_version" "secret-version-basic" { 
-	secret = google_secret_manager_secret.secret-basic.id 
-	secret_data = "dummypassword" 
-  } 
-   
-resource "google_secret_manager_secret_iam_member" "secret_iam" { 
-	secret_id  = google_secret_manager_secret.secret-basic.id 
-	role       = "roles/secretmanager.admin" 
-	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com" 
-	depends_on = [google_secret_manager_secret_version.secret-version-basic]  
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+	secret = google_secret_manager_secret.secret-basic.id
+	secret_data = "dummypassword"
+  }
+
+resource "google_secret_manager_secret_iam_member" "secret_iam" {
+	secret_id  = google_secret_manager_secret.secret-basic.id
+	role       = "roles/secretmanager.admin"
+	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+	depends_on = [google_secret_manager_secret_version.secret-version-basic]
   }
 
 resource "google_container_cluster" "primary" {
@@ -11505,7 +11488,7 @@ resource "google_container_cluster" "primary" {
       }
     }
   }
-} 
+}
 `, secretID, clusterName, networkName, subnetworkName)
 }
 
@@ -11534,29 +11517,29 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_withNodePoolPrivateRegistry(secretID, clusterName, nodePoolName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-data "google_project" "test_project" { 
+data "google_project" "test_project" {
 	}
 
-resource "google_secret_manager_secret" "secret-basic" { 
+resource "google_secret_manager_secret" "secret-basic" {
 	secret_id     = "%s"
-	replication { 
-		user_managed { 
-		replicas { 
-			location = "us-central1" 
-		} 
-		} 
-	} 
+	replication {
+		user_managed {
+		replicas {
+			location = "us-central1"
+		}
+		}
+	}
 }
-resource "google_secret_manager_secret_version" "secret-version-basic" { 
-	secret = google_secret_manager_secret.secret-basic.id 
-	secret_data = "dummypassword" 
-  } 
-   
-resource "google_secret_manager_secret_iam_member" "secret_iam" { 
-	secret_id  = google_secret_manager_secret.secret-basic.id 
-	role       = "roles/secretmanager.admin" 
-	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com" 
-	depends_on = [google_secret_manager_secret_version.secret-version-basic] 
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+	secret = google_secret_manager_secret.secret-basic.id
+	secret_data = "dummypassword"
+  }
+
+resource "google_secret_manager_secret_iam_member" "secret_iam" {
+	secret_id  = google_secret_manager_secret.secret-basic.id
+	role       = "roles/secretmanager.admin"
+	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+	depends_on = [google_secret_manager_secret_version.secret-version-basic]
   }
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -11593,29 +11576,29 @@ resource "google_container_cluster" "primary" {
 
 func testAccContainerCluster_withNodeConfigPrivateRegistry(secretID, clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
-data "google_project" "test_project" { 
+data "google_project" "test_project" {
 	}
 
 resource "google_secret_manager_secret" "secret-basic" {
 	secret_id     = "%s"
-	replication { 
-		user_managed { 
-		replicas { 
-			location = "us-central1" 
-		} 
-		} 
-	}  
+	replication {
+		user_managed {
+		replicas {
+			location = "us-central1"
+		}
+		}
+	}
 }
-resource "google_secret_manager_secret_version" "secret-version-basic" { 
-	secret = google_secret_manager_secret.secret-basic.id 
-	secret_data = "dummypassword" 
-  } 
-   
-resource "google_secret_manager_secret_iam_member" "secret_iam" { 
-	secret_id  = google_secret_manager_secret.secret-basic.id 
-	role       = "roles/secretmanager.admin" 
-	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com" 
-	depends_on = [google_secret_manager_secret_version.secret-version-basic] 
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+	secret = google_secret_manager_secret.secret-basic.id
+	secret_data = "dummypassword"
+  }
+
+resource "google_secret_manager_secret_iam_member" "secret_iam" {
+	secret_id  = google_secret_manager_secret.secret-basic.id
+	role       = "roles/secretmanager.admin"
+	member     = "serviceAccount:${data.google_project.test_project.number}-compute@developer.gserviceaccount.com"
+	depends_on = [google_secret_manager_secret_version.secret-version-basic]
   }
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -11668,11 +11651,12 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.%", "1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.created-by", "terraform"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "2"),
+					// goog-terraform-provisioned: true is added
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "3"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.default_key1", "default_value1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.created-by", "terraform"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "3"),
 				),
 			},
 			{
@@ -11688,11 +11672,12 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.created-by", "terraform"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.default_key1", "value1"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "2"),
+					// goog-terraform-provisioned: true is added
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "3"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.default_key1", "value1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.created-by", "terraform"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "3"),
 				),
 			},
 			{
@@ -11706,11 +11691,12 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.%", "0"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "2"),
+					// goog-terraform-provisioned: true is added
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "3"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.default_key1", "default_value1"),
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.created-by", "terraform"),
 
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "3"),
 				),
 			},
 			{
@@ -11723,8 +11709,8 @@ func TestAccContainerCluster_withProviderDefaultLabels(t *testing.T) {
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "resource_labels.%", "0"),
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "0"),
-					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "0"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "terraform_labels.%", "1"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "effective_labels.%", "1"),
 				),
 			},
 			{
@@ -11811,11 +11797,7 @@ func TestAccContainerCluster_storagePoolsWithNodePool(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 	location := envvar.GetTestZoneFromEnv()
 
-	storagePoolNameURL := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
-	storagePoolResourceName, err := extractSPName(storagePoolNameURL)
-	if err != nil {
-		t.Fatal("Failed to extract Storage Pool resource name from URL.")
-	}
+	storagePoolResourceName := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -11868,11 +11850,7 @@ func TestAccContainerCluster_storagePoolsWithNodeConfig(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 	location := envvar.GetTestZoneFromEnv()
 
-	storagePoolNameURL := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
-	storagePoolResourceName, err := extractSPName(storagePoolNameURL)
-	if err != nil {
-		t.Fatal("Failed to extract Storage Pool resource name from URL.")
-	}
+	storagePoolResourceName := acctest.BootstrapComputeStoragePool(t, "basic-1", "hyperdisk-balanced")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -11912,17 +11890,6 @@ resource "google_container_cluster" "storage_pools_with_node_config" {
   }
 }
 `, cluster, location, networkName, subnetworkName, storagePoolResourceName)
-}
-
-func extractSPName(url string) (string, error) {
-    re := regexp.MustCompile(`https://www\.googleapis\.com/compute/beta/(projects/[^"]+)`)
-    matches := re.FindStringSubmatch(url)
-
-    if len(matches) > 1 {
-        return matches[1], nil
-    } else {
-        return "", fmt.Errorf("no match found")
-    }
 }
 
 func TestAccContainerCluster_withAutopilotGcpFilestoreCsiDriver(t *testing.T) {

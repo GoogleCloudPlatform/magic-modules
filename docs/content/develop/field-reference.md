@@ -156,6 +156,10 @@ for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
 `send_empty_value` and `default_from_api` cannot both be true on the same field.
 
+Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
+NestedObject fields will currently be sent as `null` if unset (rather than being
+omitted.)
+
 Example:
 
 ```yaml
@@ -174,6 +178,21 @@ Example:
 - name: 'fieldOne'
   type: String
   conflicts:
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `required_with`
+Specifies a list of fields (excluding the current field) that must all be specified
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: String
+  required_with:
     - field_two
     - nested_object.0.nested_field
 ```

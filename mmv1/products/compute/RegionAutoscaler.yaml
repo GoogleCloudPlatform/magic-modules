@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionAutoscaler'
+api_resource_type_kind: Autoscaler
 kind: 'compute#autoscaler'
 description: |
   Represents an Autoscaler resource.

@@ -945,6 +945,16 @@ properties:
         type: String
         description: |
           If an alert policy that was active has no data for this long, any open incidents will close.
+      - name: 'notificationPrompts'
+        type: Array
+        description: |
+          Control when notifications will be sent out.
+        item_type:
+          type: Enum
+          enum_values:
+            - 'NOTIFICATION_PROMPT_UNSPECIFIED'
+            - 'OPENED'
+            - 'CLOSED'
       - name: 'notificationChannelStrategy'
         type: Array
         description: |

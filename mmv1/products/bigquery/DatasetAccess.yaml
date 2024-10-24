@@ -13,6 +13,7 @@
 
 ---
 name: 'DatasetAccess'
+api_resource_type_kind: Dataset
 description: |
   Gives dataset access for a single entity. This resource is intended to be used in cases where
   it is not possible to compile a full list of access blocks to include in a
@@ -134,6 +135,7 @@ properties:
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
     custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
   - name: 'groupByEmail'
     type: String
     description: An email address of a Google Group to grant access to.
@@ -148,6 +150,7 @@ properties:
       - 'routine'
     diff_suppress_func: 'resourceBigQueryDatasetAccessIamMemberDiffSuppress'
     custom_expand: 'templates/terraform/custom_expand/string_to_lower_case.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/string_to_lower_case.go.tmpl'
   - name: 'domain'
     type: String
     description: |

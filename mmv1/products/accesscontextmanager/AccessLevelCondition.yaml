@@ -13,6 +13,7 @@
 
 ---
 name: 'AccessLevelCondition'
+api_resource_type_kind: AccessLevel
 description: |
   Allows configuring a single access level condition to be appended to an access level's conditions.
   This resource is intended to be used in cases where it is not possible to compile a full list

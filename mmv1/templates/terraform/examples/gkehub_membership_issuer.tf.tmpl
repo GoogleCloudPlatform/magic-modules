@@ -5,7 +5,7 @@ resource "google_container_cluster" "primary" {
   workload_identity_config {
     workload_pool = "{{index $.TestEnvVars "project"}}.svc.id.goog"
   }
-  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection  = {{index $.Vars "deletion_protection"}}
   network       = "{{index $.Vars "network_name"}}"
   subnetwork    = "{{index $.Vars "subnetwork_name"}}"
 }

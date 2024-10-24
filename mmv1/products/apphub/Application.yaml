@@ -43,14 +43,30 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+  constants: 'templates/terraform/constants/apphub_application.go.tmpl'
+custom_diff:
+  - 'apphubApplicationCustomizeDiff'
 examples:
-  - name: 'application_basic'
+  - name: 'apphub_application_basic'
+    primary_resource_id: 'example'
+    vars:
+      application_id: 'example-application'
+      location: 'us-east1'
+      scope_type: 'REGIONAL'
+    test_vars_overrides:
+      'location': '"us-east1"'
+      'scope_type': '"REGIONAL"'
+  - name: 'apphub_application_global_basic'
     config_path: 'templates/terraform/examples/apphub_application_basic.tf.tmpl'
     primary_resource_id: 'example'
     vars:
       application_id: 'example-application'
-  - name: 'application_full'
-    config_path: 'templates/terraform/examples/apphub_application_full.tf.tmpl'
+      location: 'global'
+      scope_type: 'GLOBAL'
+    test_vars_overrides:
+      'location': '"global"'
+      'scope_type': '"GLOBAL"'
+  - name: 'apphub_application_full'
     primary_resource_id: 'example2'
     vars:
       application_id: 'example-application'
@@ -171,10 +187,11 @@ properties:
     properties:
       - name: 'type'
         type: Enum
-        description: "Required. Scope Type. \n Possible values:\nREGIONAL"
+        description: "Required. Scope Type. \n Possible values:\nREGIONAL\nGLOBAL"
         required: true
         enum_values:
           - 'REGIONAL'
+          - 'GLOBAL'
   - name: 'uid'
     type: String
     description: 'Output only. A universally unique identifier (in UUID4 format) for

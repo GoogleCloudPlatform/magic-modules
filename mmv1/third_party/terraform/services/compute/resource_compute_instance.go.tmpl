@@ -316,6 +316,7 @@ func ResourceComputeInstance() *schema.Resource {
 										Elem:             &schema.Schema{Type: schema.TypeString},
 										Optional:         true,
 										ForceNew:         true,
+										Computed:         true,
 										AtLeastOneOf:     initializeParamsKeys,
 										DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 										MaxItems:         1,
@@ -937,7 +938,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Optional:    true,
 							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
-						
+
 						"maintenance_interval": {
 							Type:          schema.TypeString,
 							Optional:      true,
@@ -1128,7 +1129,7 @@ be from 0 to 999,999,999 inclusive.`,
 								The confidential computing technology the instance uses.
 								SEV is an AMD feature. TDX is an Intel feature. One of the following
 								values is required: SEV, SEV_SNP, TDX. If SEV_SNP, min_cpu_platform =
-								"AMD Milan" is currently required. TDX is only available in beta.`,
+								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
 					},
@@ -1174,6 +1175,12 @@ be from 0 to 999,999,999 inclusive.`,
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `The server-assigned unique identifier of this instance.`,
+			},
+
+			"creation_timestamp": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `Creation timestamp in RFC3339 text format.`,
 			},
 
 			"label_fingerprint": {
@@ -1260,6 +1267,14 @@ be from 0 to 999,999,999 inclusive.`,
 						},
 					},
 				},
+			},
+
+			"key_revocation_action_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"STOP", "NONE", ""}, false),
+				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
 			},
 		},
 		CustomizeDiff: customdiff.All(
@@ -1436,6 +1451,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		DisplayDevice:              expandDisplayDevice(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
+		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 	}, nil
 }
 
@@ -1740,7 +1756,7 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					di["disk_encryption_key_sha256"] = key.Sha256
 				}
 			}
-			
+
 			// We want the disks to remain in the order we set in the config, so if a disk
 			// is present in the config, make sure it's at the correct index. Otherwise, append it.
 			if inConfig {
@@ -1802,6 +1818,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("instance_id", fmt.Sprintf("%d", instance.Id)); err != nil {
 		return fmt.Errorf("Error setting instance_id: %s", err)
 	}
+	if err := d.Set("creation_timestamp", instance.CreationTimestamp); err != nil {
+		return fmt.Errorf("Error setting creation_timestamp: %s", err)
+	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
@@ -1833,6 +1852,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 	if err := d.Set("reservation_affinity", flattenReservationAffinity(instance.ReservationAffinity)); err != nil {
 		return fmt.Errorf("Error setting reservation_affinity: %s", err)
+	}
+	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {
+		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
