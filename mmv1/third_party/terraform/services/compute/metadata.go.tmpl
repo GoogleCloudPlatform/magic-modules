@@ -31,7 +31,7 @@ func MetadataRetryWrapper(update func() error) error {
 
 // Update the metadata (serverMD) according to the provided diff (oldMDMap v
 // newMDMap).
-func MetadataUpdate(oldMDMapA map[string]interface{}, newMDMap map[string]interface{}, serverMD *compute.Metadata) {
+func MetadataUpdate(oldMDMap map[string]interface{}, newMDMap map[string]interface{}, serverMD *compute.Metadata) {
 	curMDMap := make(map[string]string)
 	// Load metadata on server into map
 	for _, kv := range serverMD.Items {
