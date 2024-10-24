@@ -480,13 +480,11 @@ properties:
     type: String
     description: |
       Specifies the active zone for regional volume.
-    min_version: 'beta'
     output: true
   - name: 'replicaZone'
     type: String
     description: |
       Specifies the replica zone for regional volume.
-    min_version: 'beta'
     output: true
   - name: 'largeCapacity'
     type: Boolean
