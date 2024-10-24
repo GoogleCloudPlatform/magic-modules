@@ -7,7 +7,6 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   labels       = {
     label-one = "value-one"
   }
-  dedicated_endpoint_enabled = true
   enable_private_service_connect = true
   private_service_connect_config {
     enable_private_service_connect = true
@@ -18,6 +17,16 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   }
 
   traffic_split = jsonencode({})
+
+  predict_request_response_logging_config {
+    bigquery_destination {
+      output_uri = "bq://${data.google_project.project.number}"
+    }
+    enabled       = true
+    sampling_rate = 0.1
+  }
+
+  dedicated_endpoint_enabled = true
 }
 
 data "google_project" "project" {}
