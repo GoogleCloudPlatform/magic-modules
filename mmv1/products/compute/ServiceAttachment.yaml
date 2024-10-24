@@ -169,7 +169,6 @@ properties:
           type: Integer
           description: |
             The number of consumer Network Connectivity Center spokes that the connected Private Service Connect endpoint has propagated to.
-          min_version: 'beta'
           output: true
   - name: 'targetService'
     type: String
@@ -266,5 +265,4 @@ properties:
       If the connection preference of the service attachment is ACCEPT_AUTOMATIC, the limit applies to each project that contains a connected endpoint.
 
       If unspecified, the default propagated connection limit is 250.
-    min_version: 'beta'
     default_from_api: true
