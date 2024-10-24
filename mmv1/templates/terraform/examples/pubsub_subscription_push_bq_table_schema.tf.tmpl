@@ -14,27 +14,13 @@ resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
   depends_on = [google_project_iam_member.viewer, google_project_iam_member.editor]
 }
 
-data "google_project" "project" {
-}
-
-resource "google_project_iam_member" "viewer" {
-  project = data.google_project.project.project_id
-  role   = "roles/bigquery.metadataViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "editor" {
-  project = data.google_project.project.project_id
-  role   = "roles/bigquery.dataEditor"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
+data "google_project" "project" {}
 
 resource "google_bigquery_dataset" "test" {
   dataset_id = "{{index $.Vars "dataset_id"}}"
 }
 
 resource "google_bigquery_table" "test" {
-  deletion_protection = false
   table_id   = "{{index $.Vars "table_id"}}"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
@@ -48,4 +34,6 @@ resource "google_bigquery_table" "test" {
   }
 ]
 EOF
+
+  deletion_protection = false
 }
