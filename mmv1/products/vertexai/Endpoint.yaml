@@ -435,7 +435,7 @@ properties:
     description:
       'If true, expose the Endpoint via private service connect.
       Only one of the fields, `network` or `enablePrivateServiceConnect`, can be set.'
-    deprecation_message: '`enablePrivateServiceConnect` is deprecated and will be removed in a future major release. Please use `network`instead.'
+    deprecation_message: '`enablePrivateServiceConnect` is deprecated and will be removed in a future major release. Please use `network` instead.'
     conflicts:
       - 'network'
       - 'dedicatedEndpointEnabled'
