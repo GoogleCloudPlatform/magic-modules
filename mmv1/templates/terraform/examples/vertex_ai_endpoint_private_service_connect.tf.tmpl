@@ -25,8 +25,6 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     enabled       = true
     sampling_rate = 0.1
   }
-
-  dedicated_endpoint_enabled = true
 }
 
 data "google_project" "project" {}
