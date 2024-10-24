@@ -1585,7 +1585,7 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// First test with empty `node_config.linux_node_config`
+			// First test with empty `node_config.linux_node_config` (should result in "CGROUP_MODE_UNSPECIFIED")
 			{
 				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, ""),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -1621,13 +1621,13 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
-			// Lastly, update the setting in-place.
+			// Lastly, update the setting in-place. V1 since UNSPECIFIED is default
 			{
-				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, "CGROUP_MODE_UNSPECIFIED"),
+				Config: testAccContainerCluster_withNodeConfigLinuxNodeConfig(clusterName, networkName, subnetworkName, "CGROUP_MODE_V1"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_container_cluster.with_linux_node_config",
-						"node_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_UNSPECIFIED",
+						"node_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_V1",
 					),
 				),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
