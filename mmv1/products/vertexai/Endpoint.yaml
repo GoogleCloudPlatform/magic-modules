@@ -67,11 +67,7 @@ examples:
     exclude_test: true
   - name: 'vertex_ai_endpoint_private_service_connect'
     primary_resource_id: 'endpoint'
-    primary_resource_name: 'endpoint-name'
-    vars:
-      name: 'vertex_ai_endpoint'
-      project: 'vertex-ai'
-      endpoint_name: 'endpoint-name'
+    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
 parameters:
   - name: 'location'
     type: String
