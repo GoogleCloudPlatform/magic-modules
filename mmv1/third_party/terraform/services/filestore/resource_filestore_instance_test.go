@@ -285,3 +285,71 @@ resource "google_filestore_instance" "instance" {
 }
 `, name, location, tier, deletionProtection, deletionProtectionReason)
 }
+
+func TestAccFilestoreInstance_replication(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_replication(context),
+			},
+			{
+				ResourceName:      "google_filestore_instance.replica-instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_replication(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "instance" {
+  name          = "tf-instance-%{random_suffix}"
+  location      = "us-central1"
+  tier          = "ENTERPRISE"
+  description   = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+    modes   = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica-instance" {
+  name          = "tf-rinstance-%{random_suffix}"
+  location      = "us-central1"
+  tier          = "ENTERPRISE"
+  description   = "An replica instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+  }
+
+  networks {
+    network = "default"
+    modes   = ["MODE_IPV4"]
+  }
+
+  replication {
+	replicas {
+	  peer_instance = google_filestore_instance.instance.id
+	     }
+	}
+}
+`, context)
+}
