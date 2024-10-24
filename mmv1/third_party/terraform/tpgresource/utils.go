@@ -238,6 +238,39 @@ func ExpandStringMap(d TerraformResourceData, key string) map[string]string {
 	return ConvertStringMap(v.(map[string]interface{}))
 }
 
+// ExpandStoragePoolUrl
+func ExpandStoragePoolUrl(v interface{}, d TerraformResourceData, config *transport_tpg.Config) string {
+	formattedStr := v.(string)
+	if strings.HasPrefix(v.(string), "/") {
+		formattedStr = formattedStr[1:]
+	}
+	replacedStr := ""
+
+	// This method returns a full self link from a partial self link.
+	if v == nil || v.(string) == "" {
+		// It does not try to construct anything from empty.
+		return ""
+	} else if strings.HasPrefix(v.(string), "https://") {
+		// Anything that starts with a URL scheme is assumed to be a self link worth using.
+		return v.(string)
+	} else if strings.HasPrefix(v.(string), "projects/") || strings.HasPrefix(v.(string), "/projects") {
+		// If the self link references a project, we'll just stuck the compute prefix on it
+		replacedStr = config.ComputeBasePath + formattedStr
+	} else if strings.HasPrefix(v.(string), "zones/") || strings.HasPrefix(v.(string), "/zones") {
+		// For regional or zonal resources which include their region or zone, just put the project in front.
+		replacedStr = config.ComputeBasePath + "projects/" + config.Project + "/" + formattedStr
+	} else {
+		// Anything else is assumed to be a zonal resource, with a partial link that begins with the resource name.
+		replacedStr = config.ComputeBasePath + "projects/" + config.Project + "/zones/" + config.Zone + "/storagePools/" + formattedStr
+	}
+
+	url, err := ReplaceVars(d, config, replacedStr)
+	if err != nil {
+		return ""
+	}
+	return url
+}
+
 // InterfaceSliceToStringSlice converts a []interface{} containing strings to []string
 func InterfaceSliceToStringSlice(v interface{}) ([]string, error) {
 	interfaceSlice, ok := v.([]interface{})

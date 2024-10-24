@@ -1632,6 +1632,28 @@ func TestAccComputeDisk_storagePoolSpecified(t *testing.T) {
 	})
 }
 
+func TestAccComputeDisk_storagePoolSpecified_nameOnly(t *testing.T) {
+	t.Parallel()
+
+	acctest.BootstrapComputeStoragePool(t, "basic-2", "hyperdisk-throughput")
+	diskName := fmt.Sprintf("tf-test-disk-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_storagePoolSpecified(diskName, "tf-bootstrap-storage-pool-hyperdisk-throughput-basic-2"),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeDisk_storagePoolSpecified(diskName, storagePoolUrl string) string {
 	return fmt.Sprintf(`
 resource "google_compute_disk" "foobar" {
