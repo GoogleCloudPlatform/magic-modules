@@ -17,14 +17,6 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   }
 
   traffic_split = jsonencode({})
-
-  predict_request_response_logging_config {
-    bigquery_destination {
-      output_uri = "bq://${data.google_project.project.project_id}"
-    }
-    enabled       = true
-    sampling_rate = 0.1
-  }
 }
 
 data "google_project" "project" {}

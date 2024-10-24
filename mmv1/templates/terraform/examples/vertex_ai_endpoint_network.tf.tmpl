@@ -12,6 +12,13 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     kms_key_name = "{{index $.Vars "kms_key_name"}}"
   }
   dedicated_endpoint_enabled = true
+  predict_request_response_logging_config {
+    bigquery_destination {
+      output_uri = "bq://${data.google_project.project.project_id}"
+    }
+    enabled       = true
+    sampling_rate = 0.1
+  }
 
   depends_on   = [
     google_service_networking_connection.vertex_vpc_connection

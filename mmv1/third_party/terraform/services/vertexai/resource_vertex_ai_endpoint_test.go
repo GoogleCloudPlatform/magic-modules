@@ -61,6 +61,13 @@ resource "google_vertex_ai_endpoint" "endpoint" {
     kms_key_name = "%{kms_key_name}"
   }
   dedicated_endpoint_enabled = true
+  predict_request_response_logging_config {
+    bigquery_destination {
+      output_uri = "bq://${data.google_project.project.project_id}"
+    }
+    enabled       = true
+    sampling_rate = 0.1
+  }
 
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
