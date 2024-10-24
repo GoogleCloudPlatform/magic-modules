@@ -2161,7 +2161,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.Tags = ntags
 			}
 
-		    // sets tags to the empty list when user removes a previously defined list of tags entriely
+			// sets tags to the empty list when user removes a previously defined list of tags entriely
 			// aka the node pool goes from having tags to no longer having any
 			if req.Tags == nil {
 				tags := []string{}
