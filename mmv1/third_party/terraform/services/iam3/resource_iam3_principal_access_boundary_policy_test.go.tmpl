@@ -29,7 +29,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 				ResourceName:            "google_iam3_principal_access_boundary_policy.my-pab-policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "location", "organization", "principal_access_boundary_policy_id"},
+				ImportStateVerifyIgnore: []string{"annotations", "location", "organization", "principal_access_boundary_policy_id", "etag"},
 			},
 			{
 				Config: testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyExample_update(context),
