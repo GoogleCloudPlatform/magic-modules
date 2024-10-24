@@ -46,6 +46,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 func testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
+  provider       = google-beta
   organization   = "%{org_id}"
   location       = "global"
   display_name   = "test pab policy%{random_suffix}"
@@ -58,6 +59,7 @@ func testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 	return acctest.Nprintf(`
 
 resource "google_project" "project" {
+  provider       = google-beta
   project_id     = "tf-test%{random_suffix}"
   name           = "tf-test%{random_suffix}"
   org_id         = "%{org_id}"
@@ -65,6 +67,7 @@ resource "google_project" "project" {
 }
 
 resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
+  provider       = google-beta
   organization   = "%{org_id}"
   location       = "global"
   display_name   = "test pab policy%{random_suffix}"

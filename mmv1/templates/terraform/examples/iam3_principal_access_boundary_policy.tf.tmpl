@@ -1,4 +1,5 @@
 resource "google_iam3_principal_access_boundary_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   organization   = "{{index $.TestEnvVars "org_id"}}"
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
