@@ -3,6 +3,7 @@ package storage
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"crypto/sha256"
@@ -34,6 +36,8 @@ func ResourceStorageBucketObject() *schema.Resource {
 			Update: schema.DefaultTimeout(4 * time.Minute),
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.ComputedIf("md5hash", detectmd5HashUpdate),
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -137,6 +141,11 @@ func ResourceStorageBucketObject() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
 					if source, ok := d.GetOkExists("source"); ok {
+						var err error
+						_, err = os.Open(source.(string))
+						if err != nil {
+							return true
+						}
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
 
@@ -602,4 +611,25 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 	retentions = append(retentions, retention)
 	return retentions
+}
+
+func detectmd5HashUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
+	tmp, _ := diff.GetChange("detect_md5hash")
+	oldSourceHash := tmp.(string)
+	currentSourceHash := ""
+	if source, ok := diff.GetOkExists("source"); ok {
+		currentSourceHash = tpgresource.GetFileMd5Hash(source.(string))
+	}
+	if content, ok := diff.GetOkExists("content"); ok {
+		currentSourceHash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+	}
+	if currentSourceHash == "" {
+		return true
+	}
+	if oldSourceHash != currentSourceHash {
+		return true
+	}
+	log.Printf("[DEBUG] source detect_md5hash: %s -> %s", oldSourceHash, currentSourceHash)
+
+	return diff.HasChange("source") || diff.HasChange("content") || diff.HasChange("md5hash")
 }
