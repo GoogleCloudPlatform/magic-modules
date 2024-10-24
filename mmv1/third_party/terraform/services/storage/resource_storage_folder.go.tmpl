@@ -227,7 +227,7 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 	folderName := strings.Split(name, "/")
 	var listError, deleteObjectError error
 	for deleteObjectError == nil {
-		res, err := config.NewStorageClient(userAgent).Objects.List(bucket + folderName[0] + "/").Versions(true).Do()
+		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(folderName[0] + "/").Do()
 		if err != nil {
 			log.Printf("Error listing contents of bucket %s: %v", bucket, err)
 			// If we can't list the contents, try deleting the bucket anyway in case it's empty
@@ -283,27 +283,33 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("could not delete non-empty folder due to error when listing contents: %v", listError)
 	}
 
-	log.Printf("[DEBUG] folder names to delete: %#v", folderName)
-	foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(folderName[0] + "/").Do()
-	if err != nil {
-		return err
-	}
-	items := foldersList.Items
-	for i := len(items) - 1; i >= 0; i-- {
-		err = transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() error {
-				err = config.NewStorageClient(userAgent).Folders.Delete(bucket, items[i].Name).Do()
-				return err
-			},
-			Timeout:              d.Timeout(schema.TimeoutDelete),
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
+	if !d.Get("force_destroy").(bool) {
+		deleteErr := fmt.Errorf("Error trying to delete folder containing sub folders without force_destroy set to true")
+		log.Printf("Error! %s : %s\n\n", name, deleteErr)
+		return deleteErr
+	} else {
+		log.Printf("[DEBUG] folder names to delete: %#v", folderName)
+		foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(folderName[0] + "/").Do()
 		if err != nil {
 			return err
 		}
-	}
+		items := foldersList.Items
+		for i := len(items) - 1; i >= 0; i-- {
+			err = transport_tpg.Retry(transport_tpg.RetryOptions{
+				RetryFunc: func() error {
+					err = config.NewStorageClient(userAgent).Folders.Delete(bucket, items[i].Name).Do()
+					return err
+				},
+				Timeout:              d.Timeout(schema.TimeoutDelete),
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
+			})
+			if err != nil {
+				return err
+			}
+		}
 
-	log.Printf("[DEBUG] Finished deleting Folder %q: %#v", d.Id(), name)
+		log.Printf("[DEBUG] Finished deleting Folder %q: %#v", d.Id(), name)
+	}
 	return nil
 }
 
