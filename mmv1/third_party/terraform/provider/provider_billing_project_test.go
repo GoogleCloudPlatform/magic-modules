@@ -140,8 +140,8 @@ func testAccSdkProvider_billing_project_emptyStringValidation(t *testing.T) {
 }
 
 func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *testing.T) {
-	// Test does interact with APIs but experienced errors when run in VCR mode
-	// See: https://github.com/GoogleCloudPlatform/magic-modules/pull/11610#discussion_r1783271457
+	// Test cannot run in VCR mode due to use of aliases
+	// See: https://github.com/hashicorp/terraform-provider-google/issues/20019
 	acctest.SkipIfVcr(t)
 
 	randomString := acctest.RandString(t, 10)
@@ -186,8 +186,8 @@ func testAccSdkProvider_billing_project_useWithAndWithoutUserProjectOverride(t *
 }
 
 func testAccSdkProvider_billing_project_affectedByClientLibraryEnv(t *testing.T) {
-	// Test does interact with APIs but experienced errors when run in VCR mode
-	// See: https://github.com/GoogleCloudPlatform/magic-modules/pull/11610#issuecomment-2432649993
+	// Test cannot run in VCR mode due to use of aliases
+	// See: https://github.com/hashicorp/terraform-provider-google/issues/20019
 	acctest.SkipIfVcr(t)
 
 	randomString := acctest.RandString(t, 10)
