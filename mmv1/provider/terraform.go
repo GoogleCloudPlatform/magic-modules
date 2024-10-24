@@ -702,7 +702,7 @@ func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 func commentBlock(text []string, lang string) string {
 	var headers []string
 	switch lang {
-	case "ruby", "python", "yaml", "gemfile":
+	case "python", "yaml", "gemfile":
 		headers = commentText(text, "#")
 	case "go":
 		headers = commentText(text, "//")
