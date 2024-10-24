@@ -165,6 +165,18 @@ resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "dlp_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/dlp.admin"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "dlp_org_driver" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/dlp.orgDriver"
+  member = "serviceAccount:service-${google_project.proj.number}@dlp-api.iam.gserviceaccount.com"
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
