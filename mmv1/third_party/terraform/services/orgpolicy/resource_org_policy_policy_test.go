@@ -459,3 +459,30 @@ func testAccCheckOrgPolicyPolicyDestroyProducer(t *testing.T) func(s *terraform.
 	}
 }
 
+func testAccOrgPolicyPolicy_EnforceParameterizedMCPolicy(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_org_policy_policy" "primary" {
+  name   = "projects/${google_project.basic.name}/policies/constraints/compute.managed.restrictDiskCreation"
+  parent = "projects/${google_project.basic.name}"
+
+  spec {
+    rules {
+      enforce = "TRUE"
+      parameters {
+              "isSizeLimitCheck" : True,
+              "allowedDiskTypes" : ["pd-ssd"]
+      }
+    }
+  }
+}
+
+resource "google_project" "basic" {
+  project_id = "tf-test-id%{random_suffix}"
+  name       = "tf-test-id%{random_suffix}"
+  org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
+}
+
+
+`, context)
+}
