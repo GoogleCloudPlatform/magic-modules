@@ -128,6 +128,8 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+    # Signing custom keys requires a service account which does not exist for the terraform testing project
+    exclude_test: true
     # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
 virtual_fields:
