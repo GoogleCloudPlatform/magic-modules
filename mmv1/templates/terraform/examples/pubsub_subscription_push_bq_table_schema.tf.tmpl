@@ -10,8 +10,6 @@ resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
     table = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
     use_table_schema = true
   }
-
-  depends_on = [google_project_iam_member.viewer, google_project_iam_member.editor]
 }
 
 data "google_project" "project" {}
