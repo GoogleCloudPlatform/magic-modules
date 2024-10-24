@@ -222,6 +222,8 @@ properties:
         type: NestedObject
         description: |
           Configuration of the autoscaling applied to this cluster
+          Currently, autoscale settings can be updated for management cluster only during updation
+          PC creation does not support autoscale settings for now
         properties:
           - name: 'autoscalingPolicies'
             type: Map
