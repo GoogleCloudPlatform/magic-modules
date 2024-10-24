@@ -11,7 +11,7 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   private_service_connect_config {
     enable_private_service_connect = true
     project_allowlist = [
-      "${data.google_project.project.id}"
+      "${data.google_project.project.project_id}"
     ]
     enable_secure_private_service_connect = true
   }
@@ -20,7 +20,7 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
 
   predict_request_response_logging_config {
     bigquery_destination {
-      output_uri = "bq://${data.google_project.project.id}"
+      output_uri = "bq://${data.google_project.project.project_id}"
     }
     enabled       = true
     sampling_rate = 0.1
