@@ -1,15 +1,11 @@
 resource "google_org_policy_policy" "primary" {
-  provider = google-beta
-  name     = "projects/${google_project.basic.name}/policies/iam.managed.disableServiceAccountKeyUpload"
+  name     = "projects/${google_project.basic.name}/policies/compute.managed.restrictDiskCreation"
   parent   = "projects/${google_project.basic.name}"
 
   spec {
     rules {
-      enforce = "FALSE"
-      parameters {
-      	"allowAll" : true
-	"allowedLocations" : ["us-east1", "us-west1"]
-      }
+      enforce = "TRUE"
+      parameters = jsonencode({"isSizeLimitCheck" : true, "allowedDiskTypes" : ["pd-ssd", "pd-standard"]})
     }
   }
 }
