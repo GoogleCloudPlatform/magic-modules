@@ -73,6 +73,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
@@ -161,6 +162,8 @@ properties:
           then this `IngressTo` rule will authorize access to all
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSupressFunc
         item_type:
           type: String
       - name: 'operations'
