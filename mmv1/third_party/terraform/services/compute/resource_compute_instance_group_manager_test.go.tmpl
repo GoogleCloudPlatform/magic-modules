@@ -2007,8 +2007,8 @@ resource "google_tags_tag_key" "igm-key" {
 
 resource "google_tags_tag_value" "igm-value" {
   description = "Terraform test tag value."
-  parent = "tagKeys/${google_tags_tag_key.igm-key.name}"
-  short_name = "%s"
+  parent      = google_tags_tag_key.igm-key.id
+  short_name  = "%s"
 }
 
 resource "google_compute_instance_group_manager" "igm-tags" {
@@ -2025,7 +2025,7 @@ resource "google_compute_instance_group_manager" "igm-tags" {
 
   params {
     resource_manager_tags = {
-      "tagKeys/${google_tags_tag_key.igm-key.name}" = "tagValues/${google_tags_tag_value.igm-value.name}"
+      (google_tags_tag_key.igm-key.id) = google_tags_tag_value.igm-value.id
     }
   }
 }
