@@ -469,8 +469,8 @@ resource "google_org_policy_policy" "primary" {
     rules {
       enforce = "TRUE"
       parameters {
-              "isSizeLimitCheck" : True,
-              "allowedDiskTypes" : ["pd-ssd"]
+	"isSizeLimitCheck" = True,
+        "allowedDiskTypes" = ["pd-ssd"]
       }
     }
   }
