@@ -11071,7 +11071,6 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of local-ssd
     disk_size_gb = 15
 
     resource_manager_tags = {
