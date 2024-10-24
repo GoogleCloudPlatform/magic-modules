@@ -7,6 +7,7 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   labels       = {
     label-one = "value-one"
   }
+  dedicated_endpoint_enabled = true
   enable_private_service_connect = true
   private_service_connect_config {
     enable_private_service_connect = true
@@ -15,6 +16,8 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     ]
     enable_secure_private_service_connect = true
   }
+
+  traffic_split = jsonencode({})
 }
 
 data "google_project" "project" {}
