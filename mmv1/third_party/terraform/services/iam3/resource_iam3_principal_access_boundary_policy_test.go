@@ -69,6 +69,8 @@ resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
   location       = "global"
   display_name   = "test pab policy%{random_suffix}"
   principal_access_boundary_policy_id = "test-pab-policy%{random_suffix}"
+  annotations    = "foo,bar"
+  etag           = "%{random_suffix}"
   details {
     rules {
       description = "PAB rule%{random_suffix}"

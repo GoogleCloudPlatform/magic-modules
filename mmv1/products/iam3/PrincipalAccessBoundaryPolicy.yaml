@@ -13,7 +13,12 @@
 
 ---
 name: 'PrincipalAccessBoundaryPolicy'
-description: Description
+description: An IAM Principal Access Boundary Policy resource
+references:
+  guides:
+    'Create and apply Principal Access Boundaries': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/organizations.locations.principalAccessBoundaryPolicies'
+min_version: 'beta'
 id_format: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
 base_url: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies'
 self_link: 'organizations/{{organization}}/locations/{{location}}/principalAccessBoundaryPolicies/{{principal_access_boundary_policy_id}}'
