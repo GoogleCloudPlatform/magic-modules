@@ -18,7 +18,7 @@ func (v Version) String() string {
 	case Beta:
 		return "beta"
 	case Private:
-		return "alpha"
+		return "private"
 	}
 	return "unknown"
 }
