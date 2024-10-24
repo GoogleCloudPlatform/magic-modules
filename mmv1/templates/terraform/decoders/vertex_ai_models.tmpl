@@ -1,0 +1,13 @@
+if res["model"] != "" {
+	res["name"] = res["model"]
+}
+if _, ok := d.GetOk("source_model"); ok {
+	res["sourceModel"] = d.Get("source_model").(string)
+}
+if _, ok := d.GetOk("model_id"); ok {
+	res["modelId"] = d.Get("model_id").(string)
+}
+res["labels"] = map[string]interface{}{
+	"goog-terraform-provisioned": "true",
+}
+return res, nil
