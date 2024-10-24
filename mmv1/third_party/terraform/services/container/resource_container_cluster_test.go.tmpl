@@ -1179,9 +1179,10 @@ resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
   master_authorized_networks_config {
     gcp_public_cidrs_access_enabled = %s
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, flag, networkName, subnetworkName)
 }
@@ -1198,9 +1199,11 @@ resource "google_container_cluster" "with_gcp_public_cidrs_access_enabled" {
   location           = "us-central1-a"
   min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
   initial_node_count = 1
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -5337,9 +5340,10 @@ resource "google_container_cluster" "primary" {
     project = "%s"
   }
 
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, projectID, networkName, subnetworkName)
 }
@@ -5347,12 +5351,14 @@ resource "google_container_cluster" "primary" {
 func testAccContainerCluster_DisableFleet(resource_name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5379,9 +5385,10 @@ resource "google_container_cluster" "with_security_posture_config" {
   security_posture_config {
     mode = "BASIC"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5395,9 +5402,10 @@ resource "google_container_cluster" "with_security_posture_config" {
   security_posture_config {
     mode = "ENTERPRISE"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5411,9 +5419,10 @@ resource "google_container_cluster" "with_security_posture_config" {
   security_posture_config {
     vulnerability_mode = "VULNERABILITY_BASIC"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5427,9 +5436,10 @@ resource "google_container_cluster" "with_security_posture_config" {
   security_posture_config {
     vulnerability_mode = "VULNERABILITY_ENTERPRISE"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5444,9 +5454,10 @@ resource "google_container_cluster" "with_security_posture_config" {
     mode               = "DISABLED"
     vulnerability_mode = "VULNERABILITY_DISABLED"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, resource_name, networkName, subnetworkName)
 }
@@ -5948,12 +5959,13 @@ func testAccCheckContainerClusterDestroyProducer(t *testing.T) func(s *terraform
 func testAccContainerCluster_basic(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network            = "%s"
+  subnetwork         = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, networkName, subnetworkName)
 }
@@ -6010,9 +6022,10 @@ resource "google_container_cluster" "primary" {
   enable_intranode_visibility = true
 
 {{- end }}
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, networkName, subnetworkName)
 }
@@ -6050,9 +6063,10 @@ resource "google_container_cluster" "primary" {
   enable_intranode_visibility = true
 
 {{- end }}
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, networkName, subnetworkName)
 }
@@ -6242,9 +6256,10 @@ resource "google_container_cluster" "primary" {
       load_balancer_type = "LOAD_BALANCER_TYPE_INTERNAL"
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, projectID, clusterName, networkName, subnetworkName)
 }
@@ -6266,9 +6281,10 @@ resource "google_container_cluster" "notification_config" {
       topic   = google_pubsub_topic.%s.id
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, topic, topic, clusterName, topic, networkName, subnetworkName)
 }
@@ -6284,9 +6300,10 @@ resource "google_container_cluster" "notification_config" {
       enabled = false
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6312,9 +6329,10 @@ resource "google_container_cluster" "filtered_notification_config" {
       }
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, topic, topic, clusterName, topic, networkName, subnetworkName)
 }
@@ -6340,9 +6358,10 @@ resource "google_container_cluster" "filtered_notification_config" {
 	  }
 	}
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, topic, topic, clusterName, topic, networkName, subnetworkName)
 }
@@ -6364,9 +6383,10 @@ resource "google_container_cluster" "filtered_notification_config" {
       topic   = google_pubsub_topic.%s.id
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, topic, topic, clusterName, topic, networkName, subnetworkName)
 }
@@ -6391,9 +6411,10 @@ resource "google_container_cluster" "confidential_nodes" {
   confidential_nodes {
     enabled = true
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
@@ -6418,9 +6439,10 @@ resource "google_container_cluster" "confidential_nodes" {
   confidential_nodes {
     enabled = false
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
@@ -6428,14 +6450,14 @@ resource "google_container_cluster" "confidential_nodes" {
 func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
-  name               = "%s"
-  location           = "us-central1-a"
+  name     = "%s"
+  location = "us-central1-a"
   release_channel {
     channel = "RAPID"
   }
 
   node_pool {
-    name = "%s"
+    name               = "%s"
     initial_node_count = 1
     node_config {
       machine_type = "e2-medium"
@@ -6443,9 +6465,11 @@ resource "google_container_cluster" "confidential_nodes" {
   }
 
   enable_l4_ilb_subsetting = true
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
@@ -6468,9 +6492,10 @@ resource "google_container_cluster" "confidential_nodes" {
   }
 
   enable_l4_ilb_subsetting = false
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
@@ -6493,9 +6518,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
       disabled = false
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6524,9 +6550,10 @@ resource "google_container_cluster" "with_release_channel" {
   release_channel {
     channel = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, channel, networkName, subnetworkName)
 }
@@ -6543,9 +6570,10 @@ resource "google_container_cluster" "with_release_channel" {
   location           = "us-central1-a"
   initial_node_count = 1
   min_master_version = data.google_container_engine_versions.central1a.release_channel_default_version["%s"]
+  network            = "%s"
+  subnetwork         = "%s"
+
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
 }
 `, clusterName, channel, networkName, subnetworkName)
 }
@@ -6561,9 +6589,10 @@ resource "google_container_cluster" "with_cluster_telemetry" {
   cluster_telemetry {
     type = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, telemetryType, networkName, subnetworkName)
 }
@@ -6576,9 +6605,11 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   location                 = "us-central1-a"
   initial_node_count       = 1
   remove_default_node_pool = true
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6594,9 +6625,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
   network_policy {
     enabled = false
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6618,9 +6650,10 @@ resource "google_container_cluster" "with_network_policy_enabled" {
       disabled = true
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6635,9 +6668,10 @@ resource "google_container_cluster" "primary" {
   authenticator_groups_config {
     security_group = "gke-security-groups@%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, name, orgDomain, networkName, subnetworkName)
 }
@@ -6652,9 +6686,10 @@ resource "google_container_cluster" "primary" {
   authenticator_groups_config {
     security_group = ""
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, name, networkName, subnetworkName)
 }
@@ -6706,9 +6741,11 @@ resource "google_container_cluster" "regional" {
   name               = "%s"
   location           = "us-central1"
   initial_node_count = 1
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -6975,9 +7012,10 @@ resource "google_container_cluster" "with_enable_private_endpoint" {
   private_cluster_config {
     enable_private_endpoint = %s
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, flag, networkName, subnetworkName)
 }
@@ -6991,9 +7029,10 @@ resource "google_container_cluster" "regional" {
   node_pool {
     name = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -7009,9 +7048,10 @@ resource "google_container_cluster" "with_node_locations" {
     "us-central1-f",
     "us-central1-c",
   ]
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7027,9 +7067,10 @@ resource "google_container_cluster" "with_node_locations" {
     "us-central1-f",
     "us-central1-b",
   ]
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7098,9 +7139,11 @@ resource "google_container_cluster" "with_intranode_visibility" {
   location                    = "us-central1-a"
   initial_node_count          = 1
   enable_intranode_visibility = true
-  deletion_protection         = false
-  network                     = "%s"
-  subnetwork                  = "%s"
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7113,9 +7156,11 @@ resource "google_container_cluster" "with_intranode_visibility" {
   initial_node_count          = 1
   enable_intranode_visibility = false
   private_ipv6_google_access  = "PRIVATE_IPV6_GOOGLE_ACCESS_BIDIRECTIONAL"
-  deletion_protection         = false
-  network                     = "%s"
-  subnetwork                  = "%s"
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7127,13 +7172,15 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "with_version" {
-  name                = "%s"
-  location            = "us-central1-a"
-  min_master_version  = data.google_container_engine_versions.central1a.latest_master_version
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7145,14 +7192,16 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "with_version" {
-  name                = "%s"
-  location            = "us-central1-a"
-  min_master_version  = data.google_container_engine_versions.central1a.release_channel_default_version["STABLE"]
-  node_version        = data.google_container_engine_versions.central1a.release_channel_default_version["STABLE"]
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_default_version["STABLE"]
+  node_version       = data.google_container_engine_versions.central1a.release_channel_default_version["STABLE"]
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7168,9 +7217,10 @@ resource "google_container_cluster" "with_master_auth_no_cert" {
       issue_client_certificate = false
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7182,14 +7232,16 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "with_version" {
-  name                = "%s"
-  location            = "us-central1-a"
-  min_master_version  = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
-  node_version        = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
+  node_version       = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7239,9 +7291,10 @@ resource "google_container_cluster" "with_node_config" {
     // Updatable fields
     image_type = "COS_CONTAINERD"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7281,10 +7334,10 @@ resource "google_container_cluster" "with_node_config_gcfs_config" {
       enabled = %t
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
 
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, enabled, networkName, subnetworkName)
 }
@@ -7301,9 +7354,10 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings" {
       pod_pids_limit = 1024
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7324,9 +7378,10 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings" {
       pod_pids_limit                         = %v
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, cpuManagerPolicy, cpuCfsQuota, cpuCfsQuotaPeriod, insecureKubeletReadonlyPortEnabled, podPidsLimit, networkName, subnetworkName)
 }
@@ -7334,8 +7389,8 @@ resource "google_container_cluster" "with_node_config_kubelet_config_settings" {
 func testAccContainerCluster_withInsecureKubeletReadonlyPortEnabledInNodePool(clusterName, nodePoolName, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_insecure_kubelet_readonly_port_enabled_in_node_pool" {
-  name               = "%s"
-  location           = "us-central1-f"
+  name     = "%s"
+  location = "us-central1-f"
 
   node_pool {
     name               = "%s"
@@ -7347,9 +7402,10 @@ resource "google_container_cluster" "with_insecure_kubelet_readonly_port_enabled
       }
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, nodePoolName, insecureKubeletReadonlyPortEnabled, networkName, subnetworkName)
 }
@@ -7361,9 +7417,10 @@ resource "google_container_cluster" "with_insecure_kubelet_readonly_port_enabled
   location           = "us-central1-f"
   initial_node_count = 1
 
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7380,9 +7437,10 @@ resource "google_container_cluster" "with_insecure_kubelet_readonly_port_enabled
       insecure_kubelet_readonly_port_enabled = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, insecureKubeletReadonlyPortEnabled, networkName, subnetworkName)
 }
@@ -7397,9 +7455,10 @@ resource "google_container_cluster" "with_logging_variant_in_node_config" {
   node_config {
     logging_variant = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, loggingVariant, networkName, subnetworkName)
 }
@@ -7407,8 +7466,8 @@ resource "google_container_cluster" "with_logging_variant_in_node_config" {
 func testAccContainerCluster_withLoggingVariantInNodePool(clusterName, nodePoolName, loggingVariant, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_logging_variant_in_node_pool" {
-  name               = "%s"
-  location           = "us-central1-f"
+  name     = "%s"
+  location = "us-central1-f"
 
   node_pool {
     name               = "%s"
@@ -7417,9 +7476,10 @@ resource "google_container_cluster" "with_logging_variant_in_node_pool" {
       logging_variant = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, nodePoolName, loggingVariant, networkName, subnetworkName)
 }
@@ -7436,9 +7496,10 @@ resource "google_container_cluster" "with_logging_variant_node_pool_default" {
       logging_variant = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, loggingVariant, networkName, subnetworkName)
 }
@@ -7446,8 +7507,8 @@ resource "google_container_cluster" "with_logging_variant_node_pool_default" {
 func testAccContainerCluster_withAdvancedMachineFeaturesInNodePool(clusterName, nodePoolName, networkName, subnetworkName string, nvEnabled bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_advanced_machine_features_in_node_pool" {
-  name               = "%s"
-  location           = "us-central1-f"
+  name     = "%s"
+  location = "us-central1-f"
 
   node_pool {
     name               = "%s"
@@ -7455,14 +7516,15 @@ resource "google_container_cluster" "with_advanced_machine_features_in_node_pool
     node_config {
       machine_type = "c2-standard-4"
       advanced_machine_features {
-        threads_per_core = 1
+        threads_per_core             = 1
         enable_nested_virtualization = "%t"
-	    }
+      }
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, nodePoolName, nvEnabled, networkName, subnetworkName)
 }
@@ -7481,9 +7543,10 @@ resource "google_container_cluster" "with_node_pool_defaults" {
       }
     }
   }
-  deletion_protection = false
   network    = "%s"
   subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, enabled, networkName, subnetworkName)
 }
@@ -7536,9 +7599,10 @@ resource "google_container_cluster" "with_node_config" {
 
     image_type = "UBUNTU_CONTAINERD"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7587,9 +7651,10 @@ resource "google_container_cluster" "with_node_config_scope_alias" {
     disk_size_gb = 15
     oauth_scopes = ["compute-rw", "storage-ro", "logging-write", "monitoring"]
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7602,9 +7667,9 @@ resource "google_container_cluster" "with_node_config" {
   initial_node_count = 1
 
   node_config {
-    machine_type    = "e2-medium"
-    disk_size_gb    = 15
-    disk_type       = "pd-ssd"
+    machine_type = "e2-medium"
+    disk_size_gb = 15
+    disk_type    = "pd-ssd"
     oauth_scopes = [
       "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/compute",
@@ -7619,8 +7684,8 @@ resource "google_container_cluster" "with_node_config" {
     labels = {
       foo = "bar"
     }
-    tags             = ["foo", "bar"]
-    preemptible      = true
+    tags        = ["foo", "bar"]
+    preemptible = true
 
     // Updatable fields
     image_type = "COS_CONTAINERD"
@@ -7630,9 +7695,10 @@ resource "google_container_cluster" "with_node_config" {
       enable_integrity_monitoring = true
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7645,9 +7711,9 @@ resource "google_container_cluster" "with_node_config" {
   initial_node_count = 1
 
   node_config {
-    machine_type    = "e2-medium"
-    disk_size_gb    = 15
-    disk_type       = "pd-ssd"
+    machine_type = "e2-medium"
+    disk_size_gb = 15
+    disk_type    = "pd-ssd"
     oauth_scopes = [
       "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/compute",
@@ -7662,8 +7728,8 @@ resource "google_container_cluster" "with_node_config" {
     labels = {
       foo = "bar"
     }
-    tags             = ["foo", "bar"]
-    preemptible      = true
+    tags        = ["foo", "bar"]
+    preemptible = true
 
     // Updatable fields
     image_type = "COS_CONTAINERD"
@@ -7672,9 +7738,10 @@ resource "google_container_cluster" "with_node_config" {
       consume_reservation_type = "ANY_RESERVATION"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7715,9 +7782,9 @@ resource "google_container_cluster" "with_node_config" {
   initial_node_count = 1
 
   node_config {
-    machine_type    = "n1-standard-1"
-    disk_size_gb    = 15
-    disk_type       = "pd-ssd"
+    machine_type = "n1-standard-1"
+    disk_size_gb = 15
+    disk_type    = "pd-ssd"
     oauth_scopes = [
       "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/compute",
@@ -7732,23 +7799,24 @@ resource "google_container_cluster" "with_node_config" {
     labels = {
       foo = "bar"
     }
-    tags             = ["foo", "bar"]
+    tags = ["foo", "bar"]
 
     // Updatable fields
     image_type = "COS_CONTAINERD"
 
     reservation_affinity {
       consume_reservation_type = "SPECIFIC_RESERVATION"
-      key = "compute.googleapis.com/reservation-name"
+      key                      = "compute.googleapis.com/reservation-name"
       values = [
         google_compute_reservation.gce_reservation.name
       ]
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
-  depends_on = [google_project_service.container]
+  subnetwork = "%s"
+
+  deletion_protection = false
+  depends_on          = [google_project_service.container]
 }
 `, reservation, clusterName, networkName, subnetworkName)
 }
@@ -7781,9 +7849,10 @@ resource "google_container_cluster" "with_workload_metadata_config" {
       mode = "%s"
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, workloadMetadataConfigMode, networkName, subnetworkName)
 }
@@ -7802,7 +7871,7 @@ resource "google_container_cluster" "with_sandbox_config" {
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
 
   node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of gvisor
+    machine_type = "n1-standard-1" // can't be e2 because of gvisor
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -7824,9 +7893,10 @@ resource "google_container_cluster" "with_sandbox_config" {
       effect = "NO_SCHEDULE"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7844,7 +7914,7 @@ resource "google_container_cluster" "with_sandbox_config" {
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
 
   node_config {
-    machine_type = "n1-standard-1"  // can't be e2 because of gvisor
+    machine_type = "n1-standard-1" // can't be e2 because of gvisor
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
@@ -7857,7 +7927,7 @@ resource "google_container_cluster" "with_sandbox_config" {
     }
 
     labels = {
-      "test.terraform.io/gke-sandbox" = "true"
+      "test.terraform.io/gke-sandbox"         = "true"
       "test.terraform.io/gke-sandbox-amended" = "also-true"
     }
 
@@ -7867,9 +7937,10 @@ resource "google_container_cluster" "with_sandbox_config" {
       effect = "NO_SCHEDULE"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -7893,9 +7964,10 @@ resource "google_container_cluster" "with_boot_disk_kms_key" {
 
     boot_disk_kms_key = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, kmsKeyName, networkName, subnetworkName)
 }
@@ -7913,6 +7985,7 @@ resource "google_container_cluster" "with_net_ref_by_url" {
   initial_node_count = 1
 
   network = google_compute_network.container_network.self_link
+
   deletion_protection = false
 }
 
@@ -7922,6 +7995,7 @@ resource "google_container_cluster" "with_net_ref_by_name" {
   initial_node_count = 1
 
   network = google_compute_network.container_network.name
+
   deletion_protection = false
 }
 `, network, cluster, cluster)
@@ -7954,9 +8028,10 @@ resource "google_container_cluster" "with_autoprovisioning_management" {
       }
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, autoUpgrade, autoRepair, networkName, subnetworkName)
 }
@@ -7994,9 +8069,10 @@ resource "google_container_cluster" "with_autoprovisioning_locations" {
 
     %s
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, apl, networkName, subnetworkName)
 }
@@ -8040,9 +8116,10 @@ resource "google_container_cluster" "primary" {
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, cluster, cluster, networkName, subnetworkName)
 }
@@ -8052,7 +8129,6 @@ func testAccContainerCluster_withNodePoolBasic(cluster, nodePool, networkName, s
 resource "google_container_cluster" "with_node_pool" {
   name     = "%s"
   location = "us-central1-a"
-  deletion_protection = false
 
   node_pool {
     name               = "%s"
@@ -8060,7 +8136,9 @@ resource "google_container_cluster" "with_node_pool" {
   }
 
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8082,9 +8160,10 @@ resource "google_container_cluster" "with_node_pool" {
     initial_node_count = 2
     version            = data.google_container_engine_versions.central1a.valid_node_versions[2]
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8106,9 +8185,10 @@ resource "google_container_cluster" "with_node_pool" {
     initial_node_count = 2
     version            = data.google_container_engine_versions.central1a.valid_node_versions[1]
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8128,9 +8208,10 @@ resource "google_container_cluster" "with_node_pool" {
     name       = "%s"
     node_count = 2
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8150,9 +8231,10 @@ resource "google_container_cluster" "with_node_pool" {
     name       = "%s"
     node_count = 3
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8168,9 +8250,10 @@ resource "google_container_cluster" "autoscaling_with_profile" {
     enabled             = false
     autoscaling_profile = "%s"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, cluster, autoscalingProfile, networkName, subnetworkName)
 	return config
@@ -8187,9 +8270,11 @@ resource "google_container_cluster" "with_autoprovisioning" {
   location            = "us-central1-a"
   min_master_version  = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count  = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 `, cluster, networkName, subnetworkName)
 	if autoprovisioning {
 		config += `
@@ -8234,10 +8319,9 @@ resource "google_container_cluster" "with_autoprovisioning" {
   location           = "us-central1-a"
   min_master_version = data.google_container_engine_versions.central1a.latest_master_version
   initial_node_count = 1
-  deletion_protection = false
 
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
 
   logging_service    = "none"
   monitoring_service = "none"
@@ -8268,6 +8352,7 @@ if monitoringWrite {
       ]
     }
   }
+  deletion_protection = false
 }`
 	return config
 }
@@ -8355,9 +8440,10 @@ func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettings(clusterName
           }
         }
       }
-      deletion_protection = false
       network    = "%s"
-      subnetwork    = "%s"
+      subnetwork = "%s"
+
+      deletion_protection = false
     }
   `, clusterName, maxSurge, maxUnavailable, strategy, blueGreenSettings, networkName, subnetworkName)
 }
@@ -8395,9 +8481,10 @@ func testAccContainerCluster_autoprovisioningDefaultsUpgradeSettingsWithBlueGree
             }
           }
         }
-        deletion_protection = false
         network    = "%s"
-        subnetwork    = "%s"
+        subnetwork = "%s"
+
+        deletion_protection = false
       }
     `, clusterName, strategy, duration, duration, networkName, subnetworkName)
 }
@@ -8431,9 +8518,10 @@ resource "google_container_cluster" "with_autoprovisioning" {
       %s
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, DiskSizeGbCfg, networkName, subnetworkName)
 }
@@ -8467,9 +8555,10 @@ resource "google_container_cluster" "with_autoprovisioning" {
       %s
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, DiskTypeCfg, networkName, subnetworkName)
 }
@@ -8503,9 +8592,10 @@ resource "google_container_cluster" "with_autoprovisioning" {
       %s
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, imageTypeCfg, networkName, subnetworkName)
 }
@@ -8533,9 +8623,10 @@ resource "google_container_cluster" "nap_boot_disk_kms_key" {
       boot_disk_kms_key = "%s"
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, kmsKeyName, networkName, subnetworkName)
 }
@@ -8567,9 +8658,10 @@ resource "google_container_cluster" "nap_shielded_instance" {
       }
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, networkName, subnetworkName)
 }
@@ -8588,9 +8680,10 @@ resource "google_container_cluster" "with_node_pool" {
       max_node_count = 3
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -8609,9 +8702,10 @@ resource "google_container_cluster" "with_node_pool" {
       max_node_count = 5
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -8623,8 +8717,8 @@ data "google_container_engine_versions" "uscentral1a" {
 }
 
 resource "google_container_cluster" "with_node_pool" {
-  name     = "%s"
-  location = "us-central1"
+  name               = "%s"
+  location           = "us-central1"
   min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
 
   node_pool {
@@ -8633,12 +8727,13 @@ resource "google_container_cluster" "with_node_pool" {
     autoscaling {
       total_min_node_count = 3
       total_max_node_count = 21
-      location_policy = "BALANCED"
+      location_policy      = "BALANCED"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -8650,8 +8745,8 @@ data "google_container_engine_versions" "uscentral1a" {
 }
 
 resource "google_container_cluster" "with_node_pool" {
-  name     = "%s"
-  location = "us-central1"
+  name               = "%s"
+  location           = "us-central1"
   min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
 
   node_pool {
@@ -8660,12 +8755,13 @@ resource "google_container_cluster" "with_node_pool" {
     autoscaling {
       total_min_node_count = 4
       total_max_node_count = 32
-      location_policy = "ANY"
+      location_policy      = "ANY"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -8677,17 +8773,18 @@ data "google_container_engine_versions" "uscentral1a" {
 }
 
 resource "google_container_cluster" "with_node_pool" {
-  name     = "%s"
-  location = "us-central1"
+  name               = "%s"
+  location           = "us-central1"
   min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
 
   node_pool {
     name               = "%s"
     initial_node_count = 2
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, nodePool, networkName, subnetworkName)
 }
@@ -8702,9 +8799,10 @@ resource "google_container_cluster" "with_node_pool_name_prefix" {
     name_prefix = "%s"
     node_count  = 2
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, npPrefix, networkName, subnetworkName)
 }
@@ -8724,9 +8822,10 @@ resource "google_container_cluster" "with_node_pool_multiple" {
     name       = "%s-two"
     node_count = 3
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, npPrefix, npPrefix, networkName, subnetworkName)
 }
@@ -8757,7 +8856,7 @@ resource "google_container_cluster" "with_node_pool_node_config" {
     name       = "%s"
     node_count = 2
     node_config {
-      machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
+      machine_type    = "n1-standard-1" // can't be e2 because of local-ssd
       disk_size_gb    = 15
       local_ssd_count = 1
       oauth_scopes = [
@@ -8778,9 +8877,10 @@ resource "google_container_cluster" "with_node_pool_node_config" {
       tags = ["foo", "bar"]
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -8802,9 +8902,11 @@ resource "google_container_cluster" "with_maintenance_window" {
   location           = "us-central1-a"
   initial_node_count = 1
   %s
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, maintenancePolicy, networkName, subnetworkName)
 }
@@ -8828,9 +8930,11 @@ resource "google_container_cluster" "with_recurring_maintenance_window" {
   location           = "us-central1-a"
   initial_node_count = 1
   %s
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, maintenancePolicy, networkName, subnetworkName)
 
@@ -8847,23 +8951,24 @@ resource "google_container_cluster" "with_maintenance_exclusion_window" {
   maintenance_policy {
     recurring_window {
       start_time = "%s"
-      end_time = "%s"
+      end_time   = "%s"
       recurrence = "FREQ=DAILY"
     }
     maintenance_exclusion {
       exclusion_name = "batch job"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
     }
     maintenance_exclusion {
       exclusion_name = "holiday data load"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, w1startTime, w1endTime, w1startTime, w1endTime, w2startTime, w2endTime, networkName, subnetworkName)
 }
@@ -8879,29 +8984,30 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
   maintenance_policy {
     recurring_window {
       start_time = "%s"
-      end_time = "%s"
+      end_time   = "%s"
       recurrence = "FREQ=DAILY"
     }
     maintenance_exclusion {
       exclusion_name = "batch job"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
       exclusion_options {
         scope = "%s"
       }
     }
     maintenance_exclusion {
       exclusion_name = "holiday data load"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
       exclusion_options {
         scope = "%s"
       }
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
 }
@@ -8917,23 +9023,24 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
   maintenance_policy {
     recurring_window {
       start_time = "%s"
-      end_time = "%s"
+      end_time   = "%s"
       recurrence = "FREQ=DAILY"
     }
     maintenance_exclusion {
       exclusion_name = "batch job"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
     }
     maintenance_exclusion {
       exclusion_name = "holiday data load"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, w2startTime, w2endTime, networkName, subnetworkName)
 }
@@ -8945,33 +9052,34 @@ resource "google_container_cluster" "with_maintenance_exclusion_options" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  deletion_protection = false
 
   maintenance_policy {
     recurring_window {
       start_time = "%s"
-      end_time = "%s"
+      end_time   = "%s"
       recurrence = "FREQ=DAILY"
     }
     maintenance_exclusion {
       exclusion_name = "batch job"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
       exclusion_options {
         scope = "%s"
       }
     }
     maintenance_exclusion {
       exclusion_name = "holiday data load"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
       exclusion_options {
         scope = "%s"
       }
     }
   }
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cclusterName, w1startTime, w1endTime, w1startTime, w1endTime, scope1, w2startTime, w2endTime, scope2, networkName, subnetworkName)
 }
@@ -8987,13 +9095,14 @@ resource "google_container_cluster" "with_maintenance_exclusion_window" {
   maintenance_policy {
     recurring_window {
       start_time = "%s"
-      end_time = "%s"
+      end_time   = "%s"
       recurrence = "FREQ=DAILY"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, w1startTime, w1endTime, networkName, subnetworkName)
 }
@@ -9012,13 +9121,14 @@ resource "google_container_cluster" "with_maintenance_exclusion_window" {
     }
     maintenance_exclusion {
       exclusion_name = "batch job"
-      start_time = "%s"
-      end_time = "%s"
+      start_time     = "%s"
+      end_time       = "%s"
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, w1startTime, w1endTime, networkName, subnetworkName)
 }
@@ -9262,9 +9372,10 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
       dataset_id = google_bigquery_dataset.default.dataset_id
     }
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, datasetId, clusterName, enableMetering, networkName, subnetworkName)
 }
@@ -9281,9 +9392,11 @@ resource "google_container_cluster" "with_resource_usage_export_config" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  deletion_protection = false
+
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, datasetId, clusterName, networkName, subnetworkName)
 }
@@ -9408,9 +9521,10 @@ resource "google_container_cluster" "with_private_cluster" {
       enabled = %t
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, masterGlobalAccessEnabled, networkName, subnetworkName)
 }
@@ -9423,9 +9537,11 @@ resource "google_container_cluster" "with_shielded_nodes" {
   initial_node_count = 1
 
   enable_shielded_nodes = %v
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection   = false
-  network               = "%s"
-  subnetwork            = "%s"
 }
 `, clusterName, enabled, networkName, subnetworkName)
 }
@@ -9445,9 +9561,11 @@ resource "google_container_cluster" "with_workload_identity_config" {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
   }
   remove_default_node_pool = true
-  deletion_protection      = false
-  network                  = "%s"
-  subnetwork               = "%s"
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, projectID, clusterName, networkName, subnetworkName)
 }
@@ -9497,9 +9615,11 @@ resource "google_container_cluster" "with_workload_identity_config" {
   initial_node_count       = 1
   remove_default_node_pool = true
   %s
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, projectID, clusterName, workloadIdentityConfig, networkName, subnetworkName)
 }
@@ -9625,9 +9745,10 @@ resource "google_container_cluster" "with_binary_authorization_enabled_bool" {
   binary_authorization {
     enabled = %v
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, enabled, networkName, subnetworkName)
 }
@@ -9645,9 +9766,10 @@ resource "google_container_cluster" "with_binary_authorization_evaluation_mode" 
   binary_authorization {
     evaluation_mode = "%s"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, autopilot_enabled, evaluation_mode, networkName, subnetworkName)
 }
@@ -9813,9 +9935,10 @@ resource "google_container_cluster" "with_external_ips_config" {
   service_external_ips_config {
     enabled = %v
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, projectID, clusterName, enabled, networkName, subnetworkName)
 }
@@ -9827,9 +9950,9 @@ data "google_project" "project" {
 }
 
 resource "google_container_cluster" "with_mesh_certificates_config" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
+  name                     = "%s"
+  location                 = "us-central1-a"
+  initial_node_count       = 1
   remove_default_node_pool = true
   workload_identity_config {
     workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
@@ -9837,9 +9960,10 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   mesh_certificates {
     enable_certificates = true
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, projectID, clusterName, networkName, subnetworkName)
 }
@@ -9861,9 +9985,10 @@ resource "google_container_cluster" "with_mesh_certificates_config" {
   mesh_certificates {
     enable_certificates = %v
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, projectID, clusterName, enabled, networkName, subnetworkName)
 }
@@ -9881,9 +10006,10 @@ resource "google_container_cluster" "with_cost_management_config" {
   cost_management_config {
     enabled = %v
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, projectID, clusterName, enabled, networkName, subnetworkName)
 }
@@ -9912,9 +10038,10 @@ resource "google_container_cluster" "primary" {
     state    = "ENCRYPTED"
     key_name = "%[2]s"
   }
-  deletion_protection = false
   network    = "%[4]s"
   subnetwork = "%[5]s"
+
+  deletion_protection = false
 }
 `, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName, networkName, subnetworkName)
 }
@@ -9933,9 +10060,10 @@ resource "google_container_cluster" "primary" {
   release_channel {
     channel = "RAPID"
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, datapathProvider, networkName, subnetworkName)
 }
@@ -10152,9 +10280,10 @@ resource "google_container_cluster" "primary" {
       auto_upgrade = false
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, cluster, np, networkName, subnetworkName)
 }
@@ -10166,13 +10295,15 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  min_master_version  = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
-  initial_node_count  = 1
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
+
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, networkName, subnetworkName)
 }
@@ -10184,11 +10315,10 @@ data "google_container_engine_versions" "uscentral1a" {
 }
 
 resource "google_container_cluster" "primary" {
-  name                = "%s"
-  location            = "us-central1-a"
-  min_master_version  = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
-  initial_node_count  = 1
-  deletion_protection = false
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.uscentral1a.release_channel_latest_version["STABLE"]
+  initial_node_count = 1
 
   # This feature has been available since GKE 1.27, and currently the only
   # supported Beta API is authentication.k8s.io/v1beta1/selfsubjectreviews.
@@ -10215,6 +10345,8 @@ resource "google_container_cluster" "primary" {
   }
   network    = "%s"
   subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, cluster, networkName, subnetworkName)
 }
@@ -10294,13 +10426,15 @@ resource "google_container_cluster" "with_autopilot" {
   name                = "%s"
   location            = "%s"
   enable_autopilot    = %v
-  deletion_protection = false
   min_master_version  = "latest"
   release_channel {
     channel = "RAPID"
   }
   network    = google_compute_network.container_network.name
   subnetwork = google_compute_subnetwork.container_subnetwork.name
+
+  deletion_protection = false
+
   ip_allocation_policy {
     cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
@@ -10338,9 +10472,10 @@ resource "google_container_cluster" "primary" {
     cluster_dns_domain = "%s"
     cluster_dns_scope  = "%s"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, clusterDns, clusterDnsDomain, clusterDnsScope, networkName, subnetworkName)
 }
@@ -10715,14 +10850,15 @@ resource "google_container_cluster" "primary" {
   location           = "us-central1-f"
   initial_node_count = 1
   node_config {
-    machine_type    = "n1-standard-1"  // can't be e2 because of local-ssd
-    disk_size_gb    = 15
-    disk_type       = "pd-ssd"
-    node_group = google_compute_node_group.group.name
+    machine_type = "n1-standard-1" // can't be e2 because of local-ssd
+    disk_size_gb = 15
+    disk_type    = "pd-ssd"
+    node_group   = google_compute_node_group.group.name
   }
-  deletion_protection = false
   network    = "%s"
-  subnetwork    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, name, name, name, networkName, subnetworkName)
 }
@@ -10800,9 +10936,10 @@ resource "google_container_cluster" "primary" {
     }
     workload_vulnerability_mode = "BASIC"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, networkName, subnetworkName)
 }
@@ -10820,9 +10957,10 @@ resource "google_container_cluster" "primary" {
     }
     workload_vulnerability_mode = "DISABLED"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, name, networkName, subnetworkName)
 }
@@ -10916,9 +11054,10 @@ resource "google_container_cluster" "cluster" {
       policy_name = google_compute_resource_policy.policy.name
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, policyName, cluster, np, networkName, subnetworkName)
 }
@@ -11060,9 +11199,10 @@ resource "google_container_cluster" "with_confidential_boot_disk" {
       disk_type                   = "hyperdisk-balanced"
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, npName, kmsKeyName, networkName, subnetworkName)
 }
@@ -11119,9 +11259,10 @@ resource "google_container_cluster" "with_confidential_boot_disk_node_config" {
     enable_confidential_storage = true
     disk_type                   = "hyperdisk-balanced"
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, kmsKeyName, networkName, subnetworkName)
 }
@@ -11172,9 +11313,10 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
       disk_type                   = "pd-balanced"
     }
   }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
@@ -11992,9 +12134,6 @@ resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
   initial_node_count = 1
-  deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
 
   node_config {
     oauth_scopes = [
@@ -12010,6 +12149,11 @@ resource "google_container_cluster" "primary" {
       }
     }
   }
+
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName)
 }
