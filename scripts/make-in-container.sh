@@ -5,7 +5,7 @@
 # will be pulled or built during the exectuion of the script.
 set -e
 
-BUILDER_IMAGE="gcr.io/graphite-docker-images/build-environment:latest"
+BUILDER_IMAGE="gcr.io/graphite-docker-images/build-environment:testing"
 
 if [ -t 1 ]; then
     red=$'\e[1;31m'

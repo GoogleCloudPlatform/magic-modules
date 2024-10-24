@@ -24,7 +24,7 @@ steps:
           - checkout
           - $COMMIT_SHA
 
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: build-magician-binary
       waitFor: ["checkout"]
@@ -74,7 +74,7 @@ steps:
           - $COMMIT_SHA
 
     # TPG
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpg-push
@@ -99,7 +99,7 @@ steps:
           - $COMMIT_SHA
 
     # TPGB
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tpgb-push
@@ -124,7 +124,7 @@ steps:
           - $COMMIT_SHA
 
     # TGC
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tgc-push
@@ -149,7 +149,7 @@ steps:
           - $COMMIT_SHA
 
     # TF-OICS
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/build-environment:testing'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN_CLASSIC"]
       id: tf-oics-push

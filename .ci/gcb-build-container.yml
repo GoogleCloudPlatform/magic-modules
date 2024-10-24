@@ -1,6 +1,6 @@
 ---
 # substitutions:
-#   _IMAGE_NAME: 'gcr.io/graphite-docker-images/bash-plus:testing'
+#   _IMAGE_NAME: 'gcr.io/graphite-docker-images/bash-plus:latest'
 #   _DIRECTORY: '.ci/containers/bash-plus'
 
 steps:
