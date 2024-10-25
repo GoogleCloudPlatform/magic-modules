@@ -429,20 +429,10 @@ properties:
       [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert):
       `projects/{project}/global/networks/{network}`. Where `{project}` is a
       project number, as in `12345`, and `{network}` is network name.
-      Only one of the fields, `network` or `enablePrivateServiceConnect`, can be set.'
+      Only one of the fields, `network` or `privateServiceConnectConfig`, can be set.'
     immutable: true
     conflicts:
-      - 'enablePrivateServiceConnect'
       - 'privateServiceConnectConfig'
-  - name: 'enablePrivateServiceConnect'
-    type: Boolean
-    description:
-      'If true, expose the Endpoint via private service connect.
-      Only one of the fields, `network` or `enablePrivateServiceConnect`, can be set.'
-    deprecation_message: '`enablePrivateServiceConnect` is deprecated and will be removed in a future major release. Please use `network` instead.'
-    conflicts:
-      - 'network'
-      - 'dedicatedEndpointEnabled'
   - name: 'privateServiceConnectConfig'
     type: NestedObject
     description:
@@ -508,7 +498,6 @@ properties:
     description: |
       If true, the endpoint will be exposed through a dedicated DNS [Endpoint.dedicated_endpoint_dns]. Your request to the dedicated DNS will be isolated from other users' traffic and will have better performance and reliability. Note: Once you enabled dedicated endpoint, you won't be able to send request to the shared DNS {region}-aiplatform.googleapis.com. The limitation will be removed soon.
     conflicts:
-      - 'enablePrivateServiceConnect'
       - 'privateServiceConnectConfig'
   - name: 'dedicatedEndpointDns'
     type: String
