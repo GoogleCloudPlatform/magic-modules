@@ -67,6 +67,7 @@ examples:
       sec_policy_name: 'policywithmultiplerules'
   - name: 'region_security_policy_rule_default_rule'
     primary_resource_id: 'policy_rule'
+    min_version: 'beta'
     vars:
       sec_policy_name: 'policywithdefaultrule'
   - name: 'region_security_policy_rule_with_preconfigured_waf_config'
