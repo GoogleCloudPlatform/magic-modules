@@ -1109,6 +1109,22 @@ func TestAccComputeInstanceTemplate_nictype_update(t *testing.T) {
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
 				),
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			{
+				Config: testAccComputeInstanceTemplate_nictype(instanceTemplateName, "MRDMA"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+				),
+			},
+			{
+				Config: testAccComputeInstanceTemplate_nictype(instanceTemplateName, "IRDMA"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+				),
+			},
+			{{- end }}
 		},
 	})
 }
