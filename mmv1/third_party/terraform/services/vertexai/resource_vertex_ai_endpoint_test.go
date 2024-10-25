@@ -62,7 +62,7 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   }
   predict_request_response_logging_config {
     bigquery_destination {
-      output_uri = "bq://${data.google_project.project.project_id}"
+      output_uri = "bq://${data.google_project.project.project_id}.${google_bigquery_dataset.bq_dataset.dataset_id}.request_response_logging"
     }
     enabled       = true
     sampling_rate = 0.1
@@ -79,6 +79,14 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "bq_dataset" {
+  dataset_id                  = "some_dataset"
+  friendly_name               = "logging dataset"
+  description                 = "This is a dataset that requests are logged to"
+  location                    = "US"
+  default_table_expiration_ms = 3600000
 }
 
 data "google_project" "project" {}

@@ -63,9 +63,13 @@ examples:
       address_name: 'address-name'
       kms_key_name: 'kms-name'
       network_name: 'network-name'
+      dataset_id: 'some_dataset'
       # Test is covered by handwritten test to include an update.
     exclude_test: true
   - name: 'vertex_ai_endpoint_private_service_connect'
+    primary_resource_id: 'endpoint'
+    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
+  - name: 'vertex_ai_endpoint_dedicated_endpoint'
     primary_resource_id: 'endpoint'
     primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
 parameters:
@@ -490,7 +494,7 @@ properties:
       - name: 'bigqueryDestination'
         type: NestedObject
         description:
-          'BigQuery table for logging. If only given a project, a new dataset will be created with name logging_<endpoint-display-name>_<endpoint-id> where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores). If no table name is given, a new table will be created with name request_response_logging'
+          'BigQuery table for logging. If only given a project, a new dataset will be created with name `logging_<endpoint-display-name>_<endpoint-id>` where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores). If no table name is given, a new table will be created with name `request_response_logging`'
         properties:
           - name: 'outputUri'
             type: String
