@@ -13,6 +13,7 @@
 
 ---
 name: 'Config'
+api_resource_type_kind: TransferConfig
 description: |
   Represents a data transfer configuration. A transfer configuration
   contains all metadata needed to perform a data transfer.

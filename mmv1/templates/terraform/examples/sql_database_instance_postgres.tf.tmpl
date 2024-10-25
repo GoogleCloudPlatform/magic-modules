@@ -6,7 +6,7 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   settings {
     tier = "db-custom-2-7680"
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
 
 resource "random_password" "pwd" {

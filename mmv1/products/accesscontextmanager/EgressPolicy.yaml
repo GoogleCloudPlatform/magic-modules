@@ -13,6 +13,7 @@
 
 ---
 name: 'EgressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   This resource has been deprecated, please refer to ServicePerimeterEgressPolicy.
 references:

@@ -1,0 +1,93 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionNetworkFirewallPolicyAssociation'
+kind: 'compute#firewallPolicyAssociation'
+description: |
+  The Compute NetworkFirewallPolicyAssociation resource
+references:
+  guides:
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionNetworkFirewallPolicies/addAssociation'
+docs:
+id_format: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}'
+self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/addAssociation'
+delete_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
+delete_verb: 'POST'
+immutable: true
+legacy_long_form_project: true
+import_format:
+  - 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+  - '{{project}}/{{firewall_policy}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'compute#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
+examples:
+  - name: 'region_network_firewall_policy_association'
+    primary_resource_id: 'default'
+    vars:
+      policy_name: 'my-policy'
+      association_name: 'my-association'
+      network_name: 'my-network'
+    test_env_vars:
+      region: 'REGION'
+      project_name: 'PROJECT_NAME'
+parameters:
+  - name: 'firewallPolicy'
+    type: ResourceRef
+    description: |
+      The firewall policy of the resource.
+    url_param_only: true
+    required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    resource: 'RegionNetworkFirewallPolicy'
+    imports: 'name'
+  - name: 'region'
+    type: String
+    description: 'The location of this resource.'
+    url_param_only: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name for an association.
+    required: true
+  - name: 'attachmentTarget'
+    type: String
+    description: |
+      The target that the firewall policy is attached to.
+    required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'shortName'
+    type: String
+    description: |
+      The short name of the firewall policy of the association.
+    output: true

@@ -228,6 +228,40 @@ properties:
               should be trying to achieve for the instance.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
 
+      - name: 'asymmetricAutoscalingOptions'
+        type: Array
+        description: |
+          Asymmetric autoscaling options for specific replicas.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'replicaSelection'
+              type: NestedObject
+              required: true
+              properties:
+                - name: 'location'
+                  type: String
+                  required: true
+                  description: |
+                    The location of the replica to apply asymmetric autoscaling options.
+            - name: 'overrides'
+              type: NestedObject
+              required: true
+              properties:
+                - name: 'autoscalingLimits'
+                  type: NestedObject
+                  required: true
+                  properties:
+                    - name: 'minNodes'
+                      type: Integer
+                      required: true
+                      description: |
+                        The minimum number of nodes for this specific replica.
+                    - name: 'maxNodes'
+                      type: Integer
+                      required: true
+                      description: |
+                        The maximum number of nodes for this specific replica.
   - name: 'edition'
     type: Enum
     description: |

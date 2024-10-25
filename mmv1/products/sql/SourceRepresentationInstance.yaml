@@ -13,6 +13,7 @@
 
 ---
 name: 'SourceRepresentationInstance'
+api_resource_type_kind: Instance
 kind: 'sql#instance'
 description: |
   A source representation instance is a Cloud SQL instance that represents

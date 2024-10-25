@@ -8,6 +8,9 @@ description: |-
 
 Get information about a CloudVmCluster.
 
+For more information see the
+[API](https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters).
+
 ## Example Usage
 
 ```hcl
@@ -31,4 +34,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_oracle_database_cloud_vm_cluster](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_oracle_database_cloud_vm_cluster#argument-reference) resource for details of the available attributes.
+See [google_oracle_database_cloud_vm_cluster](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/oracle_database_cloud_vm_cluster#argument-reference) resource for details of the available attributes.
