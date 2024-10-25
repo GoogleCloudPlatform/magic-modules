@@ -17,7 +17,7 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
   }
 
   traffic_split = jsonencode({
-    my_model_id = 1.0
+    "12345" = 100
   })
 }
 
