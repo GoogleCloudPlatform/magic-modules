@@ -26,7 +26,7 @@ resource "google_compute_region_network_firewall_policy_with_rules" "{{$.Primary
       dest_address_groups = [google_network_security_address_group.address_group_1.id]
     }
     target_secure_tag {
-      name = "google_tags_tag_value.secure_tag_value_1.id
+      name = google_tags_tag_value.secure_tag_value_1.id
     }
   }
   rule {
