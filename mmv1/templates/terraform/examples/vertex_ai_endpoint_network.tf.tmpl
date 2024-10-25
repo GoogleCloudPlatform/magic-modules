@@ -18,6 +18,9 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     enabled       = true
     sampling_rate = 0.1
   }
+  traffic_split = jsonencode({
+    "12345" = 100
+  })
 
   depends_on   = [
     google_service_networking_connection.vertex_vpc_connection

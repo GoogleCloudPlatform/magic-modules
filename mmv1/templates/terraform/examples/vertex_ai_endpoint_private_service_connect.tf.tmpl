@@ -15,10 +15,6 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     ]
     enable_secure_private_service_connect = false
   }
-
-  traffic_split = jsonencode({
-    "12345" = 100
-  })
 }
 
 data "google_project" "project" {}
