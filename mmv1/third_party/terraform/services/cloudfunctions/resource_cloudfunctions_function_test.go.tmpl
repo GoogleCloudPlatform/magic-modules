@@ -428,7 +428,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName, "PRIVATE_RANGES_ONLY"),
+				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -437,7 +437,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update",  "PRIVATE_RANGES_ONLY"),
+				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -467,7 +467,7 @@ func TestAccCloudFunctionsFunction_vpcConnectorEgressSettings(t *testing.T) {
 		CheckDestroy:             testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName, "PRIVATE_RANGES_ONLY"),
+				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.10.0.0/28", vpcConnectorName, "PRIVATE_RANGES_ONLY"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -476,7 +476,7 @@ func TestAccCloudFunctionsFunction_vpcConnectorEgressSettings(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update",  "ALL_TRAFFIC"),
+				Config: testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, "10.20.0.0/28", vpcConnectorName+"-update",  "ALL_TRAFFIC"),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -1053,7 +1053,71 @@ resource "google_cloudfunctions_function" "function" {
 `, bucketName, zipFilePath, functionName)
 }
 
-func testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName, vpcConnectorEgressSettings string) string {
+func testAccCloudFunctionsFunction_vpcConnector(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "gcfadmin" {
+  project = data.google_project.project.project_id
+  role     = "roles/editor"
+  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
+}
+
+resource "google_compute_network" "vpc" {
+	name = "%s"
+	auto_create_subnetworks = false
+}
+
+resource "google_vpc_access_connector" "%s" {
+  name          = "%s"
+  region        = "us-central1"
+  ip_cidr_range = "%s"
+  network       = google_compute_network.vpc.name
+  min_throughput  = 200
+  max_throughput = 300
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name     = "index.zip"
+  bucket   = google_storage_bucket.bucket.name
+  source   = "%s"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  name     = "%s"
+  runtime  = "nodejs20"
+
+  description           = "test function"
+  available_memory_mb   = 128
+  source_archive_bucket = google_storage_bucket.bucket.name
+  source_archive_object = google_storage_bucket_object.archive.name
+  trigger_http          = true
+  timeout               = 61
+  entry_point           = "helloGET"
+  labels = {
+	my-label = "my-label-value"
+  }
+  environment_variables = {
+	TEST_ENV_VARIABLE = "test-env-variable-value"
+  }
+  max_instances = 10
+  min_instances = 3
+  vpc_connector = google_vpc_access_connector.%s.self_link
+  vpc_connector_egress_settings = "PRIVATE_RANGES_ONLY"
+
+  depends_on = [google_project_iam_member.gcfadmin]
+}
+`, projectNumber, networkName, vpcConnectorName, vpcConnectorName, vpcIp, bucketName, zipFilePath, functionName, vpcConnectorName)
+}
+
+
+func testAccCloudFunctionsFunction_vpcConnectorEgressSettings(projectNumber, networkName, functionName, bucketName, zipFilePath, vpcIp, vpcConnectorName, vpcConnectorEgressSettings string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
