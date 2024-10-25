@@ -60,7 +60,6 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
-  dedicated_endpoint_enabled = true
   predict_request_response_logging_config {
     bigquery_destination {
       output_uri = "bq://${data.google_project.project.project_id}"
@@ -97,7 +96,8 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   labels       = {
     label-two = "value-two"
   }
-  network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"
+  dedicated_endpoint_enabled = true
+
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
