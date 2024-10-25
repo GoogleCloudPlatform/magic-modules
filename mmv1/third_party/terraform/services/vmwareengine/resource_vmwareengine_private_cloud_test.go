@@ -151,7 +151,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 }
 
 func testVmwareenginePrivateCloudCreateConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample description", "TIME_LIMITED", 1, 1) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudConfig(context, "sample description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}) string {
@@ -208,6 +208,20 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       node_type_id = "standard-72"
       node_count = "%{node_count}"
       custom_core_count = 32
+    }
+		autoscaling_settings {
+      autoscaling_policies {
+        autoscale_policy_id = "autoscaling-policy"
+        node_type_id = "standard-72"
+        scale_out_size = 1
+        storage_thresholds {
+          scale_out = 60
+          scale_in  = 20
+        }
+      }
+      min_cluster_node_count = 3
+      max_cluster_node_count = 8
+      cool_down_period = "1800s"
     }
   }
 }
