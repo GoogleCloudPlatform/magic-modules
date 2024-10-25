@@ -52,6 +52,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/private_cloud.go.tmpl'
   decoder: 'templates/terraform/decoders/private_cloud.go.tmpl'
   pre_create: 'templates/terraform/pre_create/vmwareengine_private_cloud.go.tmpl'
+  post_create: 'templates/terraform/post_create/private_cloud.go.tmpl'
   post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
   post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
