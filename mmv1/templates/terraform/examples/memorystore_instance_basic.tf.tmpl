@@ -1,4 +1,4 @@
-resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
+resource "c" "{{$.PrimaryResourceId}}" {
   instance_id = "{{index $.Vars "instance_name"}}"
   shard_count = 3
   desired_psc_auto_connections {
