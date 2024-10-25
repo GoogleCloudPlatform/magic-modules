@@ -136,6 +136,10 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             },
             "request_timeout": schema.StringAttribute{
                 Optional: true,
+                Validators: []validator.String{
+                    NonEmptyStringValidator(),
+                    NonNegativeDurationValidator(),
+                },
             },
             "request_reason": schema.StringAttribute{
                 Optional: true,
