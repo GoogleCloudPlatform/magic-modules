@@ -1583,7 +1583,7 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 
 	if val, ok := d.GetOk("desired_status"); ok {
 		if val.(string) != "RUNNING" {
-			err = changeInstanceStatusOnCreation(config, d, project, zone.Name, d.Get("desired_status").(string), userAgent)
+			err = changeInstanceStatusOnCreation(config, d, project, zone.Name, val.(string), userAgent)
 			if err != nil {
 				return fmt.Errorf("Error changing instance status after creation: %s", err)
 			}
