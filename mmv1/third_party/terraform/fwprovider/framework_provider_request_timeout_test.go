@@ -14,7 +14,7 @@ import (
 func TestAccFwProvider_request_timeout(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		// Configuring the provider using inputs
-		"a default value of 120s is used when there are no user inputs":                                       testAccFwProvider_request_timeout_providerDefault,
+		"a default value of 0s is used when there are no user inputs":                                         testAccFwProvider_request_timeout_providerDefault,
 		"request_timeout can be set in config in different formats, are NOT normalized to full-length format": testAccFwProvider_request_timeout_setInConfig,
 		//no ENVs to test
 
@@ -40,7 +40,7 @@ func TestAccFwProvider_request_timeout(t *testing.T) {
 func testAccFwProvider_request_timeout_providerDefault(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
-	defaultValue := "120s"
+	defaultValue := "0s"
 
 	acctest.VcrTest(t, resource.TestCase{
 		// No PreCheck for checking ENVs
