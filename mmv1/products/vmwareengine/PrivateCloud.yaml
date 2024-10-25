@@ -224,8 +224,6 @@ properties:
         description: |
           Configuration of the autoscaling applied to this cluster
           You must have a minimum of 3 nodes in your PC to add autoscaling settings
-          Currently, autoscale settings can be updated for management cluster only during updation
-          PC creation does not support autoscale settings for now
         properties:
           - name: 'autoscalingPolicies'
             type: Map
