@@ -168,7 +168,7 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.accelerated_cluster", &cluster),
 					testAccCheckDataprocClusterAccelerator(&cluster, project, 1, 1),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.internal_ip_only", "false"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.gce_cluster_config.0.internal_ip_only", "false"),
 				),
 			},
 		},
