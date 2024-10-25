@@ -246,6 +246,9 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, "bq-test-sa"),
@@ -715,6 +718,11 @@ resource "google_project_iam_member" "editor" {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
 
+resource "time_sleep" "wait_30_seconds" {
+  create_duration = "30s"
+}
+
+
 %s
 
 resource "google_bigquery_dataset" "test" {
@@ -754,7 +762,8 @@ resource "google_pubsub_subscription" "foo" {
 
   depends_on = [
     google_project_iam_member.viewer,
-    google_project_iam_member.editor
+    google_project_iam_member.editor,
+    time_sleep.wait_30_seconds,
   ]
 }
 	`, serviceAccountResource, dataset, table, topic, subscription, useTableSchema, serviceAccountEmailField)
