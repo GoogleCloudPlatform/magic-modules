@@ -40,7 +40,9 @@ import_format:
   - 'locations/global/firewallPolicies/{{name}}'
   - '{{name}}'
 custom_code:
-  post_create: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_firewall_policy.go.tmpl'
+  post_delete: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
+  post_update: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 examples:

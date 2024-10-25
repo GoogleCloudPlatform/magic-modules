@@ -5,12 +5,5 @@ err = ComputeOrgOperationWaitTimeWithResponse(
 
 if err != nil {
 	// The resource didn't actually create
-	d.SetId("")
 	return fmt.Errorf("Error waiting for FirewallPolicy operation: %s", err)
-}
-
-id = fmt.Sprintf("locations/global/firewallPolicies/%s", opRes["targetId"])
-d.SetId(id)
-if err := d.Set("name", flattenComputeFirewallPolicyName(opRes["targetId"], d, config)); err != nil {
-	return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
 }
