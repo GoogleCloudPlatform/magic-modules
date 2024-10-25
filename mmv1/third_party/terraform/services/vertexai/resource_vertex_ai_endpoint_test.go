@@ -27,7 +27,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 				Config: testAccVertexAIEndpoint_vertexAiEndpointNetwork(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_endpoint.endpoint_network",
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
@@ -36,7 +36,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 				Config: testAccVertexAIEndpoint_vertexAiEndpointNetworkUpdate(context),
 			},
 			{
-				ResourceName:            "google_vertex_ai_endpoint.endpoint_network",
+				ResourceName:            "google_vertex_ai_endpoint.endpoint",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "location", "region", "labels", "terraform_labels"},
@@ -47,7 +47,7 @@ func TestAccVertexAIEndpoint_vertexAiEndpointNetwork(t *testing.T) {
 
 func testAccVertexAIEndpoint_vertexAiEndpointNetwork(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_vertex_ai_endpoint" "endpoint_network" {
+resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "%{endpoint_name}"
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
@@ -95,7 +95,7 @@ data "google_project" "project" {}
 
 func testAccVertexAIEndpoint_vertexAiEndpointNetworkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_vertex_ai_endpoint" "endpoint_network" {
+resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "%{endpoint_name}"
   display_name = "new-sample-endpoint"
   description  = "An updated sample vertex endpoint"
@@ -104,8 +104,7 @@ resource "google_vertex_ai_endpoint" "endpoint_network" {
   labels       = {
     label-two = "value-two"
   }
-  dedicated_endpoint_enabled = true
-
+  network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
