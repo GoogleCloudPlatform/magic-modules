@@ -613,6 +613,11 @@ func TestAccSpannerDatabase_mrcmek(t *testing.T) {
 	kms1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
 	kms2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-mr-cmek-test-key-us-east1")
 	kms3 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-mr-cmek-test-key-us-east4")
+
+	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-spanner", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"key_ring1":      kms1.KeyRing.Name,
@@ -660,18 +665,15 @@ resource "google_spanner_database" "database" {
   ]
 
   encryption_config {
-  	kms_key_names = [
-	  "%{key_name1}",
-	  "%{key_name2}",
-	  "%{key_name3}",
-	]
+    kms_key_names = [
+      "%{key_name1}",
+      "%{key_name2}",
+      "%{key_name3}",
+    ]
   }
 
   deletion_protection = false
-
 }
-
-
 `, context)
 }
 
