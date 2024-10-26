@@ -223,7 +223,7 @@ properties:
         type: NestedObject
         description: |
           Configuration of the autoscaling applied to this cluster
-          You must have a minimum of 3 nodes in your PC to add autoscaling settings
+          Private cloud must have a minimum of 3 nodes to add autoscale settings
         properties:
           - name: 'autoscalingPolicies'
             type: Map
