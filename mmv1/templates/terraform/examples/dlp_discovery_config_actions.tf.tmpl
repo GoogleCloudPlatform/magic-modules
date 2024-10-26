@@ -80,7 +80,7 @@ data "google_project" "project" {
 }
 
 resource "google_tags_tag_key" "tag_key" {
-  parent     = "projects/${data.google_project.project.number}"
+  parent     = data.google_project.project.id
   short_name = "environment"
 }
 
