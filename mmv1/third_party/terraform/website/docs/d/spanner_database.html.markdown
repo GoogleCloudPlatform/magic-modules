@@ -11,13 +11,9 @@ Get a spanner database from Google Cloud by its name and instance name.
 ## Example Usage
 
 ```tf
-data "google_spanner_instance" "instance" {
-  name = "my-instance"
-}
-
 data "google_spanner_database" "foo" {
   name     = "foo"
-  instance = data.google_spanner_instance.instance.name
+  instance = google_spanner_instance.instance.name
 }
 ```
 
