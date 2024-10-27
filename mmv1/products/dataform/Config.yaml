@@ -44,6 +44,8 @@ examples:
       crypto_key_name: 'example-crypto-key-name'
 parameters:
   - name: 'region'
+    type: String
+    min_version: 'beta'
     description: 'A reference to the region'
     immutable: true
     url_param_only: true
