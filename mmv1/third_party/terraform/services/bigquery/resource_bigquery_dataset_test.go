@@ -258,6 +258,29 @@ func TestAccBigQueryDataset_datasetWithContents(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_nonLegacyAccess(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_access_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDatasetWithNonLegacyAccess(datasetID),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryDataset_access(t *testing.T) {
 	t.Parallel()
 
@@ -637,6 +660,19 @@ resource "google_bigquery_dataset" "test" {
   }
 }
 `, datasetID, location)
+}
+
+func testAccBigQueryDatasetWithNonLegacyAccess(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "access_test" {
+  dataset_id = "%s"
+
+  access {
+    role          = "roles/bigquery.dataOwner"
+    user_by_email = "Joe@example.com"
+  }
+}
+`, datasetID)
 }
 
 func testAccBigQueryDatasetWithOneAccess(datasetID string) string {
