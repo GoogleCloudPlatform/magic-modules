@@ -14,6 +14,7 @@
 ---
 # This is the plural of `AccessLevel`, any changes here should be made to `AccessLevel` as well
 name: 'AccessLevels'
+api_resource_type_kind: AccessLevel
 description: |
   Replace all existing Access Levels in an Access Policy with the Access Levels provided. This is done atomically.
   This is a bulk edit of all Access Levels and may override existing Access Levels created by `google_access_context_manager_access_level`,

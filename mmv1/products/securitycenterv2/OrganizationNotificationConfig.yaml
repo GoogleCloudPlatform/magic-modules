@@ -13,6 +13,7 @@
 
 ---
 name: 'OrganizationNotificationConfig'
+api_resource_type_kind: NotificationConfig
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the

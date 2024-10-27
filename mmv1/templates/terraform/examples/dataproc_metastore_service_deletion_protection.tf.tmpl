@@ -3,7 +3,7 @@ resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
     location            = "us-central1"
     port                = 9080
     tier                = "DEVELOPER"
-    deletion_protection = "{{index $.Vars "deletion_protection"}}"
+    deletion_protection = {{index $.Vars "deletion_protection"}}
   
     maintenance_window {
       hour_of_day = 2
@@ -18,4 +18,3 @@ resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
       env = "test"
     }
   }
-  

@@ -73,18 +73,10 @@ properties:
       Create time of the active directory. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
     output: true
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       The state of the Active Directory policy (not the Active Directory itself).
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'CREATING'
-      - 'READY'
-      - 'UPDATING'
-      - 'DELETING'
-      - 'IN_USE'
-      - 'ERROR'
   - name: 'domain'
     type: String
     description: |

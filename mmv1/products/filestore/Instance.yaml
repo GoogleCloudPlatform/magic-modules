@@ -63,7 +63,6 @@ examples:
       instance_name: 'test-instance'
   - name: 'filestore_instance_protocol'
     primary_resource_id: 'instance'
-    min_version: 'beta'
     vars:
       instance_name: 'test-instance'
   - name: 'filestore_instance_enterprise'
@@ -126,7 +125,6 @@ properties:
       or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
       NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
       The default is NFSv3.
-    min_version: 'beta'
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "NFS_V3"

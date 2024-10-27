@@ -13,6 +13,7 @@
 
 ---
 name: 'PerInstanceConfig'
+api_resource_type_kind: InstanceGroupManager
 description: |
   A config defined for a single managed instance that belongs to an instance group manager. It preserves the instance name
   across instance group manager operations and can define stateful disks or metadata that are unique to the instance.
