@@ -25,7 +25,11 @@ func TestAccDataSourceSpannerDatabase_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_spanner_database.bar",
 						"google_spanner_database.foo",
-						map[string]struct{}{"deletion_protection": {}},
+						map[string]struct{}{
+							"ddl.#":               {},
+							"ddl.0":               {},
+							"deletion_protection": {},
+						},
 					),
 				),
 			},
@@ -48,7 +52,6 @@ resource "google_spanner_database" "foo" {
   instance = google_spanner_instance.instance.name
   ddl = [
     "CREATE TABLE t1 (t1 INT64 NOT NULL,) PRIMARY KEY(t1)",
-    "CREATE TABLE t2 (t2 INT64 NOT NULL,) PRIMARY KEY(t2)",
   ]
 
   deletion_protection = false

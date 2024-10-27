@@ -32,3 +32,5 @@ The following arguments are supported:
 
 ## Attributes Reference
 See [google_spanner_database](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/spanner_database) resource for details of all the available attributes.
+
+**Note** `ddl` is a read only field, and thus will show up with a null value.
