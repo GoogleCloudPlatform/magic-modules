@@ -607,7 +607,6 @@ resource "google_project_service_identity" "ck_sa" {
 }
 
 func TestAccSpannerDatabase_mrcmek(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	kms1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-mr-cmek-test-key-us-central1")
@@ -649,10 +648,13 @@ func TestAccSpannerDatabase_mrcmek(t *testing.T) {
 func testAccSpannerDatabase_mrcmek(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_spanner_instance" "main" {
-  provider     = google-beta
-  config       = "nam3"
-  display_name = "main-instance1"
-  num_nodes    = 1
+  provider = google-beta
+
+  name         = "tf-test-%{random_suffix}"
+  display_name = "Terraform test"
+
+  config           = "nam3"
+  processing_units = 200
 }
 
 resource "google_spanner_database" "database" {
