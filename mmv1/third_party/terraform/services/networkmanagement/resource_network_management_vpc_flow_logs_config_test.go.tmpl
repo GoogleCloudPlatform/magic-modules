@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetworkManagementVpcFlowLogsConfig_update(t *testing.T) {
+func TestAccNetworkManagementVpcFlowLogsConfig_updateVpn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -22,7 +22,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_update(t *testing.T) {
 		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkManagementVpcFlowLogsConfig_full(context),
+				Config: testAccNetworkManagementVpcFlowLogsConfig_fullVpn(context),
 			},
 			{
 				ResourceName:            "google_network_management_vpc_flow_logs_config.example",
@@ -31,7 +31,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
 			},
       {
-				Config: testAccNetworkManagementVpcFlowLogsConfig_update(context),
+				Config: testAccNetworkManagementVpcFlowLogsConfig_updateVpn(context),
 			},
 			{
 				ResourceName:            "google_network_management_vpc_flow_logs_config.example",
@@ -43,7 +43,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_update(t *testing.T) {
 	})
 }
 
-func testAccNetworkManagementVpcFlowLogsConfig_full(context map[string]interface{}) string {
+func testAccNetworkManagementVpcFlowLogsConfig_fullVpn(context map[string]interface{}) string {
 	vpcFlowLogsCfg := acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
@@ -59,7 +59,7 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
   return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
 }
 
-func testAccNetworkManagementVpcFlowLogsConfig_update(context map[string]interface{}) string {
+func testAccNetworkManagementVpcFlowLogsConfig_updateVpn(context map[string]interface{}) string {
 	vpcFlowLogsCfg := acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
