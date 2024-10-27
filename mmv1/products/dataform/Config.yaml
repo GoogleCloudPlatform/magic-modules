@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,46 +11,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Config
-base_url: projects/{{project}}/locations/{{region}}/config
-create_url: 'projects/{{project}}/locations/{{region}}/config'
-create_verb: :PATCH
-update_url: 'projects/{{project}}/locations/{{region}}/config'
-update_verb: :PATCH
-update_mask: true
-min_version: beta
+---
+name: 'Config'
 description: |-
   A singleton resource represents a Dataform configuration for project location.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations'
-id_format: projects/{{project}}/locations/{{region}}/config
+
+id_format: 'projects/{{project}}/locations/{{region}}/config'
+base_url: 'projects/{{project}}/locations/{{region}}/config'
+create_url: 'projects/{{project}}/locations/{{region}}/config'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{region}}/config'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  ['projects/{{project}}/locations/{{region}}/config']
+  - 'projects/{{project}}/locations/{{region}}/config'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataform_config'
-    primary_resource_id: dataform_config
-    min_version: beta
+  - name: 'dataform_config'
+    primary_resource_id: 'dataform_config'
+    min_version: 'beta'
     vars:
-      key_ring_name: example-key-ring
-      crypto_key_name: example-crypto-key-name
+      key_ring_name: 'example-key-ring'
+      crypto_key_name: 'example-crypto-key-name'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
     description: 'A reference to the region'
     immutable: true
     url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
+    min_version: beta
     description: The config's name.
     immutable: true
     required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'defaultKmsKeyName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'defaultKmsKeyName'
+    type: String
+    min_version: beta
     description:
       Optional. The customer managed KMS key that will be used as default for encryption of user data.
