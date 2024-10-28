@@ -14,12 +14,10 @@ clusterUpdateMask := []string{}
 clusterObj := make(map[string]interface{})
 
 if v, ok := d.GetOkExists("management_cluster"); !tpgresource.IsEmptyValue(reflect.ValueOf(mgmtClusterProp)) && (ok || !reflect.DeepEqual(v, mgmtClusterProp)) {
-  clusterObj["nodeTypeConfigs"] = mgmtMap["nodeTypeConfigs"]
   clusterObj["autoscalingSettings"] = mgmtMap["autoscalingSettings"]
 }
 
 if d.HasChange("management_cluster") {
-  clusterUpdateMask = append(clusterUpdateMask, "nodeTypeConfigs.*.nodeCount")
   clusterUpdateMask = append(clusterUpdateMask, "autoscalingSettings")
 }
 
