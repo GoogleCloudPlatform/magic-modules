@@ -25,7 +25,7 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan_association.bpa", "google_backup_dr_backup_plan_association.bpa-data"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa"),
 				),
 			},
 		},
@@ -75,12 +75,12 @@ func testAccCheckBackupDRBackupPlanAssociationDestroyProducer(t *testing.T) func
 func testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_service_account" "default" {
-  account_id   = "my-custom-sa"
+  account_id   = "my-custom-%{random_suffix}"
   display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "default" {
-  name         = "test"
+  name         = "test-%{random_suffix}"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"
   tags = ["foo", "bar"]
@@ -110,7 +110,7 @@ resource "google_compute_instance" "default" {
 }
 resource "google_backup_dr_backup_vault" "my-backup-vault" {
     location ="us-central1"
-    backup_vault_id    = "bv-1"
+    backup_vault_id    = "bv-%{random_suffix}"
     description = "This is a second backup vault built by Terraform."
     backup_minimum_enforced_retention_duration = "100000s"
     labels = {
@@ -129,10 +129,13 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
 
 resource "google_backup_dr_backup_plan" "foo" { 
   location = "us-central1" 
-  backup_plan_id = "bp-test-tf"
+  backup_plan_id = "bp-test-%{random_suffix}"
   resource_type= "compute.googleapis.com/Instance"
   backup_vault = google_backup_dr_backup_vault.my-backup-vault.name
  depends_on= [ google_backup_dr_backup_vault.my-backup-vault ]
+   lifecycle {
+    ignore_changes = [backup_vault]
+  }
   backup_rules {
 	rule_id = "rule-1"
 	backup_retention_days = 5
@@ -150,16 +153,18 @@ resource "google_backup_dr_backup_plan" "foo" {
 
 resource "google_backup_dr_backup_plan_association" "bpa" { 
   location = "us-central1" 
-  backup_plan_association_id = "bpa-test-tf"
+  backup_plan_association_id = "bpa-test-%{random_suffix}"
   resource =   google_compute_instance.default.id
   backup_plan = google_backup_dr_backup_plan.foo.name
   depends_on= [ google_backup_dr_backup_plan.foo ]
-
+   lifecycle {
+    ignore_changes = [resource, backup_plan, rules_config_info]
+  }
 }
 
-data "google_backup_dr_backup_plan_association" "bpa-data" {
+data "google_backup_dr_backup_plan_association" "bpa-test" {
   location =  "us-central1"
-  backup_plan_association_id="bpa-test-tf1"
+  backup_plan_association_id="bpa-test-%{random_suffix}"
   depends_on= [ google_backup_dr_backup_plan_association.bpa ]
   }
 `, context)
