@@ -7,6 +7,11 @@ resource "google_network_management_vpc_flow_logs_config" "{{$.PrimaryResourceId
   vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
   location                = "global"
   interconnect_attachment = "projects/${data.google_project.project.number}/regions/us-east4/interconnectAttachments/${google_compute_interconnect_attachment.attachment.name}"
+  state                   = "ENABLED"
+  aggregation_interval    = "INTERVAL_5_SEC"
+  description             = "VPC Flow Logs over a VPN Gateway."
+  flow_sampling           = 0.5
+  metadata                = "INCLUDE_ALL_METADATA"
 }
 
 resource "google_compute_network" "network" {
