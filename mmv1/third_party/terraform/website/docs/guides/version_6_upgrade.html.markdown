@@ -212,7 +212,7 @@ An empty value now means UTILIZATION.
 
 [Argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) is no longer supported for this field,
 in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
-For configurations using argument syntax with  variables, it is recommended to use
+For configurations using argument syntax dynamically with variables, it is recommended to use
 [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks) instead.
 
 By default, omitting `guest_accelerator` will lead to Terraform defaulting to the API's value.
