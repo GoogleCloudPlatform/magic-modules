@@ -13,7 +13,7 @@
 
 ---
 name: 'FirewallPolicy'
-kind: 'compute#firewallPolicy'
+api_resource_type_kind: FirewallPolicy
 description: |
   Hierarchical firewall policy rules let you create and enforce a consistent firewall policy across your organization. Rules can explicitly allow or deny connections or delegate evaluation to lower level policies. Policies can be created within organizations or folders.
 
@@ -24,14 +24,10 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies'
 docs:
-id_format: 'locations/global/firewallPolicies/{{name}}'
 base_url: 'locations/global/firewallPolicies'
 self_link: 'locations/global/firewallPolicies/{{name}}'
 create_url: 'locations/global/firewallPolicies?parentId={{parent}}'
-update_url: 'locations/global/firewallPolicies/{{name}}'
 update_verb: 'PATCH'
-delete_url: 'locations/global/firewallPolicies/{{name}}'
-delete_verb: 'DELETE'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -59,15 +55,16 @@ properties:
     description: |
       Creation timestamp in RFC3339 text format.
     output: true
-  - name: 'kind'
-    type: String
-    description: |
-      Type of the resource. Always compute#firewallPolicy for firewall policies
-    output: true
   - name: 'name'
     type: String
     description: |
       Name of the resource. It is a numeric ID allocated by GCP which uniquely identifies the Firewall Policy.
+    output: true
+  - name: 'firewallPolicyId'
+    type: String
+    api_name: 'id'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
     output: true
   - name: 'shortName'
     type: String

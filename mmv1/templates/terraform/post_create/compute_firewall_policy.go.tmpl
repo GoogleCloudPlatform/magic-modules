@@ -9,7 +9,11 @@ if err != nil {
 	return fmt.Errorf("Error waiting to create FirewallPolicy: %s", err)
 }
 
-if err := d.Set("name", flattenComputeFirewallPolicyName(opRes["targetId"], d, config)); err != nil {
+firewallPolicyId, ok := opRes["targetId"]
+if !ok {
+	return fmt.Errorf("Create response didn't contain targetId. Create may not have succeeded.")
+}
+if err := d.Set("name", firewallPolicyId.(string)); err != nil {
 	return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
 }
 
