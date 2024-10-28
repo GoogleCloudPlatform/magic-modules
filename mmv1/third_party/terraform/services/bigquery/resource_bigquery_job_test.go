@@ -97,13 +97,13 @@ func TestAccBigQueryJob_validationErrors(t *testing.T) {
 			{
 				Config: testAccBigQueryJob_missingProjectId(context),
 				ExpectError: regexp.MustCompile(
-					`Invalid BigQuery job configuration\. You must either:.*Missing or empty projectId`,
+					`(?s)Invalid BigQuery job destination_table configuration\. You must either:.*Missing or empty projectId`,
 				),
 			},
 			{
 				Config: testAccBigQueryJob_missingDatasetId(context),
 				ExpectError: regexp.MustCompile(
-					`Invalid BigQuery job configuration\. You must either:.*Missing or empty datasetId`,
+					`(?s)Invalid BigQuery job destination_table configuration\. You must either:.*Missing or empty datasetId`,
 				),
 			},
 		},
@@ -112,18 +112,6 @@ func TestAccBigQueryJob_validationErrors(t *testing.T) {
 
 func testAccBigQueryJob_missingProjectId(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_bigquery_table" "foo" {
-  deletion_protection = false
-  dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "tf_test_job_query%{random_suffix}_table"
-}
-
-resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "tf_test_job_query%{random_suffix}_dataset"
-  friendly_name               = "test"
-  description                 = "This is a test description"
-  location   = "US"
-}
 resource "google_bigquery_job" "job" {
   job_id     = "tf-test-job-%{random_suffix}"
 
@@ -141,18 +129,6 @@ resource "google_bigquery_job" "job" {
 
 func testAccBigQueryJob_missingDatasetId(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_bigquery_table" "foo" {
-  deletion_protection = false
-  dataset_id = google_bigquery_dataset.bar.dataset_id
-  table_id   = "tf_test_job_query%{random_suffix}_table"
-}
-
-resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "tf_test_job_query%{random_suffix}_dataset"
-  friendly_name               = "test"
-  description                 = "This is a test description"
-  location   = "US"
-}
 resource "google_bigquery_job" "job" {
   job_id     = "tf-test-job-%{random_suffix}"
 
