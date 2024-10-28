@@ -34,6 +34,10 @@ async:
     base_url: '{{op_id}}'
     path: 'name'
     wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
   result:
     path: 'response'
     resource_inside_response: true
@@ -144,8 +148,8 @@ properties:
           description: |
             The content of this Model that may be exported.
           enum_values:
-            - :ARTIFACT
-            - :IMAGE
+            - ARTIFACT
+            - IMAGE
   - type: String
     name: 'trainerPipeline'
     output: true
@@ -570,7 +574,7 @@ properties:
                     name: 'dataFormat'
                     description: 'The format in which instances are given, if not specified, assume its JSONL format. Currently only JSONL format is supported.'
                     enum_values:
-                      - :JSONL
+                      - JSONL
                   - type: NestedObject
                     name: 'gcsSource'
                     description: 'The Cloud Storage location for the input instances.'
@@ -588,24 +592,6 @@ properties:
                   - presets
                   - nearestNeighborSearchConfig
                 properties:
-                  - type: String
-                    name: 'contentsDeltaUri'
-                    required: true
-                    description: |-
-                      Allows inserting, updating  or deleting the contents of the Matching Engine Index.
-                      The string must be a valid Cloud Storage directory path. If this
-                      field is set when calling IndexService.UpdateIndex, then no other
-                      Index field can be also updated as part of the same call.
-                      The expected structure and format of the files this URI points to is
-                      described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
-                    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
-                  - type: Boolean
-                    name: 'isCompleteOverwrite'
-                    description: |-
-                      If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
-                      then existing content of the Index will be replaced by the data from the contentsDeltaUri.
-                    default_value: false
-                    custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
                   - type: NestedObject
                     name: 'config'
                     immutable: true
@@ -698,15 +684,15 @@ properties:
                     name: 'modality'
                     description: The modality of the uploaded model, which automatically configures the distance measurement and feature normalization for the underlying example index and queries
                     enum_values:
-                      - :IMAGE
-                      - :TEXT
-                      - :TABULAR
+                      - IMAGE
+                      - TEXT
+                      - TABULAR
                   - type: Enum
                     name: 'query'
                     description: Preset option controlling parameters for speed-precision trade-off when querying for examples. If omitted, defaults to PRECISE.
                     enum_values:
-                      - :PRECISE
-                      - :FAST
+                      - PRECISE
+                      - FAST
       - type: NestedObject
         name: 'metadata'
         description: metadata describing the Model's input and output for explanation.
@@ -797,28 +783,28 @@ properties:
                       description: |
                         type of the image visualization. Only applicable to Integrated Gradients attribution.
                       enum_values:
-                        - :PIXELS
-                        - :OUTLINES
+                        - PIXELS
+                        - OUTLINES
                     - type: Enum
                       name: 'polarity'
                       description: |
                         Whether to only highlight pixels with positive contributions, negative or both. Defaults to POSITIVE.
                       default_value: :BOTH
                       enum_values:
-                        - :POSITIVE
-                        - :NEGATIVE
-                        - :BOTH
+                        - POSITIVE
+                        - NEGATIVE
+                        - BOTH
                     - type: Enum
                       name: 'colorMap'
                       description: |
                         The color scheme used for highlighting areas.
                       enum_values:
-                        - :PINK_GREEN
-                        - :VIRIDIS
-                        - :RED
-                        - :GREEN
-                        - :RED_GREEN
-                        - :PINK_WHITE_GREEN
+                        - PINK_GREEN
+                        - VIRIDIS
+                        - RED
+                        - GREEN
+                        - RED_GREEN
+                        - PINK_WHITE_GREEN
                     - type: Double
                       name: 'clipPercentUpperbound'
                       description: |
@@ -834,10 +820,10 @@ properties:
                       description: |
                         How the original image is displayed in the visualization.
                       enum_values:
-                        - :NONE
-                        - :ORIGINAL
-                        - :GRAYSCALE
-                        - :MASK_BLACK
+                        - NONE
+                        - ORIGINAL
+                        - GRAYSCALE
+                        - MASK_BLACK
                 - type: String
                   name: 'groupName'
                   required: true
