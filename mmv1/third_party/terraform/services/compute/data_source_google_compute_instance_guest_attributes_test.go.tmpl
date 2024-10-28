@@ -6,7 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"google.golang.org/api/compute/v1"
+  {{- if ne $.TargetVersionName "ga" }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- else }}
+	compute "google.golang.org/api/compute/v1"
+{{- end }}
 )
 
 func TestAccDataSourceComputeInstanceGuestAttributes_basic(t *testing.T) {
