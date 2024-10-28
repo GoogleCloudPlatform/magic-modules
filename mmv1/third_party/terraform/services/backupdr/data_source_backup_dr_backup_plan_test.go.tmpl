@@ -26,7 +26,7 @@ func TestAccDataSourceGoogleBackupDRBackupPlan_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlan_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan.foo", "google_backup_dr_backup_plan.foo"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan.test", "google_backup_dr_backup_plan.test"),
 				),
 			},
 		},
@@ -75,7 +75,7 @@ func testAccCheckBackupDRBackupPlanDestroyProducer(t *testing.T) func(s *terrafo
 
 func testAccDataSourceGoogleBackupDRBackupPlan_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_backup_dr_backup_vault" "my-backup-vault" {
+resource "google_backup_dr_backup_vault" "my-backup-vault-1" {
     location ="us-central1"
     backup_vault_id    = "bv-%{random_suffix}"
     description = "This is a second backup vault built by Terraform."
@@ -94,12 +94,12 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
 }
 
 
-resource "google_backup_dr_backup_plan" "foo" { 
+resource "google_backup_dr_backup_plan" "test" { 
   location = "us-central1" 
   backup_plan_id = "bp-test-%{random_suffix}"
   resource_type= "compute.googleapis.com/Instance"
-  backup_vault = google_backup_dr_backup_vault.my-backup-vault.name
-  depends_on=[ google_backup_dr_backup_vault.my-backup-vault ]
+  backup_vault = google_backup_dr_backup_vault.my-backup-vault-1.name
+  depends_on=[ google_backup_dr_backup_vault.my-backup-vault-1 ]
   backup_rules {
 	rule_id = "rule-1"
 	backup_retention_days = 5
@@ -115,10 +115,10 @@ resource "google_backup_dr_backup_plan" "foo" {
 	}
 }
 
-data "google_backup_dr_backup_plan" "foo" {
+data "google_backup_dr_backup_plan" "test" {
   location =  "us-central1"
   backup_plan_id="bp-test-%{random_suffix}"
-  depends_on= [ google_backup_dr_backup_plan.foo ]
+  depends_on= [ google_backup_dr_backup_plan.test ]
   }
 `, context)
 }
