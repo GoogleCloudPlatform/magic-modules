@@ -3,9 +3,6 @@ func resourcePrivateCaCACustomDiff(_ context.Context, diff *schema.ResourceDiff,
 		_, new := diff.GetChange("desired_state")
 
 		if tpgresource.IsNewResource(diff) {
-			if diff.Get("type").(string) == "SUBORDINATE" {
-				return fmt.Errorf("`desired_state` can not be specified when creating a SUBORDINATE CA")
-			}
 			if new.(string) != "STAGED" && new.(string) != "ENABLED" {
 				return fmt.Errorf("`desired_state` can only be set to `STAGED` or `ENABLED` when creating a new CA")
 			}
