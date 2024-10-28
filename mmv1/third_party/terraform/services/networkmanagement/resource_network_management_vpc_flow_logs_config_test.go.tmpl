@@ -9,6 +9,123 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
+func TestAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(t *testing.T) {
+  t.Parallel()
+
+  context := map[string]interface{}{
+          "random_suffix": acctest.RandString(t, 10),
+  }
+
+  acctest.VcrTest(t, resource.TestCase{
+          PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+          ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+          CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
+          Steps: []resource.TestStep{
+            {
+              Config: testAccNetworkManagementVpcFlowLogsConfig_fullInterconnect(context),
+            },
+            {
+              ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
+              ImportState:             true,
+              ImportStateVerify:       true,
+              ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
+            },
+            {
+              Config: testAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(context),
+            },
+            {
+              ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
+              ImportState:             true,
+              ImportStateVerify:       true,
+              ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
+            },
+          },
+  })
+}
+
+func testAccNetworkManagementVpcFlowLogsConfig_fullInterconnect(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_management_vpc_flow_logs_config" "interconnect-test" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "tf-test-full-interconnect-test-id%{random_suffix}"
+  location                = "global"
+  interconnect_attachment = "projects/${data.google_project.project.number}/regions/us-east4/interconnectAttachments/${google_compute_interconnect_attachment.attachment.name}"
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+  name     = "tf-test-full-interconnect-test-network%{random_suffix}"
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name    = "tf-test-full-interconnect-test-router%{random_suffix}"
+  network = google_compute_network.network.name
+  bgp {
+    asn = 16550
+  }
+}
+
+resource "google_compute_interconnect_attachment" "attachment" {
+  provider                 = google-beta
+  name                     = "tf-test-full-interconnect-test-id%{random_suffix}"
+  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
+  type                     = "PARTNER"
+  router                   = google_compute_router.router.id
+  mtu                      = 1500
+}
+
+`, context)
+}
+
+func testAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_network_management_vpc_flow_logs_config" "interconnect-test" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "tf-test-full-interconnect-test-id%{random_suffix}"
+  location                = "global"
+  interconnect_attachment = "projects/${data.google_project.project.number}/regions/us-east4/interconnectAttachments/${google_compute_interconnect_attachment.attachment.name}"
+  state                   = "DISABLED"
+  aggregation_interval    = "INTERVAL_30_SEC"
+  description             = "This is an updated description"
+  flow_sampling           = 0.5
+  metadata                = "EXCLUDE_ALL_METADATA"
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+  name     = "tf-test-full-interconnect-test-network%{random_suffix}"
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name    = "tf-test-full-interconnect-test-router%{random_suffix}"
+  network = google_compute_network.network.name
+  bgp {
+    asn = 16550
+  }
+}
+
+resource "google_compute_interconnect_attachment" "attachment" {
+  provider                 = google-beta
+  name                     = "tf-test-full-interconnect-test-id%{random_suffix}"
+  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
+  type                     = "PARTNER"
+  router                   = google_compute_router.router.id
+  mtu                      = 1500
+}
+
+`, context)
+}
+
 func TestAccNetworkManagementVpcFlowLogsConfig_updateVpn(t *testing.T) {
 	t.Parallel()
 

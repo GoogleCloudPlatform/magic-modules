@@ -43,6 +43,22 @@ async:
     message: 'message'
 custom_code:
 examples:
+  - name: 'network_management_vpc_flow_logs_config_interconnect_full'
+    primary_resource_id: 'interconnect-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'full-interconnect-test-network'
+      router_name: 'full-interconnect-test-router'
+      vpc_flow_logs_config_id: 'full-interconnect-test-id'
+      interconnect_attachment_name: 'full-interconnect-test-id'
+  - name: 'network_management_vpc_flow_logs_config_interconnect_basic'
+    primary_resource_id: 'interconnect-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'basic-interconnect-test-network'
+      router_name: 'basic-interconnect-test-router'
+      vpc_flow_logs_config_id: 'basic-interconnect-test-id'
+      interconnect_attachment_name: 'basic-interconnect-test-id'
   - name: 'network_management_vpc_flow_logs_config_vpn_basic'
     primary_resource_id: 'vpn-test'
     min_version: 'beta'
