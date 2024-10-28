@@ -24,16 +24,16 @@ func TestColor(t *testing.T) {
 			want:  "🟡 Test text",
 		},
 		{
-			name: "green",
+			name:  "green",
 			color: "green",
-			text: "Test text",
-			want: "🟢 Test text",
+			text:  "Test text",
+			want:  "🟢 Test text",
 		},
 		{
-			name: "unsupported color",
+			name:  "unsupported color",
 			color: "mauve",
-			text: "Test text",
-			want: "Test text",
+			text:  "Test text",
+			want:  "Test text",
 		},
 		{
 			name: "empty color",

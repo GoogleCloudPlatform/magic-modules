@@ -46,6 +46,9 @@ if d.HasChange("autoscaling_config") {
 		if d.HasChange("autoscaling_config.0.autoscaling_targets.0.storage_utilization_percent") {
 			updateMask = append(updateMask, "autoscalingConfig.autoscalingTargets.storageUtilizationPercent")
 		}
+		if d.HasChange("autoscaling_config.0.asymmetric_autoscaling_options") {
+			updateMask = append(updateMask, "autoscalingConfig.asymmetricAutoscalingOptions")
+		}
 	}
 }
 newObj["fieldMask"] = strings.Join(updateMask, ",")

@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunEgressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single EgressPolicy in the spec (dry-run) configuration for a service perimeter.
   EgressPolicies match requests based on egressFrom and egressTo stanzas.
@@ -71,6 +72,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   pre_create: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
   pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
@@ -143,6 +145,8 @@ properties:
           if it contains a resource in this list. If * is specified for resources,
           then this `EgressTo` rule will authorize access to all resources outside
           the perimeter.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_egress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunEgressPolicyEgressToResourcesDiffSupressFunc
         item_type:
           type: String
       - name: 'externalResources'

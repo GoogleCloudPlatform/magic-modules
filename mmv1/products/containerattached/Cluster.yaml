@@ -13,6 +13,7 @@
 
 ---
 name: 'Cluster'
+api_resource_type_kind: AttachedCluster
 description: |
   An Anthos cluster running on customer owned infrastructure.
 references:
@@ -359,6 +360,7 @@ properties:
     description: |
       Enable/Disable Security Posture API features for the cluster.
     default_from_api: true
+    deprecation_message: '`security_posture_config` is deprecated and will be removed in a future major release.'
     properties:
       - name: 'vulnerabilityMode'
         type: Enum

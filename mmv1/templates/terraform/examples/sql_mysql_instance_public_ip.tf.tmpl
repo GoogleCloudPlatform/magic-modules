@@ -18,5 +18,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
     }
     tier = "db-custom-4-26624"
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }

@@ -13,6 +13,7 @@
 
 ---
 name: 'FeatureOnlineStoreFeatureview'
+api_resource_type_kind: FeatureView
 description: |-
   FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
 references:

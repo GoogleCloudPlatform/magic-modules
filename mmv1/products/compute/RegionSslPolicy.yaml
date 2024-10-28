@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionSslPolicy'
+api_resource_type_kind: SslPolicy
 kind: 'compute#sslPolicy'
 description: |
   Represents a Regional SSL policy. SSL policies give you the ability to control the
