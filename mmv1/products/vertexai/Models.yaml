@@ -52,6 +52,13 @@ examples:
       model_id: 'test-model'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+  - name: 'vertex_ai_model_upload_explanation_spec_integrated_gradients'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+      integrated_gradients_model_name: 'test-model'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
   - type: String
     name: region
