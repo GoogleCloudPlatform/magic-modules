@@ -473,7 +473,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		"cp",
 		"-r",
 		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
-		fmt.Sprintf("%sbuild-log/%s_test%s.log/", bucketPath, opts.Mode.Lower(), suffix),
+		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
