@@ -42,37 +42,11 @@ var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 
 var forceProvider = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
 
-// Example usage: --yaml
-var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
-
-// Example usage: --template
-var templateMode = flag.Bool("template", false, "copy templates over from .erb to go .tmpl")
-
-// Example usage: --handwritten
-var handwrittenMode = flag.Bool("handwritten", false, "copy handwritten files over from .erb to go .tmpl")
-
-var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml to go yaml in a temp file")
-
-var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
-var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
-
 var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
 
 func main() {
 
 	flag.Parse()
-
-	if *yamlMode || *yamlTempMode {
-		CopyAllDescriptions(*yamlTempMode)
-	}
-
-	if *templateMode || *templateTempFiles != "" {
-		convertTemplates(*templateTempFiles)
-	}
-
-	if *handwrittenMode || *handwrittenTempFiles != "" {
-		convertAllHandwrittenFiles(*handwrittenTempFiles)
-	}
 
 	if outputPath == nil || *outputPath == "" {
 		log.Printf("No output path specified, exiting")
