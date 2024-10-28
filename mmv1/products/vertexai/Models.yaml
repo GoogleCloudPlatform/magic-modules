@@ -52,6 +52,13 @@ examples:
       model_id: 'test-model'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+  - name: 'vertex_ai_model_upload_sampled_shapley_attribution'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+      sampled_shapley_model_name: 'sampled-shapley-test-model'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
   - type: String
     name: region
