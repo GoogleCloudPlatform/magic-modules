@@ -52,8 +52,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
-      organization: 'ORG_ID'
-      location: 'global'
       display_name: 'test pab policy'
       pab_id: 'test-pab-policy'
 parameters:
@@ -94,16 +92,15 @@ properties:
   - name: 'etag'
     type: String
     description: |
-      Optional. The etag for the principal access boundary. If this is provided on update, it must match the server's etag.
-    default_from_api: true
+      The etag for the principal access boundary. If this is provided on update, it must match the server's etag.
   - name: 'displayName'
     type: String
     description: |
-      Optional. The description of the principal access boundary policy. Must be less than or equal to 63 characters.
+      The description of the principal access boundary policy. Must be less than or equal to 63 characters.
   - name: 'annotations'
     type: KeyValueAnnotations
     description: |
-      Optional. User defined annotations. See https://google.aip.dev/148#annotations
+      User defined annotations. See https://google.aip.dev/148#annotations
       for more details such as format and size limitations
   - name: 'createTime'
     type: String
@@ -124,7 +121,7 @@ properties:
       - name: 'rules'
         type: Array
         description: |
-          Required. A list of principal access boundary policy rules. The number of rules in a policy is limited to 500.
+          A list of principal access boundary policy rules. The number of rules in a policy is limited to 500.
         required: true
         item_type:
           type: NestedObject
@@ -132,11 +129,11 @@ properties:
             - name: 'description'
               type: String
               description: |
-                Optional. The description of the principal access boundary policy rule. Must be less than or equal to 256 characters.
+                The description of the principal access boundary policy rule. Must be less than or equal to 256 characters.
             - name: 'resources'
               type: Array
               description: |
-                Required. A list of Cloud Resource Manager resources. The resource
+                A list of Cloud Resource Manager resources. The resource
                 and all the descendants are included. The number of resources in a policy
                 is limited to 500 across all rules.
                 The following resource types are supported:
@@ -150,13 +147,13 @@ properties:
             - name: 'effect'
               type: String
               description: |
-                Required. The access relationship of principals to the resources in this rule.
-                Possible values:  EFFECT_UNSPECIFIED ALLOW
+                The access relationship of principals to the resources in this rule.
+                Possible values: ALLOW
               required: true
       - name: 'enforcementVersion'
         type: String
         description: |
-          Optional. The version number that indicates which Google Cloud services
+          The version number that indicates which Google Cloud services
           are included in the enforcement (e.g. \"latest\", \"1\", ...). If empty, the
           PAB policy version will be set to the current latest version, and this version
           won't get updated when new versions are released.
