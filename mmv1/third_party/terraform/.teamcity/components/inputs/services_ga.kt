@@ -141,6 +141,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
     ),
+    "cloudaicompanion" to mapOf(
+        "name" to "cloudaicompanion",
+        "displayName" to "Cloudaicompanion",
+        "path" to "./google/services/cloudaicompanion"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",

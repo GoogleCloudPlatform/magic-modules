@@ -141,6 +141,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google-beta/services/certificatemanager"
     ),
+    "cloudaicompanion" to mapOf(
+        "name" to "cloudaicompanion",
+        "displayName" to "Cloudaicompanion",
+        "path" to "./google-beta/services/cloudaicompanion"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",

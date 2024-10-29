@@ -1,4 +1,4 @@
-resource "google_geminifor_google_cloud_code_repository_index" "example_cri" {
+resource "google_gemini_code_repository_index" "example_cri" {
   location = "us-central1"
   code_repository_index_id = "{{index $.Vars "cri_id"}}"
 }

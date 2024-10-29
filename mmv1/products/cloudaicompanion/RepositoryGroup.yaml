@@ -21,7 +21,7 @@ id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{c
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups/{{repository_group_id}}
 examples:
-  - name: "geminifor_google_cloud_repository_group_basic"
+  - name: "gemini_repository_group_basic"
     primary_resource_id: "example"
     vars:
       repository_resource: "projects/example-location/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
@@ -31,11 +31,11 @@ autogen_async: true
 async:
   operation:
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
     path: name
-    base_url: '{{op_id}}'
+    base_url: "{{op_id}}"
     wait_ms: 1000
   actions:
     - create
@@ -76,18 +76,18 @@ properties:
     item_type:
       type: NestedObject
       properties:
-      - name: resource
-        type: String
-        description: |-
-          Required. The DeveloperConnect repository full resource name, relative resource name
-          or resource URL to be indexed.
-        required: true
-      - name: branchPattern
-        type: String
-        description: |-
-          Required. The Git branch pattern used for indexing in RE2 syntax.
-          See https://github.com/google/re2/wiki/syntax for syntax.
-        required: true
+        - name: resource
+          type: String
+          description: |-
+            Required. The DeveloperConnect repository full resource name, relative resource name
+            or resource URL to be indexed.
+          required: true
+        - name: branchPattern
+          type: String
+          description: |-
+            Required. The Git branch pattern used for indexing in RE2 syntax.
+            See https://github.com/google/re2/wiki/syntax for syntax.
+          required: true
   - name: name
     type: String
     description: Immutable. Identifier. name of resource

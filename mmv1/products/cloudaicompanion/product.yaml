@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: GeminiforGoogleCloud
+name: Gemini
 display_name: Gemini for Google Cloud
 scopes:
   - https://www.googleapis.com/auth/cloud-platform

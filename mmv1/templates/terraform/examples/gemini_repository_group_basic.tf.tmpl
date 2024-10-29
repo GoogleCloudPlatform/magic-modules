@@ -1,6 +1,6 @@
-resource "google_geminifor_google_cloud_repository_group" "example_repository_group" {
+resource "google_gemini_repository_group" "example_repository_group" {
   location = "us-central1"
-  coderepositoryindex = google_geminifor_google_cloud_code_repository_index.example_cri.code_repository_index_id
+  coderepositoryindex = google_gemini_code_repository_index.example_cri.code_repository_index_id
   repository_group_id = "{{index $.Vars "repository_group_id"}}"
   repositories {
       resource = "{{index $.Vars "repository_resource"}}" 
@@ -8,7 +8,7 @@ resource "google_geminifor_google_cloud_repository_group" "example_repository_gr
   }
 }
 
-resource "google_geminifor_google_cloud_code_repository_index" "example_cri" {
+resource "google_gemini_code_repository_index" "example_cri" {
   code_repository_index_id = "{{index $.Vars "cri_id"}}"
   location = "us-central1"
 }
