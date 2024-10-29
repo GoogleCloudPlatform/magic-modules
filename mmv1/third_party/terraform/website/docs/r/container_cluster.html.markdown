@@ -171,6 +171,10 @@ for more information.
     Structure is [documented below](#nested_enable_k8s_beta_apis).
 
 * `enable_tpu` - (Optional) Whether to enable Cloud TPU resources in this cluster.
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/network-isolation#dns-based_endpoint).
+
+* `enable_dns_access` - (Optional) Enable access to the cluster's control plane over DNS-based  
+    endpoint. DNS-based control plane access is recommended.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
 
 * `enable_legacy_abac` - (Optional) Whether the ABAC authorizer is enabled for this cluster.
