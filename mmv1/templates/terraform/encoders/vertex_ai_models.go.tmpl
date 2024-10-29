@@ -1,6 +1,18 @@
+
+// Copy encoder
 if obj["sourceModel"] != nil {
     delete(obj, "labels")
     delete(obj, "metadata")
+    return obj, nil
 }
 
-return obj, nil
+// Upload encoder
+obj["displayName"] = obj["modelName"]
+delete(obj, "modelName")
+
+newObj := make(map[string]interface{})
+newObj["model"] = obj
+newObj["modelId"] = obj["modelId"]
+delete(obj, "modelId")
+
+return newObj, nil
