@@ -59,6 +59,10 @@ examples:
     primary_resource_id: 'template'
     vars:
       template_name: 'soletenant-with-accelerators'
+  - name: 'node_template_disks'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-disks'
 parameters:
   - name: 'region'
     type: ResourceRef
