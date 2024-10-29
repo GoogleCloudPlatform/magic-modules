@@ -354,8 +354,9 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	} else { //  len(replayingResult.FailedTests) == 0
 		withoutReplayFailedTestsData := withoutReplayFailedTests{
 			ReplayingErr: replayingErr,
-			Head:         newBranch,
 			LogBucket:    "ci-vcr-logs",
+			Version:      provider.Beta.String(),
+			Head:         newBranch,
 			BuildID:      buildID,
 		}
 		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
