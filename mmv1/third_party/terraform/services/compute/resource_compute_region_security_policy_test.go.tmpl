@@ -189,6 +189,11 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate
 			},
 			{
 				Config: testAccComputeRegionSecurityPolicy_withRulesUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.regionSecPolicy", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
