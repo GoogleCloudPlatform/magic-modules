@@ -51,6 +51,7 @@ async:
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/workflow.tmpl'
   encoder: 'templates/terraform/encoders/workflow.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/workflows_workflow.go.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
