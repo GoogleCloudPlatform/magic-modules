@@ -624,7 +624,7 @@ func TestAccStorageObject_detect_nofile(t *testing.T) {
 					}
 				},
 				Config:      testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
-				ExpectError: regexp.MustCompile("no such file or directory")
+				ExpectError: regexp.MustCompile("no such file or directory"),
 			},
 		},
 	})
