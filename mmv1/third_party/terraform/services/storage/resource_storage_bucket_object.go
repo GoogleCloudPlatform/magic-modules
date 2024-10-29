@@ -37,7 +37,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
-		CustomizeDiff: customdiff.ComputedIf("md5hash", detectmd5HashUpdate),
+		CustomizeDiff: customdiff.All(detectmd5HashCustomizeDiff),
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -127,37 +127,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
-				Type: schema.TypeString,
-				// This field is not Computed because it needs to trigger a diff.
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				// 1. Compute the md5 hash of the local file
-				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
-				// 3. Don't suppress the diff iff they don't match
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					localMd5Hash := ""
-					if source, ok := d.GetOkExists("source"); ok {
-						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
-					}
-
-					if content, ok := d.GetOkExists("content"); ok {
-						localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
-					}
-
-					// If `source` or `content` is dynamically set, both field will be empty.
-					// We should not suppress the diff to avoid the following error:
-					// 'Mismatch reason: extra attributes: detect_md5hash'
-					if localMd5Hash == "" {
-						return false
-					}
-
-					// `old` is the md5 hash we retrieved from the server in the ReadFunc
-					if old != localMd5Hash {
-						return false
-					}
-
-					return true
-				},
 			},
 
 			"storage_class": {
@@ -604,11 +576,24 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 	return retentions
 }
 
-func detectmd5HashUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
-	old, new := diff.GetChange("detect_md5hash")
-	log.Printf("[DEBUG] source detect_md5hash: %s -> %s", old, new)
-	if old != new {
-		return true
+func detectmd5HashCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	oldSourceHash := ""
+	if old, ok := d.GetOk("detect_md5hash"); ok {
+		oldSourceHash = old.(string)
 	}
-	return diff.HasChange("source") || diff.HasChange("content") || diff.HasChange("md5hash")
+
+	currentSourceHash := ""
+	if source, ok := d.GetOkExists("source"); ok {
+		currentSourceHash = tpgresource.GetFileMd5Hash(source.(string))
+	}
+	if content, ok := d.GetOkExists("content"); ok {
+		currentSourceHash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+	}
+	if oldSourceHash != currentSourceHash {
+		err := d.SetNew("detect_md5hash", currentSourceHash)
+		if err != nil {
+			return fmt.Errorf("Error setting detect_md5hash: %s", err)
+		}
+	}
+	return nil
 }
