@@ -1,0 +1,96 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CodeRepositoryIndex
+description: The resource for managing Code Repository Indexes for Gemini Code Assist. 
+base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
+self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
+id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+examples:
+  - name: "geminifor_google_cloud_code_repository_index_basic"
+    primary_resource_id: "example"
+    vars:
+      cri_id: "example-coderepositoryindex-id"
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    path: name
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  actions:
+  - create
+  - delete
+  - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+    path: response
+  error:
+    path: error
+    message: message
+  include_project: false
+parameters:
+- name: location
+  type: String
+  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
+- name: codeRepositoryIndexId
+  type: String
+  description: Required. Id of the requesting object
+  immutable: true
+  url_param_only: true
+  required: true
+properties:
+- name: updateTime
+  type: String
+  description: Output only. Update time stamp
+  output: true
+- name: state
+  type: String
+  description: |-
+    Output only. Code Repository Index instance State
+    Possible values:
+    STATE_UNSPECIFIED
+    CREATING
+    ACTIVE
+    DELETING
+    SUSPENDED
+  output: true
+- name: labels
+  type: KeyValueLabels
+  description: Optional. Labels as key value pairs
+- name: kmsKey
+  type: String
+  description: |-
+    Optional. Immutable. Customer-managed encryption key name, in the format
+    projects/*/locations/*/keyRings/*/cryptoKeys/*.
+  immutable: true
+- name: name
+  type: String
+  description: Immutable. Identifier. name of resource
+  output: true
+  immutable: true
+- name: createTime
+  type: String
+  description: Output only. Create time stamp
+  output: true
