@@ -259,6 +259,7 @@ properties:
                   description: |
                     CIDR IP address range. Maximum number of srcIpRanges allowed is 10.
                   min_version: 'beta'
+                  max_size: 10
                   item_type:
                     type: String
         - name: 'preconfiguredWafConfig'
