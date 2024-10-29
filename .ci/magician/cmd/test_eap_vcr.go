@@ -68,6 +68,8 @@ The following environment variables are required:
 			val, ok := os.LookupEnv(ev)
 			if ok {
 				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
 			}
 		}
 
