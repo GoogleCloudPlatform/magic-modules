@@ -35,7 +35,6 @@ description: |
  the next apply. You can trigger a manual
  [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones)
  via Terraform by swapping the value of the `zone` and `replica_zone` parameters in your HCL code.
- Note : Regional FLEX storage pool are supported in beta provider currently.
 
 references:
   guides:
@@ -161,13 +160,11 @@ properties:
       Specifies the active zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
       [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
       If you want to create a zonal Flex pool, specify a zone name for `location` and omit `zone`.
-    min_version: 'beta'
   - name: 'replicaZone'
     type: String
     description: |
       Specifies the replica zone for regional Flex pools. `zone` and `replica_zone` values can be swapped to initiate a
       [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones).
-    min_version: 'beta'
   - name: 'allowAutoTiering'
     type: Boolean
     description: |

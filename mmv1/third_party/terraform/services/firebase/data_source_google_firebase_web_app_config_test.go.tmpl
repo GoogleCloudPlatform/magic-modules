@@ -26,9 +26,9 @@ func TestAccDataSourceGoogleFirebaseWebAppConfig(t *testing.T) {
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				Config:                   testAccDataSourceGoogleFirebaseWebAppConfig(context),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_firebase_web_app_config.my_app_config", "project", context["project_id"].(string)),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.my_app_config", "api_key"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.my_app_config", "auth_domain"),
-					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.my_app_config", "database_url"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.my_app_config", "storage_bucket"),
 				),
 			},
