@@ -80,7 +80,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Config: testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, testFile.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 			},
 			{
@@ -90,7 +90,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 						t.Errorf("Failed to rename %s to %s", updatedName, testFile.Name())
 					}
 				},
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Config: testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, testFile.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
@@ -708,6 +708,22 @@ resource "google_storage_bucket_object" "object" {
   name   = "%s"
   bucket = google_storage_bucket.bucket.name
   source = "%s"
+}
+`, bucketName, objectName, sourceFilename)
+}
+
+func testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, sourceFilename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "%s"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+  detect_md5hash = ""
 }
 `, bucketName, objectName, sourceFilename)
 }
