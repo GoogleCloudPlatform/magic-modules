@@ -127,7 +127,7 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
   resource_type = "compute.googleapis.com/Instance"
   backup_vault  = google_backup_dr_backup_vault.my_backup_vault.id
   lifecycle {
-    ignore_changes = [backup_vault]
+    ignore_changes = [backup_vault, description, backup_rules.standard_schedule.hourly_frequency]
   }
   dynamic "backup_rules" {
     for_each = var.backup_rules

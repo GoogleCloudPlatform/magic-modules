@@ -25,7 +25,7 @@ resource "google_backup_dr_backup_plan" "foo" {
   backup_vault = google_backup_dr_backup_vault.my-backup-vault.id
   depends_on= [ google_backup_dr_backup_vault.my-backup-vault ]
   lifecycle {
-    ignore_changes = [backup_vault]
+    ignore_changes = [backup_vault, description, backup_rules.standard_schedule.hourly_frequency]
   }
   backup_rules {
 	rule_id = "rule-1"
