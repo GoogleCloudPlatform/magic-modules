@@ -130,22 +130,13 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Type: schema.TypeString,
 				// This field is not Computed because it needs to trigger a diff.
 				Optional: true,
-				// Makes the diff message nicer:
-				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "different hash" (forces new resource)
-				// Instead of the more confusing:
-				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "" (forces new resource)
-				Default: "different hash",
+				Computed: true,
 				// 1. Compute the md5 hash of the local file
 				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
 					if source, ok := d.GetOkExists("source"); ok {
-						var err error
-						_, err = os.Open(source.(string))
-						if err != nil {
-							return true
-						}
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
 
@@ -614,22 +605,10 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func detectmd5HashUpdate(_ context.Context, diff *schema.ResourceDiff, v interface{}) bool {
-	tmp, _ := diff.GetChange("detect_md5hash")
-	oldSourceHash := tmp.(string)
-	currentSourceHash := ""
-	if source, ok := diff.GetOkExists("source"); ok {
-		currentSourceHash = tpgresource.GetFileMd5Hash(source.(string))
-	}
-	if content, ok := diff.GetOkExists("content"); ok {
-		currentSourceHash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
-	}
-	if currentSourceHash == "" {
+	old, new := diff.GetChange("detect_md5hash")
+	log.Printf("[DEBUG] source detect_md5hash: %s -> %s", old, new)
+	if old != new {
 		return true
 	}
-	if oldSourceHash != currentSourceHash {
-		return true
-	}
-	log.Printf("[DEBUG] source detect_md5hash: %s -> %s", oldSourceHash, currentSourceHash)
-
 	return diff.HasChange("source") || diff.HasChange("content") || diff.HasChange("md5hash")
 }
