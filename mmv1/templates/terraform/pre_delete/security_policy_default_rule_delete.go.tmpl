@@ -1,0 +1,7 @@
+// The default rule of a Security Policy cannot be removed
+rulePriority, ok := d.GetOk("priority")
+
+if ok && rulePriority.(int) == 2147483647 {
+	log.Printf("[WARN] {{$.Name}} represents a default rule, skipping Delete request")
+	return nil
+}

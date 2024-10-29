@@ -166,7 +166,7 @@ func TestAccBigQueryDataset_withProvider5(t *testing.T) {
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccBigQueryDataset_withoutLabels(datasetID),
+				Config:            testAccBigQueryDataset_withoutLabelsV4(datasetID),
 				ExternalProviders: oldVersion,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "labels.%"),
@@ -509,6 +509,19 @@ resource "google_bigquery_dataset" "test" {
 `, datasetID)
 }
 
+func testAccBigQueryDataset_withoutLabelsV4(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id                      = "%s"
+  friendly_name                   = "foo"
+  description                     = "This is a foo description"
+  location                        = "EU"
+  default_partition_expiration_ms = 3600000
+  default_table_expiration_ms     = 3600000
+}
+`, datasetID)
+}
+
 func testAccBigQueryDataset(datasetID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -782,22 +795,22 @@ data "google_project" "project" {
 }
 
 resource "google_tags_tag_key" "tag_key1" {
-  parent = "projects/${data.google_project.project.number}"
+  parent     = data.google_project.project.id
   short_name = "tf_test_tag_key1%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  parent = google_tags_tag_key.tag_key1.id
   short_name = "tf_test_tag_value1%{random_suffix}"
 }
 
 resource "google_tags_tag_key" "tag_key2" {
-  parent = "projects/${data.google_project.project.number}"
+  parent     = data.google_project.project.id
   short_name = "tf_test_tag_key2%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value2" {
-  parent = "tagKeys/${google_tags_tag_key.tag_key2.name}"
+  parent     = google_tags_tag_key.tag_key2.id
   short_name = "tf_test_tag_value2%{random_suffix}"
 }
 
@@ -808,8 +821,8 @@ resource "google_bigquery_dataset" "dataset" {
   location                    = "EU"
 
   resource_tags = {
-    "${data.google_project.project.project_id}/${google_tags_tag_key.tag_key1.short_name}" = "${google_tags_tag_value.tag_value1.short_name}"
-    "${data.google_project.project.project_id}/${google_tags_tag_key.tag_key2.short_name}" = "${google_tags_tag_value.tag_value2.short_name}"
+    (google_tags_tag_key.tag_key1.namespaced_name) = google_tags_tag_value.tag_value1.short_name
+    (google_tags_tag_key.tag_key2.namespaced_name) = google_tags_tag_value.tag_value2.short_name
   }
 }
 `, context)
@@ -821,22 +834,22 @@ data "google_project" "project" {
 }
 
 resource "google_tags_tag_key" "tag_key1" {
-  parent = "projects/${data.google_project.project.number}"
+  parent     = data.google_project.project.id
   short_name = "tf_test_tag_key1%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  parent     = google_tags_tag_key.tag_key1.id
   short_name = "tf_test_tag_value1%{random_suffix}"
 }
 
 resource "google_tags_tag_key" "tag_key2" {
-  parent = "projects/${data.google_project.project.number}"
+  parent     = data.google_project.project.id
   short_name = "tf_test_tag_key2%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value2" {
-  parent = "tagKeys/${google_tags_tag_key.tag_key2.name}"
+  parent     = google_tags_tag_key.tag_key2.id
   short_name = "tf_test_tag_value2%{random_suffix}"
 }
 

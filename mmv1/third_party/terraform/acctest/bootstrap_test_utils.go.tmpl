@@ -738,10 +738,11 @@ func BootstrapConfig(t *testing.T) *transport_tpg.Config {
 	}
 
 	config := &transport_tpg.Config{
-		Credentials: envvar.GetTestCredsFromEnv(),
-		Project:     envvar.GetTestProjectFromEnv(),
-		Region:      envvar.GetTestRegionFromEnv(),
-		Zone:        envvar.GetTestZoneFromEnv(),
+		Credentials:               envvar.GetTestCredsFromEnv(),
+		ImpersonateServiceAccount: envvar.GetTestImpersonateServiceAccountFromEnv(),
+		Project:                   envvar.GetTestProjectFromEnv(),
+		Region:                    envvar.GetTestRegionFromEnv(),
+		Zone:                      envvar.GetTestZoneFromEnv(),
 	}
 
 	transport_tpg.ConfigureBasePaths(config)
