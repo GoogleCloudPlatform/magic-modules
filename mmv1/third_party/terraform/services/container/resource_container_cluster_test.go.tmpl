@@ -1318,6 +1318,33 @@ func TestAccContainerCluster_withTpu(t *testing.T) {
 }
 {{- end }}
 
+func TestAccContainerCluster_withDnsAccess(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDnsAccess(containerNetName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_dns_access", "enable_dns_access", "true"),
+				),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_dns_access",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 	t.Parallel()
 
@@ -6787,6 +6814,62 @@ resource "google_container_cluster" "with_tpu" {
 }
 
 {{ end }}
+
+func testAccContainerCluster_withDnsAccess(containerNetName string, clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "container_network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "container_subnetwork" {
+  name    = google_compute_network.container_network.name
+  network = google_compute_network.container_network.name
+  region  = "us-central1"
+
+  ip_cidr_range            = "10.0.35.0/24"
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pod"
+    ip_cidr_range = "10.1.0.0/19"
+  }
+
+  secondary_ip_range {
+    range_name    = "svc"
+    ip_cidr_range = "10.2.0.0/22"
+  }
+}
+
+resource "google_container_cluster" "with_dns_access" {
+  name               = "%s"
+  location           = "us-central1-b"
+  initial_node_count = 1
+
+  enable_dns_access = true
+
+  network         = google_compute_network.container_network.name
+  subnetwork      = google_compute_subnetwork.container_subnetwork.name
+  networking_mode = "VPC_NATIVE"
+
+  private_cluster_config {
+    enable_private_endpoint = true
+    enable_private_nodes    = true
+    master_ipv4_cidr_block  = "10.42.0.0/28"
+  }
+
+  master_authorized_networks_config {
+  }
+
+  ip_allocation_policy {
+    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
+    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
+  }
+  deletion_protection = false
+}
+`, containerNetName, clusterName)
+}
+
 func testAccContainerCluster_withIntraNodeVisibility(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
