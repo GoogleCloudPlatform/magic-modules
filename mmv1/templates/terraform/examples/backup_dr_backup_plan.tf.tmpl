@@ -103,7 +103,6 @@ variable "backup_rules" {
 
 resource "google_backup_dr_backup_vault" "my_backup_vault" {
   provider = google-beta
-  project  = "<%= ctx[:vars]['project'] %>"
   location = "us-central1"
   backup_vault_id = "bv-test1"
   description     = "This is a backup vault built by Terraform."
@@ -124,7 +123,6 @@ resource "google_backup_dr_backup_vault" "my_backup_vault" {
 resource "google_backup_dr_backup_plan" "backup_plan" {
   provider      = google-beta
   location      = "us-central1"
-  project = "<%= ctx[:vars]['project'] %>"
   backup_plan_id = "bp-tf20"
   resource_type = "compute.googleapis.com/Instance"
   backup_vault  = google_backup_dr_backup_vault.my_backup_vault.id
