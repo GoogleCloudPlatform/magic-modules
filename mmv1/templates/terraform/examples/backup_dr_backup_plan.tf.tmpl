@@ -120,14 +120,14 @@ resource "google_backup_dr_backup_vault" "my_backup_vault" {
   allow_missing  = true
 }
 
-resource "google_backup_dr_backup_plan" "backup_plan" {
+resource "google_backup_dr_backup_plan" "{{$.PrimaryResourceId}}" {
   provider      = google-beta
   location      = "us-central1"
-  backup_plan_id = "bp-tf20"
+  backup_plan_id = "{{index $.Vars "backup_plan_id"}}"
   resource_type = "compute.googleapis.com/Instance"
   backup_vault  = google_backup_dr_backup_vault.my_backup_vault.id
   lifecycle {
-    ignore_changes = [backup_vault, description, backup_rules.standard_schedule.hourly_frequency]
+    ignore_changes = [backup_vault, description]
   }
   dynamic "backup_rules" {
     for_each = var.backup_rules

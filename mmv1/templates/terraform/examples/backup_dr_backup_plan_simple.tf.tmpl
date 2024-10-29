@@ -17,15 +17,15 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
     allow_missing = "true" 
 }
 
-resource "google_backup_dr_backup_plan" "foo" { 
+resource "google_backup_dr_backup_plan" "{{$.PrimaryResourceId}}" { 
   provider = google-beta
   location = "us-central1" 
-  backup_plan_id = "bp-test"
+  backup_plan_id = "{{index $.Vars "backup_plan_id"}}"
   resource_type= "compute.googleapis.com/Instance"
   backup_vault = google_backup_dr_backup_vault.my-backup-vault.id
   depends_on= [ google_backup_dr_backup_vault.my-backup-vault ]
   lifecycle {
-    ignore_changes = [backup_vault, description, backup_rules.standard_schedule.hourly_frequency]
+    ignore_changes = [backup_vault, description]
   }
   backup_rules {
 	rule_id = "rule-1"
