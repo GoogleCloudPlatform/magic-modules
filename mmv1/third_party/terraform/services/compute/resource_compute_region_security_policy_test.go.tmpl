@@ -24,7 +24,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 				Config: testAccComputeRegionSecurityPolicy_basic(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,7 +32,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 				Config: testAccComputeRegionSecurityPolicy_update(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -42,7 +42,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 
 func testAccComputeRegionSecurityPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -56,7 +56,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -84,7 +84,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -92,7 +92,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -100,7 +100,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withUserDefinedFieldsUpdate(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -108,7 +108,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -118,7 +118,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 
 func testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -128,7 +128,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_withUserDefinedFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -145,7 +145,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_withUserDefinedFieldsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -183,7 +183,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate
 				Config: testAccComputeRegionSecurityPolicy_withRules(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -191,12 +191,12 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate
 				Config: testAccComputeRegionSecurityPolicy_withRulesUpdate(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_region_security_policy.regionSecPolicy", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -206,7 +206,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate
 
 func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "regionSecPolicy" {
+		resource "google_compute_region_security_policy" "policy" {
 		name        = "tf-test%{random_suffix}"
 		description = "region security policy with rules updated"
 		type        = "CLOUD_ARMOR"
@@ -240,7 +240,7 @@ func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}
 
 func testAccComputeRegionSecurityPolicy_withRulesUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_compute_region_security_policy" "regionSecPolicy" {
+	resource "google_compute_region_security_policy" "policy" {
 		name        = "tf-test%{random_suffix}"
 		description = "region security policy with rules updated"
 		type        = "CLOUD_ARMOR"
@@ -446,7 +446,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOp
 				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -454,12 +454,12 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOp
 				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_rate_limit", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -469,7 +469,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOp
 
 func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
+		resource "google_compute_region_security_policy" "policy" {
 			name	= "tf-test%{random_suffix}"
 			type	= "CLOUD_ARMOR"
 			region  = "us-west2"
@@ -519,7 +519,7 @@ func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]
 
 func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
+		resource "google_compute_region_security_policy" "policy" {
 			name	= "tf-test%{random_suffix}"
 			type	= "CLOUD_ARMOR"
 			region  = "us-west2"
@@ -584,7 +584,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnf
 				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -592,12 +592,12 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnf
 				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_rate_limit", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -607,7 +607,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnf
 
 func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
+		resource "google_compute_region_security_policy" "policy" {
 			name	= "tf-test%{random_suffix}"
 			type	= "CLOUD_ARMOR"
 			region  = "us-west2"
@@ -665,7 +665,7 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context 
 
 func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-		resource "google_compute_region_security_policy" "policy_rate_limit" {
+		resource "google_compute_region_security_policy" "policy" {
 			name	= "tf-test%{random_suffix}"
 			type	= "CLOUD_ARMOR"
 			region  = "us-west2"
@@ -736,7 +736,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_network_match",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -744,12 +744,12 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_network_match", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy_network_match",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -776,7 +776,7 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]inte
 		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
 	}
 
-	resource "google_compute_region_security_policy" "policy_network_match" {
+	resource "google_compute_region_security_policy" "policy" {
 		region      = "us-west1"
 		name        = "tf-test-policy%{random_suffix}"
 		description = "region security policy for network match test"
@@ -840,7 +840,7 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
 	}
 
-	resource "google_compute_region_security_policy" "policy_network_match" {
+	resource "google_compute_region_security_policy" "policy" {
 		region      = "us-west1"
 		name        = "tf-test-policy%{random_suffix}"
 		description = "region security policy for network match test"
