@@ -855,7 +855,7 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 
 	resource "google_project" "project" {
 		name = "tf-region-ca-rules-%{random_suffix}"
-		project_id = "tf-region-ca-rules-%{random_suffix}"
+		project_id = "tf-test-region-ca-rules-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_id}"
 	}
