@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t *testing.T) {
@@ -725,6 +726,8 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"org_id": envvar.GetTestOrgFromEnv(t),
+		"billing_id": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -759,14 +762,37 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 
 func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+	resource "google_project" "project" {
+		name = "tf-region-ca-rules-%{random_suffix}"
+		project_id = "tf-region-ca-rules-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_id}"
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+
+		depends_on = [google_project.project]
+	}
+
+	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
+		project          = google_project.project.project_id  
+		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
+		depends_on       = [google_project_service.compute_api]
+	}
+
 	resource "google_compute_region_security_policy" "policy_ddos_enable" {
 		region      = "us-west1"
 		name        = "tf-test-ddos-enable%{random_suffix}"
+		project = google_project.project.project_id
 		description = "region security policy to pre-enable ddos protection in the region, otherwise network_match throws error ddos not enabled"
 		type        = "CLOUD_ARMOR_NETWORK"
 		ddos_protection_config {
 			ddos_protection = "ADVANCED_PREVIEW"
 		}
+
+		depends_on = [google_compute_project_cloud_armor_tier.cloud_armor_tier_config]
 	}
 
 	resource "google_compute_network_edge_security_service" "edge_security_service" {
@@ -774,10 +800,12 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]inte
 		name            = "tf-test-edge-service%{random_suffix}"
 		description = "edge security service is required to be pre-created when creasting a policy with network_match rules"
 		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
+		project = google_project.project.project_id
 	}
 
 	resource "google_compute_region_security_policy" "policy" {
 		region      = "us-west1"
+		project = google_project.project.project_id
 		name        = "tf-test-policy%{random_suffix}"
 		description = "region security policy for network match test"
 		type        = "CLOUD_ARMOR_NETWORK"
@@ -824,19 +852,44 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]inte
 
 func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+
+	resource "google_project" "project" {
+		name = "tf-region-ca-rules-%{random_suffix}"
+		project_id = "tf-region-ca-rules-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_id}"
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+
+		depends_on = [google_project.project]
+	}
+
+	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
+		project          = google_project.project.project_id  
+		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
+		depends_on       = [google_project_service.compute_api]
+	}
+
 	resource "google_compute_region_security_policy" "policy_ddos_enable" {
 		region      = "us-west1"
 		name        = "tf-test-ddos-enable%{random_suffix}"
+		project = google_project.project.project_id
 		description = "region security policy to pre-enable ddos protection in the region, otherwise network_match throws error ddos not enabled"
 		type        = "CLOUD_ARMOR_NETWORK"
 		ddos_protection_config {
 			ddos_protection = "ADVANCED_PREVIEW"
 		}
+
+		depends_on = [google_compute_project_cloud_armor_tier.cloud_armor_tier_config]
 	}
 	
 	resource "google_compute_network_edge_security_service" "edge_security_service" {
 		region          = "us-west1"
 		name            = "tf-test-edge-service%{random_suffix}"
+		project = google_project.project.project_id
 		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
 	}
 
@@ -844,6 +897,7 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 		region      = "us-west1"
 		name        = "tf-test-policy%{random_suffix}"
 		description = "region security policy for network match test"
+		project = google_project.project.project_id
 		type        = "CLOUD_ARMOR_NETWORK"
 		user_defined_fields {
 			name = "ipv4_fragment_offset"
