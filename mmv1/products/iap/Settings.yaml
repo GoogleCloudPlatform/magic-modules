@@ -14,7 +14,7 @@
 ---
 name: 'Settings'
 description: |
-  gcloud iap settings - manage IAP settings
+  IAP settings - manage IAP settings
 references:
   guides:
     'Customizing IAP': 'https://cloud.google.com/iap/docs/customizing'
