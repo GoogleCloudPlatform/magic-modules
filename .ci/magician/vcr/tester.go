@@ -462,6 +462,10 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	if !ok {
 		return fmt.Errorf("no log path found for mode %s and version %s", opts.Mode.Lower(), opts.Version)
 	}
+	var suffix string
+	if opts.AfterRecording {
+		suffix = "_after_recording"
+	}
 	args := []string{
 		"-h",
 		"Content-Type:text/plain",
@@ -469,15 +473,11 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		"cp",
 		"-r",
 		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
-		bucketPath + "build-log/",
+		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
-	}
-	var suffix string
-	if opts.AfterRecording {
-		suffix = "_after_recording"
 	}
 	if opts.Parallel {
 		args := []string{
