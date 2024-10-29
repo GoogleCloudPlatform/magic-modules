@@ -742,6 +742,11 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 			},
 			{
 				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_network_match", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy_network_match",
