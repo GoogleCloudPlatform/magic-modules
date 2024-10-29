@@ -6,12 +6,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"os"
@@ -587,7 +587,7 @@ func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) 
 	}
 }
 
-func TestAccStorageObject_detect_md5hash_nofile(t *testing.T) {
+func TestAccStorageObject_detect_nofile(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
@@ -623,12 +623,8 @@ func TestAccStorageObject_detect_md5hash_nofile(t *testing.T) {
 						t.Errorf("Failed to remove file %s ", testFile.Name())
 					}
 				},
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectEmptyPlan(),
-					},
-				},
+				Config:      testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				ExpectError: regexp.MustCompile("no such file or directory")
 			},
 		},
 	})
