@@ -23,7 +23,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/backupVaults?backupVaul
 update_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{force_update}}'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}?force={{ignore_inactive_datasources}}&ignoreBackupPlanReferences={{ignore_backup_plan_references}}&allowMissing={{allow_missing}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/backupVaults/{{backup_vault_id}}'
 timeouts:
@@ -45,6 +45,8 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+  !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
 examples:
   - name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test'
@@ -75,6 +77,14 @@ parameters:
         the restriction against conflicting retention periods. This conflict may occur when the
         expiration schedule defined by the associated backup plan is shorter than the minimum
         retention set by the backup vault.
+    min_version: 'beta'
+    url_param_only: true
+    default_value: false
+  - name: 'force-delete'
+    type: Boolean
+    description: |
+       If set, the following restrictions against deletion of the backup vault instance can be overridden:
+          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
     min_version: 'beta'
     url_param_only: true
     default_value: false
