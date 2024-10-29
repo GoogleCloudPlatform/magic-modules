@@ -264,15 +264,11 @@ properties:
           The repository with this flag will allow publishing the same
           snapshot versions.
         immutable: true
-        default_value: false
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
       - name: 'versionPolicy'
         type: Enum
         description: |-
           Version policy defines the versions that the registry will accept.
         immutable: true
-        default_value: 'VERSION_POLICY_UNSPECIFIED'
-        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
         enum_values:
           - 'VERSION_POLICY_UNSPECIFIED'
           - 'RELEASE'
