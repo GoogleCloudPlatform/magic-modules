@@ -12,11 +12,11 @@
 # limitations under the License.
 
 name: 'BackupPlan'
+min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlans
 create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
 self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
 immutable: true
-delete_url: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
 description: A backup plan defines when and how to back up a resource, including the backup's schedule, retention, and location.
 references:
   guides:
@@ -27,12 +27,14 @@ timeouts:
   insert_minutes: 60
   delete_minutes: 60
 examples:
-  - min_version: beta
-    name: 'backup_dr_backup_plan'
+  - name: 'backup_dr_backup_plan_simple'
+    primary_resource_id: 'my-backup-plan-1'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - name: 'backup_dr_backup_plan'
     primary_resource_id: 'my-backup-plan'
     test_env_vars:
       project: :PROJECT_NAME
-    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -199,6 +201,7 @@ properties:
               properties:
                 - name: 'startHourOfDay'
                   type: Integer
+                  send_empty_value: true
                   description: |
                     The hour of the day (0-23) when the window starts, for example, if the value of the start hour of the day is 6, that means the backup window starts at 6:00.
                   required: true
