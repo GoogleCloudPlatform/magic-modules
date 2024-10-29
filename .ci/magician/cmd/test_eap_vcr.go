@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var tevEnvironmentVariables = [...]string{
+var tevRequiredEnvironmentVariables = [...]string{
 	"GEN_PATH",
 	"GOCACHE",
 	"GOPATH",
@@ -35,6 +35,15 @@ var tevEnvironmentVariables = [...]string{
 	"USER",
 }
 
+var tevOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CUST_ID",
+	"GOOGLE_IDENTITY_USER",
+	"GOOGLE_MASTER_BILLING_ACCOUNT",
+	"GOOGLE_ORG_2",
+	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
+	"GOOGLE_SERVICE_ACCOUNT",
+}
+
 var testEAPVCRCmd = &cobra.Command{
 	Use:   "test-eap-vcr",
 	Short: "Run vcr tests for affected packages in EAP",
@@ -47,14 +56,21 @@ It expects the following arguments:
 The following environment variables are required:
 ` + listTEVEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		env := make(map[string]string, len(tevEnvironmentVariables))
-		for _, ev := range tevEnvironmentVariables {
+		env := make(map[string]string, len(tevRequiredEnvironmentVariables))
+		for _, ev := range tevRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
 		}
+		for _, ev := range tevOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			}
+		}
+
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			return err
@@ -63,13 +79,18 @@ The following environment variables are required:
 		if err != nil {
 			return err
 		}
+
+		if len(args) != 1 {
+			return fmt.Errorf("wrong number of arguments %d, expected 1", len(args))
+		}
+
 		return execTestEAPVCR(args[0], env["GEN_PATH"], env["KOKORO_ARTIFACTS_DIR"], env["MODIFIED_FILE_PATH"], rnr, vt)
 	},
 }
 
 func listTEVEnvironmentVariables() string {
 	var result string
-	for i, ev := range tevEnvironmentVariables {
+	for i, ev := range tevRequiredEnvironmentVariables {
 		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
 	}
 	return result
