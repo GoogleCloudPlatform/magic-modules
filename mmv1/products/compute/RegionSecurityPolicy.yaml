@@ -202,8 +202,6 @@ properties:
     description: |
       The set of rules that belong to this policy. There must always be a default rule (rule with priority 2147483647 and match "*"). If no rules are provided when creating a security policy, a default rule with action "allow" will be added.
     min_version: 'beta'
-    required: false
-    immutable: false
     default_from_api: true
     item_type:
       type: NestedObject
