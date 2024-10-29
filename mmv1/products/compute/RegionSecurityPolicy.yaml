@@ -238,7 +238,7 @@ properties:
             - name: 'expr'
               type: NestedObject
               description: |
-                User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header.
+                User defined CEVAL expression. A CEVAL expression is used to specify match criteria such as origin.ip, source.region_code and contents in the request header. See [Sample expressions](https://cloud.google.com/armor/docs/configure-security-policies#sample-expressions) for examples.
               min_version: 'beta'
               properties:
                 - name: 'expression'
