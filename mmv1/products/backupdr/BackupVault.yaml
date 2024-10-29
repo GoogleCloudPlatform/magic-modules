@@ -80,12 +80,6 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     default_value: false
-  - name: 'force_delete'
-    type: Boolean
-    description: |
-       If set, the following restrictions against deletion of the backup vault instance can be overridden:
-          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
-    min_version: 'beta'
   - name: 'ignore_inactive_datasources'
     type: Boolean
     description: |
