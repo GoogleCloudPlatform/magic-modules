@@ -43,3 +43,10 @@ func upstreamPoliciesDiffSuppress(k, old, new string, d *schema.ResourceData) bo
   newSet := schema.NewSet(schema.HashString, newHashes)
   return oldSet.Equal(newSet)
 }
+
+// emptyMavenConfigDiffSuppress generates a config from defaults if it or any
+// properties are unset. Missing, empty and default configs are all equivalent.
+func emptyMavenConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  o, n := d.GetChange("maven_config.0")
+  return reflect.DeepEqual(o, n)
+}

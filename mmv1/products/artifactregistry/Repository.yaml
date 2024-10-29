@@ -255,6 +255,7 @@ properties:
       Provides additional configuration details for repositories of the maven
       format type.
     allow_empty_object: true
+    diff_suppress_func: 'emptyMavenConfigDiffSuppress'
     properties:
       # Maven properties.
       - name: 'allowSnapshotOverwrites'
@@ -263,13 +264,15 @@ properties:
           The repository with this flag will allow publishing the same
           snapshot versions.
         immutable: true
+        default_value: false
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
       - name: 'versionPolicy'
         type: Enum
         description: |-
           Version policy defines the versions that the registry will accept.
         immutable: true
+        default_value: 'VERSION_POLICY_UNSPECIFIED'
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-        default_value: "VERSION_POLICY_UNSPECIFIED"
         enum_values:
           - 'VERSION_POLICY_UNSPECIFIED'
           - 'RELEASE'
