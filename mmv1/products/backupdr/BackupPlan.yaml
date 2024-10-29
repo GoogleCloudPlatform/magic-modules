@@ -18,6 +18,8 @@ create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan
 self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
 immutable: true
 description: A backup plan defines when and how to back up a resource, including the backup's schedule, retention, and location.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
