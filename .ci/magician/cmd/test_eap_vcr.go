@@ -114,9 +114,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 
 	var servicesArr []string
 	for s := range services {
-		if _, ok := allowedPrivateServices[s]; ok {
-			servicesArr = append(servicesArr, s)
-		}
+		servicesArr = append(servicesArr, s)
 	}
 	analyticsData := analytics{
 		ReplayingResult:  replayingResult,
@@ -206,33 +204,6 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		}
 	}
 	return nil
-}
-
-var allowedPrivateServices = map[string]struct{}{
-	"accesscontextmanager":      {},
-	"chronicle":                 {},
-	"cloudbuildv2":              {},
-	"contactcenteraiplatform":   {},
-	"gkeonprem":                 {},
-	"kms":                       {},
-	"netapp":                    {},
-	"oracledatabase":            {},
-	"remotebuildexecutionadmin": {},
-	"spanner":                   {},
-	"storageinsights":           {},
-	"vmwareengine":              {},
-	"bigquery":                  {},
-	"cloudbuild":                {},
-	"compute":                   {},
-	"dataprocgdc":               {},
-	"healthcare":                {},
-	"managedkafka":              {},
-	"networksecurity":           {},
-	"osconfig":                  {},
-	"saasmanagement":            {},
-	"stackdriver":               {},
-	"tpuv2":                     {},
-	"workstations":              {},
 }
 
 func handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath string, result vcr.Result, mode vcr.Mode, rnr ExecRunner) (bool, error) {
