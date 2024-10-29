@@ -33,7 +33,6 @@ create_url: 'organizations/{{organization}}/locations/{{location}}/notificationC
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

@@ -562,7 +562,6 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 
 var TemplateFunctions = template.FuncMap{
 	"title":                           strings.Title,
-	"containz":                        strings.Contains,
 	"patternToRegex":                  PatternToRegex,
 	"replace":                         strings.Replace,
 	"isLastIndex":                     isLastIndex,
