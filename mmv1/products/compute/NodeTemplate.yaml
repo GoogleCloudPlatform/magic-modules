@@ -175,3 +175,23 @@ properties:
     enum_values:
       - 'ENABLED'
       - 'NONE'
+  - name: 'disks'
+    type: Array
+    description: |
+      List of the type, size and count of disks attached to the
+      node template
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'diskCount'
+          type: Integer
+          description: |
+            The number of disks exposed to this node template.
+        - name: 'diskType'
+          type: String
+          description: |
+            The type of disks exposed to this node template.
+        - name: 'diskSizeGb'
+          type: Integer
+          description: |
+            The disk pool size in GB.
