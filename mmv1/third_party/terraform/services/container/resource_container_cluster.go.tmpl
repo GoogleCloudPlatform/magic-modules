@@ -981,6 +981,13 @@ func ResourceContainerCluster() *schema.Resource {
 				// ConflictsWith: many fields, see https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison. The conflict is only set one-way, on other fields w/ this field.
 			},
 
+			"enable_dns_access": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: `Enable access to the cluster's control plane over DNS-based endpoint. DNS-based control plane access is recommended.`,
+			},
+
 			"allow_net_admin": {
 				Type: schema.TypeBool,
 				Optional: true,
@@ -2373,6 +2380,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 {{- end }}
 	    },
+		ControlPlaneEndpointsConfig: &container.ControlPlaneEndpointsConfig{
+			DnsEndpointConfig: &container.DNSEndpointConfig{
+				AllowExternalTraffic: d.Get("enable_dns_access").(bool),
+				ForceSendFields: 	  []string{"AllowExternalTraffic"},
+			},
+		},
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
 		ConfidentialNodes: expandConfidentialNodes(d.Get("confidential_nodes")),
@@ -2893,6 +2906,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enable_tpu", cluster.EnableTpu); err != nil {
 		return fmt.Errorf("Error setting enable_tpu: %s", err)
 	}
+	if err := d.Set("enable_dns_access", cluster.ControlPlaneEndpointsConfig.DnsEndpointConfig.AllowExternalTraffic); err != nil {
+		return fmt.Errorf("Error setting enable_dns_access: %s", err)
+	}
 	if err := d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock); err != nil {
 		return fmt.Errorf("Error setting tpu_ipv4_cidr_block: %s", err)
 	}
@@ -3184,6 +3200,28 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	    }
 
 		log.Printf("[INFO] GKE cluster %s's autopilot workload policy config allow_net_admin has been set to %v", d.Id(), allowed)
+	}
+
+	if d.HasChange("enable_dns_access") {
+		allowed := d.Get("enable_dns_access").(bool)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredControlPlaneEndpointsConfig: &container.ControlPlaneEndpointsConfig{
+					DnsEndpointConfig: &container.DNSEndpointConfig{
+						AllowExternalTraffic: allowed,
+						ForceSendFields:      []string{"AllowExternalTraffic"},
+					},
+				},
+			},
+		}
+
+		updateF := updateFunc(req, "updating dns-endpoint control plane for GKE")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's dns-endpoint control plane config enable_dns_access has been set to %v", d.Id(), allowed)
 	}
 
 	if d.HasChange("private_cluster_config.0.enable_private_endpoint") {
