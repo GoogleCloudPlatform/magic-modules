@@ -51,6 +51,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/security_policy_default_rule_update_on_create.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
 examples:
   - name: 'security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
@@ -60,8 +62,6 @@ examples:
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
-      project_id: 'PROJECT_NAME'
-    exclude_test: true
   - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:

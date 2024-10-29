@@ -1,0 +1,11 @@
+// We can't Create a default rule since one is automatically created with the policy
+rulePriority, ok := d.GetOk("priority")
+
+if ok && rulePriority.(int) == 2147483647 {
+	log.Printf("[WARN] {{$.Name}} represents a default rule, will attempt an Update instead")
+	newUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/securityPolicies/{{"{{"}}security_policy{{"}}"}}/patchRule?priority={{"{{"}}priority{{"}}"}}")
+	if err != nil {
+		return err
+	}
+	url = newUrl
+}
