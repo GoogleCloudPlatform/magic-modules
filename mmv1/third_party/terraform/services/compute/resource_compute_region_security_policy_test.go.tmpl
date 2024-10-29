@@ -452,6 +452,11 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOp
 			},
 			{
 				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_rate_limit", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
