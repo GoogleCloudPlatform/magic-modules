@@ -93,6 +93,7 @@ properties:
     type: String
     description: |
       The etag for the principal access boundary. If this is provided on update, it must match the server's etag.
+    default_from_api: true
   - name: 'displayName'
     type: String
     description: |
