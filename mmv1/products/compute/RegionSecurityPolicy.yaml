@@ -219,7 +219,6 @@ properties:
             Rules are evaluated from highest to lowest priority where 0 is the highest priority and 2147483647 is the lowest priority.
           min_version: 'beta'
           required: true
-          immutable: true
         - name: 'match'
           type: NestedObject
           description: |
