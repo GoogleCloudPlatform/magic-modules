@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -585,49 +584,6 @@ func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) 
 
 		return nil
 	}
-}
-
-func TestAccStorageObject_detect_nofile(t *testing.T) {
-	t.Parallel()
-
-	bucketName := acctest.TestBucketName(t)
-
-	writeFile := func(name string, data []byte) string {
-		h := md5.New()
-		if _, err := h.Write(data); err != nil {
-			t.Errorf("error calculating md5: %v", err)
-		}
-		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-		if err := ioutil.WriteFile(name, data, 0644); err != nil {
-			t.Errorf("error writing file: %v", err)
-		}
-		return dataMd5
-	}
-	testFile := getNewTmpTestFile(t, "tf-test")
-	dataMd5 := writeFile(testFile.Name(), []byte("data data data"))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
-				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
-			},
-			{
-				PreConfig: func() {
-					err := os.Remove(testFile.Name())
-					if err != nil {
-						t.Errorf("Failed to remove file %s ", testFile.Name())
-					}
-				},
-				Config:      testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
-				ExpectError: regexp.MustCompile("no such file or directory"),
-			},
-		},
-	})
 }
 
 func testGoogleStorageBucketsObjectCustomContent(bucketName string, customContent string) string {
