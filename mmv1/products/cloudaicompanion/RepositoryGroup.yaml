@@ -23,10 +23,11 @@ import_format:
 examples:
   - name: "gemini_repository_group_basic"
     primary_resource_id: "example"
+    primary_resource_name: '"cri-1", fmt.Sprintf("tf-test-my-repo-group%s", context["random_suffix"])'
     vars:
       repository_resource: "projects/example-location/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
       repository_group_id: "example-repository-group-id"
-      cri_id: "example-code-repository-index-id"
+      cri_id: "cri-1"
 autogen_async: true
 async:
   operation:
@@ -49,6 +50,16 @@ async:
     path: error
     message: message
   include_project: false
+iam_policy:
+  parent_resource_attribute: 'repository_group_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'GET'
+  set_iam_policy_verb: 'POST'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups/{{repository_group_id}}'
+    - '{{repository_group_id}}'
+  allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
+  iam_conditions_request_type: 'REQUEST_BODY'
 parameters:
   - name: location
     type: String

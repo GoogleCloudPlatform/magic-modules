@@ -24,7 +24,7 @@ examples:
   - name: "gemini_code_repository_index_basic"
     primary_resource_id: "example"
     vars:
-      cri_id: "example-coderepositoryindex-id"
+      cri_id: "cri-1"
 autogen_async: true
 async:
   operation:
