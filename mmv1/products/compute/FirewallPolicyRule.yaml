@@ -35,6 +35,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_diff:
+  - 'tpgresource.DefaultProviderProject'
 custom_code:
   post_create: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
   post_delete: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
@@ -55,10 +57,11 @@ parameters:
     type: ResourceRef
     description: |
       The firewall policy of the resource.
-    url_param_only: true
+    ignore_read: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_expand: 'templates/terraform/custom_expand/compute_firewall_policy_rule.go.tmpl'
     resource: 'FirewallPolicy'
     imports: 'name'
 properties:

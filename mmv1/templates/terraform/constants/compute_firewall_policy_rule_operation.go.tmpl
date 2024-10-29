@@ -1,9 +1,4 @@
-
-parent, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}firewall_policy{{"}}"}}")
-if err != nil {
-	return fmt.Errorf("Error constructing parent: %s", err)
-}
-
+parent := d.Get("firewall_policy").(string)
 var opRes map[string]interface{}
 err = ComputeOrgOperationWaitTimeWithResponse(
 	config, res, &opRes, parent, "FirewallPolicyRule operation", userAgent,
