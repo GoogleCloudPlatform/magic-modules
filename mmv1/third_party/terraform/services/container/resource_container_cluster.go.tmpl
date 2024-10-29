@@ -1734,11 +1734,6 @@ func ResourceContainerCluster() *schema.Resource {
 				MaxItems:    1,
 				Optional:    true,
 				Computed:    true,
-				ConflictsWith: []string{
-					"private_cluster_config.0.enable_private_endpoint",
-					"private_cluster_config.0.private_endpoint_subnetwork",
-					"private_cluster_config.0.master_global_access_config",
-				},
 				Description: `Configuration for all of the cluster's control plane endpoints. If this is specified, then respective configured values from private_cluster_config are ignored.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1775,7 +1770,12 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:        schema.TypeBool,
 										Optional:    true,
-										Description: `Controls whether to allow direct IP access. When this is false, all other ip_endpoints_config values are ignored.`,
+										ConflictsWith: []string{
+											"private_cluster_config.0.enable_private_endpoint",
+											"private_cluster_config.0.private_endpoint_subnetwork",
+											"private_cluster_config.0.master_global_access_config",
+										},
+										Description: `Controls whether to allow direct IP access. When this is false, all other ip_endpoints_config values are ignored. Implicitly true if private_cluster_config settings are still used.`,
 									},
 									"enable_public_endpoint": {
 										Type:             schema.TypeBool,
@@ -1862,7 +1862,10 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Deprecated:       "use control_plane_endpoints_config.ip_endpoints_config.enable_public_endpoint instead, and note the flipped semantics",
-							ConflictsWith:    []string{"control_plane_endpoints_config"},
+							ConflictsWith:    []string{
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled",
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint",
+							},
 							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 							Description:      `When true, the cluster's private endpoint is used as the cluster endpoint and access through the public endpoint is disabled. When false, either endpoint can be used.`,
@@ -1899,7 +1902,10 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Deprecated:       "use control_plane_endpoints_config.ip_endpoints_config.private_endpoint_subnetwork instead",
-							ConflictsWith:    []string{"control_plane_endpoints_config"},
+							ConflictsWith:    []string{
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled",
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint_subnetwork",
+							},
 							ForceNew:         true,
 							AtLeastOneOf:     privateClusterConfigKeys,
 							DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
@@ -1915,7 +1921,10 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:      1,
 							Optional:      true,
 							Deprecated:    "use control_plane_endpoints_config.ip_endpoints_config.global_access instead",
-							ConflictsWith: []string{"control_plane_endpoints_config"},
+							ConflictsWith: []string{
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled",
+								"control_plane_endpoints_config.0.ip_endpoints_config.0.global_access",
+							},
 							Computed:      true,
 							AtLeastOneOf:  privateClusterConfigKeys,
 							Description:   "Controls cluster master global access settings.",
@@ -5562,97 +5571,63 @@ func expandDefaultEnablePrivateNodes(d *schema.ResourceData) bool {
 }
 
 func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.ControlPlaneEndpointsConfig {
-	cpec, hasCpec := d.GetOk("control_plane_endpoints_config")
-
-	if !hasCpec {
-		// Check if the config uses the deprecated private_cluster_config or master_authorized_networks_config
-		return expandEndpointsConfigFromLegacyConfigs(d)
-	}
-	l := cpec.([]interface{})
-	if len(l) == 0 {
-		return nil
-	}
-	config := l[0].(map[string]interface{})
 	dns := &container.DNSEndpointConfig{}
-	dnsConfig, ok := config["dns_endpoint_config"]
-	if ok {
-		l := dnsConfig.([]interface{})
-		if len(l) != 0 {
-			config := l[0].(map[string]interface{})
-			dns.AllowExternalTraffic = config["allow_external_traffic"].(bool)
-			dns.ForceSendFields = []string{"AllowExternalTraffic"}
+	if v, ok := d.GetOk("control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic"); ok {
+		dns.AllowExternalTraffic = v.(bool)
+		dns.ForceSendFields = []string{"AllowExternalTraffic"}
+	}
+
+	ip := &container.IPEndpointsConfig{
+		// If ip_endpoints_config.enabled isn't configured, it will be set based on the presence of
+		// private_cluster_config fields. These are fields marked using ConflictsWith annotations, so
+		// we won't get contradictory settings.
+		ForceSendFields: []string{"Enabled"},
+	}
+	if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.0.enabled"); ok {
+		ip.Enabled = v.(bool)
+	}
+	if v, ok := d.GetOk("private_cluster_config.0.enable_private_endpoint"); ok {
+		ip.Enabled = true
+		ip.EnablePublicEndpoint = !v.(bool)
+		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
+	} else if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.0.enable_public_endpoint"); ok {
+		ip.EnablePublicEndpoint = v.(bool)
+		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
+	}
+	if v, ok := d.GetOk("private_cluster_config.0.private_endpoint_subnetwork"); ok {
+		ip.Enabled = true
+		ip.PrivateEndpointSubnetwork = v.(string)
+		ip.ForceSendFields = append(ip.ForceSendFields, "PrivateEndpointSubnetwork")
+	} else if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.0.private_endpoint_subnetwork"); ok {
+		ip.PrivateEndpointSubnetwork = v.(string)
+		ip.ForceSendFields = append(ip.ForceSendFields, "PrivateEndpointSubnetwork")
+	}
+	if v, ok := d.GetOk("private_cluster_config.0.master_global_access_config.0.enabled"); ok {
+		ip.Enabled = true
+		ip.GlobalAccess = v.(bool)
+		ip.ForceSendFields = append(ip.ForceSendFields, "GlobalAccess")
+	} else if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.0.global_access"); ok {
+		ip.GlobalAccess = v.(bool)
+		ip.ForceSendFields = append(ip.ForceSendFields, "GlobalAccess")
+	}
+	if v, ok := d.GetOk("master_authorized_networks_config"); ok {
+		ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(v)
+	} else if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.0.authorized_networks_config"); ok {
+		ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(v)
+	} else {
+		// TF doesn't have an explicit enabled field for authorized networks, it is assumed to be enabled based
+		// on whether the master_authorized_networks_conifg is present at all. The GKE API pays attention to the
+		// field presence of authorized_networks_config, so it's important to explicitly include enabled = false
+		// to allow disabling this during updates.
+		ip.AuthorizedNetworksConfig = &container.MasterAuthorizedNetworksConfig{
+			Enabled: false,
 		}
 	}
 
-	ip := &container.IPEndpointsConfig{}
-	ipConfig, ok := config["ip_endpoints_config"]
-	if ok {
-		l := ipConfig.([]interface{})
-		if len(l) != 0 {
-			config := l[0].(map[string]interface{})
-			ip.Enabled = config["enabled"].(bool)
-			ip.ForceSendFields = []string{"Enabled"}
-			if ip.Enabled {
-				ip.EnablePublicEndpoint = config["enable_public_endpoint"].(bool)
-				ip.GlobalAccess = config["global_access"].(bool)
-				man, hasMan := d.GetOk("master_authorized_networks_config")
-				if hasMan {
-					ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(man)
-				} else {
-					ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(config["authorized_networks_config"])
-				}
-				ip.PrivateEndpointSubnetwork = config["private_endpoint_subnetwork"].(string)
-				ip.ForceSendFields = []string{"Enabled", "EnablePublicEndpoint", "GlobalAccess", "PrivateEndpointSubnetwork"}
-			}
-		}
-	}
 	return &container.ControlPlaneEndpointsConfig{
 		DnsEndpointConfig: dns,
 		IpEndpointsConfig: ip,
 	}
-}
-
-func expandEndpointsConfigFromLegacyConfigs(d *schema.ResourceData) *container.ControlPlaneEndpointsConfig {
-	pcc, hasPcc := d.GetOk("private_cluster_config")
-	man, hasMan := d.GetOk("master_authorized_networks_config")
-	if !hasPcc && !hasMan {
-		return nil
-	}
-
-	cpec := &container.ControlPlaneEndpointsConfig{}
-
-	if hasPcc {
-		l := pcc.([]interface{})
-		if len(l) == 0 {
-			return nil
-		}
-		config := l[0].(map[string]interface{})
-		global_access := false
-		l = config["master_global_access_config"].([]interface{})
-		if len(l) != 0 {
-			global_access = l[0].(map[string]interface{})["enabled"].(bool)
-		}
-		cpec = &container.ControlPlaneEndpointsConfig{
-			IpEndpointsConfig: &container.IPEndpointsConfig{
-				Enabled:                   true,
-				EnablePublicEndpoint:      !config["enable_private_endpoint"].(bool),
-				GlobalAccess:              global_access,
-				PrivateEndpointSubnetwork: config["private_endpoint_subnetwork"].(string),
-				ForceSendFields:           []string{"Enabled", "EnablePublicEndpoint", "GlobalAccess", "PrivateEndpointSubnetwork"},
-			},
-		}
-	}
-
-	if hasMan {
-		if cpec.IpEndpointsConfig == nil {
-			cpec.IpEndpointsConfig = &container.IPEndpointsConfig{
-				Enabled: true,
-			}
-		}
-		cpec.IpEndpointsConfig.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(man)
-	}
-
-	return cpec
 }
 
 func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPodAutoscaling {
@@ -6327,23 +6302,31 @@ func flattenControlPlaneEndpointsConfig(cpec *container.ControlPlaneEndpointsCon
 	}
 
 	// Most of ip_endpoints_config is being migrated from other fields on private_cluster_config.
-	// These fields are marked with ConflictsWith to prevent both from being set.
-	// These fields are generally marked Computed, so we can fill in both locations without causing
-	// unexpected diffs.
+	// These fields are marked with ConflictsWith to prevent both from being set. We need to ensure
+	// that we only set one of such fields to ensure that migration is possible without unexpected diffs.
 
 	// Note that this is specifically negated, as the semantics of the fields are reversed.
-	outPcc[0]["enable_private_endpoint"] = !cpec.IpEndpointsConfig.EnablePublicEndpoint
-	outIp[0]["enable_public_endpoint"] = cpec.IpEndpointsConfig.EnablePublicEndpoint
-
-	outPcc[0]["master_global_access_config"] = []map[string]interface{}{
-		{
-			"enabled": cpec.IpEndpointsConfig.GlobalAccess,
-		},
+	if _, ok := d.GetOk("private_cluster_config.0.enable_private_endpoint"); ok {
+		outPcc[0]["enable_private_endpoint"] = !cpec.IpEndpointsConfig.EnablePublicEndpoint
+	} else {
+		outIp[0]["enable_public_endpoint"] = cpec.IpEndpointsConfig.EnablePublicEndpoint
 	}
-	outIp[0]["global_access"] = cpec.IpEndpointsConfig.GlobalAccess
 
-	outPcc[0]["private_endpoint_subnetwork"] = cpec.IpEndpointsConfig.PrivateEndpointSubnetwork
-	outIp[0]["private_endpoint_subnetwork"] = cpec.IpEndpointsConfig.PrivateEndpointSubnetwork
+	if _, ok := d.GetOk("private_cluster_config.0.master_global_access_config.0.enabled"); ok {
+		outPcc[0]["master_global_access_config"] = []map[string]interface{}{
+			{
+				"enabled": cpec.IpEndpointsConfig.GlobalAccess,
+			},
+		}
+	} else {
+		outIp[0]["global_access"] = cpec.IpEndpointsConfig.GlobalAccess
+	}
+
+	if _, ok := d.GetOk("private_cluster_config.0.private_endpoint_subnetwork"); ok {
+		outPcc[0]["private_endpoint_subnetwork"] = cpec.IpEndpointsConfig.PrivateEndpointSubnetwork
+	} else {
+		outIp[0]["private_endpoint_subnetwork"] = cpec.IpEndpointsConfig.PrivateEndpointSubnetwork
+	}
 
 	// default_enable_private_nodes needs to be set on private_cluster_config in the old format,
 	// otherwise it has its own network_config struct in the new format.
@@ -6351,21 +6334,26 @@ func flattenControlPlaneEndpointsConfig(cpec *container.ControlPlaneEndpointsCon
 	if nc != nil {
 		defaultEnablePrivateNodes = nc.DefaultEnablePrivateNodes
 	}
-	outPcc[0]["enable_private_nodes"] = defaultEnablePrivateNodes
-
-	if err := d.Set("network_config", []map[string]interface{}{
-		{
-			"default_enable_private_nodes": defaultEnablePrivateNodes,
-		},
-	}); err != nil {
-		return err
+	if _, ok := d.GetOk("private_cluster_config.0.enable_private_nodes"); ok {
+		outPcc[0]["enable_private_nodes"] = defaultEnablePrivateNodes
+	} else {
+		if err := d.Set("network_config", []map[string]interface{}{
+			{
+				"default_enable_private_nodes": defaultEnablePrivateNodes,
+			},
+		}); err != nil {
+			return err
+		}
 	}
 
 	// MAN is configured on its own in the deprecated config.
-	if err := d.Set("master_authorized_networks_config", flattenMasterAuthorizedNetworksConfig(cpec.IpEndpointsConfig.AuthorizedNetworksConfig)); err != nil {
-		return err
+	if _, ok := d.GetOk("master_authorized_networks_config"); ok {
+		if err := d.Set("master_authorized_networks_config", flattenMasterAuthorizedNetworksConfig(cpec.IpEndpointsConfig.AuthorizedNetworksConfig)); err != nil {
+			return err
+		}
+	} else {
+		outIp[0]["authorized_networks_config"] = flattenMasterAuthorizedNetworksConfig(cpec.IpEndpointsConfig.AuthorizedNetworksConfig)
 	}
-	outIp[0]["authorized_networks_config"] = flattenMasterAuthorizedNetworksConfig(cpec.IpEndpointsConfig.AuthorizedNetworksConfig)
 
 	// Only VPC Peering related fields (master_ipv4_cidr_block, peering_name) are canonically located in private_cluster_config now.
 	if pcc != nil {
