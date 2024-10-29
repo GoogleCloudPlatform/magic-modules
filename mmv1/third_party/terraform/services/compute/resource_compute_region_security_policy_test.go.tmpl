@@ -580,6 +580,11 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnf
 			},
 			{
 				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy_rate_limit", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy_rate_limit",
