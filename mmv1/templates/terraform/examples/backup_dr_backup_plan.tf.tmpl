@@ -100,6 +100,7 @@ default = [
   ]
 
 resource "google_backup_dr_backup_vault" "my-backup-vault" {
+    provider = google-beta
     project       = "<%= ctx[:vars]['project'] %>"
     location = "<%= ctx[:vars]['location'] %>"
     backup_vault_id    = "<%= ctx[:vars]['backup_vault_name'] %>"
@@ -119,6 +120,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
 }
 
 resource "google_backup_dr_backup_plan" "<%= ctx[:vars]['primary_resource_id'] %>" {
+  provider = google-beta
   location      = "us-central1"
   backup_plan_id          = "bp-tf20"
   resource_type = "compute.googleapis.com/Instance"
