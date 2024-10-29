@@ -126,7 +126,9 @@ resource "google_backup_dr_backup_plan" "backup_plan" {
   backup_plan_id = "bp-tf20"
   resource_type = "compute.googleapis.com/Instance"
   backup_vault  = google_backup_dr_backup_vault.my_backup_vault.id
-
+  lifecycle {
+    ignore_changes = [backup_vault]
+  }
   dynamic "backup_rules" {
     for_each = var.backup_rules
     content {
