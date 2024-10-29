@@ -28,10 +28,12 @@ timeouts:
   delete_minutes: 60
 examples:
   - name: 'backup_dr_backup_plan_simple'
+    min_version: 'beta'
     primary_resource_id: 'my-backup-plan-1'
     test_env_vars:
       project: :PROJECT_NAME
   - name: 'backup_dr_backup_plan'
+    min_version: 'beta'
     primary_resource_id: 'my-backup-plan'
     test_env_vars:
       project: :PROJECT_NAME
