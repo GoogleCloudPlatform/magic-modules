@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionSslCertificate'
+api_resource_type_kind: SslCertificate
 kind: 'compute#sslCertificate'
 description: |
   A RegionSslCertificate resource, used for HTTPS load balancing. This resource

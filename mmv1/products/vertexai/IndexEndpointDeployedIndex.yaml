@@ -13,6 +13,7 @@
 
 ---
 name: 'IndexEndpointDeployedIndex'
+api_resource_type_kind: IndexEndpoint
 description: |-
   An endpoint indexes are deployed into. An index endpoint can have multiple deployed indexes.
 references:

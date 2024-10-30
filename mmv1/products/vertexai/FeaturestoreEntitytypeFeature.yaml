@@ -13,6 +13,7 @@
 
 ---
 name: 'FeaturestoreEntitytypeFeature'
+api_resource_type_kind: Feature
 description: |-
   Feature Metadata information that describes an attribute of an entity type. For example, apple is an entity type, and color is a feature that describes apple.
 references:

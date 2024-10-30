@@ -119,6 +119,12 @@ examples:
       account_id: 'my-account'
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
+  - name: 'workstation_config_allowed_ports'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
 parameters:
   - name: 'workstationConfigId'
     type: String
@@ -650,6 +656,30 @@ properties:
     description: |
       Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
     min_version: 'beta'
+  - name: 'maxUsableWorkstations'
+    type: Integer
+    description: |
+      Maximum number of workstations under this configuration a user can have workstations.workstation.use permission on. Only enforced on CreateWorkstation API calls on the user issuing the API request.
+    default_from_api: true
+  - name: 'allowedPorts'
+    type: Array
+    default_from_api: true
+    description: |
+      A list of port ranges specifying single ports or ranges of ports that are externally accessible in the workstation. Allowed ports must be one of 22, 80, or within range 1024-65535. If not specified defaults to ports 22, 80, and ports 1024-65535.
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'first'
+          type: Integer
+          description: |
+            Starting port number for the current range of ports. Valid ports are 22, 80, and ports within the range 1024-65535.
+          min_version: 'beta'
+        - name: 'last'
+          type: Integer
+          description: |
+            Ending port number for the current range of ports. Valid ports are 22, 80, and ports within the range 1024-65535.
+          min_version: 'beta'
   - name: 'conditions'
     type: Array
     description: |-

@@ -13,6 +13,7 @@
 
 ---
 name: 'MembershipRBACRoleBinding'
+api_resource_type_kind: RBACRoleBinding
 description: |
   RBACRoleBinding represents a rbacrolebinding across the Fleet.
 min_version: 'beta'

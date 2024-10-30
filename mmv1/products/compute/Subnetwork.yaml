@@ -129,6 +129,8 @@ examples:
     vars:
       subnetwork_name: 'subnetwork-reserved-secondary-range'
       network_name: 'network-reserved-secondary-range'
+      primary_range_name: 'reserved-primary'
+      secondary_range_name: 'reserved-secondary'
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |

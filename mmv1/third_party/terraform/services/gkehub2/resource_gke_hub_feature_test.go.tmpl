@@ -546,7 +546,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     configmanagement {
-      version = "1.16.0"
+      version = "1.19.1"
       config_sync {
         source_format = "hierarchy"
         git {
@@ -573,7 +573,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     configmanagement {
-      version = "1.16.1"
+      version = "1.19.2"
       management = "MANAGEMENT_MANUAL"
       config_sync {
         enabled = true
@@ -602,7 +602,6 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     configmanagement {
-      version = "1.16.1"
       management = "MANAGEMENT_AUTOMATIC"
       config_sync {
         prevent_drift = true

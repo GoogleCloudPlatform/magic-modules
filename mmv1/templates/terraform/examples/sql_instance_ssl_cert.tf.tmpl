@@ -8,7 +8,7 @@ resource "google_sql_database_instance" "mysql_instance" {
       ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_ssl_cert" "mysql_client_cert" {
@@ -26,7 +26,7 @@ resource "google_sql_database_instance" "postgres_instance" {
       ssl_mode = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
   }
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_ssl_cert" "postgres_client_cert" {
@@ -45,5 +45,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
       ssl_mode = "ENCRYPTED_ONLY"
     }
   }
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
 }
