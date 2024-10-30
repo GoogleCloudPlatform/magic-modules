@@ -155,6 +155,21 @@ properties:
               type: String
               description: |
                 The project id/number, should be same as the key of this project config in the project map.
+  - name: 'reservationSharingPolicy'
+    type: NestedObject
+    description: |
+      Specify the reservation sharing policy. If unspecified, the reservation will not be shared with Google Cloud managed services.
+    min_version: 'beta'
+    default_from_api: true
+    properties:
+      - name: 'serviceShareType'
+        type: Enum
+        description: |
+          Sharing config for all Google Cloud services.
+        default_from_api: true
+        enum_values:
+          - 'ALLOW_ALL'
+          - 'DISALLOW_ALL'
   - name: 'specificReservation'
     type: NestedObject
     description: |
