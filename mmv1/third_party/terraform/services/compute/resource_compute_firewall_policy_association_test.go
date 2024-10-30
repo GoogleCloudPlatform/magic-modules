@@ -93,13 +93,10 @@ func TestAccComputeFirewallPolicyAssociation_organization(t *testing.T) {
 
 func testAccComputeFirewallPolicyAssociation_organization(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "time_sleep" "wait_180s" {
-  destroy_duration = "180s"
-}
-
 resource "google_folder" "folder" {
   display_name = "tf-test-my-folder-%{random_suffix}"
   parent       = "%{org_name}"
+  deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "policy" {
@@ -112,11 +109,6 @@ resource "google_compute_firewall_policy_association" "default" {
   firewall_policy = google_compute_firewall_policy.policy.id
   attachment_target = google_folder.folder.name
   name = "tf-test-my-association-%{random_suffix}"
-  depends_on = [
-	time_sleep.wait_180s,
-	google_folder.folder,
-	google_compute_firewall_policy.policy
-  ]
 }
 `, context)
 }

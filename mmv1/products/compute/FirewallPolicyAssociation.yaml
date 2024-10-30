@@ -17,16 +17,15 @@ kind: 'compute#firewallPolicyAssociation'
 description: |
   Allows associating hierarchical firewall policies with the target where they are applied. This allows creating policies and rules in a different location than they are applied.
   For more information on applying hierarchical firewall policies see the [official documentation](https://cloud.google.com/firewall/docs/firewall-policies#managing_hierarchical_firewall_policy_resources)
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addAssociation'
 docs:
-id_format: '{{firewall_policy}}/associations/{{name}}'
-base_url: '{{firewall_policy}}'
-self_link: '{{firewall_policy}}/getAssociation?name={{name}}'
-create_url: '{{firewall_policy}}/addAssociation'
-delete_url: '{{firewall_policy}}/removeAssociation?name={{name}}'
+id_format: 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
+base_url: 'locations/global/firewallPolicies/{{firewall_policy}}'
+self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getAssociation?name={{name}}'
+create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation'
+delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
 immutable: true
 import_format:
@@ -37,10 +36,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/constants/compute_firewall_policy_association_operation.go.tmpl'
-  post_delete: 'templates/terraform/constants/compute_firewall_policy_association_operation.go.tmpl'
-  custom_import: 'templates/terraform/constants/firewall_policy_association_import.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
+  # custom_import: 'templates/terraform/constants/firewall_policy_association_import.go.tmpl'
+  # test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 examples:
@@ -57,14 +56,12 @@ parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
     description: |
-      The firewall policy ID of the association.
-    min_version: 'beta'
-    url_param_only: true
+      The firewall policy of the resource.
+    ignore_read: true
     required: true
     immutable: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    custom_expand: 'templates/terraform/custom_expand/compute_firewall_policy_association.go.tmpl'
     resource: 'FirewallPolicy'
     imports: 'name'
 properties:
@@ -72,21 +69,15 @@ properties:
     type: String
     description: |
       The name for an association.
-    min_version: 'beta'
     required: true
-    immutable: true
   - name: 'attachmentTarget'
     type: String
     description: |
       The target that the firewall policy is attached to.
-    min_version: 'beta'
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'shortName'
     type: String
     description: |
       The short name of the firewall policy of the association.
-    min_version: 'beta'
-    immutable: true
     output: true
