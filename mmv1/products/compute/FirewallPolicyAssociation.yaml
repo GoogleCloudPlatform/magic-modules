@@ -17,6 +17,7 @@ kind: 'compute#firewallPolicyAssociation'
 description: |
   Allows associating hierarchical firewall policies with the target where they are applied. This allows creating policies and rules in a different location than they are applied.
   For more information on applying hierarchical firewall policies see the [official documentation](https://cloud.google.com/firewall/docs/firewall-policies#managing_hierarchical_firewall_policy_resources)
+min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies/addAssociation'
