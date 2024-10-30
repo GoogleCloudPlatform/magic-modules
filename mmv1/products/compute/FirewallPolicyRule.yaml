@@ -208,6 +208,7 @@ properties:
       - 'EGRESS'
   - name: 'targetResources'
     type: Array
+    send_empty_value: true
     description: |
       A list of network resource URLs to which this rule applies.
       This field allows you to control which network's VMs get this rule.
@@ -230,6 +231,7 @@ properties:
     output: true
   - name: 'targetServiceAccounts'
     type: Array
+    send_empty_value: true
     description: |
       A list of service accounts indicating the sets of instances that are applied with this rule.
     item_type:
