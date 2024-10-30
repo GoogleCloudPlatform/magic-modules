@@ -269,6 +269,7 @@ properties:
         description: |-
           Version policy defines the versions that the registry will accept.
         immutable: true
+        default_value: 'VERSION_POLICY_UNSPECIFIED'
         enum_values:
           - 'VERSION_POLICY_UNSPECIFIED'
           - 'RELEASE'
