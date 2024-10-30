@@ -1,5 +1,4 @@
 resource "google_composer_environment" "environment" {
-  provider = google-beta
   name   = "{{index $.Vars "environment_name"}}"
   region = "us-central1"
   config {
@@ -10,7 +9,6 @@ resource "google_composer_environment" "environment" {
 }
 
 resource "google_composer_user_workloads_config_map" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.Vars "config_map_name"}}"
   region = "us-central1"
   environment = google_composer_environment.environment.name

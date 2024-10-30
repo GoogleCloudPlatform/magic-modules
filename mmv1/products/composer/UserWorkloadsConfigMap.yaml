@@ -16,11 +16,11 @@ name: 'UserWorkloadsConfigMap'
 description: |
   User workloads ConfigMap used by Airflow tasks that run with Kubernetes Executor or KubernetesPodOperator.
   Intended for Composer 3 Environments.
-min_version: 'beta'
+min_version: 'ga'
 references:
   guides:
-  # TODO: add v1 reference when this is moved to ga
   api: 'https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments.userWorkloadsConfigMaps'
+  api: 'https://cloud.google.com/composer/docs/reference/rest/v1/projects.locations.environments.userWorkloadsConfigMaps'
 docs:
 base_url: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps'
 self_link: 'projects/{{project}}/locations/{{region}}/environments/{{environment}}/userWorkloadsConfigMaps/{{name}}'
@@ -41,7 +41,7 @@ parameters:
     type: String
     description: |
       The location or Compute Engine region for the environment.
-    min_version: 'beta'
+    min_version: 'ga'
     url_param_only: true
     immutable: true
     default_from_api: true
@@ -49,7 +49,7 @@ parameters:
     type: String
     description: |
       Environment where the Kubernetes ConfigMap will be stored and used.
-    min_version: 'beta'
+    min_version: 'ga'
     url_param_only: true
     required: true
     immutable: true
@@ -60,7 +60,7 @@ properties:
     type: String
     description: |
       Name of the Kubernetes ConfigMap.
-    min_version: 'beta'
+    min_version: 'ga'
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
@@ -72,5 +72,5 @@ properties:
     description: |
       The "data" field of Kubernetes ConfigMap, organized in key-value pairs.
       For details see: https://kubernetes.io/docs/concepts/configuration/configmap/
-    min_version: 'beta'
+    min_version: 'ga'
     immutable: false

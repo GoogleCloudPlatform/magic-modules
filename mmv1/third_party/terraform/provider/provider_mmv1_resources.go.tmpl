@@ -7,9 +7,7 @@ import (
 	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $service }}"
 	{{- end }}
 
-	{{ if eq $.TargetVersionName `ga` }}
 	"github.com/hashicorp/terraform-provider-google/google/services/composer"
-	{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/services/container"
 	"github.com/hashicorp/terraform-provider-google/google/services/containeraws"
 	"github.com/hashicorp/terraform-provider-google/google/services/containerazure"
@@ -63,10 +61,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
 	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
-	{{- end }}
 	"google_composer_image_versions":                   composer.DataSourceGoogleComposerImageVersions(),
 	"google_compute_address":                           compute.DataSourceGoogleComputeAddress(),
 	"google_compute_addresses":                         compute.DataSourceGoogleComputeAddresses(),
@@ -315,9 +311,7 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_billing_subaccount":                    resourcemanager.ResourceBillingSubaccount(),
 	"google_cloudfunctions_function":               cloudfunctions.ResourceCloudFunctionsFunction(),
 	"google_composer_environment":                  composer.ResourceComposerEnvironment(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_composer_user_workloads_secret":        composer.ResourceComposerUserWorkloadsSecret(),
-	{{- end }}
 	"google_compute_attached_disk":                 compute.ResourceComputeAttachedDisk(),
 	"google_compute_instance":                      compute.ResourceComputeInstance(),
 	"google_compute_disk_async_replication":        compute.ResourceComputeDiskAsyncReplication(),
