@@ -859,6 +859,7 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 		project_id = "tf-test-ca-rules-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_id}"
+		deletion_policy = "DELETE"
 	}
 
 	resource "google_project_service" "compute_api" {
