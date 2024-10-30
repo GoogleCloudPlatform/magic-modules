@@ -1955,8 +1955,8 @@ resource "google_tags_tag_key" "rigm-key" {
 
 resource "google_tags_tag_value" "rigm-value" {
   description = "Terraform test tag value."
-  parent = "tagKeys/${google_tags_tag_key.rigm-key.name}"
-  short_name = "%s"
+  parent      = google_tags_tag_key.rigm-key.id
+  short_name  = "%s"
 }
 
 resource "google_compute_region_instance_group_manager" "rigm-tags" {
@@ -1973,7 +1973,7 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
 
   params {
     resource_manager_tags = {
-      "tagKeys/${google_tags_tag_key.rigm-key.name}" = "tagValues/${google_tags_tag_value.rigm-value.name}"
+      (google_tags_tag_key.rigm-key.id) = google_tags_tag_value.rigm-value.id
     }
   }
 }
