@@ -192,26 +192,17 @@ func resourceStorageFolderRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceStorageFolderUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
-	oldName, newName := d.GetChange("name")
+	_ = config
 
-	bucket := d.Get("bucket").(string)
-
-	if oldName != newName {
-		objectsService := storage.NewFoldersService(config.NewStorageClientWithTimeoutOverride(userAgent, d.Timeout(schema.TimeoutUpdate)))
-
-		rename := objectsService.Rename(bucket, oldName.(string), newName.(string))
-		_, err = rename.Do()
-
-		if err != nil {
-			return fmt.Errorf("Error updating folder %s: %s", oldName, err)
+	// we can only get here if force_destroy was updated
+	if d.Get("force_destroy") != nil {
+		if err := d.Set("force_destroy", d.Get("force_destroy")); err != nil {
+			return fmt.Errorf("Error updating force_destroy: %s", err)
 		}
 	}
 
-	return resourceStorageFolderRead(d, meta)
+	// all other fields are immutable, don't do anything else
+	return nil
 }
 
 func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error {
@@ -279,12 +270,12 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		wp.StopWait()
 	}
 
-	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && listError != nil {
+	if listError != nil {
 		return fmt.Errorf("could not delete non-empty folder due to error when listing contents: %v", listError)
 	}
 
 	if !d.Get("force_destroy").(bool) {
-		deleteErr := fmt.Errorf("Error trying to delete folder containing sub folders without force_destroy set to true")
+		deleteErr := fmt.Errorf("Error trying to delete folder without force_destroy set to true")
 		log.Printf("Error! %s : %s\n\n", name, deleteErr)
 		return deleteErr
 	} else {
