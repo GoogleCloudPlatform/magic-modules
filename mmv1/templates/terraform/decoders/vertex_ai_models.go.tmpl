@@ -8,8 +8,6 @@ if _, ok := d.GetOk("model_id"); ok {
 	res["modelId"] = d.Get("model_id").(string)
 }
 
-res["modelName"] = res["displayName"]
-
 // Create a new map with the default label
 res["labels"] = map[string]interface{}{
 	"goog-terraform-provisioned": "true",
@@ -22,5 +20,7 @@ if v, ok := d.GetOk("labels"); ok {
 		res["labels"].(map[string]interface{})[k] = v
 	}
 }
+
+res["modelName"] = d.Get("model_name").(string)
 
 return res, nil
