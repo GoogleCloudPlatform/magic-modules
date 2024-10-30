@@ -167,8 +167,8 @@ func ResourceComposerEnvironment() *schema.Resource {
 				customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 				versionValidationCustomizeDiffFunc,
 			),
-			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewCustomDiff("config.0.node_config.0.network")),
-			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewCustomDiff("config.0.node_config.0.subnetwork")),
+			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewIfNotComposer3CustomDiff("config.0.node_config.0.network")),
+			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewIfNotComposer3CustomDiff("config.0.node_config.0.subnetwork")),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -2988,7 +2988,7 @@ func isComposer3(imageVersion string)	bool {
 	return strings.Contains(imageVersion, "composer-3")
 }
 
-func forceNewCustomDiff(key string) customdiff.ResourceConditionFunc {
+func forceNewIfNotComposer3CustomDiff(key string) customdiff.ResourceConditionFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		old, new := d.GetChange(key)
 		imageVersion := d.Get("config.0.software_config.0.image_version").(string)
