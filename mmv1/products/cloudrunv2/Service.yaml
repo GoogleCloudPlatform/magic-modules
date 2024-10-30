@@ -1111,6 +1111,13 @@ properties:
     description: |
       The main URI in which this Service is serving traffic.
     output: true
+  - name: 'urls'
+    type: Array
+    item_type:
+      type: String
+    description: |-
+      All URLs serving traffic for this Service.
+    output: true
   - name: 'reconciling'
     type: Boolean
     description: |
