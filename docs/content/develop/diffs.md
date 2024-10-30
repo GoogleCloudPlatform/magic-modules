@@ -1,15 +1,21 @@
 ---
-title: "Fix a permadiff"
+title: "Fix diffs"
 weight: 60
+aliases:
+  - /develop/permadiff
 ---
 
-# Fix a permadiff
+# Fix diffs
 
-Permadiffs are an extremely common class of errors that users experience. They manifest as diffs at plan time on fields that a user has not modified in their configuration. They can also show up as test failures with the error message: "After applying this test step, the plan was not empty."
+This page outlines best practices for fixing various kinds of diffs that can show up at plan time. These will often show up as test failures with the text: `After applying this test step, the plan was not empty.`. They can also show up for users at plan time, on fields that a user has not modified in their configuration. If the diff does not go away even after running `terraform apply` more than once with the same configuration, the diff is called a "permadiff".
 
-In a general sense, permadiffs are caused by the API returning a different value for the field than what the user sent, which causes Terraform to try to re-send the same request, which gets the same response, which continues to result in the user seeing a diff. In general, APIs that return exactly what the user sent are more friendly for Terraform or other declarative tooling. However, many GCP APIs normalize inputs, have server-side defaults that are returned to the user, do not return all the fields set on a resource, or return data in a different format in some other way.
+In a general sense, diffs appear when the API response is detected by Terraform to be different than what is in the user's configuration. This can happen for a number of reasons, including:
 
-This page outlines best practices for working around various types of permadiffs in the `google` and `google-beta` providers.
+- API returns a normalized version of the input
+- API returns server-side defaults if the field is unset
+- API does not return all the fields set on a resource (for example, secrets)
+
+The sections below describe in more detail how to address a number of different causes of diffs.
 
 ## API returns default value for unset field {#default}
 

@@ -69,14 +69,17 @@ examples:
     primary_resource_id: 'example'
     primary_resource_name: 'fmt.Sprintf("tf-test-example-image%s", context["random_suffix"])'
     vars:
+      disk_name: 'example-disk'
       image_name: 'example-image'
   - name: 'image_guest_os'
     primary_resource_id: 'example'
     vars:
+      disk_name: 'example-disk'
       image_name: 'example-image'
   - name: 'image_basic_storage_location'
     primary_resource_id: 'example'
     vars:
+      disk_name: 'example-disk'
       image_name: 'example-sl-image'
       primary_resource_name: 'fmt.Sprintf("tf-test-sl-example-image%s", context["random_suffix"])'
 parameters:
