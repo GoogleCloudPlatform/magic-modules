@@ -155,6 +155,23 @@ properties:
               type: String
               description: |
                 The project id/number, should be same as the key of this project config in the project map.
+  - name: 'reservationSharingPolicy'
+    type: NestedObject
+    description: |
+      Specify the reservation sharing policy. If unspecified, the reservation will not be shared with Google Cloud managed services.
+    default_from_api: true
+    min_version: 'beta'
+    update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}?paths=reservationSharingPolicy.serviceShareType'
+    update_verb: 'PATCH'
+    properties:
+      - name: 'serviceShareType'
+        type: Enum
+        description: |
+          Sharing config for all Google Cloud services.
+        default_from_api: true
+        enum_values:
+          - 'ALLOW_ALL'
+          - 'DISALLOW_ALL'
   - name: 'specificReservation'
     type: NestedObject
     description: |
@@ -201,6 +218,7 @@ properties:
             type: Array
             description: |
               Guest accelerator type and count.
+            default_from_api: true
             immutable: true
             item_type:
               type: NestedObject
@@ -213,6 +231,7 @@ properties:
                     `projects/my-project/zones/us-central1-c/acceleratorTypes/nvidia-tesla-p100`
 
                     If you are creating an instance template, specify only the accelerator name.
+                  default_from_api: true
                   required: true
                   immutable: true
                 - name: 'acceleratorCount'
@@ -220,6 +239,7 @@ properties:
                   description: |
                     The number of the guest accelerator cards exposed to
                     this instance.
+                  default_from_api: true
                   required: true
                   immutable: true
           - name: 'localSsds'
