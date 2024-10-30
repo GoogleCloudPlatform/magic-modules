@@ -2481,7 +2481,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
 			GatewayApiConfig:                     expandGatewayApiConfig(d.Get("gateway_api_config")),
 			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
-			DefaultEnablePrivateNodes:	          expandDefaultEnablePrivateNodes(d),
+			DefaultEnablePrivateNodes:            expandDefaultEnablePrivateNodes(d),
 {{- if ne $.TargetVersionName "ga" }}
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
 {{- end }}
@@ -5412,12 +5412,12 @@ func isEnablePDCSI(cluster *container.Cluster) bool {
 	return cluster.AddonsConfig.GcePersistentDiskCsiDriverConfig.Enabled
 }
 
-// Most of the contents of PrivateClusterConfig have been deprecated and replaced by ControlPlaneEndpointsConfig.
-// This function only handles the sole remaining undeprecated field, master_ipv4_cidr_block.
-// Unfortunately, since private_cluster_config.enable_private_nodes is not marked optional, we can't just leave it
-// unset, as that would implicitly use the value false, and it must match the value of
-// network_config.default_enable_private_nodes. This function is intended to be called only during cluster creation,
-// after the network_config field is been configured. This is possible because master_ipv4_cidr_block is immutable.
+// Most of the contents of PrivateClusterConfig have been deprecated in the underlying API and replaced by ControlPlaneEndpointsConfig.
+// This function primarily handles the sole remaining undeprecated field, master_ipv4_cidr_block.
+// Unfortunately, since the private_cluster_config.enable_private_nodes proto field is not marked optional, we can't just leave it
+// unset, as that would implicitly use the value false, and it must match the value of network_config.default_enable_private_nodes.
+// This function is intended to be called only during cluster creation, after the network_config field is been configured.
+// This is possible because master_ipv4_cidr_block is immutable.
 func expandPrivateClusterConfigMasterIpv4CidrBlock(configured interface{}, c *container.Cluster) *container.PrivateClusterConfig {
 	v := configured.(string)
 
