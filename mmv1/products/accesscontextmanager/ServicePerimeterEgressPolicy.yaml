@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterEgressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single EgressPolicy in the status (enforced) configuration for a service perimeter.
   EgressPolicies match requests based on egressFrom and egressTo stanzas.
@@ -28,6 +29,7 @@ description: |
   is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
 references:
   guides:
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#egresspolicy'
 docs:
 id_format: '{{perimeter}}'
@@ -70,7 +72,8 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
-  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -140,6 +143,8 @@ properties:
           if it contains a resource in this list. If * is specified for resources,
           then this `EgressTo` rule will authorize access to all resources outside
           the perimeter.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_egress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterEgressPolicyEgressToResourcesDiffSupressFunc
         item_type:
           type: String
       - name: 'externalResources'

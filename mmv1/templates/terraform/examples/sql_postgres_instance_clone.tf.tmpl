@@ -5,7 +5,7 @@ resource "google_sql_database_instance" "source" {
   settings {
     tier = "db-n1-standard-2"
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
@@ -15,5 +15,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
   clone {
     source_instance_name = google_sql_database_instance.source.id
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }

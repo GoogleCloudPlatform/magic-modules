@@ -13,6 +13,7 @@
 
 ---
 name: 'UrlLists'
+api_resource_type_kind: UrlList
 description: |
   UrlList proto helps users to set reusable, independently manageable lists of hosts, host patterns, URLs, URL patterns.
 references:

@@ -13,6 +13,7 @@
 
 ---
 name: 'HaVpnGateway'
+api_resource_type_kind: VpnGateway
 kind: 'compute#vpnGateway'
 description: |
   Represents a VPN gateway running in GCP. This virtual device is managed

@@ -541,6 +541,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Notebooks",
         "path" to "./google/services/notebooks"
     ),
+    "oracledatabase" to mapOf(
+        "name" to "oracledatabase",
+        "displayName" to "OracleDatabase",
+        "path" to "./google/services/oracledatabase"
+    ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
         "displayName" to "Orgpolicy",
@@ -720,6 +725,11 @@ var ServicesListGa = mapOf(
         "name" to "tpuv2",
         "displayName" to "Tpuv2",
         "path" to "./google/services/tpuv2"
+    ),
+    "transcoder" to mapOf(
+        "name" to "transcoder",
+        "displayName" to "Transcoder",
+        "path" to "./google/services/transcoder"
     ),
     "vertexai" to mapOf(
         "name" to "vertexai",

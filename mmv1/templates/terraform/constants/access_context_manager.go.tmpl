@@ -1,0 +1,41 @@
+func {{$.ResourceName}}EgressToResourcesDiffSupressFunc(_, _, _ string, d *schema.ResourceData) bool {
+    old, new := d.GetChange("egress_to.0.resources")
+
+    oldResources, err := tpgresource.InterfaceSliceToStringSlice(old)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return false
+    }
+
+    newResources, err := tpgresource.InterfaceSliceToStringSlice(new)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return false
+    }
+
+    sort.Strings(oldResources)
+    sort.Strings(newResources)
+
+    return slices.Equal(oldResources, newResources)
+}
+
+func {{$.ResourceName}}IngressToResourcesDiffSupressFunc(_, _, _ string, d *schema.ResourceData) bool {
+    old, new := d.GetChange("ingress_to.0.resources")
+
+    oldResources, err := tpgresource.InterfaceSliceToStringSlice(old)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return false
+    }
+
+    newResources, err := tpgresource.InterfaceSliceToStringSlice(new)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert config value: %s", err)
+        return false
+    }
+
+    sort.Strings(oldResources)
+    sort.Strings(newResources)
+
+    return slices.Equal(oldResources, newResources)
+}
