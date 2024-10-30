@@ -38,8 +38,6 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
-  # custom_import: 'templates/terraform/constants/firewall_policy_association_import.go.tmpl'
-  # test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 examples:
