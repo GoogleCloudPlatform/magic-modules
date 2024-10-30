@@ -21,6 +21,7 @@ resource "google_workflows_workflow" "{{$.PrimaryResourceId}}" {
   region        = "us-central1"
   description   = "Magic"
   service_account = google_service_account.test_account.id
+  deletion_protection = false
   tags = {
     "${data.google_project.project.project_id}/${google_tags_tag_key.tag_key.short_name}" = "${google_tags_tag_value.tag_value.short_name}"
   }
