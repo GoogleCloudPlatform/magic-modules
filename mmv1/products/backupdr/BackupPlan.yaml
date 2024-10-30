@@ -41,6 +41,7 @@ examples:
     primary_resource_id: 'my-backup-plan'
     vars:
       backup_plan_id: 'backup-plan-test'
+    exclude_test: true
     test_env_vars:
       project: :PROJECT_NAME
 parameters:
