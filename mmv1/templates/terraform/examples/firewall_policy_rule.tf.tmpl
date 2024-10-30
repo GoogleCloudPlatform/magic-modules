@@ -1,4 +1,6 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
+  provider = google-beta
+  
   name        = "{{index $.Vars "address"}}"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   description = "Sample global networksecurity_address_group"
@@ -9,18 +11,24 @@ resource "google_network_security_address_group" "basic_global_networksecurity_a
 }
 
 resource "google_folder" "folder" {
+  provider = google-beta
+  
   display_name        = "{{index $.Vars "folder"}}"
   parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {
+  provider = google-beta
+  
   parent      = google_folder.folder.id
   short_name  = "{{index $.Vars "fw_policy"}}"
   description = "Resource created for Terraform acceptance testing"
 }
 
 resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  
   firewall_policy = google_compute_firewall_policy.default.name
   description     = "Resource created for Terraform acceptance testing"
   priority        = 9000
