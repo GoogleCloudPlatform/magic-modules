@@ -38,10 +38,9 @@ timeouts:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 custom_code:
-  post_create: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
-  post_delete: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
-  post_update: 'templates/terraform/constants/compute_firewall_policy_rule_operation.go.tmpl'
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_firewall_policy_rule.go.tmpl'
+  post_delete: 'templates/terraform/post_delete/compute_firewall_policy_rule.go.tmpl'
+  post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
 examples:
   - name: 'firewall_policy_rule'
     primary_resource_id: 'policy_rule'
