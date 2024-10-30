@@ -26,7 +26,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccStorageFolder_storageFolderBasicForceDestroy(t *testing.T) {
+func TestAccStorageFolder_storageFolderBasic(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
