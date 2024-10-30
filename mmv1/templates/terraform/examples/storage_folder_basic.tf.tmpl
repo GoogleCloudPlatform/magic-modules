@@ -5,10 +5,12 @@ resource "google_storage_bucket" "bucket" {
   hierarchical_namespace {
     enabled = true
   }
+  force_destroy = true
 }
 
 resource "google_storage_folder" "{{$.PrimaryResourceId}}" {
   bucket        = google_storage_bucket.bucket.name
   name          = "folder/name/"
+  force_destroy = true
   recursive     = true
 }
