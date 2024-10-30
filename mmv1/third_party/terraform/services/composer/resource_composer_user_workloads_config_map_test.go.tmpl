@@ -1,7 +1,5 @@
 package composer_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"strings"
@@ -166,5 +164,3 @@ func testAccComposerUserWorkloadsConfigMapDestroyed(t *testing.T) func(s *terraf
 		return nil
 	}
 }
-
-{{ end }}
