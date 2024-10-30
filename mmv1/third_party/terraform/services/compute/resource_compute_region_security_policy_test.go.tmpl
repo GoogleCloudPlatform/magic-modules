@@ -763,8 +763,8 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatc
 func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "project" {
-		name = "tf-region-ca-rules-%{random_suffix}"
-		project_id = "tf-test-region-ca-rules-%{random_suffix}"
+		name = "tf-test-ca-rules-%{random_suffix}"
+		project_id = "tf-test-ca-rules-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_id}"
 	}
@@ -854,8 +854,8 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 	return acctest.Nprintf(`
 
 	resource "google_project" "project" {
-		name = "tf-region-ca-rules-%{random_suffix}"
-		project_id = "tf-test-region-ca-rules-%{random_suffix}"
+		name = "tf-test-ca-rules-%{random_suffix}"
+		project_id = "tf-test-ca-rules-%{random_suffix}"
 		org_id     = "%{org_id}"
 		billing_account = "%{billing_id}"
 	}
