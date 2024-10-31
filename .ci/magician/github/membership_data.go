@@ -106,5 +106,10 @@ var (
 			startDate: newDate(2024, 10, 2, bstLoc),
 			endDate:   newDate(2024, 10, 14, bstLoc),
 		},
+		{
+			id:        "ScottSuarez",
+			startDate: newDate(2024, 10, 31, bstLoc),
+			endDate:   newDate(2024, 11, 17, bstLoc),
+		},
 	}
 )
