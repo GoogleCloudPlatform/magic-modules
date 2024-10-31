@@ -482,7 +482,7 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -742,7 +742,7 @@ resource "google_container_cluster" "cluster" {
 `, clusterName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -1000,7 +1000,7 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -1290,7 +1290,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withTpu(t *testing.T) {
 	t.Parallel()
 
@@ -4058,8 +4058,7 @@ func TestAccContainerCluster_withInvalidAutoscalingProfile(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
@@ -5098,7 +5097,7 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withTPUConfig(t *testing.T) {
 	t.Parallel()
 
@@ -5258,7 +5257,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerCluster_withWorkloadALTSConfig(t *testing.T) {
 	t.Parallel()
 
@@ -6551,7 +6550,7 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withTelemetryEnabled(clusterName, telemetryType, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_cluster_telemetry" {
@@ -7035,7 +7034,7 @@ resource "google_container_cluster" "with_node_locations" {
 `, clusterName, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withTpu(containerNetName string, clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -7090,8 +7089,8 @@ resource "google_container_cluster" "with_tpu" {
 }
 `, containerNetName, clusterName)
 }
+{{- end }}
 
-{{ end }}
 func testAccContainerCluster_withIntraNodeVisibility(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
@@ -10728,7 +10727,7 @@ resource "google_container_cluster" "primary" {
 `, name, name, name, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withTPUConfig(network, cluster string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -10785,9 +10784,9 @@ resource "google_container_cluster" "with_tpu_config" {
 }
 `, network, cluster)
 }
-{{- end }}
+{{ end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
 func testAccContainerCluster_withProtectConfig(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -11181,7 +11180,7 @@ resource "google_container_cluster" "without_confidential_boot_disk" {
 `, clusterName, npName, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func testAccContainerCluster_withWorkloadALTSConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
   return fmt.Sprintf(`
   data "google_project" "project" {
@@ -11241,8 +11240,7 @@ func testAccContainerCluster_withWorkloadALTSConfigAutopilot(projectID, name str
   }
 `, projectID, name, enable)
 }
-
-{{ end }}
+{{- end }}
 
 func testAccContainerCluster_withAutopilotKubeletConfigBaseline(name string) string {
   return fmt.Sprintf(`

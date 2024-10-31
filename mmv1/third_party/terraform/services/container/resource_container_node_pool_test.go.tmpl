@@ -1482,9 +1482,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 	})
 }
 
-
-
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerNodePool_ephemeralStorageConfig(t *testing.T) {
 	t.Parallel()
 
@@ -4230,7 +4228,7 @@ resource "google_container_node_pool" "with_tpu_topology" {
 `, cluster, networkName, subnetworkName, np1, np2, tpuTopology)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 	t.Parallel()
 

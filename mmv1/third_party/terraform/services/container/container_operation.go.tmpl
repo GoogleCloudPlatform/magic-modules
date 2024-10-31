@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-{{ if eq $.TargetVersionName `ga` }}
+{{ if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/container/v1"
 {{- else }}
 	container "google.golang.org/api/container/v1beta1"

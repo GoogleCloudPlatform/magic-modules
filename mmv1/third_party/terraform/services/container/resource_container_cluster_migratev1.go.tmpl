@@ -660,7 +660,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 {{- end }}
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 			"tpu_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -880,7 +880,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				},
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"protect_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1249,7 +1249,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"pod_security_policy_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1663,7 +1663,7 @@ func resourceContainerClusterResourceV1() *schema.Resource {
 				Description: `The IP address range of the Cloud TPUs in this cluster, in CIDR notation (e.g. 1.2.3.4/29).`,
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"cluster_telemetry": {
 				Type:     schema.TypeList,
 				Optional: true,

@@ -10,7 +10,7 @@ import (
 {{- end }}
 )
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
 func TestValidateNodePoolAutoConfig(t *testing.T) {
 	withTags := &container.NodePoolAutoConfig{
 		NetworkTags: &container.NetworkTags{

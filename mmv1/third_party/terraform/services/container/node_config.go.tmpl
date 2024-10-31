@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-{{ if eq $.TargetVersionName `ga` }}
+{{ if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/container/v1"
 {{- else }}
 	container "google.golang.org/api/container/v1beta1"
@@ -258,7 +258,7 @@ func schemaNodeConfig() *schema.Schema {
 
 				"logging_variant": schemaLoggingVariant(),
 
-	{{ if ne $.TargetVersionName `ga` -}}
+	{{ if ne $.TargetVersionName "ga" }}
 				"ephemeral_storage_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -568,7 +568,7 @@ func schemaNodeConfig() *schema.Schema {
 					},
 				},
 
-	{{ if ne $.TargetVersionName `ga` -}}
+	{{ if ne $.TargetVersionName "ga" }}
 				"sandbox_config": {
 					Type:       schema.TypeList,
 					Optional:   true,
@@ -934,7 +934,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 	if v, ok := nodeConfig["ephemeral_storage_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.EphemeralStorageConfig = &container.EphemeralStorageConfig{
@@ -1120,7 +1120,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.WorkloadMetadataConfig = expandWorkloadMetadataConfig(v)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 	if v, ok := nodeConfig["sandbox_config"]; ok && len(v.([]interface{})) > 0 {
 		conf := v.([]interface{})[0].(map[string]interface{})
 		nc.SandboxConfig = &container.SandboxConfig{
@@ -1160,7 +1160,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.EnableConfidentialStorage = v.(bool)
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+	{{ if ne $.TargetVersionName "ga" }}
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
 	}
@@ -1437,7 +1437,7 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 func expandHostMaintenancePolicy(v interface{}) *container.HostMaintenancePolicy {
 	if v == nil {
 		return nil
@@ -1625,7 +1625,7 @@ func flattenShieldedInstanceConfig(c *container.ShieldedInstanceConfig) []map[st
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 func flattenEphemeralStorageConfig(c *container.EphemeralStorageConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -1977,7 +1977,7 @@ func flattenFastSocket(c *container.FastSocket) []map[string]interface{} {
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" }}
 func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {

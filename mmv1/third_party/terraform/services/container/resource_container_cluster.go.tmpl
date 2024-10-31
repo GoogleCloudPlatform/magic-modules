@@ -20,7 +20,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-{{ if eq $.TargetVersionName `ga` }}
+{{ if eq $.TargetVersionName "ga" }}
 	"google.golang.org/api/container/v1"
 {{- else }}
 	container "google.golang.org/api/container/v1beta1"
@@ -927,7 +927,7 @@ func ResourceContainerCluster() *schema.Resource {
 {{- end }}
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"tpu_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1147,7 +1147,7 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"protect_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1515,7 +1515,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `The Kubernetes version on the nodes. Must either be unset or set to the same value as min_master_version on create. Defaults to the default version set by GKE which is not necessarily the latest version. This only affects nodes in the default node pool. While a fuzzy version can be specified, it's recommended that you specify explicit versions as Terraform will see spurious diffs when fuzzy versions are used. See the google_container_engine_versions data source's version_prefix field to approximate fuzzy versions in a Terraform-compatible way. To update nodes in other node pools, use the version attribute on the node pool.`,
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"pod_security_policy_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1961,7 +1961,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Description: `The IP address range of the Cloud TPUs in this cluster, in CIDR notation (e.g. 1.2.3.4/29).`,
 			},
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 			"cluster_telemetry": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -2551,7 +2551,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.IdentityServiceConfig = expandIdentityServiceConfig(v)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if v, ok := d.GetOk("tpu_config"); ok {
 		cluster.TpuConfig = expandContainerClusterTpuConfig(v)
 	}
@@ -2613,7 +2613,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.AddonsConfig.GcePersistentDiskCsiDriverConfig.Enabled = true
 	}
 
-	{{ if ne $.TargetVersionName `ga` -}}
+	{{ if ne $.TargetVersionName "ga" -}}
 	if v, ok := d.GetOk("workload_alts_config"); ok {
 		cluster.WorkloadAltsConfig = expandWorkloadAltsConfig(v)
 	}
@@ -3040,7 +3040,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -3105,13 +3105,13 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if err := d.Set("protect_config", flattenProtectConfig(cluster.ProtectConfig)); err != nil {
 		return err
 	}
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if err := d.Set("workload_alts_config", flattenWorkloadAltsConfig(cluster.WorkloadAltsConfig)); err != nil {
 		return err
 	}
@@ -3460,7 +3460,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s L4 ILB Subsetting has been updated to %v", d.Id(), enabled)
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if d.HasChange("enable_fqdn_network_policy") {
 		enabled := d.Get("enable_fqdn_network_policy").(bool)
 		req := &container.UpdateClusterRequest{
@@ -3998,7 +3998,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s database encryption config has been updated", d.Id())
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		req := &container.UpdateClusterRequest{
@@ -4457,7 +4457,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(false)
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if d.HasChange("cluster_telemetry") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4495,7 +4495,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if d.HasChange("protect_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
@@ -4758,7 +4758,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if v, ok := config["istio_config"]; ok && len(v.([]interface{})) > 0 {
 		addon := v.([]interface{})[0].(map[string]interface{})
 		ac.IstioConfig = &container.IstioConfig{
@@ -5100,7 +5100,7 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func expandProtectConfig(configured interface{}) *container.ProtectConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5434,7 +5434,7 @@ func expandReleaseChannel(configured interface{}) *container.ReleaseChannel {
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5487,7 +5487,7 @@ func expandIdentityServiceConfig(configured interface{}) *container.IdentityServ
 	return v
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5707,7 +5707,7 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 	return mc
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func expandContainerClusterTpuConfig(configured interface{}) *container.TpuConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5805,7 +5805,7 @@ func expandNodePoolAutoConfigNetworkTags(configured interface{}) *container.Netw
 	return nt
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -5994,7 +5994,7 @@ func flattenClusterAddonsConfig(c *container.AddonsConfig) []map[string]interfac
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 	if c.IstioConfig != nil {
 		result["istio_config"] = []map[string]interface{}{
 			{
@@ -6096,7 +6096,7 @@ func flattenReleaseChannel(c *container.ReleaseChannel) []map[string]interface{}
 	return result
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 
 func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interface{} {
 	result := []map[string]interface{}{}
@@ -6400,7 +6400,7 @@ func flattenMasterAuthorizedNetworksConfig(c *container.MasterAuthorizedNetworks
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -6664,7 +6664,7 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 	return []map[string]interface{}{result}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -6870,7 +6870,7 @@ func containerClusterNetworkPolicyEmptyCustomizeDiff(_ context.Context, d *schem
 	return nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("pod_security_policy_config"); ok {
