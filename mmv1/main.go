@@ -48,17 +48,6 @@ var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML f
 // Example usage: --yaml
 var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
 
-// Example usage: --template
-var templateMode = flag.Bool("template", false, "copy templates over from .erb to go .tmpl")
-
-// Example usage: --handwritten
-var handwrittenMode = flag.Bool("handwritten", false, "copy handwritten files over from .erb to go .tmpl")
-
-var yamlTempMode = flag.Bool("yaml-temp", false, "copy text over from ruby yaml to go yaml in a temp file")
-
-var handwrittenTempFiles = flag.String("handwritten-temp", "", "copy specific handwritten files over from .erb to go .tmpl.temp comma separated")
-var templateTempFiles = flag.String("template-temp", "", "copy specific templates over from .erb to go .tmpl.temp comma separated")
-
 var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
 
 func main() {
@@ -69,18 +58,6 @@ func main() {
 		parser := openapi_generate.NewOpenapiParser("openapi_generate/openapi", "products")
 		parser.Run()
 		return
-	}
-
-	if *yamlMode || *yamlTempMode {
-		CopyAllDescriptions(*yamlTempMode)
-	}
-
-	if *templateMode || *templateTempFiles != "" {
-		convertTemplates(*templateTempFiles)
-	}
-
-	if *handwrittenMode || *handwrittenTempFiles != "" {
-		convertAllHandwrittenFiles(*handwrittenTempFiles)
 	}
 
 	if outputPath == nil || *outputPath == "" {
