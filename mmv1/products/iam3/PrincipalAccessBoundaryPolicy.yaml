@@ -46,7 +46,7 @@ async:
     path: 'error'
     message: 'message'
 examples:
-  - name: 'iam3_principal_access_boundary_policy'
+  - name: 'iam_principal_access_boundary_policy'
     min_version: 'beta'
     primary_resource_id: 'my-pab-policy'
     test_env_vars:

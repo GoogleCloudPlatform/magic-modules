@@ -12,6 +12,7 @@
 # limitations under the License.
 ---
 name: 'IAM3'
+legacy_name: 'iam'
 display_name: 'Cloud IAM'
 versions:
   - name: 'beta'

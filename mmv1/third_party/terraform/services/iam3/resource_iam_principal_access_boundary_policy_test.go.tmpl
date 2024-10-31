@@ -26,7 +26,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 				Config: testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyExample_full(context),
 			},
 			{
-				ResourceName:            "google_iam3_principal_access_boundary_policy.my-pab-policy",
+				ResourceName:            "google_iam_principal_access_boundary_policy.my-pab-policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "location", "organization", "principal_access_boundary_policy_id", "etag"},
@@ -35,7 +35,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 				Config: testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyExample_update(context),
 			},
 			{
-				ResourceName:            "google_iam3_principal_access_boundary_policy.my-pab-policy",
+				ResourceName:            "google_iam_principal_access_boundary_policy.my-pab-policy",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "location", "organization", "principal_access_boundary_policy_id", "etag"},
@@ -46,7 +46,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 
 func testAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
+resource "google_iam_principal_access_boundary_policy" "my-pab-policy" {
   provider       = google-beta
   organization   = "%{org_id}"
   location       = "global"
@@ -67,7 +67,7 @@ resource "google_project" "project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_iam3_principal_access_boundary_policy" "my-pab-policy" {
+resource "google_iam_principal_access_boundary_policy" "my-pab-policy" {
   provider       = google-beta
   organization   = "%{org_id}"
   location       = "global"
