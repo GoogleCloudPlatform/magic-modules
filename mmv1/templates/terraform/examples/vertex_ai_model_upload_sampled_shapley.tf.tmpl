@@ -1,0 +1,82 @@
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
+  model_name = "{{index $.Vars "sampled_shapley_model_name"}}"
+  description = "sampled_shapley_description"
+
+container_spec {
+  # Base container configuration
+  image_uri             = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest"
+  command              = ["python3", "/usr/bin/serve"]
+  args                 = [
+    "--model_path=/model",
+    "--port=8080",
+    "--rest_api_port=8080",
+    "--worker_count=1"
+  ]
+  deployment_timeout    = "300s"
+  shared_memory_size_mb = 1024
+
+  # Environment variables
+  env {
+    name  = "TF_CPP_MIN_LOG_LEVEL"
+    value = "2"
+  }
+  env {
+    name  = "AIP_STORAGE_URI"
+    value = "gs://your-bucket/model"
+  }
+
+  # Port configurations
+  ports {
+    container_port = 8080
+  }
+  ports {
+    container_port = 8081
+  }
+
+  grpc_ports {
+    container_port = 8500
+  }
+  grpc_ports {
+    container_port = 8501
+  }
+
+  # Health checking
+  health_route = "/health"
+  predict_route = "/v1/models/model/predict"
+
+  # Health probe configuration
+  health_probe {
+    exec {
+      command = ["curl", "http://localhost:8080/health"]
+    }
+    period_seconds       = 30
+    timeout_seconds      = 5
+  }
+
+  # Startup probe configuration
+  startup_probe {
+    exec {
+      command = ["curl", "http://localhost:8080/health"]
+    }
+
+    period_seconds       = 30
+    timeout_seconds      = 10
+  }
+
+}
+
+artifact_uri = "gs://cloud-samples-data/ai-platform/mnist_tfrecord/pretrained"
+
+  explanation_spec {
+
+    parameters {
+      sampled_shapley_attribution {
+        path_count = 1
+      }
+      output_indices = [1]
+      top_k = 1
+    }
+  }
+
+  region       = "us-central1"
+}

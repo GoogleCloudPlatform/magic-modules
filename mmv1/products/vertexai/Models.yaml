@@ -34,6 +34,10 @@ async:
     base_url: '{{op_id}}'
     path: 'name'
     wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
   result:
     path: 'response'
     resource_inside_response: true
@@ -52,6 +56,13 @@ examples:
       model_id: 'test-model'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+  - name: 'vertex_ai_model_upload_sampled_shapley'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+      sampled_shapley_model_name: 'test-model'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
   - type: String
     name: region
@@ -65,9 +76,8 @@ properties:
     description:
       The name of the Model. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.tmpl
     output: true
-    # url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.tmpl
   - type: String
     name: 'description'
     description: Description of the Model.
@@ -137,8 +147,8 @@ properties:
           description: |
             The content of this Model that may be exported.
           enum_values:
-            - :ARTIFACT
-            - :IMAGE
+            - ARTIFACT
+            - IMAGE
   - type: String
     name: 'trainerPipeline'
     output: true
@@ -422,447 +432,32 @@ properties:
     default_from_api: true
     description: |
       Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
-  # - type: NestedObject
-  #   name: 'explanationSpec'
-  #   description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
-  #   properties:
-  #     - type: NestedObject
-  #       name: 'parameters'
-  #       required: true
-  #       description: Parameters that configure explaining of the Model's predictions.
-  #       properties:
-  #         - type: Integer
-  #           name: 'topK'
-  #           description: If populated, returns attributions for top K indices of outputs (defaults to 1).
-  #           default_value: 1
-  #           immutable: true
-  #         - type: Array
-  #           name: 'outputIndices'
-  #           description: If populated, only returns attributions that have outputIndex contained in outputIndices.
-  #           immutable: true
-  #           item_type:
-  #             type: Double
-  #         ## Union field method can be only one of the following
-  #         - type: NestedObject
-  #           name: 'sampledShapleyAttribution'
-  #           description: An attribution method that approximates Shapley values for features that contribute to the label being predicted.
-  #           immutable: true
-  #           properties:
-  #             - type: Integer
-  #               name: 'pathCount'
-  #               description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 50], inclusively.
-  #               required: true
-  #         - type: NestedObject
-  #           name: 'integratedGradientsAttribution'
-  #           description: An attribution method that computes Aumann-Shapley values taking advantage of the model's fully differentiable structure.
-  #           properties:
-  #             - type: Integer
-  #               name: 'stepCount'
-  #               description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
-  #               required: true
-  #             - type: NestedObject
-  #               name: 'smoothGradConfig'
-  #               description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
-  #               properties:
-  #                 - type: Integer
-  #                   name: 'noisySampleCount'
-  #                   description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
-  #                   default_value: 3
-  #                 - type: Double
-  #                   name: 'noiseSigma'
-  #                   at_least_one_of:
-  #                     - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
-  #                     - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
-  #                   description: This is a single float value and will be used to add noise to all the features.
-  #                 - type: NestedObject
-  #                   name: 'featureNoiseSigma'
-  #                   at_least_one_of:
-  #                     - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.noiseSigma
-  #                     - explanationSpec.parameters.integratedGradientsAttribution.smoothGradConfig.featureNoiseSigma
-  #                   description: The number of gradient samples to use for approximation.
-  #                   properties:
-  #                     - type: Array
-  #                       name: 'noiseSigma'
-  #                       description: The number of gradient samples to use for approximation.
-  #                       item_type:
-  #                         type: NestedObject
-  #                         properties:
-  #                           - type: String
-  #                             name: 'name'
-  #                             description: The name of the input feature for which noise sigma is provided.
-  #                           # - type: Double
-  #                           #   name: 'sigma'
-  #                           #   description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
-  #                           #   default_value: 0.1
-  #             - type: NestedObject
-  #               name: 'blurBaselineConfig'
-  #               description: Config for IG with blur baseline.
-  #               required: true
-  #               properties:
-  #                 - type: Double
-  #                   name: 'maxBlurSigma'
-  #                   description: The standard deviation of the blur kernel for the blurred baseline.
-  #         - type: NestedObject
-  #           name: 'xraiAttribution'
-  #           description: An attribution method that redistributes Integrated Gradients attribution to segmented regions, taking advantage of the model's fully differentiable structure.
-  #           properties:
-  #             - type: Integer
-  #               name: 'stepCount'
-  #               description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 100], inclusively.
-  #               required: true
-  #             - type: NestedObject
-  #               name: 'smoothGradConfig'
-  #               description: When enabled, the gradients are approximated by averaging the gradients from noisy samples in the vicinity of the inputs.
-  #               properties:
-  #                 - type: Integer
-  #                   name: 'noisySampleCount'
-  #                   description: The number of gradient samples to use for approximation. Valid range of its value is [1, 50].
-  #                   default_value: 3
-  #                 - type: Double
-  #                   name: 'noiseSigma'
-  #                   description: This is a single float value and will be used to add noise to all the features.
-  #                   default_value: 0.1
-  #                 - type: NestedObject
-  #                   name: 'featureNoiseSigma'
-  #                   description: The number of gradient samples to use for approximation.
-  #                   properties:
-  #                     - type: Array
-  #                       name: 'noiseSigma'
-  #                       description: The number of gradient samples to use for approximation.
-  #                       item_type:
-  #                         type: NestedObject
-  #                         properties:
-  #                           - type: String
-  #                             name: 'name'
-  #                             description: The name of the input feature for which noise sigma is provided.
-  #                           - type: Double
-  #                             name: 'sigma'
-  #                             description: This represents the standard deviation of the Gaussian kernel that will be used to add noise to the feature prior to computing gradients.
-  #                             default_value: 0.1
-  #             - type: NestedObject
-  #               name: 'blurBaselineConfig'
-  #               description: Config for IG with blur baseline.
-  #               required: true
-  #               properties:
-  #                 - type: Double
-  #                   name: 'maxBlurSigma'
-  #                   default_value: 0.0
-  #                   description: The standard deviation of the blur kernel for the blurred baseline.
-  #         - type: NestedObject
-  #           name: 'examples'
-  #           description: Description of the Model.
-  #           properties:
-  #             - type: Integer
-  #               name: 'neighborCount'
-  #               description: The number of neighbors to return when querying for examples.
-  #             - type: NestedObject
-  #               name: 'exampleGcsSource'
-  #               description: The number of neighbors to return when querying for examples.
-  #               properties:
-  #                 - type: Enum
-  #                   name: 'dataFormat'
-  #                   description: 'The format in which instances are given, if not specified, assume its JSONL format. Currently only JSONL format is supported.'
-  #                   enum_values:
-  #                     - :JSONL
-  #                 - type: NestedObject
-  #                   name: 'gcsSource'
-  #                   description: 'The Cloud Storage location for the input instances.'
-  #                   properties:
-  #                     - type: Array
-  #                       name: 'uris'
-  #                       required: true
-  #                       description: 'Google Cloud Storage URI(-s) to the input file(s). May contain wildcards.'
-  #                       item_type:
-  #                         type: String
-  #             - type: NestedObject
-  #               name: 'nearestNeighborSearchConfig'
-  #               description: The number of neighbors to return when querying for examples.
-  #               exactly_one_of:
-  #                 - presets
-  #                 - nearestNeighborSearchConfig
-  #               properties:
-  #                 - type: String
-  #                   name: 'contentsDeltaUri'
-  #                   required: true
-  #                   description: |-
-  #                     Allows inserting, updating  or deleting the contents of the Matching Engine Index.
-  #                     The string must be a valid Cloud Storage directory path. If this
-  #                     field is set when calling IndexService.UpdateIndex, then no other
-  #                     Index field can be also updated as part of the same call.
-  #                     The expected structure and format of the files this URI points to is
-  #                     described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
-  #                   custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.erb
-  #                 - type: Boolean
-  #                   name: 'isCompleteOverwrite'
-  #                   description: |-
-  #                     If this field is set together with contentsDeltaUri when calling IndexService.UpdateIndex,
-  #                     then existing content of the Index will be replaced by the data from the contentsDeltaUri.
-  #                   default_value: false
-  #                   custom_flatten: templates/terraform/custom_flatten/vertex_ai_index_ignore_is_complete_overwrite.go.erb
-  #                 - type: NestedObject
-  #                   name: 'config'
-  #                   immutable: true
-  #                   description: The configuration of the Matching Engine Index.
-  #                   properties:
-  #                     - type: Integer
-  #                       name: 'dimensions'
-  #                       description: The number of dimensions of the input vectors.
-  #                       required: true
-  #                     - type: Integer
-  #                       name: 'approximateNeighborsCount'
-  #                       description: |-
-  #                         The default number of neighbors to find via approximate search before exact reordering is
-  #                         performed. Exact reordering is a procedure where results returned by an
-  #                         approximate search algorithm are reordered via a more expensive distance computation.
-  #                         Required if tree-AH algorithm is used.
-  #                     - type: String
-  #                       name: 'shardSize'
-  #                       description: |-
-  #                         Index data is split into equal parts to be processed. These are called "shards".
-  #                         The shard size must be specified when creating an index. The value must be one of the followings:
-  #                         * SHARD_SIZE_SMALL: Small (2GB)
-  #                         * SHARD_SIZE_MEDIUM: Medium (20GB)
-  #                         * SHARD_SIZE_LARGE: Large (50GB)
-  #                       immutable: true
-  #                       default_from_api: true
-  #                     - type: String
-  #                       name: 'distanceMeasureType'
-  #                       description: |-
-  #                         The distance measure used in nearest neighbor search. The value must be one of the followings:
-  #                         * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
-  #                         * L1_DISTANCE: Manhattan (L_1) Distance
-  #                         * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
-  #                         * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
-  #                       default_value: 'DOT_PRODUCT_DISTANCE'
-  #                     - type: String
-  #                       name: 'featureNormType'
-  #                       description: |-
-  #                         Type of normalization to be carried out on each vector. The value must be one of the followings:
-  #                         * UNIT_L2_NORM: Unit L2 normalization type
-  #                         * NONE: No normalization type is specified.
-  #                       default_value: 'NONE'
-  #                       ignore_read: true
-  #                     - type: NestedObject
-  #                       name: 'algorithmConfig'
-  #                       description:
-  #                         The configuration with regard to the algorithms used for efficient
-  #                         search.
-  #                       properties:
-  #                         - type: NestedObject
-  #                           name: 'treeAhConfig'
-  #                           exactly_one_of:
-  #                             - treeAhConfig
-  #                             - bruteForceConfig
-  #                           description: |-
-  #                             Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
-  #                             Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
-  #                           properties:
-  #                             - type: Integer
-  #                               name: 'leafNodeEmbeddingCount'
-  #                               description:
-  #                                 Number of embeddings on each leaf node. The default value
-  #                                 is 1000 if not set.
-  #                               default_value: 1000
-  #                             - type: Integer
-  #                               name: 'leafNodesToSearchPercent'
-  #                               description: |-
-  #                                 The default percentage of leaf nodes that any query may be searched. Must be in
-  #                                 range 1-100, inclusive. The default value is 10 (means 10%) if not set.
-  #                               default_value: 10
-  #                         - type: NestedObject
-  #                           name: 'bruteForceConfig'
-  #                           allow_empty_object: true
-  #                           send_empty_value: true
-  #                           properties: []
-  #                           exactly_one_of:
-  #                             - treeAhConfig
-  #                             - bruteForceConfig
-  #                           description: |-
-  #                             Configuration options for using brute force search, which simply implements the
-  #                             standard linear search in the database for each query.
-  #             - type: NestedObject
-  #               name: 'presets'
-  #               exactly_one_of:
-  #                 - presets
-  #                 - nearestNeighborSearchConfig
-  #               description: Simplified preset configuration, which automatically sets configuration values based on the desired query speed-precision trade-off and modality.
-  #               properties:
-  #                 - type: Enum
-  #                   name: 'modality'
-  #                   description: The modality of the uploaded model, which automatically configures the distance measurement and feature normalization for the underlying example index and queries
-  #                   enum_values:
-  #                     - :IMAGE
-  #                     - :TEXT
-  #                     - :TABULAR
-  #                 - type: Enum
-  #                   name: 'query'
-  #                   description: Preset option controlling parameters for speed-precision trade-off when querying for examples. If omitted, defaults to PRECISE.
-  #                   enum_values:
-  #                     - :PRECISE
-  #                     - :FAST
-  #     - type: NestedObject
-  #       name: 'metadata'
-  #       description: metadata describing the Model's input and output for explanation.
-  #       properties:
-  #         - type: Map
-  #           name: 'inputs'
-  #           key_name: 'name'
-  #           description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
-  #           required: true
-  #           value_type:
-  #             type: NestedObject
-  #             properties:
-  #               - type: String
-  #                 name: 'inputTensorName'
-  #                 description: |
-  #                   name of the input tensor for this feature. Required and is only applicable to Vertex AI-provided images for Tensorflow.
-  #               - type: Enum
-  #                 name: 'encoding'
-  #                 description: |
-  #                   Defines how the feature is encoded into the input tensor. Defaults to IDENTITY.
-  #                 enum_values:
-  #                   - IDENTITY
-  #                   - BAG_OF_FEATURES
-  #                   - BAG_OF_FEATURES_SPARSE
-  #                   - IDENTITY_SPARSE
-  #                   - INDICATOR
-  #                   - COMBINED_EMBEDDING
-  #                   - CONCAT_EMBEDDING
-  #               - type: String
-  #                 name: 'modality'
-  #                 default_value: 'numeric'
-  #                 description: |
-  #                   Modality of the feature. Valid values are: numeric, image.
-  #               - type: NestedObject
-  #                 name: 'featureValueDomain'
-  #                 description: |
-  #                   The domain details of the input feature value. Like min/max, original mean or standard deviation if normalized.
-  #                 properties:
-  #                   - type: Double
-  #                     name: 'minValue'
-  #                     description: |
-  #                       The minimum permissible value for this feature.
-  #                   - type: Double
-  #                     name: 'maxValue'
-  #                     description: |
-  #                       The maximum permissible value for this feature.
-  #                   - type: Double
-  #                     name: 'originalMean'
-  #                     description: |
-  #                       If this input feature has been normalized to a mean value of 0, the originalMean specifies the mean value of the domain prior to normalization.
-  #                   - type: Double
-  #                     name: 'originalStddev'
-  #                     description: |
-  #                       If this input feature has been normalized to a standard deviation of 1.0, the originalStddev specifies the standard deviation of the domain prior to normalization.
-  #               - type: String
-  #                 name: 'indicesTensorName'
-  #                 description: |
-  #                   Specifies the index of the values of the input tensor.
-  #               - type: String
-  #                 name: 'denseShapeTensorName'
-  #                 description: |
-  #                   Specifies the shape of the values of the input if the input is a sparse representation.
-  #               - type: Array
-  #                 name: 'indexFeatureMapping'
-  #                 required: true
-  #                 description: |
-  #                   A list of feature names for each index in the input tensor.
-  #                 item_type: 
-  #                   type: String
-  #               - type: String
-  #                 name: 'encodedTensorName'
-  #                 description: |
-  #                   Encoded tensor is a transformation of the input tensor.
-  #               - type: Array
-  #                 name: 'encodedBaselines'
-  #                 description: |
-  #                   A list of baselines for the encoded tensor.
-  #                 item_type:
-  #                   type: Double
-  #               - type: NestedObject
-  #                 name: 'visualization'
-  #                 required: true
-  #                 description: |
-  #                   Visualization configurations for image explanation.
-  #                 properties:
-  #                   - type: Enum
-  #                     name: 'type'
-  #                     description: |
-  #                       type of the image visualization. Only applicable to Integrated Gradients attribution.
-  #                     enum_values:
-  #                       - :PIXELS
-  #                       - :OUTLINES
-  #                   - type: Enum
-  #                     name: 'polarity'
-  #                     description: |
-  #                       Whether to only highlight pixels with positive contributions, negative or both. Defaults to POSITIVE.
-  #                     default_value: :BOTH
-  #                     enum_values:
-  #                       - :POSITIVE
-  #                       - :NEGATIVE
-  #                       - :BOTH
-  #                   - type: Enum
-  #                     name: 'colorMap'
-  #                     description: |
-  #                       The color scheme used for highlighting areas.
-  #                     enum_values:
-  #                       - :PINK_GREEN
-  #                       - :VIRIDIS
-  #                       - :RED
-  #                       - :GREEN
-  #                       - :RED_GREEN
-  #                       - :PINK_WHITE_GREEN
-  #                   - type: Double
-  #                     name: 'clipPercentUpperbound'
-  #                     description: |
-  #                       Excludes attributions above the specified percentile from the highlighted areas.
-  #                     default_value: 99.9
-  #                   - type: Integer
-  #                     name: 'clipPercentLowerbound'
-  #                     description: |
-  #                       Excludes attributions below the specified percentile, from the highlighted areas.
-  #                     default_value: 62
-  #                   - type: Enum
-  #                     name: 'overlayType'
-  #                     description: |
-  #                       How the original image is displayed in the visualization.
-  #                     enum_values:
-  #                       - :NONE
-  #                       - :ORIGINAL
-  #                       - :GRAYSCALE
-  #                       - :MASK_BLACK
-  #               - type: String
-  #                 name: 'groupName'
-  #                 required: true
-  #                 description: |
-  #                   name of the group that the input belongs to. Features with the same group name will be treated as one feature when computing attributions.
-  #         - type: Map
-  #           name: 'outputs'
-  #           key_name: 'name'
-  #           description: The resource name of the Artifact that was created in MetadataStore when creating the Model.
-  #           required: true
-  #           value_type:
-  #             type: NestedObject
-  #             properties:
-  #               - type: String
-  #                 name: 'outputTensorName'
-  #                 required: true
-  #                 description: |
-  #                   name of the output tensor.
-  #               - type: Array
-  #                 name: 'indexDisplayNameMapping'
-  #                 description: |
-  #                   Static mapping between the index and display name.
-  #                 item_type:
-  #                   type: String
-  #               - type: String
-  #                 name: 'displayNameMappingKey'
-  #                 description: |
-  #                   Specify a field name in the prediction to look for the display name.
-  #         - type: String
-  #           name: 'featureAttributionsSchemaUri'
-  #           description: Points to a YAML file stored on Google Cloud Storage describing the format of the feature attributions.
-  #           output: true
-  #         - type: String
-  #           name: 'latentSpaceSource'
-  #           description: name of the source to generate embeddings for example based explanations.
+  - type: NestedObject
+    name: 'explanationSpec'
+    description: The pointers to DeployedModels created from this Model. Note that Model could have been deployed to Endpoints in different Locations.
+    properties:
+      - type: NestedObject
+        name: 'parameters'
+        required: true
+        description: Parameters that configure explaining of the Model's predictions.
+        properties:
+          - type: Integer
+            name: 'topK'
+            description: If populated, returns attributions for top K indices of outputs (defaults to 1).
+            default_value: 1
+            immutable: true
+          - type: Array
+            name: 'outputIndices'
+            description: If populated, only returns attributions that have outputIndex contained in outputIndices.
+            immutable: true
+            item_type:
+              type: Double
+          - type: NestedObject
+            name: 'sampledShapleyAttribution'
+            description: An attribution method that approximates Shapley values for features that contribute to the label being predicted.
+            immutable: true
+            properties:
+              - type: Integer
+                name: 'pathCount'
+                description: The number of feature permutations to consider when approximating the Shapley values. Valid range of its value is [1, 50], inclusively.
+                required: true
