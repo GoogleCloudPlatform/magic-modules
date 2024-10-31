@@ -80,6 +80,27 @@ properties:
     default_value: "BACKUP_RESTORE"
     enum_values:
       - 'BACKUP_RESTORE'
+  - name: 'networks'
+    type: Array
+    description: |
+      Network details to create management server (management console).
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: String
+          description: |
+            Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
+          min_version: 'beta'
+          required: true
+        - name: 'peeringMode'
+          type: Enum
+          description: |
+            Type of Network peeringMode
+          min_version: 'beta'
+          enum_values:
+            - 'PRIVATE_SERVICE_ACCESS'
   ## outputs
   - name: 'oauth2ClientId'
     type: String
