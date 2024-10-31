@@ -76,6 +76,7 @@ properties:
     description:
       The name of the Model. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
+    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.tmpl
     output: true
     # url_param_only: true
     custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.tmpl
