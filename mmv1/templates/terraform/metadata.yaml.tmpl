@@ -1,5 +1,5 @@
 resource: '{{ $.TerraformName }}'
 generation_type: 'mmv1'
-api_name: '{{ $.ProductMetadata.ServiceName }}'
+api_service_name: '{{ $.ProductMetadata.ServiceName }}'
 api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
 api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
