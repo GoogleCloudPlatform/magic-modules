@@ -21,6 +21,9 @@ var allowedGuards = []string{
 	`{{ if eq $.TargetVersionName "ga" }}`,
 	`{{ if eq $.TargetVersionName "ga" -}}`,
 	`{{- if eq $.TargetVersionName "ga" -}}`,
+	`{{ if eq $.TargetVersionName `ga` }}`,
+	`{{ if eq $.TargetVersionName `ga` -}}`,
+	`{{- if eq $.TargetVersionName `ga` -}}`,
 }
 
 // Note: this does not account for _every_ possible use of a version guard (for example, those
