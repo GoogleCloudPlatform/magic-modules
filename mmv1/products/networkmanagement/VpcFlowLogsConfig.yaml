@@ -13,8 +13,9 @@
 
 ---
 name: 'VpcFlowLogsConfig'
-description: "VPC Flow Logs Config is a resource that lets you configure
-  Flow Logs for VPC, Interconnect attachments or VPN Tunnels."
+description:
+  VPC Flow Logs Config is a resource that lets you configure
+  Flow Logs for VPC, Interconnect attachments or VPN Tunnels.
 id_format: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
