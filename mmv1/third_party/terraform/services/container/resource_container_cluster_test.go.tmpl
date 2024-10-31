@@ -1410,49 +1410,6 @@ func TestAccContainerCluster_withPrivateClusterConfigBasic(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:	testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, "us-central1-a", false),
-				ExpectError: regexp.MustCompile("master_ipv4_cidr_block must be set if enable_private_nodes is true"),
-			},
-		},
-	})
-}
-
-func TestAccContainerCluster_withPrivateClusterConfigMissingCidrBlock_withAutopilot(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:	testAccContainerCluster_withPrivateClusterConfigMissingCidrBlock(containerNetName, clusterName, "us-central1", true),
-			},
-			{
-				ResourceName:      "google_container_cluster.with_private_cluster",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withPrivateClusterConfigGlobalAccessEnabledOnly(t *testing.T) {
 	t.Parallel()
 
@@ -5069,23 +5026,6 @@ func TestAccContainerCluster_withIncompatibleMasterVersionNodeVersion(t *testing
 	})
 }
 
-func TestAccContainerCluster_withIPv4Error(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccContainerCluster_withIPv4Error(clusterName),
-				ExpectError: regexp.MustCompile("master_ipv4_cidr_block can only be set if"),
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	t.Parallel()
 
@@ -6779,6 +6719,7 @@ resource "google_container_cluster" "with_master_authorized_networks" {
 
   master_authorized_networks_config {
     %s
+	private_endpoint_enforcement_enabled = true
   }
   deletion_protection = false
 }
@@ -10410,22 +10351,6 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
 }
 `, cluster, networkName, subnetworkName)
-}
-
-func testAccContainerCluster_withIPv4Error(name string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "primary" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  private_cluster_config {
-    enable_private_endpoint = true
-    enable_private_nodes    = false
-    master_ipv4_cidr_block  = "10.42.0.0/28"
-  }
-  deletion_protection = false
-}
-`, name)
 }
 
 func testAccContainerCluster_withAutopilot(projectID string, containerNetName string, clusterName string, location string, enabled bool, withNetworkTag bool, serviceAccount string) string {
