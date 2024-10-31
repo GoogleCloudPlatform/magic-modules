@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccApigeeEnvironment_apigeeEnvironmentUpdateTest(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
