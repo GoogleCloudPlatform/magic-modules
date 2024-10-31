@@ -42,6 +42,7 @@ func flattenBackupDRManagementServerResource(v interface{}, d *schema.ResourceDa
 	}
 	transformed := make(map[string]interface{})
 	transformed["type"] = flattenBackupDRManagementServerType(original["type"], d, config)
+	transformed["networks"] = flattenBackupDRManagementServerNetworks(original["networks"], d, config)
 	transformed["oauth2ClientId"] = flattenBackupDRManagementServerOauth2ClientId(original["oauth2ClientId"], d, config)
 	transformed["managementUri"] = flattenBackupDRManagementServerManagementUri(original["managementUri"], d, config)
 	transformed["name"] = flattenBackupDRManagementServerName(original["name"], d, config)
@@ -82,6 +83,9 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	}
 
 	if err := d.Set("type", resourceResponse["type"]); err != nil {
+		return fmt.Errorf("Error reading ManagementServer: %s", err)
+	}
+	if err := d.Set("networks", resourceResponse["networks"]); err != nil {
 		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
 	if err := d.Set("oauth2_client_id", resourceResponse["oauth2ClientId"]); err != nil {
