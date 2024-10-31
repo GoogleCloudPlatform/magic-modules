@@ -390,6 +390,7 @@ properties:
     description: |
       Looker Instance OAuth login settings.
     ignore_read: true
+    required: true
     properties:
       - name: 'clientId'
         type: String
