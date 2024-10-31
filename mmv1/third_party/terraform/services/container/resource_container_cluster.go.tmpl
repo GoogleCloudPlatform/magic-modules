@@ -59,6 +59,7 @@ var (
 			"private_endpoint_enforcement_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed: 	 true,
 				Description: `Whether authorized networks is enforced on the private endpoint or not. Defaults to false.`,
 			},
 		},
@@ -5330,28 +5331,31 @@ func expandMasterAuth(configured interface{}) *container.MasterAuth {
 }
 
 
-func expandMasterAuthorizedNetworksConfig(configured interface{}) *container.MasterAuthorizedNetworksConfig {
-	l := configured.([]interface{})
-	if len(l) == 0 {
+func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) *container.MasterAuthorizedNetworksConfig {
+	v := d.Get("master_authorized_networks_config")
+	if v == nil {
+		// TF doesn't have an explicit enabled field for authorized networks, it is assumed to be enabled based
+		// on whether the master_authorized_networks_conifg is present at all. The GKE API pays attention to the
+		// field presence of authorized_networks_config, so it's important to explicitly include enabled = false
+		// to allow disabling this during updates.
 		return &container.MasterAuthorizedNetworksConfig{
 			Enabled: false,
 		}
 	}
+
 	result := &container.MasterAuthorizedNetworksConfig{
 		Enabled: true,
 	}
-	if config, ok := l[0].(map[string]interface{}); ok {
-		if v, ok := config["cidr_blocks"]; ok {
-			result.CidrBlocks = expandManCidrBlocks(v)
-		}
-		if v, ok := config["gcp_public_cidrs_access_enabled"]; ok {
-			result.GcpPublicCidrsAccessEnabled = v.(bool)
-			result.ForceSendFields = append(result.ForceSendFields, "GcpPublicCidrsAccessEnabled")
-		}
-		if v, ok := config["private_endpoint_enforcement_enabled"]; ok {
-			result.PrivateEndpointEnforcementEnabled = v.(bool)
-			result.ForceSendFields = append(result.ForceSendFields, "PrivateEndpointEnforcementEnabled")
-		}
+	if v, ok := d.GetOk("master_authorized_networks_config.0.cidr_blocks"); ok {
+		result.CidrBlocks = expandManCidrBlocks(v)
+	}
+	if v, ok := d.GetOk("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
+		result.GcpPublicCidrsAccessEnabled = v.(bool)
+		result.ForceSendFields = append(result.ForceSendFields, "GcpPublicCidrsAccessEnabled")
+	}
+	if v, ok := d.GetOk("master_authorized_networks_config.0.private_endpoint_enforcement_enabled"); ok {
+		result.PrivateEndpointEnforcementEnabled = v.(bool)
+		result.ForceSendFields = append(result.ForceSendFields, "PrivateEndpointEnforcementEnabled")
 	}
 	return result
 }
@@ -5461,17 +5465,7 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 		ip.GlobalAccess = v.(bool)
 		ip.ForceSendFields = append(ip.ForceSendFields, "GlobalAccess")
 	}
-	if v := d.Get("master_authorized_networks_config"); v != nil {
-		ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(v)
-	} else {
-		// TF doesn't have an explicit enabled field for authorized networks, it is assumed to be enabled based
-		// on whether the master_authorized_networks_conifg is present at all. The GKE API pays attention to the
-		// field presence of authorized_networks_config, so it's important to explicitly include enabled = false
-		// to allow disabling this during updates.
-		ip.AuthorizedNetworksConfig = &container.MasterAuthorizedNetworksConfig{
-			Enabled: false,
-		}
-	}
+	ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(d)
 
 	return &container.ControlPlaneEndpointsConfig{
 		DnsEndpointConfig: dns,
