@@ -5,7 +5,7 @@ resource "google_dataproc_gdc_service_instance" "{{$.PrimaryResourceId}}" {
   gdce_cluster {
       gdce_cluster = "projects/gdce-cluster-monitoring/locations/us-west2/clusters/gdce-prism-prober-ord106"
   }
-  display_name = "A service instance for a Terraform create test"
+  display_name = "A service instance"
   labels = {
     "test-label": "label-value"
   }
