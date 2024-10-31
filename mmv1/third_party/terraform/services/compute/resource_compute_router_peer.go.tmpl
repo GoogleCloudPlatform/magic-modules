@@ -1285,7 +1285,7 @@ func flattenNestedComputeRouterBgpPeerPeerIpv4NexthopAddress(v interface{}, d *s
 	return v
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName `ga` }}
 func flattenNestedComputeRouterBgpPeerExportPolicies(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
@@ -1524,7 +1524,7 @@ func expandNestedComputeRouterBgpPeerPeerIpv4NexthopAddress(v interface{}, d tpg
 	return v, nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName `ga` }}
 func expandNestedComputeRouterBgpPeerExportPolicies(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
