@@ -242,9 +242,11 @@ properties:
             name: 'exec'
             description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
-              - type: String
+              - type: Array
                 name: 'command'
                 description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type:
+                  type: String
       - type: NestedObject
         name: 'healthProbe'
         immutable: true
@@ -264,9 +266,11 @@ properties:
             name: 'exec'
             description: Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1. Must be greater or equal to periodSeconds.
             properties:
-              - type: String
+              - type: Array
                 name: 'command'
                 description: Command is the command line to execute inside the container, the working directory for the command is root ('/') in the container's filesystem.
+                item_type:
+                  type: String
   - type: String
     name: 'artifactUri'
     immutable: true
@@ -284,7 +288,7 @@ properties:
     description: |
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - type: String
-    name: 'displayName'
+    name: 'modelName'
     default_from_api: true
     description:
       The display name of the Model. The name can be up to 128 characters long
@@ -405,19 +409,9 @@ properties:
     name: 'sourceModel'
     default_from_api: true
     at_least_one_of:
-      - model
       - sourceModel
     description: |
       The resource name of the Model to copy. That Model must be in the same Project
-  - type: ResourceRef
-    name: 'model'
-    resource: 'Model'
-    imports: 'displayName'
-    at_least_one_of:
-      - sourceModel
-      - model
-    description: |
-      The Model to create.
   - type: String
     name: 'modelId'
     default_from_api: true

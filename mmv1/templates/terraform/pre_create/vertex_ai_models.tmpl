@@ -1,7 +1,4 @@
 var postRequestType string
-if _, ok := d.GetOk("model"); ok {
-	postRequestType = ":upload"
-}
 
 if _, ok := d.GetOk("source_model"); ok {
 	postRequestType = ":copy"

@@ -7,6 +7,9 @@ if _, ok := d.GetOk("source_model"); ok {
 if _, ok := d.GetOk("model_id"); ok {
 	res["modelId"] = d.Get("model_id").(string)
 }
+
+res["modelName"] = res["displayName"]
+
 res["labels"] = map[string]interface{}{
 	"goog-terraform-provisioned": "true",
 }
