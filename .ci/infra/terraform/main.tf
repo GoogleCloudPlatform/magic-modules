@@ -217,6 +217,7 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
+    "cloudaicompanion.googleapis.com"
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",
