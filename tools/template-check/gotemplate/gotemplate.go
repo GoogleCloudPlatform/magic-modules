@@ -1,4 +1,4 @@
-package ruby
+package gotemplate
 
 import (
 	"bufio"
@@ -13,10 +13,17 @@ import (
 // need to add more options to this list in the future, like `private`. The main thing we want to
 // prevent is targeting `beta` in version guards, because it mishandles either `ga` or `private`.
 var allowedGuards = []string{
-	"<% unless version == 'ga' -%>",
-	"<% if version == 'ga' -%>",
-	"<% unless version == \"ga\" -%>",
-	"<% if version == \"ga\" -%>",
+	`{{- if ne $.TargetVersionName "ga" }}`,
+	`{{ if ne $.TargetVersionName "ga" }}`,
+	`{{ if ne $.TargetVersionName "ga" -}}`,
+	`{{- if ne $.TargetVersionName "ga" -}}`,
+	`{{- if eq $.TargetVersionName "ga" }}`,
+	`{{ if eq $.TargetVersionName "ga" }}`,
+	`{{ if eq $.TargetVersionName "ga" -}}`,
+	`{{- if eq $.TargetVersionName "ga" -}}`,
+	"{{- if ne $.TargetVersionName `ga` }}",
+	"{{ if ne $.TargetVersionName `ga` }}",
+	"{{- if ne $.TargetVersionName `ga` -}}",
 }
 
 // Note: this does not account for _every_ possible use of a version guard (for example, those
@@ -24,7 +31,7 @@ var allowedGuards = []string{
 // the goal is to capture (and validate) all "standard" version guards that would be added for new
 // resources/fields.
 func isVersionGuard(line string) bool {
-	re := regexp.MustCompile("<% [a-z]+ version ")
+	re := regexp.MustCompile(`{{-? if (eq|ne) \$\.TargetVersionName`)
 	return re.MatchString(line)
 }
 

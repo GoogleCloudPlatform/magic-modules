@@ -320,7 +320,7 @@ func (t *Type) SetDefault(r *Resource) {
 		}
 
 		if t.Description == "" {
-			t.Description = "A nested object resource"
+			t.Description = "A nested object resource."
 		}
 
 		for _, p := range t.Properties {
