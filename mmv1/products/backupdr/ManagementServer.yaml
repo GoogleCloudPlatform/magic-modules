@@ -101,6 +101,8 @@ properties:
           min_version: 'beta'
           enum_values:
             - 'PRIVATE_SERVICE_ACCESS'
+          default_value: "PRIVATE_SERVICE_ACCESS"
+
   ## outputs
   - name: 'oauth2ClientId'
     type: String
