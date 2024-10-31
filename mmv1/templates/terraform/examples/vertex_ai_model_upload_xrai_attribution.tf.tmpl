@@ -1,0 +1,30 @@
+resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" { // xrai_attribution
+  model_name = "{{index $.Vars "xrai_attribution_model_name"}}"
+  artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
+  description  = "sample description"
+
+  explanation_spec {
+    parameters {
+      output_indices = [1]
+      top_k = 1
+      xrai_attribution {
+        blur_baseline_config {
+          max_blur_sigma = 1
+        }
+        smooth_grad_config {
+          feature_noise_sigma {
+            noise_sigma {
+              name  = "test"
+              sigma = 1
+            }
+          }
+          noise_sigma        = 1
+          noisy_sample_count = 1
+        }
+        step_count = 1
+      }
+    }
+  }
+
+  region       = "us-central1"
+}
