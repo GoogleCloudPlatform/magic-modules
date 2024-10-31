@@ -1,30 +1,120 @@
 resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" { // xrai_attribution
   model_name = "{{index $.Vars "xrai_attribution_model_name"}}"
-  artifact_uri = "gs://cloud-samples-data/vertex-ai/google-cloud-aiplatform-ci-artifacts/models/iris_xgboost/"
+  artifact_uri = "gs://cloud-samples-data/ai-platform/mnist_tfrecord/pretrained"
   description  = "sample description"
 
-  explanation_spec {
-    parameters {
-      output_indices = [1]
-      top_k = 1
-      xrai_attribution {
-        blur_baseline_config {
-          max_blur_sigma = 1
-        }
-        smooth_grad_config {
-          feature_noise_sigma {
-            noise_sigma {
-              name  = "test"
-              sigma = 1
-            }
-          }
-          noise_sigma        = 1
-          noisy_sample_count = 1
-        }
-        step_count = 1
-      }
-    }
+    container_spec {
+  # Base container configuration
+  image_uri             = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest"
+  command              = ["python3", "/usr/bin/serve"]
+  args                 = [
+    "--model_path=/model",
+    "--port=8080",
+    "--rest_api_port=8080",
+    "--worker_count=1"
+  ]
+  deployment_timeout    = "300s"
+  shared_memory_size_mb = 1024
+
+  # Environment variables
+  env {
+    name  = "TF_CPP_MIN_LOG_LEVEL"
+    value = "2"
+  }
+  env {
+    name  = "AIP_STORAGE_URI"
+    value = "gs://your-bucket/model"
   }
 
-  region       = "us-central1"
+  # Port configurations
+  ports {
+    container_port = 8080
+  }
+  ports {
+    container_port = 8081
+  }
+
+  grpc_ports {
+    container_port = 8500
+  }
+  grpc_ports {
+    container_port = 8501
+  }
+
+  # Health checking
+  health_route = "/health"
+  predict_route = "/v1/models/model/predict"
+
+  # Health probe configuration
+  health_probe {
+    exec {
+      command = ["curl", "http://localhost:8080/health"]
+    }
+    period_seconds       = 30
+    timeout_seconds      = 5
+  }
+
+  # Startup probe configuration
+  startup_probe {
+    exec {
+      command = ["curl", "http://localhost:8080/health"]
+    }
+
+    period_seconds       = 30
+    timeout_seconds      = 10
+  }
+
 }
+
+  explanation_spec {
+    metadata {
+      inputs {
+        name = "input_1"
+          input_tensor_name = "sequential/conv2d/Conv2D"  # Standard MNIST input tensor name
+          encoding         = "IDENTITY"
+          modality        = "image"
+          feature_value_domain {
+            min_value = 2.0
+            max_value = 255.0
+          }
+          index_feature_mapping = ["pixel_values"]
+          visualization {
+            type      = "PIXELS"
+            polarity  = "BOTH"
+            color_map = "VIRIDIS"
+            clip_percent_upperbound = 99.9
+            clip_percent_lowerbound = 62
+            overlay_type = "GRAYSCALE"
+          }
+          group_name = "image_features"
+        }
+      outputs {
+        name = "output_1"
+          output_tensor_name = "sequential/dense/Softmax"
+        #   index_display_name_mapping = [
+        #     "zero", "one", "two", "three", "four",
+        #     "five", "six", "seven", "eight", "nine"
+        #   ]
+      }
+      }
+      
+    parameters {
+      xrai_attribution {
+        step_count = 50
+        smooth_grad_config {
+          noisy_sample_count = 3
+          noise_sigma        = 0.1
+        }
+        blur_baseline_config {
+          max_blur_sigma = 0.0
+        }
+      }
+      output_indices = [0]  # Analyze first class prediction
+      top_k          = 1
+    }
+      
+    #   feature_attributions_schema_uri = "gs://google-cloud-aiplatform/schema/attributions/feature_attributions.yaml"
+    }
+    
+  region       = "us-central1"
+  }
