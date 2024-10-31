@@ -17,6 +17,7 @@ func TestAccDataSourceGoogleBackupDRManagementServer_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "backupdr-managementserver-basic"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -77,10 +78,17 @@ func testAccCheckBackupDRManagementServerDestroyProducer(t *testing.T) func(s *t
 
 func testAccDataSourceGoogleBackupDRManagementServer_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
 resource "google_backup_dr_management_server" "foo" {
  location = "us-central1"
   name     = "tf-test-management-server%{random_suffix}"
   type     = "BACKUP_RESTORE" 
+    networks {
+    network      = data.google_compute_network.default.id
+    peering_mode = "PRIVATE_SERVICE_ACCESS"
+  }
 }
 
 data "google_backup_dr_management_server" "foo" {
