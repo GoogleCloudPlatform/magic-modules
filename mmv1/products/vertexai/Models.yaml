@@ -78,8 +78,6 @@ properties:
       valid characters are [a-z0-9_]. The first character cannot be a number.
     custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.tmpl
     output: true
-    # url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.tmpl
   - type: String
     name: 'description'
     description: Description of the Model.
