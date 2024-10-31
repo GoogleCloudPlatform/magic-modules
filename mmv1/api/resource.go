@@ -501,9 +501,11 @@ func (r Resource) ServiceVersion() string {
 
 func extractVersionFromBaseUrl(baseUrl string) string {
 	parts := strings.Split(baseUrl, "/")
-	if parts[0][0] == 'v' {
+	// starts with v...
+	if parts[0] != "" && parts[0][0] == 'v' {
 		return parts[0]
 	}
+	// starts with /v...
 	if parts[0] == "" && parts[1][0] == 'v' {
 		return parts[1]
 	}
