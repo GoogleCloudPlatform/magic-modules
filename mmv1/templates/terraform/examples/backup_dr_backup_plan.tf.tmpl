@@ -1,106 +1,3 @@
-variable "backup_rules" {
-  type = list(object({
-    rule_id               = string
-    backup_retention_days = number
-    recurrence_type       = string
-    frequency             = number
-    time_zone             = string
-    start_hour_of_day     = number
-    end_hour_of_day       = number
-    days_of_week          = list(string)
-    days_of_month         = list(number)
-    week_day_of_month     = object({
-      week_of_month = string
-      day_of_week   = string
-    })
-    months = list(string)
-  }))
-  
-  # Default backup rules
-  default = [
-    {
-      rule_id               = "rule-1"
-      backup_retention_days = 5
-      recurrence_type       = "HOURLY"
-      frequency             = 6
-      time_zone             = "UTC"
-      start_hour_of_day     = 0
-      end_hour_of_day       = 24
-      days_of_week          = []
-      days_of_month         = []
-      week_day_of_month = {
-        week_of_month = ""
-        day_of_week   = ""
-      }
-      months = []
-    },
-    {
-      rule_id               = "rule-2"
-      backup_retention_days = 10
-      recurrence_type       = "DAILY"
-      frequency             = 1
-      time_zone             = "UTC"
-      start_hour_of_day     = 0
-      end_hour_of_day       = 24
-      days_of_week          = []
-      days_of_month         = []
-      week_day_of_month = {
-        week_of_month = ""
-        day_of_week   = ""
-      }
-      months = []
-    },
-    {
-      rule_id               = "rule-3"
-      backup_retention_days = 15
-      recurrence_type       = "WEEKLY"
-      frequency             = 1
-      time_zone             = "UTC"
-      start_hour_of_day     = 0
-      end_hour_of_day       = 24
-      days_of_week          = ["MONDAY", "WEDNESDAY", "FRIDAY"]
-      days_of_month         = []
-      week_day_of_month = {
-        week_of_month = ""
-        day_of_week   = ""
-      }
-      months = []
-    },
-    {
-      rule_id               = "rule-4"
-      backup_retention_days = 20
-      recurrence_type       = "MONTHLY"
-      frequency             = 1
-      time_zone             = "UTC"
-      start_hour_of_day     = 0
-      end_hour_of_day       = 24
-      days_of_week          = []
-      days_of_month         = [1, 15, 30]
-      week_day_of_month = {
-        week_of_month = "FIRST"
-        day_of_week   = "SUNDAY"
-      }
-      months = []
-    },
-    {
-      rule_id               = "rule-5"
-      backup_retention_days = 30
-      recurrence_type       = "YEARLY"
-      frequency             = 1
-      time_zone             = "UTC"
-      start_hour_of_day     = 0
-      end_hour_of_day       = 24
-      days_of_week          = []
-      days_of_month         = []
-      week_day_of_month = {
-        week_of_month = "FIRST"
-        day_of_week   = "SUNDAY"
-      }
-      months = ["JANUARY", "DECEMBER"]
-    }
-  ]
-}
-
 resource "google_backup_dr_backup_vault" "my_backup_vault" {
   provider = google-beta
   location = "us-central1"
@@ -120,44 +17,73 @@ resource "google_backup_dr_backup_vault" "my_backup_vault" {
   allow_missing  = true
 }
 
-resource "google_backup_dr_backup_plan" "{{$.PrimaryResourceId}}" {
-  provider      = google-beta
-  location      = "us-central1"
+resource "google_backup_dr_backup_plan" "{{$.PrimaryResourceId}}" { 
+  provider = google-beta
+  location = "us-central1" 
   backup_plan_id = "{{index $.Vars "backup_plan_id"}}"
-  resource_type = "compute.googleapis.com/Instance"
-  backup_vault  = google_backup_dr_backup_vault.my_backup_vault.id
+  resource_type= "compute.googleapis.com/Instance"
+  backup_vault = google_backup_dr_backup_vault.my-backup-vault.id
+  depends_on= [ google_backup_dr_backup_vault.my-backup-vault ]
   lifecycle {
     ignore_changes = [backup_vault, description]
   }
-  dynamic "backup_rules" {
-    for_each = var.backup_rules
-    content {
-      rule_id               = backup_rules.value.rule_id
-      backup_retention_days = backup_rules.value.backup_retention_days
-
-      standard_schedule {
-        recurrence_type = backup_rules.value.recurrence_type
-
-        hourly_frequency = backup_rules.value.recurrence_type == "HOURLY" ? backup_rules.value.frequency : null
-        days_of_week     = backup_rules.value.recurrence_type == "WEEKLY" ? backup_rules.value.days_of_week : []
-        days_of_month    = backup_rules.value.recurrence_type == "MONTHLY" ? backup_rules.value.days_of_month : []
-        months           = backup_rules.value.recurrence_type == "YEARLY" ? backup_rules.value.months : []
-
-        dynamic "week_day_of_month" {
-          for_each = backup_rules.value.recurrence_type == "YEARLY" ? [1] : []
-          content {
-            week_of_month = backup_rules.value.week_day_of_month.week_of_month
-            day_of_week   = backup_rules.value.week_day_of_month.day_of_week
-          }
-        }
-
-        time_zone = backup_rules.value.time_zone
-
-        backup_window {
-          start_hour_of_day = backup_rules.value.start_hour_of_day
-          end_hour_of_day   = backup_rules.value.end_hour_of_day
-        }
+  backup_rules {
+	rule_id = "rule-1"
+	backup_retention_days = 5
+	standard_schedule {
+	  recurrence_type = "HOURLY"
+	   hourly_frequency = 6
+	    time_zone = "UTC"
+	     backup_window{
+		start_hour_of_day = 0
+		end_hour_of_day = 24
       }
     }
-  }
+}
+  backup_rules {
+	rule_id = "rule-2"
+	backup_retention_days = 5
+	standard_schedule {
+	  recurrence_type = "WEEKLY"
+	   days_of_week = ["MONDAY", "WEDNESDAY", "FRIDAY"]
+	    time_zone = "UTC"
+	     backup_window{
+		start_hour_of_day = 0
+		end_hour_of_day = 24
+      }
+    }
+}
+  backup_rules {
+	rule_id = "rule-3"
+	backup_retention_days = 5
+	standard_schedule {
+	  recurrence_type = "MONTHLY"
+	   days_of_month = [1, 15, 30]
+     week_day_of_month = {
+        week_of_month = "FIRST"
+        day_of_week   = "SUNDAY"
+      }
+	    time_zone = "UTC"
+	     backup_window{
+		start_hour_of_day = 0
+		end_hour_of_day = 24
+      }
+    }
+}
+  backup_rules {
+	rule_id = "rule-4"
+	backup_retention_days = 5
+	standard_schedule {
+	  recurrence_type = "YEARLY"
+      week_day_of_month = {
+        week_of_month = "FIRST"
+        day_of_week   = "SUNDAY"
+      }
+	    time_zone = "UTC"
+	     backup_window{
+		start_hour_of_day = 0
+		end_hour_of_day = 24
+      }
+    }
+}
 }
