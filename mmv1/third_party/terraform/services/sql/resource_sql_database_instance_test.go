@@ -21,7 +21,6 @@ import (
 var ignoredReplicaConfigurationFields = []string{
 	"deletion_protection",
 	"root_password",
-	// "replica_configuration.0.cascadable_replica",
 	"replica_configuration.0.ca_certificate",
 	"replica_configuration.0.client_certificate",
 	"replica_configuration.0.client_key",
@@ -4559,7 +4558,7 @@ func checkSwitchoverOriginalPrimaryConfigurations(primaryResourceName string, re
 			return fmt.Errorf("Master instance name is not present in state for %s", primaryResourceName)
 		}
 		if primaryMasterInstanceName != replicaName {
-			return fmt.Errorf("Error in switchover. Master_instance_name should be %s", replicaName)
+			return fmt.Errorf("Error in switchover. master_instance_name should be %s", replicaName)
 		}
 		return nil
 	}

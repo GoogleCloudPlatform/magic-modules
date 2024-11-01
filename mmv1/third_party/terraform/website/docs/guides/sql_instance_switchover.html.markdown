@@ -9,11 +9,12 @@ This page is a brief walkthrough of performing a switchover through terraform.
 
   ~> **NOTE:** Only supported for SQL Server.
 
-1. Create a **cross-region** primary and cascadable replica
+1. Create a **cross-region** primary and cascadable replica. It is recommended to use deletion_protection to prevent accidental deletions.
 ```
 resource "google_sql_database_instance" "original-primary" {
 name = "p1"
 region = "us-central1"
+deletion_protection = true
 instance_type = "CLOUD_SQL_INSTANCE"
 replica_names = ["p1-r1"] 
     ...
@@ -21,6 +22,7 @@ replica_names = ["p1-r1"]
 resource "google_sql_database_instance" "original-replica" {
 name = "p1-r1"
 region = "us-east1"
+deletion_protection = true
 instance_type = "READ_REPLICA_INSTANCE"
 master_instance_name = "p1"
 replica_configuration {
