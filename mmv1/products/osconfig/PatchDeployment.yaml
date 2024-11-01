@@ -24,6 +24,9 @@ docs:
 id_format: '{{name}}'
 base_url: 'projects/{{project}}/patchDeployments'
 self_link: '{{name}}'
+import_format:
+  - '{{project}} {{name}}'
+  - '{{name}}'
 create_url: 'projects/{{project}}/patchDeployments?patchDeploymentId={{patch_deployment_id}}'
 immutable: true
 timeouts:

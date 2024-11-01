@@ -27,6 +27,7 @@ self_link: '{{name}}'
 update_verb: 'PATCH'
 mutex: '{{name}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20
