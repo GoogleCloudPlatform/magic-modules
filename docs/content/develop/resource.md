@@ -156,7 +156,7 @@ For more information about types of resources and the generation process overall
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
    - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
-   - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
+   - Sweepers: Put to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and add `_sweeper` suffix to the filename
 4. Modify the Go code as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
@@ -164,7 +164,7 @@ For more information about types of resources and the generation process overall
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.tmpl`
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
-5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
+5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
     - [Add resource tests]({{< ref "/develop/test/test.md" >}})
@@ -406,7 +406,7 @@ iam_policy:
 
 ### Add support in MMv1
 
-1. Follow the MMv1 directions in [Add the resource]({{<ref "#add-the-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields:
+1. Follow the MMv1 directions in [Add a resource]({{<ref "#add-a-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields:
    - `name`
    - `description` (required but unused)
    - `base_url` (set to URL of IAM parent resource)
