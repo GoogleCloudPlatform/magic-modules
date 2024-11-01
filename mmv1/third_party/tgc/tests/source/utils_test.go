@@ -190,7 +190,9 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 
 // newTestConfig create a config using the http test server.
 func newTestConfig(server *httptest.Server) *transport_tpg.Config {
-	cfg := &transport_tpg.Config{}
+	cfg := &transport_tpg.Config{
+		Project: data.Provider["project"],
+	}
 	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
 	return cfg
