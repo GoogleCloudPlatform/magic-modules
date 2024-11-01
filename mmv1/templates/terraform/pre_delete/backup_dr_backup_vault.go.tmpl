@@ -1,0 +1,24 @@
+if v, ok := d.GetOk("ignore_inactive_datasources") ; ok {
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": fmt.Sprintf("%v", v)})
+    if err != nil {
+        return err
+    }
+}
+if v, ok := d.GetOk("force_delete") ; ok {
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": fmt.Sprintf("%v", v)})
+    if err != nil {
+        return err
+    }
+}
+if v, ok := d.GetOk("ignore_backup_plan_references"); ok {
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"ignoreBackupPlanReferences": fmt.Sprintf("%v", v)})
+    if err != nil {
+        return err
+    }
+}
+if v, ok := d.GetOk("allow_missing"); ok {
+    url, err = transport_tpg.AddQueryParams(url, map[string]string{"allowMissing": fmt.Sprintf("%v", v)})
+    if err != nil {
+        return err
+    }
+}
