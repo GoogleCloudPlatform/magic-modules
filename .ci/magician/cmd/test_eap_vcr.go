@@ -164,10 +164,14 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:     vcr.Recording,
-			Version:  provider.Beta,
+			Version:  provider.Private,
 			TestDirs: testDirs,
 			Tests:    replayingResult.FailedTests,
 		})
+
+		if recordingErr != nil {
+			fmt.Println("error during recording:", recordingErr)
+		}
 
 		if err := vt.UploadCassettes(head, provider.Private); err != nil {
 			return fmt.Errorf("error uploading cassettes: %w", err)
@@ -205,6 +209,9 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
+			LogBucket:                     "ci-vcr-logs",
+			Version:                       provider.Private.String(),
+			Head:                          head,
 		}
 		recordReplayComment, err := formatRecordReplay(recordReplayData)
 		if err != nil {
