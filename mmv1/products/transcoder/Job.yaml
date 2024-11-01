@@ -76,6 +76,7 @@ examples:
     ignore_read_extra:
       - 'state'
       - 'end_time'
+      - 'start_time'
 parameters:
   - name: 'location'
     type: String
