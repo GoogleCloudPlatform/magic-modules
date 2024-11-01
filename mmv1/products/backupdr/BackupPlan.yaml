@@ -36,14 +36,6 @@ examples:
       backup_plan_id: 'backup-plan-simple-test'
     test_env_vars:
       project: :PROJECT_NAME
-  - name: 'backup_dr_backup_plan'
-    min_version: 'beta'
-    primary_resource_id: 'my-backup-plan'
-    vars:
-      backup_plan_id: 'backup-plan-test'
-    exclude_test: true
-    test_env_vars:
-      project: :PROJECT_NAME
 parameters:
   - name: 'location'
     type: String
@@ -65,6 +57,8 @@ properties:
     output: true
   - name: 'description'
     type: String
+    default_value: ""
+    send_empty_value: true
     description: |
       The description allows for additional details about `BackupPlan` and its use cases to be provided.
   - name: 'backupVault'
@@ -72,6 +66,7 @@ properties:
     description: |
       Backup vault where the backups gets stored using this Backup plan.
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'backupVaultServiceAccount'
     type: String
     description: |
