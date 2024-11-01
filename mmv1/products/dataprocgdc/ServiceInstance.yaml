@@ -1,0 +1,139 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ServiceInstance
+description: A service instance is an instance of the Dataproc operator running on a GDC cluster.
+references:
+  guides:
+    'Dataproc Intro': 'https://cloud.google.com/dataproc/'
+  api: 'https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances'
+base_url: projects/{{project}}/locations/{{location}}/serviceInstances
+create_url: projects/{{project}}/locations/{{location}}/serviceInstances?serviceInstanceId={{service_instance_id}}
+self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
+autogen_async: true
+parameters:
+  - name: location
+    type: String
+    description: 'Location of the resource. '
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: serviceInstanceId
+    type: String
+    description: "Id of the service instance."
+    url_param_only: true
+    required: true
+    immutable: true
+async:
+  actions: ['create', 'delete']
+  type: OpAsync
+  operation:
+    base_url: "{{op_id}}"
+immutable: true
+examples:
+  - name: "dataprocgdc_serviceinstance"
+    primary_resource_id: "service-instance"
+    vars:
+      service_instance_id: "tf-e2e-service-instance"
+      project: "my-project"
+    test_vars_overrides:
+      'project': '"gdce-cluster-monitoring"'
+properties:
+  - name: gdceCluster
+    type: NestedObject
+    properties:
+      - name: gdceCluster
+        type: String
+        description: 'Gdce cluster resource id. '
+        required: true
+    description: 'Gdce cluster information. '
+  - name: name
+    type: String
+    description: 'Identifier. The name of the service instance. '
+    output: true
+  - name: uid
+    type: String
+    description: "System generated unique identifier for this service instance,
+      formatted as UUID4. "
+    output: true
+  - name: displayName
+    type: String
+    description: 'User-provided human-readable name to be used in user interfaces. '
+  - name: createTime
+    type: String
+    description: 'The timestamp when the resource was created. '
+    output: true
+  - name: updateTime
+    type: String
+    description: 'The timestamp when the resource was most recently updated. '
+    output: true
+  - name: requestedState
+    type: String
+    description: |
+      The intended state to which the service instance is reconciling. Possible values:
+      * `CREATING`
+      * `ACTIVE`
+      * `DISCONNECTED`
+      * `DELETING`
+      * `STOPPING`
+      * `STOPPED`
+      * `STARTING`
+      * `UPDATING`
+      * `FAILED`
+    output: true
+  - name: state
+    type: String
+    description: |
+      The current state. Possible values:
+      * `CREATING`
+      * `ACTIVE`
+      * `DISCONNECTED`
+      * `DELETING`
+      * `STOPPING`
+      * `STOPPED`
+      * `STARTING`
+      * `UPDATING`
+      * `FAILED`
+    output: true
+  - name: reconciling
+    type: Boolean
+    description: "Whether the service instance is currently reconciling. True
+      if the current state of the resource does not match the intended state, and the
+      system is working to reconcile them, whether or not the change was user initiated."
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: "The labels to associate with this service instance. Labels
+      may be used for filtering and billing tracking. "
+  - name: sparkServiceInstanceConfig
+    type: NestedObject
+    properties: []
+    description: 'Spark-specific service instance configuration. '
+  - name: stateMessage
+    type: String
+    description: 'A message explaining the current state. '
+    output: true
+  - name: serviceAccount
+    type: String
+    description: 'Requested service account to associate with ServiceInstance. '
+  - name: effectiveServiceAccount
+    type: String
+    description: "Effective service account associated with ServiceInstance.
+      This will be the service_account if specified. Otherwise, it will be an automatically created
+      per-resource P4SA that also automatically has Fleet Workload. Identity bindings
+      applied. "
+    output: true
