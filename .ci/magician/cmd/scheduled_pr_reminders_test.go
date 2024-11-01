@@ -794,6 +794,7 @@ func TestFormatReminderComment(t *testing.T) {
 		sinceDays          int
 		expectedStrings    []string
 		notExpectedStrings []string
+		currentReviewer    string
 	}{
 		// waitingForMerge
 		"waitingForMerge one week": {
@@ -933,6 +934,30 @@ func TestFormatReminderComment(t *testing.T) {
 				"@other-reviewer",
 			},
 		},
+		"waitingForReview three days with current reviewer": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
+			},
+			state:     waitingForReview,
+			sinceDays: 3,
+			expectedStrings: []string{
+				"waiting for review for 3 weekdays",
+				"disable-review-reminders",
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@GoogleCloudPlatform/terraform-team",
+				"@pr-author",
+				"@other-reviewer",
+				"@" + firstCoreReviewer,
+			},
+			currentReviewer: secondCoreReviewer,
+		},
 
 		// waitingForContributor
 		"waitingForContributor two weeks": {
@@ -1048,7 +1073,7 @@ func TestFormatReminderComment(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 
-			comment, err := formatReminderComment(tc.pullRequest, tc.state, tc.sinceDays)
+			comment, err := formatReminderComment(tc.pullRequest, tc.state, tc.sinceDays, tc.currentReviewer)
 			assert.Nil(t, err)
 
 			for _, s := range tc.expectedStrings {
