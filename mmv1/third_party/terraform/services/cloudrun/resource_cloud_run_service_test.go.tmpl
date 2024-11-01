@@ -1425,8 +1425,6 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-  {{ if ne $.TargetVersionName `ga` -}}
-
 func TestAccCloudRunService_emptyDirVolume(t *testing.T) {
 	t.Parallel()
 
@@ -1454,7 +1452,6 @@ func TestAccCloudRunService_emptyDirVolume(t *testing.T) {
 func testAccCloudRunService_cloudRunServiceWithEmptyDirVolume(name, project string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "%s"
   location = "us-central1"
 
@@ -1462,7 +1459,6 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
-      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -1485,7 +1481,6 @@ resource "google_cloud_run_service" "default" {
 }
 `, name, project)
 }
-  {{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunService_resourcesRequirements(t *testing.T) {

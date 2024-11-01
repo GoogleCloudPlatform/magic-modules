@@ -507,7 +507,6 @@ properties:
                   type: NestedObject
                   description: |-
                     Ephemeral storage used as a shared volume.
-                  min_version: 'beta'
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
