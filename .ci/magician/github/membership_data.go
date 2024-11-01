@@ -113,8 +113,8 @@ var (
 		},
 		{
 			id:        "c2thorn",
-			startDate: newDate(2024, 11, 1, bstLoc),
-			endDate:   newDate(2024, 11, 11, bstLoc),
+			startDate: newDate(2024, 11, 1, pdtLoc),
+			endDate:   newDate(2024, 11, 11, pdtLoc),
 		},
 	}
 )
