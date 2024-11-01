@@ -85,7 +85,6 @@ properties:
     description: |
       Network details to create management server (management console).
     min_version: 'beta'
-    required: true
     item_type:
       type: NestedObject
       properties:
@@ -100,9 +99,10 @@ properties:
           description: |
             Type of Network peeringMode
           min_version: 'beta'
-          default_value: "PRIVATE_SERVICE_ACCESS"
           enum_values:
             - 'PRIVATE_SERVICE_ACCESS'
+          default_value: "PRIVATE_SERVICE_ACCESS"
+
   ## outputs
   - name: 'oauth2ClientId'
     type: String
