@@ -1,4 +1,127 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Contribute on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/</link><description>Recent content in Contribute on Magic Modules</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/contribute/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</guid><description>Create a pull request (PR) # Requirements # Make sure your branch contains a single self-contained change. For example: If you are adding multiple resources to the provider, only put one resource in each PR - even if the product requires all resources to be present before it can be meaningfully used. If you are adding a few fields and also fixing a bug, create one PR for adding the new fields and a separate PR for the bugs.</description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</guid><description>Write release notes # This guide explains best practices for composing accurate, end-user focused release notes for Magic Modules pull requests.
-Every pull request must have at least one release note block in the opening comment. Release note blocks have the following format:
-```release-note:TYPE CONTENT ``` Replace TYPE with the correct release note type, and CONTENT with a release note written according to the guidelines in the following sections.</description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</guid><description>Review a pull request # This page provides guidelines for reviewing a Magic Modules pull request (PR).
-Read the PR description to understand the context and ensure the PR either is linked to a GitHub issue or an internal bug if not, check the issue tracker to see whether the feature has already been requested and add the issues in the description, if any. establishes clear context itself via title or description.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Contribute on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/</link><description>Recent content in Contribute on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/contribute/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</guid><description>&lt;h1 id="create-a-pull-request-pr">
+ Create a pull request (PR)
+ &lt;a class="anchor" href="#create-a-pull-request-pr">#&lt;/a>
+&lt;/h1>
+&lt;h2 id="requirements">
+ Requirements
+ &lt;a class="anchor" href="#requirements">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>Make sure your &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">branch&lt;/a> contains a single self-contained change. For example:
+&lt;ul>
+&lt;li>If you are adding multiple resources to the provider, only put one resource in each PR - even if the product requires all resources to be present before it can be meaningfully used.&lt;/li>
+&lt;li>If you are adding a few fields and also fixing a bug, create one PR for adding the new fields and a separate PR for the bugs.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Follow the instructions at &lt;a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">Creating a pull request&lt;/a> to create a pull request to merge your branch into &lt;code>GoogleCloudPlatform/magic-modules&lt;/code>.
+&lt;ul>
+&lt;li>Make sure the PR body includes the text &lt;code>Fixes GITHUB_ISSUE_LINK.&lt;/code> once per issue resolved by your PR. Replace &lt;code>GITHUB_ISSUE_LINK&lt;/code> with a link to a GitHub issue from the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">provider issue tracker&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">Write release notes&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="code-review">
+ Code review
+ &lt;a class="anchor" href="#code-review">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>A reviewer will automatically be assigned to your PR.&lt;/li>
+&lt;li>Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">VCR tests&lt;/a> can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
+&lt;ul>
+&lt;li>While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We &lt;strong>strongly&lt;/strong> recommend you &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">test your changes locally before pushing&lt;/a> even after the initial change.&lt;/li>
+&lt;li>VCR tests will first attempt to play back recorded HTTP requests (REPLAYING mode). If any tests fail, they will run in RECORDING mode to generate a new cassette; then, the same tests will run again in REPLAYING mode to detect any nondeterministic behavior in the test (which can cause flaky tests.)&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.&lt;/li>
+&lt;/ol>
+&lt;blockquote class="book-hint info">
+ &lt;p>&lt;strong>TIP:&lt;/strong> Speeding up review:&lt;/p></description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</guid><description>&lt;h1 id="write-release-notes">
+ Write release notes
+ &lt;a class="anchor" href="#write-release-notes">#&lt;/a>
+&lt;/h1>
+&lt;p>This guide explains best practices for composing accurate, end-user focused release notes for Magic Modules pull requests.&lt;/p>
+&lt;p>Every pull request must have at least one release note block in the opening comment. Release note blocks have the following format:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-markdown" data-lang="markdown">&lt;span style="display:flex;">&lt;span>```release-note:TYPE
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CONTENT
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>```
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>TYPE&lt;/code> with the correct release note type, and &lt;code>CONTENT&lt;/code> with a release note written according to the guidelines in the following sections.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
+ Review a pull request
+ &lt;a class="anchor" href="#review-a-pull-request">#&lt;/a>
+&lt;/h1>
+&lt;p>This page provides guidelines for reviewing a Magic Modules pull request (PR).&lt;/p>
+&lt;ol>
+&lt;li>Read the PR description to understand the context and ensure the PR either
+&lt;ul>
+&lt;li>is linked to a GitHub issue or an internal bug
+&lt;ul>
+&lt;li>if not, check the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">issue tracker&lt;/a> to see whether the feature has already been requested and add the issues in the description, if any.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>establishes clear context itself via title or description.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>If the PR adds any new resource, ensure that the resource does not already exist in the &lt;a href="https://github.com/hashicorp/terraform-provider-google">GA provider&lt;/a> or &lt;a href="https://github.com/hashicorp/terraform-provider-google-beta">beta provider&lt;/a>&lt;/li>
+&lt;li>Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
+&lt;ol>
+&lt;li>the resource schema added in the PR matches the API structure.&lt;/li>
+&lt;li>the features are added in the correct version
+&lt;ul>
+&lt;li>features only available in beta are not included in the GA google provider.&lt;/li>
+&lt;li>features added to the GA provider are also included in the beta provider &amp;ndash; beta should be a strict superset of GA.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>no &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">breaking changes&lt;/a> are introduced without a valid justification. Add the &lt;code>override-breaking-change&lt;/code> label if there is a valid justification.
+&lt;ul>
+&lt;li>remember to check for changes in default behaviour like changing the flags on delete!&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>verify the change &lt;strong>fully&lt;/strong> resolves the linked issues, if any. If it does not, change the &amp;ldquo;Fixes&amp;rdquo; message to &amp;ldquo;Part of&amp;rdquo;.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Check the tests added/modified to ensure that:
+&lt;ol>
+&lt;li>all fields added/updated in the PR appear in at least one test.
+&lt;ul>
+&lt;li>It is advisable to test updating from a non-zero value to a zero value if feasible.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>all mutable fields are tested in at least one update test.&lt;/li>
+&lt;li>all resources in the acceptance tests have a &lt;code>tf-test&lt;/code> or &lt;code>tf_test&lt;/code> prefix in their primary id field.&lt;/li>
+&lt;li>all handwritten test Config steps include import steps following them&lt;/li>
+&lt;li>all related tests pass in GA for features promoted from beta to GA.
+&lt;blockquote class="book-hint info">
+ Note:
+Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
+&lt;/blockquote>
+&lt;/li>
+&lt;li>newly added or modified diff suppress functions are tested in at least one unit test.&lt;/li>
+&lt;li>the linked issue (if any) is covered by at least one test that reproduces the issue
+&lt;ul>
+&lt;li>for example - a bugfix should test the bug (or explain why it&amp;rsquo;s not feasible to do so in the description, including manual results when possible) and an enhancement should test the new behaviour(s).&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>all related PR presubmit tests have been completed successfully, including:
+&lt;ul>
+&lt;li>terraform-provider-breaking-change-test&lt;/li>
+&lt;li>presubmit-rake-tests&lt;/li>
+&lt;li>terraform-provider-google-build-and-unit-tests&lt;/li>
+&lt;li>terraform-provider-google-beta-build-and-unit-tests&lt;/li>
+&lt;li>VCR-test
+&lt;blockquote class="book-hint info">
+ Note:
+Some acceptance tests may be skipped in VCR and manual testing is required.
+&lt;/blockquote>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>a significant number of preexisting tests have not been modified. Changing old tests often indicates a change is backwards incompatible.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Check documentation to ensure
+&lt;ol>
+&lt;li>resouce-level and field-level documentation are generated correctly for MMv1-based resource&lt;/li>
+&lt;li>documentation is added manually for handwritten resources.&lt;/li>
+&lt;/ol>
+&lt;/li>
+&lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
+&lt;/ol></description></item></channel></rss>

@@ -1,3 +1,87 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Get started on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/</link><description>Recent content in Get started on Magic Modules</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/get-started/index.xml" rel="self" type="application/rss+xml"/><item><title>Generate the providers</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</guid><description>Generate google and google-beta providers # This quickstart guides you through setting up your development environment, making a change to magic-modules, generating provider changes to the google and google-beta Terraform providers, and running tests related to the change.
-Before you begin # Install the gcloud CLI. In the Google Cloud console, on the project selector page, select or create a Google Cloud project. Note: If you don&amp;rsquo;t already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject.</description></item><item><title>How Magic Modules works</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/</guid><description>How Magic Modules works # Magic Modules can be thought of as a source of truth for how to map a GCP API resource representation to a Terraform resource (or datasource) representation. Magic Modules uses that mapping (and additional handwritten code where necessary) to generate &amp;ldquo;downstream&amp;rdquo; repositories - in particular, the Terraform providers for Google Cloud: google (or TPG) and google-beta (or TPGB).
-Generation of the downstream repositories happens for every new commit in a PR (to a temporary branch owned by the modular-magician robot user) and on every merge into the main branch (to the main branch of downstreams).</description></item><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/contribution-process/</guid><description>Contribution process # Before you begin # Familiarize yourself with GitHub flow Fork the Magic Modules repository into your GitHub account Set up your development environment Check whether the feature you want to work on has already been requested in the issue tracker. If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Get started on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/</link><description>Recent content in Get started on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/get-started/index.xml" rel="self" type="application/rss+xml"/><item><title>Generate the providers</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</guid><description>&lt;h1 id="generate-google-and-google-beta-providers">
+ Generate &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
+ &lt;a class="anchor" href="#generate-google-and-google-beta-providers">#&lt;/a>
+&lt;/h1>
+&lt;p>This quickstart guides you through setting up your development environment, making a change to &lt;code>magic-modules&lt;/code>, generating provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> Terraform providers, and running tests related to the change.&lt;/p>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://cloud.google.com/sdk/docs/install">Install the gcloud CLI.&lt;/a>&lt;/li>
+&lt;li>In the Google Cloud console, on the project selector page, select or &lt;a href="https://cloud.google.com/resource-manager/docs/creating-managing-projects">create a Google Cloud project&lt;/a>.
+&lt;blockquote class="book-hint info">
+ &lt;strong>Note:&lt;/strong> If you don&amp;rsquo;t already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject. After you finish these steps, you can delete the project, removing all resources associated with the project.
+&lt;/blockquote>
+
+
+
+
+ 
+ 
+
+
+&lt;a href="https://console.cloud.google.com/projectselector2/home/dashboard" target="_blank" rel="noopener" class="book-btn">
+ Go to project selector
+&lt;/a>
+&lt;/li>
+&lt;li>Make sure that billing is enabled for your Google Cloud project. Learn how to &lt;a href="https://cloud.google.com/billing/docs/how-to/verify-billing-enabled">check if billing is enabled on a project&lt;/a>.&lt;/li>
+&lt;/ol>
+&lt;h2 id="set-up-your-development-environment">
+ Set up your development environment
+ &lt;a class="anchor" href="#set-up-your-development-environment">#&lt;/a>
+&lt;/h2>
+&lt;blockquote class="book-hint warning">
+ If you are familiar with Docker or Podman, you may want to use the experimental &lt;a href="https://googlecloudplatform.github.io/magic-modules/reference/make-commands/#container-based-environment">container-based environment&lt;/a> instead of this section.
+&lt;/blockquote>
+
+&lt;ol>
+&lt;li>
+&lt;p>&lt;a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">Install git&lt;/a>&lt;/p></description></item><item><title>How Magic Modules works</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/how-magic-modules-works/</guid><description>&lt;h1 id="how-magic-modules-works">
+ How Magic Modules works
+ &lt;a class="anchor" href="#how-magic-modules-works">#&lt;/a>
+&lt;/h1>
+&lt;p>Magic Modules can be thought of as a source of truth for how to map a GCP API resource representation to a Terraform resource (or datasource) representation. Magic Modules uses that mapping (and additional handwritten code where necessary) to generate &amp;ldquo;downstream&amp;rdquo; repositories - in particular, the Terraform providers for Google Cloud: &lt;a href="https://github.com/hashicorp/terraform-provider-google">&lt;code>google&lt;/code>&lt;/a> (or TPG) and &lt;a href="https://github.com/hashicorp/terraform-provider-google-beta">&lt;code>google-beta&lt;/code>&lt;/a> (or TPGB).&lt;/p>
+&lt;p>Generation of the downstream repositories happens for every new commit in a PR (to a temporary branch owned by the &lt;a href="https://github.com/modular-magician/">&lt;code>modular-magician&lt;/code>&lt;/a> robot user) and on every merge into the main branch (to the main branch of downstreams). Generation for PR commits allows contributors to manually examine the changes, as well as allowing automatic running of unit tests, acceptance tests, and automated checks such as breaking change detection.&lt;/p></description></item><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/contribution-process/</guid><description>&lt;h1 id="contribution-process">
+ Contribution process
+ &lt;a class="anchor" href="#contribution-process">#&lt;/a>
+&lt;/h1>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
+&lt;ul>
+&lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="contribute-code">
+ Contribute code
+ &lt;a class="anchor" href="#contribute-code">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
+&lt;li>Make the code change. For example:
+&lt;ul>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Add or modify a resource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">Add resource tests&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">Make a breaking change&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
+&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="after-your-change-is-merged">
+ After your change is merged
+ &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
+&lt;/h2>
+&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item></channel></rss>

@@ -1,14 +1,14 @@
 {
   "name": "Magic Modules",
   "short_name": "Magic Modules",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/magic-modules/",
+  "scope": "/magic-modules/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/magic-modules/favicon.svg",
       "sizes": "512x512"
     }
   ]
