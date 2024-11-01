@@ -89,9 +89,8 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     default_value: false
-    deprecation_message: '`force_delete` is deprecated and will be removed in a future major release. Use ignore_inactive_datasources` instead.'
-    exactly_one_of:
-      - 'force_delete'
+    deprecation_message: '`force_delete` is deprecated and will be removed in a future major release. Use `ignore_inactive_datasources` instead.'
+    conflicts:
       - 'ignore_inactive_datasources'
   - name: 'ignore_inactive_datasources'
     type: Boolean
@@ -101,9 +100,8 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     default_value: false
-    exactly_one_of:
+    conflicts:
       - 'force_delete'
-      - 'ignore_inactive_datasources'
   - name: 'ignore_backup_plan_references'
     type: Boolean
     description: |
