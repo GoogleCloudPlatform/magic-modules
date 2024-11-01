@@ -38,8 +38,8 @@ var (
 		// },
 		{
 			id:        "BBBmau",
-			startDate: newDate(2024, 9, 26, pdtLoc),
-			endDate:   newDate(2024, 10, 2, pdtLoc),
+			startDate: newDate(2024, 11, 1, pdtLoc),
+			endDate:   newDate(2024, 11, 1, pdtLoc),
 		},
 		{
 			id:        "hao-nan-li",
@@ -98,8 +98,8 @@ var (
 		},
 		{
 			id:        "SarahFrench",
-			startDate: newDate(2024, 9, 20, bstLoc),
-			endDate:   newDate(2024, 9, 23, bstLoc),
+			startDate: newDate(2024, 11, 1, bstLoc),
+			endDate:   newDate(2024, 11, 4, bstLoc),
 		},
 		{
 			id:        "c2thorn",
