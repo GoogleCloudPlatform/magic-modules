@@ -131,3 +131,70 @@ func TestResourceNotInVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceServiceVersion(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		obj         Resource
+		expected    string
+	}{
+		{
+			description: "BaseUrl does not start with a version",
+			obj: Resource{
+				BaseUrl: "test",
+			},
+			expected: "",
+		},
+		{
+			description: "BaseUrl starts with / and does not include a version",
+			obj: Resource{
+				BaseUrl: "/test",
+			},
+			expected: "",
+		},
+		{
+			description: "BaseUrl starts with a version",
+			obj: Resource{
+				BaseUrl: "v3/test",
+			},
+			expected: "v3",
+		},
+		{
+			description: "BaseUrl starts with a / followed by version",
+			obj: Resource{
+				BaseUrl: "/v3/test",
+			},
+			expected: "v3",
+		},
+		{
+			description: "CaiBaseUrl does not start with a version",
+			obj: Resource{
+				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
+				CaiBaseUrl: "projects/{{project}}/locations/{{location}}/services",
+			},
+			expected: "",
+		},
+		{
+			description: "CaiBaseUrl starts with a version",
+			obj: Resource{
+				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
+				CaiBaseUrl: "v1/projects/{{project}}/locations/{{location}}/services",
+			},
+			expected: "v1",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			if got, want := tc.obj.ServiceVersion(), tc.expected; got != want {
+				t.Errorf("expected %q to be %q", got, want)
+			}
+		})
+	}
+}
