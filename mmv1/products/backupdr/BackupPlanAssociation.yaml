@@ -31,8 +31,10 @@ examples:
   - min_version: beta
     name: 'backup_dr_bpa'
     primary_resource_id: 'my-backup-plan'
+    vars:
+      backup_vault_name: "test-vault"
     test_env_vars:
-      project: :PROJECT_NAME
+      project: "PROJECT_NAME"
     exclude_test: true
 parameters:
   - name: 'location'
