@@ -190,12 +190,12 @@ properties:
         - name: 'diskCount'
           type: Integer
           description: |
-            The number of disks exposed to this node template.
+            Specifies the number of such disks.
         - name: 'diskType'
           type: String
           description: |
-            The type of disks exposed to this node template.
+            Specifies the desired disk type on the node. This disk type must be a local storage type (e.g.: local-ssd). Note that for nodeTemplates, this should be the name of the disk type and not its URL.
         - name: 'diskSizeGb'
           type: Integer
           description: |
-            The disk pool size in GB.
+            Specifies the size of the disk in base-2 GB.
