@@ -63,8 +63,15 @@ examples:
       address_name: 'address-name'
       kms_key_name: 'kms-name'
       network_name: 'network-name'
+      dataset_id: 'some_dataset'
       # Test is covered by handwritten test to include an update.
     exclude_test: true
+  - name: 'vertex_ai_endpoint_private_service_connect'
+    primary_resource_id: 'endpoint'
+    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
+  - name: 'vertex_ai_endpoint_dedicated_endpoint'
+    primary_resource_id: 'endpoint'
+    primary_resource_name: 'fmt.Sprintf("endpoint-name%s", context["random_suffix"])'
 parameters:
   - name: 'location'
     type: String
@@ -358,6 +365,22 @@ properties:
             `stderr` and `stdout` streams to Stackdriver Logging. Only supported
             for custom-trained Models and AutoML Tabular Models.
           output: true
+  - name: 'trafficSplit'
+    type: String
+    description: |
+      A map from a DeployedModel's id to the percentage of this Endpoint's traffic that should be forwarded to that DeployedModel.
+      If a DeployedModel's id is not listed in this map, then it receives no traffic.
+      The traffic percentage values must add up to 100, or map must be empty if the Endpoint is to not accept any traffic at a moment.
+
+      ~> **Note:** The `traffic_split` setting only applies after a model has been deployed to the endpoint. Re-applying a `google_vertex_ai_endpoint`
+      resource without updating the `traffic_split` post-deployment may lead to your deployed `traffic_split` being lost; see
+      the `deployModel` [example](https://cloud.google.com/vertex-ai/docs/general/deployment#deploy_a_model_to_an_endpoint) and
+      [documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints/deployModel) for details.
+    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+    validation:
+      function: 'validation.StringIsJSON'
   - name: 'etag'
     type: String
     description:
@@ -410,8 +433,38 @@ properties:
       enable_private_service_connect, can be set.
       [Format](https://cloud.google.com/compute/docs/reference/rest/v1/networks/insert):
       `projects/{project}/global/networks/{network}`. Where `{project}` is a
-      project number, as in `12345`, and `{network}` is network name.'
+      project number, as in `12345`, and `{network}` is network name.
+      Only one of the fields, `network` or `privateServiceConnectConfig`, can be set.'
     immutable: true
+    conflicts:
+      - 'privateServiceConnectConfig'
+  - name: 'privateServiceConnectConfig'
+    type: NestedObject
+    description:
+      'Configuration for private service connect.
+      `network` and `privateServiceConnectConfig` are mutually exclusive.'
+    conflicts:
+      - 'network'
+      - 'dedicatedEndpointEnabled'
+    properties:
+      - name: 'enablePrivateServiceConnect'
+        type: Boolean
+        description:
+          'Required. If true, expose the IndexEndpoint via private service connect.'
+        required: true
+        immutable: true
+      - name: 'projectAllowlist'
+        description:
+          'A list of Projects from which the forwarding rule will target the service attachment.'
+        type: Array
+        item_type:
+          type: String
+          description:
+            'A list of Projects from which the forwarding rule will target the service attachment.'
+      - name: 'enableSecurePrivateServiceConnect'
+        type: Boolean
+        description:
+          'If set to true, enable secure private service connect with IAM authorization. Otherwise, private service connect will be done without authorization. Note latency will be slightly increased if authorization is enabled.'
   - name: 'modelDeploymentMonitoringJob'
     type: String
     description:
@@ -419,4 +472,40 @@ properties:
       this Endpoint if monitoring is enabled by
       CreateModelDeploymentMonitoringJob. Format:
       `projects/{project}/locations/{location}/modelDeploymentMonitoringJobs/{model_deployment_monitoring_job}`'
+    output: true
+  - name: 'predictRequestResponseLoggingConfig'
+    type: NestedObject
+    description:
+      'Configures the request-response logging for online prediction.'
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description:
+          'If logging is enabled or not.'
+      - name: 'samplingRate'
+        type: Double
+        description:
+          'Percentage of requests to be logged, expressed as a fraction in range(0,1]'
+      - name: 'bigqueryDestination'
+        type: NestedObject
+        description:
+          'BigQuery table for logging. If only given a project, a new dataset will be created with name `logging_<endpoint-display-name>_<endpoint-id>` where will be made BigQuery-dataset-name compatible (e.g. most special characters will become underscores). If no table name is given, a new table will be created with name `request_response_logging`'
+        properties:
+          - name: 'outputUri'
+            type: String
+            description:
+              'BigQuery URI to a project or table, up to 2000 characters long.
+              When only the project is specified, the Dataset and Table is created. When the full table reference is specified, the Dataset must exist and table must not exist.
+              Accepted forms:
+              - BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.'
+  - name: 'dedicatedEndpointEnabled'
+    type: Boolean
+    description: |
+      If true, the endpoint will be exposed through a dedicated DNS [Endpoint.dedicated_endpoint_dns]. Your request to the dedicated DNS will be isolated from other users' traffic and will have better performance and reliability. Note: Once you enabled dedicated endpoint, you won't be able to send request to the shared DNS {region}-aiplatform.googleapis.com. The limitation will be removed soon.
+    conflicts:
+      - 'privateServiceConnectConfig'
+  - name: 'dedicatedEndpointDns'
+    type: String
+    description:
+      'Output only. DNS of the dedicated endpoint. Will only be populated if dedicatedEndpointEnabled is true. Format: `https://{endpointId}.{region}-{projectNumber}.prediction.vertexai.goog`.'
     output: true
