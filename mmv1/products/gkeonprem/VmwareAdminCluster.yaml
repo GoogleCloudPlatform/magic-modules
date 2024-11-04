@@ -376,7 +376,7 @@ properties:
           - loadBalancer.0.f5_config
           - loadBalancer.0.manual_lb_config
           - loadBalancer.0.metal_lb_config
-        properties: 
+        properties:
           - type: Boolean
             name: enabled
             description: Metal LB is enabled.
