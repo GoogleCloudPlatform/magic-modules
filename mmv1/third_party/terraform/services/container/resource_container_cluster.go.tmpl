@@ -5349,11 +5349,11 @@ func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) *container.Mas
 	if v, ok := d.GetOk("master_authorized_networks_config.0.cidr_blocks"); ok {
 		result.CidrBlocks = expandManCidrBlocks(v)
 	}
-	if v, ok := d.GetOk("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
+	if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
 		result.GcpPublicCidrsAccessEnabled = v.(bool)
 		result.ForceSendFields = append(result.ForceSendFields, "GcpPublicCidrsAccessEnabled")
 	}
-	if v, ok := d.GetOk("master_authorized_networks_config.0.private_endpoint_enforcement_enabled"); ok {
+	if v, ok := d.GetOkExists("master_authorized_networks_config.0.private_endpoint_enforcement_enabled"); ok {
 		result.PrivateEndpointEnforcementEnabled = v.(bool)
 		result.ForceSendFields = append(result.ForceSendFields, "PrivateEndpointEnforcementEnabled")
 	}
