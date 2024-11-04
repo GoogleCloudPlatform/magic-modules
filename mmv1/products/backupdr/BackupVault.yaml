@@ -47,6 +47,7 @@ async:
 custom_code:
   !ruby/object:Provider::Terraform::CustomCode
   pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/backup_dr_backup_vault.go.tmpl'
 examples:
   - name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test'
@@ -117,6 +118,19 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     default_value: false
+  - name: 'access_restriction'
+    type: Enum
+    description: |
+        Access restriction for the backup vault. Default value is `WITHIN_ORGANIZATION` if not provided during creation.
+    min_version: 'beta'
+    url_param_only: true
+    default_value: "WITHIN_ORGANIZATION"
+    enum_values:
+      - 'ACCESS_RESTRICTION_UNSPECIFIED'
+      - 'WITHIN_PROJECT'
+      - 'WITHIN_ORGANIZATION'
+      - 'UNRESTRICTED'
+      - 'WITHIN_ORG_BUT_UNRESTRICTED_FOR_BA'
 properties:
   - name: 'name'
     type: String

@@ -1,0 +1,6 @@
+if v, ok := d.GetOk("access_restriction"); ok {
+   url, err = transport_tpg.AddQueryParams(url, map[string]string{"accessRestriction": fmt.Sprintf("%v", v)})
+   if err != nil {
+       return err
+   }
+}
