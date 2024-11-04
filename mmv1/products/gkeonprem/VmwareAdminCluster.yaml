@@ -679,7 +679,7 @@ properties:
         description: |
           ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
         output: true
-        item_type: 
+        item_type:
           type: NestedObject
           properties:
             - type: String
