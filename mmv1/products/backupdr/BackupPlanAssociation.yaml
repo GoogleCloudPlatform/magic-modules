@@ -19,6 +19,8 @@ self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{
 immutable: true
 delete_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
 description: A Backup and DR BackupPlanAssociation.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
@@ -30,12 +32,11 @@ timeouts:
 examples:
   - min_version: beta
     name: 'backup_dr_bpa'
-    primary_resource_id: 'my-backup-plan'
+    primary_resource_id: 'my-backup-plan-association'
     vars:
-      backup_vault_name: "test-vault"
+      backup_plan_association_id: "my-bpa"
     test_env_vars:
       project: "PROJECT_NAME"
-    exclude_test: true
 parameters:
   - name: 'location'
     type: String
