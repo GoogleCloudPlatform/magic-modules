@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: Models
+name: Model
 base_url: projects/{{project}}/locations/{{region}}/models
 create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
 delete_url: '{{name}}'
@@ -44,8 +44,15 @@ custom_code:
   encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
 examples:
-  - name: 'vertex_ai_model_source_basic'
+  - name: 'vertex_ai_model_source_basic_1'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+  - name: 'vertex_ai_model_source_basic_2'
     exclude_import_test: true
     primary_resource_id: 'model'
     vars:
@@ -66,16 +73,13 @@ properties:
       The name of the Model. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
     output: true
-    # url_param_only: true
     custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.tmpl
   - type: String
     name: 'description'
     description: Description of the Model.
-    immutable: true
   - type: String
     name: 'versionId'
     description: The version ID of the Model.
-    immutable: true
     output: true
   - type: String
     name: 'versionCreateTime'
@@ -305,9 +309,6 @@ properties:
       user provided version aliases so that a model version can be referenced via alias.
     item_type:
       type: String
-  - type: KeyValueLabels
-    name: 'labels'
-    description: The labels with user-defined metadata to organize your Models.
   - type: NestedObject
     name: 'encryptionSpec'
     immutable: true
@@ -407,13 +408,15 @@ properties:
                   standard linear search in the database for each query.
   - type: String
     name: 'sourceModel'
-    default_from_api: true
+    ignore_read: true
+    immutable: true
     at_least_one_of:
       - sourceModel
     description: |
       The resource name of the Model to copy. That Model must be in the same Project
   - type: String
     name: 'modelId'
-    default_from_api: true
+    ignore_read: true
+    immutable: true
     description: |
       Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.

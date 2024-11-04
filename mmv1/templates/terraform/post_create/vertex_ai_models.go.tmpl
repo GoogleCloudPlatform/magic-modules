@@ -1,0 +1,4 @@
+if _, ok := d.GetOk("model_id"); !ok {
+    modelId := tpgresource.NameFromSelfLinkStateFunc(res["name"].(string))
+	d.Set("model_id", modelId)
+}
