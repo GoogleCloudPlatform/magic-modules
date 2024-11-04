@@ -546,6 +546,14 @@ properties:
                       type: Boolean
                       description: |-
                         If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
+                    - name: 'mountOptions'
+                      type: Array
+                      min_version: 'beta'
+                      description: |
+                        A list of flags to pass to the gcsfuse command for configuring this volume.
+                        Flags should be passed without leading dashes.
+                      item_type:
+                        type: String
                 - name: 'nfs'
                   type: NestedObject
                   description: |-
