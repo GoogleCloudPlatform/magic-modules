@@ -45,7 +45,7 @@ resource "google_backup_dr_backup_plan" "bp1" {
   location       = "us-central1"
   backup_plan_id = "bp-bpa-test"
   resource_type  = "compute.googleapis.com/Instance"
-  backup_vault   = google_backup_dr_backup_vault.my_backup_vault.id
+  backup_vault   = google_backup_dr_backup_vault.bv1.id
 
   backup_rules {
     rule_id                = "rule-1"

@@ -29,6 +29,10 @@ autogen_async: true
 timeouts:
   insert_minutes: 60
   delete_minutes: 60
+custom_code:
+  constants: 'templates/terraform/constants/backupdr_bpa.go.tmpl'
+custom_diff:
+  - 'ResourceNameDiffSuppress'
 examples:
   - min_version: beta
     name: 'backup_dr_bpa'
@@ -55,7 +59,7 @@ properties:
     type: String
     description: |
       The resource for which BPA needs to be created
-    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    diff_suppress_func: 'ResourceNameDiffSuppress'
     required: true
   - name: 'name'
     type: String
