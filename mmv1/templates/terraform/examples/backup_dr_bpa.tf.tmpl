@@ -6,7 +6,7 @@
 
 resource "google_compute_instance" "myinstance" {
   provider = google-beta
-  name         = "test-instance"
+  name         = "{{index $.Vars "compute-name"}}"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"
   boot_disk {
@@ -36,7 +36,7 @@ resource "google_compute_instance" "myinstance" {
 resource "google_backup_dr_backup_vault" "bv1" {
   provider                                      = google-beta
   location                                      = "us-central1"
-  backup_vault_id                               = "bv-bpa"
+  backup_vault_id                               = "{{index $.Vars "backup_vault_id"}}"
   backup_minimum_enforced_retention_duration    = "100000s"
    force_delete = "true"
 }
@@ -44,7 +44,7 @@ resource "google_backup_dr_backup_vault" "bv1" {
 resource "google_backup_dr_backup_plan" "bp1" {
   provider       = google-beta
   location       = "us-central1"
-  backup_plan_id = "bp-bpa-test"
+  backup_plan_id = "{{index $.Vars "backup_plan_id"}}"
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.bv1.id
 

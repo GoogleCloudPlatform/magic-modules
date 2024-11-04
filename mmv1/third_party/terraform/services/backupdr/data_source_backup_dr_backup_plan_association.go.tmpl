@@ -24,7 +24,6 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociation() *schema.Resource {
 
 func dataSourceGoogleCloudBackupDRBackupPlanAssociationRead(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*transport_tpg.Config)
-
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
@@ -34,20 +33,16 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationRead(d *schema.ResourceDa
 	if err != nil {
 		return err
 	}
-
 	backup_plan_association_id := d.Get("backup_plan_association_id").(string)
-
 	id := fmt.Sprintf("projects/%s/locations/%s/backupPlanAssociations/%s", project, location, backup_plan_association_id)
 	d.SetId(id)
     err = resourceBackupDRBackupPlanAssociationRead(d, meta)
 	if err != nil {
 		return err
 	}
-
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
-
 	return nil
 }
 {{- end }}

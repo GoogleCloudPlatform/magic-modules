@@ -35,6 +35,9 @@ examples:
     primary_resource_id: 'my-backup-plan-association'
     vars:
       backup_plan_association_id: "my-bpa"
+      compute-name: "test-instance"
+      backup_vault_id: "bv-bpa"
+      backup_plan_id: "bp-bpa-test"
     test_env_vars:
       project: "PROJECT_NAME"
 parameters:

@@ -17,7 +17,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/guides/provid
 data "google_backup_dr_backup_plan_association" "my-backupplan-association" {
   location =  "us-central1"
   backup_plan_association_id="bpa-id"
-  }
+}
 ```
 
 ## Argument Reference
