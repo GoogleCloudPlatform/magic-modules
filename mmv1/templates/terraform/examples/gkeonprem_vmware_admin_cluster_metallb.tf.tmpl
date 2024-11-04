@@ -32,10 +32,6 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
       control_plane_vip = "10.251.133.5"
       addons_vip = "10.251.135.19"
     }
-    f5_config {
-      address = "10.251.135.22"
-      partition = "test-parition"
-      snat_pool = "test-snat-pool"
-    }
+    metal_lb_config {}
   }
 }

@@ -52,6 +52,20 @@ examples:
       name: "basic"
     test_env_vars:
       project: "fake-backend-360322"
+  - name: 'gkeonprem_vmware_admin_cluster_full'
+    primary_resource_id: 'admin-cluster-full'
+    min_version: beta
+    vars:
+      name: 'full'
+    test_env_vars:
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_admin_cluster_metallb'
+    primary_resource_id: 'admin-cluster-metallb'
+    min_version: beta
+    vars:
+      name: 'metallb'
+    test_env_vars:
+      project: 'fake-backend-360322'
 parameters:
   - type: String
     name: "name"
@@ -286,14 +300,14 @@ properties:
         name: "vipConfig"
         required: true
         description: |
-          Specified the Bare Metal Load Balancer Config
+          Specified the VMware Load Balancer Config
         properties:
           - type: String
             name: "controlPlaneVip"
             required: true
             description: |
               The VIP which you previously set aside for the Kubernetes
-              API of this Bare Metal Admin Cluster.
+              API of this VMware Admin Cluster.
           - type: String
             name: "addonsVip"
             description: |
@@ -355,12 +369,17 @@ properties:
             description: |
               NodePort for add-ons server in the admin cluster.
             default_from_api: true
-      - name: 'metalLbConfig'
+      - type: NestedObject
+        name: 'metalLbConfig'
         description: Manually configured load balancers.
         exactly_one_of:
           - loadBalancer.0.f5_config
           - loadBalancer.0.manual_lb_config
           - loadBalancer.0.metal_lb_config
+        properties: 
+          - type: Boolean
+            name: enabled
+            description: Metal LB is enabled.
   - type: NestedObject
     name: vcenter
     description: |
@@ -433,17 +452,6 @@ properties:
               name: username
               required: true
               description: The name of the user, e.g. `my-gcp-id@gmail.com`.
-  - type: NestedObject
-    name: preparedSecrets
-    description: |
-      The VMware admin cluster prepared secrets configuration. It should always be
-      enabled by the Central API, instead of letting users set it.
-    default_from_api: true
-    properties:
-      - type: Boolean
-        name: enabled
-        description: Whether prepared secrets is enabled.
-        required: true
   - type: NestedObject
     name: platformConfig
     description: |
