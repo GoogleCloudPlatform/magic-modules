@@ -104,7 +104,7 @@ resource "google_backup_dr_backup_plan" "foo" {
 
 resource "google_backup_dr_backup_plan_association" "bpa" { 
   location = "us-central1" 
-  backup_plan_association_id = "bpa-test-%{random_suffix}"
+  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
   resource =   google_compute_instance.default.id
   resource_type= "compute.googleapis.com/Instance"
   backup_plan = google_backup_dr_backup_plan.foo.name
