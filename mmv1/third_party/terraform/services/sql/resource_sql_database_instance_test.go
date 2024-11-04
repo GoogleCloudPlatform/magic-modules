@@ -943,29 +943,29 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 }
 
 func TestAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        instanceName := "tf-test-" + acctest.RandString(t, 10)
-        projectId := envvar.GetTestProjectFromEnv()
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := envvar.GetTestProjectFromEnv()
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
-                                Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
-                        },
-                        {
-                                ResourceName:            "google_sql_database_instance.instance",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
-                                ImportStateVerifyIgnore: []string{"deletion_protection"},
-                        },
-                },
-        })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
 }
 
 func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing.T) {
@@ -976,7 +976,6 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing
 	projectId := envvar.GetTestProjectFromEnv()
 	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
 	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
-
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1001,11 +1000,11 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing
 func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRemovePscAutoConnections(t *testing.T) {
 	t.Parallel()
 
-        testId := "test-psc-auto-con"
-        instanceName := "tf-test-" + acctest.RandString(t, 10)
+	testId := "test-psc-auto-con"
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-        networkName := acctest.BootstrapSharedTestNetwork(t, testId)
-        network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1036,7 +1035,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRem
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
-                              Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
 			},
 		},
 	})
@@ -3432,7 +3431,7 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 	}
 }
 
-func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool,isPscAutoConnectionConfigExpected bool, expectedConsumerNetwork string, expectedConsumerProject string) func(*terraform.State) error {
+func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, isPscAutoConnectionConfigExpected bool, expectedConsumerNetwork string, expectedConsumerProject string) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[resourceName]
 		if !ok {
@@ -3459,19 +3458,19 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 
 			_, ok = resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.#"]
 			if !ok {
-                                return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections property is not present or set in state of %s", resourceName)
-                        }
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections property is not present or set in state of %s", resourceName)
+			}
 
 			if isPscAutoConnectionConfigExpected {
-			        consumerNetwork, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network"]
-                                if !ok || consumerNetwork!= expectedConsumerNetwork {
-                                        return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network property is not present or set as expected in state of %s", resourceName)
-                                }
+				consumerNetwork, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network"]
+				if !ok || consumerNetwork != expectedConsumerNetwork {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network property is not present or set as expected in state of %s", resourceName)
+				}
 
-                                consumerProject, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id"]
-                                if !ok || consumerProject!= expectedConsumerProject {
-                                        return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id property is not present or set as expected in state of %s", resourceName)
-                                }
+				consumerProject, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id"]
+				if !ok || consumerProject != expectedConsumerProject {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id property is not present or set as expected in state of %s", resourceName)
+				}
 			}
 		}
 
