@@ -64,6 +64,7 @@ resource "google_backup_dr_backup_plan" "bp1" {
 resource "google_backup_dr_backup_plan_association" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   location = "us-central1"
+  resource_type= "compute.googleapis.com/Instance"
   name          = "{{index $.Vars "backup_plan_association_id"}}"
   resource      = google_compute_instance.myinstance.id
   backup_plan  = [ google_backup_dr_backup_plan.bp1.name ]

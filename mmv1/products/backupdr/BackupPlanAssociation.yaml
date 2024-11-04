@@ -72,7 +72,7 @@ properties:
     type: String
     description: |
       The resource type of workload on which backupplan is applied
-    output: true
+    required: true
   - name: 'createTime'
     type: String
     description: |

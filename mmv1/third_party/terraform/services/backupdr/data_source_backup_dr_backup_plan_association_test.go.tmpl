@@ -3,14 +3,8 @@ package backupdr_test
 
 import (
 	"testing"
-	"fmt"
-	"strings"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
@@ -112,6 +106,7 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
   location = "us-central1" 
   backup_plan_association_id = "bpa-test-%{random_suffix}"
   resource =   google_compute_instance.default.id
+  resource_type= "compute.googleapis.com/Instance"
   backup_plan = google_backup_dr_backup_plan.foo.name
 }
 
