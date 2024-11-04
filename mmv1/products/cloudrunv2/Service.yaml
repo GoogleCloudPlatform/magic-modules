@@ -127,7 +127,6 @@ examples:
   - name: 'cloudrunv2_service_multicontainer'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -837,7 +836,6 @@ properties:
               type: NestedObject
               description: |-
                 Ephemeral storage used as a shared volume.
-              min_version: 'beta'
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
