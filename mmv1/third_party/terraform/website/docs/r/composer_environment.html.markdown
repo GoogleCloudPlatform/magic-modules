@@ -363,6 +363,32 @@ resource "google_composer_environment" "example" {
 }
 ```
 
+When using an existing network attachment that is also managed in Terraform, ensure Terraform ignores changes to producer_accept_lists as follows:
+
+```hcl
+resource "google_compute_network_attachment" "example" {
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
+  }
+
+  # ... other configuration parameters
+}
+
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      composer_network_attachment = google_compute_network_attachment.example.id
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
 ### With Software (Airflow) Config
 
 ```hcl
