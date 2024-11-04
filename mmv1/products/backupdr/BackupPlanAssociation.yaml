@@ -31,8 +31,6 @@ timeouts:
   delete_minutes: 60
 custom_code:
   constants: 'templates/terraform/constants/backupdr_bpa.go.tmpl'
-custom_diff:
-  - 'ResourceNameDiffSuppress'
 examples:
   - min_version: beta
     name: 'backup_dr_bpa'
