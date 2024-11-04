@@ -59,6 +59,10 @@ examples:
     primary_resource_id: 'template'
     vars:
       template_name: 'soletenant-with-accelerators'
+  - name: 'node_template_disks'
+    primary_resource_id: 'template'
+    vars:
+      template_name: 'soletenant-with-disks'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -175,3 +179,23 @@ properties:
     enum_values:
       - 'ENABLED'
       - 'NONE'
+  - name: 'disks'
+    type: Array
+    description: |
+      List of the type, size and count of disks attached to the
+      node template
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'diskCount'
+          type: Integer
+          description: |
+            Specifies the number of such disks.
+        - name: 'diskType'
+          type: String
+          description: |
+            Specifies the desired disk type on the node. This disk type must be a local storage type (e.g.: local-ssd). Note that for nodeTemplates, this should be the name of the disk type and not its URL.
+        - name: 'diskSizeGb'
+          type: Integer
+          description: |
+            Specifies the size of the disk in base-2 GB.
