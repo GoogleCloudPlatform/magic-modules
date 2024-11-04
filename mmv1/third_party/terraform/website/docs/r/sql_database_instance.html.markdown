@@ -234,7 +234,9 @@ includes an up-to-date reference of supported versions.
     is not provided, the provider project is used.
 
 * `replica_configuration` - (Optional) The configuration for replication. The
-    configuration is detailed below. Valid only for MySQL instances.
+    configuration is detailed below. 
+
+* `replica_names` - (Optional, Computed) List of replica names. Can be updated.
 
 * `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
@@ -377,9 +379,9 @@ Specifying a network enables private IP.
 At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
+* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections.
 
-* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
+* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported value is `GOOGLE_MANAGED_INTERNAL_CA`.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
@@ -449,12 +451,11 @@ The optional `settings.password_validation_policy` subblock for instances declar
 * `enable_password_policy` - Enables or disable the password validation policy.
 
 The optional `replica_configuration` block must have `master_instance_name` set
-to work, cannot be updated and supports:
+to work, cannot be updated, and supports:
 
--> **Note:** `replica_configuration` field is not meant to be used if the master
-instance is a source representation instance. The configuration provided by this
-field can be set on the source representation instance directly. If this field
-is present when the master instance is a source representation instance, `dump_file_path` must be provided.
+* `cascadable_replica` - (Optional) Specifies if the replica is a cascadable replica. If true, instance must be in different region from primary.
+
+  ~> **NOTE:** Only supported for SQL Server database.
 
 * `ca_certificate` - (Optional) PEM representation of the trusted CA's x509
     certificate.
@@ -469,14 +470,14 @@ is present when the master instance is a source representation instance, `dump_f
     between connect retries. MySQL's default is 60 seconds.
 
 * `dump_file_path` - (Optional) Path to a SQL file in GCS from which replica
-    instances are created. Format is `gs://bucket/filename`. Note, if the master
-    instance is a source representation instance this field must be present.
+    instances are created. Format is `gs://bucket/filename`.
 
 * `failover_target` - (Optional) Specifies if the replica is the failover target.
     If the field is set to true the replica will be designated as a failover replica.
     If the master instance fails, the replica instance will be promoted as
     the new master instance.
-  ~> **NOTE:** Not supported for Postgres database.
+
+  ~> **NOTE:** Only supported for MySQL.
 
 * `master_heartbeat_period` - (Optional) Time in ms between replication
     heartbeats.
@@ -577,6 +578,38 @@ performing filtering in a Terraform config.
 * `server_ca_cert.0.expiration_time` - Expiration time of the CA Cert.
 
 * `server_ca_cert.0.sha1_fingerprint` - SHA Fingerprint of the CA Cert.
+
+## Switchover (SQL Server Only)
+Users can perform a switchover on any direct `cascadable` replica by following the steps below.
+
+  ~>**WARNING:** Failure to follow these steps can lead to data loss (You will be warned during plan stage). To prevent data loss during a switchover, please verify your plan with the checklist below.
+
+For a more in-depth walkthrough with example code, see the [Switchover Guide](../guides/sql_instance_switchover.html.markdown)
+
+### Steps to Invoke Switchover
+
+Create a `cascadable` replica in a different region from the primary (`cascadable_replica` is set to true in `replica_configuration`)
+
+#### Invoking switchover in the replica resource:
+1. Change instance_type from `READ_REPLICA_INSTANCE` to `CLOUD_SQL_INSTANCE`
+2. Remove `master_instance_name`
+3. Remove `replica_configuration`
+4. Add current primary's name to the replica's `replica_names` list
+
+#### Updating the primary resource:
+1. Change `instance_type` from `CLOUD_SQL_INSTANCE` to `READ_REPLICA_INSTANCE`
+2. Set `master_instance_name` to the original replica (which will be primary after switchover)
+3. Set `replica_configuration` and set `cascadable_replica` to `true`
+4. Remove original replica from `replica_names`
+
+    ~> **NOTE**: Do **not** delete the replica_names field, even if it has no replicas remaining. Set replica_names = [ ] to indicate it having no replicas.
+
+#### Plan and verify that:
+- `terraform plan` outputs **"0 to add, 0 to destroy"**
+- `terraform plan` does not say **"must be replaced"** for any resource
+- Every resource **"will be updated in-place"**
+- Only the 2 instances involved in switchover have planned changes
+- (Recommended) Use `deletion_protection` on instances as a safety measure
 
 ## Timeouts
 
