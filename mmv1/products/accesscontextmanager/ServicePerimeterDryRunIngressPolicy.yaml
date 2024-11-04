@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunIngressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single IngressPolicy in the spec (dry-run) configuration for a service perimeter.
   IngressPolicies match requests based on ingressFrom and ingressTo stanzas. For an ingress policy to match,
@@ -29,6 +30,7 @@ description: |
   is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
 references:
   guides:
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
 docs:
 id_format: '{{perimeter}}'
@@ -71,6 +73,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   pre_create: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
   pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
@@ -159,6 +162,8 @@ properties:
           then this `IngressTo` rule will authorize access to all
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSupressFunc
         item_type:
           type: String
       - name: 'operations'

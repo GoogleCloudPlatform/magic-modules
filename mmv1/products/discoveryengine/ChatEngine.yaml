@@ -13,6 +13,7 @@
 
 ---
 name: 'ChatEngine'
+api_resource_type_kind: Engine
 description: |
   Vertex chat and Conversation Engine Chat type
 references:

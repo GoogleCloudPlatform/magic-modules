@@ -5,6 +5,7 @@ ignore_read:
   - "billing_account"
   - "kms_settings"
   - "resource_settings"
+  - "workload_options"
   - "provisioned_resources_parent"
   - "partner_services_billing_account"
 doc_hide:

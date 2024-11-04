@@ -1,5 +1,5 @@
 # Stage 1: Download go module cache for builds
-FROM golang:1.21-bullseye AS builder
+FROM golang:1.23-bullseye AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
@@ -12,7 +12,7 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 RUN go build -o /dev/null .
 
 # Stage 2: Creating the final image
-FROM golang:1.21-bullseye
+FROM golang:1.23-bullseye
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
 

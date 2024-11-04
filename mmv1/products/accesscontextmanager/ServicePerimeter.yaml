@@ -27,6 +27,7 @@ description: |
 references:
   guides:
     'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 docs:
   warning: |

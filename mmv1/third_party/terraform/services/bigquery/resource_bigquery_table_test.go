@@ -45,6 +45,72 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_OnlyDeletionProtectionUpdate(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableBasicSchemaWithDeletionProtection(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryTable_OnlyNestedFieldUpdate(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableTimePartitioningWithExpirationMs(datasetID, tableID, 1000),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccBigQueryTableTimePartitioningWithExpirationMs(datasetID, tableID, 2000),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_DropColumns(t *testing.T) {
 	t.Parallel()
 
@@ -1818,6 +1884,30 @@ EOH
 `, datasetID, tableID)
 }
 
+func testAccBigQueryTableBasicSchemaWithDeletionProtection(datasetID, tableID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = true
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  schema = <<EOH
+[
+  {
+    "name": "id",
+    "type": "INTEGER"
+  }
+]
+EOH
+
+}
+`, datasetID, tableID)
+}
+
 func testAccBigQueryTableBasicSchemaWithPolicyTags(datasetID, tableID, projectID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -1986,6 +2076,65 @@ EOH
 
 }
 `, datasetID, tableID, partitioningType)
+}
+
+func testAccBigQueryTableTimePartitioningWithExpirationMs(datasetID, tableID string, expirationMs int) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  time_partitioning {
+    type                     = "DAY"
+    field                    = "ts"
+    expiration_ms            = %d
+  }
+  require_partition_filter = true
+  clustering = ["some_int", "some_string"]
+  schema     = <<EOH
+[
+  {
+    "name": "ts",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "some_string",
+    "type": "STRING"
+  },
+  {
+    "name": "some_int",
+    "type": "INTEGER"
+  },
+  {
+    "name": "city",
+    "type": "RECORD",
+    "fields": [
+  {
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "coord",
+    "type": "RECORD",
+    "fields": [
+    {
+    "name": "lon",
+    "type": "FLOAT"
+    }
+    ]
+  }
+    ]
+  }
+]
+EOH
+
+}
+`, datasetID, tableID, expirationMs)
 }
 
 func testAccBigQueryTableTimePartitioningDropColumns(datasetID, tableID string) string {
@@ -4018,7 +4167,7 @@ func testAccBigQueryTableTableConstraintsUpdate(projectID, datasetID, tableID_pk
   }
 
   resource "google_bigquery_table" "table_pk" {
-	deletion_protection = false
+    deletion_protection = false
     table_id   	= "%s"
     dataset_id 	= google_bigquery_dataset.foo.dataset_id
 
@@ -4274,7 +4423,7 @@ resource "google_tags_tag_key" "key1" {
 }
 
 resource "google_tags_tag_value" "value1" {
-  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  parent     = google_tags_tag_key.key1.id
   short_name = "%{tag_value_name1}"
 }
 
@@ -4287,7 +4436,7 @@ resource "google_bigquery_table" "test" {
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
   table_id   = "%{table_id}"
   resource_tags = {
-    "%{project_id}/${google_tags_tag_key.key1.short_name}" = "${google_tags_tag_value.value1.short_name}"
+    (google_tags_tag_key.key1.namespaced_name) = google_tags_tag_value.value1.short_name
   }
 }
 `, context)
@@ -4301,7 +4450,7 @@ resource "google_tags_tag_key" "key1" {
 }
 
 resource "google_tags_tag_value" "value1" {
-  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  parent     = google_tags_tag_key.key1.id
   short_name = "%{tag_value_name1}"
 }
 
@@ -4311,7 +4460,7 @@ resource "google_tags_tag_key" "key2" {
 }
 
 resource "google_tags_tag_value" "value2" {
-  parent = "tagKeys/${google_tags_tag_key.key2.name}"
+  parent     = google_tags_tag_key.key2.id
   short_name = "%{tag_value_name2}"
 }
 
@@ -4324,8 +4473,8 @@ resource "google_bigquery_table" "test" {
   dataset_id = "${google_bigquery_dataset.test.dataset_id}"
   table_id   = "%{table_id}"
   resource_tags = {
-    "%{project_id}/${google_tags_tag_key.key1.short_name}" = "${google_tags_tag_value.value1.short_name}"
-    "%{project_id}/${google_tags_tag_key.key2.short_name}" = "${google_tags_tag_value.value2.short_name}"
+    (google_tags_tag_key.key1.namespaced_name) = google_tags_tag_value.value1.short_name
+    (google_tags_tag_key.key2.namespaced_name) = google_tags_tag_value.value2.short_name
   }
 }
 `, context)
@@ -4339,7 +4488,7 @@ resource "google_tags_tag_key" "key1" {
 }
 
 resource "google_tags_tag_value" "value1" {
-  parent = "tagKeys/${google_tags_tag_key.key1.name}"
+  parent     = google_tags_tag_key.key1.id
   short_name = "%{tag_value_name1}"
 }
 
@@ -4349,7 +4498,7 @@ resource "google_tags_tag_key" "key2" {
 }
 
 resource "google_tags_tag_value" "value2" {
-  parent = "tagKeys/${google_tags_tag_key.key2.name}"
+  parent     = google_tags_tag_key.key2.id
   short_name = "%{tag_value_name2}"
 }
 
