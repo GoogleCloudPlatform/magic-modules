@@ -38,6 +38,7 @@ examples:
       compute-name: "test-instance"
       backup_vault_id: "bv-bpa"
       backup_plan_id: "bp-bpa-test"
+      account_id: "my-custom"
     test_env_vars:
       project: "PROJECT_NAME"
 parameters:
