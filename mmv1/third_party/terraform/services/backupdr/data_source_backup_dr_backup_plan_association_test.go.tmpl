@@ -115,7 +115,7 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
 
 data "google_backup_dr_backup_plan_association" "bpa-test" {
   location =  "us-central1"
-  backup_plan_association_id="bpa-test-%{random_suffix}"
+  backup_plan_association_id="tf-test-bpa-test-%{random_suffix}"
   depends_on= [ google_backup_dr_backup_plan_association.bpa ]
   }
 `, context)
