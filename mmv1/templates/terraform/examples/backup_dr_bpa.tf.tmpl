@@ -1,9 +1,11 @@
  resource "google_service_account" "mySA" {
+  provider = google-beta
   account_id   = "my-custom1"
   display_name = "Custom SA for VM Instance"
 }
 
 resource "google_compute_instance" "myinstance" {
+  provider = google-beta
   name         = "test-instance"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"

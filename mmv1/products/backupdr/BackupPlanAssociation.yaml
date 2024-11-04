@@ -109,7 +109,6 @@ properties:
             - :PERMISSION_DENIED
             - :SUCCEEDED
             - :FAILED
-          default_value: :LAST_BACKUP_STATE_UNSPECIFIED
           output: true
         - name: 'lastBackupError'
           type: NestedObject
