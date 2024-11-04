@@ -2811,7 +2811,7 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "%s"
     edition = "%s"
-	 backup_configuration {
+	backup_configuration {
 	  transaction_log_retention_days = 7
     }
   }

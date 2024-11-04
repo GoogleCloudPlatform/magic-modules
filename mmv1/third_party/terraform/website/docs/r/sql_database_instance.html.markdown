@@ -453,12 +453,14 @@ The optional `settings.password_validation_policy` subblock for instances declar
 The optional `replica_configuration` block must have `master_instance_name` set
 to work, cannot be updated and supports:
 
-* `cascadable_replica` - (Optional) Specifies if the replica is a cascadable replica. If true, instance must be in different region from primary.
--> **Note:** `replica_configuration` field is not meant to be used if the master
+~> **Note:** `replica_configuration` field is not meant to be used if the master
 instance is a source representation instance. The configuration provided by this
 field can be set on the source representation instance directly. If this field
 is present when the master instance is a source representation instance, `dump_file_path` must be provided.
--> **NOTE:** Only supported for SQL Server database.
+
+* `cascadable_replica` - (Optional) Specifies if the replica is a cascadable replica. If true, instance must be in different region from primary.
+
+  ~> **NOTE:** Only supported for SQL Server database.
 
 * `ca_certificate` - (Optional) PEM representation of the trusted CA's x509
     certificate.
@@ -480,7 +482,6 @@ is present when the master instance is a source representation instance, `dump_f
     If the field is set to true the replica will be designated as a failover replica.
     If the master instance fails, the replica instance will be promoted as
     the new master instance.
-
   ~> **NOTE:** Not supported for Postgres database.
 
 * `master_heartbeat_period` - (Optional) Time in ms between replication
