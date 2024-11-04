@@ -364,7 +364,7 @@ func (m *manager) getProjectFromResource(d tpgresource.TerraformResourceData, co
 		m.errorLogger.Warn(fmt.Sprintf("Failed to retrieve project_id for %s from cai resource", cai.Name))
 
 		bucketField, ok := d.GetOk("bucket")
-		if ok {
+		if ok && m.storageClient != nil {
 			bucket := bucketField.(string)
 			resp, err := m.storageClient.Buckets.Get(bucket).Do()
 			if err == nil {
