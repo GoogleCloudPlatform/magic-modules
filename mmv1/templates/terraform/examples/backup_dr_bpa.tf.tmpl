@@ -38,6 +38,7 @@ resource "google_backup_dr_backup_vault" "bv1" {
   location                                      = "us-central1"
   backup_vault_id                               = "bv-bp-test"
   backup_minimum_enforced_retention_duration    = "100000s"
+   force_delete = "true"
 }
 
 resource "google_backup_dr_backup_plan" "bp1" {
@@ -49,7 +50,7 @@ resource "google_backup_dr_backup_plan" "bp1" {
 
   backup_rules {
     rule_id                = "rule-1"
-    backup_retention_days  = 5
+    backup_retention_days  = 2
 
     standard_schedule {
       recurrence_type     = "HOURLY"
@@ -57,8 +58,8 @@ resource "google_backup_dr_backup_plan" "bp1" {
       time_zone           = "UTC"
 
       backup_window {
-        start_hour_of_day = 0
-        end_hour_of_day   = 24
+        start_hour_of_day = 12
+        end_hour_of_day   = 18
       }
     }
   }
