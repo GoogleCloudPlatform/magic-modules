@@ -70,11 +70,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      'deletion_protection_enabled': 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      'deletion_protection_enabled': 'false'
   - name: "redis_cluster_aof"
     primary_resource_id: "cluster-aof"
     vars:
@@ -82,11 +82,11 @@ examples:
       policy_name: "mypolicy"
       subnet_name: "mysubnet"
       network_name: "mynetwork"
-      prevent_destroy: 'true'
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
-      prevent_destroy: 'false'
+      'deletion_protection_enabled': 'false'
     oics_vars_overrides:
-      prevent_destroy: 'false'
+      'deletion_protection_enabled': 'false'
 parameters:
   - name: 'name'
     type: String
