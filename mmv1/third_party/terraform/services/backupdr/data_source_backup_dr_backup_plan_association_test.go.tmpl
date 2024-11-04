@@ -32,46 +32,6 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBackupDRBackupPlanAssociationDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_backup_dr_backup_plan" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupPlans/{{"{{"}}backup_plan_id{{"}}"}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("Backup Plan still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
-}
-
-
 func testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_service_account" "default" {
