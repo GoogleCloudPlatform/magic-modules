@@ -54,6 +54,7 @@ properties:
     type: String
     description: |
       The resource for which BPA needs to be created
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     required: true
   - name: 'name'
     type: String
@@ -65,6 +66,7 @@ properties:
     description: |
       The BP with which resource needs to be created
     required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'resourceType'
     type: String
     description: |
@@ -87,6 +89,7 @@ properties:
     output: true
   - name: 'rulesConfigInfo'
     type: Array
+    output: true
     description: |
        Message for rules config info
     item_type:
@@ -106,6 +109,7 @@ properties:
             - :SUCCEEDED
             - :FAILED
           default_value: :LAST_BACKUP_STATE_UNSPECIFIED
+          output: true
         - name: 'lastBackupError'
           type: NestedObject
           description: google.rpc.Status object to store the last backup error
@@ -113,10 +117,12 @@ properties:
           properties:
             - name: 'code'
               type: Double
+              output: true
               description: The status code, which should be an enum value of [google.rpc.Code]
             - name: 'message'
               type: String
               description: A developer-facing error message, which should be in English.
+              output: true
   - name: 'lastSuccessfulBackupConsistencyTime'
     type: String
     description: The point in time when the last successful backup was captured from the source

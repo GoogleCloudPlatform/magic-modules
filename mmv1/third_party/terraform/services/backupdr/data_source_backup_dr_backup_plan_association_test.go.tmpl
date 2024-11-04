@@ -133,9 +133,6 @@ resource "google_backup_dr_backup_plan" "foo" {
   resource_type= "compute.googleapis.com/Instance"
   backup_vault = google_backup_dr_backup_vault.my-backup-vault.name
  depends_on= [ google_backup_dr_backup_vault.my-backup-vault ]
-   lifecycle {
-    ignore_changes = [backup_vault]
-  }
   backup_rules {
 	rule_id = "rule-1"
 	backup_retention_days = 5
@@ -143,9 +140,9 @@ resource "google_backup_dr_backup_plan" "foo" {
 	  recurrence_type = "HOURLY"
 	   hourly_frequency = 6
 	    time_zone = "UTC"
-	     backup_window{
-		start_hour_of_day = 0
-		end_hour_of_day = 24
+	     backup_window {
+		    start_hour_of_day = 0
+		    end_hour_of_day = 24
       }
     }
 	}
@@ -156,10 +153,6 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
   backup_plan_association_id = "bpa-test-%{random_suffix}"
   resource =   google_compute_instance.default.id
   backup_plan = google_backup_dr_backup_plan.foo.name
-  depends_on= [ google_backup_dr_backup_plan.foo ]
-   lifecycle {
-    ignore_changes = [resource, backup_plan, rules_config_info]
-  }
 }
 
 data "google_backup_dr_backup_plan_association" "bpa-test" {
