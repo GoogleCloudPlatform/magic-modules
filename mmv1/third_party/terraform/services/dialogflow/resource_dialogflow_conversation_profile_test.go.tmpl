@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccDialogflowConvesationProfile_update(t *testing.T) {
+func TestAccDialogflowConversationProfile_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -36,10 +36,10 @@ func TestAccDialogflowConvesationProfile_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDialogflowConvesationProfileDestroyProducer(t),
+		CheckDestroy:             testAccCheckDialogflowConversationProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDialogflowConvesationProfile_dialogflowAgentFull1(context),
+				Config: testAccDialogflowConversationProfile_dialogflowAgentFull1(context),
 			},
 			{
 				ResourceName:            "google_dialogflow_convesation_profile.full_profile",
@@ -48,7 +48,7 @@ func TestAccDialogflowConvesationProfile_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
-				Config: testAccDialogflowConvesationProfile_dialogflowAgentFull2(context),
+				Config: testAccDialogflowConversationProfile_dialogflowAgentFull2(context),
 			},
 			{
 				ResourceName:            "google_dialogflow_convesation_profile.full_profile",
@@ -60,7 +60,7 @@ func TestAccDialogflowConvesationProfile_update(t *testing.T) {
 	})
 }
 
-func testAccDialogflowConvesationProfile_dialogflowAgentFull1(context map[string]interface{}) string {
+func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[string]interface{}) string {
 return acctest.Nprintf(`
 	resource "google_project" "agent_project" {
 		name = "tf-test-dialogflow-%{random_suffix}"
@@ -104,7 +104,7 @@ return acctest.Nprintf(`
 	}
 	`, context)
 }
-func testAccDialogflowConvesationProfile_dialogflowAgentFull2(context map[string]interface{}) string {
+func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[string]interface{}) string {
 return acctest.Nprintf(`
 	resource "google_project" "agent_project" {
 		name = "tf-test-dialogflow-%{random_suffix}"
