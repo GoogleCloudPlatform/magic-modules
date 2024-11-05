@@ -35,7 +35,7 @@ resource "google_service_account" "default" {
 }
 
 resource "google_compute_instance" "default" {
-  name         = "test-%{random_suffix}"
+  name         = "tf-test-compute-instance-%{random_suffix}"
   machine_type = "n2-standard-2"
   zone         = "us-central1-a"
   tags = ["foo", "bar"]
