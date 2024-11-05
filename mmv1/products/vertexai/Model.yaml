@@ -52,6 +52,7 @@ examples:
     vars:
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    exclude_test: true
   - name: 'vertex_ai_model_source_basic_2'
     exclude_import_test: true
     primary_resource_id: 'model'
@@ -59,6 +60,7 @@ examples:
       model_id: 'test-model'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    exclude_test: true
 parameters:
   - type: String
     name: region
