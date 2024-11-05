@@ -835,6 +835,12 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
+* `local_ssd_encryption_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Possible Local SSD encryption modes:
+    Accepted values are:
+    * `LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED`: LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED is when unspecified local ssd encryption is used. Standard encryption is used.
+    * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
+    * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
+
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
 ```hcl
