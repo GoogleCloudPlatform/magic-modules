@@ -40,13 +40,7 @@ type Field struct {
 // MissingDocDetails denotes the doc file path and the fields that are not shown up in the corresponding doc.
 type MissingDocDetails struct {
 	FilePath string
-	Fields   []MissingDocField
-}
-
-// MissingDocField contains information about which fields are missing doc, and in which section if applicable.
-type MissingDocField struct {
-	Field   string // Field is the field name.
-	Section string // Section can either be "Argument Reference" or "Attributes Reference" for a resource.
+	Fields   []string
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -174,7 +168,7 @@ func suggestedTest(resourceName string, untested []string) string {
 func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string, resourceMap map[string]*schema.Resource) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
-		var argumentsInDoc, attributesInDoc map[string]bool
+		fieldsInDoc := make(map[string]bool)
 
 		docFilePath, err := resourceToDocFile(resource, repoPath)
 		if err != nil {
@@ -189,26 +183,30 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string, resourceMap 
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
 			}
-			argumentsInDoc = listToMap(parser.Arguments())
-			attributesInDoc = listToMap(parser.Attributes())
-			if _, ok := argumentsInDoc["member/members"]; ok {
-				argumentsInDoc["member"] = true
-				argumentsInDoc["members"] = true
+
+			argumentsInDoc := listToMap(parser.Arguments())
+			attributesInDoc := listToMap(parser.Attributes())
+			for _, m := range []map[string]bool{argumentsInDoc, attributesInDoc} {
+				for k, v := range m {
+					fieldsInDoc[k] = v
+				}
+			}
+			// for iam resource
+			if v, ok := fieldsInDoc["member/members"]; ok {
+				fieldsInDoc["member"] = v
+				fieldsInDoc["members"] = v
 			}
 		}
 		details := MissingDocDetails{
 			FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
 		}
+
 		for field, fieldDiff := range resourceDiff.Fields {
 			if !isNewField(fieldDiff) {
 				continue
 			}
-			if isAttribute(field, resourceMap[resource]) {
-				if !attributesInDoc[field] {
-					details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Attributes Reference"})
-				}
-			} else if !argumentsInDoc[field] {
-				details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Argument Reference"})
+			if !fieldsInDoc[field] {
+				details.Fields = append(details.Fields, field)
 			}
 		}
 		if len(details.Fields) > 0 {
@@ -216,19 +214,6 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string, resourceMap 
 		}
 	}
 	return ret, nil
-}
-
-func isAttribute(field string, resourceSchema *schema.Resource) bool {
-	tlField := topLevelField(field)
-	return resourceSchema.Schema[tlField].Computed && !resourceSchema.Schema[tlField].Optional
-}
-
-func topLevelField(field string) string {
-	if strings.Contains(field, ".") {
-		splits := strings.Split(field, ".")
-		return splits[0]
-	}
-	return field
 }
 
 func isNewField(fieldDiff diff.FieldDiff) bool {

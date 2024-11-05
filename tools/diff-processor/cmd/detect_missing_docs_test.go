@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/google/go-cmp/cmp"
 
@@ -54,16 +53,7 @@ func TestDetectMissingDocs(t *testing.T) {
 				{
 					Name:     "google_x",
 					FilePath: "/website/docs/r/x.html.markdown",
-					Fields: []detector.MissingDocField{
-						{
-							Field:   "field-a",
-							Section: "Argument Reference",
-						},
-						{
-							Field:   "field-b",
-							Section: "Attributes Reference",
-						},
-					},
+					Fields:   []string{"field-a", "field-b"},
 				},
 			},
 		},

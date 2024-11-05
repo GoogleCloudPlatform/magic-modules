@@ -23,7 +23,7 @@ const detectMissingDocDesc = `Compute list of fields missing documents`
 type MissingDocsInfo struct {
 	Name     string
 	FilePath string
-	Fields   []detector.MissingDocField
+	Fields   []string
 }
 
 type detectMissingDocsOptions struct {
@@ -63,9 +63,7 @@ func (o *detectMissingDocsOptions) run(args []string) error {
 	info := []MissingDocsInfo{}
 	for _, r := range resources {
 		details := detectedResources[r]
-		sort.Slice(details.Fields, func(i, j int) bool {
-			return details.Fields[i].Field < details.Fields[j].Field
-		})
+		sort.Strings(details.Fields)
 		info = append(info, MissingDocsInfo{
 			Name:     r,
 			FilePath: details.FilePath,

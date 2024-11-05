@@ -107,7 +107,6 @@ func (d *DocumentParser) Parse(src []byte) error {
 		}
 		d.attriibuteRoot = n
 	}
-
 	return nil
 }
 
