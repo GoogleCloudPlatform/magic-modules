@@ -14,6 +14,7 @@
 # Warning: This is a temporary file, and should not be edited directly
 ---
 name: 'ServiceLbPolicies'
+api_resource_type_kind: ServiceLbPolicy
 description: |
   ServiceLbPolicy holds global load balancing and traffic distribution configuration that can be applied to a BackendService.
 min_version: 'beta'

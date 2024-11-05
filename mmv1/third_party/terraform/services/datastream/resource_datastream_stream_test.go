@@ -33,7 +33,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -43,7 +43,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "PAUSED", true),
@@ -53,7 +53,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -63,7 +63,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				// Disable prevent_destroy

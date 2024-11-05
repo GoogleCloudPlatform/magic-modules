@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionNetworkFirewallPolicy'
+api_resource_type_kind: FirewallPolicy
 description: "The Compute NetworkFirewallPolicy resource"
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'

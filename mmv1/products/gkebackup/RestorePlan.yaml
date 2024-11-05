@@ -59,9 +59,9 @@ examples:
       name: 'restore-all-ns'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -74,9 +74,9 @@ examples:
       name: 'rollback-ns'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -89,9 +89,9 @@ examples:
       name: 'rollback-app'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -104,9 +104,9 @@ examples:
       name: 'all-groupkinds'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -119,9 +119,9 @@ examples:
       name: 'rename-ns'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -134,9 +134,9 @@ examples:
       name: 'transform-rule'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -149,9 +149,9 @@ examples:
       name: 'gitops-mode'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -164,9 +164,9 @@ examples:
       name: 'restore-order'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'
@@ -179,9 +179,9 @@ examples:
       name: 'volume-res'
       network_name: 'default'
       subnetwork_name: 'default'
+      deletion_protection: 'true'
     test_env_vars:
       project: 'PROJECT_NAME'
-      deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "gke-cluster")'

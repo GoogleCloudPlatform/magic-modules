@@ -13,6 +13,7 @@
 
 ---
 name: 'OrganizationSecurityPolicyAssociation'
+api_resource_type_kind: SecurityPolicy
 description: |
   An association for the OrganizationSecurityPolicy.
 min_version: 'beta'

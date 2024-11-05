@@ -6,4 +6,5 @@ resource "google_looker_instance" "{{$.PrimaryResourceId}}" {
     client_id = "{{index $.Vars "client_id"}}"
     client_secret = "{{index $.Vars "client_secret"}}"
   }
+  deletion_policy = "DEFAULT"
 }

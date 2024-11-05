@@ -81,7 +81,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/diffs#ignore_read" >}}).
 
 Example:
 
@@ -156,6 +156,10 @@ for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
 `send_empty_value` and `default_from_api` cannot both be true on the same field.
 
+Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
+NestedObject fields will currently be sent as `null` if unset (rather than being
+omitted.)
+
 Example:
 
 ```yaml
@@ -174,6 +178,21 @@ Example:
 - name: 'fieldOne'
   type: String
   conflicts:
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `required_with`
+Specifies a list of fields (excluding the current field) that must all be specified
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: String
+  required_with:
     - field_two
     - nested_object.0.nested_field
 ```
@@ -215,7 +234,7 @@ Example:
 Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
 to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
-[Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
+[Fix diffs]({{< ref "/develop/diffs" >}}) for more information and best practices.
 
 The function specified can be a
 [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)

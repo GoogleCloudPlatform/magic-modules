@@ -555,14 +555,14 @@ func ResourceStorageBucket() *schema.Resource {
 				Optional:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: hierachicalNamespaceDiffSuppress,
-				Description:      `The bucket's HNS support, which defines bucket can organize folders in logical file system structure`,
+				Description:      `The bucket's HNS configuration, which defines bucket can organize folders in logical file system structure.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
 							Type:        schema.TypeBool,
 							Required:    true,
 							ForceNew:    true,
-							Description: `Set this enabled flag to true when folders with logical files structure. Default value is false.`,
+							Description: `Set this field true to organize bucket with logical file system structure.`,
 						},
 					},
 				},
@@ -961,18 +961,9 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	// Get the bucket and acl
 	bucket := d.Get("name").(string)
 
-	var res *storage.Bucket
 	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
 	// to make sure it exists before moving on
-	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: func() (operr error) {
-			var retryErr error
-			res, retryErr = config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
-			return retryErr
-		},
-		Timeout: d.Timeout(schema.TimeoutRead),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsNotFoundRetryableError("bucket read")},
-	})
+	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
@@ -1337,7 +1328,7 @@ func flattenBucketHierarchicalNamespacePolicy(hierachicalNamespacePolicy *storag
 		defaultPolicy :=map[string]interface{}{
 			"enabled": false,
 		}
-		
+
 		policies = append(policies, defaultPolicy)
 		return policies
 	}
@@ -1979,6 +1970,6 @@ func hierachicalNamespaceDiffSuppress(k, old, new string, r *schema.ResourceData
 			return true
 		}
 	}
-	
+
 	return false
 }

@@ -13,6 +13,7 @@
 
 ---
 name: 'Trigger'
+api_resource_type_kind: BuildTrigger
 description: |
   Configuration for an automated build in response to source repository changes.
 references:

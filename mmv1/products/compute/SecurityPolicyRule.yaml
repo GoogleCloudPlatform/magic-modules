@@ -13,6 +13,7 @@
 
 ---
 name: 'SecurityPolicyRule'
+api_resource_type_kind: SecurityPolicy
 description: |
   A rule for the SecurityPolicy.
 references:
@@ -50,6 +51,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/security_policy_default_rule_update_on_create.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
 examples:
   - name: 'security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
@@ -59,8 +62,6 @@ examples:
     primary_resource_id: 'policy_rule'
     vars:
       sec_policy_name: 'policyruletest'
-      project_id: 'PROJECT_NAME'
-    exclude_test: true
   - name: 'security_policy_rule_multiple_rules'
     primary_resource_id: 'policy_rule_one'
     vars:
@@ -453,6 +454,39 @@ properties:
         description: |
           Can only be specified if the action for the rule is "rate_based_ban".
           If specified, determines the time (in seconds) the traffic will continue to be banned by the rate limit after the rate falls below the threshold.
+  - name: 'redirectOptions'
+    type: NestedObject
+    description: |
+      Parameters defining the redirect action. Cannot be specified for any other actions. This field is only supported in Global Security Policies of type CLOUD_ARMOR.
+    properties:
+      - name: 'type'
+        type: String
+        description: |
+          Type of the redirect action.
+      - name: 'target'
+        type: String
+        description: |
+          Target for the redirect action. This is required if the type is EXTERNAL_302 and cannot be specified for GOOGLE_RECAPTCHA.
+  - name: 'headerAction'
+    type: NestedObject
+    description: |
+      Optional, additional actions that are performed on headers. This field is only supported in Global Security Policies of type CLOUD_ARMOR.
+    properties:
+      - name: 'requestHeadersToAdds'
+        type: Array
+        description: |
+          The list of request headers to add or overwrite if they're already present.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'headerName'
+              type: String
+              description: |
+                The name of the header to set.
+            - name: 'headerValue'
+              type: String
+              description: |
+                The value to set the named header to.
   - name: 'preview'
     type: Boolean
     description: |

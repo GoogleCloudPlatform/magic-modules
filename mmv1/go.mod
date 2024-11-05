@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/mmv1
 
-go 1.21
+go 1.23
 
 require (
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
@@ -9,10 +9,12 @@ require (
 
 require github.com/golang/glog v1.2.0
 
-require github.com/otiai10/copy v1.9.0
+require (
+	github.com/getkin/kin-openapi v0.127.0
+	github.com/otiai10/copy v1.9.0
+)
 
 require (
-	github.com/getkin/kin-openapi v0.127.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect

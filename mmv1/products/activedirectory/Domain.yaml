@@ -29,6 +29,7 @@ update_mask: true
  # equivalent to {{name}}, but makes sweepers work
 delete_url: 'projects/{{project}}/locations/global/domains/{{domain_name}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 60

@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionSecurityPolicyRule'
+api_resource_type_kind: SecurityPolicy
 description: |
   A rule for the RegionSecurityPolicy.
 min_version: 'beta'
@@ -51,6 +52,8 @@ async:
     path: 'error/errors'
     message: 'message'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/region_security_policy_default_rule_update_on_create.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
 examples:
   - name: 'region_security_policy_rule_basic'
     primary_resource_id: 'policy_rule'
@@ -62,6 +65,11 @@ examples:
     min_version: 'beta'
     vars:
       sec_policy_name: 'policywithmultiplerules'
+  - name: 'region_security_policy_rule_default_rule'
+    primary_resource_id: 'policy_rule'
+    min_version: 'beta'
+    vars:
+      sec_policy_name: 'policywithdefaultrule'
   - name: 'region_security_policy_rule_with_preconfigured_waf_config'
     primary_resource_id: 'policy_rule'
     min_version: 'beta'

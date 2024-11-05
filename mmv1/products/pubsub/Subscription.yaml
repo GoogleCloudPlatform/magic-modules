@@ -72,6 +72,8 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+    test_vars_overrides:
+      policy_changed: 'acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"})'
   - name: 'pubsub_subscription_push_bq_table_schema'
     primary_resource_id: 'example'
     vars:
@@ -79,6 +81,8 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+    test_vars_overrides:
+      policy_changed: 'acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"})'
   - name: 'pubsub_subscription_push_bq_service_account'
     primary_resource_id: 'example'
     vars:

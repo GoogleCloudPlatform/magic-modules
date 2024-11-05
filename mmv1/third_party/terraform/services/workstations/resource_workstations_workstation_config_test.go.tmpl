@@ -762,8 +762,8 @@ resource "google_tags_tag_key" "tag_key1" {
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider = google-beta
-  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  provider   = google-beta
+  parent     = google_tags_tag_key.tag_key1.id
   short_name = "%{value_short_name}"
 }
 
@@ -1346,13 +1346,13 @@ data "google_project" "project" {
 
 resource "google_tags_tag_key" "tag_key1" {
   provider = google-beta
-  parent = "projects/${data.google_project.project.number}"
+  parent = data.google_project.project.id
   short_name = "tf_test_tag_key1%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
   provider = google-beta
-  parent = "tagKeys/${google_tags_tag_key.tag_key1.name}"
+  parent = google_tags_tag_key.tag_key1.id
   short_name = "tf_test_tag_value1%{random_suffix}"
 }
 
@@ -1390,7 +1390,7 @@ resource "google_workstations_workstation_config" "default" {
       boot_disk_size_gb           = 35
       disable_public_ip_addresses = true
       vm_tags = {
-        "tagKeys/${google_tags_tag_key.tag_key1.name}" = "tagValues/${google_tags_tag_value.tag_value1.name}"
+        (google_tags_tag_key.tag_key1.id) = google_tags_tag_value.tag_value1.id
       }
     }
   }

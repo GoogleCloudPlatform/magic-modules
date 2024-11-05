@@ -269,7 +269,7 @@ properties:
         properties:
           - name: 'version'
             type: String
-            description: 'Version of ACM installed'
+            description: 'Version of Config Sync installed'
           - name: 'management'
             type: Enum
             description: 'Set this field to MANAGEMENT_AUTOMATIC to enable Config Sync auto-upgrades, and set this field to MANAGEMENT_MANUAL or MANAGEMENT_UNSPECIFIED to disable Config Sync auto-upgrades.'
@@ -341,8 +341,8 @@ properties:
                     description: 'Period in seconds between consecutive syncs. Default: 15'
                   - name: 'version'
                     type: String
-                    description: 'Version of ACM installed'
-                    deprecation_message: 'The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of ACM installed instead.'
+                    description: 'Version of Config Sync installed'
+                    deprecation_message: 'The `configmanagement.config_sync.oci.version` field is deprecated and will be removed in a future major release. Please use `configmanagement.version` field to specify the version of Config Sync installed instead.'
       - name: 'policycontroller'
         type: NestedObject
         description: Policy Controller spec

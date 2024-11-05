@@ -2,7 +2,10 @@ The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Githu
 
 To view locally:
 
-1. [Install Hugo](https://gohugo.io/installation/)
+1. Install Hugo v0.136.5
+   ```bash
+   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.136.5
+   ```
 2. Run `hugo server` inside the `docs` directory
 3. Visit http://localhost:1313/magic-modules/ to view the docs
 

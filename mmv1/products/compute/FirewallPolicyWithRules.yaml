@@ -13,6 +13,7 @@
 
 ---
 name: 'FirewallPolicyWithRules'
+api_resource_type_kind: FirewallPolicy
 description: |
   The Compute FirewallPolicy with rules resource. It declaratively manges all
   rules in the firewall policy.
