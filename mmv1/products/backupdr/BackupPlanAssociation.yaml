@@ -60,6 +60,7 @@ properties:
     description: |
       The resource for which BPA needs to be created
     required: true
+    ignore_read: true
   - name: 'name'
     type: String
     description: |
