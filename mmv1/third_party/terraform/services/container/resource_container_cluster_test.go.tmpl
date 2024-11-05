@@ -6492,7 +6492,8 @@ resource "google_container_cluster" "local_ssd_encryption_mode" {
     name = "%s"
     initial_node_count = 1
     node_config {
-      machine_type = "c3-standard-8-lssd"
+      machine_type = "n1-standard-2"
+	  local_ssd_count = 1
 	  local_ssd_encryption_mode = "%s"
     }
   }
