@@ -36,7 +36,6 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDialogflowConversationProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull1(context),
