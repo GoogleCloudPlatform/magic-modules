@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -90,19 +86,37 @@ func (p *googleEphemeralServiceAccountAccessToken) Configure(ctx context.Context
 func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
 	var data ephemeralServiceAccountAccessTokenModel
 
-	service := p.providerConfig.NewIamCredentialsClient(p.providerConfig.UserAgent)
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	if data.Lifetime.IsNull() {
 		data.Lifetime = types.StringValue("3600s")
 	}
 
-	name := fmt.Sprintf("projects/-/serviceAccounts/%s", data.TargetServiceAccount.String())
-	DelegatesSetValue, _ := data.Delegates.ToSetValue(ctx)
-	ScopesSetValue, _ := data.Scopes.ToSetValue(ctx)
+	service := p.providerConfig.NewIamCredentialsClient(p.providerConfig.UserAgent)
+	name := fmt.Sprintf("projects/-/serviceAccounts/%s", data.TargetServiceAccount.ValueString())
+
+	ScopesSetValue, diags := data.Scopes.ToSetValue(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var delegates []string
+	if !data.Delegates.IsNull() {
+		DelegatesSetValue, diags := data.Delegates.ToSetValue(ctx)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		delegates = StringSet(DelegatesSetValue)
+	}
+
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
-		Lifetime:  data.Lifetime.String(),
-		Delegates: StringSet(DelegatesSetValue),
+		Lifetime:  data.Lifetime.ValueString(),
+		Delegates: delegates,
 		Scope:     tpgresource.CanonicalizeServiceScopes(StringSet(ScopesSetValue)),
 	}
 
@@ -116,7 +130,6 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 	}
 
 	data.AccessToken = types.StringValue(at.AccessToken)
-
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
 }
 
@@ -124,7 +137,7 @@ func StringSet(d basetypes.SetValue) []string {
 
 	StringSlice := make([]string, 0)
 	for _, v := range d.Elements() {
-		StringSlice = append(StringSlice, v.String())
+		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
 	}
 	return StringSlice
 }
