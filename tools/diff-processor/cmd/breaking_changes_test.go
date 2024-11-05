@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/breaking_changes"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

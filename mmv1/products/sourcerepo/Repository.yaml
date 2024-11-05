@@ -13,6 +13,7 @@
 
 ---
 name: 'Repository'
+api_resource_type_kind: Repo
 description: |
   A repository (or repo) is a Git repository storing versioned source content.
 references:
@@ -20,6 +21,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/source-repositories/'
   api: 'https://cloud.google.com/source-repositories/docs/reference/rest/v1/projects.repos'
 docs:
+  optional_properties: |
+    * `create_ignore_already_exists` - (Optional) If set to true, skip repository creation if a repository with the same name already exists.
 base_url: 'projects/{{project}}/repos'
 self_link: 'projects/{{project}}/repos/{{name}}'
 update_verb: 'PATCH'
@@ -41,6 +44,8 @@ custom_code:
   constants: 'templates/terraform/constants/source_repo_repository.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/source_repo_repository.tmpl'
   post_create: 'templates/terraform/post_create/source_repo_repository_update.go.tmpl'
+  extra_schema_entry: templates/terraform/extra_schema_entry/source_repo_repository.tmpl
+  custom_create: templates/terraform/custom_create/source_repo_repository.go.tmpl
 exclude_tgc: true
 examples:
   - name: 'sourcerepo_repository_basic'

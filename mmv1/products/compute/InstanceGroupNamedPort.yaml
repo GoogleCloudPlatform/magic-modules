@@ -13,6 +13,7 @@
 
 ---
 name: 'InstanceGroupNamedPort'
+api_resource_type_kind: InstanceGroup
 description: |
   Mange the named ports setting for a managed instance group without
   managing the group as whole. This resource is primarily intended for use

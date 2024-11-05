@@ -78,6 +78,8 @@ If you are familiar with Docker or Podman, you may want to use the experimental 
      type: NestedObject
      description: |
        UPDATED_DESCRIPTION
+     properties:
+       []
    ```
 1. Clone the `google` and `google-beta` provider repositories with the following commands:
 

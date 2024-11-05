@@ -1,7 +1,7 @@
 # Create Folder in GCP Organization
 resource "google_folder" "autokms_folder" {
   provider     = google-beta
-  display_name = "folder-example"
+  display_name = "{{index $.Vars "folder_name"}}"
   parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
@@ -89,7 +89,7 @@ resource "time_sleep" "wait_autokey_config" {
 resource "google_kms_key_handle" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
   project                = google_project.resource_project.project_id
-  name                   = "example-key-handle" 
+  name                   = "tf-test-key-handle"
   location               = "global"
   resource_type_selector = "storage.googleapis.com/Bucket"
   depends_on             = [time_sleep.wait_autokey_config]

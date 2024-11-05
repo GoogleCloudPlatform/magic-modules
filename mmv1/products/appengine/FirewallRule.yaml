@@ -13,6 +13,7 @@
 
 ---
 name: 'FirewallRule'
+api_resource_type_kind: Firewall
 description: |
   A single firewall rule that is evaluated against incoming traffic
   and provides an action to take on matched requests.

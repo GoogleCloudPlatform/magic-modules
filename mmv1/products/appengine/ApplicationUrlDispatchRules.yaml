@@ -13,6 +13,7 @@
 
 ---
 name: 'ApplicationUrlDispatchRules'
+api_resource_type_kind: Application
 description: |
   Rules to match an HTTP request and dispatch that request to a service.
 references:

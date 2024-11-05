@@ -14,6 +14,7 @@
 ---
  # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
+api_resource_type_kind: ServicePerimeter
 description: |
   Replace all existing Service Perimeters in an Access Policy with the Service Perimeters provided. This is done atomically.
   This is a bulk edit of all Service Perimeters and may override existing Service Perimeters created by `google_access_context_manager_service_perimeter`,
@@ -21,6 +22,7 @@ description: |
 references:
   guides:
     'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 docs:
 id_format: '{{parent}}/servicePerimeters'

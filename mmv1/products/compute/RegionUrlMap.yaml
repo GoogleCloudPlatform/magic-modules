@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionUrlMap'
+api_resource_type_kind: UrlMap
 kind: 'compute#urlMap'
 description: |
   UrlMaps are used to route requests to a backend service based on rules

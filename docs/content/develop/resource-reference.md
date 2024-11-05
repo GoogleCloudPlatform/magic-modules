@@ -245,23 +245,23 @@ async:
 
 Allows configuration of generated IAM resources. Supports the following common
 attributes – for a full reference, see
-[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb):
+[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.go):
 
 - `parent_resource_attribute`: Name of the field on the terraform IAM resources
   which references the parent resource.
 - `method_name_separator`: Character preceding setIamPolicy in the full URL for
   the API method. Usually `:`.
-- `fetch_iam_policy_verb`: HTTP method for getIamPolicy. Usually `:POST`.
-  Allowed values: `:GET`, `:POST`. Default: `:GET`
-- `set_iam_policy_verb`: HTTP method for getIamPolicy. Usually `:POST`.
-  Allowed values: :POST, :PUT. Default: :POST
+- `fetch_iam_policy_verb`: HTTP method for getIamPolicy. Usually `'POST'`.
+  Allowed values: `'GET'`, `'POST'`. Default: `'GET'`
+- `set_iam_policy_verb`: HTTP method for getIamPolicy. Usually `'POST'`.
+  Allowed values: `'POST'`, `'PUT'`. Default: `'POST'`
 - `import_format`: Must match the parent resource's `import_format` (or `self_link` if
   `import_format` is unset), but with the `parent_resource_attribute`
   value substituted for the final field.
 - `allowed_iam_role`: Valid IAM role that can be set by generated tests. Default: `'roles/viewer'`
 - `iam_conditions_request_type`: If IAM conditions are supported, set this attribute to indicate how the
-  conditions should be passed to the API. Allowed values: `:QUERY_PARAM`,
-  `:REQUEST_BODY`, `:QUERY_PARAM_NESTED`. Note: `:QUERY_PARAM_NESTED` should
+  conditions should be passed to the API. Allowed values: `'QUERY_PARAM'`,
+  `'REQUEST_BODY'`, `'QUERY_PARAM_NESTED'`. Note: `'QUERY_PARAM_NESTED'` should
   only be used if the query param field contains a `.`
 - `min_version: beta`: Marks IAM support as beta-only.
 

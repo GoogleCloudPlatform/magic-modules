@@ -20,6 +20,7 @@
         "pushConfig": {
           "pushEndpoint": "https://example.com/push"
         },
+        "retryPolicy": null,
         "topic": "projects/{{.Provider.project}}/topics/example-pubsub-topic"
       }
     },

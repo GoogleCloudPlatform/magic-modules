@@ -13,6 +13,7 @@
 
 ---
 name: 'BackendServiceSignedUrlKey'
+api_resource_type_kind: BackendService
 kind: 'compute#BackendServiceSignedUrlKey'
 description: |
   A key for signing Cloud CDN signed URLs for Backend Services.

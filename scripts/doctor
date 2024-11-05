@@ -40,9 +40,9 @@ if [ $found -eq 0 ]; then
 else
     version=($(go version))
     version=${version[2]}
-    if [[ "$version" < "go1.21.0" ]]; then
+    if [[ "$version" < "go1.23.0" ]]; then
         exitcode=1
-        warn "yel" "   $version is installed, but go 1.21 or later is required. See https://golang.org/doc/install for information on installing it."
+        warn "yel" "   $version is installed, but go 1.23 or later is required. See https://golang.org/doc/install for information on installing it."
     fi
     if [[ -z "${GOPATH}" ]]; then
         exitcode=1
