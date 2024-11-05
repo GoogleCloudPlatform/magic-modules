@@ -314,6 +314,7 @@ func DataSourceGoogleCloudBackupDRDataSourceRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return err
 	}
+	
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
