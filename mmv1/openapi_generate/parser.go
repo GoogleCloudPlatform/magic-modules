@@ -248,13 +248,8 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 
 	resource.AutogenAsync = true
 	async := api.NewAsync()
-	async.Operation.WaitMs = 1000
-	async.Operation.Path = "name"
 	async.Operation.BaseUrl = "{{op_id}}"
-	async.Result.Path = "response"
 	async.Result.ResourceInsideResponse = true
-	async.Error.Path = "error"
-	async.Error.Message = "message"
 	resource.Async = async
 
 	example := r.Examples{}

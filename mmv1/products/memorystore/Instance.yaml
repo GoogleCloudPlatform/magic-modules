@@ -14,7 +14,6 @@
 ---
 name: 'Instance'
 description: A Google Cloud Memorystore instance.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -48,7 +47,6 @@ custom_code:
 examples:
   - name: 'memorystore_instance_basic'
     primary_resource_id: 'instance-basic'
-    min_version: 'beta'
     vars:
       instance_name: 'basic-instance'
       policy_name: 'my-policy'
@@ -59,7 +57,6 @@ examples:
       'prevent_destroy': 'false'
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
-    min_version: 'beta'
     vars:
       instance_name: 'full-instance'
       policy_name: 'my-policy'
@@ -70,7 +67,6 @@ examples:
       'prevent_destroy': 'false'
   - name: 'memorystore_instance_persistence_aof'
     primary_resource_id: 'instance-persistence-aof'
-    min_version: 'beta'
     vars:
       instance_name: 'aof-instance'
       policy_name: 'my-policy'
@@ -108,7 +104,6 @@ parameters:
       "Resource ID segment making up resource `name`. It identifies the resource
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `memorystore.googleapis.com/CertificateAuthority`. "
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -120,7 +115,6 @@ parameters:
       following restrictions:\n\n* Must be 4-63 characters in length\n* Must begin with a letter
       or digit\n* Must contain only lowercase letters, digits, and hyphens\n* Must not
       end with a hyphen\n* Must be unique within a location "
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -128,71 +122,59 @@ properties:
   - name: 'name'
     type: String
     description: "Identifier. Unique name of the instance.\nFormat: projects/{project}/locations/{location}/instances/{instance} "
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: "Output only. Creation timestamp of the instance. "
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: "Output only. Latest update timestamp of the instance. "
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: "Optional. Labels to represent user-provided metadata. "
-    min_version: 'beta'
   - name: 'state'
     type: String
     description:
       "Output only. Current state of the instance. \n Possible values:\n
       CREATING\nACTIVE\nUPDATING\nDELETING"
-    min_version: 'beta'
     output: true
   - name: 'stateInfo'
     type: NestedObject
     description: "Additional information about the state of the instance. "
-    min_version: 'beta'
     output: true
     properties:
       - name: 'updateInfo'
         type: NestedObject
         description: "Represents information about instance with state UPDATING. "
-        min_version: 'beta'
         output: true
         properties:
           - name: 'targetShardCount'
             type: Integer
             description: "Output only. Target number of shards for the instance. "
-            min_version: 'beta'
             output: true
           - name: 'targetReplicaCount'
             type: Integer
             description:
               "Output only. Target number of replica nodes per shard for the
               instance. "
-            min_version: 'beta'
             output: true
   - name: 'uid'
     type: String
     description: "Output only. System assigned, unique identifier for the instance. "
-    min_version: 'beta'
     output: true
   - name: 'replicaCount'
     type: Integer
     description:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
-    min_version: 'beta'
     default_from_api: true
   - name: 'authorizationMode'
     type: String
     description:
       "Optional. Immutable. Authorization mode of the instance.
       Possible values:\n AUTH_DISABLED\nIAM_AUTH"
-    min_version: 'beta'
     immutable: true
     default_from_api: true
   - name: 'transitEncryptionMode'
@@ -200,20 +182,17 @@ properties:
     description:
       "Optional. Immutable. In-transit encryption mode of the instance. \n
       Possible values:\n TRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
-    min_version: 'beta'
     immutable: true
     default_from_api: true
   - name: 'shardCount'
     type: Integer
     description: "Required. Number of shards for the instance. "
-    min_version: 'beta'
     required: true
   - name: 'discoveryEndpoints'
     type: Array
     description:
       "Output only. Endpoints clients can connect to the instance through.
       Currently only one\ndiscovery endpoint is supported. "
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -223,38 +202,32 @@ properties:
           description:
             "Output only. IP address of the exposed endpoint clients connect
             to. "
-          min_version: 'beta'
           output: true
         - name: 'port'
           type: Integer
           description: "Output only. The port number of the exposed endpoint. "
-          min_version: 'beta'
           output: true
         - name: 'network'
           type: String
           description:
             "Output only. The network where the IP address of the discovery
             endpoint will be\nreserved, in the form of\nprojects/{network_project}/global/networks/{network_id}. "
-          min_version: 'beta'
           output: true
   - name: 'nodeType'
     type: String
     description:
       "Optional. Immutable. Machine type for individual nodes of the instance.
       \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
-    min_version: 'beta'
     immutable: true
     default_from_api: true
   - name: 'persistenceConfig'
     type: NestedObject
     description: "Represents persistence configuration for a instance. "
-    min_version: 'beta'
     default_from_api: true
     properties:
       - name: 'mode'
         type: Enum
         description: "Optional. Current persistence mode. \n Possible values:\nDISABLED\nRDB\nAOF"
-        min_version: 'beta'
         default_from_api: true
         enum_values:
           - 'DISABLED'
@@ -263,7 +236,6 @@ properties:
       - name: 'rdbConfig'
         type: NestedObject
         description: "Configuration for RDB based persistence. "
-        min_version: 'beta'
         default_from_api: true
         properties:
           - name: 'rdbSnapshotPeriod'
@@ -271,7 +243,6 @@ properties:
             description:
               "Optional. Period between RDB snapshots. \n Possible values:\n
               ONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
-            min_version: 'beta'
             default_from_api: true
           - name: 'rdbSnapshotStartTime'
             type: String
@@ -279,44 +250,36 @@ properties:
               "Optional. Time that the first snapshot was/will be attempted,
               and to which future\nsnapshots will be aligned. If not provided, the current
               time will be\nused. "
-            min_version: 'beta'
             default_from_api: true
       - name: 'aofConfig'
         type: NestedObject
         description: "Configuration for AOF based persistence. "
-        min_version: 'beta'
         default_from_api: true
         properties:
           - name: 'appendFsync'
             type: String
             description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
-            min_version: 'beta'
             default_from_api: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Immutable. Engine version of the instance. "
-    min_version: 'beta'
     immutable: true
     default_from_api: true
   - name: 'engineConfigs'
     type: KeyValuePairs
     description: "Optional. User-provided engine configurations for the instance. "
-    min_version: 'beta'
   - name: 'nodeConfig'
     type: NestedObject
     description: "Represents configuration for nodes of the instance. "
-    min_version: 'beta'
     output: true
     properties:
       - name: 'sizeGb'
         type: Double
         description: "Output only. Memory size in GB of the node. "
-        min_version: 'beta'
         output: true
   - name: 'zoneDistributionConfig'
     type: NestedObject
     description: "Zone distribution configuration for allocation of instance resources. "
-    min_version: 'beta'
     immutable: true
     default_from_api: true
     properties:
@@ -325,14 +288,12 @@ properties:
         description:
           "Optional. Defines zone where all resources will be allocated with
           SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
-        min_version: 'beta'
         immutable: true
       - name: 'mode'
         type: Enum
         description:
           "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
           \n Possible values:\n MULTI_ZONE\nSINGLE_ZONE"
-        min_version: 'beta'
         default_from_api: true
         enum_values:
           - 'MULTI_ZONE'
@@ -340,12 +301,10 @@ properties:
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
-    min_version: 'beta'
     default_value: true
   - name: 'endpoints'
     type: Array
     description: "Endpoints for the instance."
-    min_version: 'beta'
     output: true
     item_type:
       type: Array
@@ -358,47 +317,40 @@ properties:
             description:
               "Output only. The PSC connection id of the forwarding rule connected
               to the\nservice attachment. "
-            min_version: 'beta'
             output: true
           - name: 'ipAddress'
             type: String
             description:
               "Output only. The IP allocated on the consumer network for the
               PSC forwarding rule. "
-            min_version: 'beta'
             output: true
           - name: 'forwardingRule'
             type: String
             description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-            min_version: 'beta'
             output: true
           - name: 'projectId'
             type: String
             description:
               "Output only. The consumer project_id where the forwarding rule is
               created from. "
-            min_version: 'beta'
             output: true
           - name: 'network'
             type: String
             description:
               "Output only. The consumer network where the IP address resides, in
               the form of\nprojects/{project_id}/global/networks/{network_id}. "
-            min_version: 'beta'
             output: true
           - name: 'serviceAttachment'
             type: String
             description:
               "Output only. The service attachment which is the target of the PSC connection, in the form of
               projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-            min_version: 'beta'
             output: true
           - name: 'pscConnectionStatus'
             type: Enum
             description:
               "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
               \n Possible values:\n ACTIVE \n NOT_FOUND"
-            min_version: 'beta'
             output: true
             enum_values:
               - 'ACTIVE'
@@ -408,7 +360,6 @@ properties:
             description:
               "Output Only. Type of a PSC Connection.
               \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-            min_version: 'beta'
             output: true
             enum_values:
               - 'CONNECTION_TYPE_READER'
@@ -419,7 +370,6 @@ properties:
     description:
       "Optional. Standalone or cluster.
       \n Possible values:\n CLUSTER\nSTANDALONE"
-    min_version: 'beta'
     default_from_api: true
     immutable: true
     enum_values:
@@ -430,7 +380,6 @@ properties:
     description:
       "Output only. User inputs and resource details of the auto-created
       PSC connections. "
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -440,47 +389,40 @@ properties:
           description:
             "Output only. The PSC connection id of the forwarding rule connected
             to the\nservice attachment. "
-          min_version: 'beta'
           output: true
         - name: 'ipAddress'
           type: String
           description:
             "Output only. The IP allocated on the consumer network for the
             PSC forwarding rule. "
-          min_version: 'beta'
           output: true
         - name: 'forwardingRule'
           type: String
           description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-          min_version: 'beta'
           output: true
         - name: 'projectId'
           type: String
           description:
             "Output only. The consumer project_id where the forwarding rule is
             created from. "
-          min_version: 'beta'
           output: true
         - name: 'network'
           type: String
           description:
             "Output only. The consumer network where the IP address resides, in
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
-          min_version: 'beta'
           output: true
         - name: 'serviceAttachment'
           type: String
           description:
             "Output only. The service attachment which is the target of the PSC connection, in the form of
             projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-          min_version: 'beta'
           output: true
         - name: 'pscConnectionStatus'
           type: Enum
           description:
             "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
             \n Possible values:\n ACTIVE \n NOT_FOUND"
-          min_version: 'beta'
           output: true
           enum_values:
             - 'ACTIVE'
@@ -490,7 +432,6 @@ properties:
           description:
             "Output Only. Type of a PSC Connection.
             \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-          min_version: 'beta'
           output: true
           enum_values:
             - 'CONNECTION_TYPE_READER'
@@ -501,4 +442,3 @@ properties:
           description:
             "Output only. Ports of the exposed endpoint."
           output: true
-          min_version: 'beta'

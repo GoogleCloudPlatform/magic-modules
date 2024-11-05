@@ -28,6 +28,7 @@ self_link: 'v3/{{name}}'
 update_url: 'v3/projects/{{project}}/metricDescriptors'
 update_verb: 'POST'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20
