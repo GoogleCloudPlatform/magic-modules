@@ -150,7 +150,7 @@ resource "google_apigee_organization_keyvaluemaps" "apigee_organization_keyvalue
 resource "google_apigee_organization_keyvaluemaps_entries" "{{$.PrimaryResourceId}}" {
   provider = google-beta 
   
-  env_keyvaluemap_id = google_apigee_organization_keyvaluemaps.apigee_organization_keyvaluemaps.id
+  org_keyvaluemap_id = google_apigee_organization_keyvaluemaps.apigee_organization_keyvaluemaps.id
   name           = "testName"
   value          = "testValue"
   depends_on = [
