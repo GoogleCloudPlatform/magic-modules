@@ -3,13 +3,33 @@ package detector
 import (
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
+
+	newProvider "google/provider/new/google/provider"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func TestExistingMissingDoc(t *testing.T) {
+	changes := diff.ComputeSchemaDiff(map[string]*schema.Resource{}, newProvider.ResourceMap())
+	ret, err := DetectMissingDocs(changes, "/Users/ciris/gows/magic-modules/tools/diff-processor/new", newProvider.ResourceMap())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for resource, info := range ret {
+		if !(strings.Contains(resource, "_iam_policy") || strings.Contains(resource, "_iam_member") || strings.Contains(resource, "_iam_binding")) {
+			t.Log(resource)
+			t.Logf("info = %+v", info)
+		}
+	}
+	if len(ret) > 0 {
+		t.Fatalf("found %d resource has fields missing docs", len(ret))
+	}
+}
 
 func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
 	for _, test := range []struct {
@@ -205,6 +225,61 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 }
 
 func TestDetectMissingDocs(t *testing.T) {
+	// top level field_one is argument, field_two is attribute.
+	resourceSchema := map[string]*schema.Resource{
+		"a_resource": {
+			Schema: map[string]*schema.Schema{
+				"field_one": {
+					Computed: true,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"a": {
+								Computed: true,
+								Optional: true,
+							},
+							"b": {
+								Computed: true,
+								Optional: false,
+							},
+							"c": {
+								Computed: true,
+								Optional: false,
+							},
+						},
+					},
+				},
+				"field_two": {
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"a": {
+								Computed: true,
+								Optional: false,
+							},
+							"b": {
+								Computed: true,
+								Optional: false,
+							},
+							"c": {
+								Computed: true,
+								Optional: false,
+							},
+						},
+					},
+				},
+				"field_three": {
+					Computed: true,
+					Optional: true,
+				},
+				"field_four": {
+					Computed: true,
+				},
+			},
+		},
+	}
+
+	// If repo is not temp dir, then the doc file points to tools/diff-processor/testdata/website/docs/r/a_resource.html.markdown.
 	for _, test := range []struct {
 		name       string
 		schemaDiff diff.SchemaDiff
@@ -219,17 +294,26 @@ func TestDetectMissingDocs(t *testing.T) {
 						"field_one": {
 							New: &schema.Schema{},
 						},
-						"field_two.field_three": {
+						"field_one.a": {
+							New: &schema.Schema{},
+						},
+						"field_one.b": {
+							New: &schema.Schema{},
+						},
+						"field_two.a": {
 							New: &schema.Schema{},
 							Old: &schema.Schema{},
 						},
-						"field_four": {
+						"field_two.b": {
+							New: &schema.Schema{},
+						},
+						"field_three": {
 							New: &schema.Schema{
 								Computed: true,
 								Optional: true,
 							},
 						},
-						"field_five": {
+						"field_four": {
 							New: &schema.Schema{
 								Computed: true,
 							},
@@ -244,14 +328,26 @@ func TestDetectMissingDocs(t *testing.T) {
 					Fields: []MissingDocField{
 						{
 							Field:   "field_one",
-							Section: "Arguments Reference",
+							Section: "Argument Reference",
+						},
+						{
+							Field:   "field_one.a",
+							Section: "Argument Reference",
+						},
+						{
+							Field:   "field_one.b",
+							Section: "Argument Reference",
+						},
+						{
+							Field:   "field_two.b",
+							Section: "Attributes Reference",
+						},
+						{
+							Field:   "field_three",
+							Section: "Argument Reference",
 						},
 						{
 							Field:   "field_four",
-							Section: "Arguments Reference",
-						},
-						{
-							Field:   "field_five",
 							Section: "Attributes Reference",
 						},
 					},
@@ -266,17 +362,26 @@ func TestDetectMissingDocs(t *testing.T) {
 						"field_one": {
 							New: &schema.Schema{},
 						},
-						"field_two.field_three": {
+						"field_one.a": {
+							New: &schema.Schema{},
+						},
+						"field_one.b": {
+							New: &schema.Schema{},
+						},
+						"field_two.a": {
 							New: &schema.Schema{},
 							Old: &schema.Schema{},
 						},
-						"field_four": {
+						"field_two.b": {
+							New: &schema.Schema{},
+						},
+						"field_three": {
 							New: &schema.Schema{
 								Computed: true,
 								Optional: true,
 							},
 						},
-						"field_five": {
+						"field_four": {
 							New: &schema.Schema{
 								Computed: true,
 							},
@@ -290,12 +395,68 @@ func TestDetectMissingDocs(t *testing.T) {
 					FilePath: "/website/docs/r/a_resource.html.markdown",
 					Fields: []MissingDocField{
 						{
-							Field:   "field_five",
+							Field:   "field_one.b",
+							Section: "Argument Reference",
+						},
+						{
+							Field:   "field_two.b",
 							Section: "Attributes Reference",
 						},
 						{
-							Field:   "field_one",
-							Section: "Arguments Reference",
+							Field:   "field_three",
+							Section: "Argument Reference",
+						},
+						{
+							Field:   "field_four",
+							Section: "Attributes Reference",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "argument's nested new field missing doc",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_one.c": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_one.c",
+							Section: "Argument Reference",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "attribute's nested new field missing doc",
+			schemaDiff: diff.SchemaDiff{
+				"a_resource": diff.ResourceDiff{
+					Fields: map[string]diff.FieldDiff{
+						"field_two.c": {
+							New: &schema.Schema{},
+						},
+					},
+				},
+			},
+			repo: "../testdata",
+			want: map[string]MissingDocDetails{
+				"a_resource": {
+					FilePath: "/website/docs/r/a_resource.html.markdown",
+					Fields: []MissingDocField{
+						{
+							Field:   "field_two.c",
+							Section: "Attributes Reference",
 						},
 					},
 				},
@@ -303,7 +464,7 @@ func TestDetectMissingDocs(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := DetectMissingDocs(test.schemaDiff, test.repo)
+			got, err := DetectMissingDocs(test.schemaDiff, test.repo, resourceSchema)
 			if err != nil {
 				t.Fatalf("DetectMissingDocs = %v, want = nil", err)
 			}
@@ -320,6 +481,70 @@ func TestDetectMissingDocs(t *testing.T) {
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
 			}
+		})
+	}
+}
+
+func TestIsAttribute(t *testing.T) {
+	resourceSchema := &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"one": {
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"a": {
+							Computed: false,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"two": {
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"a": {
+							Computed: true,
+							Optional: false,
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, test := range []struct {
+		name  string
+		field string
+		want  bool
+	}{
+		{
+			name:  "field itself is top level attribute",
+			field: "one",
+			want:  true,
+		},
+		{
+			name:  "field's top level is attribute",
+			field: "one.a",
+			want:  true,
+		},
+		{
+			name:  "field itself is not top level attribute",
+			field: "two",
+			want:  false,
+		},
+		{
+			name:  "field's top level is not attribute",
+			field: "two.a",
+			want:  false,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := isAttribute(test.field, resourceSchema)
+			if test.want != got {
+				t.Fatalf("isAttribute = %v, want = %v", got, test.want)
+			}
+
 		})
 	}
 }

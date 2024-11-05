@@ -2,8 +2,7 @@ package documentparser
 
 import (
 	"os"
-	"path/filepath"
-	"strings"
+	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -61,13 +60,27 @@ func TestParse(t *testing.T) {
 		"params",
 		// "params.resource_manager_tags", // params text does not include a nested tag
 		"zone",
+		"labels",
+		"description",
+		"traffic_port_selector",
+		"traffic_port_selector.ports",
+		"project",
 	}
 	wantAttributes := []string{
 		"id",
 		"network_interface.access_config.nat_ip",
+		"workload_identity_config",
+		"errors",
+		"workload_identity_config.identity_provider",
+		"workload_identity_config.issuer_uri",
+		"workload_identity_config.workload_pool",
+		"errors.message",
 	}
 	gotArguments := parser.Arguments()
 	gotAttributes := parser.Attributes()
+	for _, arr := range [][]string{gotArguments, wantArguments, gotAttributes, wantAttributes} {
+		sort.Strings(arr)
+	}
 	if diff := cmp.Diff(wantArguments, gotArguments); diff != "" {
 		t.Errorf("Parse returned diff in arguments(-want, +got): %s", diff)
 	}
@@ -88,7 +101,7 @@ func TestTraverse(t *testing.T) {
 	n2.children = []*node{n4}
 
 	var paths []string
-	traverse(&paths, "", func(*node) bool { return true }, root)
+	traverse(&paths, "", root)
 
 	wantPaths := []string{
 		"n1",
@@ -100,9 +113,4 @@ func TestTraverse(t *testing.T) {
 	if diff := cmp.Diff(wantPaths, paths); diff != "" {
 		t.Errorf("traverse returned diff(-want, +got): %s", diff)
 	}
-}
-
-func resourceToDocFile(resource string, repoPath string) string {
-	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
-	return filepath.Join(repoPath, "website", "docs", "r", fileBaseName)
 }

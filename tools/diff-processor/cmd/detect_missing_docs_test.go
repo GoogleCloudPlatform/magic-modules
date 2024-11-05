@@ -24,32 +24,32 @@ func TestDetectMissingDocs(t *testing.T) {
 			oldResourceMap: map[string]*schema.Resource{
 				"google_x": {
 					Schema: map[string]*schema.Schema{
-						"field-a": {Description: "beep", Optional: true},
-						"field-b": {Description: "beep", Optional: true},
+						"field-a": {Description: "beep", Computed: true, Optional: true},
+						"field-b": {Description: "beep", Computed: true},
 					},
 				},
 			},
 			newResourceMap: map[string]*schema.Resource{
 				"google_x": {
 					Schema: map[string]*schema.Schema{
-						"field-a": {Description: "beep", Optional: true},
-						"field-b": {Description: "beep", Optional: true},
+						"field-a": {Description: "beep", Computed: true, Optional: true},
+						"field-b": {Description: "beep", Computed: true},
 					},
 				},
 			},
 			want: []MissingDocsInfo{},
 		},
 		{
-			name: "multiple new fields missing doc",
+			name:           "multiple new fields missing doc",
+			oldResourceMap: map[string]*schema.Resource{},
 			newResourceMap: map[string]*schema.Resource{
 				"google_x": {
 					Schema: map[string]*schema.Schema{
-						"field-a": {Description: "beep"},
-						"field-b": {Description: "beep"},
+						"field-a": {Description: "beep", Computed: true, Optional: true},
+						"field-b": {Description: "beep", Computed: true},
 					},
 				},
 			},
-			oldResourceMap: map[string]*schema.Resource{},
 			want: []MissingDocsInfo{
 				{
 					Name:     "google_x",
@@ -57,11 +57,11 @@ func TestDetectMissingDocs(t *testing.T) {
 					Fields: []detector.MissingDocField{
 						{
 							Field:   "field-a",
-							Section: "Arguments Reference",
+							Section: "Argument Reference",
 						},
 						{
 							Field:   "field-b",
-							Section: "Arguments Reference",
+							Section: "Attributes Reference",
 						},
 					},
 				},
@@ -76,7 +76,8 @@ func TestDetectMissingDocs(t *testing.T) {
 				computeSchemaDiff: func() diff.SchemaDiff {
 					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 				},
-				stdout: &buf,
+				newResourceSchema: tc.newResourceMap,
+				stdout:            &buf,
 			}
 
 			err := o.run([]string{t.TempDir()})

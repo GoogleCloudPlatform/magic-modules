@@ -20,21 +20,18 @@ const (
 
 // DocumentParser parse *.html.markdown resource doc files.
 type DocumentParser struct {
-	root                 *node
-	nestedBlockParagraph map[string]string
+	argumentRoot   *node
+	attriibuteRoot *node
 }
 
 type node struct {
-	name        string
-	isAttribute bool
-	children    []*node
-	text        string
+	name     string
+	children []*node
+	text     string
 }
 
 func NewParser() *DocumentParser {
-	return &DocumentParser{
-		nestedBlockParagraph: make(map[string]string),
-	}
+	return &DocumentParser{}
 }
 
 func (d *DocumentParser) Arguments() []string {
@@ -42,20 +39,14 @@ func (d *DocumentParser) Arguments() []string {
 	traverse(
 		&paths,
 		"",
-		func(n *node) bool {
-			return !n.isAttribute
-		},
-		d.root,
+		d.argumentRoot,
 	)
 	sort.Strings(paths)
 	return paths
 }
 
-func traverse(paths *[]string, path string, shouldVisit func(*node) bool, n *node) {
+func traverse(paths *[]string, path string, n *node) {
 	if n == nil {
-		return
-	}
-	if !shouldVisit(n) {
 		return
 	}
 	var curPath string
@@ -68,31 +59,23 @@ func traverse(paths *[]string, path string, shouldVisit func(*node) bool, n *nod
 		*paths = append(*paths, curPath)
 	}
 	for _, c := range n.children {
-		traverse(paths, curPath, shouldVisit, c)
+		traverse(paths, curPath, c)
 	}
 }
 
 func (d *DocumentParser) Attributes() []string {
-	if d == nil || d.root == nil {
-		return nil
-	}
-	var attributes []string
-	for _, c := range d.root.children {
-		if !c.isAttribute {
-			continue
-		}
-		attributes = append(attributes, c.name)
-	}
-	sort.Strings(attributes)
-	return attributes
+	var paths []string
+	traverse(
+		&paths,
+		"",
+		d.attriibuteRoot,
+	)
+	sort.Strings(paths)
+	return paths
 }
 
 // Parse parse a resource document markdown's arguments and attributes section.
-// It expects the markdown to contain specific format:
-// - Section titles are identified like "## abcdefg".
-// - Each item is identified like "* `abcdefg`"".
-// - Nested objects are identified by a starting line contains <a name="nested_abcdefg">.
-// - Attributes reference do not have nested layers.
+// The parsed file format is defined in mmv1/templates/terraform/resource.html.markdown.tmpl.
 func (d *DocumentParser) Parse(src []byte) error {
 	var argument, attribute string
 	for _, p := range strings.Split(string(src), "\n"+sectionSeparator) {
@@ -104,40 +87,58 @@ func (d *DocumentParser) Parse(src []byte) error {
 		}
 	}
 	if len(argument) != 0 {
-		if err := d.parseArgument(argument); err != nil {
-			return err
+		argumentParts := strings.Split(argument, "- - -")
+		for _, part := range argumentParts {
+			n, err := d.parseSection(part)
+			if err != nil {
+				return err
+			}
+			if d.argumentRoot == nil {
+				d.argumentRoot = n
+			} else {
+				d.argumentRoot.children = append(d.argumentRoot.children, n.children...)
+			}
 		}
 	}
 	if len(attribute) != 0 {
-		if err := d.parseAttribute(attribute); err != nil {
+		n, err := d.parseSection(attribute)
+		if err != nil {
 			return err
 		}
+		d.attriibuteRoot = n
 	}
 
 	return nil
 }
 
-func (d *DocumentParser) parseArgument(input string) error {
+func (d *DocumentParser) parseSection(input string) (*node, error) {
 	parts := strings.Split(input, "\n"+nestedObjectSeparator)
+	nestedBlock := make(map[string]string)
 	for _, p := range parts[1:] {
 		nestedName, err := findPattern(nestedObjectSeparator+p, nestedLinkPattern)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if nestedName == "" {
-			return fmt.Errorf("could not find nested object name in %s", nestedObjectSeparator+p)
+			return nil, fmt.Errorf("could not find nested object name in %s", nestedObjectSeparator+p)
 		}
-		d.nestedBlockParagraph[nestedName] = p
+		nestedBlock[nestedName] = p
 	}
-	return d.bfs(parts[0])
+	// bfs to traverse the first part without nested blocks.
+	root := &node{
+		text: parts[0],
+	}
+	if err := d.bfs(root, nestedBlock); err != nil {
+		return nil, err
+	}
+	return root, nil
 }
 
-func (d *DocumentParser) bfs(input string) error {
-	d.root = &node{
-		name: "",
-		text: input,
+func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
+	if root == nil {
+		return fmt.Errorf("no node to visit")
 	}
-	queue := []*node{d.root}
+	queue := []*node{root}
 
 	for len(queue) > 0 {
 		l := len(queue)
@@ -150,6 +151,8 @@ func (d *DocumentParser) bfs(input string) error {
 				if err != nil {
 					return err
 				}
+				// There is a special case in some hand written resource eg. in compute_instance, where its attributes is in a.0.b.0.c format.
+				itemName = strings.ReplaceAll(itemName, ".0.", ".")
 				nestedName, err := findNestedName(text)
 				if err != nil {
 					return err
@@ -158,7 +161,7 @@ func (d *DocumentParser) bfs(input string) error {
 					name: itemName,
 				}
 				cur.children = append(cur.children, newNode)
-				if text, ok := d.nestedBlockParagraph[nestedName]; ok {
+				if text, ok := nestedBlock[nestedName]; ok {
 					newNode.text = text
 					queue = append(queue, newNode)
 				}
@@ -166,23 +169,6 @@ func (d *DocumentParser) bfs(input string) error {
 
 		}
 		queue = queue[l:]
-	}
-	return nil
-}
-
-func (d *DocumentParser) parseAttribute(input string) error {
-	items := strings.Split(input, "\n"+listItemSeparator)
-	for _, item := range items[1:] {
-		itemName, err := findItemName(listItemSeparator + item)
-		if err != nil {
-			return err
-		}
-		itemName = strings.ReplaceAll(itemName, ".0.", ".")
-		newNode := &node{
-			name:        itemName,
-			isAttribute: true,
-		}
-		d.root.children = append(d.root.children, newNode)
 	}
 	return nil
 }

@@ -2,5 +2,17 @@
 
 ## Argument Reference
 
-* `field_four` lorem ipsum
-* `field_five` lorem ipsum
+* `field_one` lorem ipsum. Structure is [documented below](#nested_field_one).
+
+
+<a name="nested_field_one"></a>The `field_one` block supports:
+
+* `a` - (Optional) lorem ipsum.
+
+## Attributes Reference
+
+* `field_two` lorem ipsum. Structure is [documented below](#nested_field_two).
+
+<a name="nested_field_two"></a>The `field_two` block supports:
+
+* `a` - (Optional) lorem ipsum.

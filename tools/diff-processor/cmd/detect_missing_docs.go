@@ -13,6 +13,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 )
@@ -28,6 +29,7 @@ type MissingDocsInfo struct {
 type detectMissingDocsOptions struct {
 	rootOptions       *rootOptions
 	computeSchemaDiff func() diff.SchemaDiff
+	newResourceSchema map[string]*schema.Resource
 	stdout            io.Writer
 }
 
@@ -52,7 +54,7 @@ func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 }
 func (o *detectMissingDocsOptions) run(args []string) error {
 	schemaDiff := o.computeSchemaDiff()
-	detectedResources, err := detector.DetectMissingDocs(schemaDiff, args[0])
+	detectedResources, err := detector.DetectMissingDocs(schemaDiff, args[0], o.newResourceSchema)
 	if err != nil {
 		return err
 	}

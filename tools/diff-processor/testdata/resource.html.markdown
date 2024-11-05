@@ -6,7 +6,7 @@ description: |-
 
 # google_test_resource
 
-Lorem ipsum
+This resource combines some sections in google_compute_instance, google_container_attached_cluster, network_services_endpoint_policy and irrelvant parts are trimmed. 
 
 ## Example Usage
 
@@ -207,6 +207,35 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `resource_manager_tags` (Optional) - A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
+- - -
+
+
+* `labels` -
+  (Optional)
+  Set of label tags associated with the TcpRoute resource.
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+  Please refer to the field `effective_labels` for all of the labels present on the resource.
+
+* `description` -
+  (Optional)
+  A free-text description of the resource. Max length 1024 characters.
+
+* `traffic_port_selector` -
+  (Optional)
+  Port selector for the (matched) endpoints. If no port selector is provided, the matched config is applied to all ports.
+  Structure is [documented below](#nested_traffic_port_selector).
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the provider project is used.
+
+
+<a name="nested_traffic_port_selector"></a>The `traffic_port_selector` block supports:
+
+* `ports` -
+  (Required)
+  List of ports. Can be port numbers or port range (example, [80-90] specifies all ports from 80 to 90, including 80 and 90) or named ports or * to specify all ports. If the list is empty, all ports are selected.
+
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -215,6 +244,36 @@ exported:
 * `id` - an identifier for the resource with format `projects/{{project}}/zones/{{zone}}/instances/{{name}}`
 
 * `network_interface.0.access_config.0.nat_ip` - If the instance has an access config, either the given external ip (in the `nat_ip` field) or the ephemeral (generated) ip (if you didn't provide one).
+
+* `workload_identity_config` -
+  Workload Identity settings.
+  Structure is [documented below](#nested_workload_identity_config).
+
+* `errors` -
+  A set of errors found in the cluster.
+  Structure is [documented below](#nested_errors).
+ 
+
+<a name="nested_workload_identity_config"></a>The `workload_identity_config` block contains:
+
+* `identity_provider` -
+  (Optional)
+  The ID of the OIDC Identity Provider (IdP) associated to
+  the Workload Identity Pool.
+
+* `issuer_uri` -
+  (Optional)
+  The OIDC issuer URL for this cluster.
+
+* `workload_pool` -
+  (Optional)
+  The Workload Identity Pool associated to the cluster.
+
+<a name="nested_errors"></a>The `errors` block contains:
+
+* `message` -
+  (Optional)
+  Human-friendly description of the error.
 
 ## Timeouts
 

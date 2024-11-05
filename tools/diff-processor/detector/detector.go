@@ -37,14 +37,16 @@ type Field struct {
 	Tested bool
 }
 
+// MissingDocDetails denotes the doc file path and the fields that are not shown up in the corresponding doc.
 type MissingDocDetails struct {
 	FilePath string
 	Fields   []MissingDocField
 }
 
+// MissingDocField contains information about which fields are missing doc, and in which section if applicable.
 type MissingDocField struct {
-	Field   string
-	Section string
+	Field   string // Field is the field name.
+	Section string // Section can either be "Argument Reference" or "Attributes Reference" for a resource.
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -167,39 +169,46 @@ func suggestedTest(resourceName string, untested []string) string {
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
 }
 
-func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
+// DetectMissingDocs detect new fields that are missing docs given the schema diffs.
+// Return a map of resource names to missing doc info.
+func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string, resourceMap map[string]*schema.Resource) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
-		docFilePath := resourceToDocFile(resource, repoPath)
 		var argumentsInDoc, attributesInDoc map[string]bool
 
-		details := MissingDocDetails{
-			FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
-		}
-		content, err := os.ReadFile(docFilePath)
-		if err != nil && !os.IsNotExist(err) {
-			return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
-		}
-		if err == nil {
+		docFilePath, err := resourceToDocFile(resource, repoPath)
+		if err != nil {
+			fmt.Printf("Warning: %s.\n", err)
+		} else {
+			content, err := os.ReadFile(docFilePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+			}
 			parser := documentparser.NewParser()
 			err = parser.Parse(content)
 			if err != nil {
-				return nil, fmt.Errorf("failed to pass document %s: %w", docFilePath, err)
+				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
 			}
 			argumentsInDoc = listToMap(parser.Arguments())
 			attributesInDoc = listToMap(parser.Attributes())
+			if _, ok := argumentsInDoc["member/members"]; ok {
+				argumentsInDoc["member"] = true
+				argumentsInDoc["members"] = true
+			}
 		}
-
+		details := MissingDocDetails{
+			FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+		}
 		for field, fieldDiff := range resourceDiff.Fields {
 			if !isNewField(fieldDiff) {
 				continue
 			}
-			if isAttribute(fieldDiff) {
+			if isAttribute(field, resourceMap[resource]) {
 				if !attributesInDoc[field] {
 					details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Attributes Reference"})
 				}
 			} else if !argumentsInDoc[field] {
-				details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Arguments Reference"})
+				details.Fields = append(details.Fields, MissingDocField{Field: field, Section: "Argument Reference"})
 			}
 		}
 		if len(details.Fields) > 0 {
@@ -209,18 +218,44 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 	return ret, nil
 }
 
-func isAttribute(fieldDiff diff.FieldDiff) bool {
-	// for compute_instance, some attributes are not only on top level
-	return fieldDiff.New.Computed && !fieldDiff.New.Optional
+func isAttribute(field string, resourceSchema *schema.Resource) bool {
+	tlField := topLevelField(field)
+	return resourceSchema.Schema[tlField].Computed && !resourceSchema.Schema[tlField].Optional
+}
+
+func topLevelField(field string) string {
+	if strings.Contains(field, ".") {
+		splits := strings.Split(field, ".")
+		return splits[0]
+	}
+	return field
 }
 
 func isNewField(fieldDiff diff.FieldDiff) bool {
 	return fieldDiff.Old == nil && fieldDiff.New != nil
 }
 
-func resourceToDocFile(resource string, repoPath string) string {
-	fileBaseName := strings.TrimPrefix(resource, "google_") + ".html.markdown"
-	return filepath.Join(repoPath, "website", "docs", "r", fileBaseName)
+func resourceToDocFile(resource string, repoPath string) (string, error) {
+	baseNameOptions := []string{
+		strings.TrimPrefix(resource, "google_") + ".html.markdown",
+		resource + ".html.markdown",
+	}
+	suffix := []string{"_policy", "_binding", "_member"}
+	for _, s := range suffix {
+		if strings.HasSuffix(resource, "_iam"+s) {
+			iamName := strings.TrimSuffix(resource, s)
+			baseNameOptions = append(baseNameOptions, iamName+".html.markdown")
+			baseNameOptions = append(baseNameOptions, strings.TrimPrefix(iamName, "google_")+".html.markdown")
+		}
+	}
+	for _, baseName := range baseNameOptions {
+		fullPath := filepath.Join(repoPath, "website", "docs", "r", baseName)
+		_, err := os.ReadFile(fullPath)
+		if !os.IsNotExist(err) {
+			return fullPath, nil
+		}
+	}
+	return filepath.Join(repoPath, "website", "docs", "r", baseNameOptions[0]), fmt.Errorf("no document files found in %s for resource %q", baseNameOptions, resource)
 }
 
 func listToMap(items []string) map[string]bool {
