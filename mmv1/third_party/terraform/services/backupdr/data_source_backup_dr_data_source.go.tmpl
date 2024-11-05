@@ -9,7 +9,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceBackupDRDataSource() *schema.Resource {
+func DataSourceGoogleCloudBackupDRDataSource() *schema.Resource {
 	dsSchema := map[string]*schema.Schema{
 		"name": {
 			Type:     schema.TypeString,
@@ -283,12 +283,12 @@ func DataSourceBackupDRDataSource() *schema.Resource {
 	}
 
 	return &schema.Resource{
-		Read:   DataSourceBackupDRDataSourceRead,
+		Read:   DataSourceGoogleCloudBackupDRDataSourceRead,
 		Schema: dsSchema,
 	}
 }
 
-func DataSourceBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) error {
+func DataSourceGoogleCloudBackupDRDataSourceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {

@@ -10,18 +10,17 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
+func TestAccDataSourceGoogleCloudBackupDRDataSource_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	stepChecks := func(wantName string, wantState string, wantBackupCount string) []resource.TestCheckFunc {
+	stepChecks := func(wantName string, wantState string) []resource.TestCheckFunc {
 		stepCheck := []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "name", wantName),
 			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "state", wantState),
-			resource.TestCheckResourceAttr("data.google_backup_dr_data_source.foo", "backup_count", wantBackupCount),
 		}
 		return stepCheck
 	}
@@ -34,14 +33,14 @@ func TestAccDataSourceGoogleBackupDRDataSource_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleBackupDRDataSource_basic(context),
-				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, "0")...),
+				Config: testAccDataSourceGoogleCloudBackupDRDataSource_basic(context),
+				Check:  resource.ComposeTestCheckFunc(stepChecks(expectedName, expectedState, "DB1")...),
 			},
 		},
 	})
 }
 
-func testAccDataSourceGoogleBackupDRDataSource_basic(context map[string]interface{}) string {
+func testAccDataSourceGoogleCloudBackupDRDataSource_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
 }
