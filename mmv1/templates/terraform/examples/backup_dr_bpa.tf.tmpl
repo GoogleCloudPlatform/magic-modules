@@ -1,6 +1,6 @@
  resource "google_service_account" "mySA" {
   provider = google-beta
-  account_id   = "{{index $.Vars "account_idaccount_idaccount_id"}}"
+  account_id   = "{{index $.Vars "account_id"}}"
   display_name = "Custom SA for VM Instance"
 }
 
