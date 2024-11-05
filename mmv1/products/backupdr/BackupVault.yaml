@@ -203,6 +203,7 @@ properties:
     description: |
         Access restriction for the backup vault. Default value is `WITHIN_ORGANIZATION` if not provided during creation.
     min_version: 'beta'
+    immutable: true
     default_value: "WITHIN_ORGANIZATION"
     enum_values:
       - 'ACCESS_RESTRICTION_UNSPECIFIED'
