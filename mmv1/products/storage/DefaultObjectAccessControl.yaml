@@ -13,6 +13,7 @@
 
 ---
 name: 'DefaultObjectAccessControl'
+api_resource_type_kind: ObjectAccessControl
 kind: 'storage#objectAccessControl'
 description: |
   The DefaultObjectAccessControls resources represent the Access Control

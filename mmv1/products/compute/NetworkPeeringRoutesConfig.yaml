@@ -13,6 +13,7 @@
 
 ---
 name: 'NetworkPeeringRoutesConfig'
+api_resource_type_kind: Network
 description: |
   Manage a network peering's route settings without managing the peering as
   a whole. This resource is primarily intended for use with GCP-generated

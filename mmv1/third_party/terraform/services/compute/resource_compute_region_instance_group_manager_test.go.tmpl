@@ -312,7 +312,16 @@ func TestAccRegionInstanceGroupManager_distributionPolicy(t *testing.T) {
 		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRegionInstanceGroupManager_distributionPolicy(template, igm, zones),
+				Config: testAccRegionInstanceGroupManager_distributionPolicyEmpty(template, igm),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_distributionPolicy(template, igm),
 			},
 			{
 				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -322,6 +331,15 @@ func TestAccRegionInstanceGroupManager_distributionPolicy(t *testing.T) {
 			},
 			{
 				Config: testAccRegionInstanceGroupManager_distributionPolicyUpdate(template, igm, zones),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_distributionPolicyEmpty(template, igm),
 			},
 			{
 				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
@@ -377,7 +395,7 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 }
 
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -413,6 +431,50 @@ func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) 
 }
 {{- end }}
 
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
+	t.Parallel()
+
+	template := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	igm := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	network := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyUpdate(network, template, igm),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_instanceFlexibilityPolicyRemove(network, template, igm),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+		},
+	})
+}
+{{- end }}
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
 
@@ -432,7 +494,7 @@ func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
@@ -1135,7 +1197,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, primaryTemplate, canaryTemplate, igm)
 }
 
-func testAccRegionInstanceGroupManager_distributionPolicy(template, igm string, zones []string) string {
+func testAccRegionInstanceGroupManager_distributionPolicyEmpty(template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -1169,8 +1231,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
   base_instance_name               = "tf-test-igm-basic"
   region                           = "us-central1"
   target_size                      = 2
-  distribution_policy_zones        = ["%s"]
-  distribution_policy_target_shape = "ANY"
 
   update_policy {
     instance_redistribution_type = "NONE"
@@ -1180,7 +1240,54 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
     max_unavailable_fixed        = 6
   }
 }
-`, template, igm, strings.Join(zones, "\",\""))
+`, template, igm)
+}
+
+func testAccRegionInstanceGroupManager_distributionPolicy(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+  network_interface {
+    network = "default"
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm-basic" {
+  description = "Terraform test instance group manager"
+  name        = "%s"
+
+  version {
+    instance_template = google_compute_instance_template.igm-basic.self_link
+    name              = "primary"
+  }
+
+  base_instance_name               = "tf-test-igm-basic"
+  region                           = "us-central1"
+  target_size                      = 2
+  distribution_policy_target_shape = "BALANCED"
+
+  update_policy {
+    instance_redistribution_type = "NONE"
+    type                         = "OPPORTUNISTIC"
+    minimal_action               = "REPLACE"
+    max_surge_fixed              = 0
+    max_unavailable_fixed        = 6
+  }
+}
+`, template, igm)
 }
 
 func testAccRegionInstanceGroupManager_distributionPolicyUpdate(template, igm string, zones []string) string {
@@ -1751,7 +1858,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1862,7 +1969,178 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
+{{- if ne $.TargetVersionName "ga" }}
+func testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "igm-basic" {
+	name = "%s"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+	name           = "%s"
+	machine_type   = "e2-medium"
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+		auto_delete  = true
+		boot         = true
+		device_name  = "stateful-disk"
+	}
+	network_interface {
+		network = "default"
+	}
+}
+
+resource "google_compute_region_instance_group_manager" "igm-basic" {
+	description = "Terraform test instance group manager"
+	name        = "%s"
+
+	version {
+		instance_template = google_compute_instance_template.igm-basic.self_link
+		name              = "primary"
+	}
+
+	base_instance_name        = "tf-test-igm-basic"
+	region                    = "us-central1"
+	target_size               = 2
+	distribution_policy_target_shape = "ANY_SINGLE_ZONE"
+	update_policy {
+		instance_redistribution_type = "NONE"
+		type                         = "OPPORTUNISTIC"
+		minimal_action               = "REPLACE"
+		max_surge_fixed              = 0
+		max_unavailable_fixed        = 6
+	}
+	instance_flexibility_policy {
+		instance_selections {
+			name = "instance_selection_name_1"
+			rank = 2
+			machine_types = ["n1-standard-16"]
+		}
+		instance_selections {
+			name = "instance_selection_name_2"
+			rank = 1
+			machine_types = ["n1-standard-1", "n4-standard-2"]
+		}
+	}
+}
+`, network, template, igm)
+}
+
+func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyUpdate(network, template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "igm-basic" {
+	name = "%s"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+	name           = "%s"
+	machine_type   = "e2-medium"
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+		auto_delete  = true
+		boot         = true
+		device_name  = "stateful-disk"
+	}
+	network_interface {
+		network = "default"
+	}
+}
+
+resource "google_compute_region_instance_group_manager" "igm-basic" {
+	description = "Terraform test instance group manager"
+	name        = "%s"
+
+	version {
+		instance_template = google_compute_instance_template.igm-basic.self_link
+		name              = "primary"
+	}
+
+	base_instance_name        = "tf-test-igm-basic"
+	region                    = "us-central1"
+	target_size               = 0
+	distribution_policy_target_shape = "ANY_SINGLE_ZONE"
+	update_policy {
+		instance_redistribution_type = "NONE"
+		type                         = "OPPORTUNISTIC"
+		minimal_action               = "REPLACE"
+		max_surge_fixed              = 0
+		max_unavailable_fixed        = 6
+	}
+	instance_flexibility_policy {
+		instance_selections {
+			name = "instance_selection_name_1"
+			machine_types = ["n1-standard-1"]
+		}
+		instance_selections {
+				name = "instance_selection_name_2_version_2"
+				machine_types = ["n1-standard-2", "n1-standard-4"]
+		}
+	}
+}
+`, network, template, igm)
+}
+
+func testAccRegionInstanceGroupManager_instanceFlexibilityPolicyRemove(network, template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "igm-basic" {
+	name = "%s"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+	name           = "%s"
+	machine_type   = "e2-medium"
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+		auto_delete  = true
+		boot         = true
+		device_name  = "stateful-disk"
+	}
+	network_interface {
+		network = "default"
+	}
+}
+
+resource "google_compute_region_instance_group_manager" "igm-basic" {
+	description = "Terraform test instance group manager"
+	name        = "%s"
+
+	version {
+		instance_template = google_compute_instance_template.igm-basic.self_link
+		name              = "primary"
+	}
+
+	base_instance_name        = "tf-test-igm-basic"
+	region                    = "us-central1"
+	target_size               = 0
+	distribution_policy_target_shape = "ANY_SINGLE_ZONE"
+	update_policy {
+		instance_redistribution_type = "NONE"
+		type                         = "OPPORTUNISTIC"
+		minimal_action               = "REPLACE"
+		max_surge_fixed              = 0
+		max_unavailable_fixed        = 6
+	}
+}
+`, network, template, igm)
+}
+{{- end }}
+
+{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1892,8 +2170,8 @@ resource "google_tags_tag_key" "rigm-key" {
 
 resource "google_tags_tag_value" "rigm-value" {
   description = "Terraform test tag value."
-  parent = "tagKeys/${google_tags_tag_key.rigm-key.name}"
-  short_name = "%s"
+  parent      = google_tags_tag_key.rigm-key.id
+  short_name  = "%s"
 }
 
 resource "google_compute_region_instance_group_manager" "rigm-tags" {
@@ -1910,7 +2188,7 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
 
   params {
     resource_manager_tags = {
-      "tagKeys/${google_tags_tag_key.rigm-key.name}" = "tagValues/${google_tags_tag_value.rigm-value.name}"
+      (google_tags_tag_key.rigm-key.id) = google_tags_tag_value.rigm-value.id
     }
   }
 }

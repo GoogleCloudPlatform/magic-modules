@@ -13,6 +13,7 @@
 
 ---
 name: 'Slo'
+api_resource_type_kind: ServiceLevelObjective
 description: |
   A Service-Level Objective (SLO) describes the level of desired good
   service. It consists of a service-level indicator (SLI), a performance
@@ -36,6 +37,7 @@ update_verb: 'PATCH'
 update_mask: true
 mutex: 'monitoring/project/{{project}}/service/{{service}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

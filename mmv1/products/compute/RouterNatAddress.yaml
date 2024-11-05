@@ -13,6 +13,7 @@
 
 ---
 name: 'RouterNatAddress'
+api_resource_type_kind: Router
 description: |
   A resource used to set the list of IP addresses to be used in a NAT service and manage the draining of destroyed IPs.
 

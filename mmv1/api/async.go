@@ -71,7 +71,7 @@ func NewAsync() *Async {
 type OpAsync struct {
 	Result OpAsyncResult
 
-	Status OpAsyncStatus
+	Status OpAsyncStatus `yaml:"status,omitempty"`
 
 	Error OpAsyncError
 
@@ -81,42 +81,42 @@ type OpAsync struct {
 }
 
 type OpAsyncOperation struct {
-	Kind string
+	Kind string `yaml:"kind,omitempty"`
 
-	Path string
+	Path string `yaml:"path,omitempty"`
 
-	BaseUrl string `yaml:"base_url"`
+	BaseUrl string `yaml:"base_url,omitempty"`
 
-	WaitMs int `yaml:"wait_ms"`
+	WaitMs int `yaml:"wait_ms,omitempty"`
 
 	// Use this if the resource includes the full operation url.
-	FullUrl string `yaml:"full_url"`
+	FullUrl string `yaml:"full_url,omitempty"`
 }
 
 // Represents the results of an Operation request
 type OpAsyncResult struct {
-	ResourceInsideResponse bool `yaml:"resource_inside_response"`
+	ResourceInsideResponse bool `yaml:"resource_inside_response,omitempty"`
 
-	Path string
+	Path string `yaml:"path,omitempty"`
 }
 
 // Provides information to parse the result response to check operation
 // status
 type OpAsyncStatus struct {
-	Path string
+	Path string `yaml:"path,omitempty"`
 
-	Complete bool
+	Complete bool `yaml:"complete,omitempty"`
 
-	Allowed []bool
+	Allowed []bool `yaml:"allowed,omitempty"`
 }
 
 // Provides information on how to retrieve errors of the executed operations
 type OpAsyncError struct {
-	google.YamlValidator
+	google.YamlValidator `yaml:"-"`
 
-	Path string
+	Path string `yaml:"path,omitempty"`
 
-	Message string
+	Message string `yaml:"message,omitempty"`
 }
 
 // Async implementation for polling in Terraform
@@ -125,19 +125,19 @@ type PollAsync struct {
 
 	// Function to call for checking the Poll response for
 	// creating and updating a resource
-	CheckResponseFuncExistence string `yaml:"check_response_func_existence"`
+	CheckResponseFuncExistence string `yaml:"check_response_func_existence,omitempty"`
 
 	// Function to call for checking the Poll response for
 	// deleting a resource
-	CheckResponseFuncAbsence string `yaml:"check_response_func_absence"`
+	CheckResponseFuncAbsence string `yaml:"check_response_func_absence,omitempty"`
 
 	// If true, will suppress errors from polling and default to the
 	// result of the final Read()
-	SuppressError bool `yaml:"suppress_error"`
+	SuppressError bool `yaml:"suppress_error,omitempty"`
 
 	// Number of times the desired state has to occur continuously
 	// during polling before returning a success
-	TargetOccurrences int `yaml:"target_occurrences"`
+	TargetOccurrences int `yaml:"target_occurrences,omitempty"`
 }
 
 func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {

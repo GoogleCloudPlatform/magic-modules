@@ -13,6 +13,7 @@
 
 ---
 name: 'ProjectNotificationConfig'
+api_resource_type_kind: NotificationConfig
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the
@@ -31,6 +32,8 @@ self_link: '{{name}}'
 create_url: 'projects/{{project}}/notificationConfigs?configId={{config_id}}'
 update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

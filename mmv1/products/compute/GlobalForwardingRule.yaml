@@ -13,6 +13,7 @@
 
 ---
 name: 'GlobalForwardingRule'
+api_resource_type_kind: ForwardingRule
 kind: 'compute#forwardingRule'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are

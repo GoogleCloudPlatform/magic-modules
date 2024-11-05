@@ -142,14 +142,17 @@ examples:
       metastore_service_name: 'backup'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
+    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
     primary_resource_id: 'test_resource'
+    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
     primary_resource_id: 'test_resource'
+    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_no_limit_config'

@@ -1,0 +1,109 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Group
+legacy_long_form_project: true
+base_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups
+create_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
+update_url: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}?updateMask=autoAccept.autoAcceptProjects,labels,description
+self_link: projects/{{project}}/locations/global/hubs/{{hub}}/groups/{{name}}
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1beta/projects.locations.global.hubs.groups'
+async:
+  type: 'OpAsync'
+  operation:
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+  error:
+    path: 'error/errors'
+    message: 'message'
+# A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
+exclude_sweeper: true
+examples:
+  - name: 'network_connectivity_group_basic'
+    primary_resource_id: 'primary'
+    vars:
+      hub_name: "network-connectivity-hub1"
+      auto_accept_project_1_name: "foo"
+      auto_accept_project_2_name: "bar"
+description: The NetworkConnectivity Group resource
+parameters:
+  - name: 'hub'
+    type: ResourceRef
+    resource: 'Hub'
+    imports: 'id'
+    description: |
+      The name of the hub. Hub names must be unique. They use the following form: projects/{projectNumber}/locations/global/hubs/{hubId}
+    immutable: true
+    required: true
+    url_param_only: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+properties:
+  - name: name
+    type: Enum
+    description: 'The name of the group. Group names must be unique.'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    enum_values:
+      - 'default'
+      - 'center'
+      - 'edge'
+  - name: createTime
+    type: String
+    description: Output only. The time the hub was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. The time the hub was last updated.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional labels in key:value format. For more information about labels, see [Requirements for labels](https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements).
+  - name: description
+    type: String
+    description: An optional description of the group.
+  - name: uid
+    type: String
+    description: Output only. The Google-generated UUID for the group. This value is unique across all group resources. If a group is deleted and another with the same name is created, the new route table is assigned a different uniqueId.
+    output: true
+  - name: state
+    type: String
+    description: Output only. The current lifecycle state of this hub.
+    output: true
+    exactly_one_of:
+      - CREATING
+      - ACTIVE
+      - DELETING
+  - name: autoAccept
+    type: NestedObject
+    description: Optional. The auto-accept setting for this group.
+    properties:
+      - name: autoAcceptProjects
+        type: Array
+        description: 'A list of project ids or project numbers for which you want to enable auto-accept. The auto-accept setting is applied to spokes being created or updated in these projects.'
+        required: true
+        item_type:
+          type: String
+  - name: routeTable
+    type: String
+    description: 'Output only. The name of the route table that corresponds to this group. They use the following form: `projects/{projectNumber}/locations/global/hubs/{hubId}/routeTables/{route_table_id}`'
+    output: true

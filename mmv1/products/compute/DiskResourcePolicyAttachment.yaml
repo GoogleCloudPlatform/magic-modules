@@ -13,6 +13,7 @@
 
 ---
 name: 'DiskResourcePolicyAttachment'
+api_resource_type_kind: Disk
 description: |
   Adds existing resource policies to a disk. You can only add one policy
   which will be applied to this disk for scheduling snapshot creation.

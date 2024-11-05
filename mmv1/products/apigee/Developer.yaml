@@ -1,0 +1,124 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "Developer"
+description: |
+  A `Developer` is an API consumer that can have apps registered in Apigee.
+references:
+  guides:
+    "Creating a developer": "https://cloud.google.com/apigee/docs/api-platform/publish/adding-developers-your-api-product"
+  api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.developers"
+docs:
+base_url: "developers"
+self_link: "{{org_id}}/developers/{{email}}"
+create_url: "{{org_id}}/developers"
+delete_url: "{{org_id}}/developers/{{email}}"
+update_mask: true
+immutable: false
+import_format:
+  - "{{org_id}}/developers/{{email}}"
+  - "{{org_id}}/{{email}}"
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_developer.go.tmpl"
+examples:
+  - name: "apigee_developer_basic"
+    vars:
+      instance_name: "my-instance"
+      developer_email: "john.doe@acme.com"
+    exclude_test: true
+  - name: "apigee_developer_basic_test"
+    primary_resource_id: "apigee_developer"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+    exclude_docs: true
+    skip_vcr: true
+  - name: "apigee_developer_with_attributes"
+    vars:
+      instance_name: "my-instance"
+      developer_email: "john.doe@acme.com"
+    exclude_test: true
+  - name: "apigee_developer_with_attributes_test"
+    primary_resource_id: "apigee_developer"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+    exclude_docs: true
+    skip_vcr: true
+parameters:
+  - name: "orgId"
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee instance,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: "email"
+    type: String
+    description: |
+      Email address of the developer. This value is used to uniquely identify the developer in Apigee hybrid. Note that the email address has to be in lowercase only..
+    required: true
+    immutable: true
+  - name: "firstName"
+    type: String
+    description: |
+      First name of the developer.
+    required: true
+  - name: "lastName"
+    type: String
+    description: |
+      Last name of the developer.
+    required: true
+  - name: "userName"
+    type: String
+    description: |
+      User name of the developer. Not used by Apigee hybrid.
+    required: true
+  - name: "attributes"
+    type: Array
+    description: |
+      Developer attributes (name/value pairs). The custom attribute limit is 18.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: "name"
+          type: String
+          description: |
+            Key of the attribute
+        - name: "value"
+          type: String
+          description: |
+            Value of the attribute
+  - name: "organizatioName"
+    type: String
+    description: |
+      Name of the Apigee organization in which the developer resides.
+    output: true
+  - name: "status"
+    type: String
+    description: |
+      Status of the developer. Valid values are active and inactive.
+    output: true
+  - name: "createdAt"
+    type: String
+    description: |
+      Time at which the developer was created in milliseconds since epoch.
+    output: true
+  - name: "lastModifiedAt"
+    type: String
+    description: |
+      Time at which the developer was last modified in milliseconds since epoch.
+    output: true

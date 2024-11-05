@@ -75,7 +75,7 @@ examples:
       hub_name: 'basic-hub1'
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke'
       vpn_tunnel_2_spoke_name: 'vpn-tunnel-2-spoke'
- # Failing in replaying mode (https://github.com/hashicorp/terraform-provider-google/issues/19592)
+ # Skip due to multiple fine-grained resources
     skip_vcr: true
   - name: 'network_connectivity_spoke_interconnect_attachment_basic'
     primary_resource_id: 'primary'
@@ -85,6 +85,14 @@ examples:
       router_name: 'external-vpn-gateway'
       interconnect_attachment_name: 'partner-interconnect1'
       interconnect_attachment_spoke_name: 'interconnect-attachment-spoke'
+  - name: 'network_connectivity_spoke_linked_producer_vpc_network_basic'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: "net-spoke"
+      global_name: 'test-address'
+      hub_name: "hub-basic"
+      spoke_name: "vpc-spoke"
+      producer_spoke_name: "producer-spoke"
 parameters:
   - name: 'location'
     type: String
@@ -128,6 +136,7 @@ properties:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'uris'
         type: Array
@@ -156,6 +165,7 @@ properties:
       - linked_vpn_tunnels
       - linked_router_appliance_instances
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'uris'
         type: Array
@@ -184,6 +194,7 @@ properties:
       - linked_interconnect_attachments
       - linked_vpn_tunnels
       - linked_vpc_network
+      - linked_producer_vpc_network
     properties:
       - name: 'instances'
         type: Array
@@ -223,6 +234,7 @@ properties:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpn_tunnels
+      - linked_producer_vpc_network
     properties:
       - name: 'uri'
         type: String
@@ -239,6 +251,44 @@ properties:
       - name: 'includeExportRanges'
         type: Array
         description: IP ranges allowed to be included from peering.
+        immutable: true
+        item_type:
+          type: String
+  - name: linkedProducerVpcNetwork
+    type: NestedObject
+    description: Producer VPC network that is associated with the spoke.
+    immutable: true
+    conflicts:
+      - linked_interconnect_attachments
+      - linked_router_appliance_instances
+      - linked_vpn_tunnels
+      - linked_vpc_network
+    properties:
+      - name: network
+        type: String
+        description: The URI of the Service Consumer VPC that the Producer VPC is peered with.
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+      - name: peering
+        type: String
+        description: The name of the VPC peering between the Service Consumer VPC and the Producer VPC (defined in the Tenant project) which is added to the NCC hub. This peering must be in ACTIVE state.
+        required: true
+        immutable: true
+      - name: producerNetwork
+        type: String
+        description: The URI of the Producer VPC.
+        output: true
+        immutable: true
+      - name: includeExportRanges
+        type: Array
+        description: IP ranges allowed to be included from peering.
+        immutable: true
+        item_type:
+          type: String
+      - name: excludeExportRanges
+        type: Array
+        description: IP ranges encompassing the subnets to be excluded from peering.
         immutable: true
         item_type:
           type: String
