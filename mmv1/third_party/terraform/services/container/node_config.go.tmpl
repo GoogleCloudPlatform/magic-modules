@@ -809,10 +809,9 @@ func schemaNodeConfig() *schema.Schema {
 				"local_ssd_encryption_mode": {
 					Type:             schema.TypeString,
 					Optional:         true,
-					Computed:         true,
+					ForceNew:         true,
 					ValidateFunc:     validation.StringInSlice([]string{"LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED", "STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
 					Description:      `LocalSsdEncryptionMode specified the method used for encrypting the local SSDs attached to the node.`,
-					DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED"),
 				},
 			},
 		},

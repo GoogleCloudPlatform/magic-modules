@@ -270,7 +270,7 @@ cluster.
     * `batch_node_count` - (Optional) Number of blue nodes to drain in a batch.
     * `batch_soak_duration` - (Optionial) Soak time after each batch gets drained.
 
-* `local_ssd_encryption_mode` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Possible Local SSD encryption modes:
+* `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
     Accepted values are:
     * `LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED`: LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED is when unspecified local ssd encryption is used. Standard encryption is used.
     * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
