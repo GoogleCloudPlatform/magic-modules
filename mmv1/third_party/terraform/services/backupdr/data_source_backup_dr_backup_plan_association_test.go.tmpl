@@ -83,7 +83,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault" {
 
 resource "google_backup_dr_backup_plan" "foo" {
   location       = "us-central1"
-  backup_plan_id = "bp-test-%{random_suffix}"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
 
