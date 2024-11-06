@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -24,7 +26,7 @@ type googleEphemeralServiceAccountAccessToken struct {
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = "google_test"
+	resp.TypeName = req.ProviderTypeName + "_service_account_token"
 }
 
 type ephemeralServiceAccountAccessTokenModel struct {
