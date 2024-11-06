@@ -89,8 +89,15 @@ resource "google_iam_organizations_policy_binding" "my_org_binding" {
   policy_kind    = "PRINCIPAL_ACCESS_BOUNDARY"
   policy_binding_id = "tf-test-test-org-binding%{random_suffix}"
   policy         = "organizations/%{org_id}/locations/global/principalAccessBoundaryPolicies/${google_iam_principal_access_boundary_policy.pab_policy.principal_access_boundary_policy_id}"
+  annotations    = {"foo": "bar"}
   target {
     principal_set = "//cloudresourcemanager.googleapis.com/organizations/%{org_id}"
+  }
+  condition {
+    description  = "test condition"
+    expression   = "principal.subject == 'al@a.com'"
+    location     = "test location"
+    title        = "test title"
   }
 }
 `, context)

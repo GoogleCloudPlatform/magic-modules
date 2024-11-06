@@ -120,6 +120,7 @@ properties:
         description: |
           Output only. The globally unique ID of the policy to be bound.
         immutable: true
+        output: true
   - name: 'policyKind'
     type: String
     description: |
