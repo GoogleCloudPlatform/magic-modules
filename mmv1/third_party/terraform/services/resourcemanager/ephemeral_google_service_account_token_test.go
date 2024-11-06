@@ -81,13 +81,13 @@ resource "google_service_account_iam_member" "token_creator" {
 // Add a time delay to allow IAM changes to propagate
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "10s"
+  create_duration = "20s"
 }
 
+// Tests default value of lifetime
 ephemeral "google_service_account_token" "token" {
   target_service_account = %q
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
-  lifetime              = "3600s"
   depends_on = [time_sleep.wait_30_seconds]
 }
 `, envvar.GetTestProjectFromEnv(), serviceAccountEmail, serviceAccountId, serviceAccountEmail)
@@ -104,7 +104,7 @@ resource "google_service_account_iam_member" "token_creator" {
 // Add a time delay to allow IAM changes to propagate
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "10s"
+  create_duration = "20s"
 }
 
 ephemeral "google_service_account_token" "token" {
@@ -128,7 +128,7 @@ resource "google_service_account_iam_member" "token_creator" {
 // Add a time delay to allow IAM changes to propagate
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "10s"
+  create_duration = "20s"
 }
 
 ephemeral "google_service_account_token" "token" {

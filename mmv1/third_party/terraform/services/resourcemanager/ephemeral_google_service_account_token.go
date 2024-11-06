@@ -1,13 +1,14 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -42,7 +43,9 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 		Attributes: map[string]schema.Attribute{
 			"target_service_account": schema.StringAttribute{
 				Required: true,
-				// Validators: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
+				Validators: []validator.String{
+					serviceAccountNameValidator{},
+				},
 			},
 			"access_token": schema.StringAttribute{
 				Sensitive: true,
@@ -50,8 +53,11 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 			},
 			"lifetime": schema.StringAttribute{
 				Optional: true,
-				// Validators: verify.ValidateDuration(), // duration <=3600s; TODO: support validateDuration(min,max)
-				// Default:      "3600s",
+				Computed: true,
+				Validators: []validator.String{
+					durationValidator{
+						maxDuration: 3600 * time.Second,
+					}},
 			},
 			"scopes": schema.SetAttribute{
 				Required:    true,
@@ -142,4 +148,86 @@ func StringSet(d basetypes.SetValue) []string {
 		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
 	}
 	return StringSlice
+}
+
+// Define the possible service account name patterns
+var serviceAccountNamePatterns = []string{
+	`^.+@.+\.iam\.gserviceaccount\.com$`,                     // Standard IAM service account
+	`^.+@developer\.gserviceaccount\.com$`,                   // Legacy developer service account
+	`^.+@appspot\.gserviceaccount\.com$`,                     // App Engine service account
+	`^.+@cloudservices\.gserviceaccount\.com$`,               // Google Cloud services service account
+	`^.+@cloudbuild\.gserviceaccount\.com$`,                  // Cloud Build service account
+	`^service-[0-9]+@.+-compute\.iam\.gserviceaccount\.com$`, // Compute Engine service account
+}
+
+// Create a custom validator for service account names
+type serviceAccountNameValidator struct{}
+
+func (v serviceAccountNameValidator) Description(ctx context.Context) string {
+	return "value must be a valid service account email address"
+}
+
+func (v serviceAccountNameValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v serviceAccountNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := req.ConfigValue.ValueString()
+	valid := false
+	for _, pattern := range serviceAccountNamePatterns {
+		if matched, _ := regexp.MatchString(pattern, value); matched {
+			valid = true
+			break
+		}
+	}
+
+	if !valid {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Service Account Name",
+			"Service account name must match one of the expected patterns for Google service accounts",
+		)
+	}
+}
+
+// Create a custom validator for duration
+type durationValidator struct {
+	maxDuration time.Duration
+}
+
+func (v durationValidator) Description(ctx context.Context) string {
+	return fmt.Sprintf("value must be a valid duration string less than or equal to %v", v.maxDuration)
+}
+
+func (v durationValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v durationValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := req.ConfigValue.ValueString()
+	duration, err := time.ParseDuration(value)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Duration Format",
+			"Duration must be a valid duration string (e.g., '3600s', '1h')",
+		)
+		return
+	}
+
+	if duration > v.maxDuration {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Duration Too Long",
+			fmt.Sprintf("Duration must be less than or equal to %v", v.maxDuration),
+		)
+	}
 }
