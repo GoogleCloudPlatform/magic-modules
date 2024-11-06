@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -62,11 +63,16 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 			"scopes": schema.SetAttribute{
 				Required:    true,
 				ElementType: types.StringType,
-				// ValidateFunc is not yet supported on lists or sets.
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(ServiceScopeValidator{}),
+				},
 			},
 			"delegates": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(serviceAccountNameValidator{}),
+				},
 			},
 		},
 	}
@@ -228,6 +234,42 @@ func (v durationValidator) ValidateString(ctx context.Context, req validator.Str
 			req.Path,
 			"Duration Too Long",
 			fmt.Sprintf("Duration must be less than or equal to %v", v.maxDuration),
+		)
+	}
+}
+
+// ServiceScopeValidator validates that a service scope is in canonical form
+var _ validator.String = &ServiceScopeValidator{}
+
+// ServiceScopeValidator validates service scope strings
+type ServiceScopeValidator struct {
+}
+
+// Description returns a plain text description of the validator's behavior
+func (v ServiceScopeValidator) Description(ctx context.Context) string {
+	return "service scope must be in canonical form"
+}
+
+// MarkdownDescription returns a markdown formatted description of the validator's behavior
+func (v ServiceScopeValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+// ValidateString performs the validation
+func (v ServiceScopeValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	canonicalized := tpgresource.CanonicalizeServiceScope(req.ConfigValue.ValueString())
+	if req.ConfigValue.ValueString() != canonicalized {
+		resp.Diagnostics.AddAttributeWarning(
+			req.Path,
+			"Non-canonical service scope",
+			fmt.Sprintf("Service scope %q will be canonicalized to %q",
+				req.ConfigValue.ValueString(),
+				canonicalized,
+			),
 		)
 	}
 }

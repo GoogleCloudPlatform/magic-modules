@@ -13,7 +13,7 @@ func TestEphemeralServiceAccountToken_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "acctoken", serviceAccount)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "basic", serviceAccount)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
@@ -23,7 +23,7 @@ func TestEphemeralServiceAccountToken_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_basic(targetServiceAccountEmail, serviceAccount),
+				Config: testAccEphemeralServiceAccountToken_basic(targetServiceAccountEmail),
 			},
 		},
 	})
@@ -33,8 +33,7 @@ func TestEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "acctoken-delegate", serviceAccount)
-	delegateServiceAccountEmail := acctest.BootstrapServiceAccount(t, "acctoken-delegate-sa", serviceAccount)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "delegates", serviceAccount)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
@@ -44,7 +43,7 @@ func TestEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_withDelegates(targetServiceAccountEmail, delegateServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountToken_withDelegates(targetServiceAccountEmail),
 			},
 		},
 	})
@@ -54,7 +53,7 @@ func TestEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "acctoken-lifetime", serviceAccount)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "lifetime", serviceAccount)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
@@ -64,78 +63,38 @@ func TestEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(targetServiceAccountEmail, serviceAccount),
+				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(targetServiceAccountEmail),
 			},
 		},
 	})
 }
 
-func testAccEphemeralServiceAccountToken_basic(serviceAccountEmail, serviceAccountId string) string {
+func testAccEphemeralServiceAccountToken_basic(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_iam_member" "token_creator" {
-  service_account_id = "projects/%s/serviceAccounts/%s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:%s"
-}
-
-// Add a time delay to allow IAM changes to propagate
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "20s"
-}
-
-// Tests default value of lifetime
 ephemeral "google_service_account_token" "token" {
-  target_service_account = %q
+  target_service_account = "%s"
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
-  depends_on = [time_sleep.wait_30_seconds]
 }
-`, envvar.GetTestProjectFromEnv(), serviceAccountEmail, serviceAccountId, serviceAccountEmail)
+`, serviceAccountEmail)
 }
 
-func testAccEphemeralServiceAccountToken_withDelegates(serviceAccountEmail, delegateEmail string) string {
+func testAccEphemeralServiceAccountToken_withDelegates(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_iam_member" "token_creator" {
-  service_account_id = "projects/%s/serviceAccounts/%s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:%s"
-}
-
-// Add a time delay to allow IAM changes to propagate
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "20s"
-}
-
 ephemeral "google_service_account_token" "token" {
-  target_service_account = %q
-  delegates             = [%q]
+  target_service_account = "%s"
+  delegates             = ["%[1]s"]
   lifetime             = "1200s"
   scopes               = ["https://www.googleapis.com/auth/cloud-platform"]
-  depends_on = [time_sleep.wait_30_seconds]
 }
-`, envvar.GetTestProjectFromEnv(), serviceAccountEmail, delegateEmail, serviceAccountEmail, delegateEmail)
+`, serviceAccountEmail)
 }
 
-func testAccEphemeralServiceAccountToken_withCustomLifetime(serviceAccountEmail, serviceAccountId string) string {
+func testAccEphemeralServiceAccountToken_withCustomLifetime(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_iam_member" "token_creator" {
-  service_account_id = "projects/%s/serviceAccounts/%s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  member             = "serviceAccount:%s"
-}
-
-// Add a time delay to allow IAM changes to propagate
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [google_service_account_iam_member.token_creator]
-  create_duration = "20s"
-}
-
 ephemeral "google_service_account_token" "token" {
-  target_service_account = %q
+  target_service_account = "%s"
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
   lifetime              = "3600s"
-  depends_on = [time_sleep.wait_30_seconds]
 }
-`, envvar.GetTestProjectFromEnv(), serviceAccountEmail, serviceAccountId, serviceAccountEmail)
+`, serviceAccountEmail)
 }
