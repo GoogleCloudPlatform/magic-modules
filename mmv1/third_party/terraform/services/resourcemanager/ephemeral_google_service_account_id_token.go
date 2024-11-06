@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -15,14 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"google.golang.org/api/iamcredentials/v1"
-	"google.golang.org/api/idtoken"
-	"google.golang.org/api/option"
-)
-
-const (
-	userInfoScope = "https://www.googleapis.com/auth/userinfo.email"
 )
 
 var _ ephemeral.EphemeralResource = &googleEphemeralServiceAccountIdToken{}
@@ -50,30 +41,26 @@ type ephemeralServiceAccountIdTokenModel struct {
 func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"target_audience": {
-				Type:     schema.TypeString,
+			"target_audience": schema.StringAttribute{
 				Required: true,
 			},
-			"target_service_account": {
-				Type:     schema.TypeString,
+			"target_service_account": schema.StringAttribute{
 				Optional: true,
 				//ValidateFunc: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
 			},
-			"delegates": {
-				Type:        schema.TypeSet,
+			"delegates": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
 				// Validators: verify.ValidateDuration(), // duration <=3600s; TODO: support validateDuration(min,max)
 				// Default:      "3600s",
 			},
-			"include_email": {
-				Type:     schema.TypeBool,
+			"include_email": schema.BoolAttribute{
 				Optional: true,
-				Default:  basetypes.BoolValue(false),
+				Computed: true,
+				// Default:  basetypes.BoolValue(false),
 				//ValidateFunc: verify.ValidateRegexp("(" + strings.Join(verify.PossibleServiceAccountNames, "|") + ")"),
 			},
-			"id_token": {
-				Type:      schema.TypeString,
+			"id_token": schema.StringAttribute{
 				Computed:  true,
 				Sensitive: true,
 			},
@@ -106,14 +93,7 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	targetAudience := data.TargetAudience.ValueString()
-	creds, err := p.providerConfig.GetCredentials([]string{userInfoScope}, false)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error calling getCredentials()",
-			err.Error(),
-		)
-		return
-	}
+	creds := fwtransport.GetCredentials(ctx, fwmodels.ProviderModel{}, false, &resp.Diagnostics)
 
 	targetServiceAccount := data.TargetServiceAccount.ValueString()
 	// If a target service account is provided, use the API to generate the idToken
@@ -166,4 +146,13 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 
 	data.IdToken = types.StringValue(idToken.AccessToken)
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
+}
+
+func StringSet(d basetypes.SetValue) []string {
+
+	StringSlice := make([]string, 0)
+	for _, v := range d.Elements() {
+		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
+	}
+	return StringSlice
 }
