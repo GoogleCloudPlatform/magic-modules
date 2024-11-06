@@ -28,6 +28,7 @@ self_link: '{{name}}'
 update_url: '{{name}}?serviceAccountName={{service_account_name}}'
 update_verb: 'PATCH'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

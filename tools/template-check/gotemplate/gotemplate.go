@@ -12,18 +12,25 @@ import (
 // Note: this is allowlisted to combat other issues like `=` instead of `==`, but it is possible we
 // need to add more options to this list in the future, like `private`. The main thing we want to
 // prevent is targeting `beta` in version guards, because it mishandles either `ga` or `private`.
+
+// TODO: refactor to be a regex as the permitted formats are more varied under go templates
 var allowedGuards = []string{
 	`{{- if ne $.TargetVersionName "ga" }}`,
-	`{{ if ne $.TargetVersionName "ga" }}`,
 	`{{ if ne $.TargetVersionName "ga" -}}`,
 	`{{- if ne $.TargetVersionName "ga" -}}`,
+	`{{ if ne $.TargetVersionName "ga" }}`,
 	`{{- if eq $.TargetVersionName "ga" }}`,
-	`{{ if eq $.TargetVersionName "ga" }}`,
 	`{{ if eq $.TargetVersionName "ga" -}}`,
 	`{{- if eq $.TargetVersionName "ga" -}}`,
+	`{{ if eq $.TargetVersionName "ga" }}`,
 	"{{- if ne $.TargetVersionName `ga` }}",
-	"{{ if ne $.TargetVersionName `ga` }}",
+	"{{ if ne $.TargetVersionName `ga` -}}",
 	"{{- if ne $.TargetVersionName `ga` -}}",
+	"{{ if ne $.TargetVersionName `ga` }}",
+	"{{- if eq $.TargetVersionName `ga` }}",
+	"{{ if eq $.TargetVersionName `ga` -}}",
+	"{{- if eq $.TargetVersionName `ga` -}}",
+	"{{ if eq $.TargetVersionName `ga` }}",
 }
 
 // Note: this does not account for _every_ possible use of a version guard (for example, those

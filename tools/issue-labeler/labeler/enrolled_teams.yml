@@ -162,7 +162,7 @@ service/compute-instances:
   - google_compute_instance_template
   - google_compute_region_instance_template
   - google_compute_project_metadata.*
-  - google_compute_resource_policy
+  - google_compute_resource_policy.*
 service/compute-interconnect:
   resources:
   - google_compute_interconnect.*
@@ -180,9 +180,9 @@ service/compute-l7-load-balancer:
   - google_compute_backend_service_signed_url_key
   - google_compute_region_backend_service
   - google_compute_global_forwarding_rule
-  - google_compute_forwarding_rule
-  - google_compute_url_map
-  - google_compute_region_url_map
+  - google_compute_forwarding_rule.*
+  - google_compute_url_map.*
+  - google_compute_region_url_map.*
   - google_compute_ssl_policy
   - google_compute_region_ssl_policy
   - google_compute_target_tcp_proxy
@@ -203,7 +203,7 @@ service/compute-managed:
   - google_compute_resize_request.*
 service/compute-nat:
   resources:
-  - google_compute_router_nat
+  - google_compute_router_nat.*
 service/compute-network-peering:
   resources:
   - google_compute_network_peering.*
@@ -250,6 +250,7 @@ service/compute-security-policy:
   - google_compute_network_edge_security_service
   - google_compute_region_security_policy.*
   - google_compute_security_policy.*
+  - google_compute_project_cloud_armor_tier
 service/compute-sole-tenancy:
   resources:
   - google_compute_node_group
@@ -308,6 +309,9 @@ service/deploymentmanager:
   resources:
   - google_deployment_manager_.*
   - google_runtimeconfig_.*
+service/developerconnect:
+  resources:
+  - google_developer_connect_.*
 service/dialogflow:
   resources:
   - google_dialogflow_.*
@@ -519,7 +523,7 @@ service/oslogin:
   - google_os_login_.*
 service/parallelstore:
   resources:
-  - google_parallestore_.*
+  - google_parallelstore_.*
 service/policy-based-routing:
   resources:
   - google_network_connectivity_policy_based_route
@@ -555,6 +559,7 @@ service/redis-cluster:
 service/redis-instance:
   resources:
   - google_redis_instance
+  - google_memorystore_instance
 service/regional-endpoints:
   resources:
   - google_network_connectivity_regional_endpoint
@@ -576,8 +581,7 @@ service/securityposture:
   - google_securityposture_.*
 service/service-networking:
   resources:
-  - google_service_networking_connection
-  - google_service_networking_peered_dns_domain
+  - google_service_networking_.*
 service/servicedirectory:
   resources:
   - google_service_directory_.*
