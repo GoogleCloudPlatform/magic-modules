@@ -28,7 +28,7 @@ id_format: '{{name}}'
 update_verb: 'PATCH'
 exclude_import: true
 async:
-  actions: ['create', 'delete', 'update']
+  actions: ['create', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
