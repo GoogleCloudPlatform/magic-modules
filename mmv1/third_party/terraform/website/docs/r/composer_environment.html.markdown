@@ -363,7 +363,10 @@ resource "google_composer_environment" "example" {
 }
 ```
 
-When using an existing network attachment that is also managed in Terraform, ensure Terraform ignores changes to producer_accept_lists as follows:
+If you specify an existing network attachment that you also manage in Terraform, then Terraform will revert changes
+to the attachment done by Cloud Composer when you apply configuration changes. As a result, the environment will no
+longer use the attachment. To address this problem, make sure that Terraform ignores changes to the
+`producer_accept_lists` parameter of the attachment, as follows:
 
 ```hcl
 resource "google_compute_network_attachment" "example" {
