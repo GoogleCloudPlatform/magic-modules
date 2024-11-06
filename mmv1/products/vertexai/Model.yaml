@@ -15,8 +15,8 @@
 name: Model
 base_url: projects/{{project}}/locations/{{region}}/models
 create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
-delete_url: '{{name}}'
-self_link: '{{name}}'
+delete_url: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
+self_link: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
 
 references:
   guides:
@@ -418,7 +418,10 @@ properties:
       The resource name of the Model to copy. That Model must be in the same Project
   - type: String
     name: 'modelId'
-    ignore_read: true
     immutable: true
+    ignore_read: true
+    # modelId is never returned from the API as a field, but we set its value from API-returned data when it's not
+    # provided by the user as an input
+    default_from_api: true
     description: |
       Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
