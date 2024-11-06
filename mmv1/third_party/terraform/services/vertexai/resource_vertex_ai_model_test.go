@@ -29,6 +29,9 @@ func TestAccVertexAIModel_modelIdNotProvided(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIModel_modelIdNotProvided(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_vertex_ai_model.model", "model_id"),
+				),
 			},
 		},
 	})
@@ -38,7 +41,7 @@ func testAccVertexAIModel_modelIdNotProvided(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/4469245519628878651"
+  source_model = "projects/%{project_name}/locations/us-central1/models/6033738282699849728"
 
   region       = "us-central1"
 }
@@ -48,9 +51,10 @@ resource "google_vertex_ai_model" "model" {
 func TestAccVertexAIModel_modelIdProvided(t *testing.T) {
 	t.Parallel()
 
+	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project_name":  envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"project_name": envvar.GetTestProjectFromEnv(),
+		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -60,6 +64,9 @@ func TestAccVertexAIModel_modelIdProvided(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIModel_modelIdProvided(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "model_id", context["model_id"].(string)),
+				),
 			},
 		},
 	})
@@ -68,9 +75,9 @@ func TestAccVertexAIModel_modelIdProvided(t *testing.T) {
 func testAccVertexAIModel_modelIdProvided(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
-  model_id = "tf-test-test-model%{random_suffix}"
+  model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/4469245519628878651"
+  source_model = "projects/%{project_name}/locations/us-central1/models/6033738282699849728"
 
   region       = "us-central1"
 }
