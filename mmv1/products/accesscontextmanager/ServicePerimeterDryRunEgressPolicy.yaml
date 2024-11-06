@@ -108,6 +108,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
       - name: 'identities'
         type: Array
         description: |
