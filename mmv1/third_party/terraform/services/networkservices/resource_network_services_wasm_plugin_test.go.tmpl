@@ -1,0 +1,178 @@
+package networkservices_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+    "test_project_id" : envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesWasmPlugin_wasmPluginBasicCreate(context),
+			},
+			{
+				ResourceName:            "google_network_services_wasm_plugin.wasm_plugin",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
+			},
+      {
+				Config: testAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(context),
+			},
+			{
+				ResourceName:            "google_network_services_wasm_plugin.wasm_plugin",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+    "test_project_id" : envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesWasmPlugin_wasmPluginBasicCreate(context),
+			},
+			{
+				ResourceName:            "google_network_services_wasm_plugin.wasm_plugin",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
+			},
+      {
+				Config: testAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(context),
+			},
+			{
+				ResourceName:            "google_network_services_wasm_plugin.wasm_plugin",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesWasmPlugin_wasmPluginBasicCreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_services_wasm_plugin" "wasm_plugin" {
+  provider    = google-beta
+  name        = "tf-test-my-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+  location    = "global"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label =  "test_value"
+  }
+  log_config {
+    enable =  true
+    sample_rate = 1
+    min_log_level =  "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description = "v1 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
+  
+}
+`, context)
+}
+
+func testAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_services_wasm_plugin" "wasm_plugin" {
+  provider    = google-beta
+  name        = "tf-test-my-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+  location    = "global"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label2 =  "test_value2"
+  }
+  log_config {
+    enable =  true
+    sample_rate = 0.5
+    min_log_level =  "ERROR"
+  }
+
+  versions {
+    version_name = "v1"
+    description = "v1 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
+  
+}
+`, context)
+}
+
+func testAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_services_wasm_plugin" "wasm_plugin" {
+  provider    = google-beta
+  name        = "tf-test-my-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+  location    = "global"
+
+  main_version_id = "v2"
+
+  labels = {
+    test_label =  "test_value"
+  }
+  log_config {
+    enable =  true
+    sample_rate = 1
+    min_log_level =  "WARN"
+  }
+
+  versions {
+    version_name = "v2"
+    description = "v2 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
+  
+}
+`, context)
+}
