@@ -108,6 +108,7 @@ properties:
         type: NestedObject
         description: |
           Configuration options related to authenticated a user by their phone number.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_phone_number.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean
