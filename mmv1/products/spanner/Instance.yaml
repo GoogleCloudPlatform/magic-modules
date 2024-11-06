@@ -280,6 +280,5 @@ properties:
       if unset or NONE, no default backup schedule will be created for new databases within the instance.
     default_from_api: true
     enum_values:
-      - 'UNSPECIFIED'
       - 'NONE'
       - 'AUTOMATIC'
