@@ -113,7 +113,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
-        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
@@ -169,7 +169,7 @@ properties:
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'operations'

@@ -108,7 +108,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
-        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
@@ -150,7 +150,7 @@ properties:
           then this `EgressTo` rule will authorize access to all resources outside
           the perimeter.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_egress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterEgressPolicyEgressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterEgressPolicyEgressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'externalResources'

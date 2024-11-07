@@ -24,7 +24,7 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return transport_tpg.TestFakeCredentialsPath // Path to a test fixture
 			},
 		},
-		"configuring credentials as a path to a non-existant file is NOT valid": {
+		"configuring credentials as a path to a non-existent file is NOT valid": {
 			ConfigValue: func(t *testing.T) interface{} {
 				return "./this/path/doesnt/exist.json" // Doesn't exist
 			},

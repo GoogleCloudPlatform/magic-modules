@@ -70,7 +70,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
-  - 'hyperDiskIopsUpdateDiffSupress'
+  - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
@@ -313,7 +313,7 @@ properties:
       * projects/{project}/regions/{region}/disks/{disk}
       * zones/{zone}/disks/{disk}
       * regions/{region}/disks/{disk}
-    diff_suppress_func: 'sourceDiskDiffSupress'
+    diff_suppress_func: 'sourceDiskDiffSuppress'
   - name: 'sourceDiskId'
     type: String
     description: |
