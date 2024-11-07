@@ -63,6 +63,7 @@ type FrameworkProviderConfig struct {
 
 	// paths for client setup
 	IAMCredentialsBasePath           string // TODO: This will be removed once we resove the muxing issues
+	IAMBasePath                    string // TODO: This will be removed once we resove the muxing issues
 	{{- range $product := $.Products }}
 	{{ $product.Name }}BasePath string
 	{{- end }}
@@ -106,6 +107,7 @@ func (p *FrameworkProviderConfig) LoadAndValidateFramework(ctx context.Context, 
 	// Setup Base Paths for clients
 	// Generated products
 	p.IAMCredentialsBasePath = data.IamCredentialsCustomEndpoint.ValueString() // TODO: This will be removed once we resove the muxing issues
+	p.IAMBasePath = data.IAMCustomEndpoint.ValueString() // TODO: This will be removed once we resove the muxing issues
 	{{- range $product := $.Products }}
 	p.{{ $product.Name }}BasePath = data.{{ $product.Name }}CustomEndpoint.ValueString()
 	{{- end }}
