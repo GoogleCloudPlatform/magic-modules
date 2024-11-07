@@ -127,16 +127,6 @@ func StringSet(d basetypes.SetValue) []string {
 	return StringSlice
 }
 
-// Define the possible service account name patterns
-var serviceAccountNamePatterns = []string{
-	`^.+@.+\.iam\.gserviceaccount\.com$`,                     // Standard IAM service account
-	`^.+@developer\.gserviceaccount\.com$`,                   // Legacy developer service account
-	`^.+@appspot\.gserviceaccount\.com$`,                     // App Engine service account
-	`^.+@cloudservices\.gserviceaccount\.com$`,               // Google Cloud services service account
-	`^.+@cloudbuild\.gserviceaccount\.com$`,                  // Cloud Build service account
-	`^service-[0-9]+@.+-compute\.iam\.gserviceaccount\.com$`, // Compute Engine service account
-}
-
 // Create a custom validator for service account names
 type ServiceAccountNameValidator struct{}
 
@@ -154,30 +144,31 @@ func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req val
 	}
 
 	value := req.ConfigValue.ValueString()
-	valid := false
-	for _, pattern := range serviceAccountNamePatterns {
-		if matched, _ := regexp.MatchString(pattern, value); matched {
-			valid = true
-			break
-		}
+
+	fmt.Printf("value in ValidateString: %q\n", value)
+	// Check for empty string
+	if value == "" {
+		resp.Diagnostics.AddError("Invalid Service Account Name", "Service account name must not be empty")
+		return
 	}
 
-	if !valid {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
+	// Define the possible service account name patterns
+	serviceAccountNamePattern := `^.+@.+\.iam\.gserviceaccount\.com$` // Standard IAM service account
+
+	if matched, _ := regexp.MatchString(serviceAccountNamePattern, value); !matched {
+		resp.Diagnostics.AddError(
 			"Invalid Service Account Name",
-			"Service account name must match one of the expected patterns for Google service accounts",
+			"Service account name must be in the format: name@project.iam.gserviceaccount.com",
 		)
 	}
 }
 
 // Create a custom validator for duration
 type DurationValidator struct {
-	MaxDuration time.Duration
 }
 
 func (v DurationValidator) Description(ctx context.Context) string {
-	return fmt.Sprintf("value must be a valid duration string less than or equal to %v", v.MaxDuration)
+	return "value must be a valid duration string less than or equal to 1 hour"
 }
 
 func (v DurationValidator) MarkdownDescription(ctx context.Context) string {
@@ -200,11 +191,11 @@ func (v DurationValidator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	if duration > v.MaxDuration {
+	if duration > 3600*time.Second {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Duration Too Long",
-			fmt.Sprintf("Duration must be less than or equal to %v", v.MaxDuration),
+			"Duration must be less than or equal to 1 hour",
 		)
 	}
 }
