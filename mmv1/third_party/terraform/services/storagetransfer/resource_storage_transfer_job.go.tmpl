@@ -198,7 +198,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 							ExactlyOneOf: transferSpecDataSourceKeys,
 							Description:  `An Azure Blob Storage data source.`,
 						},
-						"hdfs_storage_data_source": {
+						"hdfs_data_source": {
 							Type:         schema.TypeList,
 							Optional:     true,
 							MaxItems:     1,
