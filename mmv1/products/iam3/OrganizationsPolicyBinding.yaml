@@ -115,12 +115,6 @@ properties:
           Required. Immutable. The resource name of the policy to be bound.
           The binding parent and policy must belong to the same Organization (or Project).
         immutable: true
-      - name: 'resource'
-        type: String
-        description: |
-          Output only. The globally unique ID of the policy to be bound.
-        immutable: true
-        output: true
   - name: 'policyKind'
     type: String
     description: |
