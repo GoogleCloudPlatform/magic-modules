@@ -18,6 +18,13 @@ func DataSourceAccessContextManagerAccessPolicy() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"scopes": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"title": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -56,6 +63,7 @@ func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta
 		RawURL:    url,
 		UserAgent: userAgent,
 	})
+
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("AccessContextManagerAccessPolicy %q", d.Id()), url)
 	}
@@ -64,17 +72,23 @@ func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta
 		return fmt.Errorf("Error fetching policies: %s", err)
 	}
 
-	for _, policy := range res["accessPolicies"].([]interface{}) {
-		fetched_policy := policy.(map[string]interface{})
+	policies, err := parse_policies_response(res)
+	if err != nil {
+		fmt.Errorf("Error parsing list policies response: %s", err)
+	}
 
-		if fetched_policy["parent"] == d.Get("parent").(string) {
-			name_without_prefix := strings.Split(fetched_policy["name"].(string), "accessPolicies/")[1]
+	// Find the matching policy in the list of policies response. Both the parent and scopes
+	// should match
+	for _, fetched_policy := range policies {
+		scopes_match := compare_scopes(d.Get("scopes").([]interface{}), fetched_policy.Scopes)
+		if fetched_policy.Parent == d.Get("parent").(string) && scopes_match {
+			name_without_prefix := strings.Split(fetched_policy.Name, "accessPolicies/")[1]
 			d.SetId(name_without_prefix)
 			if err := d.Set("name", name_without_prefix); err != nil {
 				return fmt.Errorf("Error setting policy name: %s", err)
 			}
 
-			if err := d.Set("title", fetched_policy["title"].(string)); err != nil {
+			if err := d.Set("title", fetched_policy.Title); err != nil {
 				return fmt.Errorf("Error setting policy title: %s", err)
 			}
 
@@ -83,4 +97,41 @@ func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta
 	}
 
 	return nil
+}
+
+func parse_policies_response(res map[string]interface{}) ([]AccessPolicy, error) {
+	var policies []AccessPolicy
+	for _, res_policy := range res["accessPolicies"].([]interface{}) {
+		parsed_policy := &AccessPolicy{}
+
+		err := tpgresource.Convert(res_policy, parsed_policy)
+		if err != nil {
+			return nil, err
+		}
+
+		policies = append(policies, *parsed_policy)
+	}
+	return policies, nil
+}
+
+// TODO find a better way to compare []interface{} to []string
+func compare_scopes(config_scopes []interface{}, policy_scopes []string) bool {
+	if len(config_scopes) != len(policy_scopes) {
+		return false
+	}
+
+	for i := range config_scopes {
+		if config_scopes[i] != policy_scopes[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+type AccessPolicy struct {
+	Name   string   `json:"name"`
+	Title  string   `json:"title"`
+	Parent string   `json:"parent"`
+	Scopes []string `json:"scopes"`
 }
