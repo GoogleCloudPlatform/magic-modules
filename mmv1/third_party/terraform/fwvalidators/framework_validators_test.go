@@ -1,4 +1,4 @@
-package fwprovider_test
+package fwvalidators_test
 
 import (
 	"context"
