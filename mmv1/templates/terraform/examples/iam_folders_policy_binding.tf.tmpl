@@ -13,6 +13,11 @@ resource "google_folder" "folder" {
   deletion_protection = false
 }
 
+resource "time_sleep" "wait_30s" {
+  depends_on      = [google_folder.folder]
+  create_duration = "30s"
+}
+
 resource "google_iam_folders_policy_binding" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   folder         = google_folder.folder.folder_id
@@ -24,4 +29,5 @@ resource "google_iam_folders_policy_binding" "{{$.PrimaryResourceId}}" {
   target {
     principal_set = "//cloudresourcemanager.googleapis.com/folders/${google_folder.folder.folder_id}"
   }
+  depends_on = [time_sleep.wait_30s]
 }

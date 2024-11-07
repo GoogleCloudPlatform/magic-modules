@@ -21,7 +21,10 @@ func TestAccIAM3FoldersPolicyBinding_iamFoldersPolicyBindingExample_update(t *te
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckIAM3FoldersPolicyBindingDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+				   "time": {},
+		},
+		CheckDestroy: testAccCheckIAM3FoldersPolicyBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIAM3FoldersPolicyBinding_iamFoldersPolicyBindingExample_full(context),
@@ -62,6 +65,11 @@ resource "google_folder" "folder" {
   deletion_protection = false
 }
 
+resource "time_sleep" "wait_30s" {
+  depends_on      = [google_folder.folder]
+  create_duration = "30s"
+}
+
 resource "google_iam_folders_policy_binding" "my-folder-binding" {
   provider = google-beta
   folder         = google_folder.folder.folder_id
@@ -73,6 +81,7 @@ resource "google_iam_folders_policy_binding" "my-folder-binding" {
   target {
     principal_set = "//cloudresourcemanager.googleapis.com/folders/${google_folder.folder.folder_id}"
   }
+  depends_on = [time_sleep.wait_30s]
 }
 `, context)
 }
@@ -94,6 +103,11 @@ resource "google_folder" "folder" {
   deletion_protection = false
 }
 
+resource "time_sleep" "wait_30s" {
+  depends_on      = [google_folder.folder]
+  create_duration = "30s"
+}
+
 resource "google_iam_folders_policy_binding" "my-folder-binding" {
   provider = google-beta
   folder         = google_folder.folder.folder_id
@@ -112,6 +126,7 @@ resource "google_iam_folders_policy_binding" "my-folder-binding" {
     location      = "test location"
     title         = "test title"
   }
+  depends_on = [time_sleep.wait_30s]
 }
 `, context)
 }
