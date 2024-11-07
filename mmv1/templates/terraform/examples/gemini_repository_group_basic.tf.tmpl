@@ -1,14 +1,33 @@
 resource "google_gemini_repository_group" "example" {
   location = "us-central1"
-  coderepositoryindex = google_gemini_code_repository_index.example_cri.code_repository_index_id
-  repository_group_id = "{{index $.Vars "repository_group_id"}}"
+  coderepositoryindex = "cri-1"
+  repository_group_id = "test-repository-group-id1" 
   repositories {
-      resource = "projects/juliamat-sandbox/locations/us-central1/connections/testtest/gitRepositoryLinks/JumiDeluxe-testtest" 
-      branch_pattern = "main"
+    resource = "projects/tf-test-project/locations/us-central1/connections/${google_developer_connect_connection.github_conn.connection_id}/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
+    branch_pattern = "main"
   }
+  labels = {"label1": "value1"}
 }
 
-resource "google_gemini_code_repository_index" "example_cri" {
-  code_repository_index_id = "{{index $.Vars "cri_id"}}"
+resource "google_developer_connect_git_repository_link" "conn" {
+  git_repository_link_id = "{{index $.Vars "git_repository_link_id"}}"
+  parent_connection = google_developer_connect_connection.github_conn.connection_id
+  clone_uri = "https://github.com/CC-R-github-robot/tf-test.git"
   location = "us-central1"
+  annotations = {}
+}
+
+resource "google_developer_connect_connection" "github_conn" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_id"}}"
+  disabled = false
+
+  github_config {
+    github_app = "DEVELOPER_CONNECT"
+    app_installation_id = 54180648
+
+    authorizer_credential {
+      oauth_token_secret_version = "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1"
+    }
+  }
 }

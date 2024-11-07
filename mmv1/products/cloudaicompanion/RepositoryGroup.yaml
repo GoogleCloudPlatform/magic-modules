@@ -27,7 +27,8 @@ examples:
     vars:
       repository_resource: "projects/example-location/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
       repository_group_id: "example-repository-group-id"
-      cri_id: "cri-1"
+      cri_id: "cri-example"
+      connection_id: "example-connection-id"
 autogen_async: true
 async:
   operation:

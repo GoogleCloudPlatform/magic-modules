@@ -1427,6 +1427,165 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	return accessToken, nil
 }
 
+// For bootstrapping Developer Connect git repository link
+const SharedGitRepositoryLinkIdPrefix = "tf-bootstrap-git-repository-"
+
+func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUri, parentConnectionId string) string {
+	gitRepositoryLinkId = SharedGitRepositoryLinkIdPrefix + gitRepositoryLinkId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared git repository link %q", gitRepositoryLinkId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks/%s",
+		config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Headers:   headers,
+	})
+
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Git repository link %q not found, bootstrapping", gitRepositoryLinkId)
+		obj := map[string]interface{}{
+			"clone_uri":   cloneUri,
+			"annotations": map[string]string{},
+		}
+
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks?gitRepositoryLinkId=%s",
+			config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
+		headers := make(http.Header)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping git repository link %q: %s", gitRepositoryLinkId, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for git repository link creation to finish")
+		var opRes map[string]interface{}
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
+			config, res, &opRes, config.Project, "Creating git repository link", config.UserAgent,
+			20*time.Minute)
+		if err != nil {
+			t.Fatalf("Error bootstrapping git repository link  %q: %s", gitRepositoryLinkId, err)
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting git repository link %q: %s", gitRepositoryLinkId, err)
+		}
+	}
+
+	return gitRepositoryLinkId
+}
+
+const SharedConnectionIdPrefix = "tf-bootstrap-developer-connect-connection-"
+
+func BootstrapDeveloperConnection(t *testing.T, connectionId, location, tokenResource string, appInstallationId int) string {
+	connectionId = SharedConnectionIdPrefix + connectionId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared developer connection %q", connectionId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s",
+		config.DeveloperConnectBasePath, config.Project, location, connectionId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Headers:   headers,
+	})
+
+	if err != nil {
+		log.Printf("[DEBUG] Developer connection %q not found, bootstrapping", connectionId)
+		authorizerCredential := map[string]string{
+			"oauth_token_secret_version": tokenResource,
+		}
+		githubConfig := map[string]interface{}{
+			"github_app":            "DEVELOPER_CONNECT",
+			"app_installation_id":   appInstallationId,
+			"authorizer_credential": authorizerCredential,
+		}
+		obj := map[string]interface{}{
+			"disabled":      false,
+			"github_config": githubConfig,
+		}
+
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections?connectionId=%s",
+			config.DeveloperConnectBasePath, config.Project, location, connectionId)
+		headers := make(http.Header)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping developer connection %q: %s", connectionId, err)
+		}
+
+		log.Printf("[DEBUG] Waiting for developer connection creation to finish")
+		var opRes map[string]interface{}
+		err = privateca.PrivatecaOperationWaitTimeWithResponse(
+			config, res, &opRes, config.Project, "Creating developer connection", config.UserAgent,
+			20*time.Minute)
+		if err != nil {
+			t.Fatalf("Error creating developer connection group %q: %s", connectionId, err)
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting developer connection %q: %s", connectionId, err)
+		}
+	}
+
+	return connectionId
+}
+
 const SharedRepositoryGroupPrefix = "tf-bootstrap-repo-group-"
 
 func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, labels, codeRepositoryIndexId, resource string) string {
@@ -1451,8 +1610,7 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 		UserAgent: config.UserAgent,
 		Headers:   headers,
 	})
-
-	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+	if err != nil {
 		log.Printf("[DEBUG] Repository group %q not found, bootstrapping", codeRepositoryIndexId)
 		repositories := [1]interface{}{map[string]string{
 			"resource":       resource,
@@ -1478,36 +1636,31 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 			Timeout:   20 * time.Minute,
 			Headers:   headers,
 		})
-
-		// Error 409 occurs when there is already code repository index creation queued
-		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-			t.Fatalf("Error creating repository group %q: %s", repositoryGroupId, err)
+		if err != nil {
+			t.Fatalf("Error bootstrapping shared repository group %q: %s", repositoryGroupId, err)
 		}
 
 		log.Printf("[DEBUG] Waiting for repository group creation to finish")
 		var opRes map[string]interface{}
 		err = privateca.PrivatecaOperationWaitTimeWithResponse(
 			config, res, &opRes, config.Project, "Creating repository group", config.UserAgent,
-			20*time.Minute)
-
+			4*time.Minute)
 		if err != nil {
-			t.Fatalf("Error bootstrapping repository group %q: %s", repositoryGroupId, err)
+			t.Errorf("Error getting shared repository group %q: %s", repositoryGroupId, err)
 		}
 
-		log.Printf("[DEBUG] Waiting for repository group creation to finish")
-	}
-
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   config.Project,
-		RawURL:    getURL,
-		UserAgent: config.UserAgent,
-		Timeout:   20 * time.Minute,
-		Headers:   headers,
-	})
-	if err != nil {
-		t.Fatalf("Error getting repository group %q: %s", repositoryGroupId, err)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Errorf("Error getting repository group %q: %s", repositoryGroupId, err)
+		}
 	}
 
 	return repositoryGroupId
@@ -1519,10 +1672,8 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 // BootstrapSharedCodeRepositoryIndex returns a persistent code repository index
 // for a test or set of tests.
 //
-// To delete a code repository index, all of the repository groups that use this code repository group
-// must be deleted first. Deletion of code repository index takes a few minutes, and creation of it
-// takes about half an hour.
-// By default there is a set quota for maximum of one code repository index per project.
+// Deletion of code repository index takes a few minutes, and creation of it
+// currently takes about half an hour.
 // That is the reason to use the shared code repository indexes for test resources.
 const SharedCodeRepositoryIndexPrefix = "tf-bootstrap-cri-"
 
@@ -1572,9 +1723,7 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 			Timeout:   90 * time.Minute,
 			Headers:   headers,
 		})
-
-		// Error 409 occurs when there is already code repository index creation queued
-		if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+		if err != nil {
 			t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
 		}
 
@@ -1588,28 +1737,28 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 			t.Fatalf("Error bootstrapping code repository index %q: %s", codeRepositoryIndexId, err)
 		}
 
-		log.Printf("[DEBUG] Waiting for code repository index creation to finish")
-	}
-
-	for {
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   config.Project,
-			RawURL:    getURL,
-			UserAgent: config.UserAgent,
-			Timeout:   90 * time.Minute,
-			Headers:   headers,
-		})
-		if err != nil {
-			t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+		for {
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    getURL,
+				UserAgent: config.UserAgent,
+				Timeout:   90 * time.Minute,
+				Headers:   headers,
+			})
+			if err != nil {
+				t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+			}
+			if res["state"] == "CREATING" {
+				time.Sleep(1 * time.Minute)
+			} else {
+				log.Printf("[DEBUG] Waiting for code repository index to change state from \"CREATING\" finished")
+				break
+			}
 		}
-		if res["state"] == "CREATING" {
-			time.Sleep(1 * time.Minute)
-		} else {
-			log.Printf("[DEBUG] Waiting for code repository index to change state from \"CREATING\" finished")
-			break
-		}
+	} else if err != nil {
+		t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
 	}
 
 	return codeRepositoryIndexId

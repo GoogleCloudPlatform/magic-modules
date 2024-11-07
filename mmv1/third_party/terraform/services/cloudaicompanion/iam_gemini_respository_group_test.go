@@ -13,8 +13,10 @@ import (
 func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
 	location := "us-central1"
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
-	resourcePath := "projects/juliamat-sandbox/locations/us-central1/connections/testtest/gitRepositoryLinks/JumiDeluxe-testtest" // TODO: Change
-	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId, resourcePath)
+	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
+	gitRepositoryLinkId := acctest.BootstrapGitRepository(t, "basic", location, "https://github.com/CC-R-github-robot/tf-test.git", developerConnectionId)
+	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId,
+		"projects/"+envvar.GetTestProjectFromEnv()+"/locations/"+location+"/connections/"+developerConnectionId+"/gitRepositoryLinks/"+gitRepositoryLinkId)
 	context := map[string]interface{}{
 		"random_suffix":            acctest.RandString(t, 10),
 		"role":                     "roles/cloudaicompanion.repositoryGroupsUser",
@@ -54,8 +56,10 @@ func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
 func TestAccGeminiRepositoryGroupIamMemberGenerated(t *testing.T) {
 	location := "us-central1"
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
-	resourcePath := "projects/juliamat-sandbox/locations/us-central1/connections/testtest/gitRepositoryLinks/JumiDeluxe-testtest" // TODO: Change
-	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId, resourcePath)
+	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
+	gitRepositoryLinkId := acctest.BootstrapGitRepository(t, "basic", location, "https://github.com/CC-R-github-robot/tf-test.git", developerConnectionId)
+	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId,
+		"projects/"+envvar.GetTestProjectFromEnv()+"/locations/"+location+"/connections/"+developerConnectionId+"/gitRepositoryLinks/"+gitRepositoryLinkId)
 	context := map[string]interface{}{
 		"random_suffix":            acctest.RandString(t, 10),
 		"role":                     "roles/cloudaicompanion.repositoryGroupsUser",
@@ -86,8 +90,10 @@ func TestAccGeminiRepositoryGroupIamMemberGenerated(t *testing.T) {
 func TestAccGeminiRepositoryGroupIamPolicyGenerated(t *testing.T) {
 	location := "us-central1"
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
-	resourcePath := "projects/juliamat-sandbox/locations/us-central1/connections/testtest/gitRepositoryLinks/JumiDeluxe-testtest" // TODO: Change
-	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId, resourcePath)
+	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
+	gitRepositoryLinkId := acctest.BootstrapGitRepository(t, "basic", location, "https://github.com/CC-R-github-robot/tf-test.git", developerConnectionId)
+	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId,
+		"projects/"+envvar.GetTestProjectFromEnv()+"/locations/"+location+"/connections/"+developerConnectionId+"/gitRepositoryLinks/"+gitRepositoryLinkId)
 	context := map[string]interface{}{
 		"random_suffix":            acctest.RandString(t, 10),
 		"role":                     "roles/cloudaicompanion.repositoryGroupsUser",
