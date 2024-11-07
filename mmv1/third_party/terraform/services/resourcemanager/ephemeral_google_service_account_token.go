@@ -45,7 +45,7 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 			"target_service_account": schema.StringAttribute{
 				Required: true,
 				Validators: []validator.String{
-					serviceAccountNameValidator{},
+					ServiceAccountNameValidator{},
 				},
 			},
 			"access_token": schema.StringAttribute{
@@ -56,9 +56,8 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 				Optional: true,
 				Computed: true,
 				Validators: []validator.String{
-					durationValidator{
-						maxDuration: 3600 * time.Second,
-					}},
+					DurationValidator{},
+				},
 			},
 			"scopes": schema.SetAttribute{
 				Required:    true,
@@ -71,7 +70,7 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.Set{
-					setvalidator.ValueStringsAre(serviceAccountNameValidator{}),
+					setvalidator.ValueStringsAre(ServiceAccountNameValidator{}),
 				},
 			},
 		},
@@ -167,22 +166,30 @@ var serviceAccountNamePatterns = []string{
 }
 
 // Create a custom validator for service account names
-type serviceAccountNameValidator struct{}
+type ServiceAccountNameValidator struct{}
 
-func (v serviceAccountNameValidator) Description(ctx context.Context) string {
+func (v ServiceAccountNameValidator) Description(ctx context.Context) string {
 	return "value must be a valid service account email address"
 }
 
-func (v serviceAccountNameValidator) MarkdownDescription(ctx context.Context) string {
+func (v ServiceAccountNameValidator) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v serviceAccountNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
 
 	value := req.ConfigValue.ValueString()
+
+	fmt.Printf("value in ValidateString: %q\n", value)
+	// Check for empty string
+	if value == "" {
+		resp.Diagnostics.AddError("Invalid Service Account Name", "Service account name must not be empty")
+		return
+	}
+
 	valid := false
 	for _, pattern := range serviceAccountNamePatterns {
 		if matched, _ := regexp.MatchString(pattern, value); matched {
@@ -192,8 +199,7 @@ func (v serviceAccountNameValidator) ValidateString(ctx context.Context, req val
 	}
 
 	if !valid {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
+		resp.Diagnostics.AddError(
 			"Invalid Service Account Name",
 			"Service account name must match one of the expected patterns for Google service accounts",
 		)
@@ -201,19 +207,18 @@ func (v serviceAccountNameValidator) ValidateString(ctx context.Context, req val
 }
 
 // Create a custom validator for duration
-type durationValidator struct {
-	maxDuration time.Duration
+type DurationValidator struct {
 }
 
-func (v durationValidator) Description(ctx context.Context) string {
-	return fmt.Sprintf("value must be a valid duration string less than or equal to %v", v.maxDuration)
+func (v DurationValidator) Description(ctx context.Context) string {
+	return "value must be a valid duration string less than or equal to 1 hour"
 }
 
-func (v durationValidator) MarkdownDescription(ctx context.Context) string {
+func (v DurationValidator) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v durationValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v DurationValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
@@ -229,11 +234,11 @@ func (v durationValidator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	if duration > v.maxDuration {
+	if duration > 3600*time.Second {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Duration Too Long",
-			fmt.Sprintf("Duration must be less than or equal to %v", v.maxDuration),
+			"Duration must be less than or equal to 1 hour",
 		)
 	}
 }
