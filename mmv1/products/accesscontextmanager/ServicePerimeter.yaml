@@ -69,6 +69,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
@@ -256,6 +257,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'identities'
                   type: Array
                   description: |
@@ -376,6 +378,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'
@@ -564,6 +567,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'identities'
                   type: Array
                   description: |
@@ -681,6 +685,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'
