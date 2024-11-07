@@ -206,6 +206,28 @@ The parameters the function receives are:
 - `d`: Terraform resource data. Use `d.Get("field_name")` to get a field's current value.
 - `meta`: Can be cast to a Config object (which can make API calls) using `meta.(*transport_tpg.Config)`
 
+### Custom retry handling
+
+```yaml
+error_retry_predicates:
+  - 'transport_tpg.IamMemberMissing'
+
+error_abort_predicates:
+  - 'transport_tpg.Is429QuotaError'
+```
+
+Use `error_retry_predicates` or `error_abort_predicates` functions to retry or abort when encountering certain error responses. By default, errors are retried using [this list](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/transport/error_retry_predicates.go#L23) of retry predicates. `error_retry_predicates` can be used to make more errors retryable, while `error_abort_predicates` can be used to prevent errors from being retried.
+
+Both functions use the following signature:
+
+```go
+func (err error) (bool, string) {}
+```
+
+The function takes an error and returns:
+- `bool`: whether the error should be retried/aborted
+- `string`: a reason that will be logged
+
 ## Replace entire CRUD methods
 
 ```yaml
