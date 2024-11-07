@@ -125,8 +125,6 @@ func dataSourceGoogleCloudBackupDrBackupRead(d *schema.ResourceData, meta interf
     id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}backup_vault_id{{"}}"}}/dataSources/{{"{{"}}data_source_id{{"}}"}}/backups")
     d.SetId(id)
     d.Set("name", id)
-    fmt.Println("name: ", id)
-    fmt.Println("structure: ", d)
 
     return nil
 }

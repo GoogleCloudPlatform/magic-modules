@@ -16,7 +16,7 @@ func TestAccDataSourceGoogleCloudBackupDRBackup_basic(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	location := "us-central1"
 	backupVaultId := "bv-test"
-	dataSourceId := "2d063854b4b6ee53d43b5ee1e473e55ebb782ca4"
+	dataSourceId := "ds-test"
 	
 	name :=	fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups", project, location, backupVaultId, dataSourceId)
 

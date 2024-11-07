@@ -272,3 +272,13 @@ properties:
       - 'STANDARD'
       - 'ENTERPRISE'
       - 'ENTERPRISE_PLUS'
+  - name: 'defaultBackupScheduleType'
+    type: Enum
+    description: |
+      Controls the default backup behavior for new databases within the instance.
+      Note that `AUTOMATIC` is not permitted for free instances, as backups and backup schedules are not allowed for free instances.
+      if unset or NONE, no default backup schedule will be created for new databases within the instance.
+    default_from_api: true
+    enum_values:
+      - 'NONE'
+      - 'AUTOMATIC'

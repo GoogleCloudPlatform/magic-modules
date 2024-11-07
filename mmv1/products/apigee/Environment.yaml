@@ -114,13 +114,13 @@ properties:
     description: |
       Display name of the environment.
     required: false
-    immutable: true
+    immutable: false
   - name: 'description'
     type: String
     description: |
       Description of the environment.
     required: false
-    immutable: true
+    immutable: false
   - name: 'deploymentType'
     type: Enum
     description: |

@@ -37,6 +37,7 @@ update_verb: 'PATCH'
 update_mask: true
 mutex: 'monitoring/project/{{project}}/service/{{service}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20
