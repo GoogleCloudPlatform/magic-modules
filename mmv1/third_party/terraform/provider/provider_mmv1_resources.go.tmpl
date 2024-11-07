@@ -35,6 +35,9 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
+	"google_backup_dr_backup_plan_association":			backupdr.DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
+	"google_backup_dr_backup_plan":						backupdr.DataSourceGoogleCloudBackupDRBackupPlan(),
+	"google_backup_dr_data_source":						backupdr.DataSourceGoogleCloudBackupDRDataSource(),
 	{{- end }}
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
@@ -206,6 +209,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_service_accounts":                          resourcemanager.DataSourceGoogleServiceAccounts(),
 	"google_site_verification_token":                   siteverification.DataSourceSiteVerificationToken(),
 	"google_sourcerepo_repository":                     sourcerepo.DataSourceGoogleSourceRepoRepository(),
+	"google_spanner_database":                          spanner.DataSourceSpannerDatabase(),
 	"google_spanner_instance":                          spanner.DataSourceSpannerInstance(),
 	"google_sql_ca_certs":                              sql.DataSourceGoogleSQLCaCerts(),
 	"google_sql_tiers":                                 sql.DataSourceGoogleSQLTiers(),
@@ -304,6 +308,7 @@ var generatedResources = map[string]*schema.Resource{
 var handwrittenResources = map[string]*schema.Resource{
 	// ####### START handwritten resources ###########
 	"google_app_engine_application":                appengine.ResourceAppEngineApplication(),
+	"google_apigee_api":                            apigee.ResourceApigeeApi(),
 	"google_apigee_sharedflow":                     apigee.ResourceApigeeSharedFlow(),
 	"google_apigee_sharedflow_deployment":          apigee.ResourceApigeeSharedFlowDeployment(),
 	"google_apigee_flowhook":                       apigee.ResourceApigeeFlowhook(),

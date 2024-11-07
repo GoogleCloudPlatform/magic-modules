@@ -367,6 +367,7 @@ resource "google_spanner_instance" "basic" {
   display_name = "%s-dname"
   num_nodes    = 1
   edition      = "ENTERPRISE"
+  default_backup_schedule_type = "NONE"
 }
 `, name, name)
 }
@@ -460,6 +461,7 @@ resource "google_spanner_instance" "basic" {
     }
   }
   edition      = "ENTERPRISE"
+  default_backup_schedule_type = "AUTOMATIC"
 }
 `, name, name, maxProcessingUnits, minProcessingUnits, cupUtilizationPercent, storageUtilizationPercent)
 }
