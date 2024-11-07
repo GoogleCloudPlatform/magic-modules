@@ -30,12 +30,12 @@ type GoogleProviderConfigPluginFrameworkDataSource struct {
 }
 
 // GoogleProviderConfigPluginFrameworkModel describes the data source and matches the schema. Its fields match those in a Config struct (google/transport/config.go) but uses a different type system.
-//    - In the original Config struct old SDK/Go primitives types are used, e.g. `string`
-//    - Here in the GoogleProviderConfigPluginFrameworkModel struct we need to use  the terraform-plugin-framework/types type system, e.g. `types.String`
-//        - This is needed because the PF type system is 'baked into' how we define schemas. The schema will expect a nullable type.
-//        - See terraform-plugin-framework/datasource/schema#StringAttribute's CustomType: https://pkg.go.dev/github.com/hashicorp/terraform-plugin-framework@v1.7.0/datasource/schema#StringAttribute
-//    - Due to the different type systems of Config versus GoogleProviderConfigPluginFrameworkModel struct, we need to convert from primitive types to terraform-plugin-framework/types when we populate
-//      GoogleProviderConfigPluginFrameworkModel structs with data in this data source's Read method.
+//   - In the original Config struct old SDK/Go primitives types are used, e.g. `string`
+//   - Here in the GoogleProviderConfigPluginFrameworkModel struct we need to use  the terraform-plugin-framework/types type system, e.g. `types.String`
+//   - This is needed because the PF type system is 'baked into' how we define schemas. The schema will expect a nullable type.
+//   - See terraform-plugin-framework/datasource/schema#StringAttribute's CustomType: https://pkg.go.dev/github.com/hashicorp/terraform-plugin-framework@v1.7.0/datasource/schema#StringAttribute
+//   - Due to the different type systems of Config versus GoogleProviderConfigPluginFrameworkModel struct, we need to convert from primitive types to terraform-plugin-framework/types when we populate
+//     GoogleProviderConfigPluginFrameworkModel structs with data in this data source's Read method.
 type GoogleProviderConfigPluginFrameworkModel struct {
 	Credentials                        types.String `tfsdk:"credentials"`
 	AccessToken                        types.String `tfsdk:"access_token"`
