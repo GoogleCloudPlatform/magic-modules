@@ -2,6 +2,7 @@ package accesscontextmanager
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -114,19 +115,14 @@ func parse_policies_response(res map[string]interface{}) ([]AccessPolicy, error)
 	return policies, nil
 }
 
-// TODO find a better way to compare []interface{} to []string
 func compare_scopes(config_scopes []interface{}, policy_scopes []string) bool {
-	if len(config_scopes) != len(policy_scopes) {
-		return false
+	// converts []interface{} to []string
+	var config_scopes_slice []string
+	for _, scope := range config_scopes {
+		config_scopes_slice = append(config_scopes_slice, scope.(string))
 	}
 
-	for i := range config_scopes {
-		if config_scopes[i] != policy_scopes[i] {
-			return false
-		}
-	}
-
-	return true
+	return slices.Equal(config_scopes_slice, policy_scopes)
 }
 
 type AccessPolicy struct {
