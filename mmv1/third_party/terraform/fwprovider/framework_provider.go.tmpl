@@ -234,7 +234,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                         "send_after": schema.StringAttribute{
                             Optional: true,
                             Validators: []validator.String{
-                                NonNegativeDurationValidator(),
+                                fwvalidators.NonNegativeDurationValidator(),
                             },
                         },
                         "enable_batching": schema.BoolAttribute{
