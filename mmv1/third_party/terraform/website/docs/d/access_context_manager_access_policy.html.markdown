@@ -6,7 +6,7 @@ description: |-
 
 # google_access_context_manager_access_policy
 
-Use this data source to look the `name` or `title` of an existing AccessPolicy.
+Get information about an Access Context Manager AccessPolicy.
 
 ## Example Usage
 
