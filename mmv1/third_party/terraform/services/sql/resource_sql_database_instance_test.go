@@ -971,7 +971,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(t *test
 func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing.T) {
 	t.Parallel()
 
-	testId := "test-psc-auto-con"
+	testId := "test-psc-auto-con" + acctest.RandString(t, 10)
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
 	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
@@ -1000,7 +1000,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing
 func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRemovePscAutoConnections(t *testing.T) {
 	t.Parallel()
 
-	testId := "test-psc-auto-con"
+	testId := "test-psc-auto-con" + acctest.RandString(t, 10)
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
 	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
@@ -3482,7 +3482,7 @@ func testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanc
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
-  region              = "us-east7"
+  region              = "us-west2"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
@@ -3511,7 +3511,7 @@ data "google_compute_network" "testnetwork" {
 
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
-  region              = "us-east7"
+  region              = "us-west2"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
