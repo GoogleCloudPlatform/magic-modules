@@ -75,8 +75,8 @@ examples:
       bucket_name: 'transcoder-job'
     ignore_read_extra:
       - 'state'
-      - 'end_time'
       - 'start_time'
+      - 'end_time'
 parameters:
   - name: 'location'
     type: String
