@@ -29,12 +29,14 @@ type GoogleProviderConfigPluginFrameworkDataSource struct {
 	providerConfig *transport_tpg.Config
 }
 
+// GoogleProviderConfigPluginFrameworkModel describes the data source and matches the schema. Its fields match those in a Config struct (google/transport/config.go) but uses a different type system.
+//    - In the original Config struct old SDK/Go primitives types are used, e.g. `string`
+//    - Here in the GoogleProviderConfigPluginFrameworkModel struct we need to use  the terraform-plugin-framework/types type system, e.g. `types.String`
+//        - This is needed because the PF type system is 'baked into' how we define schemas. The schema will expect a nullable type.
+//        - See terraform-plugin-framework/datasource/schema#StringAttribute's CustomType: https://pkg.go.dev/github.com/hashicorp/terraform-plugin-framework@v1.7.0/datasource/schema#StringAttribute
+//    - Due to the different type systems of Config versus GoogleProviderConfigPluginFrameworkModel struct, we need to convert from primitive types to terraform-plugin-framework/types when we populate
+//      GoogleProviderConfigPluginFrameworkModel structs with data in this data source's Read method.
 type GoogleProviderConfigPluginFrameworkModel struct {
-	// Currently this reflects the FrameworkProviderConfig struct and ProviderModel in google/fwmodels/provider_model.go
-	// which means it uses the plugin-framework type system where values can be explicitly Null or Unknown.
-	//
-	// As part of future muxing fixes/refactoring we'll change this struct to reflect structs used in the SDK code, and will move to
-	// using the SDK type system.
 	Credentials                        types.String `tfsdk:"credentials"`
 	AccessToken                        types.String `tfsdk:"access_token"`
 	ImpersonateServiceAccount          types.String `tfsdk:"impersonate_service_account"`
@@ -203,6 +205,8 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 
 	// Copy all values from the provider config into this data source
+	//    - The 'meta' from the provider configuration process uses Go primitive types (e.g. `string`) but this data source needs to use the plugin-framework type system due to being PF-implemented
+	//    - As a result we have to make conversions between type systems in the value assignments below
 	data.Credentials = types.StringValue(d.providerConfig.Credentials)
 	data.AccessToken = types.StringValue(d.providerConfig.AccessToken)
 	data.ImpersonateServiceAccount = types.StringValue(d.providerConfig.ImpersonateServiceAccount)
