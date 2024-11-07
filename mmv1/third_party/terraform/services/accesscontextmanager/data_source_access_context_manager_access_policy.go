@@ -64,19 +64,20 @@ func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta
 		return fmt.Errorf("Error fetching policies: %s", err)
 	}
 
-	target_policy_parent := d.Get("parent").(string)
-	fetchedPolicies := res["accessPolicies"].([]interface{})
-	for _, policy := range fetchedPolicies {
-		fetched_policy_parent := policy.(map[string]interface{})["parent"]
+	for _, policy := range res["accessPolicies"].([]interface{}) {
+		fetched_policy := policy.(map[string]interface{})
 
-		if fetched_policy_parent == target_policy_parent {
-			fetched_policy_name := policy.(map[string]interface{})["name"].(string)
-
-			name_without_prefix := strings.Split(fetched_policy_name, "accessPolicies/")[1]
+		if fetched_policy["parent"] == d.Get("parent").(string) {
+			name_without_prefix := strings.Split(fetched_policy["name"].(string), "accessPolicies/")[1]
 			d.SetId(name_without_prefix)
 			if err := d.Set("name", name_without_prefix); err != nil {
-				return fmt.Errorf("Error setting name: %s", err)
+				return fmt.Errorf("Error setting policy name: %s", err)
 			}
+
+			if err := d.Set("title", fetched_policy["title"].(string)); err != nil {
+				return fmt.Errorf("Error setting policy title: %s", err)
+			}
+
 			return nil
 		}
 	}
