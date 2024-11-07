@@ -1,5 +1,5 @@
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-  if v == nil {
+	if v == nil {
 		return map[string]interface{}{}, nil
 	}
 	m := make(map[string]interface{})
