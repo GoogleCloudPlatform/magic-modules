@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
+	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -50,7 +50,7 @@ func TestFrameworkProvider_CredentialsValidator(t *testing.T) {
 				Diagnostics: diag.Diagnostics{},
 			}
 
-			cv := fwprovider.CredentialsValidator()
+			cv := fwvalidators.CredentialsValidator()
 
 			// Act
 			cv.ValidateString(context.Background(), req, &resp)
