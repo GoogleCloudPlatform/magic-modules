@@ -2,13 +2,14 @@ package accesscontextmanager
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceAccessContextManagerAccessPolicyMap() *schema.Resource {
+func DataSourceAccessContextManagerAccessPolicy() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAccessContextManagerAccessPolicyRead,
 		Schema: map[string]*schema.Schema{
@@ -29,14 +30,14 @@ func DataSourceAccessContextManagerAccessPolicyMap() *schema.Resource {
 	}
 }
 
-func dataSourceAccessContextManagerAccessPolicyMapRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAccessContextManagerAccessPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{AccessContextManagerBasePath}}accessPolicies")
+	url, err := tpgresource.ReplaceVars(d, config, "{{AccessContextManagerBasePath}}accessPolicies?parent={{parent}}")
 	if err != nil {
 		return err
 	}
@@ -59,16 +60,25 @@ func dataSourceAccessContextManagerAccessPolicyMapRead(d *schema.ResourceData, m
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("AccessContextManagerAccessPolicy %q", d.Id()), url)
 	}
 
-	// if err := d.Set("name", res["name"]); err != nil {
-	// 	return fmt.Errorf("Error setting name: %s", err)
-	// }
-	// if err := d.Set("account_email", res["accountEmail"]); err != nil {
-	// 	return fmt.Errorf("Error setting account_email: %s", err)
-	// }
-	// d.SetId(res["name"].(string))
+	if res == nil {
+		return fmt.Errorf("Error fetching policies: %s", err)
+	}
 
-	if err := d.Set("name", "foobar"); err != nil && res != nil {
-		return fmt.Errorf("Error setting name: %s", err)
+	target_policy_parent := d.Get("parent").(string)
+	fetchedPolicies := res["accessPolicies"].([]interface{})
+	for _, policy := range fetchedPolicies {
+		fetched_policy_parent := policy.(map[string]interface{})["parent"]
+
+		if fetched_policy_parent == target_policy_parent {
+			fetched_policy_name := policy.(map[string]interface{})["name"].(string)
+
+			name_without_prefix := strings.Split(fetched_policy_name, "accessPolicies/")[1]
+			d.SetId(name_without_prefix)
+			if err := d.Set("name", name_without_prefix); err != nil {
+				return fmt.Errorf("Error setting name: %s", err)
+			}
+			return nil
+		}
 	}
 
 	return nil
