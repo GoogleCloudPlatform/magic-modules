@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -7,8 +5,10 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
@@ -25,7 +25,7 @@ type googleEphemeralServiceAccountKey struct {
 }
 
 func (p *googleEphemeralServiceAccountKey) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = "google_service_account_key"
+	resp.TypeName = req.ProviderTypeName + "_service_account_key"
 }
 
 type ephemeralServiceAccountKeyModel struct {
@@ -41,11 +41,20 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required: true,
-				// TODO: Implement custom validation for ServiceAccountKeyNameRegex
-			},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(verify.ServiceAccountKeyNameRegex),
+						"must match regex: "+verify.ServiceAccountKeyNameRegex,
+					),
+				}},
 			"public_key_type": schema.StringAttribute{
 				Optional: true,
-				// TODO: Implement validation for allowed values
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"TYPE_X509_PEM_FILE",
+						"TYPE_RAW",
+					),
+				},
 			},
 			"project": schema.StringAttribute{
 				Optional: true,
@@ -99,7 +108,6 @@ func (p *googleEphemeralServiceAccountKey) Open(ctx context.Context, req ephemer
 		publicKeyType = "TYPE_X509_PEM_FILE"
 	}
 
-	// Confirm the service account key exists
 	sak, err := p.providerConfig.NewIamClient(p.providerConfig.UserAgent).Projects.ServiceAccounts.Keys.Get(keyName).PublicKeyType(publicKeyType).Do()
 	if err != nil {
 		resp.Diagnostics.AddError(
