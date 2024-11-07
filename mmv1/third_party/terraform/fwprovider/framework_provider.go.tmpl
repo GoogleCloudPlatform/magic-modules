@@ -15,6 +15,7 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/schema/validator"
     "github.com/hashicorp/terraform-plugin-framework/types"
 
+    "github.com/hashicorp/terraform-provider-google/google/fwvalidators"
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -77,8 +78,8 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("access_token"),
                     }...),
-                    CredentialsValidator(),
-                    NonEmptyStringValidator(),
+                    fwvalidators.CredentialsValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "access_token": schema.StringAttribute{
@@ -87,13 +88,13 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("credentials"),
                     }...),
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "impersonate_service_account": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "impersonate_service_account_delegates": schema.ListAttribute{
@@ -103,25 +104,25 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
             "project": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "billing_project": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "region": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "zone": schema.StringAttribute{
                 Optional: true,
                 Validators: []validator.String{
-                    NonEmptyStringValidator(),
+                    fwvalidators.NonEmptyStringValidator(),
                 },
             },
             "scopes": schema.ListAttribute{
