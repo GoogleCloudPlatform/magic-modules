@@ -15,13 +15,13 @@ resource "google_folder" "folder" {
 
 resource "google_iam_folders_policy_binding" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  folder         = google_folder.folder.id
+  folder         = google_folder.folder.folder_id
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
   policy_kind    = "PRINCIPAL_ACCESS_BOUNDARY"
   policy_binding_id = "{{index $.Vars "folder_binding_id"}}"
-  policy         = "${google_folder.folder.id}/locations/global/principalAccessBoundaryPolicies/${google_iam_principal_access_boundary_policy.pab_policy.principal_access_boundary_policy_id}"
+  policy         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/principalAccessBoundaryPolicies/${google_iam_principal_access_boundary_policy.pab_policy.principal_access_boundary_policy_id}"
   target {
-    principal_set = "//cloudresourcemanager.googleapis.com/${google_folder.folder.id}"
+    principal_set = "//cloudresourcemanager.googleapis.com/folders/${google_folder.folder.folder_id}"
   }
 }
