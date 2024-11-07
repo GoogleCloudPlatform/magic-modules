@@ -1,5 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -11,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"google.golang.org/api/iamcredentials/v1"
 )
@@ -26,7 +29,7 @@ type googleEphemeralServiceAccountJwt struct {
 }
 
 func (p *googleEphemeralServiceAccountJwt) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = "google_service_account_jwt"
+	resp.TypeName = req.ProviderTypeName + "_service_account_jwt"
 }
 
 type ephemeralServiceAccountJwtModel struct {
@@ -126,4 +129,13 @@ func (p *googleEphemeralServiceAccountJwt) Open(ctx context.Context, req ephemer
 	data.Jwt = types.StringValue(jwtResponse.SignedJwt)
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
+}
+
+func StringSet(d basetypes.SetValue) []string {
+
+	StringSlice := make([]string, 0)
+	for _, v := range d.Elements() {
+		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
+	}
+	return StringSlice
 }
