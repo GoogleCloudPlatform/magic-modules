@@ -103,6 +103,7 @@ properties:
         type: NestedObject
         description: |
           Configuration options related to authenticating a user by their email address.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_email.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean

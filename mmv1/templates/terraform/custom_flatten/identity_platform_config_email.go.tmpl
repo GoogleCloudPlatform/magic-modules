@@ -12,8 +12,8 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 			transformed["enabled"] = original["enabled"]
 		}
 		
-		if original["testPhoneNumbers"] != nil {
-			transformed["test_phone_numbers"] = original["testPhoneNumbers"]
+		if original["passwordRequired"] != nil {
+			transformed["password_required"] = original["passwordRequired"]
 		}
 	}
 
