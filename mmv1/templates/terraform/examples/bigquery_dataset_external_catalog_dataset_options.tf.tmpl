@@ -1,0 +1,15 @@
+resource "google_bigquery_dataset" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  dataset_id    = "{{index $.Vars "dataset_id"}}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "US"
+
+  external_catalog_dataset_options {
+    parameters = {
+      "dataset_owner" = "test_dataset_owner"
+    }
+    default_storage_location_uri = "gs://test_dataset/tables"
+  }
+}
