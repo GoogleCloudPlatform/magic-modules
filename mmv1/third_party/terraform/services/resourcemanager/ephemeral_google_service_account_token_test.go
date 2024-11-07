@@ -225,7 +225,7 @@ func TestServiceScopeValidator(t *testing.T) {
 	}
 }
 
-func TestEphemeralServiceAccountToken_basic(t *testing.T) {
+func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -245,7 +245,7 @@ func TestEphemeralServiceAccountToken_basic(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountToken_withDelegates(t *testing.T) {
+func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -265,7 +265,7 @@ func TestEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
+func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)

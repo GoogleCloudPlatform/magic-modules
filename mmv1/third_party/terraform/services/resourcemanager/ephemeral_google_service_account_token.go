@@ -155,16 +155,6 @@ func StringSet(d basetypes.SetValue) []string {
 	return StringSlice
 }
 
-// Define the possible service account name patterns
-var serviceAccountNamePatterns = []string{
-	`^.+@.+\.iam\.gserviceaccount\.com$`,                     // Standard IAM service account
-	`^.+@developer\.gserviceaccount\.com$`,                   // Legacy developer service account
-	`^.+@appspot\.gserviceaccount\.com$`,                     // App Engine service account
-	`^.+@cloudservices\.gserviceaccount\.com$`,               // Google Cloud services service account
-	`^.+@cloudbuild\.gserviceaccount\.com$`,                  // Cloud Build service account
-	`^service-[0-9]+@.+-compute\.iam\.gserviceaccount\.com$`, // Compute Engine service account
-}
-
 // Create a custom validator for service account names
 type ServiceAccountNameValidator struct{}
 
@@ -190,18 +180,13 @@ func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req val
 		return
 	}
 
-	valid := false
-	for _, pattern := range serviceAccountNamePatterns {
-		if matched, _ := regexp.MatchString(pattern, value); matched {
-			valid = true
-			break
-		}
-	}
+	// Define the possible service account name patterns
+	serviceAccountNamePattern := `^.+@.+\.iam\.gserviceaccount\.com$` // Standard IAM service account
 
-	if !valid {
+	if matched, _ := regexp.MatchString(serviceAccountNamePattern, value); !matched {
 		resp.Diagnostics.AddError(
 			"Invalid Service Account Name",
-			"Service account name must match one of the expected patterns for Google service accounts",
+			"Service account name must be in the format: name@project.iam.gserviceaccount.com",
 		)
 	}
 }
