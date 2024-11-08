@@ -82,6 +82,26 @@ func TestServiceAccountNameValidator(t *testing.T) {
 			value:       types.StringValue("test@test.iam.gserviceaccount.com"),
 			expectError: false,
 		},
+		"developer service account": {
+			value:       types.StringValue("test@developer.gserviceaccount.com"),
+			expectError: false,
+		},
+		"app engine service account": {
+			value:       types.StringValue("test@appspot.gserviceaccount.com"),
+			expectError: false,
+		},
+		"cloud services service account": {
+			value:       types.StringValue("test@cloudservices.gserviceaccount.com"),
+			expectError: false,
+		},
+		"cloud build service account": {
+			value:       types.StringValue("test@cloudbuild.gserviceaccount.com"),
+			expectError: false,
+		},
+		"compute engine service account": {
+			value:       types.StringValue("service-123456@compute-system.iam.gserviceaccount.com"),
+			expectError: false,
+		},
 		"incorrect service account name": {
 			value:         types.StringValue("test"),
 			expectError:   true,
