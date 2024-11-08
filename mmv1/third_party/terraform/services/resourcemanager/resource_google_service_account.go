@@ -3,6 +3,7 @@ package resourcemanager
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -347,6 +348,12 @@ func ResourceServiceAccountCustomDiffFunc(diff tpgresource.TerraformResourceDiff
 	return nil
 }
 func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+		log.Printf("[WARN] The UniverseDomain is set to %q. Skipping resourceServiceAccountCustomDiff", config.UniverseDomain)
+		return nil
+	}
+
 	// separate func to allow unit testing
 	return ResourceServiceAccountCustomDiffFunc(diff)
 }
