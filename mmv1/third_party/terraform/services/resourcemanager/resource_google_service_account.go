@@ -31,7 +31,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			resourceGoogleServiceAccountPlanOutputs,
+			resourceServiceAccountCustomDiff,
 		),
 		Schema: map[string]*schema.Schema{
 			"email": {
@@ -325,22 +325,28 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceGoogleServiceAccountPlanOutputs(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if d.Get("email") != "" || d.Get("member") != "" {
+func ResourceServiceAccountCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if !tpgresource.IsNewResource(diff) && !diff.HasChange("account_id") {
 		return nil
 	}
 
-	aid := d.Get("account_id")
-	proj := d.Get("project")
-	if aid != "" && proj != "" {
-		email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
-		if err := d.SetNew("email", email); err != nil {
-			return fmt.Errorf("error setting email: %s", err)
-		}
-		if err := d.SetNew("member", "serviceAccount:"+email); err != nil {
-			return fmt.Errorf("error setting member: %s", err)
-		}
+	aid := diff.Get("account_id")
+	proj := diff.Get("project")
+	if aid == "" || proj == "" {
+		return nil
+	}
+
+	email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
+	if err := diff.SetNew("email", email); err != nil {
+		return fmt.Errorf("error setting email: %s", err)
+	}
+	if err := diff.SetNew("member", "serviceAccount:"+email); err != nil {
+		return fmt.Errorf("error setting member: %s", err)
 	}
 
 	return nil
+}
+func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// separate func to allow unit testing
+	return ResourceServiceAccountCustomDiffFunc(diff)
 }
