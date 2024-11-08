@@ -6,10 +6,12 @@ resource "google_tpu_v2_queued_resource" "{{$.PrimaryResourceId}}" {
 
   tpu {
     node_spec {
-      parent = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1-c"
+      parent  = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1-c"
       node_id = "{{index $.Vars "tpu_name"}}"
       node {
-        runtime_version = "tpu-vm-tf-2.13.0"
+        runtime_version  = "tpu-vm-tf-2.13.0"
+        accelerator_type = "v2-8"
+        description      = "Text description of the TPU."
       }
     }
   }

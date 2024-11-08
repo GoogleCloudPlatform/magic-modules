@@ -87,23 +87,22 @@ properties:
             - name: 'parent'
               description: |
                 The parent resource name.
+              required: true
             - name: 'nodeId'
-              immutable: true
               description: |
                 Unqualified node identifier used to identify the node in the project once provisioned.
             - name: 'node'
               type: NestedObject
               description: |
                 The node.
+              required: true
               properties:
                 - name: 'runtimeVersion'
                   required: true
-                  immutable: true
                   description: |
                     Runtime version for the TPU.
                 - name: 'acceleratorType'
-                  immutable: true
-                  default_value: 'v2-8'
+                  default_from_api: true
                   description: |
                     TPU accelerator type for the TPU. If not specified, this defaults to 'v2-8'.
                 - name: 'description'
