@@ -302,33 +302,6 @@ ephemeral "google_service_account_token" "token" {
 
 func testAccEphemeralServiceAccountToken_withDelegates(initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_iam_binding" "sa2_to_sa3" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[4]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[3]s"
-  ]
-  depends_on = [google_service_account_iam_binding.sa1_to_sa2]
-}
-
-resource "google_service_account_iam_binding" "sa1_to_sa2" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[3]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[2]s"
-  ]
-  depends_on = [google_service_account_iam_binding.terraform_to_delegate1]
-}
-
-resource "google_service_account_iam_binding" "terraform_to_delegate1" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[2]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[1]s"
-  ]
-  depends_on = [google_project_iam_member.terraform_sa_token_creator]
-}
-
 resource "google_project_iam_member" "terraform_sa_token_creator" {
   project = "%[5]s"
   role    = "roles/iam.serviceAccountTokenCreator"
@@ -337,8 +310,6 @@ resource "google_project_iam_member" "terraform_sa_token_creator" {
 
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [
-    google_service_account_iam_binding.sa1_to_sa2,
-    google_service_account_iam_binding.sa2_to_sa3,
     google_project_iam_member.terraform_sa_token_creator,
   ]
   create_duration = "60s"
@@ -361,33 +332,6 @@ ephemeral "google_service_account_token" "test" {
 
 func testAccEphemeralServiceAccountToken_delegatesSetup(initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project string) string {
 	return fmt.Sprintf(`
-resource "google_service_account_iam_binding" "sa2_to_sa3" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[4]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[3]s"
-  ]
-  depends_on = [google_service_account_iam_binding.sa1_to_sa2]
-}
-
-resource "google_service_account_iam_binding" "sa1_to_sa2" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[3]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[2]s"
-  ]
-  depends_on = [google_service_account_iam_binding.terraform_to_delegate1]
-}
-
-resource "google_service_account_iam_binding" "terraform_to_delegate1" {
-  service_account_id = "projects/%[5]s/serviceAccounts/%[2]s"
-  role               = "roles/iam.serviceAccountTokenCreator"
-  members            = [
-    "serviceAccount:%[1]s"
-  ]
-  depends_on = [google_project_iam_member.terraform_sa_token_creator]
-}
-
 resource "google_project_iam_member" "terraform_sa_token_creator" {
   project = "%[5]s"
   role    = "roles/iam.serviceAccountTokenCreator"
@@ -396,8 +340,6 @@ resource "google_project_iam_member" "terraform_sa_token_creator" {
 
 resource "time_sleep" "wait_60_seconds" {
   depends_on = [
-    google_service_account_iam_binding.sa1_to_sa2,
-    google_service_account_iam_binding.sa2_to_sa3,
     google_project_iam_member.terraform_sa_token_creator,
   ]
   create_duration = "60s"
