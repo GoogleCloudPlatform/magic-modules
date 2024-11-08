@@ -179,10 +179,12 @@ func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req val
 
 // Create a custom validator for duration
 type DurationValidator struct {
+	MinDuration time.Duration
+	MaxDuration time.Duration
 }
 
 func (v DurationValidator) Description(ctx context.Context) string {
-	return "value must be a valid duration string less than or equal to 1 hour"
+	return fmt.Sprintf("value must be a valid duration string between %v and %v", v.MinDuration, v.MaxDuration)
 }
 
 func (v DurationValidator) MarkdownDescription(ctx context.Context) string {
@@ -205,11 +207,19 @@ func (v DurationValidator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	if duration > 3600*time.Second {
+	if v.MinDuration != 0 && duration < v.MinDuration {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Duration Too Short",
+			fmt.Sprintf("Duration must be greater than or equal to %v", v.MinDuration),
+		)
+	}
+
+	if v.MaxDuration != 0 && duration > v.MaxDuration {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
 			"Duration Too Long",
-			"Duration must be less than or equal to 1 hour",
+			fmt.Sprintf("Duration must be less than or equal to %v", v.MaxDuration),
 		)
 	}
 }
