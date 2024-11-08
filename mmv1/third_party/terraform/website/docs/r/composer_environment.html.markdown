@@ -1460,9 +1460,10 @@ The following arguments are supported:
   `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?(-build\.[0-9]+)?)`
   Example: composer-3-airflow-2.6.3-build.4
 
-  **Important**: In-place upgrade is only available between minor or patch versions of Apache Airflow.
-  For example, you can upgrade your environment from `composer-3-airflow-2.6.x` to `composer-3-airflow-2.9.x`.
-  In-place upgrade from other major versions to Composer 3 is not yet supported.
+  **Important**: In-place upgrade in Composer 3 is only available between minor or patch versions of Apache Airflow.
+  You can also upgrade to a different Airflow build within the same version by specifying the build number.
+  For example, you can upgrade your environment from composer-3-airflow-2.6.x to composer-3-airflow-2.9.x,
+  or from composer-3-airflow-2.9.3-build.4 to composer-3-airflow-2.9.3-build.5.
 
 * `cloud_data_lineage_integration` -
   (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
