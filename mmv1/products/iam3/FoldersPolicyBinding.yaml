@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  post_delete: 'templates/terraform/post_delete/sleep.go.tmpl'
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -56,6 +58,7 @@ examples:
       display_name: 'test folder binding'
       folder_binding_id: 'test-folder-binding'
       folder_name: 'test folder'
+    external_providers: ["time"]
 parameters:
   - name: 'folder'
     type: String
@@ -93,6 +96,7 @@ properties:
     type: String
     description: |
       Optional. The etag for the policy binding. If this is provided on update, it must match the server's etag.
+    output: true
   - name: 'displayName'
     type: String
     description: |
@@ -113,12 +117,6 @@ properties:
           Required. Immutable. The resource name of the policy to be bound.
           The binding parent and policy must belong to the same Organization (or Project).
         immutable: true
-      - name: 'resource'
-        type: String
-        description: |
-          Output only. The globally unique ID of the policy to be bound.
-        immutable: true
-        output: true
   - name: 'policyKind'
     type: String
     description: |
