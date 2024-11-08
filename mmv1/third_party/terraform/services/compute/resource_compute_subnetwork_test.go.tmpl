@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -93,6 +95,36 @@ func TestAccComputeSubnetwork_basic(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeSubnetwork_numericId(t *testing.T) {
+	t.Parallel()
+
+	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	projectId := envvar.GetTestProjectFromEnv()
+	subnetworkId := fmt.Sprintf("projects/%s/regions/us-central1/subnetworks/%s", projectId, subnetworkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSubnetwork_numericId(cnName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("google_compute_subnetwork.numeric_id_test", "numeric_id", regexp.MustCompile("^\\d{16,48}$")),
+					resource.TestCheckResourceAttr("google_compute_subnetwork.numeric_id_test", "id", subnetworkId),
+				),
+			},
+			{
+				ResourceName:      "google_compute_subnetwork.numeric_id_test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 
 func TestAccComputeSubnetwork_update(t *testing.T) {
 	t.Parallel()
@@ -544,6 +576,23 @@ resource "google_compute_subnetwork" "network-with-private-google-access" {
   private_ip_google_access = true
 }
 `, cnName, subnetwork1Name, subnetwork2Name, subnetwork3Name)
+}
+
+func testAccComputeSubnetwork_numericId(cnName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "test" {
+  name                     = "%s"
+  auto_create_subnetworks  = false
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "numeric_id_test" {
+  name          = "%s"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test.self_link
+}
+`, cnName, subnetworkName)
 }
 
 func testAccComputeSubnetwork_update1(cnName, cidrRange, subnetworkName string) string {

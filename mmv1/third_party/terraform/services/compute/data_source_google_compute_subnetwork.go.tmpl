@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -28,6 +29,10 @@ func DataSourceGoogleComputeSubnetwork() *schema.Resource {
 				Computed: true,
 			},
 			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"numeric_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -98,6 +103,10 @@ func dataSourceGoogleComputeSubnetworkRead(d *schema.ResourceData, meta interfac
 	subnetwork, err := config.NewComputeClient(userAgent).Subnetworks.Get(project, region, name).Do()
 	if err != nil {
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Subnetwork Not Found : %s", name), id)
+	}
+
+	if err := d.Set("numeric_id", strconv.Itoa(int(subnetwork.Id))); err != nil {
+		return fmt.Errorf("Error setting numeric_id: %s", err)
 	}
 
 	if err := d.Set("ip_cidr_range", subnetwork.IpCidrRange); err != nil {
