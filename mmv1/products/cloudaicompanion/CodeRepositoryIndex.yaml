@@ -14,6 +14,7 @@
 ---
 name: CodeRepositoryIndex
 description: The resource for managing Code Repository Indexes for Gemini Code Assist.
+min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
@@ -22,6 +23,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 examples:
   - name: "gemini_code_repository_index_basic"
+    min_version: 'beta'
     primary_resource_id: "example"
     vars:
       cri_id: "cri-1"
@@ -51,12 +53,14 @@ parameters:
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    min_version: 'beta'
     immutable: true
     url_param_only: true
     required: true
   - name: codeRepositoryIndexId
     type: String
     description: Required. Id of the requesting object
+    min_version: 'beta'
     immutable: true
     url_param_only: true
     required: true
@@ -64,6 +68,7 @@ properties:
   - name: updateTime
     type: String
     description: Output only. Update time stamp
+    min_version: 'beta'
     output: true
   - name: state
     type: String
@@ -75,22 +80,27 @@ properties:
       ACTIVE
       DELETING
       SUSPENDED
+    min_version: 'beta'
     output: true
   - name: labels
     type: KeyValueLabels
     description: Optional. Labels as key value pairs
+    min_version: 'beta'
   - name: kmsKey
     type: String
     description: |-
       Optional. Immutable. Customer-managed encryption key name, in the format
       projects/*/locations/*/keyRings/*/cryptoKeys/*.
+    min_version: 'beta'
     immutable: true
   - name: name
     type: String
     description: Immutable. Identifier. name of resource
+    min_version: 'beta'
     output: true
     immutable: true
   - name: createTime
     type: String
     description: Output only. Create time stamp
+    min_version: 'beta'
     output: true

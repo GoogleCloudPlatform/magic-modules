@@ -14,6 +14,7 @@
 ---
 name: RepositoryGroup
 description: The resource for managing Repository Groups for Gemini Code Assist.
+min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups/{{repository_group_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups?repositoryGroupId={{repository_group_id}}
@@ -22,6 +23,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups/{{repository_group_id}}
 examples:
   - name: "gemini_repository_group_basic"
+    min_version: 'beta'
     primary_resource_id: "example"
     primary_resource_name: '"cri-1", fmt.Sprintf("tf-test-my-repo-group%s", context["random_suffix"])'
     vars:
@@ -52,6 +54,7 @@ async:
     message: message
   include_project: false
 iam_policy:
+  min_version: 'beta'
   parent_resource_attribute: 'repository_group_id'
   method_name_separator: ':'
   fetch_iam_policy_verb: 'GET'
@@ -65,18 +68,21 @@ parameters:
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    min_version: 'beta'
     immutable: true
     url_param_only: true
     required: true
   - name: coderepositoryindex
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    min_version: 'beta'
     immutable: true
     url_param_only: true
     required: true
   - name: repositoryGroupId
     type: String
     description: Required. Id of the requesting object
+    min_version: 'beta'
     immutable: true
     url_param_only: true
     required: true
@@ -84,6 +90,7 @@ properties:
   - name: repositories
     type: Array
     description: Required. List of repositories to group
+    min_version: 'beta'
     required: true
     item_type:
       type: NestedObject
@@ -93,26 +100,32 @@ properties:
           description: |-
             Required. The DeveloperConnect repository full resource name, relative resource name
             or resource URL to be indexed.
+          min_version: 'beta'
           required: true
         - name: branchPattern
           type: String
           description: |-
             Required. The Git branch pattern used for indexing in RE2 syntax.
             See https://github.com/google/re2/wiki/syntax for syntax.
+          min_version: 'beta'
           required: true
   - name: name
     type: String
     description: Immutable. Identifier. name of resource
+    min_version: 'beta'
     output: true
     immutable: true
   - name: createTime
     type: String
     description: Output only. Create time stamp
+    min_version: 'beta'
     output: true
   - name: updateTime
     type: String
     description: Output only. Update time stamp
+    min_version: 'beta'
     output: true
   - name: labels
     type: KeyValueLabels
     description: Optional. Labels as key value pairs
+    min_version: 'beta'

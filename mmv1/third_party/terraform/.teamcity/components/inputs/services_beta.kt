@@ -419,7 +419,7 @@ var ServicesListBeta = mapOf(
     "gemini" to mapOf(
         "name" to "gemini",
         "displayName" to "Gemini",
-        "path" to "./google/services/cloudaicompanion"
+        "path" to "./google-beta/services/cloudaicompanion"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",

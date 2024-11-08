@@ -20,7 +20,7 @@ func TestAccGeminiRepositoryGroup_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiRepositoryGroup_basic(context),
@@ -47,6 +47,7 @@ func TestAccGeminiRepositoryGroup_update(t *testing.T) {
 func testAccGeminiRepositoryGroup_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group" "example" {
+  provider = google-beta
   location = "us-central1"
   coderepositoryindex = "%{code_repository_index_id}"
   repository_group_id = "test-repository-group-id1" 
@@ -58,6 +59,7 @@ resource "google_gemini_repository_group" "example" {
 }
 
 resource "google_developer_connect_git_repository_link" "conn" {
+  provider = google-beta
   git_repository_link_id = "my_repository"
   parent_connection = google_developer_connect_connection.github_conn.connection_id
   clone_uri = "https://github.com/CC-R-github-robot/tf-test.git"
@@ -66,6 +68,7 @@ resource "google_developer_connect_git_repository_link" "conn" {
 }
 
 resource "google_developer_connect_connection" "github_conn" {
+  provider = google-beta
   location = "us-central1"
   connection_id = "tf-test-cloudaicompanion1"
   disabled = false
@@ -84,6 +87,7 @@ resource "google_developer_connect_connection" "github_conn" {
 func testAccGeminiRepositoryGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group" "example" {
+  provider = google-beta
   location = "us-central1"
   coderepositoryindex = "%{code_repository_index_id}"
   repository_group_id = "test-repository-group-id2"
@@ -95,6 +99,7 @@ resource "google_gemini_repository_group" "example" {
 }
 
 resource "google_developer_connect_git_repository_link" "conn" {
+  provider = google-beta
   git_repository_link_id = "my_repository"
   parent_connection = google_developer_connect_connection.github_conn.connection_id
   clone_uri = "https://github.com/CC-R-github-robot/tf-test.git"
@@ -103,6 +108,7 @@ resource "google_developer_connect_git_repository_link" "conn" {
 }
 
 resource "google_developer_connect_connection" "github_conn" {
+  provider = google-beta
   location = "us-central1"
   connection_id = "tf-test-cloudaicompanion2"
   disabled = false

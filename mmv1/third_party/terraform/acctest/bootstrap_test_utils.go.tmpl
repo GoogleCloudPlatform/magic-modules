@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	transport_tpg_beta "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
@@ -1444,7 +1445,7 @@ func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUr
 		config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
 
 	headers := make(http.Header)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	_, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -1453,7 +1454,7 @@ func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUr
 		Headers:   headers,
 	})
 
-	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+	if err != nil && transport_tpg_beta.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Git repository link %q not found, bootstrapping", gitRepositoryLinkId)
 		obj := map[string]interface{}{
 			"clone_uri":   cloneUri,
@@ -1463,7 +1464,7 @@ func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUr
 		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks?gitRepositoryLinkId=%s",
 			config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
 		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1486,7 +1487,7 @@ func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUr
 			t.Fatalf("Error bootstrapping git repository link  %q: %s", gitRepositoryLinkId, err)
 		}
 
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err = transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
 			Project:   config.Project,
@@ -1519,7 +1520,7 @@ func BootstrapDeveloperConnection(t *testing.T, connectionId, location, tokenRes
 		config.DeveloperConnectBasePath, config.Project, location, connectionId)
 
 	headers := make(http.Header)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	_, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -1546,7 +1547,7 @@ func BootstrapDeveloperConnection(t *testing.T, connectionId, location, tokenRes
 		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections?connectionId=%s",
 			config.DeveloperConnectBasePath, config.Project, location, connectionId)
 		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1569,7 +1570,7 @@ func BootstrapDeveloperConnection(t *testing.T, connectionId, location, tokenRes
 			t.Fatalf("Error creating developer connection group %q: %s", connectionId, err)
 		}
 
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err = transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
 			Project:   config.Project,
@@ -1602,7 +1603,7 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 		config.GeminiBasePath, config.Project, location, codeRepositoryIndexId, repositoryGroupId)
 
 	headers := make(http.Header)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	_, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -1626,7 +1627,7 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 		}
 
 		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1649,7 +1650,7 @@ func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, la
 			t.Errorf("Error getting shared repository group %q: %s", repositoryGroupId, err)
 		}
 
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		_, err = transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
 			Project:   config.Project,
@@ -1690,7 +1691,7 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s", config.GeminiBasePath, config.Project, location, codeRepositoryIndexId)
 
 	headers := make(http.Header)
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	_, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -1701,7 +1702,7 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 	})
 
 	// CRI not found responds with 404 not found
-	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+	if err != nil && transport_tpg_beta.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] Code repository index %q not found, bootstrapping", codeRepositoryIndexId)
 		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes?codeRepositoryIndexId=%s", config.GeminiBasePath, config.Project, location, codeRepositoryIndexId)
 		obj := make(map[string]interface{})
@@ -1713,7 +1714,7 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 		}
 
 		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1738,7 +1739,7 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 		}
 
 		for {
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			res, err := transport_tpg_beta.SendRequest(transport_tpg_beta.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
 				Project:   config.Project,

@@ -18,7 +18,7 @@ func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiCodeRepositoryIndex_basic(context),
@@ -45,18 +45,22 @@ func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 func testAccGeminiCodeRepositoryIndex_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
+  provider = google-beta
   labels = {"label1": "value1"}
   location = "us-central1"
   code_repository_index_id = "test-cri-index-example"
+  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)
 }
 func testAccGeminiCodeRepositoryIndex_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
+  provider = google-beta
   labels = {"label1": "value1", "label2": "value2"}
   location = "us-central1"
   code_repository_index_id = "test-cri-index-example"
+  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)
 }

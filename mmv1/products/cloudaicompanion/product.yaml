@@ -18,4 +18,4 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
   - base_url: https://cloudaicompanion.googleapis.com/v1/
-    name: ga
+    name: 'beta'
