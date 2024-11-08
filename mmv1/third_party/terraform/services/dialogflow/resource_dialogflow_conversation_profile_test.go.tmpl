@@ -41,7 +41,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull1(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_convesation_profile.full_profile",
+				ResourceName:            "google_dialogflow_convesation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -50,7 +50,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull2(context),
 			},
 			{
-				ResourceName:            "google_dialogflow_convesation_profile.full_profile",
+				ResourceName:            "google_dialogflow_convesation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -92,7 +92,7 @@ return acctest.Nprintf(`
 		depends_on = [google_project_iam_member.agent_create]
 	}
 	
-	resource "google_dialogflow_conversation_profile" "agent_conversation_profile" {
+	resource "google_dialogflow_conversation_profile" "profile" {
 		depends_on    = [google_dialogflow_agent.agent]
 		project       = google_project.agent_project.project_id
 		display_name  = "tf-test-conversation-profile-%{random_suffix}"
@@ -136,7 +136,7 @@ return acctest.Nprintf(`
 		depends_on = [google_project_iam_member.agent_create]
 	}
 	
-	resource "google_dialogflow_conversation_profile" "agent_conversation_profile" {
+	resource "google_dialogflow_conversation_profile" "profile" {
 		depends_on    = [google_dialogflow_agent.agent]
 		project       = google_project.agent_project.project_id
 		display_name  = "tf-test-conversation-profile-%{random_suffix}"
