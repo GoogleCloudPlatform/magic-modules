@@ -45,6 +45,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
 }
 
 func TestAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
