@@ -13,7 +13,7 @@
 
 ---
 name: 'FoldersPolicyBinding'
-description: Description
+description: A policy binding to a folder
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
