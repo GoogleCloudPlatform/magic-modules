@@ -403,6 +403,7 @@ properties:
     enum_values:
       - 'IPV4_ONLY'
       - 'IPV4_IPV6'
+      - 'IPV6_ONLY'
   - name: 'ipv6AccessType'
     type: Enum
     description: |
