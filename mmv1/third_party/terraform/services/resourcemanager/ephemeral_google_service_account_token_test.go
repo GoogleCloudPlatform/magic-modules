@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -93,47 +94,90 @@ func TestDurationValidator(t *testing.T) {
 
 	type testCase struct {
 		value         types.String
+		minDuration   time.Duration
+		maxDuration   time.Duration
 		expectError   bool
 		errorContains string
 	}
 
 	tests := map[string]testCase{
-		"valid duration under max": {
+		"valid duration between min and max": {
 			value:       types.StringValue("1800s"),
+			minDuration: time.Hour / 2,
+			maxDuration: time.Hour,
+			expectError: false,
+		},
+		"valid duration at min": {
+			value:       types.StringValue("1800s"),
+			minDuration: 30 * time.Minute,
+			maxDuration: time.Hour,
 			expectError: false,
 		},
 		"valid duration at max": {
 			value:       types.StringValue("3600s"),
+			minDuration: time.Hour / 2,
+			maxDuration: time.Hour,
 			expectError: false,
 		},
 		"valid duration with different unit": {
 			value:       types.StringValue("1h"),
+			minDuration: 30 * time.Minute,
+			maxDuration: 2 * time.Hour,
 			expectError: false,
+		},
+		"duration below min": {
+			value:         types.StringValue("900s"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
+			expectError:   true,
+			errorContains: "Duration Too Short",
 		},
 		"duration exceeds max - seconds": {
 			value:         types.StringValue("7200s"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
 			expectError:   true,
 			errorContains: "Duration Too Long",
 		},
 		"duration exceeds max - minutes": {
 			value:         types.StringValue("120m"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
 			expectError:   true,
 			errorContains: "Duration Too Long",
 		},
 		"duration exceeds max - hours": {
 			value:         types.StringValue("2h"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
 			expectError:   true,
 			errorContains: "Duration Too Long",
 		},
 		"invalid duration format": {
 			value:         types.StringValue("invalid"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
 			expectError:   true,
 			errorContains: "Invalid Duration Format",
 		},
 		"empty string": {
 			value:         types.StringValue(""),
+			minDuration:   30 * time.Minute,
+			maxDuration:   time.Hour,
 			expectError:   true,
 			errorContains: "Invalid Duration Format",
+		},
+		"null value": {
+			value:       types.StringNull(),
+			minDuration: 30 * time.Minute,
+			maxDuration: time.Hour,
+			expectError: false,
+		},
+		"unknown value": {
+			value:       types.StringUnknown(),
+			minDuration: 30 * time.Minute,
+			maxDuration: time.Hour,
+			expectError: false,
 		},
 	}
 
@@ -148,7 +192,10 @@ func TestDurationValidator(t *testing.T) {
 				ConfigValue:    test.value,
 			}
 			response := validator.StringResponse{}
-			validator := resourcemanager.DurationValidator{}
+			validator := resourcemanager.DurationValidator{
+				MinDuration: test.minDuration,
+				MaxDuration: test.maxDuration,
+			}
 
 			validator.ValidateString(context.Background(), request, &response)
 
