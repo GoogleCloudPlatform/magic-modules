@@ -84,7 +84,7 @@ func TestServiceAccountNameValidator(t *testing.T) {
 		"incorrect service account name": {
 			value:         types.StringValue("test"),
 			expectError:   true,
-			errorContains: "Service account name must be in the format: name@project.iam.gserviceaccount.com",
+			errorContains: "Service account name must match one of the expected patterns for Google service accounts",
 		},
 		"empty string": {
 			value:         types.StringValue(""),
