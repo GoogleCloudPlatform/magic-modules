@@ -1,4 +1,5 @@
 package gemini_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"os"
@@ -10,8 +11,6 @@ import (
 )
 
 func TestAccGeminiRepositoryGroup_update(t *testing.T) {
-	t.Parallel()
-
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", "us-central1", "", "")
 	context := map[string]interface{}{
 		"project_id":               os.Getenv("GOOGLE_PROJECT"),
@@ -50,7 +49,7 @@ resource "google_gemini_repository_group" "example" {
   provider = google-beta
   location = "us-central1"
   coderepositoryindex = "%{code_repository_index_id}"
-  repository_group_id = "test-repository-group-id1" 
+  repository_group_id = "test-repository-group-id" 
   repositories {
     resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion1/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
@@ -90,7 +89,7 @@ resource "google_gemini_repository_group" "example" {
   provider = google-beta
   location = "us-central1"
   coderepositoryindex = "%{code_repository_index_id}"
-  repository_group_id = "test-repository-group-id2"
+  repository_group_id = "test-repository-group-id"
   repositories {
     resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion2/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
@@ -124,3 +123,4 @@ resource "google_developer_connect_connection" "github_conn" {
 }
 `, context)
 }
+{{ end }}

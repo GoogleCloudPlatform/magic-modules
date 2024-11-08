@@ -1,4 +1,5 @@
 package gemini_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"os"
@@ -64,3 +65,4 @@ resource "google_gemini_code_repository_index" "example" {
 }
 `, context)
 }
+{{ end }}

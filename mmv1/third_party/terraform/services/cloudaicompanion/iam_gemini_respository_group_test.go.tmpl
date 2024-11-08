@@ -1,4 +1,5 @@
 package gemini_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -220,3 +221,4 @@ resource "google_gemini_repository_group_iam_binding" "foo" {
 }
 `, context)
 }
+{{ end }}

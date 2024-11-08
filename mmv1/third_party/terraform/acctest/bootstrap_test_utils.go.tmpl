@@ -9,7 +9,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+{{ if ne $.TargetVersionName `ga` -}}
+	// For beta tests only
 	"net/http"
+{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
