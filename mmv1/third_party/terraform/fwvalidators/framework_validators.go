@@ -55,21 +55,21 @@ func CredentialsValidator() validator.String {
 }
 
 // Non Negative Duration Validator
-type nonnegativedurationValidator struct {
+type nonnegativeBoundedDuration struct {
 }
 
 // Description describes the validation in plain text formatting.
-func (v nonnegativedurationValidator) Description(_ context.Context) string {
+func (v nonnegativeBoundedDuration) Description(_ context.Context) string {
 	return "value expected to be a string representing a non-negative duration"
 }
 
 // MarkdownDescription describes the validation in Markdown formatting.
-func (v nonnegativedurationValidator) MarkdownDescription(ctx context.Context) string {
+func (v nonnegativeBoundedDuration) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
 // ValidateString performs the validation.
-func (v nonnegativedurationValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+func (v nonnegativeBoundedDuration) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
 	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
 		return
 	}
@@ -86,8 +86,8 @@ func (v nonnegativedurationValidator) ValidateString(ctx context.Context, reques
 	}
 }
 
-func NonNegativeDurationValidator() validator.String {
-	return nonnegativedurationValidator{}
+func NonNegativeBoundedDuration() validator.String {
+	return nonnegativeBoundedDuration{}
 }
 
 // Non Empty String Validator
