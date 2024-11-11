@@ -223,7 +223,7 @@ func TestBoundedDuration(t *testing.T) {
 			minDuration:   30 * time.Minute,
 			maxDuration:   time.Hour,
 			expectError:   true,
-			errorContains: "Duration Too Long",
+			errorContains: "Invalid Duration",
 		},
 		"invalid duration format": {
 			value:         types.StringValue("invalid"),
