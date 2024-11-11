@@ -1,5 +1,5 @@
 ---
-subcategory: "Access Context Manager"
+subcategory: "Access Context Manager (VPC Service Controls)"
 description: |-
   Fetches an AccessPolicy from Access Context Manager.
 ---
