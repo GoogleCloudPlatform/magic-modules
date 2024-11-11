@@ -50,7 +50,6 @@ func testAccStorageFolder_storageFolder(forceDestroy bool) string {
 resource "google_storage_folder" "folder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "folder/name/"
-  recursive     = true 
   force_destroy = %t
 }
 `, forceDestroy)

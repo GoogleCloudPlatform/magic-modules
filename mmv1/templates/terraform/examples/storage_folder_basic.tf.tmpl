@@ -10,7 +10,6 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_folder" "{{$.PrimaryResourceId}}" {
   bucket        = google_storage_bucket.bucket.name
-  name          = "folder/name/"
+  name          = "parent-folder/"
   force_destroy = true
-  recursive     = true
 }

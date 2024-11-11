@@ -1,5 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
 //
@@ -20,14 +22,12 @@ package storage
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -50,7 +50,7 @@ func ResourceStorageFolder() *schema.Resource {
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
-            Read: schema.DefaultTimeout(1 * time.Minute),
+			Read:   schema.DefaultTimeout(1 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -63,14 +63,10 @@ func ResourceStorageFolder() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: verify.ValidateRegexp(`/$`),
 				Description: `The name of the folder expressed as a path. Must include
 trailing '/'. For example, 'example_dir/example_dir2/'.`,
-			},
-			"recursive": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: `Set to true if parent folder and child folders need to be created`,
 			},
 			"create_time": {
 				Type:        schema.TypeString,
@@ -109,7 +105,6 @@ func resourceStorageFolderCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	bucket := d.Get("bucket").(string)
-	recursive := d.Get("recursive").(bool)
 	forceDestroy := d.Get("force_destroy").(bool)
 	folder := &storage.Folder{
 		Name: d.Get("name").(string),
@@ -119,7 +114,7 @@ func resourceStorageFolderCreate(d *schema.ResourceData, meta interface{}) error
 
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
-			res, err = config.NewStorageClient(userAgent).Folders.Insert(bucket, folder).Recursive(recursive).Do()
+			res, err = config.NewStorageClient(userAgent).Folders.Insert(bucket, folder).Do()
 			return err
 		},
 		Timeout:              d.Timeout(schema.TimeoutCreate),
@@ -133,9 +128,6 @@ func resourceStorageFolderCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Store the ID now
 	d.SetId(res.Id)
-	if err := d.Set("recursive", recursive); err != nil {
-		return fmt.Errorf("Error setting recursive flag: %s", err)
-	}
 
 	if err := d.Set("force_destroy", forceDestroy); err != nil {
 		return fmt.Errorf("Error setting force destroy flag: %s", err)
@@ -231,7 +223,7 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if !d.Get("force_destroy").(bool) {
-			deleteErr := fmt.Errorf("Error trying to delete folder %s containing objects without `force_destroy` set to true", bucket)
+			deleteErr := fmt.Errorf("Error trying to delete bucket %s containing objects without force_destroy set to true", bucket)
 			log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
 			return deleteErr
 		}
@@ -273,7 +265,7 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 	if listError != nil {
 		return fmt.Errorf("could not delete non-empty folder due to error when listing contents: %v", listError)
 	}
-
+	log.Printf("[DEBUG] force_destroy value: %#v", d.Get("force_destroy").(bool))
 	if !d.Get("force_destroy").(bool) {
 		deleteErr := fmt.Errorf("Error trying to delete folder without force_destroy set to true")
 		log.Printf("Error! %s : %s\n\n", name, deleteErr)
@@ -341,18 +333,10 @@ func flattenStorageFolderName(v interface{}, d *schema.ResourceData, config *tra
 	return v
 }
 
-func flattenStorageFolderRecursive(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
 func expandStorageFolderBucket(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
 func expandStorageFolderName(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandStorageFolderRecursive(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
