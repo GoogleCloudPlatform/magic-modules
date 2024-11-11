@@ -75,6 +75,9 @@ service/billingbudgets:
 service/binaryauthorization:
   resources:
   - google_binary_authorization_.*
+service/blockchainnodeengine:
+  resources:
+  - google_blockchain_node_engine_.*
 service/certificatemanager:
   resources:
   - google_certificate_manager_.*
@@ -137,6 +140,9 @@ service/cloudscheduler:
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
+service/cloudtrace:
+  resources:
+  - google_cloud_trace_.*
 service/composer:
   resources:
   - google_composer_.*
@@ -153,6 +159,7 @@ service/compute-health:
   - google_compute_http_health_check
   - google_compute_https_health_check
   - google_compute_region_health_check
+  - google_network_services_service_lb_policies
 service/compute-instances:
   resources:
   - google_compute_instance
@@ -598,6 +605,9 @@ service/sourcerepo:
 service/spanner:
   resources:
   - google_spanner_.*
+service/speech:
+  resources:
+  - google_speech_to_text_.*
 service/sqladmin-cp:
   resources:
   - google_sql_database_instance
