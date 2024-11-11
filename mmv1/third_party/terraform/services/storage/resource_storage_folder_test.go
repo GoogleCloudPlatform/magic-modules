@@ -49,8 +49,13 @@ func testAccStorageFolder_storageFolder(forceDestroy bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_folder" "folder" {
   bucket        = google_storage_bucket.bucket.name
-  name          = "folder/name/"
+  name          = "folder/"
   force_destroy = %t
 }
-`, forceDestroy)
+resource "google_storage_folder" "subfolder" {
+  bucket        = google_storage_bucket.bucket.name
+  name          = "${google_storage_folder.folder.name}name/"
+  force_destroy = %t
+}  
+`, forceDestroy, forceDestroy)
 }
