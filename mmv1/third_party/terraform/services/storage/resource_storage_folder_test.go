@@ -23,7 +23,7 @@ func TestAccStorageFolder_storageFolderBasic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageFolder_storageBucket(bucketName, false, true) + testAccStorageFolder_storageFolder(true),
+				Config: testAccStorageFolder_storageBucket(bucketName, true, true) + testAccStorageFolder_storageFolder(true),
 			},
 			{
 				ResourceName:            "google_storage_folder.folder",
