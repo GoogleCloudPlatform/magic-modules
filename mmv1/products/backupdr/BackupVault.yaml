@@ -198,3 +198,16 @@ properties:
     description: "Optional. User annotations. See https://google.aip.dev/128#annotations\nStores
       small amounts of arbitrary data. "
     min_version: 'beta'
+  - name: 'accessRestriction'
+    type: Enum
+    description: |
+        Access restriction for the backup vault. Default value is `WITHIN_ORGANIZATION` if not provided during creation.
+    min_version: 'beta'
+    immutable: true
+    default_value: "WITHIN_ORGANIZATION"
+    enum_values:
+      - 'ACCESS_RESTRICTION_UNSPECIFIED'
+      - 'WITHIN_PROJECT'
+      - 'WITHIN_ORGANIZATION'
+      - 'UNRESTRICTED'
+      - 'WITHIN_ORG_BUT_UNRESTRICTED_FOR_BA'
