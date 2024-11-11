@@ -17,6 +17,7 @@ package openapi_generate
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path"
@@ -258,6 +259,11 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	example.Vars = map[string]string{"resource_name": "test-resource"}
 
 	resource.Examples = []r.Examples{example}
+
+	resourceNameBytes := []byte(resourceName)
+	// Write the status as an encoded string to flag when a YAML file has been
+	// copy and pasted without actually using this tool
+	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
 
 	return resource
 }
