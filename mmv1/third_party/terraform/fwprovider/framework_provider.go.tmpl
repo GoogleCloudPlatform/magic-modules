@@ -272,6 +272,9 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
     // However we don't use them; for the plugin-framework implementation of the provider
 	// we take the configuration values from the SDK implementation of the provider. This avoids duplicated logic and inconsistencies in implementation.
 	// The trade off is that we don't benefit from the new type system that differentiates Null and Unknown values, which is especially useful for strings.
+	// This makes it necessary to write code that stops empty strings (etc) being passed from the Config struct to PF-implemented resources/datasources.
+	//    E.g. GetProjectFramework treats Null and "" the same way : https://github.com/hashicorp/terraform-provider-google/blob/74c815ee4ad059453e06b84448af244d80490ec1/google/fwresource/field_helpers.go#L21-L36
+	//    See also, new approaches to handle this: https://github.com/GoogleCloudPlatform/magic-modules/pull/11925
 
 
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
