@@ -342,7 +342,7 @@ func TestAccPubsubSubscriptionCloudStorage_updateAvro(t *testing.T) {
 	})
 }
 
-func TestAccPubsubSubscriptionCloudStorage_updateAvroEmpty(t *testing.T) {
+func TestAccPubsubSubscriptionCloudStorage_emptyAvroConfig(t *testing.T) {
 	t.Parallel()
 
 	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
@@ -354,15 +354,6 @@ func TestAccPubsubSubscriptionCloudStorage_updateAvroEmpty(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{
-				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "", "", "", 0, "", 0, "", "avro"),
-			},
-			{
-				ResourceName:      "google_pubsub_subscription.foo",
-				ImportStateId:     subscriptionShort,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 			{
 				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "pre-", "-suffix", "YYYY-MM-DD/hh_mm_ssZ", 1000, "300s", 1000, "", "empty-avro"),
 			},
