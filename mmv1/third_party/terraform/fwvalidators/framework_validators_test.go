@@ -68,7 +68,7 @@ func TestFrameworkProvider_CredentialsValidator(t *testing.T) {
 	}
 }
 
-func TestServiceAccountNameValidator(t *testing.T) {
+func TestServiceAccountEmailValidator(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
@@ -133,7 +133,7 @@ func TestServiceAccountNameValidator(t *testing.T) {
 				ConfigValue:    test.value,
 			}
 			response := validator.StringResponse{}
-			validator := fwvalidators.ServiceAccountNameValidator{}
+			validator := fwvalidators.ServiceAccountEmailValidator{}
 
 			validator.ValidateString(context.Background(), request, &response)
 
@@ -161,7 +161,7 @@ func TestServiceAccountNameValidator(t *testing.T) {
 	}
 }
 
-func TestDurationValidator(t *testing.T) {
+func TestBoundedDuration(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
@@ -232,6 +232,19 @@ func TestDurationValidator(t *testing.T) {
 			expectError:   true,
 			errorContains: "Invalid Duration Format",
 		},
+		"setting min to 0": {
+			value:       types.StringValue("10s"),
+			minDuration: 0,
+			maxDuration: time.Hour,
+			expectError: false,
+		},
+		"setting max to be less than min": {
+			value:         types.StringValue("10s"),
+			minDuration:   30 * time.Minute,
+			maxDuration:   10 * time.Second,
+			expectError:   true,
+			errorContains: "Invalid Duration",
+		},
 		"empty string": {
 			value:         types.StringValue(""),
 			minDuration:   30 * time.Minute,
@@ -264,7 +277,7 @@ func TestDurationValidator(t *testing.T) {
 				ConfigValue:    test.value,
 			}
 			response := validator.StringResponse{}
-			validator := fwvalidators.DurationValidator{
+			validator := fwvalidators.BoundedDuration{
 				MinDuration: test.minDuration,
 				MaxDuration: test.maxDuration,
 			}

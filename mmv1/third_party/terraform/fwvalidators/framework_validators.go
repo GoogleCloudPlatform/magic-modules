@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	googleoauth "golang.org/x/oauth2/google"
 )
@@ -52,21 +51,21 @@ func CredentialsValidator() validator.String {
 }
 
 // Non Negative Duration Validator
-type nonnegativedurationValidator struct {
+type nonnegativeBoundedDuration struct {
 }
 
 // Description describes the validation in plain text formatting.
-func (v nonnegativedurationValidator) Description(_ context.Context) string {
+func (v nonnegativeBoundedDuration) Description(_ context.Context) string {
 	return "value expected to be a string representing a non-negative duration"
 }
 
 // MarkdownDescription describes the validation in Markdown formatting.
-func (v nonnegativedurationValidator) MarkdownDescription(ctx context.Context) string {
+func (v nonnegativeBoundedDuration) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
 // ValidateString performs the validation.
-func (v nonnegativedurationValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+func (v nonnegativeBoundedDuration) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
 	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
 		return
 	}
@@ -83,8 +82,8 @@ func (v nonnegativedurationValidator) ValidateString(ctx context.Context, reques
 	}
 }
 
-func NonNegativeDurationValidator() validator.String {
-	return nonnegativedurationValidator{}
+func NonNegativeBoundedDuration() validator.String {
+	return nonnegativeBoundedDuration{}
 }
 
 // Non Empty String Validator
@@ -118,17 +117,8 @@ func NonEmptyStringValidator() validator.String {
 	return nonEmptyStringValidator{}
 }
 
-func StringSet(d basetypes.SetValue) []string {
-
-	StringSlice := make([]string, 0)
-	for _, v := range d.Elements() {
-		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
-	}
-	return StringSlice
-}
-
 // Define the possible service account name patterns
-var serviceAccountNamePatterns = []string{
+var ServiceAccountEmailPatterns = []string{
 	`^.+@.+\.iam\.gserviceaccount\.com$`,                     // Standard IAM service account
 	`^.+@developer\.gserviceaccount\.com$`,                   // Legacy developer service account
 	`^.+@appspot\.gserviceaccount\.com$`,                     // App Engine service account
@@ -138,34 +128,35 @@ var serviceAccountNamePatterns = []string{
 }
 
 // Create a custom validator for service account names
-type ServiceAccountNameValidator struct{}
+type ServiceAccountEmailValidator struct{}
 
-func (v ServiceAccountNameValidator) Description(ctx context.Context) string {
+func (v ServiceAccountEmailValidator) Description(ctx context.Context) string {
 	return "value must be a valid service account email address"
 }
 
-func (v ServiceAccountNameValidator) MarkdownDescription(ctx context.Context) string {
+func (v ServiceAccountEmailValidator) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v ServiceAccountEmailValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
 
 	value := req.ConfigValue.ValueString()
-	valid := false
-	for _, pattern := range serviceAccountNamePatterns {
-		if matched, _ := regexp.MatchString(pattern, value); matched {
-			valid = true
-			break
-		}
-	}
 
 	// Check for empty string
 	if value == "" {
 		resp.Diagnostics.AddError("Invalid Service Account Name", "Service account name must not be empty")
 		return
+	}
+
+	valid := false
+	for _, pattern := range ServiceAccountEmailPatterns {
+		if matched, _ := regexp.MatchString(pattern, value); matched {
+			valid = true
+			break
+		}
 	}
 
 	if !valid {
@@ -178,20 +169,20 @@ func (v ServiceAccountNameValidator) ValidateString(ctx context.Context, req val
 }
 
 // Create a custom validator for duration
-type DurationValidator struct {
+type BoundedDuration struct {
 	MinDuration time.Duration
 	MaxDuration time.Duration
 }
 
-func (v DurationValidator) Description(ctx context.Context) string {
+func (v BoundedDuration) Description(ctx context.Context) string {
 	return fmt.Sprintf("value must be a valid duration string between %v and %v", v.MinDuration, v.MaxDuration)
 }
 
-func (v DurationValidator) MarkdownDescription(ctx context.Context) string {
+func (v BoundedDuration) MarkdownDescription(ctx context.Context) string {
 	return v.Description(ctx)
 }
 
-func (v DurationValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+func (v BoundedDuration) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
 		return
 	}
@@ -207,19 +198,11 @@ func (v DurationValidator) ValidateString(ctx context.Context, req validator.Str
 		return
 	}
 
-	if v.MinDuration != 0 && duration < v.MinDuration {
+	if duration < v.MinDuration || duration > v.MaxDuration {
 		resp.Diagnostics.AddAttributeError(
 			req.Path,
-			"Duration Too Short",
-			fmt.Sprintf("Duration must be greater than or equal to %v", v.MinDuration),
-		)
-	}
-
-	if v.MaxDuration != 0 && duration > v.MaxDuration {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Duration Too Long",
-			fmt.Sprintf("Duration must be less than or equal to %v", v.MaxDuration),
+			"Invalid Duration",
+			fmt.Sprintf("Duration must be between %v and %v", v.MinDuration, v.MaxDuration),
 		)
 	}
 }
