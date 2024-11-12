@@ -29,15 +29,17 @@ func TestEphemeralServiceAccountJwt_basic(t *testing.T) {
 func TestEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
 	t.Parallel()
 
-	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "delegates", serviceAccount)
+	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "delegate1", initialServiceAccount)          // SA_2
+	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "delegate2", delegateServiceAccountEmailOne) // SA_3
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "target", delegateServiceAccountEmailTwo)         // SA_4
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountJwt_withDelegates(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountJwt_withDelegates(delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail),
 			},
 		},
 	})
@@ -72,17 +74,22 @@ ephemeral "google_service_account_jwt" "jwt" {
 `, serviceAccountEmail)
 }
 
-func testAccEphemeralServiceAccountJwt_withDelegates(serviceAccountEmail string) string {
+func testAccEphemeralServiceAccountJwt_withDelegates(delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail string) string {
 	return fmt.Sprintf(`
 ephemeral "google_service_account_jwt" "jwt" {
   target_service_account = "%s"
-  delegates             = ["%[1]s"]
+  delegates = [
+    "%s",
+    "%s",
+  ]
   payload               = jsonencode({
     "sub": "%[1]s",
     "aud": "https://example.com"
   })
 }
-`, serviceAccountEmail)
+# The delegation chain is:
+# SA_1 (initialServiceAccountEmail) -> SA_2 (delegateServiceAccountEmailOne) -> SA_3 (delegateServiceAccountEmailTwo) -> SA_4 (targetServiceAccountEmail)
+`, targetServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo)
 }
 
 func testAccEphemeralServiceAccountJwt_withExpiresIn(serviceAccountEmail string) string {
