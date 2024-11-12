@@ -350,23 +350,23 @@ func TestAccRedisCluster_switchoverAndDetachSecondary(t *testing.T) {
 }
 
 type ClusterParams struct {
-	name                 string
-	replicaCount   			 int
-	shardCount     			 int
+	name                      string
+	replicaCount              int
+	shardCount                int
 	deletionProtectionEnabled bool
-	nodeType             string
-	redisConfigs         map[string]string
-	zoneDistributionMode string
-	zone 								 string
-	maintenanceDay		 string
-	maintenanceHours	 int
-	maintenanceMinutes   int
-	maintenanceSeconds	 int
-	maintenanceNanos     int
-	persistenceBlock string
-	shouldCreateSecondary bool
-	secondaryClusterName string
-	ccrRole string
+	nodeType                  string
+	redisConfigs              map[string]string
+	zoneDistributionMode      string
+	zone                      string
+	maintenanceDay            string
+	maintenanceHours          int
+	maintenanceMinutes        int
+	maintenanceSeconds        int
+	maintenanceNanos          int
+	persistenceBlock          string
+	shouldCreateSecondary     bool
+	secondaryClusterName      string
+	ccrRole                   string
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
