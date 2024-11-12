@@ -149,7 +149,7 @@ type Examples struct {
 	// Or a config with two fine grained resources that have a race condition during create
 	SkipVcr bool `yaml:"skip_vcr,omitempty"`
 
-	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before 
+	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
 	// unskipping the test. If this is not empty, the test will be skipped.
 	SkipTest string `yaml:"skip_test,omitempty"`
 
