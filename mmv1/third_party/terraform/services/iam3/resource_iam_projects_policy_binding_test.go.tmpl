@@ -14,7 +14,6 @@ func TestAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_update(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
@@ -22,9 +21,6 @@ func TestAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_update(t *
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
 		CheckDestroy: testAccCheckIAM3ProjectsPolicyBindingDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -59,20 +55,7 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
   principal_access_boundary_policy_id = "tf-test-my-pab-policy%{random_suffix}"
 }
 
-resource "google_project" "project" {
-  provider = google-beta
-  name        = "test project%{random_suffix}"
-  project_id          = "test project%{random_suffix}"
-  org_id              = "%{org_id}"
-  billing_account     = "%{billing_account}"
-  deletion_policy     = "DELETE"
-}
-
-
-resource "time_sleep" "wait_120s" {
-  depends_on      = [google_project.project]
-  create_duration = "120s"
-}
+data "google_project" "project" {}
 
 resource "google_iam_projects_policy_binding" "my-project-binding" {
   provider = google-beta
@@ -85,7 +68,6 @@ resource "google_iam_projects_policy_binding" "my-project-binding" {
   target {
     principal_set = "//cloudresourcemanager.googleapis.com/projects/${google_projects.project.project_id}"
   }
-  depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }
@@ -100,20 +82,7 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
   principal_access_boundary_policy_id = "tf-test-my-pab-policy%{random_suffix}"
 }
 
-resource "google_project" "project" {
-  provider = google-beta
-  name        = "test project%{random_suffix}"
-  project_id          = "test project%{random_suffix}"
-  org_id              = "%{org_id}"
-  billing_account     = "%{billing_account}"
-  deletion_policy     = "DELETE"
-}
-
-
-resource "time_sleep" "wait_120s" {
-  depends_on      = [google_project.project]
-  create_duration = "120s"
-}
+data "google_project" "project" {}
 
 resource "google_iam_projects_policy_binding" "my-project-binding" {
   provider = google-beta
@@ -132,7 +101,6 @@ resource "google_iam_projects_policy_binding" "my-project-binding" {
     location      = "test location"
     title         = "test title"
   }
-  depends_on = [time_sleep.wait_120s]
 }
 `, context)
 }

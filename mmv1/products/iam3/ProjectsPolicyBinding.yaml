@@ -51,13 +51,10 @@ examples:
     primary_resource_id: 'my-project-binding'
     test_env_vars:
       org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     vars:
       pab_policy_id: 'my-pab-policy'
       display_name: 'test project binding'
       project_binding_id: 'test-project-binding'
-      project_name: 'test project'
-    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String
