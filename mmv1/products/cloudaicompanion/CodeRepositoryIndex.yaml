@@ -26,7 +26,7 @@ examples:
     min_version: 'beta'
     primary_resource_id: "example"
     vars:
-      cri_id: "tf-bootstrap-cri-basic"
+      cri_id: "cri-example"
 autogen_async: true
 async:
   operation:

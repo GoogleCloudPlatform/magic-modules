@@ -11,10 +11,9 @@ import (
 )
 
 func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
-	t.Parallel()
-
 	context := map[string]interface{}{
 		"project_id": os.Getenv("GOOGLE_PROJECT"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,7 +48,7 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"label1": "value1"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example"
+  code_repository_index_id = "test-cri-index-example%{random_suffix}"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)
@@ -60,7 +59,7 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"label1": "value1", "label2": "value2"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example"
+  code_repository_index_id = "test-cri-index-example%{random_suffix}"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)
