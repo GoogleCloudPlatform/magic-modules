@@ -44,9 +44,9 @@ examples:
     config_path: 'templates/terraform/examples/network_security_mirroring_deployment_group_basic.tf.tmpl'
     primary_resource_id: 'default'
     vars:
-      subnetwork_name: 'example-subnet'
       network_name: 'example-network'
-      deployment_group_id: 'example-mdg'
+      subnetwork_name: 'example-subnet'
+      deployment_group_id: 'example-dg'
 parameters:
   - name: 'location'
     type: String
