@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	"github.com/hashicorp/terraform-provider-google/google/fwutils"
 	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	"google.golang.org/api/iamcredentials/v1"
@@ -124,13 +124,13 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		delegates = StringSet(DelegatesSetValue)
+		delegates = fwutils.StringSet(DelegatesSetValue)
 	}
 
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
 		Lifetime:  data.Lifetime.ValueString(),
 		Delegates: delegates,
-		Scope:     tpgresource.CanonicalizeServiceScopes(StringSet(ScopesSetValue)),
+		Scope:     tpgresource.CanonicalizeServiceScopes(fwutils.StringSet(ScopesSetValue)),
 	}
 
 	at, err := service.Projects.ServiceAccounts.GenerateAccessToken(name, tokenRequest).Do()
@@ -144,13 +144,4 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 
 	data.AccessToken = types.StringValue(at.AccessToken)
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
-}
-
-func StringSet(d basetypes.SetValue) []string {
-
-	StringSlice := make([]string, 0)
-	for _, v := range d.Elements() {
-		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
-	}
-	return StringSlice
 }
