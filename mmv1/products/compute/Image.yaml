@@ -146,6 +146,7 @@ properties:
             - 'VIRTIO_SCSI_MULTIQUEUE'
             - 'WINDOWS'
             - 'GVNIC'
+            - 'IDPF'
             - 'SEV_LIVE_MIGRATABLE'
             - 'SEV_SNP_CAPABLE'
             - 'SUSPEND_RESUME_COMPATIBLE'
