@@ -17,8 +17,8 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	// random_pass_1 := acctest.RandString(t, 10)
-	// random_pass_2 := acctest.RandString(t, 10)
+	random_pass_1 := acctest.RandString(t, 10)
+	random_pass_2 := acctest.RandString(t, 10)
 
 	pubkey1, privkey1, _ := acctest2.RandSSHKeyPair("ssh-acceptance-test")
 	pubkey2, privkey2, _ := acctest2.RandSSHKeyPair("ssh-acceptance-test")
@@ -34,51 +34,51 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckDatastreamConnectionProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
-			// {
-			// 	Config: testAccDatastreamConnectionProfile_update(context),
-			// },
-			// {
-			// 	ResourceName:            "google_datastream_connection_profile.default",
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation"},
-			// },
-			// {
-			// 	Config: testAccDatastreamConnectionProfile_update2(context, true),
-			// },
-			// {
-			// 	ResourceName:            "google_datastream_connection_profile.default",
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "postgresql_profile.0.password"},
-			// },
-			// {
-			// 	// Disable prevent_destroy
-			// 	Config: testAccDatastreamConnectionProfile_update2(context, false),
-			// },
-			// {
-			// 	Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, true, random_pass_1),
-			// },
-			// {
-			// 	ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "mysql_profile.0.password"},
-			// },
-			// {
-			// 	// run once more to update the password. it should update it in-place
-			// 	Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, true, random_pass_2),
-			// },
-			// {
-			// 	ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "mysql_profile.0.password"},
-			// },
-			// {
-			// 	// Disable prevent_destroy
-			// 	Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, false, random_pass_2),
-			// },
+			{
+				Config: testAccDatastreamConnectionProfile_update(context),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation"},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_update2(context, true),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "postgresql_profile.0.password"},
+			},
+			{
+				// Disable prevent_destroy
+				Config: testAccDatastreamConnectionProfile_update2(context, false),
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, true, random_pass_1),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "mysql_profile.0.password"},
+			},
+			{
+				// run once more to update the password. it should update it in-place
+				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, true, random_pass_2),
+			},
+			{
+				ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "mysql_profile.0.password"},
+			},
+			{
+				// Disable prevent_destroy
+				Config: testAccDatastreamConnectionProfile_mySQLUpdate(context, false, random_pass_2),
+			},
 			{
 				Config: testAccDatastreamConnectionProfile_SSHKey_Update(context, true, random_privkey_1, pubkey1),
 			},
