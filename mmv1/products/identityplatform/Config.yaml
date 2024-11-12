@@ -71,6 +71,17 @@ examples:
       - 'client.0.api_key'
       - 'client.0.firebase_subdomain'
     exclude_docs: true
+  - name: 'identity_platform_config_with_false_values'
+    primary_resource_id: 'default'
+    vars:
+      project_id: 'my-project-2'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_acct: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'client.0.api_key'
+      - 'client.0.firebase_subdomain'
+    exclude_docs: true
 parameters:
 properties:
   - name: 'name'
@@ -92,6 +103,7 @@ properties:
         type: NestedObject
         description: |
           Configuration options related to authenticating a user by their email address.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_email.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean
@@ -108,6 +120,7 @@ properties:
         type: NestedObject
         description: |
           Configuration options related to authenticated a user by their phone number.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_phone_number.go.tmpl'
         properties:
           - name: 'enabled'
             type: Boolean

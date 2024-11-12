@@ -239,6 +239,24 @@ async:
     resource_inside_response: true
 ```
 
+### `error_retry_predicates`
+
+An array of function names that determine whether an error is retryable.
+
+```yaml
+error_retry_predicates:
+  - 'transport_tpg.IamMemberMissing'
+```
+
+### `error_abort_predicates`
+
+An array of function names that determine whether an error is not retryable.
+
+```yaml
+error_abort_predicates:
+  - 'transport_tpg.Is429QuotaError'
+```
+
 ## IAM resources
 
 ### `iam_policy`

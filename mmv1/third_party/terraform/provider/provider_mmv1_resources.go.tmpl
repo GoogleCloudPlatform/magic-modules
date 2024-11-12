@@ -23,6 +23,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_access_approval_folder_service_account":    accessapproval.DataSourceAccessApprovalFolderServiceAccount(),
 	"google_access_approval_organization_service_account": accessapproval.DataSourceAccessApprovalOrganizationServiceAccount(),
 	"google_access_approval_project_service_account":   accessapproval.DataSourceAccessApprovalProjectServiceAccount(),
+	"google_access_context_manager_access_policy":   accesscontextmanager.DataSourceAccessContextManagerAccessPolicy(),
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
@@ -37,6 +38,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	"google_backup_dr_backup_plan_association":			backupdr.DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
 	"google_backup_dr_backup_plan":						backupdr.DataSourceGoogleCloudBackupDRBackupPlan(),
+	"google_backup_dr_data_source":						backupdr.DataSourceGoogleCloudBackupDRDataSource(),
 	{{- end }}
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
