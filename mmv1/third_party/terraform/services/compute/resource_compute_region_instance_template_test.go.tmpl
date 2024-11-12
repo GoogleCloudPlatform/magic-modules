@@ -796,7 +796,7 @@ func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_performanceMonitoringUnit(context_1),
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "STANDARD"),
@@ -808,7 +808,7 @@ func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInstanceTemplate_performanceMonitoringUnit(context_2),
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ENHANCED"),
@@ -820,7 +820,7 @@ func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInstanceTemplate_performanceMonitoringUnit(context_3),
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ARCHITECTURAL"),
