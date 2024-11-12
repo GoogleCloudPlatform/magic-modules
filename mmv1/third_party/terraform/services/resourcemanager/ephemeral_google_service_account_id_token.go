@@ -3,18 +3,19 @@ package resourcemanager
 import (
 	"context"
 	"fmt"
-	"regexp"
 
 	"google.golang.org/api/idtoken"
 	"google.golang.org/api/option"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	"github.com/hashicorp/terraform-provider-google/google/fwutils"
+	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	"google.golang.org/api/iamcredentials/v1"
 )
 
@@ -49,14 +50,14 @@ func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req e
 			"target_service_account": schema.StringAttribute{
 				Optional: true,
 				Validators: []validator.String{
-					serviceAccountNameValidator{},
+					fwvalidators.ServiceAccountEmailValidator{},
 				},
 			},
 			"delegates": schema.SetAttribute{
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.Set{
-					serviceAccountNameSetValidator{},
+					setvalidator.ValueStringsAre(fwvalidators.ServiceAccountEmailValidator{}),
 				},
 			},
 			"include_email": schema.BoolAttribute{
@@ -107,7 +108,7 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
 			IncludeEmail: data.IncludeEmail.ValueBool(),
-			Delegates:    StringSet(DelegatesSetValue),
+			Delegates:    fwutils.StringSet(DelegatesSetValue),
 		}
 		at, err := service.Projects.ServiceAccounts.GenerateIdToken(name, tokenRequest).Do()
 		if err != nil {
@@ -149,103 +150,4 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 
 	data.IdToken = types.StringValue(idToken.AccessToken)
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
-}
-
-func StringSet(d basetypes.SetValue) []string {
-
-	StringSlice := make([]string, 0)
-	for _, v := range d.Elements() {
-		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
-	}
-	return StringSlice
-}
-
-var serviceAccountNamePatterns = []string{
-	`^.+@.+\.iam\.gserviceaccount\.com$`,                     // Standard IAM service account
-	`^.+@developer\.gserviceaccount\.com$`,                   // Legacy developer service account
-	`^.+@appspot\.gserviceaccount\.com$`,                     // App Engine service account
-	`^.+@cloudservices\.gserviceaccount\.com$`,               // Google Cloud services service account
-	`^.+@cloudbuild\.gserviceaccount\.com$`,                  // Cloud Build service account
-	`^service-[0-9]+@.+-compute\.iam\.gserviceaccount\.com$`, // Compute Engine service account
-}
-
-// Create a custom validator for service account names
-type serviceAccountNameValidator struct{}
-
-func (v serviceAccountNameValidator) Description(ctx context.Context) string {
-	return "value must be a valid service account email address"
-}
-
-func (v serviceAccountNameValidator) MarkdownDescription(ctx context.Context) string {
-	return v.Description(ctx)
-}
-
-func (v serviceAccountNameValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
-	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
-		return
-	}
-
-	value := req.ConfigValue.ValueString()
-	valid := false
-	for _, pattern := range serviceAccountNamePatterns {
-		if matched, _ := regexp.MatchString(pattern, value); matched {
-			valid = true
-			break
-		}
-	}
-
-	if !valid {
-		resp.Diagnostics.AddAttributeError(
-			req.Path,
-			"Invalid Service Account Name",
-			"Service account name must match one of the expected patterns for Google service accounts",
-		)
-	}
-}
-
-// Create a custom validator for sets of service account names
-type serviceAccountNameSetValidator struct{}
-
-func (v serviceAccountNameSetValidator) Description(ctx context.Context) string {
-	return "all values must be valid service account email addresses"
-}
-
-func (v serviceAccountNameSetValidator) MarkdownDescription(ctx context.Context) string {
-	return v.Description(ctx)
-}
-
-func (v serviceAccountNameSetValidator) ValidateSet(ctx context.Context, req validator.SetRequest, resp *validator.SetResponse) {
-	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
-		return
-	}
-
-	elements := req.ConfigValue.Elements()
-	for _, element := range elements {
-		stringValue, ok := element.(basetypes.StringValue)
-		if !ok {
-			resp.Diagnostics.AddAttributeError(
-				req.Path,
-				"Invalid Element Type",
-				"Set element must be a string",
-			)
-			return
-		}
-
-		value := stringValue.ValueString()
-		valid := false
-		for _, pattern := range serviceAccountNamePatterns {
-			if matched, _ := regexp.MatchString(pattern, value); matched {
-				valid = true
-				break
-			}
-		}
-
-		if !valid {
-			resp.Diagnostics.AddAttributeError(
-				req.Path,
-				"Invalid Service Account Name",
-				fmt.Sprintf("Service account name %q must match one of the expected patterns for Google service accounts", value),
-			)
-		}
-	}
 }
