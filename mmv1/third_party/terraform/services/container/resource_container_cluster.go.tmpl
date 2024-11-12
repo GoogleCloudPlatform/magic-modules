@@ -6691,11 +6691,22 @@ func flattenUserManagedKeysConfig(c *container.UserManagedKeysConfig) []map[stri
 		"control_plane_disk_encryption_key": c.ControlPlaneDiskEncryptionKey,
 		"gkeops_etcd_backup_encryption_key": c.GkeopsEtcdBackupEncryptionKey,
 	}
+	allEmpty := true
+	for _, v := range f {
+		if v.(string) != "" {
+			allEmpty = false
+		}
+	}
 	if len(c.ServiceAccountSigningKeys) != 0 {
 		f["service_account_signing_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountSigningKeys))
+		allEmpty = false
 	}
 	if len(c.ServiceAccountVerificationKeys) != 0 {
 		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountVerificationKeys))
+		allEmpty = false
+	}
+	if allEmpty {
+		return nil
 	}
 	return []map[string]interface{}{f}
 }
