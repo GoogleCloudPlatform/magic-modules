@@ -30,4 +30,7 @@ resource "google_network_security_intercept_endpoint_group_association" "{{$.Pri
   location                                = "global"
   network                                 = google_compute_network.consumer_network.id
   intercept_endpoint_group                = google_network_security_intercept_endpoint_group.endpoint_group.id
+  labels = {
+    foo = "bar"
+  }
 }

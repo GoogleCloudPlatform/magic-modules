@@ -7,7 +7,7 @@ resource "google_compute_network" "network" {
 resource "google_compute_subnetwork" "subnetwork" {
   provider      = google-beta
   name          = "{{index $.Vars "subnetwork_name"}}"
-  region        = "us-central1"
+  region        = "asia-east1"
   ip_cidr_range = "10.1.0.0/16"
   network       = google_compute_network.network.name
 }
@@ -15,7 +15,7 @@ resource "google_compute_subnetwork" "subnetwork" {
 resource "google_compute_region_health_check" "health_check" {
   provider = google-beta
   name     = "{{index $.Vars "health_check_name"}}"
-  region   = "us-central1"
+  region   = "asia-east1"
   http_health_check {
     port = 80
   }
@@ -24,7 +24,7 @@ resource "google_compute_region_health_check" "health_check" {
 resource "google_compute_region_backend_service" "backend_service" {
   provider              = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
-  region                = "us-central1"
+  region                = "asia-east1"
   health_checks         = [google_compute_region_health_check.health_check.id]
   protocol              = "UDP"
   load_balancing_scheme = "INTERNAL"
@@ -33,7 +33,7 @@ resource "google_compute_region_backend_service" "backend_service" {
 resource "google_compute_forwarding_rule" "forwarding_rule" {
   provider               = google-beta
   name                   = "{{index $.Vars "forwarding_rule_name"}}"
-  region                 = "us-central1"
+  region                 = "asia-east1"
   network                = google_compute_network.network.name
   subnetwork             = google_compute_subnetwork.subnetwork.name
   backend_service        = google_compute_region_backend_service.backend_service.id
@@ -52,7 +52,10 @@ resource "google_network_security_intercept_deployment_group" "deployment_group"
 resource "google_network_security_intercept_deployment" "{{$.PrimaryResourceId}}" {
   provider                   = google-beta
   intercept_deployment_id    = "{{index $.Vars "deployment_id"}}"
-  location                   = "us-central1-a"
+  location                   = "asia-east1-a"
   forwarding_rule            = google_compute_forwarding_rule.forwarding_rule.id
   intercept_deployment_group = google_network_security_intercept_deployment_group.deployment_group.id
+  labels = {
+    foo = "bar"
+  }
 }
