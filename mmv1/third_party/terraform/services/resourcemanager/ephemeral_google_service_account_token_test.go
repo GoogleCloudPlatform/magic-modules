@@ -114,26 +114,6 @@ ephemeral "google_service_account_token" "test" {
 `, initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project)
 }
 
-func testAccEphemeralServiceAccountToken_delegatesSetup(initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project string) string {
-	return fmt.Sprintf(`
-resource "google_project_iam_member" "terraform_sa_token_creator" {
-  project = "%[5]s"
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = "serviceAccount:%[1]s"
-}
-
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [
-    google_project_iam_member.terraform_sa_token_creator,
-  ]
-  create_duration = "60s"
-}
-
-# The delegation chain is:
-# SA_1 (initialServiceAccountEmail) -> SA_2 (delegateServiceAccountEmailOne) -> SA_3 (delegateServiceAccountEmailTwo) -> SA_4 (targetServiceAccountEmail)
-`, initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project)
-}
-
 func testAccEphemeralServiceAccountToken_withCustomLifetime(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
 ephemeral "google_service_account_token" "token" {
