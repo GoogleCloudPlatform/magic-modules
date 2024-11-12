@@ -330,6 +330,10 @@ type Resource struct {
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
 	ImportPath string `yaml:"-"`
+
+	// Tag autogen resources so that we can track them. In the future this will
+	// control if a resource is continuously generated from public OpenAPI docs
+	AutogenStatus string `yaml:"autogen_status"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -490,6 +494,26 @@ func (r Resource) UserParameters() []*Type {
 	return google.Reject(r.Parameters, func(p *Type) bool {
 		return p.Exclude
 	})
+}
+
+func (r Resource) ServiceVersion() string {
+	if r.CaiBaseUrl != "" {
+		return extractVersionFromBaseUrl(r.CaiBaseUrl)
+	}
+	return extractVersionFromBaseUrl(r.BaseUrl)
+}
+
+func extractVersionFromBaseUrl(baseUrl string) string {
+	parts := strings.Split(baseUrl, "/")
+	// starts with v...
+	if parts[0] != "" && parts[0][0] == 'v' {
+		return parts[0]
+	}
+	// starts with /v...
+	if parts[0] == "" && parts[1][0] == 'v' {
+		return parts[1]
+	}
+	return ""
 }
 
 // Return the user-facing properties in client tools; this ends up meaning

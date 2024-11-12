@@ -163,11 +163,10 @@ The following arguments are supported:
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance. Structure [documented below](#nested_guest_accelerator).
     **Note:** GPU accelerators can only be used with [`on_host_maintenance`](#on_host_maintenance) option set to TERMINATE.
-    **Note**: This field uses [attr-as-block mode](https://www.terraform.io/docs/configuration/attr-as-blocks.html) to avoid
-    breaking users during the 0.12 upgrade. To explicitly send a list
-    of zero objects you must use the following syntax:
-    `example=[]`
-    For more details about this behavior, see [this section](https://www.terraform.io/docs/configuration/attr-as-blocks.html#defining-a-fixed-object-collection-value).
+    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) 
+    is no longer supported for this field in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
+    To dynamically set a list of guest accelerators, use [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks).
+    To set an empty list, use a single `guest_accelerator` block with `count = 0`.
 
 * `labels` - (Optional) A map of key/value label pairs to assign to the instance.
     **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
@@ -396,7 +395,7 @@ is desired, you will need to modify your state file manually using
     array of alias IP ranges for this network interface. Can only be specified for network
     interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
 
-* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET.
+* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF.
 
 * `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 

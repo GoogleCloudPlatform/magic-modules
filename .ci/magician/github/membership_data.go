@@ -98,8 +98,8 @@ var (
 		},
 		{
 			id:        "SarahFrench",
-			startDate: newDate(2024, 11, 1, bstLoc),
-			endDate:   newDate(2024, 11, 4, bstLoc),
+			startDate: newDate(2024, 11, 15, bstLoc),
+			endDate:   newDate(2024, 12, 2, bstLoc),
 		},
 		{
 			id:        "c2thorn",
@@ -110,6 +110,11 @@ var (
 			id:        "ScottSuarez",
 			startDate: newDate(2024, 10, 31, bstLoc),
 			endDate:   newDate(2024, 11, 17, bstLoc),
+		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 11, 1, pdtLoc),
+			endDate:   newDate(2024, 11, 11, pdtLoc),
 		},
 	}
 )
