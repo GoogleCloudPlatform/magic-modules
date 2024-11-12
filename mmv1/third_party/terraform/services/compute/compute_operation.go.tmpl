@@ -3,9 +3,7 @@ package compute
 import (
 	"bytes"
 	"context"
-{{- if ne $.TargetVersionName "ga" }}
 	"encoding/json"
-{{- end }}
 	"errors"
 	"fmt"
   "io"
@@ -27,9 +25,7 @@ type ComputeOperationWaiter struct {
 	Op      *compute.Operation
 	Context context.Context
 	Project string
-{{- if ne $.TargetVersionName "ga" }}
 	Parent  string
-{{- end }}
 }
 
 func (w *ComputeOperationWaiter) State() string {
@@ -86,10 +82,8 @@ func (w *ComputeOperationWaiter) QueryOp() (interface{}, error) {
 	} else if w.Op.Region != "" {
 		region := tpgresource.GetResourceNameFromSelfLink(w.Op.Region)
 		return w.Service.RegionOperations.Get(w.Project, region, w.Op.Name).Do()
-{{- if ne $.TargetVersionName "ga" }}
 	} else if w.Parent != "" {
 		return w.Service.GlobalOrganizationOperations.Get(w.Op.Name).ParentId(w.Parent).Do()
-{{- end }}
 	}
 	return w.Service.GlobalOperations.Get(w.Project, w.Op.Name).Do()
 }
@@ -130,7 +124,6 @@ func ComputeOperationWaitTime(config *transport_tpg.Config, res interface{}, pro
 	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func ComputeOrgOperationWaitTimeWithResponse(config *transport_tpg.Config, res interface{}, response *map[string]interface{}, parent, activity, userAgent string, timeout time.Duration) error {
 	op := &compute.Operation{}
 	err := tpgresource.Convert(res, op)
@@ -156,8 +149,6 @@ func ComputeOrgOperationWaitTimeWithResponse(config *transport_tpg.Config, res i
 	}
 	return json.Unmarshal(e, response)
 }
-
-{{ end }}
 
 // ComputeOperationError wraps compute.OperationError and implements the
 // error interface so it can be returned.
