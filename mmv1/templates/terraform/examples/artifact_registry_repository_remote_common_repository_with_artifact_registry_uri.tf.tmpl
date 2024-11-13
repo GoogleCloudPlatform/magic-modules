@@ -7,12 +7,6 @@ resource "google_artifact_registry_repository" "upstream_repo" {
   format        = "DOCKER"
 }
 
-resource "google_project_iam_member" "artifact_registry_sa_binding" {
-  project = "{{index $.TestEnvVars "project_id"}}"
-  role    = "roles/artifactregistry.serviceAgent"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
-}
-
 resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
   location      = "us-central1"
   repository_id = "{{index $.Vars "repository_id"}}"
