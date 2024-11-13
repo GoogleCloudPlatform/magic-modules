@@ -5,10 +5,12 @@ package storage_test
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -75,7 +77,7 @@ func TestAccStorageFolder_FolderForceDestroy(t *testing.T) {
 	})
 }
 
-func TestAccStorageFolder_DeleteSingleFolderDisableForceDestroy(t *testing.T) {
+func TestAccStorageFolder_DeleteEmptyFolderWithForceDestroyDefault(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
@@ -86,6 +88,31 @@ func TestAccStorageFolder_DeleteSingleFolderDisableForceDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageFolder_storageBucket(bucketName, true, true) + testAccStorageFolder_storageOneFolder(false),
+			},
+		},
+	})
+}
+
+func TestAccStorageFolder_FailDeleteNonEmptyFolder(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	folderName := "folder/"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFolder_storageBucket(bucketName, true, true) + testAccStorageFolder_storageOneFolder(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccStorageCreatSubFolder(t, bucketName, folderName),
+					testAccStorageDeleteFolder(t, bucketName, folderName),
+				),
+				ExpectError: regexp.MustCompile("googleapi: Error 409: The folder you tried to delete is not empty"),
+			},
+			{
+				Config: testAccStorageFolder_storageBucket(bucketName, true, true) + testAccStorageFolder_storageOneFolder(true),
 			},
 		},
 	})
@@ -157,4 +184,32 @@ resource "google_storage_folder" "folder" {
   force_destroy = %t
 } 
 `, forceDestroy)
+}
+
+func testAccStorageCreatSubFolder(t *testing.T, bucketName, parentFolder string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		subFolder := &storage.Folder{
+			Name: parentFolder + "subfolder/",
+		}
+		if res, err := config.NewStorageClient(config.UserAgent).Folders.Insert(bucketName, subFolder).Do(); err == nil {
+			log.Printf("sub folder created: %s", res.Name)
+		} else {
+			log.Printf("failed to create sub folder: %s", subFolder.Name)
+		}
+		return nil
+	}
+}
+
+func testAccStorageDeleteFolder(t *testing.T, bucketName, parentFolder string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+		var deleteError error
+		if err := config.NewStorageClient(config.UserAgent).Folders.Delete(bucketName, parentFolder).Do(); err == nil {
+			log.Printf("successfully deleted folder: %s", err)
+		} else {
+			deleteError = fmt.Errorf("failed to deleted folder: %s", err)
+		}
+		return deleteError
+	}
 }
