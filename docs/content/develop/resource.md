@@ -27,7 +27,7 @@ aliases:
 
 This page describes how to add a new resource to the `google` or `google-beta` Terraform provider using MMv1 and/or handwritten code.
 
-For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "_index.md" >}}).
+For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/" >}}).
 
 ## Before you begin
 
