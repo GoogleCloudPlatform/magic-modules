@@ -1,8 +1,5 @@
-// Handle the name field not being set in the API response after Create (is set after Read)
-if _, ok := res["name"]; !ok {
-	if v, ok := res["model"]; ok {
-		res["name"] = v.(string)
-	}
+if modelName, ok := res["model"].(string); ok && modelName != "" {
+	res["name"] = modelName
 }
 
 res["modelName"] = res["displayName"]
