@@ -1079,6 +1079,32 @@ func TestReplaceVars(t *testing.T) {
 			},
 			Expected: "projects/default-project/zones/default-zone/instances",
 		},
+		"location with provider level region": {
+			Template: "projects/{{project}}/locations/{{location}}/repositories",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			Expected: "projects/default-project/locations/default-region/repositories",
+		},
+		"location with provider level region and zone": {
+			Template: "projects/{{project}}/locations/{{location}}/repositories",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+				Zone:    "default-region-a",
+			},
+			Expected: "projects/default-project/locations/default-region/repositories",
+		},
+		"location with provider level zone": {
+			// May not actually be useful / valid for all use cases.
+			Template: "projects/{{project}}/locations/{{location}}/repositories",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Zone:    "default-region-a",
+			},
+			Expected: "projects/default-project/locations/default-region-a/repositories",
+		},
 		"regional schema values": {
 			Template: "projects/{{project}}/regions/{{region}}/subnetworks/{{name}}",
 			SchemaValues: map[string]interface{}{
@@ -1124,6 +1150,19 @@ func TestReplaceVars(t *testing.T) {
 				"innerzone": "inner",
 			},
 			Expected: "projects/project1/zones/wrapperinnerwrapper/instances/instance1",
+		},
+		"location with schema values": {
+			Template: "projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			SchemaValues: map[string]interface{}{
+				"location":      "other-location",
+				"project":       "project1",
+				"repository_id": "foo",
+			},
+			Expected: "projects/project1/locations/other-location/repositories/foo",
 		},
 		"base path recursive replacement": {
 			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
