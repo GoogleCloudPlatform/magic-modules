@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 
 // ----------------------------------------------------------------------------
 //
@@ -23,7 +25,6 @@ import (
 	"fmt"
 	"log"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -106,6 +107,7 @@ func resourceStorageFolderCreate(d *schema.ResourceData, meta interface{}) error
 
 	bucket := d.Get("bucket").(string)
 	forceDestroy := d.Get("force_destroy").(bool)
+
 	folder := &storage.Folder{
 		Name: d.Get("name").(string),
 	}
@@ -207,10 +209,9 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	folderName := strings.Split(name, "/")
 	var listError, deleteObjectError error
 	for deleteObjectError == nil {
-		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(folderName[0] + "/").Do()
+		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(name).Do()
 		if err != nil {
 			log.Printf("Error listing contents of bucket %s: %v", bucket, err)
 			// If we can't list the contents, try deleting the bucket anyway in case it's empty
@@ -271,8 +272,8 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		log.Printf("Error! %s : %s\n\n", name, deleteErr)
 		return deleteErr
 	} else {
-		log.Printf("[DEBUG] folder names to delete: %#v", folderName)
-		foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(folderName[0] + "/").Do()
+		log.Printf("[DEBUG] folder names to delete: %#v", name)
+		foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
 		if err != nil {
 			return err
 		}
