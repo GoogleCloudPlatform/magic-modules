@@ -42,7 +42,6 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/folders-overview'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/folders'
-# iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
 custom_code:
 parameters:
   - name: 'bucket'
@@ -61,9 +60,6 @@ parameters:
     # consistent output.
     validation:
       regex: '/$'
-  - name: 'recursive'
-    description: 'Set to true if parent folder and child folders need to be created'
-    type: Boolean
 properties:
   - name: createTime
     type: String
