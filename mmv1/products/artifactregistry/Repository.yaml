@@ -192,9 +192,9 @@ examples:
       upstream_repository_id: 'example-upstream-repo'
       upstream_repository_desc: 'example upstream repository'
     ignore_read_extra:
-    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-    # response.
-    - 'remote_repository_config.0.disable_upstream_validation'
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
   - name: 'artifact_registry_repository_remote_common_repository_with_custom_upstream'
     primary_resource_id: 'my-repo'
     vars:
@@ -205,9 +205,9 @@ examples:
       username: 'remote-username'
       secret_data: 'remote-password'
     ignore_read_extra:
-    # Ignore this field as it is INPUT_ONLY. AR will not return this in the
-    # response.
-    - 'remote_repository_config.0.disable_upstream_validation'
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
 parameters:
 properties:
   - name: 'name'
