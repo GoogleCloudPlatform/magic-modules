@@ -115,7 +115,6 @@ resource "google_parallelstore_instance" "instance" {
   labels = {
     test = "value23"
   }
-  provider = google-beta
   depends_on = [google_service_networking_connection.default]
 }
 
