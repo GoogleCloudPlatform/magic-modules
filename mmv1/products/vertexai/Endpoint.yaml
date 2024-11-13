@@ -375,7 +375,7 @@ properties:
       the `deployModel` [example](https://cloud.google.com/vertex-ai/docs/general/deployment#deploy_a_model_to_an_endpoint) and
       [documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints/deployModel) for more information.
 
-      ~> **Note:** To set the map to empty, use `"{}"`. Leaving unset or setting to `""` will persist the last value returned from the API.
+      ~> **Note:** To set the map to empty, set `"{}"`, apply, and then remove the field from your config.
     state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
     custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
     custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
