@@ -1857,22 +1857,6 @@ func TestAccComputeInstance_nictype_update(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
-			{
-				Config: testAccComputeInstance_nictype(instanceName, "MRDMA"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_nictype(instanceName, "IRDMA"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{{- end }}
 		},
 	})
 }

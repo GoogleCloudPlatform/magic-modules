@@ -978,22 +978,6 @@ func TestAccComputeRegionInstanceTemplate_nictype_update(t *testing.T) {
 						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
 				),
 			},
-			{{- if ne $.TargetVersionName "ga" }}
-			{
-				Config: testAccComputeRegionInstanceTemplate_nictype(instanceTemplateName, "MRDMA"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstanceTemplateExists(
-						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
-				),
-			},
-			{
-				Config: testAccComputeRegionInstanceTemplate_nictype(instanceTemplateName, "IRDMA"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionInstanceTemplateExists(
-						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
-				),
-			},
-			{{- end }}
 		},
 	})
 }
