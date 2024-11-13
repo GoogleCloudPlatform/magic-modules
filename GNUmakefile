@@ -1,4 +1,4 @@
-SHELL=/bin/bash -eo pipefail
+SHELL=/usr/bin/env bash -eo pipefail
 
 # See https://googlecloudplatform.github.io/magic-modules/docs/getting-started/generate-providers/
 # for a guide on provider generation.
