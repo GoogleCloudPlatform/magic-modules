@@ -1007,11 +1007,6 @@ func (r Resource) TerraformName() string {
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
-
-	var ids []string
-	for _, id := range r.GetIdentity() {
-		ids = append(ids, google.Underscore(id.Name))
-	}
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
 
