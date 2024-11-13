@@ -166,14 +166,16 @@ properties:
                 - 'INEFFECTIVE'
       - name: 'destAddressGroups'
         type: Array
-        send_empty_value: true
         description: |
           Address groups which should be matched against the traffic destination. Maximum number of destination address groups is 10.
         item_type:
           type: String
+        send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_network_firewall_policy_rule_dest_address_group_order.go.tmpl'
       - name: 'srcAddressGroups'
         type: Array
         send_empty_value: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_network_firewall_policy_rule_src_address_group_order.go.tmpl'
         description: |
           Address groups which should be matched against the traffic source. Maximum number of source address groups is 10.
         item_type:

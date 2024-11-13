@@ -112,7 +112,6 @@ examples:
   - name: 'cloudrunv2_job_emptydir'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
@@ -507,7 +506,6 @@ properties:
                   type: NestedObject
                   description: |-
                     Ephemeral storage used as a shared volume.
-                  min_version: 'beta'
                   # exactly_one_of:
                   #   - template.0.template.0.volumes.0.secret
                   #   - template.0.template.0.volumes.0.cloudSqlInstance
@@ -546,6 +544,14 @@ properties:
                       type: Boolean
                       description: |-
                         If true, mount this volume as read-only in all mounts. If false, mount this volume as read-write.
+                    - name: 'mountOptions'
+                      type: Array
+                      min_version: 'beta'
+                      description: |
+                        A list of flags to pass to the gcsfuse command for configuring this volume.
+                        Flags should be passed without leading dashes.
+                      item_type:
+                        type: String
                 - name: 'nfs'
                   type: NestedObject
                   description: |-
