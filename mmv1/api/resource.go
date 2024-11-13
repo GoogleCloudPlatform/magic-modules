@@ -296,6 +296,10 @@ type Resource struct {
 
 	Async *Async
 
+	// Tag autogen resources so that we can track them. In the future this will
+	// control if a resource is continuously generated from public OpenAPI docs
+	AutogenStatus string `yaml:"autogen_status"`
+
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
 
@@ -330,10 +334,6 @@ type Resource struct {
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
 	ImportPath string `yaml:"-"`
-
-	// Tag autogen resources so that we can track them. In the future this will
-	// control if a resource is continuously generated from public OpenAPI docs
-	AutogenStatus string `yaml:"autogen_status"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
