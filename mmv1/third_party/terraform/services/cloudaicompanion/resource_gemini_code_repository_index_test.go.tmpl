@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -31,6 +32,11 @@ func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 			},
 			{
 				Config: testAccGeminiCodeRepositoryIndex_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_gemini_code_repository_index.example", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_gemini_code_repository_index.example",
@@ -53,6 +59,7 @@ resource "google_gemini_code_repository_index" "example" {
 }
 `, context)
 }
+
 func testAccGeminiCodeRepositoryIndex_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {

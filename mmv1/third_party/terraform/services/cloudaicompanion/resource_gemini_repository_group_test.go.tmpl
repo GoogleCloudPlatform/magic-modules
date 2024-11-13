@@ -32,6 +32,11 @@ func TestAccGeminiRepositoryGroup_update(t *testing.T) {
 			},
 			{
 				Config: testAccGeminiRepositoryGroup_update(context),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_gemini_repository_group.example", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_gemini_repository_group.example",

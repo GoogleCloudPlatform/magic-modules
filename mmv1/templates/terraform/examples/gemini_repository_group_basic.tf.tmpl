@@ -1,7 +1,7 @@
 resource "google_gemini_repository_group" "example" {
   provider = google-beta
   location = "us-central1"
-  coderepositoryindex = "{{index $.Vars "cri_id"}}"
+  coderepositoryindex = "%{cri_id}"
   repository_group_id = "{{index $.Vars "repository_group_id"}}"
   repositories {
     resource = "{{index $.Vars "repository_resource"}}"

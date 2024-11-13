@@ -25,7 +25,7 @@ examples:
   - name: "gemini_repository_group_basic"
     min_version: 'beta'
     primary_resource_id: "example"
-    primary_resource_name: '"cri-1", fmt.Sprintf("tf-test-my-repo-group%s", context["random_suffix"])'
+    primary_resource_name: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-example", "us-central1", "", ""), "test-rg-repository-group-id"'
     vars:
       repository_group_id: "example-repository-group-id"
       git_repository_link_id: 'example-git-repository-link-id'
