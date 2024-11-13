@@ -4,6 +4,7 @@ weight: 20
 aliases:
   - /docs/how-to/types-of-resources
   - /how-to/types-of-resources
+  - /get-started/how-magic-modules-works
 ---
 
 # Magic Modules
