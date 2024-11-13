@@ -75,6 +75,22 @@ func TestAccStorageFolder_FolderForceDestroy(t *testing.T) {
 	})
 }
 
+func TestAccStorageFolder_DeleteSingleFolderDisableForceDestroy(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageFolder_storageBucket(bucketName, true, true) + testAccStorageFolder_storageOneFolder(false),
+			},
+		},
+	})
+}
+
 func testAccStorageFolder_storageBucket(bucketName string, hnsFlag bool, forceDestroy bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -131,4 +147,14 @@ resource "google_storage_folder" "subfolder" {
   force_destroy = %t
 }  
 `, forceDestroy, forceDestroy)
+}
+
+func testAccStorageFolder_storageOneFolder(forceDestroy bool) string {
+	return fmt.Sprintf(`
+resource "google_storage_folder" "folder" {
+  bucket        = google_storage_bucket.bucket.name
+  name          = "folder/"
+  force_destroy = %t
+} 
+`, forceDestroy)
 }

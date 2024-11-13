@@ -87,6 +87,7 @@ trailing '/'. For example, 'example_dir/example_dir2/'.`,
 			"force_destroy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     false,
 				Description: `Set to true if force destroy folder`,
 			},
 			"self_link": {
@@ -185,8 +186,6 @@ func resourceStorageFolderRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceStorageFolderUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-	_ = config
 
 	// we can only get here if force_destroy was updated
 	if d.Get("force_destroy") != nil {
@@ -214,7 +213,6 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(name).Do()
 		if err != nil {
 			log.Printf("Error listing contents of bucket %s: %v", bucket, err)
-			// If we can't list the contents, try deleting the bucket anyway in case it's empty
 			listError = err
 			break
 		}
@@ -224,11 +222,11 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if !d.Get("force_destroy").(bool) {
-			deleteErr := fmt.Errorf("Error trying to delete bucket %s containing objects without force_destroy set to true", bucket)
+			deleteErr := fmt.Errorf("Error trying to delete folder %s containing objects without force_destroy set to true", bucket)
 			log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
 			return deleteErr
 		}
-		// GCS requires that a bucket be empty (have no objects or object
+		// GCS requires that a folder be empty (have no objects or object
 		// versions) before it can be deleted.
 		log.Printf("[DEBUG] GCS Folder attempting to forceDestroy\n\n")
 
@@ -267,16 +265,12 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("could not delete non-empty folder due to error when listing contents: %v", listError)
 	}
 	log.Printf("[DEBUG] force_destroy value: %#v", d.Get("force_destroy").(bool))
-	if !d.Get("force_destroy").(bool) {
-		deleteErr := fmt.Errorf("Error trying to delete folder without force_destroy set to true")
-		log.Printf("Error! %s : %s\n\n", name, deleteErr)
-		return deleteErr
-	} else {
+	foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
+	if err != nil {
+		return err
+	}
+	if len(foldersList.Items) == 1 || d.Get("force_destroy").(bool) {
 		log.Printf("[DEBUG] folder names to delete: %#v", name)
-		foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
-		if err != nil {
-			return err
-		}
 		items := foldersList.Items
 		for i := len(items) - 1; i >= 0; i-- {
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -293,6 +287,10 @@ func resourceStorageFolderDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		log.Printf("[DEBUG] Finished deleting Folder %q: %#v", d.Id(), name)
+	} else {
+		deleteErr := fmt.Errorf("Error trying to delete folder without force_destroy set to true")
+		log.Printf("Error! %s : %s\n\n", name, deleteErr)
+		return deleteErr
 	}
 	return nil
 }
