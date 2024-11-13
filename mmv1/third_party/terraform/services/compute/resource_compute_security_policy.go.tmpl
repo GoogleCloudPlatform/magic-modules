@@ -326,7 +326,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
 
-									{{ if ne $.TargetVersionName `ga` -}}
 									"enforce_on_key_configs": {
 										Type:        schema.TypeList,
 										Description: `Enforce On Key Config of this security policy`,
@@ -347,7 +346,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 											},
 										},
 									},
-									{{- end }}
 
 									"ban_threshold": {
 										Type:        schema.TypeList,

@@ -403,7 +403,6 @@ func TestAccComputeSecurityPolicy_withRateLimitWithRedirectOptions(t *testing.T)
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeSecurityPolicy_withRateLimit_withEnforceOnKeyConfigs(t *testing.T) {
 	t.Parallel()
 
@@ -518,9 +517,6 @@ func TestAccComputeSecurityPolicy_EnforceOnKeyUpdates(t *testing.T) {
 		},
 	})
 }
-
-
-{{ end }}
 
 func TestAccComputeSecurityPolicy_withRecaptchaOptionsConfig(t *testing.T) {
 	t.Parallel()
@@ -1321,7 +1317,7 @@ resource "google_compute_security_policy" "policy" {
     }
     log_level    = "VERBOSE"
     user_ip_request_headers = [
-      "True-Client-IP", 
+      "True-Client-IP",
       "x-custom-ip"
     ]
   }
@@ -1582,7 +1578,6 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeSecurityPolicy_withRateLimitOptions_withEnforceOnKey(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -1812,7 +1807,6 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-{{- end }}
 
 func TestAccComputeSecurityPolicy_withRedirectOptionsRecaptcha(t *testing.T) {
 	t.Parallel()
