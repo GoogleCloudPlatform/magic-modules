@@ -5,7 +5,7 @@ aliases:
   - /docs/getting-started/contributing
   - /getting-started/contributing
   - /get-started/contributing
-  - /docs/get-started/contribution-process
+  - /get-started/contribution-process
 ---
 
 # Contribution process
