@@ -49,6 +49,7 @@ examples:
     vars:
       instance_name: 'memory-cache'
       project_id: 'my-project'
+      quota_start_time: '2014-10-02T15:01:23Z'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_acct: 'BILLING_ACCT'
@@ -228,7 +229,7 @@ properties:
       - name: 'signUpQuotaConfig'
         type: NestedObject
         description: |
-          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP. None of the child properties can be skipped.
+          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP. None of quota, startTime, or quotaDuration can be skipped.
         properties:
           - name: 'quota'
             type: Integer
