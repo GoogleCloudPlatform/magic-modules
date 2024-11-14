@@ -1,5 +1,3 @@
-SHELL=/usr/bin/env bash -eo pipefail
-
 # See https://googlecloudplatform.github.io/magic-modules/docs/getting-started/generate-providers/
 # for a guide on provider generation.
 
@@ -63,8 +61,7 @@ terraform build provider:
 mmv1:
 	cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
-			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile); \
-			go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) && go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
 		else \
 			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
