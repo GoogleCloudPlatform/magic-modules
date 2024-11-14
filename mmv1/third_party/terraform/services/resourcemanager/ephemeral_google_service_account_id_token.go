@@ -104,11 +104,11 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 	if !targetServiceAccount.IsNull() && !targetServiceAccount.IsUnknown() {
 		service := p.providerConfig.NewIamCredentialsClient(p.providerConfig.UserAgent)
 		name := fmt.Sprintf("projects/-/serviceAccounts/%s", targetServiceAccount.ValueString())
-		DelegatesSetValue, _ := data.Delegates.ToSetValue(ctx)
+
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
 			IncludeEmail: data.IncludeEmail.ValueBool(),
-			Delegates:    fwutils.StringSet(DelegatesSetValue),
+			Delegates:    fwutils.StringSet(data.Delegates),
 		}
 		at, err := service.Projects.ServiceAccounts.GenerateIdToken(name, tokenRequest).Do()
 		if err != nil {
