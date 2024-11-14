@@ -46,18 +46,21 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"target_service_account": schema.StringAttribute{
-				Required: true,
+				Description: "The service account to impersonate (e.g. `service_B@your-project-id.iam.gserviceaccount.com`)",
+				Required:    true,
 				Validators: []validator.String{
 					fwvalidators.ServiceAccountEmailValidator{},
 				},
 			},
 			"access_token": schema.StringAttribute{
-				Sensitive: true,
-				Computed:  true,
+				Description: "The `access_token` representing the new generated identity.",
+				Sensitive:   true,
+				Computed:    true,
 			},
 			"lifetime": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Description: "Lifetime of the impersonated token (defaults to its max: `3600s`)",
+				Optional:    true,
+				Computed:    true,
 				Validators: []validator.String{
 					fwvalidators.BoundedDuration{
 						MinDuration: 0,
@@ -66,10 +69,12 @@ func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, r
 				},
 			},
 			"scopes": schema.SetAttribute{
+				Description: "The scopes the new credential should have (e.g. `['cloud-platform']`)",
 				Required:    true,
 				ElementType: types.StringType,
 			},
 			"delegates": schema.SetAttribute{
+				Description: "Delegate chain of approvals needed to perform full impersonation. Specify the fully qualified service account name.  (e.g. `['projects/-/serviceAccounts/delegate-svc-account@project-id.iam.gserviceaccount.com']`)",
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.Set{
