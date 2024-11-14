@@ -4,7 +4,6 @@ func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, m
 	if diff.Id() == "" {
 		fieldNames := []string{
 			"description",
-			"labels",
 			// More to be added
 		}
 		found := []string{}

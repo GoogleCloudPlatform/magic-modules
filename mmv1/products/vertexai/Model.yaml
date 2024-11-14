@@ -125,11 +125,6 @@ properties:
         immutable: true
         description: |
           Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
-  - type: KeyValueLabels
-    name: 'labels'
-    description: |
-      The labels with user-defined metadata to organize your Models.
-      Label keys and values can be no longer than 64 characters.
   - type: Array
     name: 'supportedExportFormats'
     output: true
