@@ -42,6 +42,9 @@ type ephemeralServiceAccountIdTokenModel struct {
 }
 
 func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+	resp.Schema.Description = "This ephemeral resource provides a Google OpenID Connect (oidc) id_token."
+	resp.Schema.MarkdownDescription = "This ephemeral resource provides a Google OpenID Connect (oidc) id_token."
+
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"target_audience": schema.StringAttribute{
