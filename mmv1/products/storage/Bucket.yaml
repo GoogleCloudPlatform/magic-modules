@@ -189,8 +189,9 @@ properties:
         - name: 'responseHeader'
           type: Array
           description: |
-            The list of HTTP headers other than the simple response headers
-            to give permission for the user-agent to share across domains.
+            The list of HTTP headers to give permission for the user-agent
+            to share across domains. A typical example would e.g. be to
+            allow the `Content-Type` header.
           item_type:
             type: String
   - name: 'defaultEventBasedHold'
