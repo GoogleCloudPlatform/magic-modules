@@ -92,7 +92,7 @@ For more information about types of resources and the generation process overall
    # If true, the resource and all its fields are considered immutable - that is,
    # only creatable, not updatable. Individual fields can override this if they
    # have a custom update method in the API.
-   # immutable: true
+   immutable: true
 
    # URL for the resource's standard Create method, including query parameters.
    # https://google.aip.dev/133
