@@ -225,7 +225,7 @@ func testAccCheckStorageBucketUploadItem(t *testing.T, bucketName string) resour
 
 		data := bytes.NewBufferString("test")
 		dataReader := bytes.NewReader(data.Bytes())
-		object := &storage.Object{Name: "bucketDestroyTestFile"}
+		object := &storage.Object{Name: "folder/" + "bucketDestroyTestFile"}
 
 		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
