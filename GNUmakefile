@@ -61,7 +61,11 @@ terraform build provider:
 mmv1:
 	cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
-			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) && go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+			# Chaining these with "&&" is critical here to prevent this
+			# from exiting 0 on failure of the first command, since we're
+			# not forcing bash and errexit / pipefail here. 
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
+			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
 		else \
 			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
