@@ -15,7 +15,6 @@
 name: 'Connection'
 description: |
   A connection to a GitHub App installation.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connections'
