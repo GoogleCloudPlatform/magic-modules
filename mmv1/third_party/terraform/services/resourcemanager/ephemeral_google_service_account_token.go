@@ -40,6 +40,9 @@ type ephemeralServiceAccountAccessTokenModel struct {
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
+	resp.Schema.Description = "This ephemeral resource provides a google oauth2 access_token for a different service account than the one initially running the script."
+	resp.Schema.MarkdownDescription = "This ephemeral resource provides a google oauth2 access_token for a different service account than the one initially running the script."
+
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"target_service_account": schema.StringAttribute{
