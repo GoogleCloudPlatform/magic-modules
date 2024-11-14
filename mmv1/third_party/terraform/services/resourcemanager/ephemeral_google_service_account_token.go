@@ -104,6 +104,8 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 		return
 	}
 
+	// This is the default value for the lifetime of the access token
+	// Both ephemeral resources and data sources do not allow you to set a value for this attribute in the schema
 	if data.Lifetime.IsNull() {
 		data.Lifetime = types.StringValue("3600s")
 	}
