@@ -577,6 +577,9 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func detectmd5HashCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	if !d.NewValueKnown("detect_md5hash") {
+		d.SetNewComputed("detect_md5hash")
+	}
 	oldSourceHash := ""
 	if old, ok := d.GetOk("detect_md5hash"); ok {
 		oldSourceHash = old.(string)
