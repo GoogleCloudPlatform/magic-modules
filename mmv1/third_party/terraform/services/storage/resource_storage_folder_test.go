@@ -3,6 +3,7 @@
 package storage_test
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -215,5 +216,23 @@ func testAccStorageDeleteFolder(t *testing.T, bucketName, parentFolder string) r
 			deleteError = fmt.Errorf("failed to deleted folder: %s", err)
 		}
 		return deleteError
+	}
+}
+
+func testAccCheckStorageBucketUploadItem(t *testing.T, bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		data := bytes.NewBufferString("test")
+		dataReader := bytes.NewReader(data.Bytes())
+		object := &storage.Object{Name: "bucketDestroyTestFile"}
+
+		if res, err := config.NewStorageClient(config.UserAgent).Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
+		} else {
+			return fmt.Errorf("Objects.Insert failed: %v", err)
+		}
+
+		return nil
 	}
 }
