@@ -73,6 +73,9 @@ func TestAccStorageFolder_FolderForceDestroy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageFolder_storageBucketObject(bucketName, true, true, testFile.Name()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketUploadItem(t, bucketName),
+				),
 			},
 		},
 	})
