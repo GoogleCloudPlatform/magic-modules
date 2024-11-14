@@ -74,7 +74,7 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 
 func testAccEphemeralServiceAccountToken_basic(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
-ephemeral "google_service_account_token" "token" {
+ephemeral "google_service_account_access_token" "token" {
   target_service_account = "%s"
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
 }
@@ -83,7 +83,7 @@ ephemeral "google_service_account_token" "token" {
 
 func testAccEphemeralServiceAccountToken_withDelegates(initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project string) string {
 	return fmt.Sprintf(`
-ephemeral "google_service_account_token" "test" {
+ephemeral "google_service_account_access_token" "test" {
   target_service_account = "%s"
   delegates = [
     "%s",
@@ -100,7 +100,7 @@ ephemeral "google_service_account_token" "test" {
 
 func testAccEphemeralServiceAccountToken_withCustomLifetime(serviceAccountEmail string) string {
 	return fmt.Sprintf(`
-ephemeral "google_service_account_token" "token" {
+ephemeral "google_service_account_access_token" "token" {
   target_service_account = "%s"
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
   lifetime              = "3600s"

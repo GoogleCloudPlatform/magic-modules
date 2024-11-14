@@ -28,7 +28,7 @@ type googleEphemeralServiceAccountAccessToken struct {
 }
 
 func (p *googleEphemeralServiceAccountAccessToken) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_service_account_token"
+	resp.TypeName = req.ProviderTypeName + "_service_account_access_token"
 }
 
 type ephemeralServiceAccountAccessTokenModel struct {
