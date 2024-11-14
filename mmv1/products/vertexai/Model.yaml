@@ -40,8 +40,12 @@ async:
   error:
     path: 'error'
     message: 'message'
+custom_diff:
+  - 'vertexAiModelDiffSuppress'
 custom_code:
+  constants: templates/terraform/constants/vertex_ai_model.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
+  encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
   post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
 examples:
@@ -121,6 +125,11 @@ properties:
         immutable: true
         description: |
           Points to a YAML file stored on Google Cloud Storage describing the format of a single prediction produced by this Model, which are returned via PredictResponse.predictions, ExplainResponse.explanations, and BatchPredictionJob.output_config.
+  - type: KeyValueLabels
+    name: 'labels'
+    description: |
+      The labels with user-defined metadata to organize your Models.
+      Label keys and values can be no longer than 64 characters.
   - type: Array
     name: 'supportedExportFormats'
     output: true

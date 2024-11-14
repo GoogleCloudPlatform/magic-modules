@@ -2,5 +2,8 @@ var postRequestType string
 
 if _, ok := d.GetOk("source_model"); ok {
 	postRequestType = ":copy"
+
+	// These are not valid fields for the copy request on create
+	delete(obj, "labels")
 }
 url = regexp.MustCompile("PRE_CREATE_REPLACE_ME").ReplaceAllLiteralString(url, postRequestType)

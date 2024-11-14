@@ -1,0 +1,6 @@
+if modelName, ok := obj["modelName"].(string); ok && modelName != "" {
+	obj["displayName"] = modelName
+	delete(obj, "modelName")
+}
+
+return obj, nil
