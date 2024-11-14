@@ -121,12 +121,7 @@ func (p *googleEphemeralServiceAccountAccessToken) Open(ctx context.Context, req
 
 	var delegates []string
 	if !data.Delegates.IsNull() {
-		DelegatesSetValue, diags := data.Delegates.ToSetValue(ctx)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		delegates = fwutils.StringSet(DelegatesSetValue)
+		delegates = fwutils.StringSet(data.Delegates)
 	}
 
 	tokenRequest := &iamcredentials.GenerateAccessTokenRequest{
