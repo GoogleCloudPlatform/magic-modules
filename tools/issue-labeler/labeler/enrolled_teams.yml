@@ -7,6 +7,9 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-colab-enterprise:
+  resources:
+  - google_vertex_ai_notebook_.*
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
@@ -75,6 +78,9 @@ service/billingbudgets:
 service/binaryauthorization:
   resources:
   - google_binary_authorization_.*
+service/blockchainnodeengine:
+  resources:
+  - google_blockchain_node_engine_.*
 service/certificatemanager:
   resources:
   - google_certificate_manager_.*
@@ -137,6 +143,9 @@ service/cloudscheduler:
 service/cloudtasks:
   resources:
   - google_cloud_tasks_.*
+service/cloudtrace:
+  resources:
+  - google_cloud_trace_.*
 service/composer:
   resources:
   - google_composer_.*
@@ -153,6 +162,7 @@ service/compute-health:
   - google_compute_http_health_check
   - google_compute_https_health_check
   - google_compute_region_health_check
+  - google_network_services_service_lb_policies
 service/compute-instances:
   resources:
   - google_compute_instance
@@ -244,6 +254,7 @@ service/compute-router:
   - google_compute_router
   - google_compute_router_interface
   - google_compute_router_peer
+  - google_compute_router_route_policy
   - google_compute_router_status
 service/compute-security-policy:
   resources:
@@ -259,7 +270,7 @@ service/compute-vpc:
   resources:
   - google_compute_network
   - google_compute_route
-  - google_compute_subnetwork
+  - google_compute_subnetwork.*
   - google_compute_shared_vpc_host_project
   - google_compute_shared_vpc_service_project
   - google_compute_project_default_network_tier
@@ -495,6 +506,10 @@ service/networksecurity-swp:
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*
+service/networkservices-service-extensions:
+  resources:
+  - google_network_services_lb_route_extension
+  - google_network_services_lb_traffic_extension
 service/networkservices-traffic-director:
   resources:
   - google_network_services_endpoint_policy
@@ -509,6 +524,9 @@ service/notebooks:
   resources:
   - google_notebooks_.*
   - google_workbench_.*
+service/oracledatabase:
+  resources:
+  - google_oracle_database_.*
 service/orgpolicy:
   resources:
   - google_folder_organization_policy
@@ -592,12 +610,18 @@ service/serviceusage-quota:
   resources:
   - google_cloud_quotas_.*
   - google_service_usage_consumer_quota_override
+service/siteverification:
+  resources:
+  - google_site_verification_.*
 service/sourcerepo:
   resources:
   - google_sourcerepo_.*
 service/spanner:
   resources:
   - google_spanner_.*
+service/speech:
+  resources:
+  - google_speech_to_text_.*
 service/sqladmin-cp:
   resources:
   - google_sql_database_instance
@@ -624,6 +648,9 @@ service/storage:
 service/tpu:
   resources:
   - google_tpu_.*
+service/transcoder:
+  resources:
+  - google_transcoder_.*
 service/vmwareengine:
   resources:
   - google_vmwareengine_.*
