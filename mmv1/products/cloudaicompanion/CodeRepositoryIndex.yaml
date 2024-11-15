@@ -29,6 +29,10 @@ examples:
       cri_id: '"cri-example"'
     exclude_test: true
 autogen_async: true
+timeouts:
+  insert_minutes: 90
+  update_minutes: 90
+  delete_minutes: 90
 async:
   operation:
     timeouts:
