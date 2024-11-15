@@ -124,7 +124,7 @@ properties:
     validation:
       function: 'verify.ValidateGCEName'
   - name: 'numericId'
-    type: String
+    type: Integer
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     output: true

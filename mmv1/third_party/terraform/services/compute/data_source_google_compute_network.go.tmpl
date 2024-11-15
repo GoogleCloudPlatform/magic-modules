@@ -23,6 +23,11 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 				Computed: true,
 			},
 
+			"numeric_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
 			"gateway_ipv4": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,6 +99,9 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 	}
 	if err := d.Set("description", network.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("numeric_id", network.Id); err != nil {
+		return fmt.Errorf("Error setting numeric_id: %s", err)
 	}
 	if err := d.Set("subnetworks_self_links", network.Subnetworks); err != nil {
 		return fmt.Errorf("Error setting subnetworks_self_links: %s", err)
