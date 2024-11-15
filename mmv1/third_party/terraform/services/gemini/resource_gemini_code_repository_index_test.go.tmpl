@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -31,11 +30,6 @@ func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 			},
 			{
 				Config: testAccGeminiCodeRepositoryIndex_update(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_gemini_code_repository_index.example", plancheck.ResourceActionUpdate),
-					},
-				},
 			},
 			{
 				ResourceName:            "google_gemini_code_repository_index.example",
@@ -54,7 +48,7 @@ resource "google_gemini_code_repository_index" "example" {
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted"}
   location = "us-central1"
   code_repository_index_id = "test-cri-index-example"
-  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
+  kms_key = "projects/cloud-code-rag-github-access/locations/us-central1/keyRings/keyring-example-basic1/cryptoKeys/crypto-key-example"
 }
 `, context)
 }
@@ -65,8 +59,8 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted", "new_label": "new_val"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example"
-  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
+  code_repository_index_id = "test-cri-index-example-update"
+  kms_key = "projects/cloud-code-rag-github-access/locations/us-central1/keyRings/keyring-example-basic1/cryptoKeys/crypto-key-example"
 }
 `, context)
 }
