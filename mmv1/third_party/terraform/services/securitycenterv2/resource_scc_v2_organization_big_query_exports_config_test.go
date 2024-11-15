@@ -1,25 +1,33 @@
 package securitycenterv2_test
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
+	"cloud.google.com/go/bigquery"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"google.golang.org/api/iterator"
 )
 
 func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
-	dataset_id := "tf_test_" + randomSuffix
+	datasetID := "tf_test_" + randomSuffix
 	orgID := envvar.GetTestOrgFromEnv(t)
+
+	// Run cleanup before the test starts
+	cleanupBigQueryDatasets(t, "tf_test_")
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
 		"random_suffix":       randomSuffix,
-		"dataset_id":          dataset_id,
+		"dataset_id":          datasetID,
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"name": fmt.Sprintf("organizations/%s/locations/global/bigQueryExports/%s",
 			orgID, "tf-test-export-"+randomSuffix),
@@ -35,6 +43,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(context),
+				Destroy: true,
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
@@ -44,6 +53,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 			},
 			{
 				Config: testAccSecurityCenterV2OrganizationBigQueryExportsConfig_update(context),
+				Destroy: true,
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
@@ -53,6 +63,36 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 			},
 		},
 	})
+}
+
+func cleanupBigQueryDatasets(t *testing.T, prefix string) {
+	ctx := context.Background()
+	projectID := envvar.ProjectID()
+
+	client, err := bigquery.NewClient(ctx, projectID)
+	if err != nil {
+		t.Fatalf("Failed to create BigQuery client: %v", err)
+	}
+	defer client.Close()
+
+	it := client.Datasets(ctx)
+	for {
+		dataset, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			t.Fatalf("Failed to list datasets: %v", err)
+		}
+
+		// Delete datasets that start with the specified prefix
+		if strings.HasPrefix(dataset.DatasetID, prefix) {
+			log.Printf("Deleting existing dataset with prefix %s: %s", prefix, dataset.DatasetID)
+			if err := client.Dataset(dataset.DatasetID).DeleteWithContents(ctx); err != nil {
+				t.Fatalf("Failed to delete dataset %s: %v", dataset.DatasetID, err)
+			}
+		}
+	}
 }
 
 func testAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(context map[string]interface{}) string {
