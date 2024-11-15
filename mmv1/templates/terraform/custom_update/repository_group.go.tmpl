@@ -52,10 +52,18 @@ for {
 	})
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-			log.Printf("[DEBUG] Waiting for enqueued operation to finish before updating RepositoryGroup %q: %#v", d.Id(), obj)
-			time.Sleep(3 * time.Minute)
+			errMsg := fmt.Sprintf("%s", err)
+			if strings.Contains(errMsg, "unable to queue the operation") {
+				log.Printf("[DEBUG] Waiting for enqueued operation to finish before updating RepositoryGroup: %#v", obj)
+				time.Sleep(10 * time.Second)
+			} else if strings.Contains(errMsg, "parent resource not in ready state") {
+				log.Printf("[DEBUG] Waiting for parent resource to become active before updating RepositoryGroup: %#v", obj)
+				time.Sleep(1 * time.Minute)
+			} else {
+				return fmt.Errorf("Error updating RepositoryGroup %q: %s", d.Id(), err)
+			}
 		} else {
-			return fmt.Errorf("Error updating RepositoryGroup: %s", err)
+			return fmt.Errorf("Error updating RepositoryGroup %q: %s", d.Id(), err)
 		}
 	} else {
 		break

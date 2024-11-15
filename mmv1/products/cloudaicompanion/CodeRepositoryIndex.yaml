@@ -51,7 +51,6 @@ async:
     message: message
   include_project: false
 custom_code:
-  custom_create: templates/terraform/custom_create/code_repository_index.go.tmpl
   custom_update: templates/terraform/custom_update/code_repository_index.go.tmpl
 parameters:
   - name: location

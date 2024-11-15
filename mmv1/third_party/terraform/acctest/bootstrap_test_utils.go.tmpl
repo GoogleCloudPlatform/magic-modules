@@ -1626,10 +1626,18 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 				})
 				if err != nil {
 					if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-						log.Printf("[DEBUG] Waiting for enqueued operation to finish")
-						time.Sleep(3 * time.Minute)
+						errMsg := fmt.Sprintf("%s", err)
+						if strings.Contains(errMsg, "unable to queue the operation") {
+							log.Printf("[DEBUG] Waiting for enqueued operation to finish before creating RepositoryGroup: %#v", obj)
+							time.Sleep(10 * time.Second)
+						} else if strings.Contains(errMsg, "parent resource not in ready state") {
+							log.Printf("[DEBUG] Waiting for parent resource to become active before creating RepositoryGroup: %#v", obj)
+							time.Sleep(1 * time.Minute)
+						} else {
+							t.Fatalf("Error creating RepositoryGroup: %s", err)
+						}
 					} else {
-						t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
+						t.Fatalf("Error creating repository group %q: %s", repositoryGroupId, err)
 					}
 				} else {
 					break
@@ -1700,27 +1708,18 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			}
 
 			headers := make(http.Header)
-			for {
-				_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-					Config:    config,
-					Method:    "POST",
-					Project:   config.Project,
-					RawURL:    postURL,
-					UserAgent: config.UserAgent,
-					Body:      obj,
-					Timeout:   90 * time.Minute,
-					Headers:   headers,
-				})
-				if err != nil {
-					if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
-						log.Printf("[DEBUG] Waiting for enqueued operation to finish")
-						time.Sleep(3 * time.Minute)
-					} else {
-						t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
-					}
-				} else {
-					break
-				}
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   config.Project,
+				RawURL:    postURL,
+				UserAgent: config.UserAgent,
+				Body:      obj,
+				Timeout:   90 * time.Minute,
+				Headers:   headers,
+			})
+			if err != nil {
+				t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
