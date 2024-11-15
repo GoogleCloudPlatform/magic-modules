@@ -207,8 +207,8 @@ properties:
     resource: 'Network'
     imports: 'selfLink'
   - name: 'numericId'
-    type: String
-    description: The numeric ID of the resource as a string.
+    type: Integer
+    description: The numeric ID of the resource.
     output: true
   - name: 'purpose'
     type: String
