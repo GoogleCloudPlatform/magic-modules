@@ -43,7 +43,7 @@ func TestAccSecurityCenterV2ProjectBigQueryExportConfig_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterV2ProjectBigQueryExportConfig_basic(context),
+				Config:  testAccSecurityCenterV2ProjectBigQueryExportConfig_basic(context),
 				Destroy: true,
 			},
 			{
@@ -53,7 +53,7 @@ func TestAccSecurityCenterV2ProjectBigQueryExportConfig_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"update_time", "project"},
 			},
 			{
-				Config: testAccSecurityCenterV2ProjectBigQueryExportConfig_update(context),
+				Config:  testAccSecurityCenterV2ProjectBigQueryExportConfig_update(context),
 				Destroy: true,
 			},
 			{

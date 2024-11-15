@@ -42,7 +42,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
+				Config:  testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context),
 				Destroy: true,
 			},
 			{
@@ -52,7 +52,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 				ImportStateVerifyIgnore: []string{"update_time"},
 			},
 			{
-				Config: testAccSecurityCenterV2OrganizationBigQueryExportConfig_update(context),
+				Config:  testAccSecurityCenterV2OrganizationBigQueryExportConfig_update(context),
 				Destroy: true,
 			},
 			{
