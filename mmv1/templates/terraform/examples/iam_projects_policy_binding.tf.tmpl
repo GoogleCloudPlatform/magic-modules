@@ -1,4 +1,6 @@
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_iam_principal_access_boundary_policy" "pab_policy" {
   provider = google-beta
@@ -10,13 +12,13 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
 
 resource "google_iam_projects_policy_binding" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  project        = google_project.project.project_id
+  project        = data.google_project.project.project_id
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
   policy_kind    = "PRINCIPAL_ACCESS_BOUNDARY"
   policy_binding_id = "{{index $.Vars "project_binding_id"}}"
   policy         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/principalAccessBoundaryPolicies/${google_iam_principal_access_boundary_policy.pab_policy.principal_access_boundary_policy_id}"
   target {
-    principal_set = "//cloudresourcemanager.googleapis.com/projects/${google_projects.project.project_id}"
+    principal_set = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.project_id}"
   }
 }

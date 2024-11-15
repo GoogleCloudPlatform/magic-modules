@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  post_delete: 'templates/terraform/post_delete/sleep.go.tmpl'
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
