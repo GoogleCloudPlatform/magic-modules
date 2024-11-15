@@ -141,6 +141,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google-beta/services/certificatemanager"
     ),
+    "cloudaicompanion" to mapOf(
+        "name" to "cloudaicompanion",
+        "displayName" to "Cloudaicompanion",
+        "path" to "./google-beta/services/cloudaicompanion"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",
@@ -415,6 +420,11 @@ var ServicesListBeta = mapOf(
         "name" to "firestore",
         "displayName" to "Firestore",
         "path" to "./google-beta/services/firestore"
+    ),
+    "gemini" to mapOf(
+        "name" to "gemini",
+        "displayName" to "Gemini",
+        "path" to "./google-beta/services/cloudaicompanion"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
