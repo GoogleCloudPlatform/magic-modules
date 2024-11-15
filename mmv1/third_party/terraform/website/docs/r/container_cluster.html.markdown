@@ -404,6 +404,10 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `workload_alts_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   Configuration for [direct-path (via ALTS) with workload identity.](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#workloadaltsconfig). Structure is [documented below](#nested_workload_alts_config).
 
+* `enterprise_config` - (Optional)
+  Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config).
+
+
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
 *  `disabled` - (Required) Whether the cluster disables default in-node sNAT rules. In-node sNAT rules will be disabled when defaultSnatStatus is disabled.When disabled is set to false, default IP masquerade rules will be applied to the nodes to prevent sNAT on cluster internal traffic
@@ -1431,6 +1435,12 @@ linux_node_config {
 <a name="nested_workload_alts_config"></a>The `workload_alts_config` block supports:
 
 * `enable_alts` - (Required) Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity ([workloadPool]((#nested_workload_identity_config)) must be non-empty).
+
+<a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
+
+* `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+
+* `cluster_tier` - (Output) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
 
 ## Attributes Reference
 
