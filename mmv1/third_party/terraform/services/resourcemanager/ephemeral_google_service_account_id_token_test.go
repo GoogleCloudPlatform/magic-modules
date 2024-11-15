@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestEphemeralServiceAccountIdToken_basic(t *testing.T) {
+func TestAccEphemeralServiceAccountIdToken_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -29,7 +29,7 @@ func TestEphemeralServiceAccountIdToken_basic(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountIdToken_withDelegates(t *testing.T) {
+func TestAccEphemeralServiceAccountIdToken_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -51,7 +51,7 @@ func TestEphemeralServiceAccountIdToken_withDelegates(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountIdToken_withIncludeEmail(t *testing.T) {
+func TestAccEphemeralServiceAccountIdToken_withIncludeEmail(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
