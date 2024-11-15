@@ -48,15 +48,18 @@ func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req e
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"target_audience": schema.StringAttribute{
-				Required: true,
+				Description: "The audience claim for the `id_token`.",
+				Required:    true,
 			},
 			"target_service_account": schema.StringAttribute{
-				Optional: true,
+				Description: "The email of the service account being impersonated.  Used only when using impersonation mode.",
+				Optional:    true,
 				Validators: []validator.String{
 					fwvalidators.ServiceAccountEmailValidator{},
 				},
 			},
 			"delegates": schema.SetAttribute{
+				Description: "Delegate chain of approvals needed to perform full impersonation. Specify the fully qualified service account name.  Used only when using impersonation mode.",
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.Set{
@@ -64,12 +67,14 @@ func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req e
 				},
 			},
 			"include_email": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
+				Description: "Include the verified email in the claim. Used only when using impersonation mode.",
+				Optional:    true,
+				Computed:    true,
 			},
 			"id_token": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
+				Description: "The `id_token` representing the new generated identity.",
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}
