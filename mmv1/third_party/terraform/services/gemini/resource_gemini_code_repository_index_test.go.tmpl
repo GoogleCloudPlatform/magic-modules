@@ -51,7 +51,7 @@ func testAccGeminiCodeRepositoryIndex_basic(context map[string]interface{}) stri
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
-  labels = {"ccfe_debug_note": "gcloud_e2e_do_not_delete"}
+  labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted"}
   location = "us-central1"
   code_repository_index_id = "test-cri-index-example"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
@@ -63,7 +63,7 @@ func testAccGeminiCodeRepositoryIndex_update(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
-  labels = {"ccfe_debug_note": "gcloud_e2e_do_not_delete", "new_label": "new_val"}
+  labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted", "new_label": "new_val"}
   location = "us-central1"
   code_repository_index_id = "test-cri-index-example"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"

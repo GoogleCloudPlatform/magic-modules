@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccGeminiRepositoryGroup_update(t *testing.T) {
-	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-test", "us-central1", "", map[string]string{"ccfe_debug_note": "gcloud_e2e_do_not_delete"})
+	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-test", "us-central1", "", map[string]string{"ccfe_debug_note": "terraform_e2e_should_be_deleted"})
 	context := map[string]interface{}{
 		"project_id":               os.Getenv("GOOGLE_PROJECT"),
 		"code_repository_index_id": codeRepositoryIndexId,
