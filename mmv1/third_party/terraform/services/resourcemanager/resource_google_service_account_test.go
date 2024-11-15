@@ -308,6 +308,9 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 
 	accountId := "a" + acctest.RandString(t, 10)
 	project := envvar.GetTestProjectFromEnv()
+	if project == "" {
+		project = "test-project"
+	}
 	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
 	expectedMember := "serviceAccount:" + expectedEmail
 
