@@ -25,7 +25,7 @@ examples:
   - name: "gemini_repository_group_basic"
     min_version: 'beta'
     primary_resource_id: "example"
-    primary_resource_name: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-example", "us-central1", "", ""), "test-rg-repository-group-id"'
+    primary_resource_name: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-example%{random_suffix}", "us-central1", "", ""), "test-rg-repository-group-id"'
     vars:
       repository_group_id: "example-repository-group-id"
       git_repository_link_id: 'example-git-repository-link-id'
@@ -33,10 +33,12 @@ examples:
       repository_resource: "projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
       connection_id: "example-connection-id"
     test_vars_overrides:
+      repository_group_id: '"example_repository_group_idx"'
       git_repository_link_id: 'acctest.BootstrapGitRepository(t, "basic", "us-central1", "https://github.com/CC-R-github-robot/tf-test.git", acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648))'
-      cri_id: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-example", "us-central1", "", "")'
+      cri_id: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "test-rg", "us-central1", "", "")'
       repository_resource: '"projects/"+envvar.GetTestProjectFromEnv()+"/locations/us-central1/connections/"+acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)+"/gitRepositoryLinks/"+acctest.BootstrapGitRepository(t, "basic", "us-central1", "https://github.com/CC-R-github-robot/tf-test.git", acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648))'
       connection_id: 'acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)'
+    exclude_test: true
 autogen_async: true
 async:
   operation:
@@ -69,6 +71,9 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{coderepositoryindex}}/repositoryGroups/{{repository_group_id}}'
     - '{{repository_group_id}}'
   allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
+custom_code:
+  custom_create: templates/terraform/custom_create/repository_group.go.tmpl
+  custom_update: templates/terraform/custom_update/repository_group.go.tmpl
 parameters:
   - name: location
     type: String

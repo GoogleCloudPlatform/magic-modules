@@ -14,7 +14,6 @@ import (
 func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 	context := map[string]interface{}{
 		"project_id": os.Getenv("GOOGLE_PROJECT"),
-		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -52,9 +51,9 @@ func testAccGeminiCodeRepositoryIndex_basic(context map[string]interface{}) stri
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
-  labels = {"label1": "value1"}
+  labels = {"ccfe_debug_note": "gcloud_e2e_do_not_delete"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example%{random_suffix}"
+  code_repository_index_id = "test-cri-index-example"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)
@@ -64,9 +63,9 @@ func testAccGeminiCodeRepositoryIndex_update(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
-  labels = {"label1": "value1", "label2": "value2"}
+  labels = {"ccfe_debug_note": "gcloud_e2e_do_not_delete", "new_label": "new_val"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example%{random_suffix}"
+  code_repository_index_id = "test-cri-index-example"
   kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
 }
 `, context)

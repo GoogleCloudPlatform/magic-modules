@@ -6,14 +6,16 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
+func TestAccGeminiRepositoryGroupIamBinding(t *testing.T) {
 	location := "us-central1"
-	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
+	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", map[string]string{"ccfe_debug_note": "gcloud_e2e_do_not_delete"})
 	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
 	gitRepositoryLinkId := acctest.BootstrapGitRepository(t, "basic", location, "https://github.com/CC-R-github-robot/tf-test.git", developerConnectionId)
 	repositoryGroupId := acctest.BoostrapSharedRepositoryGroup(t, "basic", location, "", codeRepositoryIndexId,
@@ -32,7 +34,7 @@ func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGeminiRepositoryGroupIamBinding_basicGenerated(context),
+				Config: testAccGeminiRepositoryGroupIamBinding_basic(context),
 			},
 			{
 				ResourceName:      "google_gemini_repository_group_iam_binding.foo",
@@ -42,7 +44,7 @@ func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
 			},
 			{
 				// Test Iam Binding update
-				Config: testAccGeminiRepositoryGroupIamBinding_updateGenerated(context),
+				Config: testAccGeminiRepositoryGroupIamBinding_update(context),
 			},
 			{
 				ResourceName:      "google_gemini_repository_group_iam_binding.foo",
@@ -54,7 +56,7 @@ func TestAccGeminiRepositoryGroupIamBindingGenerated(t *testing.T) {
 	})
 }
 
-func TestAccGeminiRepositoryGroupIamMemberGenerated(t *testing.T) {
+func TestAccGeminiRepositoryGroupIamMember(t *testing.T) {
 	location := "us-central1"
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
 	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
@@ -76,7 +78,7 @@ func TestAccGeminiRepositoryGroupIamMemberGenerated(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccGeminiRepositoryGroupIamMember_basicGenerated(context),
+				Config: testAccGeminiRepositoryGroupIamMember_basic(context),
 			},
 			{
 				ResourceName:      "google_gemini_repository_group_iam_member.foo",
@@ -88,7 +90,7 @@ func TestAccGeminiRepositoryGroupIamMemberGenerated(t *testing.T) {
 	})
 }
 
-func TestAccGeminiRepositoryGroupIamPolicyGenerated(t *testing.T) {
+func TestAccGeminiRepositoryGroupIamPolicy(t *testing.T) {
 	location := "us-central1"
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic", location, "", "")
 	developerConnectionId := acctest.BootstrapDeveloperConnection(t, "basic", location, "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)
@@ -109,7 +111,7 @@ func TestAccGeminiRepositoryGroupIamPolicyGenerated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGeminiRepositoryGroupIamPolicy_basicGenerated(context),
+				Config: testAccGeminiRepositoryGroupIamPolicy_basic(context),
 				Check:  resource.TestCheckResourceAttrSet("data.google_gemini_repository_group_iam_policy.foo", "policy_data"),
 			},
 			{
@@ -131,7 +133,7 @@ func TestAccGeminiRepositoryGroupIamPolicyGenerated(t *testing.T) {
 	})
 }
 
-func testAccGeminiRepositoryGroupIamMember_basicGenerated(context map[string]interface{}) string {
+func testAccGeminiRepositoryGroupIamMember_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group_iam_member" "foo" {
   provider = google-beta
@@ -145,7 +147,7 @@ resource "google_gemini_repository_group_iam_member" "foo" {
 `, context)
 }
 
-func testAccGeminiRepositoryGroupIamPolicy_basicGenerated(context map[string]interface{}) string {
+func testAccGeminiRepositoryGroupIamPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_iam_policy" "foo" {
   provider = google-beta
@@ -194,7 +196,7 @@ resource "google_gemini_repository_group_iam_policy" "foo" {
 `, context)
 }
 
-func testAccGeminiRepositoryGroupIamBinding_basicGenerated(context map[string]interface{}) string {
+func testAccGeminiRepositoryGroupIamBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group_iam_binding" "foo" {
   provider = google-beta
@@ -208,7 +210,7 @@ resource "google_gemini_repository_group_iam_binding" "foo" {
 `, context)
 }
 
-func testAccGeminiRepositoryGroupIamBinding_updateGenerated(context map[string]interface{}) string {
+func testAccGeminiRepositoryGroupIamBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group_iam_binding" "foo" {
   provider = google-beta

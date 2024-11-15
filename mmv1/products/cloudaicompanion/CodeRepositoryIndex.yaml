@@ -25,8 +25,9 @@ examples:
   - name: "gemini_code_repository_index_basic"
     min_version: 'beta'
     primary_resource_id: "example"
-    vars:
-      cri_id: "cri-example"
+    test_vars_overrides:
+      cri_id: '"cri-example"'
+    exclude_test: true
 autogen_async: true
 async:
   operation:
@@ -49,6 +50,9 @@ async:
     path: error
     message: message
   include_project: false
+custom_code:
+  custom_create: templates/terraform/custom_create/code_repository_index.go.tmpl
+  custom_update: templates/terraform/custom_update/code_repository_index.go.tmpl
 parameters:
   - name: location
     type: String

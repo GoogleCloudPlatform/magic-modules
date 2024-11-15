@@ -1,0 +1,74 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for CodeRepositoryIndex: %s", err)
+}
+billingProject = project
+
+obj := make(map[string]interface{})
+kmsKeyProp, err := expandGeminiCodeRepositoryIndexKmsKey(d.Get("kms_key"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("kms_key"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, kmsKeyProp)) {
+	obj["kmsKey"] = kmsKeyProp
+}
+labelsProp, err := expandGeminiCodeRepositoryIndexEffectiveLabels(d.Get("effective_labels"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+	obj["labels"] = labelsProp
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}GeminiBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/codeRepositoryIndexes/{{"{{"}}code_repository_index_id{{"}}"}}")
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Updating CodeRepositoryIndex %q: %#v", d.Id(), obj)
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+var res map[string]interface{}
+headers := make(http.Header)
+for {
+	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PUT",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			log.Printf("[DEBUG] Waiting for enqueued operation to finish before updating CodeRepositoryIndex: %#v", obj)
+			time.Sleep(3 * time.Minute)
+		} else {
+			return fmt.Errorf("Error updating CodeRepositoryIndex: %s", err)
+		}
+	} else {
+		break
+	}
+}
+log.Printf("[DEBUG] Finished updating CodeRepositoryIndex %q: %#v", d.Id(), res)
+
+err = GeminiOperationWaitTime(
+	config, res, project, "Updating CodeRepositoryIndex", userAgent,
+	d.Timeout(schema.TimeoutUpdate))
+
+if err != nil {
+	return err
+}
+
+return resourceGeminiCodeRepositoryIndexRead(d, meta)

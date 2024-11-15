@@ -1467,7 +1467,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks?gitRepositoryLinkId=%s",
 				config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
 			headers := make(http.Header)
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
 				Project:   config.Project,
@@ -1479,15 +1479,6 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			})
 			if err != nil {
 				t.Fatalf("Error bootstrapping git repository link %q: %s", gitRepositoryLinkId, err)
-			}
-
-			log.Printf("[DEBUG] Waiting for git repository link creation to finish")
-			var opRes map[string]interface{}
-			err = privateca.PrivatecaOperationWaitTimeWithResponse(
-				config, res, &opRes, config.Project, "Creating git repository link", config.UserAgent,
-				20*time.Minute)
-			if err != nil {
-				t.Fatalf("Error bootstrapping git repository link  %q: %s", gitRepositoryLinkId, err)
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -1551,7 +1542,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections?connectionId=%s",
 				config.DeveloperConnectBasePath, config.Project, location, connectionId)
 			headers := make(http.Header)
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "POST",
 				Project:   config.Project,
@@ -1563,15 +1554,6 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			})
 			if err != nil {
 				t.Fatalf("Error bootstrapping developer connection %q: %s", connectionId, err)
-			}
-
-			log.Printf("[DEBUG] Waiting for developer connection creation to finish")
-			var opRes map[string]interface{}
-			err = privateca.PrivatecaOperationWaitTimeWithResponse(
-				config, res, &opRes, config.Project, "Creating developer connection", config.UserAgent,
-				20*time.Minute)
-			if err != nil {
-				t.Fatalf("Error creating developer connection group %q: %s", connectionId, err)
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -1631,27 +1613,27 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			}
 
 			headers := make(http.Header)
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "POST",
-				Project:   config.Project,
-				RawURL:    postURL,
-				UserAgent: config.UserAgent,
-				Body:      obj,
-				Timeout:   20 * time.Minute,
-				Headers:   headers,
-			})
-			if err != nil {
-				t.Fatalf("Error bootstrapping shared repository group %q: %s", repositoryGroupId, err)
-			}
-
-			log.Printf("[DEBUG] Waiting for repository group creation to finish")
-			var opRes map[string]interface{}
-			err = privateca.PrivatecaOperationWaitTimeWithResponse(
-				config, res, &opRes, config.Project, "Creating repository group", config.UserAgent,
-				4*time.Minute)
-			if err != nil {
-				t.Errorf("Error getting shared repository group %q: %s", repositoryGroupId, err)
+			for {
+				_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "POST",
+					Project:   config.Project,
+					RawURL:    postURL,
+					UserAgent: config.UserAgent,
+					Body:      obj,
+					Timeout:   20 * time.Minute,
+					Headers:   headers,
+				})
+				if err != nil {
+					if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+						log.Printf("[DEBUG] Waiting for enqueued operation to finish")
+						time.Sleep(3 * time.Minute)
+					} else {
+						t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
+					}
+				} else {
+					break
+				}
 			}
 
 			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -1682,7 +1664,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	// That is the reason to use the shared code repository indexes for test resources.
 	const SharedCodeRepositoryIndexPrefix = "tf-bootstrap-cri-"
 
-	func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, location, labels, kmsKey string) string {
+	func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, location, kmsKey string, labels map[string]string) string {
 		codeRepositoryIndexId = SharedCodeRepositoryIndexPrefix + codeRepositoryIndexId
 
 		config := BootstrapConfig(t)
@@ -1710,7 +1692,7 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			log.Printf("[DEBUG] Code repository index %q not found, bootstrapping", codeRepositoryIndexId)
 			postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes?codeRepositoryIndexId=%s", config.GeminiBasePath, config.Project, location, codeRepositoryIndexId)
 			obj := make(map[string]interface{})
-			if labels != "" {
+			if labels != nil {
 				obj["labels"] = labels
 			}
 			if kmsKey != "" {
@@ -1718,49 +1700,40 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 			}
 
 			headers := make(http.Header)
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "POST",
-				Project:   config.Project,
-				RawURL:    postURL,
-				UserAgent: config.UserAgent,
-				Body:      obj,
-				Timeout:   90 * time.Minute,
-				Headers:   headers,
-			})
-			if err != nil {
-				t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
-			}
-
-			log.Printf("[DEBUG] Waiting for code repository index creation to finish")
-			var opRes map[string]interface{}
-			err = privateca.PrivatecaOperationWaitTimeWithResponse(
-				config, res, &opRes, config.Project, "Creating code repository index", config.UserAgent,
-				90*time.Minute)
-
-			if err != nil {
-				t.Fatalf("Error bootstrapping code repository index %q: %s", codeRepositoryIndexId, err)
-			}
-
 			for {
-				res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 					Config:    config,
-					Method:    "GET",
+					Method:    "POST",
 					Project:   config.Project,
-					RawURL:    getURL,
+					RawURL:    postURL,
 					UserAgent: config.UserAgent,
+					Body:      obj,
 					Timeout:   90 * time.Minute,
 					Headers:   headers,
 				})
 				if err != nil {
-					t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
-				}
-				if res["state"] == "CREATING" {
-					time.Sleep(1 * time.Minute)
+					if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+						log.Printf("[DEBUG] Waiting for enqueued operation to finish")
+						time.Sleep(3 * time.Minute)
+					} else {
+						t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
+					}
 				} else {
-					log.Printf("[DEBUG] Waiting for code repository index to change state from \"CREATING\" finished")
 					break
 				}
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    getURL,
+				UserAgent: config.UserAgent,
+				Timeout:   90 * time.Minute,
+				Headers:   headers,
+			})
+			if err != nil {
+				t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
 			}
 		} else if err != nil {
 			t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
