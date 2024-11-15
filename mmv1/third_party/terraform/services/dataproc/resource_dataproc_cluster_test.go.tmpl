@@ -909,13 +909,14 @@ func TestAccDataprocCluster_withNetworkRefs(t *testing.T) {
 
 	var c1, c2 dataproc.Cluster
 	rnd := acctest.RandString(t, 10)
+	netName := fmt.Sprintf(`dproc-cluster-test-%s-net`, rnd)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withNetworkRefs(rnd),
+				Config: testAccDataprocCluster_withNetworkRefs(rnd, netName),
 				Check: resource.ComposeTestCheckFunc(
 					// successful creation of the clusters is good enough to assess it worked
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_net_ref_by_url", &c1),
@@ -2300,26 +2301,13 @@ resource "google_dataproc_cluster" "with_service_account" {
 `, sa, rnd, subnetworkName)
 }
 
-func testAccDataprocCluster_withNetworkRefs(rnd string) string {
+func testAccDataprocCluster_withNetworkRefs(rnd, netName string) string {
 	return fmt.Sprintf(`
-variable "subnetwork_cidr" {
-  default = "10.0.0.0/16"
-}
 resource "google_compute_network" "dataproc_network" {
-  name                    = "tf-test-dproc-net-%s"
-  auto_create_subnetworks = false
+  name                    = "%s"
+  auto_create_subnetworks = true
 }
-#
-# Create a subnet with Private IP Access enabled to test
-# deploying a Dataproc cluster with Internal IP Only enabled.
-#
-resource "google_compute_subnetwork" "dataproc_subnetwork" {
-  name                     = "tf-test-dproc-subnet-%s"
-  ip_cidr_range            = var.subnetwork_cidr
-  network                  = google_compute_network.dataproc_network.self_link
-  region                   = "us-central1"
-  private_ip_google_access = true
-}
+
 #
 # The default network within GCP already comes pre configured with
 # certain firewall rules open to allow internal communication. As we
@@ -2328,21 +2316,24 @@ resource "google_compute_subnetwork" "dataproc_subnetwork" {
 # internally as part of their configuration or this will just hang.
 #
 resource "google_compute_firewall" "dataproc_network_firewall" {
-  name        = "tf-test-dproc-firewall-%s"
-  description = "Firewall rules for dataproc Terraform acceptance testing"
-  network     = google_compute_network.dataproc_network.name
+  name          = "tf-test-dproc-%s"
+  description   = "Firewall rules for dataproc Terraform acceptance testing"
+  network       = google_compute_network.dataproc_network.name
+  source_ranges = ["192.168.0.0/16"]
+
   allow {
     protocol = "icmp"
   }
+
   allow {
     protocol = "tcp"
     ports    = ["0-65535"]
   }
+
   allow {
     protocol = "udp"
     ports    = ["0-65535"]
   }
-  source_ranges = [var.subnetwork_cidr]
 }
 
 resource "google_dataproc_cluster" "with_net_ref_by_name" {
@@ -2360,15 +2351,15 @@ resource "google_dataproc_cluster" "with_net_ref_by_name" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
     }
 
     gce_cluster_config {
-      subnetwork       = google_compute_subnetwork.dataproc_subnetwork.name
-      internal_ip_only = true
+      network          = google_compute_network.dataproc_network.name
+      internal_ip_only = false
     }
   }
 }
@@ -2388,19 +2379,19 @@ resource "google_dataproc_cluster" "with_net_ref_by_url" {
     }
 
     master_config {
-      machine_type = "e2-medium"
+      machine_type = "e2-standard-2"
       disk_config {
         boot_disk_size_gb = 35
       }
     }
 
     gce_cluster_config {
-      subnetwork       = google_compute_subnetwork.dataproc_subnetwork.name
-      internal_ip_only = true
+      network          = google_compute_network.dataproc_network.self_link
+      internal_ip_only = false
     }
   }
 }
-`, rnd, rnd, rnd, rnd, rnd)
+`, netName, rnd, rnd, rnd)
 }
 
 func testAccDataprocCluster_KMS(rnd, kmsKey, subnetworkName string) string {
@@ -2587,4 +2578,3 @@ resource "google_dataproc_metastore_service" "ms" {
 }
 `, clusterName, serviceId)
 }
-
