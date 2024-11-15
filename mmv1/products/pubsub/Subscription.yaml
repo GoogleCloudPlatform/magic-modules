@@ -232,6 +232,7 @@ properties:
       - name: 'avroConfig'
         type: NestedObject
         send_empty_value: true
+        allow_empty_object: true
         description: |
           If set, message data will be written to Cloud Storage in Avro format.
         properties:
