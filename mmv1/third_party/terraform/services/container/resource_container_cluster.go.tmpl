@@ -2333,14 +2333,13 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"cluster_tier": {
 							Type:             schema.TypeString,
-							Optional:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"STANDARD", "ENTERPRISE"}, false),
+							Computed:         true,
 							Description:      `Indicates the effective cluster tier. Available options include STANDARD and ENTERPRISE.`,
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CLUSTER_TIER_UNSPECIFIED"),
 						},
 						"desired_tier": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Computed:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"STANDARD", "ENTERPRISE"}, false),
 							Description:      `Indicates the desired cluster tier. Available options include STANDARD and ENTERPRISE.`,
 							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CLUSTER_TIER_UNSPECIFIED"),
@@ -5335,7 +5334,7 @@ func expandEnterpriseConfig(configured interface{}) *container.EnterpriseConfig 
 	return ec
 }
 
-func flattenEnterpriseConfig(ec *container.Enterprise) []map[string]interface{} {
+func flattenEnterpriseConfig(ec *container.EnterpriseConfig) []map[string]interface{} {
 	if ec == nil {
 		return nil
 	}
