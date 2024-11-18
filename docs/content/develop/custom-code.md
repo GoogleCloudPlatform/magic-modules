@@ -5,7 +5,7 @@ weight: 39
 
 # Add custom resource code
 
-This document covers how to add "custom code" to [MMv1 resources]({{< ref "/get-started/how-magic-modules-works#mmv1" >}}). Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can't be achieved otherwise.
+This document covers how to add "custom code" to [MMv1 resources]({{< ref "/#mmv1" >}}). Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can't be achieved otherwise.
 
 Most custom code attributes are strings that contain a path to a template file relative to the `mmv1` directory. For example:
 
