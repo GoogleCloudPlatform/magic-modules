@@ -1,8 +1,9 @@
 resource "google_tpu_v2_queued_resource" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name = "{{index $.Vars "qr_name"}}"
-  zone = "us-central1-c"
+  name    = "{{index $.Vars "qr_name"}}"
+  zone    = "us-central1-c"
+  project = "{{index $.TestEnvVars "project_id"}}"
 
   tpu {
     node_spec {
