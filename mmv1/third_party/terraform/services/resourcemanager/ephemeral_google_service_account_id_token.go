@@ -105,8 +105,20 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
 	targetAudience := data.TargetAudience.ValueString()
-	creds := fwtransport.GetCredentials(ctx, fwmodels.ProviderModel{}, false, &resp.Diagnostics)
 
+	// TODO: This is a temporary solution to get the credentials from the provider config.
+	// we'll address this once muxing issues are resolved.
+	model := fwmodels.ProviderModel{
+		Credentials:                        p.providerConfig.Credentials,
+		AccessToken:                        p.providerConfig.AccessToken,
+		ImpersonateServiceAccount:          p.providerConfig.ImpersonateServiceAccount,
+		ImpersonateServiceAccountDelegates: p.providerConfig.ImpersonateServiceAccountDelegates,
+		Project:                            p.providerConfig.Project,
+		BillingProject:                     p.providerConfig.BillingProject,
+		Scopes:                             p.providerConfig.Scopes,
+		UniverseDomain:                     p.providerConfig.UniverseDomain,
+	}
+	creds := fwtransport.GetCredentials(ctx, model, false, &resp.Diagnostics)
 	targetServiceAccount := data.TargetServiceAccount
 	// If a target service account is provided, use the API to generate the idToken
 	if !targetServiceAccount.IsNull() && !targetServiceAccount.IsUnknown() {
