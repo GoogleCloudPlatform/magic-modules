@@ -354,6 +354,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not effect behavior.
       - name: 'egressPolicies'
         type: Array
         description: |
@@ -469,6 +473,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not effect behavior.
   - name: 'spec'
     type: NestedObject
     description: |
@@ -663,6 +671,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not effect behavior. 
       - name: 'egressPolicies'
         type: Array
         description: |
@@ -776,6 +788,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not effect behavior. 
   - name: 'useExplicitDryRunSpec'
     type: Boolean
     description: |
