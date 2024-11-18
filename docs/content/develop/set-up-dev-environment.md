@@ -14,10 +14,12 @@ development environment.
 1. In the Google Cloud console, on the project selector page, select or
    [create a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects).
    {{< hint info >}}
+
    **Note:** If you don't already have a project to use for testing changes to
    the Terraform providers, create a project instead of selecting an existing
    poject. After you finish these steps, you can delete the project, removing
    all resources associated with the project.
+
    {{< /hint >}}
    {{< button href="https://console.cloud.google.com/projectselector2/home/dashboard" >}}Go to project selector{{< /button >}}
 1. Make sure that billing is enabled for your Google Cloud project. Learn how to
@@ -48,6 +50,7 @@ development environment.
    cd ~
    git clone https://github.com/GoogleCloudPlatform/magic-modules.git
    ```
+
 1. Run the following command from the root of your cloned `magic-modules` repository.
   
    ```bash
@@ -76,3 +79,4 @@ development environment.
 + [Learn how to add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Learn how to add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
 + [Learn how to promote a resource to GA]({{< ref "/develop/promote-to-ga" >}})
+
