@@ -111,7 +111,6 @@ func TestAccStorageObject_replace(t *testing.T) {
 		if err := ioutil.WriteFile(name, data, 0644); err != nil {
 			t.Errorf("error writing file: %v", err)
 		}
-		fmt.Printf("data md5: %s", dataMd5)
 		return dataMd5
 	}
 	calculateMd5 := func(data []byte) string {
