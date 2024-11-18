@@ -275,6 +275,7 @@ properties:
           - 'V3'
           - 'V4'
           - 'V5P'
+          - 'V6E'
       - name: 'topology'
         type: String
         description: |
