@@ -79,7 +79,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, testFile.Name()),
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 			},
 			{
@@ -88,6 +88,56 @@ func TestAccStorageObject_recreate(t *testing.T) {
 					if err != nil {
 						t.Errorf("Failed to rename %s to %s", updatedName, testFile.Name())
 					}
+				},
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
+			},
+		},
+	})
+}
+
+func TestAccStorageObject_replace(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	writeFile := func(name string, data []byte) string {
+		h := md5.New()
+		if _, err := h.Write(data); err != nil {
+			t.Errorf("error calculating md5: %v", err)
+		}
+		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+		if err := ioutil.WriteFile(name, data, 0644); err != nil {
+			t.Errorf("error writing file: %v", err)
+		}
+		fmt.Printf("data md5: %s", dataMd5)
+		return dataMd5
+	}
+	calculateMd5 := func(data []byte) string {
+		h := md5.New()
+		if _, err := h.Write(data); err != nil {
+			t.Errorf("error calculating md5: %v", err)
+		}
+		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+		return dataMd5
+	}
+	testFile := getNewTmpTestFile(t, "tf-test")
+	dataMd5 := writeFile(testFile.Name(), []byte("data data data"))
+	updatedDataMd5 := calculateMd5([]byte("datum"))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, testFile.Name()),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+			},
+			{
+				PreConfig: func() {
+					updatedDataMd5 = writeFile(testFile.Name(), []byte("datum"))
 				},
 				Config: testGoogleStorageBucketsObjectBasicMd5Hash(bucketName, testFile.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
