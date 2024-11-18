@@ -662,4 +662,3 @@ func TestAccBigtableAppProfile_updateRowAffinity(t *testing.T) {
 		},
 	})
 }
-
