@@ -272,7 +272,6 @@ cluster.
 
 * `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
     Accepted values are:
-    * `LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED`: LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED is when unspecified local ssd encryption is used. Standard encryption is used.
     * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
     * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
 

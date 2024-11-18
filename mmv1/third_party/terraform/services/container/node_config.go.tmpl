@@ -810,7 +810,7 @@ func schemaNodeConfig() *schema.Schema {
 					Type:             schema.TypeString,
 					Optional:         true,
 					ForceNew:         true,
-					ValidateFunc:     validation.StringInSlice([]string{"LOCAL_SSD_ENCRYPTION_MODE_UNSPECIFIED", "STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
+					ValidateFunc:     validation.StringInSlice([]string{"STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
 					Description:      `LocalSsdEncryptionMode specified the method used for encrypting the local SSDs attached to the node.`,
 				},
 			},
