@@ -1,0 +1,8 @@
+resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
+
+  github_enterprise_config {
+    host_uri = "{{index $.Vars "host_uri"}}"
+  }
+}
