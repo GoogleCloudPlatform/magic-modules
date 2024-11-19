@@ -1,5 +1,6 @@
 package composer
 
+{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 
@@ -47,3 +48,4 @@ func dataSourceGoogleComposerUserWorkloadsConfigMapRead(d *schema.ResourceData, 
 
 	return nil
 }
+{{- end }}
