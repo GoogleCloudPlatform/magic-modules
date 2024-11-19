@@ -45,6 +45,7 @@ custom_code:
 examples:
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
+    min_version: 'beta'
     vars:
       name: 'instance'
       network_name: 'network'
