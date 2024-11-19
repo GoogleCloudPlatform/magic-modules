@@ -270,3 +270,69 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'
+  - name: 'shieldedInstanceInitialState'
+    type: NestedObject
+    description: Set the secure boot keys of shielded instance.
+    properties:
+      - name: 'pk'
+        type: NestedObject
+        description: The Platform Key (PK).
+        properties:
+          - name: 'content'
+            type: String
+            description: |
+              The raw content in the secure keys file.
+
+              A base64-encoded string.
+            required: true
+          - name: 'fileType'
+            type: String
+            description: The file type of source file.
+      - name: 'keks'
+        type: Array
+        description: The Key Exchange Key (KEK).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
+      - name: 'dbs'
+        type: Array
+        description: The Key Database (db).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
+      - name: 'dbxs'
+        type: Array
+        description: The forbidden key database (dbx).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
