@@ -26,7 +26,7 @@ For more information about testing, see the [official Terraform documentation](h
 
 ## Before you begin
 
-1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/get-started/how-magic-modules-works.md" >}}).
+1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/" >}}).
 2. If you are not adding tests to an in-progress PR, ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```bash
    cd ~/magic-modules
@@ -128,6 +128,7 @@ An update test is a test that creates the target resource and then makes updates
    - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
    - Change the suffix of the first `Config` value to `_full` (or `_basic`).
    - Change the suffix of the second `Config` value to `_update`.
+   - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
    func TestAccPubsubTopic_update(t *testing.T) {
@@ -143,6 +144,11 @@ An update test is a test that creates the target resource and then makes updates
             },
             {
                Config: testAccPubsubTopic_update(...),
+               ConfigPlanChecks: resource.ConfigPlanChecks{
+                  PreApply: []plancheck.PlanCheck{
+                     plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                  },
+               },
             },
             {
                ...

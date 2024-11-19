@@ -24,6 +24,7 @@ self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/jobs'
 immutable: true
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20
@@ -74,6 +75,7 @@ examples:
       bucket_name: 'transcoder-job'
     ignore_read_extra:
       - 'state'
+      - 'start_time'
       - 'end_time'
 parameters:
   - name: 'location'

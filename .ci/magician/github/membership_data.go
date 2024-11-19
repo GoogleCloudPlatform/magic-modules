@@ -38,8 +38,8 @@ var (
 		// },
 		{
 			id:        "BBBmau",
-			startDate: newDate(2024, 9, 26, pdtLoc),
-			endDate:   newDate(2024, 10, 2, pdtLoc),
+			startDate: newDate(2024, 11, 1, pdtLoc),
+			endDate:   newDate(2024, 11, 1, pdtLoc),
 		},
 		{
 			id:        "hao-nan-li",
@@ -98,13 +98,23 @@ var (
 		},
 		{
 			id:        "SarahFrench",
-			startDate: newDate(2024, 9, 20, bstLoc),
-			endDate:   newDate(2024, 9, 23, bstLoc),
+			startDate: newDate(2024, 11, 15, bstLoc),
+			endDate:   newDate(2024, 12, 2, bstLoc),
 		},
 		{
 			id:        "c2thorn",
 			startDate: newDate(2024, 10, 2, bstLoc),
 			endDate:   newDate(2024, 10, 14, bstLoc),
+		},
+		{
+			id:        "ScottSuarez",
+			startDate: newDate(2024, 10, 31, bstLoc),
+			endDate:   newDate(2024, 11, 17, bstLoc),
+		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 11, 1, pdtLoc),
+			endDate:   newDate(2024, 11, 11, pdtLoc),
 		},
 	}
 )

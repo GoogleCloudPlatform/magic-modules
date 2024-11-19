@@ -97,7 +97,7 @@ func TestAccVertexAIEndpointIamPolicy(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccVertexAIEndpointIamPolicy_emptyBinding(context),
+				Config: testAccVertexAIEndpointIamPolicy_emptyBindingManual(context),
 			},
 			{
 				ResourceName:      "google_vertex_ai_endpoint_iam_policy.foo",
@@ -218,7 +218,7 @@ endpoint = google_vertex_ai_endpoint.endpoint.name
 `, context)
 }
 
-func testAccVertexAIEndpointIamPolicy_emptyBinding(context map[string]interface{}) string {
+func testAccVertexAIEndpointIamPolicy_emptyBindingManual(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint" "endpoint" {
   name         = "tf-test-endpoint-name%{random_suffix}"

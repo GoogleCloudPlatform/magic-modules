@@ -73,6 +73,7 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
@@ -106,12 +107,15 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
       - name: 'identities'
         type: Array
         description: |
-          A list of identities that are allowed access through this ingress policy.
-          Should be in the format of email address. The email address should represent
-          individual user or service account only.
+          Identities can be an individual user, service account, Google group,
+          or third-party identity. For third-party identity, only single identities
+          are supported and other identity types are not supported.The v1 identities
+          that have the prefix user, group and serviceAccount in
+          https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
       - name: 'sources'
@@ -161,6 +165,8 @@ properties:
           then this `IngressTo` rule will authorize access to all
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSupressFunc
         item_type:
           type: String
       - name: 'operations'
