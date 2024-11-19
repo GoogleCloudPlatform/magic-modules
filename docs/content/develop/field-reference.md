@@ -12,6 +12,14 @@ available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/m
 
 ## Shared properties
 
+### `name`
+Specifies the name of the field within Terraform. By default this will also 
+be the value that is used for communication with the API, if a seperate `api_name`
+is not declared using the corresponding property.
+
+### `type`
+Sets the expected data type of the field. All valid types are declared [here](https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673).
+
 ### `min_version: beta`
 Marks the field (and any subfields) as beta-only. Ensure a beta version block
 is present in provider.yaml. Do not use if an ancestor field (or the overall
