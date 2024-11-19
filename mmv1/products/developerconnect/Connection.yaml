@@ -47,11 +47,9 @@ examples:
   - name: 'developer_connect_connection_basic'
     primary_resource_id: 'my-connection'
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_github_doc'
-    min_version: 'beta'
     exclude_test: true
 parameters:
   - name: 'location'
@@ -60,7 +58,6 @@ parameters:
       Resource ID segment making up resource `name`. It identifies the resource
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `developerconnect.googleapis.com/GitRepositoryLink`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -69,7 +66,6 @@ parameters:
     description: |
       Required. Id of the requesting object. If auto-generating Id server-side,
       remove this field and connection_id from the method_signature of Create RPC.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -78,7 +74,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for connections to github.com.
-    min_version: 'beta'
     properties:
       - name: 'githubApp'
         type: String
@@ -89,7 +84,6 @@ properties:
             GIT_HUB_APP_UNSPECIFIED
             DEVELOPER_CONNECT
             FIREBASE"
-        min_version: 'beta'
         required: true
         immutable: true
       - name: 'authorizerCredential'
@@ -97,7 +91,6 @@ properties:
         description: |
           Represents an OAuth token of the account that authorized the Connection,and
           associated metadata.
-        min_version: 'beta'
         properties:
           - name: 'oauthTokenSecretVersion'
             type: String
@@ -105,62 +98,52 @@ properties:
               Required. A SecretManager resource containing the OAuth token
               that authorizes the connection.
               Format: `projects/*/secrets/*/versions/*`.
-            min_version: 'beta'
             required: true
           - name: 'username'
             type: String
             description: |
               Output only. The username associated with this token.
-            min_version: 'beta'
             output: true
       - name: 'appInstallationId'
         type: String
         description: |
           Optional. GitHub App installation id.
-        min_version: 'beta'
       - name: 'installationUri'
         type: String
         description: |
           Output only. The URI to navigate to in order to manage the installation
           associated with this GitHubConfig.
-        min_version: 'beta'
         output: true
   - name: 'name'
     type: String
     description: |
       Identifier. The resource name of the connection, in the format
       `projects/{project}/locations/{location}/connections/{connection_id}`.
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       Output only. [Output only] Create timestamp
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       Output only. [Output only] Update timestamp
-    min_version: 'beta'
     output: true
   - name: 'deleteTime'
     type: String
     description: |
       Output only. [Output only] Delete timestamp
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |
       Optional. Labels as key value pairs
-    min_version: 'beta'
   - name: 'installationState'
     type: NestedObject
     description: |
       Describes stage and necessary actions to be taken by the user to complete the installation.
       Used for GitHub and GitHub Enterprise based connections.
-    min_version: 'beta'
     output: true
     properties:
       - name: 'stage'
@@ -173,49 +156,41 @@ properties:
             PENDING_USER_OAUTH
             PENDING_INSTALL_APP
             COMPLETE
-        min_version: 'beta'
         output: true
       - name: 'message'
         type: String
         description: |
           Output only. Message of what the user should do next to continue
           the installation.Empty string if the installation is already complete.
-        min_version: 'beta'
       - name: 'actionUri'
         type: String
         description: |
           Output only. Link to follow for next action. Empty string if the
           installation is already complete.
-        min_version: 'beta'
   - name: 'disabled'
     type: Boolean
     description:
       Optional. If disabled is set to true, functionality is disabled for
       this connection. Repository based API methods and webhooks processing
       for repositories in this connection will be disabled.
-    min_version: 'beta'
   - name: 'reconciling'
     type: Boolean
     description: |
       Output only. Set to true when the connection is being set up or updated
       in the background.
-    min_version: 'beta'
     output: true
   - name: 'annotations'
     type: KeyValueAnnotations
     description: |
       Optional. Allows clients to store small amounts of arbitrary data.
-    min_version: 'beta'
   - name: 'etag'
     type: String
     description: |
       Optional. This checksum is computed by the server based on the value
       of other fields, and may be sent on update and delete requests to ensure the
       client has an up-to-date value before proceeding.
-    min_version: 'beta'
   - name: 'uid'
     type: String
     description: |
       Output only. A system-assigned unique identifier for a the GitRepositoryLink.
-    min_version: 'beta'
     output: true
