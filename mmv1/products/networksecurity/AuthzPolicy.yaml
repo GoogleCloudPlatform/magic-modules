@@ -52,7 +52,7 @@ async:
     message: 'message'
 custom_code:
 examples:
-  - name: 'network_services_authz_policy_basic'
+  - name: 'network_services_authz_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-authz-policy'
@@ -78,13 +78,13 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      Time the ServiceLbPolicy was created in UTC.
+      The timestamp when the resource was created.
     min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
-      Time the ServiceLbPolicy was updated in UTC.
+      The timestamp when the resource was updated.
     min_version: 'beta'
     output: true
   - name: 'description'
@@ -147,6 +147,8 @@ properties:
       Required if the action is CUSTOM. Allows delegating authorization decisions to Cloud IAP or to Service Extensions. One of cloudIap or authzExtension must be specified.
     min_version: 'beta'
     properties:
+      # Cloud IAP type has no fields according to the API
+      # https://cloud.google.com/load-balancing/docs/reference/network-security/rest/v1beta1/projects.locations.authzPolicies#cloudiap
       - name: 'cloudIap'
         type: NestedObject
         description: |

@@ -78,13 +78,13 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      Time the ServiceLbPolicy was created in UTC.
+      The timestamp when the resource was created.
     min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
-      Time the ServiceLbPolicy was updated in UTC.
+      The timestamp when the resource was updated.
     min_version: 'beta'
     output: true
   - name: 'description'
