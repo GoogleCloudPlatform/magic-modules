@@ -1,13 +1,16 @@
 ---
 title: "Contribution process"
-weight: 50
+weight: 9
 aliases:
   - /docs/getting-started/contributing
   - /getting-started/contributing
   - /get-started/contributing
+  - /get-started/contribution-process
 ---
 
 # Contribution process
+
+This page explains how you can contribute code and documentation to the	`magic-modules` repository.
 
 ## Before you begin
 
