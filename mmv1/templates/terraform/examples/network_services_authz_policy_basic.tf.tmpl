@@ -1,0 +1,147 @@
+resource "google_compute_network" "default" {
+  provider = google-beta
+
+  name                    = "lb-network"
+  project                 = "{{index $.TestEnvVars "project"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider = google-beta
+
+  name          = "backend-subnet"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-west1"
+  ip_cidr_range = "10.1.2.0/24"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_subnetwork" "proxy_only" {
+  provider = google-beta
+
+  name          = "proxy-only-subnet"
+  project       = "{{index $.TestEnvVars "project"}}"
+  region        = "us-west1"
+  ip_cidr_range = "10.129.0.0/23"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  role          = "ACTIVE"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_address" "default" {
+  provider = google-beta
+
+  name         = "l7-ilb-ip-address"
+  project      = "{{index $.TestEnvVars "project"}}"
+  region       = "us-west1"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+
+resource "google_compute_region_health_check" "default" {
+  provider = google-beta
+
+  name    = "l7-ilb-basic-check"
+  project = "{{index $.TestEnvVars "project"}}"
+  region  = "us-west1"
+
+  http_health_check {
+    port_specification = "USE_SERVING_PORT"
+  }
+}
+
+resource "google_compute_region_backend_service" "url_map" {
+  provider = google-beta
+
+  name                  = "l7-ilb-backend-service"
+  project               = "{{index $.TestEnvVars "project"}}"
+  region                = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+
+  health_checks = [google_compute_region_health_check.default.id]
+}
+
+resource "google_compute_region_url_map" "default" {
+  provider = google-beta
+
+  name            = "l7-ilb-map"
+  project         = "{{index $.TestEnvVars "project"}}"
+  region          = "us-west1"
+  default_service = google_compute_region_backend_service.url_map.id
+}
+
+resource "google_compute_region_target_http_proxy" "default" {
+  provider = google-beta
+
+  name    = "l7-ilb-proxy"
+  project = "{{index $.TestEnvVars "project"}}"
+  region  = "us-west1"
+  url_map = google_compute_region_url_map.default.id
+}
+
+resource "google_compute_forwarding_rule" "default" {
+  provider = google-beta
+
+  name                  = "l7-ilb-forwarding-rule"
+  project               = "{{index $.TestEnvVars "project"}}"
+  region                = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  network               = google_compute_network.default.id
+  subnetwork            = google_compute_subnetwork.default.id
+  ip_protocol           = "TCP"
+  port_range            = "80"
+  target                = google_compute_region_target_http_proxy.default.id
+  ip_address            = google_compute_address.default.id
+
+  depends_on = [google_compute_subnetwork.proxy_only]
+}
+
+resource "google_compute_region_backend_service" "authz_extension" {
+  provider = google-beta
+
+  name    = "authz-service"
+  project = "{{index $.TestEnvVars "project"}}"
+  region  = "us-west1"
+
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  port_name             = "grpc"
+}
+
+resource "google_network_services_authz_extension" "default" {
+  provider = google-beta
+
+  name     = "my-authz-ext"
+  project  = "{{index $.TestEnvVars "project"}}"
+  location = "us-west1"
+
+  description           = "Some description"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  authority             = "ext11.com"
+  service               = google_compute_region_backend_service.authz_extension.self_link
+  timeout               = "0.1s"
+  fail_open             = false
+  forward_headers       = ["Authorization"]
+}
+
+resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name        = "{{index $.Vars "resource_name"}}"
+  project     = "{{index $.TestEnvVars "project"}}"
+  location    = "us-west1"
+  description = "Some description"
+
+  target {
+    load_balancing_scheme = "INTERNAL_MANAGED"
+    resources = [ google_compute_forwarding_rule.default.self_link ]
+  }
+
+  action = "CUSTOM"
+  custom_provider {
+    authz_extension {
+      resources = [ google_network_services_authz_extension.default.id ]
+    }
+  }
+}
