@@ -34,12 +34,18 @@ parameters:
     description: 'The location of the job.'
     immutable: true
     imports: 'location'
-  - name: 'prefixListFile'
+  - name: 'prefix_list_file'
     type: String
-    description: one of prefixlist or manifestLocation allowed
-  - name: 'manifestLocation'
+    description: one of prefix_list_file or manifest_location allowed
+    exactly_one_of:
+      - 'manifest_location'
+      - 'prefix_list_file'
+  - name: 'manifest_location'
     type: String
-    description: one of prefixlistfile or manifestlocation allowed
+    description: one of prefix_list_file or manifest_location allowed
+    exactly_one_of:
+      - 'manifest_location'
+      - 'prefix_list_file'
 
 properties:
   - name: 'createTime'
