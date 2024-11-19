@@ -1,6 +1,7 @@
 package resourcemanager_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,54 +12,41 @@ import (
 func TestAccEphemeralServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project":       envvar.GetTestProjectFromEnv(),
-	}
+	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountKey_setup(context),
+				Config: testAccEphemeralServiceAccountKey_setup(serviceAccount),
 			},
 			{
-				Config: testAccEphemeralServiceAccountKey_basic(context),
+				Config: testAccEphemeralServiceAccountKey_basic(serviceAccount),
 			},
 		},
 	})
 }
 
-func testAccEphemeralServiceAccountKey_setup(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_service_account" "test_account" {
-  account_id   = "tf-test-%{random_suffix}"
-  display_name = "Test Service Account"
-}
-
+func testAccEphemeralServiceAccountKey_setup(serviceAccount string) string {
+	return fmt.Sprintf(`
 resource "google_service_account_key" "key" {
-  name = "${google_service_account.test_account.name}/keys/1234567890"
-  public_key_type = "TYPE_RAW"
+  service_account_id = "%s"
+  public_key_type = "TYPE_X509_PEM_FILE"
 }
-`, context)
-}
-
-func testAccEphemeralServiceAccountKey_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_service_account" "test_account" {
-  account_id   = "tf-test-%{random_suffix}"
-  display_name = "Test Service Account"
+`, serviceAccount)
 }
 
+func testAccEphemeralServiceAccountKey_basic(serviceAccount string) string {
+	return fmt.Sprintf(`
 resource "google_service_account_key" "key" {
-  name = "${google_service_account.test_account.name}/keys/1234567890"
-  public_key_type = "TYPE_RAW"
+  service_account_id = "%s"
+  public_key_type = "TYPE_X509_PEM_FILE"
 }
 
 ephemeral "google_service_account_key" "key" {
-  name            = "${google_service_account.test_account.name}/keys/1234567890"
-  public_key_type = "TYPE_RAW"
+  name            = google_service_account_key.key.name
+  public_key_type = "TYPE_X509_PEM_FILE"
 }
-`, context)
+`, serviceAccount)
 }
