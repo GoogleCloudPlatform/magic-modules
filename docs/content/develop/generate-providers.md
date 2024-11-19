@@ -67,22 +67,6 @@ provider changes to the `google` and `google-beta` Terraform providers.
    git diff -U0
    ```
 
-    In both cases, the changes should include:
-
-    ```diff
-    diff --git a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hudiff --git a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go b/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
-    --- a/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
-    +++ b/google/services/bigqueryanalyticshub/resource_bigquery_analytics_hub_data_exchange.go
-    @@ -66 +66 @@ func ResourceBigqueryAnalyticsHubDataExchange() *schema.Resource {
-    -                               Description: `Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.`,
-    +                               Description: `UPDATED_DESCRIPTION`,
-    diff --git a/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown b/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
-    --- a/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
-    +++ b/website/docs/r/bigquery_analytics_hub_data_exchange.html.markdown
-    @@ -63 +63 @@ The following arguments are supported:
-    -  Human-readable display name of the data exchange. The display name must contain only Unicode letters, numbers (0-9), underscores (_), dashes (-), spaces ( ), and must not start or end with spaces.
-    +  UPDATED_DESCRIPTION
-    ```
 
     {{< hint info >}}
     **Note**: There may be additional changes present due to specifying a
