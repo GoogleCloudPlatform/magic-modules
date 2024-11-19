@@ -71,8 +71,7 @@ provider changes to the `google` and `google-beta` Terraform providers.
     {{< hint info >}}
     **Note**: There may be additional changes present due to specifying a
     `PRODUCT=` value or due to the `magic-modules` repository being out of sync
-    with the provider repositories. This is okay as long as tests in the following
-    section pass.
+    with the provider repositories.
     {{< /hint >}}
 
 
