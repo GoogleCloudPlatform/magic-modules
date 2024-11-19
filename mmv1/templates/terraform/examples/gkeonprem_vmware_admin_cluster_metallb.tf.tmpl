@@ -32,6 +32,8 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
       control_plane_vip = "10.251.133.5"
       addons_vip = "10.251.135.19"
     }
-    metal_lb_config {}
+    metal_lb_config {
+      enabled = true
+    }
   }
 }

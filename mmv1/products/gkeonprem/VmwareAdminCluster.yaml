@@ -371,7 +371,8 @@ properties:
             default_from_api: true
       - type: NestedObject
         name: 'metalLbConfig'
-        description: Manually configured load balancers.
+        description: Metal LB load balancers.
+        send_empty_value: true
         exactly_one_of:
           - loadBalancer.0.f5_config
           - loadBalancer.0.manual_lb_config
