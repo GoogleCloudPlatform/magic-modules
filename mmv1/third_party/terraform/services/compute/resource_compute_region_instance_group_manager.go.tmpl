@@ -94,7 +94,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				},
 			},
 
-			{{- if ne $.TargetVersionName "ga" }}
 			"instance_flexibility_policy": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -134,7 +133,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-			{{- end }}
 
 			"name": {
 				Type:        schema.TypeString,
@@ -672,9 +670,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetSuspendedSize:         int64(d.Get("target_suspended_size").(int)),
 		TargetStoppedSize:           int64(d.Get("target_stopped_size").(int)),
 		{{- end }}
-		{{- if ne $.TargetVersionName "ga" }}
 		InstanceFlexibilityPolicy:   expandInstanceFlexibilityPolicy(d),
-		{{- end }}
 		UpdatePolicy:                expandRegionUpdatePolicy(d.Get("update_policy").([]interface{})),
 		InstanceLifecyclePolicy:     expandInstanceLifecyclePolicy(d.Get("instance_lifecycle_policy").([]interface{})),
 		AllInstancesConfig:          expandAllInstancesConfig(nil, d.Get("all_instances_config").([]interface{})),
@@ -878,11 +874,9 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("Error setting target_stopped_size: %s", err)
 	}
 	{{- end }}
-	{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("instance_flexibility_policy", flattenInstanceFlexibilityPolicy(manager.InstanceFlexibilityPolicy)); err != nil {
 		return err
 	}
-	{{- end }}
 	if err := d.Set("update_policy", flattenRegionUpdatePolicy(manager.UpdatePolicy)); err != nil {
 		return fmt.Errorf("Error setting update_policy in state: %s", err.Error())
 	}
@@ -956,7 +950,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 		change = true
 	}
 
-	{{- if ne $.TargetVersionName "ga" }}
 	var targetSizePatchUpdate bool
 	if d.HasChange("instance_flexibility_policy") {
 		updatedManager.InstanceFlexibilityPolicy = expandInstanceFlexibilityPolicy(d)
@@ -969,7 +962,6 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 			targetSizePatchUpdate = true
 		}
 	}
-	{{- end }}
 
 	if d.HasChange("distribution_policy_target_shape") {
 		updatedManager.DistributionPolicy = expandDistributionPolicyForUpdate(d)
@@ -1060,7 +1052,7 @@ func resourceComputeRegionInstanceGroupManagerUpdate(d *schema.ResourceData, met
 	}
 
 	// target size should use resize
-	if d.HasChange("target_size") {{- if ne $.TargetVersionName "ga" }} && !targetSizePatchUpdate {{- end}} {
+	if d.HasChange("target_size") && !targetSizePatchUpdate {
 		d.Partial(true)
 		targetSize := int64(d.Get("target_size").(int))
 		op, err := config.NewComputeClient(userAgent).RegionInstanceGroupManagers.Resize(
@@ -1210,7 +1202,6 @@ func flattenRegionUpdatePolicy(updatePolicy *compute.InstanceGroupManagerUpdateP
 	return results
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandInstanceFlexibilityPolicy(d *schema.ResourceData) *compute.InstanceGroupManagerInstanceFlexibilityPolicy {
 	instanceFlexibilityPolicy := &compute.InstanceGroupManagerInstanceFlexibilityPolicy{}
 	oldFlexibilityPolicy, newFlexibilityPolicy := d.GetChange("instance_flexibility_policy")
@@ -1244,7 +1235,6 @@ func expandInstanceSelections(instanceSelections []any) map[string]compute.Insta
 	}
 	return instanceSelectionsMap
 }
-{{- end }}
 
 func expandDistributionPolicyForUpdate(d *schema.ResourceData) *compute.DistributionPolicy {
 	dpts := d.Get("distribution_policy_target_shape").(string)
@@ -1281,7 +1271,6 @@ func expandDistributionPolicyForCreate(d *schema.ResourceData) *compute.Distribu
   return distributionPolicy
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func flattenInstanceFlexibilityPolicy(instanceFlexibilityPolicy *compute.InstanceGroupManagerInstanceFlexibilityPolicy) []map[string]any {
 	flattenedInstanceFlexibilityPolicy := []map[string]any{}
 	if instanceFlexibilityPolicy != nil {
@@ -1303,7 +1292,6 @@ func flattenInstanceSelections(instanceSelections map[string]compute.InstanceGro
 	}
 	return instanceSelectionsMap
 }
-{{- end }}
 
 func flattenDistributionPolicy(distributionPolicy *compute.DistributionPolicy) []string {
 	zones := make([]string, 0)

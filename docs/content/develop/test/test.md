@@ -26,7 +26,7 @@ For more information about testing, see the [official Terraform documentation](h
 
 ## Before you begin
 
-1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/get-started/how-magic-modules-works.md" >}}).
+1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/" >}}).
 2. If you are not adding tests to an in-progress PR, ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```bash
    cd ~/magic-modules
