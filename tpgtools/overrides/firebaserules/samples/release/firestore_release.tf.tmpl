@@ -1,9 +1,3 @@
-# In case there are existing rules in the default db
-import {
-  id = "projects/{{project}}/releases/cloud.firestore"
-  to = google_firebaserules_release.primary
-}
-
 resource "google_firebaserules_release" "primary" {
   name         = "cloud.firestore"
   project      = "{{project}}"
