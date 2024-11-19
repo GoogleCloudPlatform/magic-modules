@@ -431,7 +431,6 @@ func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) 
 }
 {{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -474,7 +473,7 @@ func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 		},
 	})
 }
-{{- end }}
+
 func TestAccRegionInstanceGroupManager_APISideListRecordering(t *testing.T) {
 	t.Parallel()
 
@@ -1969,7 +1968,6 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 }
 {{- end }}
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -2138,7 +2136,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 `, network, template, igm)
 }
-{{- end }}
 
 {{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {
