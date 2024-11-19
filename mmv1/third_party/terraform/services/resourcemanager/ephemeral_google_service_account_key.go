@@ -38,9 +38,11 @@ type ephemeralServiceAccountKeyModel struct {
 
 func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Get an ephemeral service account public key.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required: true,
+				Description: "The name of the service account key. This must have format `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}/keys/{KEYID}`, where `{ACCOUNT}` is the email address or unique id of the service account.",
+				Required:    true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(verify.ServiceAccountKeyNameRegex),
@@ -48,22 +50,27 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 					),
 				}},
 			"public_key_type": schema.StringAttribute{
-				Optional: true,
+				Description: "The output format of the public key requested. TYPE_X509_PEM_FILE is the default output format.",
+				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
+						"TYPE_NONE",
 						"TYPE_X509_PEM_FILE",
-						"TYPE_RAW",
+						"TYPE_RAW_PUBLIC_KEY",
 					),
 				},
 			},
 			"project": schema.StringAttribute{
-				Optional: true,
+				Description: "The ID of the project that the service account will be created in. Defaults to the provider project configuration.",
+				Optional:    true,
 			},
 			"key_algorithm": schema.StringAttribute{
-				Computed: true,
+				Description: "The algorithm used to generate the key.",
+				Computed:    true,
 			},
 			"public_key": schema.StringAttribute{
-				Computed: true,
+				Description: "The public key, base64 encoded.",
+				Computed:    true,
 			},
 		},
 	}
