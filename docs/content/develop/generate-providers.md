@@ -36,7 +36,7 @@ provider changes to the `google` and `google-beta` Terraform providers.
    ```bash
    make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=[PRODUCT_NAME]
    ```
-    Where [PRODUCT_NAME] is one of the folder names in
+    Where `[PRODUCT_NAME]` is one of the folder names in
     https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products.
   
     For example, if your product is `bigqueryanalyticshub`, the command would be
