@@ -25,8 +25,8 @@ timeouts:
   delete_minutes: 20
 exclude_sweeper: true
 description: |
-  Storage Batch Operations (SBO) is a Cloud Storage management feature that offers a 
-  seamless experience to perform single batch operations on millions of GCS objects in a 
+  Storage Batch Operations (SBO) is a Cloud Storage management feature that offers a
+  seamless experience to perform single batch operations on millions of GCS objects in a
   serverless manner.
 parameters:
   - name: 'location'
@@ -39,7 +39,7 @@ parameters:
     description: one of prefixlist or manifestLocation allowed
   - name: 'manifestLocation'
     type: String
-    description: on eof prefixlistfile or manifestlocation alloowed
+    description: one of prefixlistfile or manifestlocation allowed
 
 properties:
   - name: 'createTime'
