@@ -56,7 +56,11 @@ examples:
       project: 'my-project'
       cloud_vm_cluster_id: 'my-instance'
       cloud_exadata_infrastructure_id: 'my-exadata'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
       'cloud_vm_cluster_id': '"ofake-vmcluster-basic"'
       'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-basic"'
@@ -66,7 +70,11 @@ examples:
       project: 'my-project'
       cloud_vm_cluster_id: 'my-instance'
       cloud_exadata_infrastructure_id: 'my-exadata'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
       'cloud_vm_cluster_id': '"ofake-vmcluster-full"'
       'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-full"'
