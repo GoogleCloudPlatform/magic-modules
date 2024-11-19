@@ -194,8 +194,8 @@ properties:
     type: String
     min_version: 'beta'
     description: |
-    Parallelstore Instance deployment type.
-      Possible values:
-      DEPLOYMENT_TYPE_UNSPECIFIED
-      SCRATCH
-      PERSISTENT
+      Parallelstore Instance deployment type.
+        Possible values:
+        DEPLOYMENT_TYPE_UNSPECIFIED
+        SCRATCH
+        PERSISTENT
