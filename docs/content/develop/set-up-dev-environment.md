@@ -25,11 +25,6 @@ development environment.
 1. Make sure that billing is enabled for your Google Cloud project. Learn how to
    [check if billing is enabled on a project](https://cloud.google.com/billing/docs/how-to/verify-billing-enabled).
 
-   {{< hint warning >}}
-   If you are familiar with Docker or Podman, you may want to use the experimental
-   [container-based environment]({{< ref "/reference/make-commands.md#container-based-environment" >}})
-   instead of the following steps.
-   {{< /hint >}}
 
 1. [Install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 1. [Install go](https://go.dev/doc/install)
