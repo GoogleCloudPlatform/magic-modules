@@ -42,6 +42,7 @@ type ephemeralServiceAccountJwtModel struct {
 
 func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Produces an arbitrary self-signed JWT for service accounts.",
 		Attributes: map[string]schema.Attribute{
 			"payload": schema.StringAttribute{
 				Required:    true,
@@ -52,15 +53,18 @@ func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephem
 				Description: "Number of seconds until the JWT expires. If set and non-zero an `exp` claim will be added to the payload derived from the current timestamp plus expires_in seconds.",
 			},
 			"target_service_account": schema.StringAttribute{
-				Required: true,
+				Description: "The email of the service account that will sign the JWT.",
+				Required:    true,
 			},
 			"delegates": schema.SetAttribute{
+				Description: "Delegate chain of approvals needed to perform full impersonation. Specify the fully qualified service account name.",
 				Optional:    true,
 				ElementType: types.StringType,
 			},
 			"jwt": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
+				Description: "The signed JWT containing the JWT Claims Set from the `payload`.",
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}

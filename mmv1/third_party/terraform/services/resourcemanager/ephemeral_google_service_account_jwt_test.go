@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestEphemeralServiceAccountJwt_basic(t *testing.T) {
+func TestAccEphemeralServiceAccountJwt_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -26,7 +26,7 @@ func TestEphemeralServiceAccountJwt_basic(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
+func TestAccEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -45,7 +45,7 @@ func TestEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
 	})
 }
 
-func TestEphemeralServiceAccountJwt_withExpiresIn(t *testing.T) {
+func TestAccEphemeralServiceAccountJwt_withExpiresIn(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
