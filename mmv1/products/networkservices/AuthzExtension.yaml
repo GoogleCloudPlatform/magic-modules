@@ -15,7 +15,6 @@
 name: 'AuthzExtension'
 description: |
   AuthzExtension is a resource that allows traffic forwarding to a callout backend service to make an authorization decision.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.authzExtensions'
@@ -63,7 +62,6 @@ parameters:
     type: String
     description: |
       Identifier. Name of the AuthzExtension resource.
-    min_version: 'beta'
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/network_services_authz_extensions.tmpl'
@@ -71,7 +69,6 @@ parameters:
     type: String
     description: |
       The location of the resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
 properties:
@@ -79,30 +76,25 @@ properties:
     type: Time
     description: |
       The timestamp when the resource was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       The timestamp when the resource was updated.
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |
       A human-readable description of the resource.
-    min_version: 'beta'
   - name: 'labels'
     type: KeyValueLabels
     description: |
       Set of labels associated with the AuthzExtension resource.
-    min_version: 'beta'
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
       All backend services and forwarding rules referenced by this extension must share the same load balancing scheme.
       For more information, refer to [Backend services overview](https://cloud.google.com/load-balancing/docs/backend-service).
-    min_version: 'beta'
     required: true
     enum_values:
       - 'INTERNAL_MANAGED'
@@ -111,7 +103,6 @@ properties:
     type: String
     description: |
       The :authority header in the gRPC request sent from Envoy to the extension service.
-    min_version: 'beta'
     required: true
   - name: 'service'
     type: ResourceRef
@@ -119,7 +110,6 @@ properties:
       The reference to the service that runs the extension.
       To configure a callout extension, service must be a fully-qualified reference to a [backend service](https://cloud.google.com/compute/docs/reference/rest/v1/backendServices) in the format:
       https://www.googleapis.com/compute/v1/projects/{project}/regions/{region}/backendServices/{backendService} or https://www.googleapis.com/compute/v1/projects/{project}/global/backendServices/{backendService}.
-    min_version: 'beta'
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     resource: 'BackendService'
@@ -128,7 +118,6 @@ properties:
     type: String
     description: |
       Specifies the timeout for each individual message on the stream. The timeout must be between 10-10000 milliseconds.
-    min_version: 'beta'
     required: true
     diff_suppress_func: 'tpgresource.DurationDiffSuppress'
   - name: 'failOpen'
@@ -138,7 +127,6 @@ properties:
       When set to TRUE, request or response processing continues without error. Any subsequent extensions in the extension chain are also executed. When set to FALSE or the default setting of FALSE is used, one of the following happens:
       * If response headers have not been delivered to the downstream client, a generic 500 error is returned to the client. The error response can be tailored by configuring a custom error response in the load balancer.
       * If response headers have been delivered, then the HTTP stream to the downstream client is reset.
-    min_version: 'beta'
     default_from_api: true
     send_empty_value: true
   - name: 'metadata'
@@ -147,12 +135,10 @@ properties:
       The metadata provided here is included as part of the metadata_context (of type google.protobuf.Struct) in the ProcessingRequest message sent to the extension server. The metadata is available under the namespace com.google.authz_extension.<resourceName>. The following variables are supported in the metadata Struct:
 
       {forwarding_rule_id} - substituted with the forwarding rule's fully qualified resource name.
-    min_version: 'beta'
   - name: 'forwardHeaders'
     type: Array
     description: |
       List of the HTTP headers to forward to the extension (from the client). If omitted, all headers are sent. Each element is a string indicating the header name.
-    min_version: 'beta'
     item_type:
       type: String
   - name: 'wireFormat'
@@ -160,7 +146,6 @@ properties:
     description: |
       The format of communication supported by the callout extension.
       If not specified, the default is EXT_PROC_GRPC.
-    min_version: 'beta'
     default_from_api: true
     enum_values:
       - 'WIRE_FORMAT_UNSPECIFIED'

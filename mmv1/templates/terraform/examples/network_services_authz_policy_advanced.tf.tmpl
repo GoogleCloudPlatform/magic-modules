@@ -1,14 +1,10 @@
 resource "google_compute_network" "default" {
-  provider = google-beta
-
   name                    = "lb-network"
   project                 = "{{index $.TestEnvVars "project"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider = google-beta
-
   name          = "backend-subnet"
   project       = "{{index $.TestEnvVars "project"}}"
   region        = "us-west1"
@@ -17,8 +13,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_subnetwork" "proxy_only" {
-  provider = google-beta
-
   name          = "proxy-only-subnet"
   project       = "{{index $.TestEnvVars "project"}}"
   region        = "us-west1"
@@ -29,8 +23,6 @@ resource "google_compute_subnetwork" "proxy_only" {
 }
 
 resource "google_compute_address" "default" {
-  provider = google-beta
-
   name         = "l7-ilb-ip-address"
   project      = "{{index $.TestEnvVars "project"}}"
   region       = "us-west1"
@@ -40,8 +32,6 @@ resource "google_compute_address" "default" {
 }
 
 resource "google_compute_region_health_check" "default" {
-  provider = google-beta
-
   name    = "l7-ilb-basic-check"
   project = "{{index $.TestEnvVars "project"}}"
   region  = "us-west1"
@@ -52,8 +42,6 @@ resource "google_compute_region_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "url_map" {
-  provider = google-beta
-
   name                  = "l7-ilb-backend-service"
   project               = "{{index $.TestEnvVars "project"}}"
   region                = "us-west1"
@@ -63,8 +51,6 @@ resource "google_compute_region_backend_service" "url_map" {
 }
 
 resource "google_compute_region_url_map" "default" {
-  provider = google-beta
-
   name            = "l7-ilb-map"
   project         = "{{index $.TestEnvVars "project"}}"
   region          = "us-west1"
@@ -72,8 +58,6 @@ resource "google_compute_region_url_map" "default" {
 }
 
 resource "google_compute_region_target_http_proxy" "default" {
-  provider = google-beta
-
   name    = "l7-ilb-proxy"
   project = "{{index $.TestEnvVars "project"}}"
   region  = "us-west1"
@@ -81,8 +65,6 @@ resource "google_compute_region_target_http_proxy" "default" {
 }
 
 resource "google_compute_forwarding_rule" "default" {
-  provider = google-beta
-
   name                  = "l7-ilb-forwarding-rule"
   project               = "{{index $.TestEnvVars "project"}}"
   region                = "us-west1"
@@ -98,8 +80,6 @@ resource "google_compute_forwarding_rule" "default" {
 }
 
 resource "google_compute_region_backend_service" "authz_extension" {
-  provider = google-beta
-
   name    = "authz-service"
   project = "{{index $.TestEnvVars "project"}}"
   region  = "us-west1"
@@ -110,8 +90,6 @@ resource "google_compute_region_backend_service" "authz_extension" {
 }
 
 resource "google_network_services_authz_extension" "default" {
-  provider = google-beta
-
   name     = "my-authz-ext"
   project  = "{{index $.TestEnvVars "project"}}"
   location = "us-west1"
@@ -126,8 +104,6 @@ resource "google_network_services_authz_extension" "default" {
 }
 
 resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
-
   name        = "{{index $.Vars "resource_name"}}"
   project     = "{{index $.TestEnvVars "project"}}"
   location    = "us-west1"

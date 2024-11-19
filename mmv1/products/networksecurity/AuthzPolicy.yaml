@@ -15,7 +15,6 @@
 name: 'AuthzPolicy'
 description: |
   AuthzPolicy is a resource that allows to forward traffic to a callout backend designed to scan the traffic for security purposes.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/load-balancing/docs/reference/network-security/rest/v1beta1/projects.locations.authzPolicies'
@@ -63,7 +62,6 @@ parameters:
     type: String
     description: |
       Identifier. Name of the AuthzPolicy resource.
-    min_version: 'beta'
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/network_services_authz_policies.tmpl'
@@ -71,7 +69,6 @@ parameters:
     type: String
     description: |
       The location of the resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
 properties:
@@ -79,29 +76,24 @@ properties:
     type: Time
     description: |
       The timestamp when the resource was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       The timestamp when the resource was updated.
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |
       A human-readable description of the resource.
-    min_version: 'beta'
   - name: 'labels'
     type: KeyValueLabels
     description: |
       Set of labels associated with the AuthzExtension resource.
-    min_version: 'beta'
   - name: 'target'
     type: NestedObject
     description: |
       Specifies the set of resources to which this policy should be applied to.
-    min_version: 'beta'
     required: true
     properties:
       - name: 'loadBalancingScheme'
@@ -109,7 +101,6 @@ properties:
         description: |
           All gateways and forwarding rules referenced by this policy and extensions must share the same load balancing scheme.
           For more information, refer to [Backend services overview](https://cloud.google.com/load-balancing/docs/backend-service).
-        min_version: 'beta'
         required: true
         enum_values:
           - 'INTERNAL_MANAGED'
@@ -119,7 +110,6 @@ properties:
         type: Array
         description: |
           A list of references to the Forwarding Rules on which this policy will be applied.
-        min_version: 'beta'
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         item_type:
           type: String
@@ -135,7 +125,6 @@ properties:
       2. If there are any DENY policies that match the request, the request is denied.
       3. If there are no ALLOW policies for the resource or if any of the ALLOW policies match the request, the request is allowed.
       4. Else the request is denied by default if none of the configured AuthzPolicies with ALLOW action match the request.
-    min_version: 'beta'
     required: true
     enum_values:
       - 'ALLOW'
@@ -145,7 +134,6 @@ properties:
     type: NestedObject
     description: |
       Required if the action is CUSTOM. Allows delegating authorization decisions to Cloud IAP or to Service Extensions. One of cloudIap or authzExtension must be specified.
-    min_version: 'beta'
     properties:
       # Cloud IAP type has no fields according to the API
       # https://cloud.google.com/load-balancing/docs/reference/network-security/rest/v1beta1/projects.locations.authzPolicies#cloudiap
@@ -166,13 +154,11 @@ properties:
         type: NestedObject
         description: |
           Delegate authorization decision to user authored Service Extension. Only one of cloudIap or authzExtension can be specified.
-        min_version: 'beta'
         properties:
           - name: 'resources'
             type: Array
             description: |
               A list of references to authorization extensions that will be invoked for requests matching this policy. Limited to 1 custom provider.
-            min_version: 'beta'
             required: true
             diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             item_type:
