@@ -1355,7 +1355,7 @@ func GetRegionFromRegionSelfLink(selfLink string) string {
 
 func GetUniverseDomainFromMeta(meta interface{}) string {
 	config := meta.(*Config)
-	if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+	if config.UniverseDomain == "" {
 		return "googleapis.com"
 	}
 	return config.UniverseDomain
