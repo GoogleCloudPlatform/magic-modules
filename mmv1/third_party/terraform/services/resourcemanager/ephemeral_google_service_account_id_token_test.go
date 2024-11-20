@@ -34,7 +34,7 @@ func TestAccEphemeralServiceAccountIdToken_withDelegates(t *testing.T) {
 
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "id-delegate1", initialServiceAccount)          // SA_2
-	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, id-delegate2", delegateServiceAccountEmailOne) // SA_3
+	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "id-delegate2", delegateServiceAccountEmailOne) // SA_3
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "id-target", delegateServiceAccountEmailTwo)         // SA_4
 
 	resource.Test(t, resource.TestCase{
