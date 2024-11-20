@@ -1,7 +1,5 @@
 ---
 subcategory: "Cloud Platform"
-layout: "google"
-sidebar_current: "docs-google-service-account-jwt"
 description: |-
   Produces an arbitrary self-signed JWT for service accounts
 ---

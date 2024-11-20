@@ -1,7 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package resourcemanager
 
 import (
@@ -10,11 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	"github.com/hashicorp/terraform-provider-google/google/fwutils"
+	"github.com/hashicorp/terraform-provider-google/google/fwvalidators"
 	"google.golang.org/api/iamcredentials/v1"
 )
 
@@ -55,11 +54,17 @@ func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephem
 			"target_service_account": schema.StringAttribute{
 				Description: "The email of the service account that will sign the JWT.",
 				Required:    true,
+				Validators: []validator.String{
+					fwvalidators.ServiceAccountEmailValidator{},
+				},
 			},
 			"delegates": schema.SetAttribute{
 				Description: "Delegate chain of approvals needed to perform full impersonation. Specify the fully qualified service account name.",
 				Optional:    true,
 				ElementType: types.StringType,
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(fwvalidators.ServiceAccountEmailValidator{}),
+				},
 			},
 			"jwt": schema.StringAttribute{
 				Description: "The signed JWT containing the JWT Claims Set from the `payload`.",
@@ -121,7 +126,7 @@ func (p *googleEphemeralServiceAccountJwt) Open(ctx context.Context, req ephemer
 	DelegatesSetValue, _ := data.Delegates.ToSetValue(ctx)
 	jwtRequest := &iamcredentials.SignJwtRequest{
 		Payload:   payload,
-		Delegates: StringSet(DelegatesSetValue),
+		Delegates: fwutils.StringSet(DelegatesSetValue),
 	}
 
 	jwtResponse, err := service.Projects.ServiceAccounts.SignJwt(name, jwtRequest).Do()
@@ -133,13 +138,4 @@ func (p *googleEphemeralServiceAccountJwt) Open(ctx context.Context, req ephemer
 	data.Jwt = types.StringValue(jwtResponse.SignedJwt)
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
-}
-
-func StringSet(d basetypes.SetValue) []string {
-
-	StringSlice := make([]string, 0)
-	for _, v := range d.Elements() {
-		StringSlice = append(StringSlice, v.(basetypes.StringValue).ValueString())
-	}
-	return StringSlice
 }
