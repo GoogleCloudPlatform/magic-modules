@@ -30,9 +30,9 @@ func TestAccEphemeralServiceAccountJwt_withDelegates(t *testing.T) {
 	t.Parallel()
 
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
-	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "delegate1", initialServiceAccount)          // SA_2
-	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "delegate2", delegateServiceAccountEmailOne) // SA_3
-	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "target", delegateServiceAccountEmailTwo)         // SA_4
+	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "jwt-delegate1", initialServiceAccount)          // SA_2
+	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "jwt-delegate2", delegateServiceAccountEmailOne) // SA_3
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "jwt-target", delegateServiceAccountEmailTwo)         // SA_4
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
