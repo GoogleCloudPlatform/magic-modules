@@ -16,7 +16,7 @@
  Before you begin
  &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
 &lt;/h2>
-&lt;p>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Generate the modified provider(s)&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the modified provider(s)&lt;/a>&lt;/p>
 &lt;ol>
 &lt;li>
 &lt;p>Set up application default credentials for Terraform&lt;/p>

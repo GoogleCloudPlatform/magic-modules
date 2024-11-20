@@ -1,0 +1,73 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="
+  Set up your development environment
+  #
+
+Before you start adding or updating a Terraform resource using
+magic-modules, you must first set up your environment by
+installing the necessary tools. This page explains the steps for setting up your
+development environment.
+
+
+Install the gcloud CLI.
+
+
+In the Google Cloud console, on the project selector page, select or
+create a Google Cloud project.
+
+  Note: If you don&rsquo;t already have a project to use for testing changes to
+the Terraform providers, create a project instead of selecting an existing
+poject. After you finish these steps, you can delete the project, removing
+all resources associated with the project.
+
+
+
+
+
+  
+  
+
+
+
+  Go to project selector
+
+"><meta name=theme-color media="(prefers-color-scheme: light)" content="#ffffff"><meta name=theme-color media="(prefers-color-scheme: dark)" content="#343a40"><meta name=color-scheme content="light dark"><meta property="og:url" content="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/"><meta property="og:site_name" content="Magic Modules"><meta property="og:title" content="Set up your development environment"><meta property="og:description" content="Set up your development environment # Before you start adding or updating a Terraform resource using magic-modules, you must first set up your environment by installing the necessary tools. This page explains the steps for setting up your development environment.
+Install the gcloud CLI.
+In the Google Cloud console, on the project selector page, select or create a Google Cloud project. Note: If you don’t already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject. After you finish these steps, you can delete the project, removing all resources associated with the project. Go to project selector"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="develop"><meta property="article:modified_time" content="2024-11-19T19:03:10-05:00"><title>Set up your development environment | Magic Modules</title>
+<link rel=manifest href=/magic-modules/manifest.json><link rel=icon href=/magic-modules/favicon.png><link rel=canonical href=https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/><link rel=stylesheet href=/magic-modules/book.min.309b7ed028807cdb68d8d61e26d609f48369c098dbf5e4d8c0dcf4cdf49feafc.css integrity="sha256-MJt+0CiAfNto2NYeJtYJ9INpwJjb9eTYwNz0zfSf6vw=" crossorigin=anonymous><script defer src=/magic-modules/fuse.min.js></script><script defer src=/magic-modules/en.search.min.f686760f276f367e30ff2dd94f5c15e99e2bb485c0ba5435281661161cc9418e.js integrity="sha256-9oZ2DydvNn4w/y3ZT1wV6Z4rtIXAulQ1KBZhFhzJQY4=" crossorigin=anonymous></script></head><body dir=ltr><input type=checkbox class="hidden toggle" id=menu-control>
+<input type=checkbox class="hidden toggle" id=toc-control><main class="container flex"><aside class=book-menu><div class=book-menu-content><nav><h2 class=book-brand><a class="flex align-center" href=/magic-modules/><img src=/magic-modules/magic-modules.svg alt=Logo><span>Magic Modules</span></a></h2><div class="book-search hidden"><input type=text id=book-search-input placeholder=Search aria-label=Search maxlength=64 data-hotkeys=s/><div class="book-search-spinner hidden"></div><ul id=book-search-results></ul></div><script>document.querySelector(".book-search").classList.remove("hidden")</script><ul><li><a href=/magic-modules/>Overview</a></li></ul><ul><li><a href=/magic-modules/contribution-process/>Contribution process</a></li><li><span>Develop</span><ul><li><a href=/magic-modules/develop/set-up-dev-environment/ class=active>Set up your development environment</a></li><li><a href=/magic-modules/develop/resource/>Add or modify a resource</a></li><li><a href=/magic-modules/develop/add-handwritten-datasource/>Add a datasource</a></li><li><a href=/magic-modules/develop/custom-code/>Add custom resource code</a></li><li><a href=/magic-modules/develop/promote-to-ga/>Promote to GA</a></li><li><a href=/magic-modules/develop/update-dependencies/>Update dependencies</a></li><li><a href=/magic-modules/develop/diffs/>Fix diffs</a></li><li><a href=/magic-modules/develop/generate-providers/>Generate the providers</a></li><li><a href=/magic-modules/develop/field-reference/>MMv1 field reference</a></li><li><a href=/magic-modules/develop/resource-reference/>MMv1 resource reference</a></li><li><input type=checkbox id=section-388be1d03669075d184a63bd2902c124 class=toggle>
+<label for=section-388be1d03669075d184a63bd2902c124 class="flex justify-between"><a role=button>Test</a></label><ul><li><a href=/magic-modules/develop/test/test/>Add resource tests</a></li><li><a href=/magic-modules/develop/test/run-tests/>Run tests</a></li></ul></li><li><input type=checkbox id=section-c414d1ebdbeb6957a666f9e9dfd1a53a class=toggle>
+<label for=section-c414d1ebdbeb6957a666f9e9dfd1a53a class="flex justify-between"><a role=button>Breaking changes</a></label><ul><li><a href=/magic-modules/develop/breaking-changes/breaking-changes/>Types of breaking changes</a></li><li><a href=/magic-modules/develop/breaking-changes/make-a-breaking-change/>Make a breaking change</a></li></ul></li><li><a href=/magic-modules/develop/handwritten-docs-style-guide/>Handwritten docs style guide</a></li><li><a href=/magic-modules/develop/client-side-fields/>Client-side fields</a></li></ul></li><li><span>Best practices</span><ul><li><a href=/magic-modules/best-practices/immutable-fields/>Immutable fields</a></li><li><a href=/magic-modules/best-practices/deletion-behaviors/>Deletion behaviors</a></li><li><a href=/magic-modules/best-practices/labels-and-annotations/>Labels and annotations</a></li></ul></li><li><span>Contribute</span><ul><li><a href=/magic-modules/contribute/create-pr/>Create a pull request</a></li><li><a href=/magic-modules/contribute/release-notes/>Write release notes</a></li><li><a href=/magic-modules/contribute/review-pr/>Review a pull request</a></li></ul></li><li><span>Reference</span><ul><li><a href=/magic-modules/reference/make-commands/>make commands</a></li><li><a href=/magic-modules/reference/ruby-go-changes/>Ruby to Go Migration</a></li></ul></li></ul></nav><script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script></div></aside><div class=book-page><header class=book-header><div class="flex align-center justify-between"><label for=menu-control><img src=/magic-modules/svg/menu.svg class=book-icon alt=Menu>
+</label><strong>Set up your development environment</strong>
+<label for=toc-control><img src=/magic-modules/svg/toc.svg class=book-icon alt="Table of Contents"></label></div><aside class="hidden clearfix"><nav id=TableOfContents><ul><li><a href=#whats-next>What&rsquo;s next</a></li></ul></nav></aside></header><article class="markdown book-article"><h1 id=set-up-your-development-environment>Set up your development environment
+<a class=anchor href=#set-up-your-development-environment>#</a></h1><p>Before you start adding or updating a Terraform resource using
+<a href=https://googlecloudplatform.github.io/magic-modules/>magic-modules</a>, you must first set up your environment by
+installing the necessary tools. This page explains the steps for setting up your
+development environment.</p><ol><li><p><a href=https://cloud.google.com/sdk/docs/install>Install the gcloud CLI.</a></p></li><li><p>In the Google Cloud console, on the project selector page, select or
+<a href=https://cloud.google.com/resource-manager/docs/creating-managing-projects>create a Google Cloud project</a>.<blockquote class="book-hint info"><strong>Note:</strong> If you don&rsquo;t already have a project to use for testing changes to
+the Terraform providers, create a project instead of selecting an existing
+poject. After you finish these steps, you can delete the project, removing
+all resources associated with the project.</blockquote><a href=https://console.cloud.google.com/projectselector2/home/dashboard target=_blank rel=noopener class=book-btn>Go to project selector</a></p></li><li><p>Make sure that billing is enabled for your Google Cloud project. Learn how to
+<a href=https://cloud.google.com/billing/docs/how-to/verify-billing-enabled>check if billing is enabled on a project</a>.</p></li><li><p><a href=https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>Install git</a></p></li><li><p><a href=https://go.dev/doc/install>Install go</a></p></li><li><p>Add the following values to your environment settings such as <code>.bashrc</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#75715e># Add GOPATH variable for convenience</span>
+</span></span><span style=display:flex><span>export GOPATH<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>go env GOPATH<span style=color:#66d9ef>)</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Add Go binaries to PATH</span>
+</span></span><span style=display:flex><span>export PATH<span style=color:#f92672>=</span>$PATH:<span style=color:#66d9ef>$(</span>go env GOPATH<span style=color:#66d9ef>)</span>/bin
+</span></span></code></pre></div></li><li><p>Install goimports</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>go install golang.org/x/tools/cmd/goimports@latest
+</span></span></code></pre></div></li><li><p><a href=https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli>Install terraform</a></p></li><li><p>Clone the <code>magic-modules</code> repository</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>cd ~
+</span></span><span style=display:flex><span>git clone https://github.com/GoogleCloudPlatform/magic-modules.git
+</span></span></code></pre></div></li><li><p>Run the following command from the root of your cloned <code>magic-modules</code> repository.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>cd magic-modules
+</span></span><span style=display:flex><span>./scripts/doctor
+</span></span></code></pre></div><p>Expected output if everything is installed properly:</p><pre tabindex=0><code>Check for go in path...
+   found!
+Check for goimports in path...
+   found!
+Check for git in path...
+   found!
+Check for terraform in path...
+   found!
+Check for make in path...
+   found!
+</code></pre></li></ol><h2 id=whats-next>What&rsquo;s next
+<a class=anchor href=#whats-next>#</a></h2><ul><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/resource/>Learn how to add or modify a resource</a></li><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/custom-code/>Learn how to add custom resource code</a></li><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/>Learn how to add a datasource</a></li><li><a href=https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/>Learn how to promote a resource to GA</a></li></ul></article><footer class=book-footer><div class="flex flex-wrap justify-between"><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/commit/727c6c279f274b2668f6954604d36c6e7a2a6102 title='Last modified by nityaravi | November 20, 2024' target=_blank rel=noopener><img src=/magic-modules/svg/calendar.svg class=book-icon alt=Calendar>
+<span>November 20, 2024</span></a></div><div><a class="flex align-center" href="https://github.com/hashicorp/terraform-provider-google/issues/new?assignees=&labels=technical-debt,documentation&projects=&title=MM%20docsite%20issue%20in%20content/develop%2fset-up-dev-environment.md&template=11_developer_productivity.md" target=_blank rel=noopener><img src=/magic-modules/report.svg class=book-icon alt=Edit>
+<span>Report documentation issue</span></a></div><div><a class="flex align-center" href=https://github.com/GoogleCloudPlatform/magic-modules/edit/main/docs/content/develop/set-up-dev-environment.md target=_blank rel=noopener><img src=/magic-modules/svg/edit.svg class=book-icon alt=Edit>
+<span>Edit this page</span></a></div></div><script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script></footer><label for=menu-control class="hidden book-menu-overlay"></label></div><aside class=book-toc><div class=book-toc-content><nav id=TableOfContents><ul><li><a href=#whats-next>What&rsquo;s next</a></li></ul></nav></div></aside></main></body></html>

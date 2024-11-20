@@ -1,47 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Overview on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/</link><description>Recent content in Overview on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/index.xml" rel="self" type="application/rss+xml"/><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribution-process/</guid><description>&lt;h1 id="contribution-process">
- Contribution process
- &lt;a class="anchor" href="#contribution-process">#&lt;/a>
-&lt;/h1>
-&lt;p>This page explains how you can contribute code and documentation to the	&lt;code>magic-modules&lt;/code> repository.&lt;/p>
-&lt;h2 id="before-you-begin">
- Before you begin
- &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Set up your development environment&lt;/a>&lt;/li>
-&lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
-&lt;ul>
-&lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="contribute-code">
- Contribute code
- &lt;a class="anchor" href="#contribute-code">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
-&lt;li>Make the code change. For example:
-&lt;ul>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Add or modify a resource&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">Add resource tests&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">Make a breaking change&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
-&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
-&lt;/ol>
-&lt;h2 id="after-your-change-is-merged">
- After your change is merged
- &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
-&lt;/h2>
-&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</guid><description>&lt;h1 id="add-resource-tests">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Overview on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/</link><description>Recent content in Overview on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/index.xml" rel="self" type="application/rss+xml"/><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</guid><description>&lt;h1 id="add-resource-tests">
  Add resource tests
  &lt;a class="anchor" href="#add-resource-tests">#&lt;/a>
 &lt;/h1>
@@ -88,46 +45,7 @@
 &lt;li>If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.&lt;/li>
 &lt;/ol>
 &lt;blockquote class="book-hint info">
- &lt;p>&lt;strong>TIP:&lt;/strong> Speeding up review:&lt;/p></description></item><item><title>Generate the providers</title><link>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/</guid><description>&lt;h1 id="generate-google-and-google-beta-providers">
- Generate &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
- &lt;a class="anchor" href="#generate-google-and-google-beta-providers">#&lt;/a>
-&lt;/h1>
-&lt;p>This quickstart guides you through setting up your development environment, making a change to &lt;code>magic-modules&lt;/code>, generating provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> Terraform providers, and running tests related to the change.&lt;/p>
-&lt;h2 id="before-you-begin">
- Before you begin
- &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>&lt;a href="https://cloud.google.com/sdk/docs/install">Install the gcloud CLI.&lt;/a>&lt;/li>
-&lt;li>In the Google Cloud console, on the project selector page, select or &lt;a href="https://cloud.google.com/resource-manager/docs/creating-managing-projects">create a Google Cloud project&lt;/a>.
-&lt;blockquote class="book-hint info">
- &lt;strong>Note:&lt;/strong> If you don&amp;rsquo;t already have a project to use for testing changes to the Terraform providers, create a project instead of selecting an existing poject. After you finish these steps, you can delete the project, removing all resources associated with the project.
-&lt;/blockquote>
-
-
-
-
- 
- 
-
-
-&lt;a href="https://console.cloud.google.com/projectselector2/home/dashboard" target="_blank" rel="noopener" class="book-btn">
- Go to project selector
-&lt;/a>
-&lt;/li>
-&lt;li>Make sure that billing is enabled for your Google Cloud project. Learn how to &lt;a href="https://cloud.google.com/billing/docs/how-to/verify-billing-enabled">check if billing is enabled on a project&lt;/a>.&lt;/li>
-&lt;/ol>
-&lt;h2 id="set-up-your-development-environment">
- Set up your development environment
- &lt;a class="anchor" href="#set-up-your-development-environment">#&lt;/a>
-&lt;/h2>
-&lt;blockquote class="book-hint warning">
- If you are familiar with Docker or Podman, you may want to use the experimental &lt;a href="https://googlecloudplatform.github.io/magic-modules/reference/make-commands/#container-based-environment">container-based environment&lt;/a> instead of this section.
-&lt;/blockquote>
-
-&lt;ol>
-&lt;li>
-&lt;p>&lt;a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">Install git&lt;/a>&lt;/p></description></item><item><title>Immutable fields</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/immutable-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/immutable-fields/</guid><description>&lt;h1 id="immutable-fields">
+ &lt;p>&lt;strong>TIP:&lt;/strong> Speeding up review:&lt;/p></description></item><item><title>Immutable fields</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/immutable-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/immutable-fields/</guid><description>&lt;h1 id="immutable-fields">
  Immutable fields
  &lt;a class="anchor" href="#immutable-fields">#&lt;/a>
 &lt;/h1>
@@ -205,7 +123,186 @@ such as &lt;code>gcloud&lt;/code> or Cloud Console.&lt;/li>
 &lt;/ul>
 &lt;p>This document lists many types of breaking changes but may not be entirely
 comprehensive. Some types of changes that would normally be &amp;ldquo;breaking&amp;rdquo; may
-have specific mitigating circumstances that make them non-breaking.&lt;/p></description></item><item><title>Deletion behaviors</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</guid><description>&lt;h1 id="deletion-behaviors">
+have specific mitigating circumstances that make them non-breaking.&lt;/p></description></item><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribution-process/</guid><description>&lt;h1 id="contribution-process">
+ Contribution process
+ &lt;a class="anchor" href="#contribution-process">#&lt;/a>
+&lt;/h1>
+&lt;p>This page explains how you can contribute code and documentation to the	&lt;code>magic-modules&lt;/code> repository.&lt;/p>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
+&lt;ul>
+&lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="contribute-code">
+ Contribute code
+ &lt;a class="anchor" href="#contribute-code">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
+&lt;li>Make the code change. For example:
+&lt;ul>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Add or modify a resource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">Add resource tests&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">Make a breaking change&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
+&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="after-your-change-is-merged">
+ After your change is merged
+ &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
+&lt;/h2>
+&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Set up your development environment</title><link>https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/</guid><description>&lt;h1 id="set-up-your-development-environment">
+ Set up your development environment
+ &lt;a class="anchor" href="#set-up-your-development-environment">#&lt;/a>
+&lt;/h1>
+&lt;p>Before you start adding or updating a Terraform resource using
+&lt;a href="https://googlecloudplatform.github.io/magic-modules/">magic-modules&lt;/a>, you must first set up your environment by
+installing the necessary tools. This page explains the steps for setting up your
+development environment.&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;a href="https://cloud.google.com/sdk/docs/install">Install the gcloud CLI.&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>In the Google Cloud console, on the project selector page, select or
+&lt;a href="https://cloud.google.com/resource-manager/docs/creating-managing-projects">create a Google Cloud project&lt;/a>.
+&lt;blockquote class="book-hint info">
+ &lt;strong>Note:&lt;/strong> If you don&amp;rsquo;t already have a project to use for testing changes to
+the Terraform providers, create a project instead of selecting an existing
+poject. After you finish these steps, you can delete the project, removing
+all resources associated with the project.
+&lt;/blockquote>
+
+
+
+
+ 
+ 
+
+
+&lt;a href="https://console.cloud.google.com/projectselector2/home/dashboard" target="_blank" rel="noopener" class="book-btn">
+ Go to project selector
+&lt;/a>
+&lt;/p></description></item><item><title>Add or modify a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/resource/</guid><description>&lt;h1 id="add-or-modify-a-resource">
+ Add or modify a resource
+ &lt;a class="anchor" href="#add-or-modify-a-resource">#&lt;/a>
+&lt;/h1>
+&lt;p>This page describes how to add a new resource to the &lt;code>google&lt;/code> or &lt;code>google-beta&lt;/code> Terraform provider using MMv1 and/or handwritten code.&lt;/p>
+&lt;p>For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/">How Magic Modules works&lt;/a>.&lt;/p>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
+&lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
+&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
+git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
+cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
+&lt;/code>&lt;/pre>&lt;/li>
+&lt;/ol>
+&lt;h2 id="add-a-resource">
+ Add a resource
+ &lt;a class="anchor" href="#add-a-resource">#&lt;/a>
+&lt;/h2>
+
+
+
+
+&lt;div class="book-tabs">&lt;input type="radio" class="toggle" name="tabs-resource" id="tabs-resource-0" checked="checked" />
+ &lt;label for="tabs-resource-0">MMv1&lt;/label>
+ &lt;div class="book-tabs-content markdown-inner">&lt;ol>
+&lt;li>
+&lt;p>Using an editor of your choice, in the appropriate &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">product folder&lt;/a>, create a file called &lt;code>RESOURCE_NAME.yaml&lt;/code>. Replace &lt;code>RESOURCE_NAME&lt;/code> with the name of the API resource you are adding support for. For example, a configuration file for &lt;a href="https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses">NatAddress&lt;/a> would be called &lt;code>NatAddress.yaml&lt;/code>.&lt;/p></description></item><item><title>Add a datasource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/</guid><description>Datasources are like terraform resources except they don&amp;rsquo;t &lt;em>create&lt;/em> anything.</description></item><item><title>Add custom resource code</title><link>https://googlecloudplatform.github.io/magic-modules/develop/custom-code/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/custom-code/</guid><description>&lt;h1 id="add-custom-resource-code">
+ Add custom resource code
+ &lt;a class="anchor" href="#add-custom-resource-code">#&lt;/a>
+&lt;/h1>
+&lt;p>This document covers how to add &amp;ldquo;custom code&amp;rdquo; to &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">MMv1 resources&lt;/a>. Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can&amp;rsquo;t be achieved otherwise.&lt;/p>
+&lt;p>Most custom code attributes are strings that contain a path to a template file relative to the &lt;code>mmv1&lt;/code> directory. For example:&lt;/p></description></item><item><title>Promote to GA</title><link>https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/</guid><description>&lt;h1 id="promote-from-beta-to-ga">
+ Promote from beta to GA
+ &lt;a class="anchor" href="#promote-from-beta-to-ga">#&lt;/a>
+&lt;/h1>
+&lt;p>This document describes how to promote an existing resource or field that uses MMv1 and/or handwritten code from the &lt;code>google-beta&lt;/code> provider to the &lt;code>google&lt;/code> (also known as &amp;ldquo;GA&amp;rdquo;) provider.&lt;/p>
+&lt;p>Handwritten code (including &lt;code>custom_code&lt;/code>) commonly uses &amp;ldquo;version guards&amp;rdquo; in the form of &lt;code>{{- if ne $.TargetVersionName &amp;quot;ga&amp;quot; }}...{{- end }}&lt;/code> to wrap code that is beta-specific, which need to be removed during promotion.&lt;/p>
+&lt;p>For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/">How Magic Modules works&lt;/a>.&lt;/p></description></item><item><title>Update dependencies</title><link>https://googlecloudplatform.github.io/magic-modules/develop/update-dependencies/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/update-dependencies/</guid><description>&lt;h1 id="update-provider-dependencies">
+ Update provider dependencies
+ &lt;a class="anchor" href="#update-provider-dependencies">#&lt;/a>
+&lt;/h1>
+&lt;p>The Magic Modules repository does not contain a complete Go module, preventing the use of automated tooling like &lt;code>go get&lt;/code> from that repository. To add or update provider dependencies, use standard Go tooling to update the dependency in the &lt;code>terraform-provider-google&lt;/code> provider and copy the results to the upstream files in Magic Modules.&lt;/p>
+&lt;p>Below are the steps you can follow to make the change:&lt;/p>
+&lt;ol>
+&lt;li>Navigate to the local &lt;code>google&lt;/code> provider directory:&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
+&lt;li>Open the &lt;a href="https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod">&lt;code>go.mod&lt;/code>&lt;/a> file and add the new entries or modify the versions of existing entries as needed&lt;/li>
+&lt;li>Update dependencies using either of the following methods
+&lt;ul>
+&lt;li>run the following commands to update all dependencies:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>go get
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>Alternatively, update a specific package to a desired version:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>go get google.golang.org/api@v0.105.0 
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>Copy the contents of the updated &lt;code>go.mod&lt;/code> and &lt;code>go.sum&lt;/code> file into &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb">&lt;code>mmv1/third_party/terraform/go.mod&lt;/code>&lt;/a> and &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum">&lt;code>mmv1/third_party/terraform/go.sum&lt;/code>&lt;/a> in the &lt;code>magic-modules&lt;/code> respectively.&lt;/li>
+&lt;li>Create a pull request containing &lt;em>only&lt;/em> the dependency changes.&lt;/li>
+&lt;li>Resolve any errors caused by the dependency upgrade.&lt;/li>
+&lt;li>After the dependency pull request is merged, continue with a separate pull request for any additional changes that were blocked by the upgrade.&lt;/li>
+&lt;/ol></description></item><item><title>Fix diffs</title><link>https://googlecloudplatform.github.io/magic-modules/develop/diffs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/diffs/</guid><description>&lt;h1 id="fix-diffs">
+ Fix diffs
+ &lt;a class="anchor" href="#fix-diffs">#&lt;/a>
+&lt;/h1>
+&lt;p>This page outlines best practices for fixing various kinds of diffs that can show up at plan time. These will often show up as test failures with the text: &lt;code>After applying this test step, the plan was not empty.&lt;/code>. They can also show up for users at plan time, on fields that a user has not modified in their configuration. If the diff does not go away even after running &lt;code>terraform apply&lt;/code> more than once with the same configuration, the diff is called a &amp;ldquo;permadiff&amp;rdquo;.&lt;/p></description></item><item><title>Generate the providers</title><link>https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/</guid><description>&lt;h1 id="generate-google-and-google-beta-providers">
+ Generate &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
+ &lt;a class="anchor" href="#generate-google-and-google-beta-providers">#&lt;/a>
+&lt;/h1>
+&lt;p>After making a change to the Terraform providers for Google Cloud, you must
+integrate your changes with the providers. This page explains how to generate
+provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> Terraform providers.&lt;/p>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>.&lt;/li>
+&lt;li>Update &lt;code>magic-modules&lt;/code> as needed. These updates could be any of the following changes:&lt;/li>
+&lt;/ol>
+&lt;ul>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Adding or modifying a resource&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Adding a datasource&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/custom-code/">Adding custom resource code&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promoting a resource to GA&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;h2 id="generate-a-provider-change">
+ Generate a provider change
+ &lt;a class="anchor" href="#generate-a-provider-change">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>Clone the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> provider repositories with the following commands:&lt;/p></description></item><item><title>Deletion behaviors</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</guid><description>&lt;h1 id="deletion-behaviors">
  Deletion behaviors
  &lt;a class="anchor" href="#deletion-behaviors">#&lt;/a>
 &lt;/h1>
@@ -225,7 +322,7 @@ have specific mitigating circumstances that make them non-breaking.&lt;/p></desc
  Before you begin
  &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
 &lt;/h2>
-&lt;p>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Generate the modified provider(s)&lt;/a>&lt;/p>
+&lt;p>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the modified provider(s)&lt;/a>&lt;/p>
 &lt;ol>
 &lt;li>
 &lt;p>Set up application default credentials for Terraform&lt;/p>
@@ -266,40 +363,7 @@ GOOGLE_BILLING_ACCOUNT
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-markdown" data-lang="markdown">&lt;span style="display:flex;">&lt;span>```release-note:TYPE
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CONTENT
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>```
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>TYPE&lt;/code> with the correct release note type, and &lt;code>CONTENT&lt;/code> with a release note written according to the guidelines in the following sections.&lt;/p></description></item><item><title>Add or modify a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/resource/</guid><description>&lt;h1 id="add-or-modify-a-resource">
- Add or modify a resource
- &lt;a class="anchor" href="#add-or-modify-a-resource">#&lt;/a>
-&lt;/h1>
-&lt;p>This page describes how to add a new resource to the &lt;code>google&lt;/code> or &lt;code>google-beta&lt;/code> Terraform provider using MMv1 and/or handwritten code.&lt;/p>
-&lt;p>For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/">How Magic Modules works&lt;/a>.&lt;/p>
-&lt;h2 id="before-you-begin">
- Before you begin
- &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Generate the providers&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
-&lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
-&lt;/ol>
-&lt;h2 id="add-a-resource">
- Add a resource
- &lt;a class="anchor" href="#add-a-resource">#&lt;/a>
-&lt;/h2>
-
-
-
-
-&lt;div class="book-tabs">&lt;input type="radio" class="toggle" name="tabs-resource" id="tabs-resource-0" checked="checked" />
- &lt;label for="tabs-resource-0">MMv1&lt;/label>
- &lt;div class="book-tabs-content markdown-inner">&lt;ol>
-&lt;li>
-&lt;p>Using an editor of your choice, in the appropriate &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">product folder&lt;/a>, create a file called &lt;code>RESOURCE_NAME.yaml&lt;/code>. Replace &lt;code>RESOURCE_NAME&lt;/code> with the name of the API resource you are adding support for. For example, a configuration file for &lt;a href="https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses">NatAddress&lt;/a> would be called &lt;code>NatAddress.yaml&lt;/code>.&lt;/p></description></item><item><title>Labels and annotations</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/labels-and-annotations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/labels-and-annotations/</guid><description>&lt;h1 id="add-labels-and-annotations-support">
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>TYPE&lt;/code> with the correct release note type, and &lt;code>CONTENT&lt;/code> with a release note written according to the guidelines in the following sections.&lt;/p></description></item><item><title>Labels and annotations</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/labels-and-annotations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/labels-and-annotations/</guid><description>&lt;h1 id="add-labels-and-annotations-support">
  Add labels and annotations support
  &lt;a class="anchor" href="#add-labels-and-annotations-support">#&lt;/a>
 &lt;/h1>
@@ -441,22 +505,7 @@ available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/mag
  &lt;code>references&lt;/code>
  &lt;a class="anchor" href="#references">#&lt;/a>
 &lt;/h3>
-&lt;p>Links to reference documentation for a resource. Contains two attributes:&lt;/p></description></item><item><title>Add custom resource code</title><link>https://googlecloudplatform.github.io/magic-modules/develop/custom-code/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/custom-code/</guid><description>&lt;h1 id="add-custom-resource-code">
- Add custom resource code
- &lt;a class="anchor" href="#add-custom-resource-code">#&lt;/a>
-&lt;/h1>
-&lt;p>This document covers how to add &amp;ldquo;custom code&amp;rdquo; to &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">MMv1 resources&lt;/a>. Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can&amp;rsquo;t be achieved otherwise.&lt;/p>
-&lt;p>Most custom code attributes are strings that contain a path to a template file relative to the &lt;code>mmv1&lt;/code> directory. For example:&lt;/p></description></item><item><title>Add a datasource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/</guid><description>Datasources are like terraform resources except they don&amp;rsquo;t &lt;em>create&lt;/em> anything.</description></item><item><title>Promote to GA</title><link>https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/</guid><description>&lt;h1 id="promote-from-beta-to-ga">
- Promote from beta to GA
- &lt;a class="anchor" href="#promote-from-beta-to-ga">#&lt;/a>
-&lt;/h1>
-&lt;p>This document describes how to promote an existing resource or field that uses MMv1 and/or handwritten code from the &lt;code>google-beta&lt;/code> provider to the &lt;code>google&lt;/code> (also known as &amp;ldquo;GA&amp;rdquo;) provider.&lt;/p>
-&lt;p>Handwritten code (including &lt;code>custom_code&lt;/code>) commonly uses &amp;ldquo;version guards&amp;rdquo; in the form of &lt;code>{{- if ne $.TargetVersionName &amp;quot;ga&amp;quot; }}...{{- end }}&lt;/code> to wrap code that is beta-specific, which need to be removed during promotion.&lt;/p>
-&lt;p>For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/">How Magic Modules works&lt;/a>.&lt;/p></description></item><item><title>Fix diffs</title><link>https://googlecloudplatform.github.io/magic-modules/develop/diffs/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/diffs/</guid><description>&lt;h1 id="fix-diffs">
- Fix diffs
- &lt;a class="anchor" href="#fix-diffs">#&lt;/a>
-&lt;/h1>
-&lt;p>This page outlines best practices for fixing various kinds of diffs that can show up at plan time. These will often show up as test failures with the text: &lt;code>After applying this test step, the plan was not empty.&lt;/code>. They can also show up for users at plan time, on fields that a user has not modified in their configuration. If the diff does not go away even after running &lt;code>terraform apply&lt;/code> more than once with the same configuration, the diff is called a &amp;ldquo;permadiff&amp;rdquo;.&lt;/p></description></item><item><title>Handwritten docs style guide</title><link>https://googlecloudplatform.github.io/magic-modules/develop/handwritten-docs-style-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/handwritten-docs-style-guide/</guid><description>&lt;h1 id="handwritten-documentation-style-guide">
+&lt;p>Links to reference documentation for a resource. Contains two attributes:&lt;/p></description></item><item><title>Handwritten docs style guide</title><link>https://googlecloudplatform.github.io/magic-modules/develop/handwritten-docs-style-guide/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/handwritten-docs-style-guide/</guid><description>&lt;h1 id="handwritten-documentation-style-guide">
  Handwritten documentation style guide
  &lt;a class="anchor" href="#handwritten-documentation-style-guide">#&lt;/a>
 &lt;/h1>
@@ -475,35 +524,7 @@ available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/mag
  YAML frontmatter
  &lt;a class="anchor" href="#yaml-frontmatter">#&lt;/a>
 &lt;/h2>
-&lt;p>Every resource or datasource documentation page must include YAML frontmatter which sets &lt;code>subcategory&lt;/code> (where the page will be displayed in the left sidebar).&lt;/p></description></item><item><title>Update dependencies</title><link>https://googlecloudplatform.github.io/magic-modules/develop/update-dependencies/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/update-dependencies/</guid><description>&lt;h1 id="update-provider-dependencies">
- Update provider dependencies
- &lt;a class="anchor" href="#update-provider-dependencies">#&lt;/a>
-&lt;/h1>
-&lt;p>The Magic Modules repository does not contain a complete Go module, preventing the use of automated tooling like &lt;code>go get&lt;/code> from that repository. To add or update provider dependencies, use standard Go tooling to update the dependency in the &lt;code>terraform-provider-google&lt;/code> provider and copy the results to the upstream files in Magic Modules.&lt;/p>
-&lt;p>Below are the steps you can follow to make the change:&lt;/p>
-&lt;ol>
-&lt;li>Navigate to the local &lt;code>google&lt;/code> provider directory:&lt;/li>
-&lt;/ol>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol start="2">
-&lt;li>Open the &lt;a href="https://github.com/hashicorp/terraform-provider-google/blob/main/go.mod">&lt;code>go.mod&lt;/code>&lt;/a> file and add the new entries or modify the versions of existing entries as needed&lt;/li>
-&lt;li>Update dependencies using either of the following methods
-&lt;ul>
-&lt;li>run the following commands to update all dependencies:&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>go get
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
-&lt;li>Alternatively, update a specific package to a desired version:&lt;/li>
-&lt;/ul>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>go get google.golang.org/api@v0.105.0 
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>go mod tidy
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
-&lt;li>Copy the contents of the updated &lt;code>go.mod&lt;/code> and &lt;code>go.sum&lt;/code> file into &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.mod.erb">&lt;code>mmv1/third_party/terraform/go.mod&lt;/code>&lt;/a> and &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/go.sum">&lt;code>mmv1/third_party/terraform/go.sum&lt;/code>&lt;/a> in the &lt;code>magic-modules&lt;/code> respectively.&lt;/li>
-&lt;li>Create a pull request containing &lt;em>only&lt;/em> the dependency changes.&lt;/li>
-&lt;li>Resolve any errors caused by the dependency upgrade.&lt;/li>
-&lt;li>After the dependency pull request is merged, continue with a separate pull request for any additional changes that were blocked by the upgrade.&lt;/li>
-&lt;/ol></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
+&lt;p>Every resource or datasource documentation page must include YAML frontmatter which sets &lt;code>subcategory&lt;/code> (where the page will be displayed in the left sidebar).&lt;/p></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
  Client-side fields
  &lt;a class="anchor" href="#client-side-fields">#&lt;/a>
 &lt;/h1>
