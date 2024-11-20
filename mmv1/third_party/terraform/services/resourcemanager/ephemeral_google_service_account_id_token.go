@@ -94,7 +94,6 @@ func (p *googleEphemeralServiceAccountIdToken) Configure(ctx context.Context, re
 		return
 	}
 
-	// Required for accessing userAgent and passing as an argument into a util function
 	p.providerConfig = pd
 }
 
