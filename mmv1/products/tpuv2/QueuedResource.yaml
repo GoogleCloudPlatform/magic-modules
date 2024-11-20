@@ -23,9 +23,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{zone}}/queuedResources'
 self_link: 'projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}'
 create_url: 'projects/{{project}}/locations/{{zone}}/queuedResources?queuedResourceId={{name}}'
-update_url: 'projects/{{project}}/locations/{{zone}}/queuedResources/{{name}}'
-update_verb: 'PATCH'
-update_mask: true
+immutable: true
 autogen_async: true
 async:
   actions: ['create', 'delete']
@@ -88,6 +86,7 @@ properties:
               description: |
                 The parent resource name.
               required: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
             - name: 'nodeId'
               description: |
                 Unqualified node identifier used to identify the node in the project once provisioned.
