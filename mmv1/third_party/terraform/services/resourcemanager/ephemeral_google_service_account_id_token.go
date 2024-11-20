@@ -68,8 +68,7 @@ func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req e
 			},
 			"include_email": schema.BoolAttribute{
 				Description: "Include the verified email in the claim. Used only when using impersonation mode.",
-				Optional:    true,
-				Computed:    true,
+				Optional:    true, // Defaults to false when not set (Null / Unknown)
 			},
 			"id_token": schema.StringAttribute{
 				Description: "The `id_token` representing the new generated identity.",
