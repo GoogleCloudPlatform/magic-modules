@@ -13,16 +13,17 @@ func TestAccEphemeralServiceAccountKey_basic(t *testing.T) {
 	t.Parallel()
 
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "key-basic", serviceAccount)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountKey_setup(serviceAccount),
+				Config: testAccEphemeralServiceAccountKey_setup(targetServiceAccountEmail),
 			},
 			{
-				Config: testAccEphemeralServiceAccountKey_basic(serviceAccount),
+				Config: testAccEphemeralServiceAccountKey_basic(targetServiceAccountEmail),
 			},
 		},
 	})

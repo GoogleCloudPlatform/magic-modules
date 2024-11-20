@@ -54,7 +54,6 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
-						"TYPE_NONE",
 						"TYPE_X509_PEM_FILE",
 						"TYPE_RAW_PUBLIC_KEY",
 					),
