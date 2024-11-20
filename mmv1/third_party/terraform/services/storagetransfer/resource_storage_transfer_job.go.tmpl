@@ -467,9 +467,14 @@ func gcsDataSchema() *schema.Resource {
 			},
 			"path": {
 				Optional:    true,
-				Computed:    true,
 				Type:        schema.TypeString,
 				Description: `Google Cloud Storage path in bucket to transfer`,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if strings.ToLower(old) == strings.ToLower(new) {
+						return true
+					}
+					return false
+				},
 			},
 		},
 	}
@@ -560,9 +565,14 @@ func azureBlobStorageDataSchema() *schema.Resource {
 			},
 			"path": {
 				Optional:    true,
-				Computed:    true,
 				Type:        schema.TypeString,
 				Description: `Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.`,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if strings.ToLower(old) == strings.ToLower(new) {
+						return true
+					}
+					return false
+				},
 			},
 			"azure_credentials": {
 				Type:         schema.TypeList,
