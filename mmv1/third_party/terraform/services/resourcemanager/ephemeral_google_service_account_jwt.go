@@ -50,6 +50,9 @@ func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephem
 			"expires_in": schema.Int64Attribute{
 				Optional:    true,
 				Description: "Number of seconds until the JWT expires. If set and non-zero an `exp` claim will be added to the payload derived from the current timestamp plus expires_in seconds.",
+				Validators: []validator.Int64{
+					fwvalidators.PositiveIntegerValidator(),
+				},
 			},
 			"target_service_account": schema.StringAttribute{
 				Description: "The email of the service account that will sign the JWT.",
@@ -101,23 +104,22 @@ func (p *googleEphemeralServiceAccountJwt) Open(ctx context.Context, req ephemer
 
 	if !data.ExpiresIn.IsNull() {
 		expiresIn := data.ExpiresIn.ValueInt64()
-		if expiresIn != 0 {
-			var decoded map[string]interface{}
-			if err := json.Unmarshal([]byte(payload), &decoded); err != nil {
-				resp.Diagnostics.AddError("Error decoding payload", err.Error())
-				return
-			}
-
-			decoded["exp"] = time.Now().Add(time.Duration(expiresIn) * time.Second).Unix()
-
-			payloadBytesWithExp, err := json.Marshal(decoded)
-			if err != nil {
-				resp.Diagnostics.AddError("Error re-encoding payload", err.Error())
-				return
-			}
-
-			payload = string(payloadBytesWithExp)
+		var decoded map[string]interface{}
+		if err := json.Unmarshal([]byte(payload), &decoded); err != nil {
+			resp.Diagnostics.AddError("Error decoding payload", err.Error())
+			return
 		}
+
+		decoded["exp"] = time.Now().Add(time.Duration(expiresIn) * time.Second).Unix()
+
+		payloadBytesWithExp, err := json.Marshal(decoded)
+		if err != nil {
+			resp.Diagnostics.AddError("Error re-encoding payload", err.Error())
+			return
+		}
+
+		payload = string(payloadBytesWithExp)
+
 	}
 
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", data.TargetServiceAccount.ValueString())

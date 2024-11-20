@@ -307,3 +307,72 @@ func TestBoundedDuration(t *testing.T) {
 		})
 	}
 }
+
+func TestPositiveIntegerValidator(t *testing.T) {
+	tests := map[string]struct {
+		value         types.Int64
+		expectError   bool
+		errorContains string
+	}{
+		"valid positive integer": {
+			value:       types.Int64Value(42),
+			expectError: false,
+		},
+		"zero is invalid": {
+			value:         types.Int64Value(0),
+			expectError:   true,
+			errorContains: "Invalid Integer Value",
+		},
+		"negative integer is invalid": {
+			value:         types.Int64Value(-1),
+			expectError:   true,
+			errorContains: "Invalid Integer Value",
+		},
+		"null value": {
+			value:       types.Int64Null(),
+			expectError: false,
+		},
+		"unknown value": {
+			value:       types.Int64Unknown(),
+			expectError: false,
+		},
+	}
+
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			request := validator.Int64Request{
+				Path:           path.Root("test"),
+				PathExpression: path.MatchRoot("test"),
+				ConfigValue:    test.value,
+			}
+			response := validator.Int64Response{}
+			validator := fwvalidators.PositiveIntegerValidator()
+
+			validator.ValidateInt64(context.Background(), request, &response)
+
+			if test.expectError && !response.Diagnostics.HasError() {
+				t.Errorf("expected error, got none")
+			}
+
+			if !test.expectError && response.Diagnostics.HasError() {
+				t.Errorf("got unexpected error: %s", response.Diagnostics.Errors())
+			}
+
+			if test.errorContains != "" {
+				foundError := false
+				for _, err := range response.Diagnostics.Errors() {
+					if err.Summary() == test.errorContains {
+						foundError = true
+						break
+					}
+				}
+				if !foundError {
+					t.Errorf("expected error with summary %q, got none", test.errorContains)
+				}
+			}
+		})
+	}
+}
