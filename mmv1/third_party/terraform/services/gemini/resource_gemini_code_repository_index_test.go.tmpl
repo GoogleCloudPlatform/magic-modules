@@ -13,6 +13,7 @@ import (
 func TestAccGeminiCodeRepositoryIndex_update(t *testing.T) {
 	bootstrappedKMS := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 		"project_id": os.Getenv("GOOGLE_PROJECT"),
 		"kms_key":    bootstrappedKMS.CryptoKey.Name,
 	}
@@ -49,7 +50,7 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example"
+  code_repository_index_id = "tf-test-cri-index-example-%{random_suffix}"
   kms_key = "%{kms_key}"
   depends_on = [google_kms_crypto_key_iam_binding.crypto_key_binding]
 }
@@ -75,7 +76,7 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted", "new_label": "new_val"}
   location = "us-central1"
-  code_repository_index_id = "test-cri-index-example-update"
+  code_repository_index_id = "tf-test-cri-index-example-update-%{random_suffix}"
   kms_key = "%{kms_key}"
 }
 `, context)
