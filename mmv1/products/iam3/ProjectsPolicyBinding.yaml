@@ -84,7 +84,7 @@ properties:
       Output only. The globally unique ID of the policy binding. Assigned when the policy binding is created.
     output: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       Optional. The etag for the policy binding. If this is provided on update, it must match the server's etag.
     output: true

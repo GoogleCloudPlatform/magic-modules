@@ -41,6 +41,16 @@ func TestAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_update(t *
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "location", "policy_binding_id"},
 			},
+			{
+				Config: testAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_full(context),
+			},
+			{
+				ResourceName:            "google_iam_projects_policy_binding.my-project-binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "location", "policy_binding_id"},
+			},
+
 		},
 	})
 }
