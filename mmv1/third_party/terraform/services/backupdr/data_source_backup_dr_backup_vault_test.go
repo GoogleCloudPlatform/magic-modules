@@ -29,27 +29,15 @@ func TestAccDataSourceGoogleBackupDRBackupVault_basic(t *testing.T) {
 func testAccDataSourceGoogleBackupDRBackupVault_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_backup_dr_backup_vault" "test-bv" {
-    location ="us-central1"
-    backup_vault_id    = "bv-%{random_suffix}"
-    description = "This is a a backup vault built by Terraform."
-    backup_minimum_enforced_retention_duration = "100000s"
-    labels = {
-      foo = "bar1"
-      bar = "baz1"
-    }
-    annotations = {
-      annotations1 = "bar1"
-      annotations2 = "baz1"
-    }
-    force_update = "true"
-    force_delete = "true"
-    allow_missing = "true" 
+  location = "us-central1"
+  backup_vault_id = "bv-%{random_suffix}"
+  description = "This is a a backup vault built by Terraform."
+  backup_minimum_enforced_retention_duration = "100000s"
 }
 
 data "google_backup_dr_backup_vault" "fetch-bv" {
-  location =  "us-central1"
-  backup_vault_id = "bv-%{random_suffix}"
-  depends_on = [ google_backup_dr_backup_vault.test-bv ]
-  }
+  location = "us-central1"
+  backup_vault_id = google_backup_dr_backup_vault.test-bv
+}
 `, context)
 }
