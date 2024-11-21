@@ -36,12 +36,13 @@ func dataSourceGoogleCloudBackupDRBackupVaultRead(d *schema.ResourceData, meta i
 	backup_vault_id := d.Get("backup_vault_id").(string)
 	id := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, backup_vault_id)
 	d.SetId(id)
-    err = resourceBackupDRBackupVault(d, meta)
+    err = resourceBackupDRBackupVaultRead(d, meta)
 	if err != nil {
 		return err
 	}
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
+
 	return nil
 }
