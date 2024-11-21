@@ -206,38 +206,3 @@ func (v BoundedDuration) ValidateString(ctx context.Context, req validator.Strin
 		)
 	}
 }
-
-// Positive Integer Validator
-var _ validator.Int64 = positiveIntegerValidator{}
-
-// positiveIntegerValidator validates that an Int64 Attribute's value is greater than 0.
-type positiveIntegerValidator struct {
-}
-
-// Description describes the validation in plain text formatting.
-func (v positiveIntegerValidator) Description(_ context.Context) string {
-	return "value must be greater than 0"
-}
-
-// MarkdownDescription describes the validation in Markdown formatting.
-func (v positiveIntegerValidator) MarkdownDescription(ctx context.Context) string {
-	return v.Description(ctx)
-}
-
-// ValidateInt64 performs the validation.
-func (v positiveIntegerValidator) ValidateInt64(ctx context.Context, request validator.Int64Request, response *validator.Int64Response) {
-	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
-		return
-	}
-
-	if request.ConfigValue.ValueInt64() <= 0 {
-		response.Diagnostics.AddError(
-			"Invalid Integer Value",
-			fmt.Sprintf("Value must be greater than 0, got: %d", request.ConfigValue.ValueInt64()),
-		)
-	}
-}
-
-func PositiveIntegerValidator() validator.Int64 {
-	return positiveIntegerValidator{}
-}

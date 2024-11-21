@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
@@ -51,7 +52,7 @@ func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephem
 				Optional:    true,
 				Description: "Number of seconds until the JWT expires. If set and non-zero an `exp` claim will be added to the payload derived from the current timestamp plus expires_in seconds.",
 				Validators: []validator.Int64{
-					fwvalidators.PositiveIntegerValidator(),
+					int64validator.AtLeast(0),
 				},
 			},
 			"target_service_account": schema.StringAttribute{
