@@ -54,17 +54,21 @@ examples:
     vars:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
+      database_name: 'testdb'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
-      'autonomous_database_id': '"my-adb-instance-id"'
+      'autonomous_database_id': '"tf-test-my-adb-instance-id-" + acctest.RandString(t, 10)'
+      'database_name': '"testdb" + acctest.RandString(t, 10)'
   - name: 'oracledatabase_autonomous_database_full'
     primary_resource_id: 'myADB'
     vars:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
+      database_name: 'testdatabase'
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
-      'autonomous_database_id': '"my-adb-instance-id-2"'
+      'autonomous_database_id': '"tf-test-my-adb-instance-id-2-" + acctest.RandString(t, 10)'
+      'database_name': '"testdatabase" + acctest.RandString(t, 10)'
 parameters:
   - name: 'location'
     type: String
