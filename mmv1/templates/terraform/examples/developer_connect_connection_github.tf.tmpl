@@ -1,5 +1,4 @@
 resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   location = "us-central1"
   connection_id = "{{index $.Vars "connection_name"}}"
 
@@ -9,5 +8,13 @@ resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
     authorizer_credential {
       oauth_token_secret_version = "projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"
     }
+  }
+}
+resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
+
+  github_enterprise_config {
+    host_uri = "https://devconnect-terraform.com"
   }
 }

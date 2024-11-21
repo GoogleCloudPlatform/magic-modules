@@ -12,130 +12,106 @@
 # limitations under the License.
 
 ---
-name: 'GitRepositoryLink'
+name: GitRepositoryLink
 description: "A git repository link to a parent connection."
-min_version: 'beta'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks'
-self_link: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}'
+base_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+create_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}
+id_format: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+- projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+examples:
+- name: name_of_example_file
+  primary_resource_id: example
+  vars:
+    resource_name: test-resource
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
   operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
+  actions:
+  - create
+  - delete
+  - update
+  type: OpAsync
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
-examples:
-  # These tests depend on secrets stored in a separate project, so we prefer not
-  # to show them in the docs.
-  - name: 'developer_connect_git_repository_link_github'
-    primary_resource_id: 'primary'
-    min_version: 'beta'
-    vars:
-      connection_name: 'my-connection'
-      git_repository_link_name: 'my-repository'
-    exclude_docs: true
-  - name: 'developer_connect_git_repository_link_github_doc'
-    min_version: 'beta'
-    exclude_test: true
+  error: {}
+  include_project: false
+autogen_status: R2l0UmVwb3NpdG9yeUxpbms=
 parameters:
-  - name: 'location'
-    type: String
-    description:
-      "Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122. See documentation
-      for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
-    min_version: 'beta'
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'parent_connection'
-    type: String
-    description:
-      "Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122. See documentation
-      for resource type `developerconnect.googleapis.com/GitRepositoryLink`. "
-    min_version: 'beta'
-    url_param_only: true
-    required: true
-    immutable: true
-  - name: 'gitRepositoryLinkId'
-    type: String
-    description:
-      "Required. The ID to use for the repository, which will become the
-      final component of\nthe repository's resource name. This ID should be unique in
-      the connection.\nAllows alphanumeric characters and any of -._~%!$&'()*+,;=@. "
-    min_version: 'beta'
-    url_param_only: true
-    required: true
-    immutable: true
+- name: location
+  type: String
+  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
+- name: connection
+  type: String
+  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
+- name: gitRepositoryLinkId
+  type: String
+  description: |-
+    Required. The ID to use for the repository, which will become the final component of
+    the repository's resource name. This ID should be unique in the connection.
+    Allows alphanumeric characters and any of -._~%!$&'()*+,;=@.
+  immutable: true
+  url_param_only: true
+  required: true
 properties:
-  - name: 'name'
-    type: String
-    description: "Identifier. Resource name of the repository, in the format\n`projects/*/locations/*/connections/*/gitRepositoryLinks/*`. "
-    min_version: 'beta'
-    output: true
-  - name: 'cloneUri'
-    type: String
-    description: "Required. Git Clone URI. "
-    min_version: 'beta'
-    required: true
-  - name: 'createTime'
-    type: String
-    description: "Output only. [Output only] Create timestamp "
-    min_version: 'beta'
-    output: true
-  - name: 'updateTime'
-    type: String
-    description: "Output only. [Output only] Update timestamp "
-    min_version: 'beta'
-    output: true
-  - name: 'deleteTime'
-    type: String
-    description: "Output only. [Output only] Delete timestamp "
-    min_version: 'beta'
-    output: true
-  - name: 'labels'
-    type: KeyValueLabels
-    description: "Optional. Labels as key value pairs "
-    min_version: 'beta'
-  - name: 'etag'
-    type: String
-    description:
-      "Optional. This checksum is computed by the server based on the value
-      of other\nfields, and may be sent on update and delete requests to ensure the\nclient
-      has an up-to-date value before proceeding. "
-    min_version: 'beta'
-  - name: 'reconciling'
-    type: Boolean
-    description:
-      "Output only. Set to true when the connection is being set up or updated
-      in the\nbackground. "
-    min_version: 'beta'
-    output: true
-  - name: 'annotations'
-    type: KeyValueAnnotations
-    description: "Optional. Allows clients to store small amounts of arbitrary data. "
-    min_version: 'beta'
-  - name: 'uid'
-    type: String
-    description: "Output only. A system-assigned unique identifier for a the GitRepositoryLink. "
-    min_version: 'beta'
-    output: true
+- name: cloneUri
+  type: String
+  description: Required. Git Clone URI.
+  required: true
+- name: deleteTime
+  type: String
+  description: Output only. [Output only] Delete timestamp
+  output: true
+- name: reconciling
+  type: Boolean
+  description: |-
+    Output only. Set to true when the connection is being set up or updated in the
+    background.
+  output: true
+- name: annotations
+  type: KeyValuePairs
+  description: Optional. Allows clients to store small amounts of arbitrary data.
+- name: uid
+  type: String
+  description: Output only. A system-assigned unique identifier for a the GitRepositoryLink.
+  output: true
+- name: name
+  type: String
+  description: |-
+    Identifier. Resource name of the repository, in the format
+    `projects/*/locations/*/connections/*/gitRepositoryLinks/*`.
+  output: true
+- name: createTime
+  type: String
+  description: Output only. [Output only] Create timestamp
+  output: true
+- name: updateTime
+  type: String
+  description: Output only. [Output only] Update timestamp
+  output: true
+- name: labels
+  type: KeyValueLabels
+  description: Optional. Labels as key value pairs
+- name: etag
+  type: String
+  description: |-
+    Optional. This checksum is computed by the server based on the value of other
+    fields, and may be sent on update and delete requests to ensure the
+    client has an up-to-date value before proceeding.
+- name: webhookId
+  type: String
+  description: Output only. External ID of the webhook created for the repository.
+  output: true
