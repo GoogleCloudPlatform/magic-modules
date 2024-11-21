@@ -12,21 +12,21 @@
 # limitations under the License.
 
 ---
-name: 'FoldersPolicyBinding'
-description: A policy binding to a folder
+name: 'ProjectsPolicyBinding'
+description: A policy binding to a Project
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/folders.locations.policyBindings'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/projects.locations.policyBindings'
 min_version: 'beta'
-id_format: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
-base_url: 'folders/{{folder}}/locations/{{location}}/policyBindings'
-self_link: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
-create_url: 'folders/{{folder}}/locations/{{location}}/policyBindings?policyBindingId={{policy_binding_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/policyBindings'
+self_link: 'projects/{{project}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/policyBindings?policyBindingId={{policy_binding_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+  - 'projects/{{project}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -47,31 +47,21 @@ async:
   error:
     path: 'error'
     message: 'message'
-  include_project: true
 examples:
-  - name: 'iam_folders_policy_binding'
+  - name: 'iam_projects_policy_binding'
     min_version: 'beta'
-    primary_resource_id: 'my-folder-binding'
+    primary_resource_id: 'my-project-binding'
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test folder binding'
-      folder_binding_id: 'test-folder-binding'
-      folder_name: 'test folder'
-    external_providers: ["time"]
+      display_name: 'test project binding'
+      project_binding_id: 'test-project-binding'
 parameters:
-  - name: 'folder'
-    type: String
-    description: |
-      The parent folder for the PolicyBinding.
-    url_param_only: true
-    required: true
-    immutable: true
   - name: 'location'
     type: String
     description: |
-      The location of the PolicyBinding.
+      The location of the Policy Binding
     url_param_only: true
     required: true
     immutable: true
@@ -94,7 +84,7 @@ properties:
       Output only. The globally unique ID of the policy binding. Assigned when the policy binding is created.
     output: true
   - name: 'etag'
-    type: String
+    type: Fingerprint
     description: |
       Optional. The etag for the policy binding. If this is provided on update, it must match the server's etag.
     output: true
