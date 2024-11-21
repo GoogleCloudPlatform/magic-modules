@@ -1,0 +1,11 @@
+resource "google_developer_connect_connection" "my-connection" {
+
+  location = "us-central1"
+  connection_id = "my-connection"
+
+  gitlab_config {
+    webhook_secret_secret_version: 'projects/terraform-proj/secrets/webhook-version/versions/latest'
+    read_authorizer_credential: 'glpat-some-read-auth-credential'
+    authorizer_credential: 'glpat-some-auth-credential'    
+  }
+}

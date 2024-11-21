@@ -1,0 +1,21 @@
+resource "google_developer_connect_git_repository_link" "{{$.PrimaryResourceId}}" {
+  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}"
+  parent_connection = google_developer_connect_connection.gitlab_enterprise_conn.connection_id
+  clone_uri = "https://gitlab.com/gcb-developerconnect-robot/tf-demo.git"
+  location = "us-central1"
+  annotations = {}
+}
+
+resource "google_developer_connect_connection" "gitlab_enterprise_conn" {
+
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
+  disabled = false
+
+  gitlab_enterprise_config {
+    host_uri = "{{index $.Vars "host_uri_name"}}"
+    webhook_secret_secret_version = "{{index $.Vars "webhook_version"}}"
+    read_authorizer_credential = "{{index $.Vars "reader_cred"}}"
+    authorizer_credential = "{{index $.Vars "authorizer_cred"}}"
+  }
+}
