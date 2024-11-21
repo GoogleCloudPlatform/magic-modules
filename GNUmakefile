@@ -75,7 +75,7 @@ tpgtools:
 clean-provider:
 	cd $(OUTPUT_PATH);\
 		go mod download;\
-		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "CODEOWNERS" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
 
 clean-tgc:
 	cd $(OUTPUT_PATH);\
@@ -114,7 +114,7 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
 validate_environment:
@@ -127,9 +127,3 @@ doctor:
 	./scripts/doctor
 
 .PHONY: mmv1 tpgtools test
-
-refresh-go:
-	cd mmv1;\
-		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile) --go-yaml; \
-		go run . --yaml --template; \
-		go run . --yaml --handwritten

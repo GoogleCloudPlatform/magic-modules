@@ -13,6 +13,7 @@
 
 ---
 name: 'HmacKey'
+api_resource_type_kind: HmacKeyMetadata
 kind: 'storage#hmacKey'
 description: |
   The hmacKeys resource represents an HMAC key within Cloud Storage. The resource

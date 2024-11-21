@@ -69,17 +69,10 @@ parameters:
     immutable: true
 properties:
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       The state of the Backup Vault.
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'CREATING'
-      - 'READY'
-      - 'UPDATING'
-      - 'DELETING'
-      - 'ERROR'
   - name: 'createTime'
     type: String
     description: |

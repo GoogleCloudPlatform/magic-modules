@@ -13,6 +13,7 @@
 
 ---
 name: 'RouterRoutePolicy'
+api_resource_type_kind: Router
 description: A route policy created in a router
 min_version: 'beta'
 references:

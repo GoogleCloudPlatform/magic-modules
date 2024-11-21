@@ -13,6 +13,7 @@
 
 ---
 name: 'SSHPublicKey'
+api_resource_type_kind: SshPublicKey
 kind: 'user#sshPublicKeys'
 description: |
   The SSH public key information associated with a Google account.

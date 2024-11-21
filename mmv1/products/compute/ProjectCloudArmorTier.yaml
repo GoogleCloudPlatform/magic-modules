@@ -13,6 +13,7 @@
 
 ---
 name: 'ProjectCloudArmorTier'
+api_resource_type_kind: Project
 description: |
   Sets the Cloud Armor tier of the project.
 references:

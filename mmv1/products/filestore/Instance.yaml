@@ -63,7 +63,6 @@ examples:
       instance_name: 'test-instance'
   - name: 'filestore_instance_protocol'
     primary_resource_id: 'instance'
-    min_version: 'beta'
     vars:
       instance_name: 'test-instance'
   - name: 'filestore_instance_enterprise'
@@ -126,7 +125,6 @@ properties:
       or NFSv4.1, for using NFS version 4.1 as file sharing protocol.
       NFSv4.1 can be used with HIGH_SCALE_SSD, ZONAL, REGIONAL and ENTERPRISE.
       The default is NFSv3.
-    min_version: 'beta'
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "NFS_V3"
@@ -294,3 +292,39 @@ properties:
     type: String
     description: |
       The reason for enabling deletion protection.
+  - name: 'performanceConfig'
+    type: NestedObject
+    description: |
+      Performance configuration for the instance. If not provided,
+      the default performance settings will be used.
+    properties:
+      - name: 'iopsPerTb'
+        type: NestedObject
+        description: |
+          The instance provisioned IOPS will change dynamically
+          based on the capacity of the instance.
+        conflicts:
+          - fixed_iops
+        properties:
+          - name: 'maxIopsPerTb'
+            type: Integer
+            description: |
+              The instance max IOPS will be calculated by multiplying
+              the capacity of the instance (TB) by max_iops_per_tb,
+              and rounding to the nearest 1000. The instance max IOPS
+              will be changed dynamically based on the instance
+              capacity.
+      - name: 'fixedIops'
+        type: NestedObject
+        description: |
+          The instance will have a fixed provisioned IOPS value,
+          which will remain constant regardless of instance
+          capacity.
+        conflicts:
+          - iops_per_tb
+        properties:
+          - name: 'maxIops'
+            type: Integer
+            description: |
+              The number of IOPS to provision for the instance.
+              max_iops must be in multiple of 1000.

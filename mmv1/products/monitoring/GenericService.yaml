@@ -13,6 +13,7 @@
 
 ---
 name: 'GenericService'
+api_resource_type_kind: Service
 legacy_name: 'google_monitoring_service'
 description: |
   A Service is a discrete, autonomous, and network-accessible unit,

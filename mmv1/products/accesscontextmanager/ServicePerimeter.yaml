@@ -27,6 +27,7 @@ description: |
 references:
   guides:
     'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
 docs:
   warning: |
@@ -68,6 +69,7 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
@@ -255,12 +257,15 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'identities'
                   type: Array
                   description: |
-                    A list of identities that are allowed access through this ingress policy.
-                    Should be in the format of email address. The email address should represent
-                    individual user or service account only.
+                    Identities can be an individual user, service account, Google group,
+                    or third-party identity. For third-party identity, only single identities
+                    are supported and other identity types are not supported.The v1 identities
+                    that have the prefix user, group and serviceAccount in
+                    https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
                   is_set: true
                   item_type:
                     type: String
@@ -375,6 +380,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'
@@ -394,9 +400,11 @@ properties:
                 - name: 'identities'
                   type: Array
                   description: |
-                    A list of identities that are allowed access through this `EgressPolicy`.
-                    Should be in the format of email address. The email address should
-                    represent individual user or service account only.
+                    Identities can be an individual user, service account, Google group,
+                    or third-party identity. For third-party identity, only single identities
+                    are supported and other identity types are not supported.The v1 identities
+                    that have the prefix user, group and serviceAccount in
+                    https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
                   is_set: true
                   item_type:
                     type: String
@@ -563,6 +571,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'identities'
                   type: Array
                   description: |
@@ -680,6 +689,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'

@@ -260,26 +260,166 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 	})
 }
 
+
+// Validate that persistence is updated for the cluster
+func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with AOF enabled
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"AOF\"\naof_config{\nappend_fsync = \"EVERYSEC\"\n}\n}"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// disable AOF
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"DISABLED\"\n}"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},			{
+				// update persistence to RDB
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
+			},
+		},
+	})
+}
+
+// Validate that deletion protection enabled/disabled cluster is created updated 
+func TestAccRedisCluster_switchoverAndDetachSecondary(t *testing.T) {
+	t.Parallel()
+
+	pcName := fmt.Sprintf("tf-test-prim-%d", acctest.RandInt(t))
+	scName := fmt.Sprintf("tf-test-sec-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create primary and secondary clusters cluster
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: pcName, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE", shouldCreateSecondary: true, secondaryClusterName: scName, ccrRole: "SECONDARY"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test_secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// // Switchover to secondary cluster
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: pcName, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE", shouldCreateSecondary: true, secondaryClusterName: scName, ccrRole: "PRIMARY"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test_secondary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// Detach secondary cluster and delete the clusters
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: pcName, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE", shouldCreateSecondary: true, secondaryClusterName: scName, ccrRole: "NONE"}),
+			},
+		},
+	})
+}
+
 type ClusterParams struct {
-	name                 string
-	replicaCount   			 int
-	shardCount     			 int
+	name                      string
+	replicaCount              int
+	shardCount                int
 	deletionProtectionEnabled bool
-	nodeType             string
-	redisConfigs         map[string]string
-	zoneDistributionMode string
-	zone 								 string
-	maintenanceDay		 string
-	maintenanceHours	 int
-	maintenanceMinutes   int
-	maintenanceSeconds	 int
-	maintenanceNanos     int
+	nodeType                  string
+	redisConfigs              map[string]string
+	zoneDistributionMode      string
+	zone                      string
+	maintenanceDay            string
+	maintenanceHours          int
+	maintenanceMinutes        int
+	maintenanceSeconds        int
+	maintenanceNanos          int
+	persistenceBlock          string
+	shouldCreateSecondary     bool
+	secondaryClusterName      string
+	ccrRole                   string
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
-	var strBuilder strings.Builder
+	clusterResourceBlock := createRedisClusterResourceConfig(params, /*isSecondaryCluster*/false)
+	secClusterResourceBlock := ``
+	if params.shouldCreateSecondary {
+		secClusterResourceBlock = createRedisClusterResourceConfig(params, /*isSecondaryCluster*/true)
+	}
+
+	return fmt.Sprintf(`
+		%s
+		%s
+		resource "google_network_connectivity_service_connection_policy" "default" {
+			provider = google-beta
+			name = "%s"
+			location = "us-central1"
+			service_class = "gcp-memorystore-redis"
+			description   = "my basic service connection policy"
+			network = google_compute_network.producer_net.id
+			psc_config {
+			subnetworks = [google_compute_subnetwork.producer_subnet.id]
+			}
+		}
+
+		resource "google_compute_subnetwork" "producer_subnet" {
+			provider      = google-beta
+			name          = "%s"
+			ip_cidr_range = "10.0.0.16/28"
+			region        = "us-central1"
+			network       = google_compute_network.producer_net.id
+		}
+
+		resource "google_compute_network" "producer_net" {
+			provider                = google-beta
+			name                    = "%s"
+			auto_create_subnetworks = false
+		}
+		`,
+		clusterResourceBlock,
+		secClusterResourceBlock,
+		params.name,
+		params.name,
+		params.name)
+}
+
+func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster bool) string {
+	tfClusterResourceName := "test"
+	clusterName := params.name
+	dependsOnBlock := "google_network_connectivity_service_connection_policy.default"
+
+	var redsConfigsStrBuilder strings.Builder
 	for key, value := range params.redisConfigs {
-		strBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
+		redsConfigsStrBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
 	}
 
 	zoneDistributionConfigBlock := ``
@@ -309,54 +449,73 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 		`, params.maintenanceDay, params.maintenanceHours, params.maintenanceMinutes, params.maintenanceSeconds, params.maintenanceNanos)
 	}
 
+	crossClusterReplicationConfigBlock := ``
+	if isSecondaryCluster {
+		tfClusterResourceName = "test_secondary"
+		clusterName = params.secondaryClusterName
+		dependsOnBlock = dependsOnBlock + ", google_redis_cluster.test"
+
+		// Construct cross_cluster_replication_config block
+		pcBlock := ``
+		scsBlock := ``
+		if params.ccrRole == "SECONDARY" {
+			pcBlock = fmt.Sprintf(`
+			primary_cluster {
+				cluster = google_redis_cluster.test.id
+			}
+			`)
+		} else if params.ccrRole == "PRIMARY" {
+			scsBlock = fmt.Sprintf(`
+			secondary_clusters {
+				cluster = google_redis_cluster.test.id
+			}
+			`)
+		}
+		crossClusterReplicationConfigBlock = fmt.Sprintf(`
+		cross_cluster_replication_config {
+			cluster_role = "%s"
+			%s
+			%s
+		}
+		`, params.ccrRole, pcBlock, scsBlock)
+	}
+
 	return fmt.Sprintf(`
-resource "google_redis_cluster" "test" {
-	provider = google-beta
-	name           = "%s"
-	replica_count = %d
-	shard_count = %d
-	node_type = "%s"
-	deletion_protection_enabled = %v
-	region         = "us-central1"
-	psc_configs {
-			network = google_compute_network.producer_net.id
-	}
-	redis_configs = {
+		resource "google_redis_cluster" "%s" {
+		provider = google-beta
+		name           = "%s"
+		replica_count = %d
+		shard_count = %d
+		node_type = "%s"
+		deletion_protection_enabled = %v
+		region         = "us-central1"
+		psc_configs {
+				network = google_compute_network.producer_net.id
+		}
+		redis_configs = {
+			%s
+		}
 		%s
-	}
-  %s
-  %s
-	depends_on = [
-          google_network_connectivity_service_connection_policy.default
-        ]
-}
-
-resource "google_network_connectivity_service_connection_policy" "default" {
-	provider = google-beta
-	name = "%s"
-	location = "us-central1"
-	service_class = "gcp-memorystore-redis"
-	description   = "my basic service connection policy"
-	network = google_compute_network.producer_net.id
-	psc_config {
-	subnetworks = [google_compute_subnetwork.producer_subnet.id]
-	}
-}
-
-resource "google_compute_subnetwork" "producer_subnet" {
-	provider      = google-beta
-	name          = "%s"
-	ip_cidr_range = "10.0.0.248/29"
-	region        = "us-central1"
-	network       = google_compute_network.producer_net.id
-}
-
-resource "google_compute_network" "producer_net" {
-	provider                = google-beta
-	name                    = "%s"
-	auto_create_subnetworks = false
-}
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, params.name, params.name, params.name)
+		%s
+		%s
+		%s
+		depends_on = [
+				%s
+			]
+		}
+		`,
+		tfClusterResourceName,
+		clusterName,
+		params.replicaCount,
+		params.shardCount,
+		params.nodeType,
+		params.deletionProtectionEnabled,
+		redsConfigsStrBuilder.String(),
+		zoneDistributionConfigBlock,
+		maintenancePolicyBlock,
+		params.persistenceBlock,
+		crossClusterReplicationConfigBlock,
+		dependsOnBlock)
 }
 
 {{ end }}

@@ -296,6 +296,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Dataproc",
         "path" to "./google-beta/services/dataproc"
     ),
+    "dataprocgdc" to mapOf(
+        "name" to "dataprocgdc",
+        "displayName" to "Dataproc on GDC",
+        "path" to "./google-beta/services/dataprocgdc"
+    ),
     "dataprocmetastore" to mapOf(
         "name" to "dataprocmetastore",
         "displayName" to "Dataprocmetastore",
@@ -441,6 +446,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Iam2",
         "path" to "./google-beta/services/iam2"
     ),
+    "iam3" to mapOf(
+        "name" to "iam3",
+        "displayName" to "Iam3",
+        "path" to "./google-beta/services/iam3"
+    ),
     "iambeta" to mapOf(
         "name" to "iambeta",
         "displayName" to "Iambeta",
@@ -545,6 +555,11 @@ var ServicesListBeta = mapOf(
         "name" to "notebooks",
         "displayName" to "Notebooks",
         "path" to "./google-beta/services/notebooks"
+    ),
+    "oracledatabase" to mapOf(
+        "name" to "oracledatabase",
+        "displayName" to "OracleDatabase",
+        "path" to "./google-beta/services/oracledatabase"
     ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
@@ -725,6 +740,11 @@ var ServicesListBeta = mapOf(
         "name" to "tpuv2",
         "displayName" to "Tpuv2",
         "path" to "./google-beta/services/tpuv2"
+    ),
+     "transcoder" to mapOf(
+        "name" to "transcoder",
+        "displayName" to "Transcoder",
+        "path" to "./google-beta/services/transcoder"
     ),
     "vertexai" to mapOf(
         "name" to "vertexai",

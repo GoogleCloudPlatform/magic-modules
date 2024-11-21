@@ -13,6 +13,7 @@
 
 ---
 name: 'RecaptchaV3Config'
+api_resource_type_kind: RecaptchaConfig
 description: |
   An app's reCAPTCHA V3 configuration object.
 references:

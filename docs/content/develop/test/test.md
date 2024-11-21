@@ -15,11 +15,18 @@ aliases:
 
 This page describes how to add tests to a new resource in the `google` or `google-beta` Terraform provider.
 
+The providers have two basic types of tests:
+
+- Unit tests: test specific functions thoroughly. Unit tests do not interact with GCP APIs.
+- Acceptance tests (aka VCR tests, or create and update tests): test that resources interact as expected with the APIs. Acceptance tests interact with GCP APIs, but should only test the provider's behavior in constructing the API requests and parsing the responses.
+
+Acceptance tests are also called "VCR tests" because they use [`go-vcr`](https://github.com/dnaeon/go-vcr) to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don't actually need to be created, updated, or destroyed by the live API.
+
 For more information about testing, see the [official Terraform documentation](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests).
 
 ## Before you begin
 
-1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/get-started/how-magic-modules-works.md" >}}).
+1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/" >}}).
 2. If you are not adding tests to an in-progress PR, ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```bash
    cd ~/magic-modules
@@ -93,7 +100,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 > **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
 
 1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+2. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}}).
 3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
 4. Modify the tests as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
@@ -113,7 +120,7 @@ An update test is a test that creates the target resource and then makes updates
 
 {{< tabs "update" >}}
 {{< tab "MMv1" >}}
-1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+1. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
 2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
 4. Modify the `TestAcc*` *test function* to support updates.
@@ -121,6 +128,7 @@ An update test is a test that creates the target resource and then makes updates
    - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
    - Change the suffix of the first `Config` value to `_full` (or `_basic`).
    - Change the suffix of the second `Config` value to `_update`.
+   - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
    func TestAccPubsubTopic_update(t *testing.T) {
@@ -136,6 +144,11 @@ An update test is a test that creates the target resource and then makes updates
             },
             {
                Config: testAccPubsubTopic_update(...),
+               ConfigPlanChecks: resource.ConfigPlanChecks{
+                  PreApply: []plancheck.PlanCheck{
+                     plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                  },
+               },
             },
             {
                ...
@@ -261,4 +274,4 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 
 ## What's next?
 
-- [Run your tests]({{< ref "/develop/test/run-tests.md" >}})
+- [Run your tests]({{< ref "/develop/test/run-tests" >}})
