@@ -270,6 +270,28 @@ properties:
                 - 'TIME'
                 - 'DATETIME'
                 - 'RECORD'
+                - 'FOREIGN'
+            - name: 'foreignTypeDefinition'
+              type: String
+              description: |
+                Definition of the foreign data type.
+                Only valid for top-level schema fields (not nested fields).
+                If the type is FOREIGN, this field is required.
+              min_version: beta
+  - name: 'schemaForeignTypeInfo'
+    type: NestedObject
+    description: |
+      Specifies metadata of the foreign data type definition in field schema.
+    min_version: beta
+    properties:
+      - name: 'typeSystem'
+        type: Enum
+        description: |
+          The foreign type of the table.
+        required: true
+        enum_values:
+          - 'HIVE'
+        min_version: beta
   - name: 'encryptionConfiguration'
     type: NestedObject
     description: Custom encryption configuration
