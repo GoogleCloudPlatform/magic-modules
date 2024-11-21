@@ -73,7 +73,7 @@ func testAccVertexAIModel_modelIdNotProvided_create(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/tf-static-1"
+  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
 
   region       = "us-central1"
 }
@@ -121,7 +121,7 @@ func testAccVertexAIModel_modelIdProvided_update(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/tf-static-1"
+  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
 
   region       = "us-central1"
 
