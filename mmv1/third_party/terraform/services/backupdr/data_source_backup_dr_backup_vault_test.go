@@ -33,11 +33,21 @@ resource "google_backup_dr_backup_vault" "test-bv" {
   backup_vault_id = "bv-%{random_suffix}"
   description = "This is a a backup vault built by Terraform."
   backup_minimum_enforced_retention_duration = "100000s"
+  force_update = "true"
+  force_delete = "true"
+  allow_missing = "true"
+  ignore_backup_plan_references = "false"
+  ignore_inactive_datasources = "false"
 }
 
 data "google_backup_dr_backup_vault" "fetch-bv" {
   location = "us-central1"
   backup_vault_id = google_backup_dr_backup_vault.test-bv.backup_vault_id
+  force_update = "true"
+  force_delete = "true"
+  allow_missing = "true"
+  ignore_backup_plan_references = "false"
+  ignore_inactive_datasources = "false"
 }
 `, context)
 }
