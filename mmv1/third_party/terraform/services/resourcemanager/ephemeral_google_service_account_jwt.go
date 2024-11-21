@@ -126,10 +126,9 @@ func (p *googleEphemeralServiceAccountJwt) Open(ctx context.Context, req ephemer
 	name := fmt.Sprintf("projects/-/serviceAccounts/%s", data.TargetServiceAccount.ValueString())
 
 	service := p.providerConfig.NewIamCredentialsClient(p.providerConfig.UserAgent)
-	DelegatesSetValue, _ := data.Delegates.ToSetValue(ctx)
 	jwtRequest := &iamcredentials.SignJwtRequest{
 		Payload:   payload,
-		Delegates: fwutils.StringSet(DelegatesSetValue),
+		Delegates: fwutils.StringSet(data.Delegates),
 	}
 
 	jwtResponse, err := service.Projects.ServiceAccounts.SignJwt(name, jwtRequest).Do()
