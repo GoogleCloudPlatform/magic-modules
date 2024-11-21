@@ -8,6 +8,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+var echoResourceName string = "echo.test"
+var defaultMaxLifetime string = "3600s"
+
 func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 	t.Parallel()
 
@@ -16,17 +19,26 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",
+		"ephemeral_reference":     "ephemeral.google_service_account_access_token.token",
 		"target_service_account":  targetServiceAccountEmail,
 		"scope_1":                 "https://www.googleapis.com/auth/cloud-platform",
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
-
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEphemeralServiceAccountToken_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Assert exact values
+					resource.TestCheckResourceAttr(echoResourceName, "data.target_service_account", context["target_service_account"].(string)),
+					resource.TestCheckResourceAttr(echoResourceName, "data.scopes.0", context["scope_1"].(string)),
+					resource.TestCheckResourceAttr(echoResourceName, "data.lifetime", defaultMaxLifetime),
+					// Assert set
+					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+				),
 			},
 		},
 	})
@@ -42,18 +54,26 @@ func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",
+		"ephemeral_reference":     "ephemeral.google_service_account_access_token.token",
 		"target_service_account":  targetServiceAccountEmail,
 		"delegate_1":              delegateServiceAccountEmailOne,
 		"delegate_2":              delegateServiceAccountEmailTwo,
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
-
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEphemeralServiceAccountToken_withDelegates(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Assert exact values
+					resource.TestCheckResourceAttr(echoResourceName, "data.delegates.0", context["delegate_1"].(string)),
+					resource.TestCheckResourceAttr(echoResourceName, "data.delegates.1", context["delegate_2"].(string)),
+					// Assert set
+					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+				),
 			},
 		},
 	})
@@ -67,17 +87,24 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 
 	context := map[string]interface{}{
 		"ephemeral_resource_name": "token",
+		"ephemeral_reference":     "ephemeral.google_service_account_access_token.token",
 		"target_service_account":  targetServiceAccountEmail,
 		"lifetime":                "3600s",
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
-
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Assert exact values
+					resource.TestCheckResourceAttr(echoResourceName, "data.lifetime", context["lifetime"].(string)),
+					// Assert set
+					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+				),
 			},
 		},
 	})
@@ -85,6 +112,11 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 
 func testAccEphemeralServiceAccountToken_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
+
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
   scopes                = ["%{scope_1}"]
@@ -94,6 +126,11 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 
 func testAccEphemeralServiceAccountToken_withDelegates(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
+
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
   delegates = [
@@ -107,6 +144,10 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 
 func testAccEphemeralServiceAccountToken_withCustomLifetime(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
