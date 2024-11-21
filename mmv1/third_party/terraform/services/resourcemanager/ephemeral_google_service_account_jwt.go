@@ -52,7 +52,7 @@ func (p *googleEphemeralServiceAccountJwt) Schema(ctx context.Context, req ephem
 				Optional:    true,
 				Description: "Number of seconds until the JWT expires. If set and non-zero an `exp` claim will be added to the payload derived from the current timestamp plus expires_in seconds.",
 				Validators: []validator.Int64{
-					int64validator.AtLeast(0),
+					int64validator.AtLeast(1), // Must be greater than 0
 				},
 			},
 			"target_service_account": schema.StringAttribute{
