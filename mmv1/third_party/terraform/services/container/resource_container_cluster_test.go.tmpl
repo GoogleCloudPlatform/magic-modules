@@ -69,8 +69,8 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagHoldAdmin") 
-		|| acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagAdmin") {
+	if acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagHoldAdmin") ||
+		acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagAdmin") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
