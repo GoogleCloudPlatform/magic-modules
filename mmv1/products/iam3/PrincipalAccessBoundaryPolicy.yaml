@@ -44,6 +44,7 @@ async:
   error:
     path: 'error'
     message: 'message'
+  include_project: true
 examples:
   - name: 'iam_principal_access_boundary_policy'
     primary_resource_id: 'my-pab-policy'
