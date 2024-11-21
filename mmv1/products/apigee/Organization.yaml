@@ -64,6 +64,7 @@ examples:
     exclude_docs: true
     # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering'
     exclude_test: true
   # This is a more verbose version of the above that creates all
@@ -95,6 +96,7 @@ examples:
     exclude_docs: true
     # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_organization_cloud_full_disable_vpc_peering'
     exclude_test: true
   # This is a more verbose version of the above that creates all
@@ -112,6 +114,7 @@ examples:
     exclude_docs: true
     # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_organization_retention_test'
     primary_resource_id: 'org'
     min_version: 'beta'
@@ -121,6 +124,7 @@ examples:
     exclude_docs: true
     # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_organization_drz_test'
     primary_resource_id: 'org'
     min_version: 'beta'
@@ -130,6 +134,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'projectId'
     type: String
