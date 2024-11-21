@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-var echoResourceName string = "echo.test"
 var defaultMaxLifetime string = "3600s"
 
 func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
@@ -33,11 +32,11 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 				Config: testAccEphemeralServiceAccountToken_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Assert exact values
-					resource.TestCheckResourceAttr(echoResourceName, "data.target_service_account", context["target_service_account"].(string)),
-					resource.TestCheckResourceAttr(echoResourceName, "data.scopes.0", context["scope_1"].(string)),
-					resource.TestCheckResourceAttr(echoResourceName, "data.lifetime", defaultMaxLifetime),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.target_service_account", context["target_service_account"].(string)),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.scopes.0", context["scope_1"].(string)),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.lifetime", defaultMaxLifetime),
 					// Assert set
-					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+					resource.TestCheckResourceAttrSet(acctest.EchoResourceName, "data.access_token"),
 				),
 			},
 		},
@@ -69,10 +68,10 @@ func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 				Config: testAccEphemeralServiceAccountToken_withDelegates(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Assert exact values
-					resource.TestCheckResourceAttr(echoResourceName, "data.delegates.0", context["delegate_1"].(string)),
-					resource.TestCheckResourceAttr(echoResourceName, "data.delegates.1", context["delegate_2"].(string)),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.delegates.0", context["delegate_1"].(string)),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.delegates.1", context["delegate_2"].(string)),
 					// Assert set
-					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+					resource.TestCheckResourceAttrSet(acctest.EchoResourceName, "data.access_token"),
 				),
 			},
 		},
@@ -101,9 +100,9 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Assert exact values
-					resource.TestCheckResourceAttr(echoResourceName, "data.lifetime", context["lifetime"].(string)),
+					resource.TestCheckResourceAttr(acctest.EchoResourceName, "data.lifetime", context["lifetime"].(string)),
 					// Assert set
-					resource.TestCheckResourceAttrSet(echoResourceName, "data.access_token"),
+					resource.TestCheckResourceAttrSet(acctest.EchoResourceName, "data.access_token"),
 				),
 			},
 		},
@@ -111,11 +110,7 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 }
 
 func testAccEphemeralServiceAccountToken_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-provider "echo" {
-  data = %{ephemeral_reference}
-}
-resource "echo" "test" {}
+	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
@@ -125,11 +120,7 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 }
 
 func testAccEphemeralServiceAccountToken_withDelegates(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-provider "echo" {
-  data = %{ephemeral_reference}
-}
-resource "echo" "test" {}
+	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
@@ -143,11 +134,7 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 }
 
 func testAccEphemeralServiceAccountToken_withCustomLifetime(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-provider "echo" {
-  data = %{ephemeral_reference}
-}
-resource "echo" "test" {}
+	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
