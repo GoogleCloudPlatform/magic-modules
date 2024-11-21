@@ -5,6 +5,7 @@ import (
 	"maps"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -315,33 +316,26 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 	expectedMember := "serviceAccount:" + expectedEmail
 
 	cases := []struct {
-		name      string
-		isNew     bool
-		before    map[string]interface{}
-		after     map[string]interface{}
-		result    map[string]interface{}
-		wantError bool
+		name       string
+		before     map[string]interface{}
+		after      map[string]interface{}
+		result     map[string]interface{}
+		wantEmail  string
+		wantMember string
 	}{
 		{
-			name:      "normal",
-			isNew:     true,
-			wantError: false,
-			before:    map[string]interface{}{},
+			name:   "normal (new)",
+			before: map[string]interface{}{},
 			after: map[string]interface{}{
 				"account_id": accountId,
+				"name":       "", // Empty name indicates a new resource
 				"project":    project,
 			},
-			result: map[string]interface{}{
-				"account_id": accountId,
-				"project":    project,
-				"email":      expectedEmail,
-				"member":     expectedMember,
-			},
+			wantEmail:  expectedEmail,
+			wantMember: expectedMember,
 		},
 		{
-			name:      "no change",
-			isNew:     false,
-			wantError: false,
+			name: "no change",
 			before: map[string]interface{}{
 				"account_id": accountId,
 				"email":      "dontchange",
@@ -350,17 +344,14 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 			},
 			after: map[string]interface{}{
 				"account_id": accountId,
+				"name":       "unimportant",
 				"project":    project,
 			},
-			result: map[string]interface{}{
-				"account_id": accountId,
-				"project":    project,
-			},
+			wantEmail:  "",
+			wantMember: "",
 		},
 		{
-			name:      "recreate",
-			isNew:     true,
-			wantError: false,
+			name: "recreate (new)",
 			before: map[string]interface{}{
 				"account_id": "recreate-account",
 				"email":      "recreate-email",
@@ -369,66 +360,49 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 			},
 			after: map[string]interface{}{
 				"account_id": accountId,
+				"name":       "",
 				"project":    project,
 			},
-			result: map[string]interface{}{
-				"account_id": accountId,
-				"project":    project,
-				"email":      expectedEmail,
-				"member":     expectedMember,
-			},
+			wantEmail:  expectedEmail,
+			wantMember: expectedMember,
 		},
 		{
-			name:      "missing account_id",
-			isNew:     true,
-			wantError: false,
-			before:    map[string]interface{}{},
+			name:   "missing account_id (new)",
+			before: map[string]interface{}{},
 			after: map[string]interface{}{
 				"account_id": "",
+				"name":       "",
 				"project":    project,
 			},
-			result: map[string]interface{}{
-				"account_id": "",
-				"project":    project,
-			},
+			wantEmail:  "",
+			wantMember: "",
 		},
 		{
-			name:      "missing project",
-			isNew:     true,
-			wantError: false,
-			before:    map[string]interface{}{},
+			name:   "missing project (new)",
+			before: map[string]interface{}{},
 			after: map[string]interface{}{
 				"account_id": accountId,
+				"name":       "",
 				"project":    "",
 			},
-			result: map[string]interface{}{
-				"account_id": accountId,
-				"project":    "",
-			},
+			wantEmail:  "",
+			wantMember: "",
 		},
 	}
 	for _, tc := range cases {
-		tn := tc.name
-		tc.after["name"] = "whatever"
-		if tc.isNew {
-			tc.after["name"] = ""
-			tn = tc.name + " new"
+		tc.result = maps.Clone(tc.after)
+		if tc.wantEmail != "" || tc.wantMember != "" {
+			tc.result["email"] = tc.wantEmail
+			tc.result["member"] = tc.wantMember
 		}
-		tc.result["name"] = tc.after["name"]
-		t.Run(tn, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			diff := &tpgresource.ResourceDiffMock{
 				Before: tc.before,
 				After:  tc.after,
 				Schema: tpgresourcemanager.ResourceGoogleServiceAccount().Schema,
 			}
-			err := tpgresourcemanager.ResourceServiceAccountCustomDiffFunc(diff)
-			if tc.wantError && err == nil {
-				t.Fatalf("want error, got nil")
-			}
-			if !tc.wantError && err != nil {
-				t.Fatalf("got unexpected error: %v", err)
-			}
-			if !maps.Equal(tc.result, diff.After) {
+			tpgresourcemanager.ResourceServiceAccountCustomDiffFunc(diff)
+			if d := cmp.Diff(tc.result, diff.After); d != "" {
 				t.Fatalf("got unexpected change: %v expected: %v", diff.After, tc.result)
 			}
 		})
