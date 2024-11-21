@@ -215,6 +215,12 @@ properties:
     description: |
       An optional description of this resource. Provide this property when
       you create the resource.
+  - name: 'forwardingRuleId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   # This is a multi-resource resource reference (Address, GlobalAddress)
   - name: 'IPAddress'
     type: String
