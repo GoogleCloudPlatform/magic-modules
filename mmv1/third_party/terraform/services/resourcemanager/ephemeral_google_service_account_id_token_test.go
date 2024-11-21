@@ -1,7 +1,6 @@
 package resourcemanager_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,12 +14,17 @@ func TestAccEphemeralServiceAccountIdToken_basic(t *testing.T) {
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "idtoken", serviceAccount)
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountIdToken_basic(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountIdToken_basic(context),
 			},
 		},
 	})
@@ -34,12 +38,19 @@ func TestAccEphemeralServiceAccountIdToken_withDelegates(t *testing.T) {
 	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "id-delegate2", delegateServiceAccountEmailOne) // SA_3
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "id-target", delegateServiceAccountEmailTwo)         // SA_4
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+		"delegate_1":              delegateServiceAccountEmailOne,
+		"delegate_2":              delegateServiceAccountEmailTwo,
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountIdToken_withDelegates(delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountIdToken_withDelegates(context),
 			},
 		},
 	})
@@ -51,48 +62,50 @@ func TestAccEphemeralServiceAccountIdToken_withIncludeEmail(t *testing.T) {
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "idtoken-email", serviceAccount)
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountIdToken_withIncludeEmail(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountIdToken_withIncludeEmail(context),
 			},
 		},
 	})
 }
 
-func testAccEphemeralServiceAccountIdToken_basic(serviceAccountEmail string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_id_token" "token" {
-  target_service_account = "%s"
+func testAccEphemeralServiceAccountIdToken_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+ephemeral "google_service_account_id_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
   target_audience       = "https://example.com"
 }
-`, serviceAccountEmail)
+`, context)
 }
 
-func testAccEphemeralServiceAccountIdToken_withDelegates(delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_id_token" "token" {
-  target_service_account = "%s"
+func testAccEphemeralServiceAccountIdToken_withDelegates(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+ephemeral "google_service_account_id_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
   delegates = [
-    "%s",
-    "%s",
+    "%{delegate_1}",
+    "%{delegate_2}",
   ]
   target_audience       = "https://example.com"
 }
-
-# The delegation chain is:
-# SA_1 (initialServiceAccountEmail) -> SA_2 (delegateServiceAccountEmailOne) -> SA_3 (delegateServiceAccountEmailTwo) -> SA_4 (targetServiceAccountEmail)
-`, targetServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo)
+`, context)
 }
 
-func testAccEphemeralServiceAccountIdToken_withIncludeEmail(serviceAccountEmail string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_id_token" "token" {
-  target_service_account = "%s"
+func testAccEphemeralServiceAccountIdToken_withIncludeEmail(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+ephemeral "google_service_account_id_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
   target_audience       = "https://example.com"
   include_email        = true
 }
-`, serviceAccountEmail)
+`, context)
 }
