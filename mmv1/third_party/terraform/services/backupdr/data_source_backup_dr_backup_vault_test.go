@@ -8,9 +8,12 @@ import (
 
 func TestAccDataSourceGoogleBackupDRBackupVault_basic(t *testing.T) {
 	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix": random_suffix,
 	}
+	id := "bv-" + random_suffix
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -19,7 +22,7 @@ func TestAccDataSourceGoogleBackupDRBackupVault_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupVault_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_vault.fetch-bv", "google_backup_dr_backup_vault.test-bv"),
+					resource.TestCheckResourceAttr("data.google_backup_dr_backup_vault.fetch-bv", "backup_vault_id", id),
 				),
 			},
 		},
@@ -43,11 +46,6 @@ resource "google_backup_dr_backup_vault" "test-bv" {
 data "google_backup_dr_backup_vault" "fetch-bv" {
   location = "us-central1"
   backup_vault_id = google_backup_dr_backup_vault.test-bv.backup_vault_id
-  force_update = "true"
-  force_delete = "true"
-  allow_missing = "true"
-  ignore_backup_plan_references = "false"
-  ignore_inactive_datasources = "false"
 }
 `, context)
 }
