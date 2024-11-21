@@ -191,7 +191,7 @@ properties:
                 The name of the pathMatcher associated with this hostRule.
               required: true
         min_size: 1
-        max_size: 10
+        max_size: 50
       - name: 'path_matcher'
         type: Array
         description: |
@@ -891,7 +891,7 @@ properties:
               min_size: 1
               max_size: 200
         min_size: 1
-        max_size: 10
+        max_size: 50
   - name: 'logConfig'
     type: NestedObject
     description: |

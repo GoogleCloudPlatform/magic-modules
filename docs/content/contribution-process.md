@@ -1,13 +1,16 @@
 ---
 title: "Contribution process"
-weight: 50
+weight: 11
 aliases:
   - /docs/getting-started/contributing
   - /getting-started/contributing
   - /get-started/contributing
+  - /get-started/contribution-process
 ---
 
 # Contribution process
+
+This page explains how you can contribute code and documentation to the	`magic-modules` repository.
 
 ## Before you begin
 
@@ -19,6 +22,7 @@ aliases:
 
 ## Contribute code
 
+1. [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}})
 1. [Create a new branch for your change](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch)
 1. Make the code change. For example:
    - [Add or modify a resource]({{< ref "/develop/resource" >}})
@@ -26,7 +30,7 @@ aliases:
    - [Add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
    - [Promote to GA]({{< ref "/develop/promote-to-ga" >}})
    - [Make a breaking change]({{< ref "/develop/breaking-changes/make-a-breaking-change" >}})
-1. [Generate the providers]({{< ref "/get-started/generate-providers" >}}) that include your change.
+1. [Generate the providers]({{< ref "/develop/generate-providers" >}}) that include your change.
 1. [Run provider tests locally]({{< ref "/develop/test/run-tests" >}}) that are relevant to the change you made
 1. [Create a pull request (PR)]({{< ref "/contribute/create-pr" >}})
 1. Make changes in response to [code review]({{< ref "/contribute/create-pr#code-review" >}})
