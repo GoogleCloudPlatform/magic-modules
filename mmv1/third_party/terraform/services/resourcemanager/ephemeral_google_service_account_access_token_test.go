@@ -1,7 +1,6 @@
 package resourcemanager_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,15 +14,19 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "basic", serviceAccount)
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+		"scope_1":                 "https://www.googleapis.com/auth/cloud-platform",
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
+
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_basic(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountToken_basic(context),
 			},
 		},
 	})
@@ -32,21 +35,25 @@ func TestAccEphemeralServiceAccountToken_basic(t *testing.T) {
 func TestAccEphemeralServiceAccountToken_withDelegates(t *testing.T) {
 	t.Parallel()
 
-	project := envvar.GetTestProjectFromEnv()
 	initialServiceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	delegateServiceAccountEmailOne := acctest.BootstrapServiceAccount(t, "delegate1", initialServiceAccount)          // SA_2
 	delegateServiceAccountEmailTwo := acctest.BootstrapServiceAccount(t, "delegate2", delegateServiceAccountEmailOne) // SA_3
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "target", delegateServiceAccountEmailTwo)         // SA_4
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+		"delegate_1":              delegateServiceAccountEmailOne,
+		"delegate_2":              delegateServiceAccountEmailTwo,
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
+
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_withDelegates(initialServiceAccount, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project),
+				Config: testAccEphemeralServiceAccountToken_withDelegates(context),
 			},
 		},
 	})
@@ -58,52 +65,53 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 	targetServiceAccountEmail := acctest.BootstrapServiceAccount(t, "lifetime", serviceAccount)
 
+	context := map[string]interface{}{
+		"ephemeral_resource_name": "token",
+		"target_service_account":  targetServiceAccountEmail,
+		"lifetime":                "3600s",
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
+
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(targetServiceAccountEmail),
+				Config: testAccEphemeralServiceAccountToken_withCustomLifetime(context),
 			},
 		},
 	})
 }
 
-func testAccEphemeralServiceAccountToken_basic(serviceAccountEmail string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_access_token" "token" {
-  target_service_account = "%s"
-  scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
+func testAccEphemeralServiceAccountToken_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
+  scopes                = ["%{scope_1}"]
 }
-`, serviceAccountEmail)
+`, context)
 }
 
-func testAccEphemeralServiceAccountToken_withDelegates(initialServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo, targetServiceAccountEmail, project string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_access_token" "test" {
-  target_service_account = "%s"
+func testAccEphemeralServiceAccountToken_withDelegates(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
   delegates = [
-    "%s",
-    "%s",
+    "%{delegate_1}",
+    "%{delegate_2}",
   ]
   scopes = ["https://www.googleapis.com/auth/cloud-platform"]
-  lifetime = "3600s"
+}
+`, context)
 }
 
-# The delegation chain is:
-# SA_1 (initialServiceAccountEmail) -> SA_2 (delegateServiceAccountEmailOne) -> SA_3 (delegateServiceAccountEmailTwo) -> SA_4 (targetServiceAccountEmail)
-`, targetServiceAccountEmail, delegateServiceAccountEmailOne, delegateServiceAccountEmailTwo)
-}
+func testAccEphemeralServiceAccountToken_withCustomLifetime(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 
-func testAccEphemeralServiceAccountToken_withCustomLifetime(serviceAccountEmail string) string {
-	return fmt.Sprintf(`
-ephemeral "google_service_account_access_token" "token" {
-  target_service_account = "%s"
+ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
+  target_service_account = "%{target_service_account}"
   scopes                = ["https://www.googleapis.com/auth/cloud-platform"]
   lifetime              = "3600s"
 }
-`, serviceAccountEmail)
+`, context)
 }
