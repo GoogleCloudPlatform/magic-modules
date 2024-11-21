@@ -37,7 +37,7 @@ resource "google_backup_dr_backup_vault" "test-bv" {
 
 data "google_backup_dr_backup_vault" "fetch-bv" {
   location = "us-central1"
-  backup_vault_id = google_backup_dr_backup_vault.test-bv
+  backup_vault_id = google_backup_dr_backup_vault.test-bv.backup_vault_id
 }
 `, context)
 }
