@@ -319,7 +319,6 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 		name       string
 		before     map[string]interface{}
 		after      map[string]interface{}
-		result     map[string]interface{}
 		wantEmail  string
 		wantMember string
 	}{
@@ -390,10 +389,10 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		tc.result = maps.Clone(tc.after)
+		result := maps.Clone(tc.after)
 		if tc.wantEmail != "" || tc.wantMember != "" {
-			tc.result["email"] = tc.wantEmail
-			tc.result["member"] = tc.wantMember
+			result["email"] = tc.wantEmail
+			result["member"] = tc.wantMember
 		}
 		t.Run(tc.name, func(t *testing.T) {
 			diff := &tpgresource.ResourceDiffMock{
@@ -402,8 +401,8 @@ func TestResourceServiceAccountCustomDiff(t *testing.T) {
 				Schema: tpgresourcemanager.ResourceGoogleServiceAccount().Schema,
 			}
 			tpgresourcemanager.ResourceServiceAccountCustomDiffFunc(diff)
-			if d := cmp.Diff(tc.result, diff.After); d != "" {
-				t.Fatalf("got unexpected change: %v expected: %v", diff.After, tc.result)
+			if d := cmp.Diff(result, diff.After); d != "" {
+				t.Fatalf("got unexpected change: %v expected: %v", diff.After, result)
 			}
 		})
 	}
