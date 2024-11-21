@@ -491,11 +491,6 @@ func validatePath(v interface{}, k string) (ws []string, errors []error) {
 	if err == nil && len(value) > 0 && regex.Match([]byte(value)) {
 		errors = append(errors, fmt.Errorf("%q cannot start with /", k))
 	}
-	// check if path ends with "/"
-	regex, err = regexp.Compile("/$")
-	if err == nil && len(value) > 0 && !regex.Match([]byte(value)) {
-		errors = append(errors, fmt.Errorf("%q should end with /", k))
-	}
 	return
 }
 
