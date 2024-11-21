@@ -40,6 +40,9 @@
 {{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
+{{ if .WriteOnly -}}
+  WriteOnly: true,
+{{ end -}}
 {{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),

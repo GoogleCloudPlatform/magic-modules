@@ -171,6 +171,9 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
+	// If true, the field is write-only and should not be read from the API.
+	WriteOnly bool `yaml:"write_only,omitempty"`
+
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
 	IgnoreRead bool `yaml:"ignore_read,omitempty"`
