@@ -15,7 +15,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -158,6 +160,14 @@ func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.Pro
 			return provider(), err
 		},
 {{- end }}
+	}
+}
+
+// ProtoV6ProviderFactories returns a provider server for that currently
+// only contains an echo provider for testing usage of ephemeral values
+func ProtoV6ProviderFactories(t *testing.T) map[string]func() (tfprotov6.ProviderServer, error) {
+	return map[string]func() (tfprotov6.ProviderServer, error){
+		"echo": echoprovider.NewProviderServer(),
 	}
 }
 
