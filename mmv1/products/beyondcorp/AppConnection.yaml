@@ -59,7 +59,6 @@ examples:
       account_id: 'my-account'
       app_connector_name: 'my-app-connector'
       app_connection_name: 'my-app-connection'
-    external_providers: ["time"]
   - name: 'beyondcorp_app_connection_full'
     primary_resource_id: 'app_connection'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_app_connection%s", context["random_suffix"])'
@@ -69,7 +68,6 @@ examples:
       app_connector_name: 'my-app-connector'
       app_connection_name: 'my-app-connection'
       display_name: 'some display name'
-    external_providers: ["time"]
 parameters:
 properties:
   - name: 'name'
