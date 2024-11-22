@@ -272,6 +272,51 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
+## Skipping tests in VCR mode
+
+As described above, acceptance tests can be run in VCR modes where HTTP requests are either recorded or are replayed. This system can fail in some scenarios, so we will oftern flag tests that are incompatible with VCR so that they're skipped. This means the tests will not run automatically on PRs (in VCR mode) but the tests will still run in our nightly test suite.
+
+### When should tests be skipped in VCR mode?
+
+| Problem        | Possible symptoms you'll see    | How to fix/Other info  | Skip in VCR? |
+| -------------- | ------------------------------- | ---------------------- |------------- |
+| Incorrect or insufficient data is present in VCR recordings to replay tests | Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, e.g. by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+| Bigtable acceptance tests aren't working in VCR mode |  `Requested interaction not found` errors during REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR ofr Bigtable. |
+| Using multiple provider aliases doesn't work in VCR | You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments, e.g. using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the other instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
+| Using multiple versions of the google/google-beta provider in a single test isn't working in VCR  |  Unexpected test failures during REPLAYING mode in tests with `ExternalProviders` pulling in past versions of the google/google-beta provider | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |
+
+Some additional things to bear in mind are that VCR tests in REPLAYING mode will still interact with GCP APIs somewhat. For example:
+
+- When the provider is configured it will use credentials to obtain access tokens from GCP
+- Some acceptance tests use bootstrapping functions that ensure long-lived resources are present in a testing project before the provider is tested.
+
+Due to this you cannot use REPLAYING mode as a way to completely avoid HTTP traffic generally or with GCP APIs.
+
+### How can tests be skipped in VCR mode?
+
+You can make generated and handwritten tests be skipped in VCR mode. If possible, please include a code comment explaining the reason for skipping, or link to a GitHub issue.
+
+Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
+
+```yaml
+examples:
+  - name: 'bigtable_app_profile_anycluster'
+    ...
+
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
+```
+
+Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
+
+```go
+func TestAccPubsubTopic_update(t *testing.T) {
+      acctest.SkipIfVcr(t)
+      acctest.VcrTest(t, resource.TestCase{ ... }
+}
+```
+
+
 ## What's next?
 
 - [Run your tests]({{< ref "/develop/test/run-tests" >}})
