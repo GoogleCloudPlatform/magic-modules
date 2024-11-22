@@ -207,6 +207,44 @@ func TestAccPubsubTopic_cloudStorageIngestionUpdate(t *testing.T) {
 	})
 }
 
+func TestAccPubsubTopic_messageStoragePolicyRemove(t *testing.T) {
+	resourceName := "google_pubsub_topic.usage-metrics"
+
+	initialConfig := `
+resource "google_pubsub_topic" "usage-metrics" {
+  name = "topic-name"
+
+  message_storage_policy {
+    allowed_persistence_regions = ["us-central1"]
+  }
+}
+`
+
+	updatedConfig := `
+resource "google_pubsub_topic" "usage-metrics" {
+  name = "topic-name"
+}
+`
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {},
+		Steps: []resource.TestStep{
+			{
+				Config: initialConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "message_storage_policy.0.allowed_persistence_regions.#", "1"),
+				),
+			},
+			{
+				Config: updatedConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "message_storage_policy.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccPubsubTopic_update(topic, key, value string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {

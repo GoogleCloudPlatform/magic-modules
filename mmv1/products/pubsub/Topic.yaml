@@ -126,7 +126,7 @@ properties:
           of GCP altogether) will be routed for storage in one of the
           allowed regions. An empty list means that no regions are allowed,
           and is not a valid configuration.
-        required: true
+        required: false
         item_type:
           type: String
   - name: 'schemaSettings'
