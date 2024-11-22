@@ -546,6 +546,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Networkservices",
         "path" to "./google/services/networkservices"
     ),
+    "networkservicesplugins" to mapOf(
+        "name" to "networkservicesplugins",
+        "displayName" to "Networkservicesplugins",
+        "path" to "./google/services/networkservicesplugins"
+    ),
     "notebooks" to mapOf(
         "name" to "notebooks",
         "displayName" to "Notebooks",
