@@ -21,7 +21,8 @@ references:
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
 docs:
   note: |
-    loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
+    * loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
+    * Enabling gcipSetting significantly changes the way IAP authenticates users. Identity Platform does not support IAM, so IAP will not enforce any IAM policies for requests to your application.
 id_format: '{{name}}/iapSettings'
 base_url: '{{name}}:iapSettings'
 self_link: '{{name}}:iapSettings'
