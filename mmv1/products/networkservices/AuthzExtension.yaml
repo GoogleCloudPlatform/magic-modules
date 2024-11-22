@@ -145,8 +145,8 @@ properties:
     type: Enum
     description: |
       The format of communication supported by the callout extension.
-      If not specified, the default is EXT_PROC_GRPC.
-    default_from_api: true
+    default_value: "EXT_PROC_GRPC"
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     enum_values:
       - 'WIRE_FORMAT_UNSPECIFIED'
       - 'EXT_PROC_GRPC'
