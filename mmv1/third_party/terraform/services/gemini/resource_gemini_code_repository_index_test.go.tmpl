@@ -76,7 +76,7 @@ resource "google_gemini_code_repository_index" "example" {
   provider = google-beta
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted", "new_label": "new_val"}
   location = "us-central1"
-  code_repository_index_id = "tf-test-cri-index-example-update-%{random_suffix}"
+  code_repository_index_id = "tf-test-cri-index-example-%{random_suffix}"
   kms_key = "%{kms_key}"
 }
 `, context)

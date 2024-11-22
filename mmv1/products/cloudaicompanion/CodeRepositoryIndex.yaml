@@ -18,9 +18,12 @@ min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
+update_verb: 'PATCH'
+update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}'
 examples:
   - name: "gemini_code_repository_index_basic"
     min_version: 'beta'
