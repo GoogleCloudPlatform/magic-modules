@@ -13,7 +13,7 @@ type RegionGetter interface {
 	GetRegion(types.String, *transport_tpg.Config, *diag.Diagnostics) types.String
 }
 
-// WithGetRegion can be embedded into _model) structs for resources and data sources
+// WithGetRegion can be embedded into structs implementing resource and data source interfaces
 // that are expected to contain a Region field
 type WithGetRegion struct {
 	Config *transport_tpg.Config
