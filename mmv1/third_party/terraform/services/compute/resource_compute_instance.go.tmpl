@@ -29,6 +29,13 @@ import (
 {{- end }}
 )
 
+func scratchDiskDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Z3 instances have 12 disks that are added without user input by the API
+	// These disks cannot be edited or deleted when using type Z3
+	// No additional local-ssd disk can be added on top of these 12 so we can just suppress this diff
+	return regexp.MustCompile("z3").MatchString(d.Get("machine_type").(string))
+}
+
 func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// The range may be a:
 	// A) single IP address (e.g. 10.2.3.4)
@@ -997,10 +1004,11 @@ be from 0 to 999,999,999 inclusive.`,
 			},
 
 			"scratch_disk": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				ForceNew:    true,
-				Description: `The scratch disks attached to the instance.`,
+				Type:        	  schema.TypeList,
+				Optional:    	  true,
+				ForceNew:    	  true,
+				DiffSuppressFunc: scratchDiskDiffSuppress
+				Description: 	  `The scratch disks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"device_name": {
