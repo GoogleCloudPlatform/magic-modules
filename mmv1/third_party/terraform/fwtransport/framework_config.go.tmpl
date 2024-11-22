@@ -174,12 +174,7 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 	}
 
 	if data.BillingProject.IsNull() && os.Getenv("GOOGLE_BILLING_PROJECT") != "" {
-		billingProject := transport_tpg.MultiEnvDefault([]string{
-			"GOOGLE_BILLING_PROJECT",
-			"GOOGLE_CLOUD_QUOTA_PROJECT",
-		}, nil)
-
-		data.BillingProject = types.StringValue(billingProject)
+		data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
 	}
 
 	if data.Region.IsNull() || data.Region.IsUnknown() {
@@ -600,20 +595,6 @@ func GetTokenSource(ctx context.Context, data fwmodels.ProviderModel, initialCre
 	creds := GetCredentials(ctx, data, initialCredentialsOnly, diags)
 
 	return creds.TokenSource
-}
-
-// GetQuotaProject attempts to GetQuotaProject from the credentials file
-// TODO - use this function to read project quota in case of default ADC
-// unclear how this should interact with user-project-override.
-func GetQuotaProject(ctx context.Context, data fwmodels.ProviderModel, initialCredentialsOnly bool, diags *diag.Diagnostics) string {
-	creds := GetCredentials(ctx, data, initialCredentialsOnly, diags)
-	var v struct {
-		QuotaProject string `json:"quota_project_id"`
-	}
-	if err := json.Unmarshal(creds.JSON, &v); err != nil {
-		return ""
-	}
-	return v.QuotaProject
 }
 
 // GetCredentials gets credentials with a given scope (clientScopes).
