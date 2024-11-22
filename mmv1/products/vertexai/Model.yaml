@@ -297,7 +297,7 @@ properties:
     description: |
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - type: String
-    name: 'modelName'
+    name: 'displayName'
     default_from_api: true
     description:
       The display name of the Model. The name can be up to 128 characters long
