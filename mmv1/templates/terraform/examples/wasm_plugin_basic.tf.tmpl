@@ -1,6 +1,6 @@
 data "google_project" "project" { provider = google-beta }
 
-resource "google_network_services_wasm_plugin" "{{$.PrimaryResourceId}}" {
+resource "google_network_services_plugins_wasm_plugin" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
   name        = "{{index $.Vars "wasm_plugin_name"}}"
   description = "my wasm plugin"
