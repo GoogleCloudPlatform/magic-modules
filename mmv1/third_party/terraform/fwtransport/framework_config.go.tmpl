@@ -174,7 +174,12 @@ func (p *FrameworkProviderConfig) HandleDefaults(ctx context.Context, data *fwmo
 	}
 
 	if data.BillingProject.IsNull() && os.Getenv("GOOGLE_BILLING_PROJECT") != "" {
-		data.BillingProject = types.StringValue(os.Getenv("GOOGLE_BILLING_PROJECT"))
+		billingProject := transport_tpg.MultiEnvDefault([]string{
+			"GOOGLE_BILLING_PROJECT",
+			"GOOGLE_CLOUD_QUOTA_PROJECT",
+		}, nil)
+
+		data.BillingProject = types.StringValue(billingProject)
 	}
 
 	if data.Region.IsNull() || data.Region.IsUnknown() {
@@ -461,8 +466,15 @@ func (p *FrameworkProviderConfig) SetupClient(ctx context.Context, data fwmodels
 
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
+	// Quota project header gets set by a transport layer within transport.NewHTTPClient
+	// this means logger won't capture this header being set  b/360405077#comment8
+	if data.UserProjectOverride.ValueBool() && !data.BillingProject.IsNull() {
+		quotaProject := data.BillingProject.ValueString()
+		clientOptions = append(clientOptions, option.WithQuotaProject(quotaProject))
+	}
+
 	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
-	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
+	client, _, err := transport.NewHTTPClient(cleanCtx, clientOptions...)
 	if err != nil {
 		diags.AddError("error creating new http client", err.Error())
 		return
@@ -492,6 +504,8 @@ func (p *FrameworkProviderConfig) SetupClient(ctx context.Context, data fwmodels
 
 	// Ensure $userProject is set for all HTTP requests using the client if specified by the provider config
 	// See https://cloud.google.com/apis/docs/system-parameters
+	// We add this above our logging transport layer so the logs are able to 
+	// accurately display that this header is being sent.
 	if data.UserProjectOverride.ValueBool() && !data.BillingProject.IsNull() {
 		headerTransport.Set("X-Goog-User-Project", data.BillingProject.ValueString())
 	}
@@ -586,6 +600,20 @@ func GetTokenSource(ctx context.Context, data fwmodels.ProviderModel, initialCre
 	creds := GetCredentials(ctx, data, initialCredentialsOnly, diags)
 
 	return creds.TokenSource
+}
+
+// GetQuotaProject attempts to GetQuotaProject from the credentials file
+// TODO - use this function to read project quota in case of default ADC
+// unclear how this should interact with user-project-override.
+func GetQuotaProject(ctx context.Context, data fwmodels.ProviderModel, initialCredentialsOnly bool, diags *diag.Diagnostics) string {
+	creds := GetCredentials(ctx, data, initialCredentialsOnly, diags)
+	var v struct {
+		QuotaProject string `json:"quota_project_id"`
+	}
+	if err := json.Unmarshal(creds.JSON, &v); err != nil {
+		return ""
+	}
+	return v.QuotaProject
 }
 
 // GetCredentials gets credentials with a given scope (clientScopes).
