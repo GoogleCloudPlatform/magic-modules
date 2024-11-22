@@ -23,7 +23,7 @@ func DataSourceGoogleCloudBackupDRBackupVault() *schema.Resource {
 }
 
 func dataSourceGoogleCloudBackupDRBackupVaultRead(d *schema.ResourceData, meta interface{}) error {
-    config := meta.(*transport_tpg.Config)
+	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func dataSourceGoogleCloudBackupDRBackupVaultRead(d *schema.ResourceData, meta i
 	backup_vault_id := d.Get("backup_vault_id").(string)
 	id := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, backup_vault_id)
 	d.SetId(id)
-    err = resourceBackupDRBackupVaultRead(d, meta)
+	err = resourceBackupDRBackupVaultRead(d, meta)
 	if err != nil {
 		return err
 	}
