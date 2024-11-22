@@ -5,4 +5,4 @@
 - type: COMPLEX_MAP_KEY_NAME
   field: associated_entities
   details:
-    keyname: entity_name
+    keyname: entity_id
