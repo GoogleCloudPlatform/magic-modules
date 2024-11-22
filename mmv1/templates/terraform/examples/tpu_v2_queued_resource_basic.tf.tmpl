@@ -1,0 +1,19 @@
+resource "google_tpu_v2_queued_resource" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name    = "{{index $.Vars "qr_name"}}"
+  zone    = "us-central1-c"
+  project = "{{index $.TestEnvVars "project"}}"
+
+  tpu {
+    node_spec {
+      parent  = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1-c"
+      node_id = "{{index $.Vars "tpu_name"}}"
+      node {
+        runtime_version  = "tpu-vm-tf-2.13.0"
+        accelerator_type = "v2-8"
+        description      = "Text description of the TPU."
+      }
+    }
+  }
+}
