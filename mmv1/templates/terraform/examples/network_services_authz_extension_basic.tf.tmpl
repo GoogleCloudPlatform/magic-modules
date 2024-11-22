@@ -50,21 +50,6 @@ resource "google_compute_region_backend_service" "url_map" {
   health_checks = [google_compute_region_health_check.default.id]
 }
 
-resource "google_compute_forwarding_rule" "default" {
-  name                  = "l7-ilb-forwarding-rule"
-  project               = "{{index $.TestEnvVars "project"}}"
-  region                = "us-west1"
-  load_balancing_scheme = "INTERNAL_MANAGED"
-  network               = google_compute_network.default.id
-  subnetwork            = google_compute_subnetwork.default.id
-  ip_protocol           = "TCP"
-  port_range            = "80"
-  target                = google_compute_region_target_http_proxy.default.id
-  ip_address            = google_compute_address.default.id
-
-  depends_on = [google_compute_subnetwork.proxy_only]
-}
-
 resource "google_compute_region_url_map" "default" {
   name            = "l7-ilb-map"
   project         = "{{index $.TestEnvVars "project"}}"
@@ -101,13 +86,4 @@ name     = "{{index $.Vars "resource_name"}}"
   timeout               = "0.1s"
   fail_open             = false
   forward_headers       = ["Authorization"]
-  wire_format           = "EXT_PROC_GRPC"
-
-  metadata = {
-    forwarding_rule_id = google_compute_forwarding_rule.default.id
-  }
-
-  labels = {
-    foo = "bar"
-  }
 }
