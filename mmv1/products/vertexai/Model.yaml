@@ -81,6 +81,7 @@ properties:
   - type: String
     name: 'description'
     description: Description of the Model.
+    default_from_api: true
   - type: String
     name: 'versionId'
     description: The version ID of the Model.
