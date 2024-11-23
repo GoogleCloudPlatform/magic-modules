@@ -84,6 +84,9 @@ examples:
     vars:
       disk_name: 'test-disk-features'
 parameters:
+  - name: 'rootWriteTest'
+    type: String
+    write_only: true
   - name: 'zone'
     type: ResourceRef
     description: 'A reference to the zone where the disk resides.'

@@ -1,18 +1,11 @@
-{{ "" }}
-{{- if and $.FlattenObject (not $.WriteOnlyProperties) }}
-  {{- range $np := $.NestedProperties }}
-{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $np -}}
-  {{- end -}}
-{{- else if and $.NestedProperties (not $.WriteOnlyProperties) }}
+{{- if $.WriteOnlyProperties }}
 <a name="nested_{{ underscore $.Name }}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }}contains{{ else }}supports{{ end }}:
 {{ "" }}
-  {{- if $.IsA "Map" }}
-* `{{ underscore $.KeyName }}` - (Required) The identifier for this object. Format specified above.
-{{ "" }}
-  {{- end -}}
   {{- if $.NestedProperties }}
     {{- range $np := $.NestedProperties }}
+      {{- if $np.WriteOnly }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $np -}}
+      {{- end -}}
     {{- end -}}
 {{ "" }}
     {{- $innerNested := false }}
@@ -26,7 +19,7 @@
     {{- end }}
     {{- range $np := $.NestedProperties }}
       {{- if $np.NestedProperties }}
-{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $np -}}
+{{- trimTemplate "nested_property_write_only_documentation.html.markdown.tmpl" $np -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

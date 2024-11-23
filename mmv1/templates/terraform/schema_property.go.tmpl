@@ -40,9 +40,6 @@
 {{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if .WriteOnly -}}
-  WriteOnly: true,
-{{ end -}}
 {{ if and (not .Output) .Validation -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
@@ -163,6 +160,9 @@ Default value: {{ .ItemType.DefaultValue -}}
 {{ end -}}
 {{ if .Sensitive -}}
     Sensitive: true,
+{{ end -}}
+{{ if .WriteOnly -}}
+  WriteOnly: true,
 {{ end -}}
 {{ if not (eq .DefaultValue nil ) -}}
     Default: {{ .GoLiteral .DefaultValue -}},

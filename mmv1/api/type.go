@@ -171,8 +171,7 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
-	// If true, the field is write-only and should not be read from the API.
-	WriteOnly bool `yaml:"write_only,omitempty"`
+	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
 
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
@@ -636,6 +635,30 @@ func (t Type) NestedProperties() []*Type {
 		props = t.UserProperties()
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.NestedProperties(), func(p *Type) bool {
+			return t.Exclude
+		})
+	default:
+	}
+	return props
+}
+
+// Returns write-only properties for this property.
+func (t Type) WriteOnlyProperties() []*Type {
+	props := make([]*Type, 0)
+
+	switch {
+	case t.IsA("Array"):
+		if t.ItemType.IsA("NestedObject") {
+			props = google.Reject(t.ItemType.WriteOnlyProperties(), func(p *Type) bool {
+				return t.Exclude
+			})
+		}
+	case t.IsA("NestedObject"):
+		props = google.Select(t.UserProperties(), func(p *Type) bool {
+			return p.WriteOnly
+		})
+	case t.IsA("Map"):
+		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
 			return t.Exclude
 		})
 	default:
