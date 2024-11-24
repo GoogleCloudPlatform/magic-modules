@@ -42,7 +42,7 @@ func TestAccNetworkSecurityInterceptDeploymentGroup_update(t *testing.T) {
 				ResourceName:            "google_network_security_intercept_deployment_group.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"update_time", "labels", "terraform_labels"},
 			},
 		},
 	})

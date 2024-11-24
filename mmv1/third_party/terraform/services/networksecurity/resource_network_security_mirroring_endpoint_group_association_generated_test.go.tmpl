@@ -42,7 +42,7 @@ func TestAccNetworkSecurityMirroringEndpointGroupAssociation_update(t *testing.T
 				ResourceName:            "google_network_security_mirroring_endpoint_group_association.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"update_time", "labels", "terraform_labels"},
 			},
 		},
 	})
