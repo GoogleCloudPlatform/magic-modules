@@ -113,6 +113,19 @@ examples:
       'prevent_destroy': 'false'
     ignore_read_extra:
       - 'runtime_config.0.properties'
+  - name: 'dataproc_batch_autotuning'
+    primary_resource_id: 'example_batch_autotuning'
+    primary_resource_name: 'fmt.Sprintf("tf-test-batch-autotuning%s", context["random_suffix"])'
+    vars:
+      subnetwork_name: 'default'
+      prevent_destroy: 'true'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    test_vars_overrides:
+      'subnetwork_name': 'acctest.BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")'
+      'prevent_destroy': 'false'
+    ignore_read_extra:
+      - 'runtime_config.0.properties'
 parameters:
   - name: 'location'
     type: String
@@ -278,6 +291,33 @@ properties:
         description: |
           A mapping of property names to values, which are used to configure workload execution.
         output: true
+      - name: 'autotuningConfig'
+        type: NestedObject
+        immutable: true
+        description: |
+          Optional. Autotuning configuration of the workload.
+        properties:
+          - name: 'scenarios'
+            type: Array
+            required_with:
+              - 'runtimeConfig.0.cohort'
+            description: |
+              Optional. Scenarios for which tunings are applied.
+            item_type:
+              type: Enum
+              description: |
+                Scenario represents a specific goal that autotuning will attempt to achieve by modifying workloads.
+              required: true
+              enum_values:
+                - 'SCALING'
+                - 'BROADCAST_HASH_JOIN'
+                - 'MEMORY'
+      - name: 'cohort'
+        type: String
+        description: |
+          Optional. Cohort identifier. Identifies families of the workloads having the same shape, e.g. daily ETL jobs.
+        immutable: true
+        required: false
   - name: 'environmentConfig'
     type: NestedObject
     description: |

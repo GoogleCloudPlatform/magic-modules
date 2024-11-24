@@ -1,6 +1,6 @@
 ---
 title: "Promote to GA"
-weight: 50
+weight: 16
 ---
 
 # Promote from beta to GA
@@ -13,7 +13,7 @@ For more information about types of resources and the generation process overall
 
 ## Before you begin
 
-1. Complete the [Generate the providers]({{< ref "/get-started/generate-providers" >}}) quickstart to set up your environment and your Google Cloud project.
+1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```
    cd ~/magic-modules

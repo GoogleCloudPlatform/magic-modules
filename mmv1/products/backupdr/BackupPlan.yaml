@@ -33,6 +33,7 @@ examples:
     min_version: 'beta'
     primary_resource_id: 'my-backup-plan-1'
     vars:
+      backup_vault_id: 'backup-vault-simple-test'
       backup_plan_id: 'backup-plan-simple-test'
     test_env_vars:
       project: :PROJECT_NAME

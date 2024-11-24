@@ -1,0 +1,9 @@
+resource: 'google_dns_record_set'
+generation_type: 'handwritten'
+api_service_name: 'dns.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'v1beta2'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'ResourceRecordSet'

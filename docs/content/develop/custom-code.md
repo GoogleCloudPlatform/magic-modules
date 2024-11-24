@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 39
+weight: 15
 ---
 
 # Add custom resource code
@@ -17,7 +17,7 @@ custom_code:
 
 By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
 
-When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/get-started/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
+When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/develop/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
 
 The following sections describe types of custom code in more detail.
 

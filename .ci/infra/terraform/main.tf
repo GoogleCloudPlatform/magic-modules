@@ -57,6 +57,12 @@ resource "google_organization_iam_member" "sa_billing_viewer" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_chronicle_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/chronicle.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_cloudkms_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/cloudkms.admin"
@@ -217,7 +223,8 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
-    "cloudaicompanion.googleapis.com"
+    "chronicle.googleapis.com",
+    "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",

@@ -264,17 +264,12 @@ properties:
       - accelerator_type
     properties:
       - name: 'type'
-        type: Enum
+        type: String
         description: |
-          Type of TPU.
+          Type of TPU. Please select one of the allowed types: https://cloud.google.com/tpu/docs/reference/rest/v2/AcceleratorConfig#Type
         min_version: 'beta'
         required: true
         immutable: true
-        enum_values:
-          - 'V2'
-          - 'V3'
-          - 'V4'
-          - 'V5P'
       - name: 'topology'
         type: String
         description: |

@@ -430,7 +430,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_replica, databaseID, databaseID, databaseID, "true"),
-				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance.., invalid"),
+				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance"),
 			},
 			{
 				Config: fmt.Sprintf(
@@ -1058,7 +1058,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName, projectId, orgId, billingAccount),
-				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with public IP"),
+				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with only public IP"),
 			},
 		},
 	})
@@ -1796,7 +1796,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 			{
 				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
 				ExpectError: regexp.MustCompile(
-					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache.., invalid", enterpriseInstanceName)),
+					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache", enterpriseInstanceName)),
 			},
 		},
 	})
@@ -1879,7 +1879,6 @@ func TestAccSqlDatabaseInstance_Postgres_Edition_Upgrade(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_Edition_Downgrade(t *testing.T) {
-	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20010")
 	t.Parallel()
 	enterprisePlusTier := "db-perf-optimized-N-2"
 	enterpriseTier := "db-custom-2-13312"

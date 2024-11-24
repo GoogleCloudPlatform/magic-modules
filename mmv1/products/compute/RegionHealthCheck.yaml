@@ -141,6 +141,12 @@ properties:
       An optional description of this resource. Provide this property when
       you create the resource.
     send_empty_value: true
+  - name: 'healthCheckId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'healthyThreshold'
     type: Integer
     description: |

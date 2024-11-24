@@ -24,7 +24,7 @@ base_url: "developers"
 self_link: "{{org_id}}/developers/{{email}}"
 create_url: "{{org_id}}/developers"
 delete_url: "{{org_id}}/developers/{{email}}"
-update_mask: true
+update_mask: false
 immutable: false
 import_format:
   - "{{org_id}}/developers/{{email}}"

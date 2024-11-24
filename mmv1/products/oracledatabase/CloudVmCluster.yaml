@@ -49,6 +49,8 @@ async:
   error:
     path: 'error'
     message: 'message'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/oracledatabase_cloud_vmcluster.go.tmpl'
 examples:
   - name: 'oracledatabase_cloud_vmcluster_basic'
     primary_resource_id: 'my_vmcluster'
@@ -56,7 +58,11 @@ examples:
       project: 'my-project'
       cloud_vm_cluster_id: 'my-instance'
       cloud_exadata_infrastructure_id: 'my-exadata'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
       'cloud_vm_cluster_id': '"ofake-vmcluster-basic"'
       'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-basic"'
@@ -66,10 +72,21 @@ examples:
       project: 'my-project'
       cloud_vm_cluster_id: 'my-instance'
       cloud_exadata_infrastructure_id: 'my-exadata'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
       'cloud_vm_cluster_id': '"ofake-vmcluster-full"'
       'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-full"'
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: true
+    description: 'Whether or not to allow Terraform to destroy the instance.
+    Unless this field is set to false in Terraform state, a terraform destroy
+    or terraform apply that would delete the instance will fail.'
 parameters:
   - name: 'location'
     type: String
