@@ -488,6 +488,10 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 		formatFile := filepath.Ext(targetFile) == ".go"
 
 		fileTemplate.GenerateFile(targetFile, source, providerWithProducts, formatFile, templates...)
+		// continue to next file if no file was generated
+		if _, err := os.Stat(targetFile); errors.Is(err, os.ErrNotExist) {
+			continue
+		}
 		t.replaceImportPath(outputFolder, target)
 		t.addHashicorpCopyRightHeader(outputFolder, target)
 	}
@@ -510,7 +514,7 @@ func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	//       The test-fixtures folder is not included here as it's copied as a whole,
 	//       not file by file
 	ignoredFolders := []string{".release/", ".changelog/", "examples/", "scripts/", "META.d/"}
-	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json"}
+	ignoredFiles := []string{"go.mod", ".goreleaser.yml", ".golangci.yml", "terraform-registry-manifest.json", "_meta.yaml"}
 	shouldAddHeader := true
 	for _, folder := range ignoredFolders {
 		// folder will be path leading to file

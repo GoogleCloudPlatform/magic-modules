@@ -65,6 +65,12 @@ properties:
       hyphen and a random four-character string to the base instance name.
       The base instance name must comply with RFC1035.
     required: true
+  - name: 'instanceGroupManagerId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'creationTimestamp'
     type: Time
     description: |

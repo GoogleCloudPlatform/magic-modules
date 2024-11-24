@@ -174,7 +174,7 @@ or resource. It is also great to log warnings at runtime if possible.
 When working on your breaking change, make sure that your base branch
 is `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`. This
 means that you will follow the standard
-[contribution process]({{< ref "/get-started/contribution-process" >}})
+[contribution process]({{< ref "/contribution-process" >}})
 with the following changes:
 
 1. Before you start, check out and sync your local `magic-modules` and provider

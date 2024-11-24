@@ -15,7 +15,7 @@ aliases:
 
 ## Before you begin
 
-[Generate the modified provider(s)]({{< ref "/get-started/generate-providers" >}})
+[Generate the modified provider(s)]({{< ref "/develop/generate-providers" >}})
 
 
 1. Set up application default credentials for Terraform
@@ -243,7 +243,7 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 
 ### Run manual tests
 
-1. [Generate the provider(s) you want to test]({{< ref "/get-started/generate-providers" >}})
+1. [Generate the provider(s) you want to test]({{< ref "/develop/generate-providers" >}})
 2. Build the provider(s) you want to test
 
     ```bash

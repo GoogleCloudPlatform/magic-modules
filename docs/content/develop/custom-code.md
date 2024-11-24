@@ -1,11 +1,11 @@
 ---
 title: "Add custom resource code"
-weight: 39
+weight: 15
 ---
 
 # Add custom resource code
 
-This document covers how to add "custom code" to [MMv1 resources]({{< ref "/get-started/how-magic-modules-works#mmv1" >}}). Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can't be achieved otherwise.
+This document covers how to add "custom code" to [MMv1 resources]({{< ref "/#mmv1" >}}). Custom code can be used to add arbitrary logic to a resource while still generating most of the code; it allows for a balance between maintainability and supporting real-worlds APIs that deviate from what MMv1 can support. Custom code should only be added if the desired behavior can't be achieved otherwise.
 
 Most custom code attributes are strings that contain a path to a template file relative to the `mmv1` directory. For example:
 
@@ -17,7 +17,7 @@ custom_code:
 
 By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
 
-When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/get-started/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
+When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/develop/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
 
 The following sections describe types of custom code in more detail.
 

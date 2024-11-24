@@ -14,7 +14,6 @@
 ---
 name: 'Instance'
 description: A Parallelstore Instance.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -46,7 +45,6 @@ custom_code:
 examples:
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
-    min_version: 'beta'
     vars:
       name: 'instance'
       network_name: 'network'
@@ -56,7 +54,6 @@ parameters:
     type: String
     description: |
       Part of `parent`. See documentation of `projectsId`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -69,7 +66,6 @@ parameters:
         * Must be between 1-63 characters.
         * Must end with a number or a letter.
         * Must be unique within the customer project/ location
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -79,13 +75,11 @@ properties:
     description: |
       Identifier. The resource name of the instance, in the format
       `projects/{project}/locations/{location}/instances/{instance_id}`
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: |
       The description of the instance. 2048 characters or less.
-    min_version: 'beta'
   - name: 'state'
     type: String
     description: |
@@ -97,19 +91,16 @@ properties:
         DELETING
         FAILED
         UPGRADING
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       The time when the instance was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       The time when the instance was updated.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
@@ -135,26 +126,22 @@ properties:
       specific characters being disallowed.  For example, representing labels
       as the string:  `name + "_" + value` would prove problematic if we were to
       allow `"_"` in a future release. "
-    min_version: 'beta'
   - name: 'capacityGib'
     type: String
     description: |
       Required. Immutable. Storage capacity of Parallelstore instance in Gibibytes (GiB).
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'daosVersion'
     type: String
     description: |
       The version of DAOS software running in the instance.
-    min_version: 'beta'
     output: true
   - name: 'accessPoints'
     type: Array
     description: |
       Output only. List of access_points.
       Contains a list of IPv4 addresses used for client side configuration.
-    min_version: 'beta'
     output: true
     item_type:
       type: String
@@ -163,7 +150,6 @@ properties:
     description: |
       Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the instance is connected.
-    min_version: 'beta'
     immutable: true
   - name: 'reservedIpRange'
     type: String
@@ -172,7 +158,6 @@ properties:
       associated with the private service access connection for example, \"test-default\"
       associated with IP range 10.0.0.0/29. If no range id is provided all ranges will
       be considered.
-    min_version: 'beta'
     immutable: true
   - name: 'effectiveReservedIpRange'
     type: String
@@ -181,7 +166,6 @@ properties:
       range associated with the private service access connection for example, \"test-default\"
       associated with IP range 10.0.0.0/29. This field is populated by the service
       and contains the value currently used by the service.
-    min_version: 'beta'
     immutable: true
     output: true
   - name: 'fileStripeLevel'
@@ -195,7 +179,6 @@ properties:
         FILE_STRIPE_LEVEL_MIN
         FILE_STRIPE_LEVEL_BALANCED
         FILE_STRIPE_LEVEL_MAX
-    min_version: 'beta'
   - name: 'directoryStripeLevel'
     type: String
     description: |
@@ -207,4 +190,3 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MIN
         DIRECTORY_STRIPE_LEVEL_BALANCED
         DIRECTORY_STRIPE_LEVEL_MAX
-    min_version: 'beta'

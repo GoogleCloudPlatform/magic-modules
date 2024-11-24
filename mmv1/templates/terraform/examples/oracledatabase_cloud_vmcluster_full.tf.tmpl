@@ -35,6 +35,8 @@ resource "google_oracle_database_cloud_vm_cluster" "{{$.PrimaryResourceId}}"{
     }
     memory_size_gb = 60
   }
+
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 resource "google_oracle_database_cloud_exadata_infrastructure" "cloudExadataInfrastructures"{

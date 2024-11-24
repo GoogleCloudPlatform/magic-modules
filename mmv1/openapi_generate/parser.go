@@ -253,6 +253,13 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	async.Result.ResourceInsideResponse = true
 	resource.Async = async
 
+	if hasUpdate(resourceName, root) {
+		resource.UpdateVerb = "PATCH"
+		resource.UpdateMask = true
+	} else {
+		resource.Immutable = true
+	}
+
 	example := r.Examples{}
 	example.Name = "name_of_example_file"
 	example.PrimaryResourceId = "example"
@@ -266,6 +273,20 @@ func buildResource(filePath, resourcePath, resourceName string, root *openapi3.T
 	resource.AutogenStatus = base64.StdEncoding.EncodeToString(resourceNameBytes)
 
 	return resource
+}
+
+func hasUpdate(resourceName string, root *openapi3.T) bool {
+	// Create and Update have different paths in the OpenAPI spec, so look
+	// through all paths to find one that matches the expected operation name
+	for _, pathValue := range root.Paths.Map() {
+		if pathValue.Patch == nil {
+			continue
+		}
+		if pathValue.Patch.OperationID == fmt.Sprintf("Update%s", resourceName) {
+			return true
+		}
+	}
+	return false
 }
 
 func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {

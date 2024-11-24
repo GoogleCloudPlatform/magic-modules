@@ -212,6 +212,9 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
+	if len(sourceByte) == 0 {
+		return
+	}
 
 	if goFormat {
 		formattedByte, err := format.Source(sourceByte)
