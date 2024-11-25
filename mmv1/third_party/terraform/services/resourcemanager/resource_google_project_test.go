@@ -274,6 +274,29 @@ func TestAccProject_tags(t *testing.T) {
 	})
 }
 
+// testAccCheckGoogleProjectExistsViaAPI asserts that the project with the given id exists in GCP
+// This might be useful when checking that a project has been deleted by an abandon action.
+func testAccCheckGoogleProjectExistsViaAPI(t *testing.T, pid string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		url := fmt.Sprintf("%sprojects/%s", config.ResourceManagerBasePath, pid)
+
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("project doesn't exists at %s", url)
+		}
+		// project still exists in GCP
+		return nil
+	}
+}
+
+// testAccCheckGoogleProjectExists asserts that the project with the given id exists in state
 func testAccCheckGoogleProjectExists(r, pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[r]
@@ -442,8 +465,14 @@ func TestAccProject_abandon(t *testing.T) {
 			{
 				Config:  testAccProject_abandon(pid, org),
 				Destroy: true,
+			},
+			{
+				// We cannot use a Check on the step above because of an error reporting that state is altered"
+				// "Error: Saved plan is stale. The given plan file can no longer be applied because the state was changed by another operation after the plan was created."
+				// This makes sense- by doing a destroy action we remove all data from state; what is the state check going to be on?
+				Config: "// Using separate step to assert project still exists. This is an empty test config string!",
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+					testAccCheckGoogleProjectExistsViaAPI(t, pid),
 				),
 			},
 		},
