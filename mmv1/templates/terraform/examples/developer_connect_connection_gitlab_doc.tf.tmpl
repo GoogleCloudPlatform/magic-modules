@@ -16,6 +16,15 @@ resource "google_secret_manager_secret" "gitlab-auth-cred" {
   }
 }
 
+resource "google_secret_manager_secret" "gitlab-webhook-secret" {
+
+  secret_id = "gitlab-webhook-secret"
+
+  replication {
+    auto {}
+  }
+}
+
 resource "google_secret_manager_secret_version" "gitlab-read-cred-version" {
 
   secret = google_secret_manager_secret.gitlab-read-cred.id
@@ -27,6 +36,11 @@ resource "google_secret_manager_secret_version" "gitlab-auth-cred-version" {
   secret = google_secret_manager_secret.gitlab-auth-cred.id
   secret_data = file("my-gitlab-auth-cred.txt")
 }
+
+resource "google_secret_manager_secret_version" "gitlab-webhook-secret-version" {
+
+  secret = google_secret_manager_secret.gitlab-webhook-secret.id
+  secret_data = file("my-gitlab-webhook-secret.txt")
 
 data "google_iam_policy" "p4sa-secretAccessor" {
   binding {
@@ -40,6 +54,7 @@ resource "google_secret_manager_secret_iam_policy" "policy" {
 
   secret_id = google_secret_manager_secret.gitlab-read-cred.secret_id
   secret_id = google_secret_manager_secret.gitlab-auth-cred.secret_id
+  secret_id = google_secret_manager_secret.gitlab-webhook-secret.secret_id
   policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
 }
 
@@ -49,14 +64,14 @@ resource "google_developer_connect_connection" "my-connection" {
   connection_id = "my-connection"
 
   gitlab_config {
-    webhook_secret_secret_version: 'projects/devconnect-terraform-proj/secrets/webhook-version/versions/latest'
+    webhook_secret_secret_version = google_secret_manager_secret_version.gitlab-webhook-secret-version.id
   
     read_authorizer_credential {
-      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred-version.id'
+      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred-version.id
     }
 
     authorizer_credential {
-      user_token_secret_version = 'google_secret_manager_secret_version.gitlab-auth-cred-version.id'
+      user_token_secret_version = google_secret_manager_secret_version.gitlab-auth-cred-version.id
     }    
   }
 }

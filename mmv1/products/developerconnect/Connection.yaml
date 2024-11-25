@@ -43,9 +43,6 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
-      webhook_version: 'projects/devconnect-terraform-proj/secrets/webhook-version/versions/latest'
-      read_cred: 'projects/devconnect-terraform-proj/secrets/gitlab-read-cred/versions/latest'
-      auth_cred: 'projects/devconnect-terraform-proj/secrets/gitlab-auth-cred/versions/latest'
   - name: 'developer_connect_connection_gitlab_doc'
     exclude_test: true
   - name: 'developer_connect_connection_gitlab_enterprise'

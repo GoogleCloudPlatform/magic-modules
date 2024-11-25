@@ -3,14 +3,14 @@ resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
   connection_id = "{{index $.Vars "connection_name"}}"
 
   gitlab_config {
-    webhook_secret_secret_version = "{{index $.Vars "webhook_version"}}"
+    webhook_secret_secret_version = "projects/devconnect-terraform-proj/secrets/webhook-version/versions/latest"
     
     read_authorizer_credential {
-      user_token_secret_version = "{{index $.Vars "read_cred"}}"
+      user_token_secret_version = "projects/devconnect-terraform-proj/secrets/gitlab-read-cred/versions/latest"
     }
     
     authorizer_credential {
-      user_token_secret_version = "{{index $.Vars "auth_cred"}}"
+      user_token_secret_version = "projects/devconnect-terraform-proj/secrets/gitlab-auth-cred/versions/latest"
     }
   }
 }
