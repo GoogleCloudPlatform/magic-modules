@@ -1,9 +1,8 @@
 data "google_project" "project" {
-  provider = google-beta
+  provider = google
 }
 
 resource "google_iam_principal_access_boundary_policy" "pab_policy" {
-  provider = google-beta
   organization   = "{{index $.TestEnvVars "org_id"}}"
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
@@ -11,7 +10,6 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
 }
 
 resource "google_iam_projects_policy_binding" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   project        = data.google_project.project.project_id
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
