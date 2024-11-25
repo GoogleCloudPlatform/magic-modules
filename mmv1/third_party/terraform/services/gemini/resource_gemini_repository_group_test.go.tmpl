@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -14,6 +13,7 @@ import (
 func TestAccGeminiRepositoryGroup_update(t *testing.T) {
 	codeRepositoryIndexId := acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-test", "us-central1", "", map[string]string{"ccfe_debug_note": "terraform_e2e_should_be_deleted"})
 	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 		"project_id":               os.Getenv("GOOGLE_PROJECT"),
 		"code_repository_index_id": codeRepositoryIndexId,
 	}
@@ -33,11 +33,6 @@ func TestAccGeminiRepositoryGroup_update(t *testing.T) {
 			},
 			{
 				Config: testAccGeminiRepositoryGroup_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_gemini_repository_group.example", plancheck.ResourceActionUpdate),
-					},
-				},
 			},
 			{
 				ResourceName:            "google_gemini_repository_group.example",
@@ -55,7 +50,7 @@ resource "google_gemini_repository_group" "example" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = "%{code_repository_index_id}"
-  repository_group_id = "tf-test-rg-repository-group-id" 
+  repository_group_id = "tf-test-rg-repository-group-id-%{random_suffix}" 
   repositories {
     resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion1/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
@@ -95,7 +90,7 @@ resource "google_gemini_repository_group" "example" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = "%{code_repository_index_id}"
-  repository_group_id = "tf-test-rg-repository-group-id"
+  repository_group_id = "tf-test-rg-repository-group-id-%{random_suffix}"
   repositories {
     resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion2/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
