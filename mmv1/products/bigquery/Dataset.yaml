@@ -88,6 +88,9 @@ examples:
     vars:
       dataset_id: 'example_dataset'
     exclude_docs: true
+    ignore_read_extra:
+      - etag
+      - last_modified_time
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
