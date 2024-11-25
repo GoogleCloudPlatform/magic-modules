@@ -42,7 +42,7 @@ headers := make(http.Header)
 for {
 	res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
-		Method:    "PUT",
+		Method:    "PATCH",
 		Project:   billingProject,
 		RawURL:    url,
 		UserAgent: userAgent,
