@@ -461,21 +461,18 @@ available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/mag
  Shared properties
  &lt;a class="anchor" href="#shared-properties">#&lt;/a>
 &lt;/h2>
-&lt;h3 id="min_version-beta">
- &lt;code>min_version: beta&lt;/code>
- &lt;a class="anchor" href="#min_version-beta">#&lt;/a>
+&lt;h3 id="name">
+ &lt;code>name&lt;/code>
+ &lt;a class="anchor" href="#name">#&lt;/a>
 &lt;/h3>
-&lt;p>Marks the field (and any subfields) as beta-only. Ensure a beta version block
-is present in provider.yaml. Do not use if an ancestor field (or the overall
-resource) is already marked as beta-only.&lt;/p>
-&lt;h3 id="immutable">
- &lt;code>immutable&lt;/code>
- &lt;a class="anchor" href="#immutable">#&lt;/a>
+&lt;p>Specifies the name of the field within Terraform. By default this will also
+be the key for the field in the API request message, if a separate &lt;code>api_name&lt;/code>
+is not declared using the corresponding property.&lt;/p>
+&lt;h3 id="type">
+ &lt;code>type&lt;/code>
+ &lt;a class="anchor" href="#type">#&lt;/a>
 &lt;/h3>
-&lt;p>If true, the field (and any subfields) are considered immutable - that is,
-only settable on create. If unset or false, the field is still considered
-immutable if any ancestor field (or the overall resource) is immutable,
-unless &lt;code>update_url&lt;/code> is set.&lt;/p></description></item><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/develop/resource-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/resource-reference/</guid><description>&lt;h1 id="mmv1-resource-reference">
+&lt;p>Sets the expected data type of the field. All valid types are declared &lt;a href="https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673">here&lt;/a>.&lt;/p></description></item><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/develop/resource-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/resource-reference/</guid><description>&lt;h1 id="mmv1-resource-reference">
  MMv1 resource reference
  &lt;a class="anchor" href="#mmv1-resource-reference">#&lt;/a>
 &lt;/h1>
