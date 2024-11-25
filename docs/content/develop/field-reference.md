@@ -14,7 +14,7 @@ available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/m
 
 ### `name`
 Specifies the name of the field within Terraform. By default this will also 
-be the value that is used for communication with the API, if a seperate `api_name`
+be the key for the field in the API request message, if a separate `api_name`
 is not declared using the corresponding property.
 
 ### `type`
