@@ -437,9 +437,9 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 					testGoogleSqlDatabaseInstance_replica, databaseID, databaseID, databaseID, "false"),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.instance_master",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.instance_master",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
@@ -450,13 +450,13 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.replica1",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.replica2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 		},
 	})
@@ -1128,20 +1128,20 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(t
 				Config: testAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRangeReplica(databaseName, networkName, addressName),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
-					"settings.0.version"
+					"settings.0.version",
 				},
 			},
 			{
 				ResourceName:            "google_sql_database_instance.replica1",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 		},
 	})
@@ -1572,9 +1572,9 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 					testGoogleSqlDatabaseInstance_encryptionKey, context),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.replica",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.replica",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
@@ -1582,9 +1582,9 @@ func TestAccSqlDatabaseInstance_encryptionKey(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:            "google_sql_database_instance.master",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.master",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
@@ -1614,9 +1614,9 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 					testGoogleSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion, context),
 			},
 			{
-				ResourceName:            "google_sql_database_instance.replica",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.replica",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
@@ -1624,9 +1624,9 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 				},
 			},
 			{
-				ResourceName:            "google_sql_database_instance.master",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_sql_database_instance.master",
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"deletion_protection",
 					"replica_names",
@@ -2608,13 +2608,13 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.original-primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})},
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-replica",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})},
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -2631,7 +2631,7 @@ func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.original-primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})},
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"}),
 			},
 			{
 				ResourceName:      "google_sql_database_instance.original-replica",
