@@ -16,7 +16,7 @@ This page explains how you can contribute code and documentation to the	`magic-m
 
 1. Familiarize yourself with [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow)
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the `Magic Modules` repository into your GitHub account
-1. [Set up your development environment](https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/)
+1. [Set up your development environment]({{< ref "/develop/set-up-dev-environment/" >}})
 1. Check whether the feature you want to work on has already been [requested in the issue tracker](https://github.com/hashicorp/terraform-provider-google/issues).
    - If there's an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you're welcome to work on the issue.
 

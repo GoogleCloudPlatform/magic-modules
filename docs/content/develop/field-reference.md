@@ -240,7 +240,7 @@ Example:
 
 ### `diff_suppress_func`
 Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
-to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+to use for this field. In many cases, a [custom flattener]({{< ref "/develop/custom-code/#custom_flatten" >}})
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
 [Fix diffs]({{< ref "/develop/diffs" >}}) for more information and best practices.
 
