@@ -52,11 +52,11 @@ resource "google_developer_connect_connection" "my-connection" {
     webhook_secret_secret_version: 'projects/devconnect-terraform-proj/secrets/webhook-version/versions/latest'
   
     read_authorizer_credential {
-      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred.id'
+      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred-version.id'
     }
 
     authorizer_credential {
-      user_token_secret_version = 'google_secret_manager_secret_version.gitlab-auth-cred.id'
+      user_token_secret_version = 'google_secret_manager_secret_version.gitlab-auth-cred-version.id'
     }    
   }
 }
