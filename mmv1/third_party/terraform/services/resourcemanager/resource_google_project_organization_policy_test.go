@@ -200,6 +200,11 @@ func testAccProjectOrganizationPolicy_none(t *testing.T) {
 				ResourceName:      "google_project_organization_policy.none",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"etag",
+					"update_time",
+					"version",
+				},
 			},
 		},
 	})
