@@ -571,7 +571,10 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateLive(bucketName),
@@ -585,7 +588,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateAny(bucketName),
@@ -599,7 +606,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
@@ -613,7 +624,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 		},
 	})
