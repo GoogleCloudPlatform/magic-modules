@@ -60,6 +60,9 @@ func compareServices(teamcityServiceFile, providerServiceFile string) error {
 	for scanner.Scan() {
 		googleServices = append(googleServices, scanner.Text())
 	}
+	if len(googleServices) == 0 {
+		return fmt.Errorf("could not find any services in the provider service list file %s", providerServiceFile)
+	}
 
 	// Get array of services from the TeamCity service list file
 	f, err := os.Open(teamcityServiceFile)

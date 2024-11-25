@@ -83,6 +83,12 @@ func Test_main_unhappyPaths(t *testing.T) {
 			expectError:         true,
 			errorRegex:          regexp.MustCompile("could not find any services in the TeamCity service list file"),
 		},
+		"empty provider service file": {
+			providerServiceFile: "./test-fixtures/empty-files/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/everything-ok/services_ga.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("could not find any services in the provider service list file"),
+		},
 	}
 
 	for tn, tc := range testCases {
