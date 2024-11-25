@@ -1,0 +1,7 @@
+{{ if ne $.TargetVersionName "ga" -}}
+resource: 'google_compute_instance_from_machine_image'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+api_version: 'beta'
+api_resource_type_kind: 'Instance'
+{{ end }}
