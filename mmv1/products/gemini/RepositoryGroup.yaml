@@ -78,9 +78,6 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}/repositoryGroups/{{repository_group_id}}'
     - '{{repository_group_id}}'
   allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
-custom_code:
-  custom_create: templates/terraform/custom_create/repository_group.go.tmpl
-  custom_update: templates/terraform/custom_update/repository_group.go.tmpl
 parameters:
   - name: location
     type: String
