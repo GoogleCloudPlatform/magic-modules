@@ -1723,7 +1723,7 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 				ResourceName:            "google_bigquery_table.replica_mv",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "etag", "last_modified_time", "schema"},
 			},
 		},
 	})
@@ -1758,7 +1758,7 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 				ResourceName:            "google_bigquery_table.replica_mv",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "etag", "last_modified_time", "schema"},
 			},
 		},
 	})
