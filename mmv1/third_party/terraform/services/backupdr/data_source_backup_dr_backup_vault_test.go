@@ -13,7 +13,7 @@ func TestAccDataSourceGoogleBackupDRBackupVault_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": random_suffix,
 	}
-	id := "bv-" + random_suffix
+	id := "tf-test-bv-" + random_suffix
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -33,7 +33,7 @@ func testAccDataSourceGoogleBackupDRBackupVault_basic(context map[string]interfa
 	return acctest.Nprintf(`
 resource "google_backup_dr_backup_vault" "test-bv" {
   location = "us-central1"
-  backup_vault_id = "bv-%{random_suffix}"
+  backup_vault_id = "tf-test-bv-%{random_suffix}"
   description = "This is a a backup vault built by Terraform."
   backup_minimum_enforced_retention_duration = "100000s"
   force_update = "true"

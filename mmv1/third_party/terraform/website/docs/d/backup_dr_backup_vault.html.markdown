@@ -26,6 +26,9 @@ The following arguments are supported:
 
 - - -
 
+* `project` - (Optional) The project in which the resource belongs. If it
+    is not provided, the provider project is used.
+
 ## Attributes Reference
 
 See [google_backup_dr_backup_vault](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/backup_dr_backup_vault) resource for details of the available attributes.
