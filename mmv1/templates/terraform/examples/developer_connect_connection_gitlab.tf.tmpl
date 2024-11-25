@@ -4,7 +4,13 @@ resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
 
   gitlab_config {
     webhook_secret_secret_version = "{{index $.Vars "webhook_version"}}"
-    read_authorizer_credential = "{{index $.Vars "reader_cred"}}"
-    authorizer_credential = "{{index $.Vars "authorizer_cred"}}"
+    
+    read_authorizer_credential {
+      user_token_secret_version = "{{index $.Vars "read_cred"}}"
+    }
+    
+    authorizer_credential {
+      user_token_secret_version = "{{index $.Vars "auth_cred"}}"
+    }
   }
 }
