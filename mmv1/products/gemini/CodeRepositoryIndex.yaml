@@ -31,11 +31,11 @@ examples:
     test_vars_overrides:
       cri_id: '"cri-example"'
     exclude_test: true
-autogen_async: true
 timeouts:
   insert_minutes: 90
   update_minutes: 90
   delete_minutes: 90
+autogen_async: true
 async:
   operation:
     timeouts:
