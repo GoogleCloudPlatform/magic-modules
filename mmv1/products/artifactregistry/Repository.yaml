@@ -184,6 +184,30 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_common_repository_with_artifact_registry_uri'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-common-remote'
+      desc: 'example remote common repository with docker upstream'
+      upstream_repository_id: 'example-upstream-repo'
+      upstream_repository_desc: 'example upstream repository'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_common_repository_with_custom_upstream'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-docker-custom-remote'
+      desc: 'example remote custom docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
 parameters:
 properties:
   - name: 'name'
@@ -482,7 +506,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.public_repository
@@ -521,7 +545,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.public_repository
@@ -560,7 +584,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.public_repository
@@ -599,7 +623,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.public_repository
@@ -665,7 +689,10 @@ properties:
           - name: 'uri'
             type: String
             description: |-
-              Specific uri to the Artifact Registory repository, e.g. `projects/UPSTREAM_PROJECT_ID/locations/REGION/repositories/UPSTREAM_REPOSITORY`
+              One of:
+              a. Artifact Registry Repository resource, e.g. `projects/UPSTREAM_PROJECT_ID/locations/REGION/repositories/UPSTREAM_REPOSITORY`
+              b. URI to the registry, e.g. `"https://registry-1.docker.io"`
+              c. URI to Artifact Registry Repository, e.g. `"https://REGION-docker.pkg.dev/UPSTREAM_PROJECT_ID/UPSTREAM_REPOSITORY"`
             immutable: true
             required: true
       - name: 'upstreamCredentials'
