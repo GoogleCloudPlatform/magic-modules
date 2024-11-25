@@ -515,24 +515,24 @@ func TestNotificationState(t *testing.T) {
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)}, // Earlier request
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
-					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)}, // Earlier request
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
 					User:        &github.User{Login: github.String(firstCoreReviewer)},
 					State:       github.String("CHANGES_REQUESTED"),
-					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)}, // Early changes requested
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)}, // Early changes requested
 				},
 			},
 			expectState: waitingForContributor,
-			expectSince: time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC), // Should use ready_for_review time
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC), // Should use ready_for_review time
 		},
 
 		"changes_requested before ready_for_review": {
@@ -543,19 +543,19 @@ func TestNotificationState(t *testing.T) {
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
 					Event:             github.String("review_requested"),
-					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
 					Event:     github.String("ready_for_review"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)}, // Earlier ready
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)}, // Earlier ready
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
 					User:        &github.User{Login: github.String(firstCoreReviewer)},
 					State:       github.String("CHANGES_REQUESTED"),
-					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
 			expectState: waitingForContributor,
@@ -570,7 +570,7 @@ func TestNotificationState(t *testing.T) {
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
 					Event:     github.String("ready_for_review"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.IssueEvent{
 					Event:             github.String("review_requested"),
@@ -582,7 +582,7 @@ func TestNotificationState(t *testing.T) {
 				&github.PullRequestReview{
 					User:        &github.User{Login: github.String(firstCoreReviewer)},
 					State:       github.String("COMMENTED"),
-					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
 			expectState: waitingForContributor,
@@ -606,7 +606,7 @@ func TestNotificationState(t *testing.T) {
 				},
 				&github.IssueEvent{
 					Event:     github.String("ready_for_review"),
-					CreatedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)}, // Later ready_for_review
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC)}, // Later ready_for_review
 				},
 			},
 			reviews: []*github.PullRequestReview{
@@ -617,7 +617,7 @@ func TestNotificationState(t *testing.T) {
 				},
 			},
 			expectState: waitingForContributor,
-			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC), // Should use latest ready_for_review time
+			expectSince: time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC), // Should use latest ready_for_review time
 		},
 	}
 
