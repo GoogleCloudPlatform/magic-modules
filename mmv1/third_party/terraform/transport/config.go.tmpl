@@ -438,8 +438,16 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 
+	// 'X-Goog-User-Project' gets set by a transport layer within transport.NewHTTPClient
+	// setting explicitly here to override the setting of it by underlying utility function.
+	//  b/360405077#comment8
+	if data.UserProjectOverride.ValueBool() && !data.BillingProject.IsNull() {
+		quotaProject := data.BillingProject.ValueString()
+		clientOptions = append(clientOptions, option.WithQuotaProject(quotaProject))
+	}
+
 	// 1. MTLS TRANSPORT/CLIENT - sets up proper auth headers
-	client, _, err := transport.NewHTTPClient(cleanCtx, option.WithTokenSource(tokenSource))
+	client, _, err := transport.NewHTTPClient(cleanCtx, clientOptions...)
 	if err != nil {
 		return err
 	}
@@ -468,6 +476,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 
 	// Ensure $userProject is set for all HTTP requests using the client if specified by the provider config
 	// See https://cloud.google.com/apis/docs/system-parameters
+	// We explicitly set this header for logging visibility, even though 
+	// option.WithQuotaProject will automatically set it in the client
 	if c.UserProjectOverride && c.BillingProject != "" {
 		headerTransport.Set("X-Goog-User-Project", c.BillingProject)
 	}
