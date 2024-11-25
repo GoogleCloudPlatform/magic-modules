@@ -9,7 +9,8 @@ import (
 	"regexp"
 )
 
-var serviceFile = flag.String("service_file", "services_ga", "kotlin service file to be parsed")
+var teamcityServiceFile = flag.String("teamcity_services", "", "path to a kotlin service file to be parsed")
+var providerServiceFile = flag.String("provider_services", "", "path to a .txt file listing all service packages in the provider")
 
 // listDifference checks that all the items in list B are present in list A
 func listDifference(listA, listB []string) error {
@@ -35,7 +36,7 @@ func listDifference(listA, listB []string) error {
 func main() {
 	flag.Parse()
 
-	err := compareServices(*serviceFile)
+	err := compareServices(*teamcityServiceFile, *providerServiceFile)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
@@ -45,10 +46,10 @@ func main() {
 }
 
 // compareServices contains most of the logic of the main function, but is separated to make the code more testable
-func compareServices(serviceFile string) error {
+func compareServices(teamcityServiceFile, providerServiceFile string) error {
 
 	// Get array of services from the provider service list file
-	file, err := os.Open(serviceFile + ".txt")
+	file, err := os.Open(providerServiceFile)
 	if err != nil {
 		return fmt.Errorf("error opening provider service list file: %w", err)
 	}
@@ -61,8 +62,7 @@ func compareServices(serviceFile string) error {
 	}
 
 	// Get array of services from the TeamCity service list file
-	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", serviceFile)
-	f, err := os.Open(fmt.Sprintf("../../%s", filePath)) // Need to make path relative to where the script is called
+	f, err := os.Open(teamcityServiceFile)
 	if err != nil {
 		return fmt.Errorf("error opening TeamCity service list file: %w", err)
 	}
@@ -91,7 +91,7 @@ func compareServices(serviceFile string) error {
 		teamcityServices = append(teamcityServices, string(service))
 	}
 	if len(teamcityServices) == 0 {
-		return fmt.Errorf("could not find any services in the TeamCity service list file %s", serviceFile)
+		return fmt.Errorf("could not find any services in the TeamCity service list file %s", teamcityServiceFile)
 	}
 
 	// Determine diffs
