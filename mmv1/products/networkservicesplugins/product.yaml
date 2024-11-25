@@ -13,7 +13,7 @@
 
 ---
 name: 'NetworkServicesPlugins'
-display_name: 'Network services plugins'
+display_name: 'Network Services Plugins'
 versions:
   - name: 'beta'
     base_url: 'https://networkservices.googleapis.com/v1beta1/'
