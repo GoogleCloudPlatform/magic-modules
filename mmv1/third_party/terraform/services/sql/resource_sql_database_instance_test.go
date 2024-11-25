@@ -450,16 +450,16 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.replica1",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})},
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
 			},
 			{
 				ResourceName:            "google_sql_database_instance.replica2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})},
+				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
 			},
 		},
-	})
+	}),
 }
 
 func TestAccSqlDatabaseInstance_slave(t *testing.T) {
