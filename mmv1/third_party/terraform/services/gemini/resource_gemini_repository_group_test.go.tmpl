@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccGeminiRepositoryGroup_noBootstrao(t *testing.T) {
+func TestAccGeminiRepositoryGroup_noBootstrap(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"project_id":               os.Getenv("GOOGLE_PROJECT"),
@@ -82,7 +82,7 @@ resource "google_gemini_repository_group" "example" {
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id
   repository_group_id = "tf-test-rg-repository-group-id-%{random_suffix}"
   repositories {
-    resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion1/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
+    resource = "projects/%{project_id}/locations/us-central1/connections/${google_developer_connect_connection.github_conn.connection_id}/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
   }
   labels = {"label1": "value1"}
@@ -100,7 +100,7 @@ resource "google_developer_connect_git_repository_link" "conn" {
 resource "google_developer_connect_connection" "github_conn" {
   provider = google-beta
   location = "us-central1"
-  connection_id = "tf-test-cloudaicompanion1"
+  connection_id = "tf-test-cloudaicompanion1-%{random_suffix}"
   disabled = false
 
   github_config {
@@ -123,7 +123,7 @@ resource "google_gemini_repository_group" "example" {
   code_repository_index_id = "%{code_repository_index_id}"
   repository_group_id = "tf-test-rg-repository-group-id-%{random_suffix}" 
   repositories {
-    resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion1/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
+    resource = "projects/%{project_id}/locations/us-central1/connections/${google_developer_connect_connection.github_conn.connection_id}/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
   }
   labels = {"label1": "value1"}
@@ -141,7 +141,7 @@ resource "google_developer_connect_git_repository_link" "conn" {
 resource "google_developer_connect_connection" "github_conn" {
   provider = google-beta
   location = "us-central1"
-  connection_id = "tf-test-cloudaicompanion1"
+  connection_id = "tf-test-cloudaicompanion2-%{random_suffix}"
   disabled = false
 
   github_config {
@@ -163,7 +163,7 @@ resource "google_gemini_repository_group" "example" {
   code_repository_index_id = "%{code_repository_index_id}"
   repository_group_id = "tf-test-rg-repository-group-id-%{random_suffix}"
   repositories {
-    resource = "projects/%{project_id}/locations/us-central1/connections/tf-test-cloudaicompanion2/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
+    resource = "projects/%{project_id}/locations/us-central1/connections/${google_developer_connect_connection.github_conn.connection_id}/gitRepositoryLinks/${google_developer_connect_git_repository_link.conn.git_repository_link_id}"
     branch_pattern = "main"
   }
   labels = {"label1": "value1", "label2": "value2"}
@@ -181,7 +181,7 @@ resource "google_developer_connect_git_repository_link" "conn" {
 resource "google_developer_connect_connection" "github_conn" {
   provider = google-beta
   location = "us-central1"
-  connection_id = "tf-test-cloudaicompanion2"
+  connection_id = "tf-test-cloudaicompanion3-%{random_suffix}"
   disabled = false
 
   github_config {
