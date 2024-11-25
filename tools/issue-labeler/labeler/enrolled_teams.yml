@@ -491,6 +491,9 @@ service/network-security-distributed-firewall:
   - google_compute_network_firewall_policy.*
   - google_compute_organization_security_policy.*
   - google_compute_region_network_firewall_policy.*
+service/networkconnectivity-private-range:
+  resources:
+  - google_network_connectivity_internal_range
 service/networkconnectivity-serviceautomation:
   resources:
   - google_network_connectivity_service_.*
