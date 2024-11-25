@@ -69,25 +69,25 @@ func Test_main_unhappyPaths(t *testing.T) {
 			providerServiceFile: "./test-fixtures/doesnt-exist.txt",
 			teamcityServiceFile: "./test-fixtures/everything-ok/services_ga.kt",
 			expectError:         true,
-			errorRegex:          regexp.MustCompile("error opening provider service list file"),
+			errorRegex:          regexp.MustCompile("error opening provider service list file: open ./test-fixtures/doesnt-exist.txt"),
 		},
 		"cannot find TeamCity service file": {
 			providerServiceFile: "./test-fixtures/everything-ok/ga-services.txt",
 			teamcityServiceFile: "./test-fixtures/everything-ok/doesnt-exist.kt",
 			expectError:         true,
-			errorRegex:          regexp.MustCompile("error opening TeamCity service list file"),
+			errorRegex:          regexp.MustCompile("error opening TeamCity service list file: open ./test-fixtures/everything-ok/doesnt-exist.kt"),
 		},
 		"empty TeamCity service file": {
 			providerServiceFile: "./test-fixtures/everything-ok/ga-services.txt",
 			teamcityServiceFile: "./test-fixtures/empty-files/services_ga.kt",
 			expectError:         true,
-			errorRegex:          regexp.MustCompile("could not find any services in the TeamCity service list file"),
+			errorRegex:          regexp.MustCompile("could not find any services in the TeamCity service list file ./test-fixtures/empty-files/services_ga.kt"),
 		},
 		"empty provider service file": {
 			providerServiceFile: "./test-fixtures/empty-files/ga-services.txt",
 			teamcityServiceFile: "./test-fixtures/everything-ok/services_ga.kt",
 			expectError:         true,
-			errorRegex:          regexp.MustCompile("could not find any services in the provider service list file"),
+			errorRegex:          regexp.MustCompile("could not find any services in the provider service list file ./test-fixtures/empty-files/ga-services.txt"),
 		},
 	}
 
