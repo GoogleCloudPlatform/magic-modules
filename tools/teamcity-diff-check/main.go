@@ -11,20 +11,25 @@ import (
 
 var serviceFile = flag.String("service_file", "services_ga", "kotlin service file to be parsed")
 
-func serviceDifference(gS, tS []string) []string {
-	t := make(map[string]struct{}, len(tS))
-	for _, s := range tS {
-		t[s] = struct{}{}
-	}
+// listDifference checks that all the items in list B are present in list A
+func listDifference(listA, listB []string) error {
 
+	a := make(map[string]struct{}, len(listA))
+	for _, s := range listA {
+		a[s] = struct{}{}
+	}
 	var diff []string
-	for _, s := range gS {
-		if _, found := t[s]; !found {
+	for _, s := range listB {
+		if _, found := a[s]; !found {
 			diff = append(diff, s)
 		}
 	}
 
-	return diff
+	if len(diff) > 0 {
+		return fmt.Errorf("%v", diff)
+	}
+
+	return nil
 }
 
 func main() {
@@ -81,12 +86,28 @@ func main() {
 	}
 	if len(teamcityServices) == 0 {
 		fmt.Fprintf(os.Stderr, "error: script could not find any services listed in the file %s.kt .\n", filePath)
-		os.Exit(1)
 	}
 
-	if diff := serviceDifference(googleServices, teamcityServices); len(diff) != 0 {
-		fmt.Fprintf(os.Stderr, "error: missing services detected in %s\n", filePath)
-		fmt.Fprintf(os.Stderr, "Please update file to include these new services: %s\n", diff)
+	// Determine diffs
+	errTeamCity := listDifference(teamcityServices, googleServices)
+	errProvider := listDifference(googleServices, teamcityServices)
+
+	switch {
+	case errTeamCity != nil && errProvider != nil:
+		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+TeamCity service file is missing services present in the provider: %s
+Provider codebase is missing services present in the TeamCity service file: %s`,
+			errTeamCity, errProvider)
+		os.Exit(1)
+	case errTeamCity != nil:
+		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+TeamCity service file is missing services present in the provider: %s`,
+			errTeamCity)
+		os.Exit(1)
+	case errProvider != nil:
+		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+Provider codebase is missing services present in the TeamCity service file: %s`,
+			errProvider)
 		os.Exit(1)
 	}
 
