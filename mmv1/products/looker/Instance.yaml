@@ -293,6 +293,10 @@ properties:
     type: Boolean
     description: |
       FIPS 140-2 Encryption enablement for Looker (Google Cloud Core).
+  - name: 'geminiEnabled'
+    type: Boolean
+    description: |
+      Gemini feature enablement for Looker (Google Cloud Core).
   - name: 'ingressPrivateIp'
     type: String
     description: |
