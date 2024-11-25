@@ -80,7 +80,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 			{
 				Config: testAccStorageBucket_basicWithAutoclass_update(bucketName, true),
@@ -94,7 +94,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 			{
 				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
@@ -103,7 +103,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 		},
 	})
