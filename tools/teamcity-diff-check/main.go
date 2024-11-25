@@ -35,10 +35,22 @@ func listDifference(listA, listB []string) error {
 func main() {
 	flag.Parse()
 
-	file, err := os.Open(*serviceFile + ".txt")
+	err := compareServices(*serviceFile)
 	if err != nil {
-		fmt.Println(err)
-		return
+		fmt.Fprint(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Fprint(os.Stdout, "All services present in the codebase are present in TeamCity config, and vice versa")
+}
+
+// compareServices contains most of the logic of the main function, but is separated to make the code more testable
+func compareServices(serviceFile string) error {
+
+	// Get array of services from the provider service list file
+	file, err := os.Open(serviceFile + ".txt")
+	if err != nil {
+		return fmt.Errorf("error opening provider service list file: %w", err)
 	}
 	defer file.Close()
 
@@ -48,30 +60,25 @@ func main() {
 		googleServices = append(googleServices, scanner.Text())
 	}
 
-	////////////////////////////////////////////////////////////////////////////////
-
-	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", *serviceFile)
+	// Get array of services from the TeamCity service list file
+	filePath := fmt.Sprintf("mmv1/third_party/terraform/.teamcity/components/inputs/%s.kt", serviceFile)
 	f, err := os.Open(fmt.Sprintf("../../%s", filePath)) // Need to make path relative to where the script is called
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error opening TeamCity service list file: %w", err)
 	}
 
-	// Get the file size
 	stat, err := f.Stat()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return fmt.Errorf("error stating TeamCity service list file: %w", err)
 	}
 
-	// Read the file into a byte slice
 	bs := make([]byte, stat.Size())
 	_, err = bufio.NewReader(f).Read(bs)
 	if err != nil && err != io.EOF {
-		fmt.Println(err)
-		return
+		return fmt.Errorf("error processing TeamCity service list file: %w", err)
 	}
 
-	// Regex pattern captures "services" from *serviceFile.
+	// Regex pattern captures "services" from the Kotlin service list file.
 	pattern := regexp.MustCompile(`(?m)"(?P<service>\w+)"\sto\s+mapOf`)
 
 	template := []byte("$service")
@@ -79,13 +86,12 @@ func main() {
 	dst := []byte{}
 	teamcityServices := []string{}
 
-	// For each match of the regex in the content.
 	for _, submatches := range pattern.FindAllSubmatchIndex(bs, -1) {
 		service := pattern.Expand(dst, template, bs, submatches)
 		teamcityServices = append(teamcityServices, string(service))
 	}
 	if len(teamcityServices) == 0 {
-		fmt.Fprintf(os.Stderr, "error: script could not find any services listed in the file %s.kt .\n", filePath)
+		return fmt.Errorf("could not find any services in the TeamCity service list file %s", serviceFile)
 	}
 
 	// Determine diffs
@@ -94,21 +100,19 @@ func main() {
 
 	switch {
 	case errTeamCity != nil && errProvider != nil:
-		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+		return fmt.Errorf(`mismatches detected:
 TeamCity service file is missing services present in the provider: %s
 Provider codebase is missing services present in the TeamCity service file: %s`,
 			errTeamCity, errProvider)
-		os.Exit(1)
 	case errTeamCity != nil:
-		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+		return fmt.Errorf(`mismatches detected:
 TeamCity service file is missing services present in the provider: %s`,
 			errTeamCity)
-		os.Exit(1)
 	case errProvider != nil:
-		fmt.Fprintf(os.Stderr, `error: mismatches detected:
+		return fmt.Errorf(`mismatches detected:
 Provider codebase is missing services present in the TeamCity service file: %s`,
 			errProvider)
-		os.Exit(1)
 	}
 
+	return nil
 }
