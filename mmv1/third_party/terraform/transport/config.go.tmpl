@@ -435,8 +435,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	}
 
 	c.TokenSource = tokenSource
-
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
+	clientOptions := []option.ClientOption{option.WithTokenSource(tokenSource)}
 
 	// 'X-Goog-User-Project' gets set by a transport layer within transport.NewHTTPClient
 	// setting explicitly here to override the setting of it by underlying utility function.
