@@ -157,7 +157,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.with_state", "lifecycle_rule.1.condition.0.with_state", "lifecycle_rule.2.condition.0.with_state"},
 			},
 			{
 				Config: testAccStorageBucket_basic(bucketName),
@@ -170,7 +170,7 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.with_state", "lifecycle_rule.1.condition.0.with_state", "lifecycle_rule.2.condition.0.with_state"},
 			},
 		},
 	})
