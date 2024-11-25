@@ -17,7 +17,7 @@ func TestAccIAM3PrincipalAccessBoundaryPolicy_iam3PrincipalAccessBoundaryPolicyE
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIAM3PrincipalAccessBoundaryPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
