@@ -49,6 +49,8 @@ examples:
       pub_sub_topic_name: 'transcoder-notifications'
     ignore_read_extra:
       - 'state'
+      - 'create_time'
+      - 'start_time'
       - 'end_time'
   - name: 'transcoder_job_encryptions'
     primary_resource_id: 'default'
@@ -59,6 +61,8 @@ examples:
       secret_manager_secret_id: 'transcoder-encryption-key'
     ignore_read_extra:
       - 'state'
+      - 'create_time'
+      - 'start_time'
       - 'end_time'
   - name: 'transcoder_job_overlays'
     primary_resource_id: 'default'
@@ -67,6 +71,8 @@ examples:
       bucket_name: 'transcoder-job'
     ignore_read_extra:
       - 'state'
+      - 'create_time'
+      - 'start_time'
       - 'end_time'
   - name: 'transcoder_job_manifests'
     primary_resource_id: 'default'
@@ -75,6 +81,7 @@ examples:
       bucket_name: 'transcoder-job'
     ignore_read_extra:
       - 'state'
+      - 'create_time'
       - 'start_time'
       - 'end_time'
 parameters:
