@@ -5,6 +5,102 @@ import (
 	"testing"
 )
 
+func Test_main_happyPaths(t *testing.T) {
+	testCases := map[string]struct {
+		providerServiceFile string
+		teamcityServiceFile string
+		expectError         bool
+		errorRegex          *regexp.Regexp
+		missingServiceRegex *regexp.Regexp
+	}{
+		"everything matches": {
+			providerServiceFile: "./test-fixtures/everything-ok/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/everything-ok/services_ga.kt",
+		},
+		"something missing in TeamCity config present in provider code": {
+			providerServiceFile: "./test-fixtures/mismatch-teamcity/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/mismatch-teamcity/services_ga.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("TeamCity service file is missing services present in the provider"),
+			missingServiceRegex: regexp.MustCompile("[pubsub]"),
+		},
+		"something missing in provider code present in TeamCity config": {
+			providerServiceFile: "./test-fixtures/mismatch-provider/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/mismatch-provider/services_ga.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("Provider codebase is missing services present in the TeamCity service file"),
+			missingServiceRegex: regexp.MustCompile("[compute]"),
+		},
+	}
+
+	for tn, tc := range testCases {
+		t.Run(tn, func(t *testing.T) {
+			err := compareServices(tc.teamcityServiceFile, tc.providerServiceFile)
+			if err != nil && !tc.expectError {
+				t.Fatalf("saw an unexpected error: %s", err)
+			}
+			if err == nil && tc.expectError {
+				t.Fatalf("expected an error but saw none")
+			}
+
+			if err == nil {
+				// Stop handling of non-error test cases
+				return
+			}
+
+			if !tc.errorRegex.MatchString(err.Error()) {
+				t.Fatalf("expected error to contain a match for regex `%s`, got error string: `%s`", tc.errorRegex.String(), err)
+			}
+			if !tc.missingServiceRegex.MatchString(err.Error()) {
+				t.Fatalf("expected error to contain a match for regex `%s`, got error string: `%s`", tc.errorRegex.String(), err)
+			}
+		})
+	}
+}
+
+func Test_main_unhappyPaths(t *testing.T) {
+	testCases := map[string]struct {
+		providerServiceFile string
+		teamcityServiceFile string
+		expectError         bool
+		errorRegex          *regexp.Regexp
+	}{
+		"cannot find provider service file": {
+			providerServiceFile: "./test-fixtures/doesnt-exist.txt",
+			teamcityServiceFile: "./test-fixtures/everything-ok/services_ga.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("error opening provider service list file"),
+		},
+		"cannot find TeamCity service file": {
+			providerServiceFile: "./test-fixtures/everything-ok/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/everything-ok/doesnt-exist.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("error opening TeamCity service list file"),
+		},
+		"empty TeamCity service file": {
+			providerServiceFile: "./test-fixtures/everything-ok/ga-services.txt",
+			teamcityServiceFile: "./test-fixtures/empty-files/services_ga.kt",
+			expectError:         true,
+			errorRegex:          regexp.MustCompile("could not find any services in the TeamCity service list file"),
+		},
+	}
+
+	for tn, tc := range testCases {
+		t.Run(tn, func(t *testing.T) {
+			err := compareServices(tc.teamcityServiceFile, tc.providerServiceFile)
+			if err != nil && !tc.expectError {
+				t.Fatalf("saw an unexpected error: %s", err)
+			}
+			if err == nil && tc.expectError {
+				t.Fatalf("expected an error but saw none")
+			}
+
+			if !tc.errorRegex.MatchString(err.Error()) {
+				t.Fatalf("expected error to contain a match for regex `%s`, got error string: `%s`", tc.errorRegex.String(), err)
+			}
+		})
+	}
+}
 
 func Test_listDifference(t *testing.T) {
 	testCases := map[string]struct {
