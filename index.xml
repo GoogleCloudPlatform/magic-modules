@@ -135,7 +135,7 @@ have specific mitigating circumstances that make them non-breaking.&lt;/p></desc
 &lt;ol>
 &lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/get-started/generate-providers/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
 &lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
 &lt;ul>
 &lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
