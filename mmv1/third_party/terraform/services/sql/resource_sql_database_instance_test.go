@@ -459,7 +459,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 				ImportStateVerifyIgnore: append(ignoredReplicaConfigurationFields, []string{"deletion_protection", "replica_names", "settings.0.version"})
 			},
 		},
-	}),
+	})
 }
 
 func TestAccSqlDatabaseInstance_slave(t *testing.T) {
