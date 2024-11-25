@@ -441,8 +441,8 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	// 'X-Goog-User-Project' gets set by a transport layer within transport.NewHTTPClient
 	// setting explicitly here to override the setting of it by underlying utility function.
 	//  b/360405077#comment8
-	if data.UserProjectOverride.ValueBool() && !data.BillingProject.IsNull() {
-		quotaProject := data.BillingProject.ValueString()
+	if c.UserProjectOverride && c.BillingProject != "" {
+		quotaProject :=  c.BillingProject
 		clientOptions = append(clientOptions, option.WithQuotaProject(quotaProject))
 	}
 
