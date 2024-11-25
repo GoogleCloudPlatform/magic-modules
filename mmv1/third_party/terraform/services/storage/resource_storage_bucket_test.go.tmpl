@@ -1525,7 +1525,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "soft_delete_policy.0.effective_time"},
 			},
 			{
 				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,0),
@@ -1540,7 +1540,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "soft_delete_policy.0.effective_time"},
 			},
 		},
 	})
