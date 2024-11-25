@@ -9,6 +9,7 @@ import (
 	"regexp"
 )
 
+var version = flag.String("version", "", "the provider version under test. Must be `ga` or `beta`")
 var teamcityServiceFile = flag.String("teamcity_services", "", "path to a kotlin service file to be parsed")
 var providerServiceFile = flag.String("provider_services", "", "path to a .txt file listing all service packages in the provider")
 
@@ -36,13 +37,21 @@ func listDifference(listA, listB []string) error {
 func main() {
 	flag.Parse()
 
-	err := compareServices(*teamcityServiceFile, *providerServiceFile)
-	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+	ga := *version == "ga"
+	beta := *version == "beta"
+	if !ga && !beta {
+		fmt.Fprint(os.Stderr, "the flag `version` must be set to either `ga` or `beta`, and is case sensitive\n")
 		os.Exit(1)
 	}
 
-	fmt.Fprint(os.Stdout, "All services present in the codebase are present in TeamCity config, and vice versa")
+	err := compareServices(*teamcityServiceFile, *providerServiceFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Errors when inspecting the %s version of the Google provider\n", *version)
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
+
+	fmt.Fprintf(os.Stdout, "All services present in the %s provider codebase are present in TeamCity config, and vice versa", *version)
 }
 
 // compareServices contains most of the logic of the main function, but is separated to make the code more testable

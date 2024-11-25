@@ -43,5 +43,5 @@ jobs:
     
               # Run tool to compare service packages in the providers vs those listed in TeamCity config files
               cd tools/teamcity-diff-check
-              go run main.go -provider_services=provider_services_ga.txt -teamcity_services=../../mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt
-              go run main.go -provider_services=provider_services_beta.txt -teamcity_services=../../mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt
+              go run main.go -version=ga -provider_services=provider_services_ga.txt -teamcity_services=../../mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt
+              go run main.go -version=beta -provider_services=provider_services_beta.txt -teamcity_services=../../mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt
