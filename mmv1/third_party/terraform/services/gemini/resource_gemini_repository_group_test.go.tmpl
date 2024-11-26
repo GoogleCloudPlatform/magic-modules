@@ -58,7 +58,7 @@ func TestAccGeminiRepositoryGroup_noBootstrap(t *testing.T) {
 				Config: testAccGeminiRepositoryGroup_noBootstrap(context),
 			},
 			{
-				ResourceName:            "google_gemini_repository_group.example",
+				ResourceName:            "google_gemini_repository_group.example_e",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"code_repository_index_id", "labels", "location", "repository_group_id", "terraform_labels"},
@@ -157,7 +157,7 @@ resource "google_gemini_code_repository_index" "cri" {
   code_repository_index_id = "tf-test-rg-index-example-%{random_suffix}"
 }
 
-resource "google_gemini_repository_group" "example" {
+resource "google_gemini_repository_group" "example_a" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id
@@ -169,7 +169,7 @@ resource "google_gemini_repository_group" "example" {
   labels = {"label1": "value1"}
 }
 
-resource "google_gemini_repository_group" "example" {
+resource "google_gemini_repository_group" "example_b" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id
@@ -181,7 +181,7 @@ resource "google_gemini_repository_group" "example" {
   labels = {"label1": "value1"}
 }
 
-resource "google_gemini_repository_group" "example" {
+resource "google_gemini_repository_group" "example_c" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id
@@ -193,7 +193,7 @@ resource "google_gemini_repository_group" "example" {
   labels = {"label1": "value1"}
 }
 
-resource "google_gemini_repository_group" "example" {
+resource "google_gemini_repository_group" "example_d" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id
@@ -205,7 +205,7 @@ resource "google_gemini_repository_group" "example" {
   labels = {"label1": "value1"}
 }
 
-resource "google_gemini_repository_group" "example" {
+resource "google_gemini_repository_group" "example_e" {
   provider = google-beta
   location = "us-central1"
   code_repository_index_id = google_gemini_code_repository_index.cri.code_repository_index_id

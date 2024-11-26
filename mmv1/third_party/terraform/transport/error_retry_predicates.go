@@ -115,7 +115,9 @@ func is409OperationInProgressError(err error) (bool, string) {
 	return false, ""
 }
 
-func isCodeRepositoryIndexUnreadyError(err error) (bool, string) {
+// Code Repository Index is a long running operation
+// The resource takes time to change it's state from "CREATING" to "ACTIVE"
+func IsCodeRepositoryIndexUnreadyError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
 		return false, ""

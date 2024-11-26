@@ -79,6 +79,7 @@ iam_policy:
     - '{{repository_group_id}}'
   allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
 error_retry_predicates:
+  - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
 parameters:
   - name: location
