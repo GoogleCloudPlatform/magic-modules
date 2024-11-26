@@ -89,6 +89,7 @@ properties:
     enum_values:
       - 'GENERIC'
       - 'MEDIA'
+      - 'HEALTHCARE_FHIR'
   - name: 'displayName'
     type: String
     description: |
