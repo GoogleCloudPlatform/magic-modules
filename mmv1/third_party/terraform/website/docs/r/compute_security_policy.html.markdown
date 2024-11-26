@@ -454,7 +454,7 @@ The following arguments are supported:
 
 <a name="nested_traffic_granularity_configs"></a>The `traffic_granularity_configs` block supports:
 
-* `type` - a granular traffic unit can be one of the following:
+* `type` - The type of this configuration, a granular traffic unit can be one of the following:
   * `HTTP_HEADER_HOST`
   * `HTTP_PATH`
 
