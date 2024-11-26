@@ -51,7 +51,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Fprintf(os.Stdout, "All services present in the %s provider codebase are present in TeamCity config, and vice versa", *version)
+	fmt.Fprintf(os.Stdout, "All services present in the %s provider codebase are present in TeamCity config, and vice versa\n", *version)
 }
 
 // compareServices contains most of the logic of the main function, but is separated to make the code more testable
