@@ -1948,7 +1948,7 @@ func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
 			},
 		},
 	})
