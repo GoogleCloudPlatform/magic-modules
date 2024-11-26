@@ -28,7 +28,4 @@ resource "google_apigee_organization" "apigee_org" {
 resource "google_apigee_organization_keyvaluemaps" "{{$.PrimaryResourceId}}" {
   org_id    = google_apigee_organization.apigee_org.id
   name      = "tf-test-org-kvms%{random_suffix}"
-  depends_on = [
-    google_apigee_organization.apigee_org
-  ]
 }
