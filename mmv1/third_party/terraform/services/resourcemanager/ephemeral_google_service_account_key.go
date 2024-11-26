@@ -31,7 +31,6 @@ func (p *googleEphemeralServiceAccountKey) Metadata(ctx context.Context, req eph
 type ephemeralServiceAccountKeyModel struct {
 	Name          types.String `tfsdk:"name"`
 	PublicKeyType types.String `tfsdk:"public_key_type"`
-	Project       types.String `tfsdk:"project"`
 	KeyAlgorithm  types.String `tfsdk:"key_algorithm"`
 	PublicKey     types.String `tfsdk:"public_key"`
 }
@@ -58,10 +57,6 @@ func (p *googleEphemeralServiceAccountKey) Schema(ctx context.Context, req ephem
 						"TYPE_RAW_PUBLIC_KEY",
 					),
 				},
-			},
-			"project": schema.StringAttribute{
-				Description: "The ID of the project that the service account will be created in. Defaults to the provider project configuration.",
-				Optional:    true,
 			},
 			"key_algorithm": schema.StringAttribute{
 				Description: "The algorithm used to generate the key.",
