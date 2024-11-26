@@ -128,6 +128,12 @@ properties:
       IPv4 address external endpoint.
 
       This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
+  - name: 'networkEndpointId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'fqdn'
     type: String
     description: |

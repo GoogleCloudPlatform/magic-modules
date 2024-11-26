@@ -1,0 +1,7 @@
+{{ if ne $.TargetVersionName "ga" -}}
+resource: 'google_project_service_identity'
+generation_type: 'handwritten'
+api_service_name: 'serviceusage.googleapis.com'
+api_version: 'v1'
+api_resource_type_kind: 'Service'
+{{ end }}
