@@ -67,6 +67,8 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_external_iap'
     primary_resource_id: 'default'
     vars:
@@ -76,6 +78,8 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_cache_include_http_headers'
     primary_resource_id: 'default'
     vars:
@@ -89,29 +93,39 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_cache_bypass_cache_on_request_headers'
     primary_resource_id: 'default'
     vars:
       backend_service_name: 'backend-service'
       http_health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_traffic_director_round_robin'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_network_endpoint'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -123,6 +137,8 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    ignore_read_extra:
+      - "health_checks.0"
   - name: 'backend_service_ip_address_selection_policy'
     primary_resource_id: 'default'
     vars:
