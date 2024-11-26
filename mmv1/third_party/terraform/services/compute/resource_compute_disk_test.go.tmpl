@@ -671,6 +671,7 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 				ResourceName:      "google_compute_disk.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"last_attach_timestamp", "users"},
 			},
 			// this needs to be a second step so we refresh and see the instance
 			// listed as attached to the disk; the instance is created after the
@@ -683,6 +684,7 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 				ResourceName:      "google_compute_disk.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"last_attach_timestamp", "users"},
 			},
 		},
 	})
@@ -838,6 +840,7 @@ func TestAccComputeDisk_multiWriter(t *testing.T) {
 				ResourceName:      "google_compute_disk.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"last_attach_timestamp", "users"},
 			},
 		},
 	})
