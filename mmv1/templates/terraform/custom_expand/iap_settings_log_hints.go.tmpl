@@ -1,0 +1,8 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil {
+    return nil, nil
+  }else {
+    log.Printf("The login_hint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.")
+    return v, nil
+  }
+}

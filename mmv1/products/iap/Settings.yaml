@@ -111,6 +111,7 @@ properties:
         properties:
           - name: 'loginHint'
             type: String
+            custom_expand: 'templates/terraform/custom_expand/iap_settings_log_hints.go.tmpl'
             description: |
               Domain hint to send as hd=? parameter in OAuth request flow.
               Enables redirect to primary IDP by skipping Google's login screen.
