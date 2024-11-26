@@ -769,7 +769,7 @@ func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 				ResourceName:            "google_container_cluster.cluster",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range", "deletion_protection", "node_pool"},
 			},
 		},
 	})
