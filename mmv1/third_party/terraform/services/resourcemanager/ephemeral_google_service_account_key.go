@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
@@ -21,7 +21,7 @@ func GoogleEphemeralServiceAccountKey() ephemeral.EphemeralResource {
 }
 
 type googleEphemeralServiceAccountKey struct {
-	providerConfig *fwtransport.FrameworkProviderConfig
+	providerConfig *transport_tpg.Config
 }
 
 func (p *googleEphemeralServiceAccountKey) Metadata(ctx context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
@@ -80,11 +80,11 @@ func (p *googleEphemeralServiceAccountKey) Configure(ctx context.Context, req ep
 		return
 	}
 
-	pd, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
+	pd, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
