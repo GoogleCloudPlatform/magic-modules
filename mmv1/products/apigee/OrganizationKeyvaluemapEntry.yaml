@@ -50,13 +50,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-  - name: 'apigee_organization_keyvaluemaps_entries_test'
-    primary_resource_id: 'apigee_organization_keyvaluemaps_entries'
-    min_version: 'beta'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
-    exclude_docs: true
 parameters:
   - name: 'org_keyvaluemap_id'
     type: String
