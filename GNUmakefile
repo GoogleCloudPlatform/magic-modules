@@ -75,7 +75,7 @@ tpgtools:
 clean-provider:
 	cd $(OUTPUT_PATH);\
 		go mod download;\
-		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "CODEOWNERS" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
 
 clean-tgc:
 	cd $(OUTPUT_PATH);\
@@ -127,9 +127,3 @@ doctor:
 	./scripts/doctor
 
 .PHONY: mmv1 tpgtools test
-
-refresh-go:
-	cd mmv1;\
-		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile) --go-yaml; \
-		go run . --yaml --template; \
-		go run . --yaml --handwritten

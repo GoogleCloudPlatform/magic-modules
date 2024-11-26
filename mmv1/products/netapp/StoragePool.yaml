@@ -53,7 +53,7 @@ delete_url: 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/storagePools/{{name}}'
 timeouts:
-  insert_minutes: 20
+  insert_minutes: 45
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true

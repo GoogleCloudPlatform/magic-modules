@@ -20,6 +20,80 @@ references:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
   api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
 docs:
+  note: |
+    For [Cross Region Replication](https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication), please follow the instructions below for performing certain update and failover (switchover and detach) operations
+
+    **Cross Region Replication**
+
+    **Settings updated on primary and propagated to secondaries**
+
+    The settings listed [here](https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication#set_on_primary)
+    are only allowed to be updated on the primary cluster and the changes are automatically propagated to the secondary clusters.
+    To keep the Terraform configuration and state in sync for such settings, please follow the below steps to update them:
+      1. Update the setting on the primary cluster:
+          * Update the setting to its new desired value in the Terraform configuration file.
+          * Execute `terraform apply` to apply the change and wait for it to complete.
+      1. Detect configuration drift on the secondary cluster(s):
+          * Execute `terraform plan`. This should reveal a diff for the modified setting. The proposed value in the Terraform plan should align with the updated value applied to the primary cluster in the preceding step.
+      1. Reconcile secondary cluster(s) configuration:
+          * Manually edit the Terraform configuration file(s) for the secondary cluster(s) to update the setting with the latest value from the state.
+          * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+
+    **Switchover**
+
+    To perform a [switchover](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#perform_a_switchover), please follow the below steps:
+      1. Ensure that the Terraform configuration file for the secondary cluster that needs to become the new primary has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the secondary that needs to become the new primary:
+          * Change `cross_cluster_replication_config.cluster_role` from `SECONDARY` to `PRIMARY`.
+          * Remove `cross_cluster_replication_config.primary_cluster` field.
+          * Set `cross_cluster_replication_config.secondary_clusters` list with the new secondaries. The new secondaries are the current primary and other secondary clusters(if any).
+
+          -> You can refer to the current value of `cross_cluster_replication_config.membership` field to lookup the current primary and secondary clusters.
+      1. Execute switchover:
+          * Execute`terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the previous primary and other secondary clusters:
+          * Execute `terraform plan`. If any diffs are reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file(s) for those clusters with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+    **Detach a secondary cluster**
+
+    To [detach](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#detach_secondary_clusters_option_1) a secondary cluster, please follow the below steps:
+      1. Ensure that the Terraform configuration file for the secondary cluster that needs to be detached has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the secondary that needs to be detached:
+          * Change `cross_cluster_replication_config.cluster_role` from `SECONDARY` to `NONE`.
+          * Remove `cross_cluster_replication_config.primary_cluster`.
+      1. Execute detach:
+          * Execute`terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the primary cluster:
+          * Execute `terraform plan`. If any diff is reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+    **Detach secondary cluster(s) via primary cluster**
+
+    To [detach](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#detach_secondary_clusters_option_2) secondary clusters via primary, please follow the below steps:
+      1. Ensure that the Terraform configuration file for the primary cluster from which the secondary(ies) has(ve) to be detached has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the primary cluster:
+          * If you are detaching all secondaries from the primary:
+              * Change `cross_cluster_replication_config.cluster_role` from `PRIMARY` to `NONE`.
+              * Remove `cross_cluster_replication_config.secondary_clusters` list field.
+          * If you are detaching a subset of secondaries:
+              * Update `cross_cluster_replication_config.secondary_clusters` list field to remove the secondary clusters that need to be detached.
+      1. Execute detach:
+          * Execute `terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the secondary cluster(s) that was detached:
+          * Execute `terraform plan`. If any diffs are reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file(s) for those clusters with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}'
@@ -58,6 +132,48 @@ examples:
       policy_name: 'mypolicy'
       subnet_name: 'mysubnet'
       network_name: 'mynetwork'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_secondary'
+    primary_resource_id: 'secondary_cluster'
+    vars:
+      primary_cluster_name: 'my-primary-cluster'
+      primary_cluster_deletion_protection_enabled: 'true'
+      primary_cluster_policy_name: 'mypolicy-primary-cluster'
+      primary_cluster_subnet_name: 'mysubnet-primary-cluster'
+      secondary_cluster_name: 'my-secondary-cluster'
+      secondary_cluster_deletion_protection_enabled: 'true'
+      secondary_cluster_policy_name: 'mypolicy-secondary-cluster'
+      secondary_cluster_subnet_name: 'mysubnet-secondary-cluster'
+      network_name: 'mynetwork'
+    test_vars_overrides:
+      'primary_cluster_deletion_protection_enabled': 'false'
+      'secondary_cluster_deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'primary_cluster_deletion_protection_enabled': 'false'
+      'secondary_cluster_deletion_protection_enabled': 'false'
+  - name: "redis_cluster_rdb"
+    primary_resource_id: "cluster-rdb"
+    vars:
+      cluster_name: "rdb-cluster"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_aof"
+    primary_resource_id: "cluster-aof"
+    vars:
+      cluster_name: "aof-cluster"
+      policy_name: "mypolicy"
+      subnet_name: "mysubnet"
+      network_name: "mynetwork"
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -286,6 +402,74 @@ properties:
       Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
       Please check Memorystore documentation for the list of supported parameters:
       https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
+  - name: 'persistenceConfig'
+    type: NestedObject
+    description: Persistence config (RDB, AOF) for the cluster.
+    default_from_api: true
+    properties:
+      - name: 'mode'
+        type: Enum
+        description: |
+          Optional. Controls whether Persistence features are enabled. If not provided, the existing value will be used.
+
+          - DISABLED: 	Persistence (both backup and restore) is disabled for the cluster.
+          - RDB: RDB based Persistence is enabled.
+          - AOF: AOF based Persistence is enabled.
+        enum_values:
+          - 'PERSISTENCE_MODE_UNSPECIFIED'
+          - 'DISABLED'
+          - 'RDB'
+          - 'AOF'
+        default_from_api: true
+      - name: 'rdbConfig'
+        type: NestedObject
+        description: |
+          RDB configuration. This field will be ignored if mode is not RDB.
+        default_from_api: true
+        properties:
+          - name: 'rdbSnapshotPeriod'
+            type: Enum
+            default_from_api: true
+            description: |
+              Optional. Available snapshot periods for scheduling.
+
+              - ONE_HOUR:	Snapshot every 1 hour.
+              - SIX_HOURS:	Snapshot every 6 hours.
+              - TWELVE_HOURS:	Snapshot every 12 hours.
+              - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
+            enum_values:
+              - 'SNAPSHOT_PERIOD_UNSPECIFIED'
+              - 'ONE_HOUR'
+              - 'SIX_HOURS'
+              - 'TWELVE_HOURS'
+              - 'TWENTY_FOUR_HOURS'
+          - name: 'rdbSnapshotStartTime'
+            type: Time
+            description: |
+              The time that the first snapshot was/will be attempted, and to which
+              future snapshots will be aligned.
+              If not provided, the current time will be used.
+            default_from_api: true
+      - name: 'aofConfig'
+        type: NestedObject
+        description: |
+          AOF configuration. This field will be ignored if mode is not AOF.
+        default_from_api: true
+        properties:
+          - name: 'appendFsync'
+            type: Enum
+            default_from_api: true
+            description: |
+              Optional. Available fsync modes.
+
+              - NO - Do not explicilty call fsync(). Rely on OS defaults.
+              - EVERYSEC - Call fsync() once per second in a background thread. A balance between performance and durability.
+              - ALWAYS - Call fsync() for earch write command.
+            enum_values:
+              - 'APPEND_FSYNC_UNSPECIFIED'
+              - 'NO'
+              - 'EVERYSEC'
+              - 'ALWAYS'
   - name: 'maintenancePolicy'
     type: NestedObject
     description: Maintenance policy for a cluster
@@ -404,4 +588,102 @@ properties:
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
+        output: true
+  - name: 'crossClusterReplicationConfig'
+    type: NestedObject
+    description: Cross cluster replication config
+    default_from_api: true
+    properties:
+      - name: 'clusterRole'
+        type: Enum
+        description: |
+          The role of the cluster in cross cluster replication. Supported values are:
+
+          1. `CLUSTER_ROLE_UNSPECIFIED`: This is an independent cluster that has never participated in cross cluster replication. It allows both reads and writes.
+
+          1. `NONE`: This is an independent cluster that previously participated in cross cluster replication(either as a `PRIMARY` or `SECONDARY` cluster). It allows both reads and writes.
+
+          1. `PRIMARY`: This cluster serves as the replication source for secondary clusters that are replicating from it. Any data written to it is automatically replicated to its secondary clusters. It allows both reads and writes.
+
+          1. `SECONDARY`: This cluster replicates data from the primary cluster. It allows only reads.
+
+        enum_values:
+          - 'CLUSTER_ROLE_UNSPECIFIED'
+          - 'NONE'
+          - 'PRIMARY'
+          - 'SECONDARY'
+      - name: 'primaryCluster'
+        type: NestedObject
+        description: |
+          Details of the primary cluster that is used as the replication source for this secondary cluster. This is allowed to be set only for clusters whose cluster role is of type `SECONDARY`.
+        properties:
+          - name: 'cluster'
+            type: String
+            description: |
+              The full resource path of the primary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+          - name: 'uid'
+            type: String
+            description: |
+              The unique id of the primary cluster.
+            output: true
+      - name: 'secondaryClusters'
+        type: Array
+        description: |
+          List of secondary clusters that are replicating from this primary cluster. This is allowed to be set only for clusters whose cluster role is of type `PRIMARY`.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'cluster'
+              type: String
+              description: |
+                The full resource path of the secondary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+            - name: 'uid'
+              type: String
+              description: |
+                The unique id of the secondary cluster.
+              output: true
+      - name: 'membership'
+        type: NestedObject
+        description: |
+          An output only view of all the member clusters participating in cross cluster replication. This field is populated for all the member clusters irrespective of their cluster role.
+        output: true
+        properties:
+          - name: 'primaryCluster'
+            type: NestedObject
+            description: |
+              Details of the primary cluster that is used as the replication source for all the secondary clusters.
+            output: true
+            properties:
+              - name: 'cluster'
+                type: String
+                description: |
+                  The full resource path of the primary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+                output: true
+              - name: 'uid'
+                type: String
+                description: |
+                  The unique id of the primary cluster.
+                output: true
+          - name: 'secondaryClusters'
+            type: Array
+            description: |
+              List of secondary clusters that are replicating from the primary cluster.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'cluster'
+                  type: String
+                  description: |
+                    The full resource path of the secondary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+                  output: true
+                - name: 'uid'
+                  type: String
+                  description: |
+                    The unique id of the secondary cluster.
+                  output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The last time cross cluster replication config was updated.
         output: true
