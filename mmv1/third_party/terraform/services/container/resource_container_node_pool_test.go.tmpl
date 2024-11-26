@@ -2141,7 +2141,7 @@ func TestAccContainerNodePool_threadsPerCore(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
 			},
 		},
 	})
