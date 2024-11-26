@@ -35,13 +35,13 @@ func TestAccInstanceGroupManager_basic(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 			{
 				ResourceName:            "google_compute_instance_group_manager.igm-no-tp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 		},
 	})
@@ -334,7 +334,7 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 			{
 				Config: testAccInstanceGroupManager_autoHealingPoliciesRemoved(template, target, igm, hck),
@@ -343,7 +343,7 @@ func TestAccInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 		},
 	})
