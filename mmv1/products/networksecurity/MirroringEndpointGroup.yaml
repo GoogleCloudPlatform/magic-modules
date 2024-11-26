@@ -16,6 +16,7 @@ name: 'MirroringEndpointGroup'
 description: A mirroring endpoint group is a global resource in the consumer account representing the producer’s deployment group.
 min_version: 'beta'
 docs:
+  url: 'https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview'
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups'
 self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroups/{{mirroring_endpoint_group_id}}'

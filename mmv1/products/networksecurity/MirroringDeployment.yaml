@@ -16,6 +16,7 @@ name: 'MirroringDeployment'
 description: MirroringDeployment represents the collectors within a Zone and is associated with a deployment group.
 min_version: 'beta'
 docs:
+  url: 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployments-overview'
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeployments/{{mirroring_deployment_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeployments'
 self_link: 'projects/{{project}}/locations/{{location}}/mirroringDeployments/{{mirroring_deployment_id}}'

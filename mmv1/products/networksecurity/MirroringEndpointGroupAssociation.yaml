@@ -16,6 +16,7 @@ name: 'MirroringEndpointGroupAssociation'
 description: Creates an association between a VPC and a mirroring endpoint group in order to mirror traffic in that VPC.
 min_version: 'beta'
 docs:
+  url: 'https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview#mirroring-endpoint-group-association'
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations'
 self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'

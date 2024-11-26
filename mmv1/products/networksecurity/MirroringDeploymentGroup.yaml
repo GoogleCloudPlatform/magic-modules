@@ -16,6 +16,7 @@ name: 'MirroringDeploymentGroup'
 description: A Deployment Group represents the collector deployments across different zones within an organization.
 min_version: 'beta'
 docs:
+  url: 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployment-groups-overview'
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups'
 self_link: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
