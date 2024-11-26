@@ -11,8 +11,9 @@ import (
 )
 
 func TestNotificationState(t *testing.T) {
-	firstCoreReviewer := membership.AvailableReviewers()[0]
-	secondCoreReviewer := membership.AvailableReviewers()[1]
+	availableReviewers := membership.AvailableReviewers()
+	firstCoreReviewer := availableReviewers[0]
+	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
 		pullRequest *github.PullRequest
 		issueEvents []*github.IssueEvent
@@ -786,8 +787,9 @@ func TestShouldNotify(t *testing.T) {
 }
 
 func TestFormatReminderComment(t *testing.T) {
-	firstCoreReviewer := membership.AvailableReviewers()[0]
-	secondCoreReviewer := membership.AvailableReviewers()[1]
+	availableReviewers := membership.AvailableReviewers()
+	firstCoreReviewer := availableReviewers[0]
+	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
 		pullRequest        *github.PullRequest
 		state              pullRequestReviewState
