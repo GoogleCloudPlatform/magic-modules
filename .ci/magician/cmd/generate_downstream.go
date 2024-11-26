@@ -335,12 +335,15 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	commitSha = strings.TrimSpace(commitSha)
 	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
-	variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
-	fmt.Println("variablePath: ", variablePath)
-
-	err = rnr.WriteFile(variablePath, commitSha)
-	if err != nil {
-		fmt.Println("Error:", err)
+	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
+	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
+	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") && !strings.HasSuffix(scratchRepo.Branch, "-old") {
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+		fmt.Println("variablePath: ", variablePath)
+		err = rnr.WriteFile(variablePath, commitSha)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
 	}
 
 	return commitSha, err
