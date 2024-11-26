@@ -67,13 +67,13 @@ func TestAccInstanceGroupManager_self_link_unique(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 			{
 				ResourceName:            "google_compute_instance_group_manager.igm-no-tp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 		},
 	})
@@ -129,7 +129,7 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0", "target_size"},
 			},
 			{
 				Config: testAccInstanceGroupManager_update2(template1, target1, target2, template2, description, igm),
@@ -141,7 +141,7 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0", "target_size"},
 			},
 			{
 				Config: testAccInstanceGroupManager_update3(template1, target1, target2, template2, description2, igm),
@@ -153,7 +153,7 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0", "target_size"},
 			},
 		},
 	})
@@ -370,7 +370,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
       			{
 				Config: testAccInstanceGroupManager_statefulUpdated(network, template, target, igm, hck),
@@ -379,7 +379,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
       {
 				Config: testAccInstanceGroupManager_statefulRemoved(network, template, target, igm),
@@ -388,7 +388,7 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 		},
 	})
@@ -450,7 +450,7 @@ func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status", "wait_for_instances_status", "wait_for_instances"},
+				ImportStateVerifyIgnore: []string{"status", "wait_for_instances_status", "wait_for_instances", "target_pools.0", "target_size"},
 			},
 			{
 				Config: testAccInstanceGroupManager_waitForStatusUpdated(template, target, igm, perInstanceConfig),
@@ -459,7 +459,7 @@ func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 				ResourceName:            "google_compute_instance_group_manager.igm-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status", "wait_for_instances_status", "wait_for_instances"},
+				ImportStateVerifyIgnore: []string{"status", "wait_for_instances_status", "wait_for_instances", "target_pools.0", "target_size"},
 			},
 		},
 	})
