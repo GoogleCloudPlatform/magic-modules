@@ -46,25 +46,28 @@ func testAccFirestoreField_runUpdateTest(updateConfig string, useOwnProject bool
 				Config: testAccFirestoreField_firestoreFieldUpdateInitialExample(context, useOwnProject),
 			},
 			{
-				ResourceName:      fmt.Sprintf("google_firestore_field.%s", resourceName),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fmt.Sprintf("google_firestore_field.%s", resourceName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"index_config.0.indexes"}, // prefix for multiple fields
 			},
 			{
 				Config: updateConfig,
 			},
 			{
-				ResourceName:      fmt.Sprintf("google_firestore_field.%s", resourceName),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fmt.Sprintf("google_firestore_field.%s", resourceName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"index_config.0.indexes"}, // prefix for multiple fields
 			},
 			{
 				Config: testAccFirestoreField_firestoreFieldUpdateInitialExample(context, useOwnProject),
 			},
 			{
-				ResourceName:      fmt.Sprintf("google_firestore_field.%s", resourceName),
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fmt.Sprintf("google_firestore_field.%s", resourceName),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"index_config.0.indexes"}, // prefix for multiple fields
 			},
 		},
 	})
