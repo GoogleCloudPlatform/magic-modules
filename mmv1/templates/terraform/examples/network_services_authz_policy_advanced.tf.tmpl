@@ -120,8 +120,4 @@ resource "google_network_security_authz_policy" "{{$.PrimaryResourceId}}" {
       resources = [ google_network_services_authz_extension.default.id ]
     }
   }
-
-  labels = {
-    foo = "bar"
-  }
 }
