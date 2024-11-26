@@ -99,7 +99,7 @@ If true, the resource and all its fields are considered immutable - that is,
 only creatable, not updatable. Individual fields can override this if they
 have a custom update method in the API.
 
-See [Best practices: ForceNew](https://googlecloudplatform.github.io/magic-modules/best-practices/#forcenew) for more information.
+See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
 Default: `false`
 

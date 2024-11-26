@@ -39,7 +39,7 @@ resource "google_compute_forwarding_rule" "default" {
 
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.default.id
-  all_ports             = true
+  ports                 = ["80", "88", "443"]
   network               = google_compute_network.default.name
   subnetwork            = google_compute_subnetwork.default.name
 }
@@ -61,7 +61,9 @@ resource "google_compute_region_network_endpoint_group" "{{$.PrimaryResourceId}}
 
   network_endpoint_type = "PRIVATE_SERVICE_CONNECT"
   psc_target_service    = google_compute_service_attachment.default.self_link
-
+  psc_data {
+    producer_port = "88"
+  }
   network               = google_compute_network.default.self_link
   subnetwork            = google_compute_subnetwork.default.self_link
 }
