@@ -59,7 +59,7 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(t *testing.
 		CheckDestroy:             testAccCheckNetworkServicesPluginsWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginBasicCreate(context),
+				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionCreate(context),
 			},
 			{
 				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
@@ -191,6 +191,48 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
+func testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionCreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+  provider    = google-beta
+  name        = "tf-test-my-wasm-plugin%{random_suffix}"
+  description = "my wasm plugin"
+  location    = "global"
+
+  main_version_id = "v2"
+
+  labels = {
+    test_label =  "test_value"
+  }
+  log_config {
+    enable =  true
+    sample_rate = 1
+    min_log_level =  "WARN"
+  }
+
+	versions {
+    version_name = "v1"
+    description = "v1 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
+  versions {
+    version_name = "v2"
+    description = "v2 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
+  
+}
+`, context)
+}
+
 func testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
@@ -219,7 +261,15 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
       test_label =  "test_value"
     }
   }
-  
+  versions {
+    version_name = "v3"
+    description = "v3 version of my wasm plugin"
+    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+
+    labels = {
+      test_label =  "test_value"
+    }
+  }
 }
 `, context)
 }
