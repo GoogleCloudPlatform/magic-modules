@@ -24,7 +24,7 @@ Ephemeral resources are a source of ephemeral data, and they can be referenced i
 
 Until then, ephemeral resources can only be used to pass values into the provider block, which is already capable of receiving ephemeral values. This is described in a section below.
 
-### Testing out how ephemeral resources look like during `terraform plan` and `terraform apply`
+### See how ephemeral resources behave during `terraform plan` and `terraform apply`
 
 The [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_key) for the `google_service_account_key` ephemeral resource has a simple example that you can use to view how ephemeral resources behave during plan and apply operations:
 
@@ -74,7 +74,7 @@ Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 If you run the example using the local backend you can also inspect the state, where you will see that the ephemeral resource is not represented.
 
 
-### Testing out using ephemeral resources to configure the Google Cloud provider
+### Test using ephemeral resources to configure the Google Cloud provider
 
 The [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_access_token) for the `google_service_account_access_token` ephemeral resource demonstrates how it can be used to configure the provider. Check that ephemeral resource's documentation for details about the IAM permissions required for this example to work:
 
