@@ -794,7 +794,7 @@ properties:
   - name: 'userDefinedAccessUrls'
     type: NestedObject
     description: |
-      Custom URLs for accessing content published by this CA, such as the CA certificate and CRLs, 
+      Custom URLs for accessing content published by this CA, such as the CA certificate and CRLs,
       that can be specified by users.
     properties:
       - name: 'aiaIssuingCertificateUrls'
