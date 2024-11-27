@@ -111,7 +111,7 @@ examples:
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
     exclude_test: true
-      # Multiple IAM bindings on the same key cause non-determinism
+    # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
   - name: 'privateca_certificate_authority_custom_ski'
     primary_resource_id: 'default'
@@ -657,7 +657,7 @@ properties:
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
- # 10 years
+    # 10 years
     default_value: "315360000s"
   - name: 'keySpec'
     type: NestedObject
@@ -813,7 +813,7 @@ properties:
       - name: 'aiaIssuingCertificateUrls'
         type: Array
         description: |
-          A list of URLs where this CertificateAuthority's CA certificate is published that are specified by users. 
+          A list of URLs where this CertificateAuthority's CA certificate is published that are specified by users.
         item_type:
           type: String
       - name: 'crlAccessUrls'
