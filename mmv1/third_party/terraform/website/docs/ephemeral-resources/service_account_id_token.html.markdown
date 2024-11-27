@@ -49,29 +49,6 @@ For more information see
 
   ```
 
-## Example Usage - Invoking Cloud Run Endpoint
-
-  The following configuration will invoke [Cloud Run](https://cloud.google.com/run/docs/authenticating/service-to-service) endpoint where the service account for Terraform has been granted `roles/run.invoker` role previously.
-
-```hcl
-
-ephemeral "google_service_account_id_token" "oidc" {
-  target_audience = "https://your.cloud.run.app/"
-}
-
-data "http" "cloudrun" {
-  url = "https://your.cloud.run.app/"
-  request_headers  = {
-    Authorization = "Bearer ${ephemeral.google_service_account_id_token.oidc.id_token}"
-  }
-}
-
-
-output "cloud_run_response" {
-  value = data.http.cloudrun.body
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
