@@ -2,7 +2,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   if v == nil {
     return nil, nil
   }else {
-    log.Printf("The login_hint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.")
+    log.Printf("Enabling the gcipSettings setting significantly changes the way IAP authenticates users. Identity Platform does not support IAM, so IAP will not enforce any IAM policies for requests to your application.")
     return v, nil
   }
 }
