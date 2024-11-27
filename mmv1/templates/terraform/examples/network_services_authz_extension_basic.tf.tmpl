@@ -1,5 +1,5 @@
 resource "google_compute_region_backend_service" "default" {
-  name                  = "authz-service"
+  name                  = "{{index $.Vars "backend_name"}}"
   project               = "{{index $.TestEnvVars "project"}}"
   region                = "us-west1"
 

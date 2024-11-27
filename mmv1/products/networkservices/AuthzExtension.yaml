@@ -55,6 +55,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-authz-ext'
+      backend_name: 'authz-service'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:

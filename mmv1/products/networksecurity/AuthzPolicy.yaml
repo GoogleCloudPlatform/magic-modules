@@ -55,6 +55,17 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-authz-policy'
+      network_name: 'lb-network'
+      subnet_name: 'backend-subnet'
+      proxy_subnet_name: 'proxy-only-subnet'
+      address_name: 'l7-ilb-ip-address'
+      health_check_name: 'l7-ilb-basic-check'
+      backend_url_name: 'l7-ilb-backend-service'
+      url_name: 'l7-ilb-map'
+      target_proxy_name: 'l7-ilb-proxy'
+      forwarding_rule_name: 'l7-ilb-forwarding-rule'
+      backend_authz_name: 'authz-service'
+      authz_extension_name: 'my-authz-ext'
     test_env_vars:
       project: 'PROJECT_NAME'
 parameters:
