@@ -10,6 +10,9 @@ Get an ephemeral service account public key. For more information, see [the offi
 
 ## Example Usage
 
+~> **Note:** If you run this example configuration you will be able to see ephemeral.google_service_account_key.mykey in terraform plan and apply terminal output but you will not see it in state, as ephemeral resources are excluded from state. In future, when write-only attributes are added to the Google provider's resources, google_service_account_key ephemeral resources can be used to supply values for fields when creating other resources.
+
+
 ```hcl
 resource "google_service_account" "myaccount" {
   account_id = "dev-foo-account"
