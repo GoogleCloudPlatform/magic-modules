@@ -17,8 +17,7 @@ description: A policy binding to a folder
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/folders.locations.policyBindings'
-min_version: 'beta'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3/folders.locations.policyBindings'
 id_format: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
 base_url: 'folders/{{folder}}/locations/{{location}}/policyBindings'
 self_link: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
@@ -50,7 +49,6 @@ async:
   include_project: true
 examples:
   - name: 'iam_folders_policy_binding'
-    min_version: 'beta'
     primary_resource_id: 'my-folder-binding'
     test_env_vars:
       org_id: 'ORG_ID'

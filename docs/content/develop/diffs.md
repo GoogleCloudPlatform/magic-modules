@@ -130,7 +130,7 @@ diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 diff_suppress_func: 'resourceNameFieldNameDiffSuppress'
 ```
 
-Define resource-specific functions in a [`custom_code.constants`](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#add-reusable-variables-and-functions) file.
+Define resource-specific functions in a [`custom_code.constants`]({{< ref "/develop/custom-code/#add-reusable-variables-and-functions" >}}) file.
 
 ```go
 func resourceNameFieldNameDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {

@@ -17,8 +17,7 @@ description: A policy binding to a Project
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/projects.locations.policyBindings'
-min_version: 'beta'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3/projects.locations.policyBindings'
 id_format: 'projects/{{project}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/policyBindings'
 self_link: 'projects/{{project}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
@@ -49,7 +48,6 @@ async:
     message: 'message'
 examples:
   - name: 'iam_projects_policy_binding'
-    min_version: 'beta'
     primary_resource_id: 'my-project-binding'
     test_env_vars:
       org_id: 'ORG_ID'
