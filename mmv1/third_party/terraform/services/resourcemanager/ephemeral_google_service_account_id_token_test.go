@@ -2,6 +2,7 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -66,6 +67,7 @@ func TestAccEphemeralServiceAccountIdToken_withEmptyDelegates(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccEphemeralServiceAccountIdToken_withEmptyDelegates(targetServiceAccountEmail),
+				ExpectError: regexp.MustCompile("Attribute delegates set must contain at least 1 elements"),
 			},
 		},
 	})

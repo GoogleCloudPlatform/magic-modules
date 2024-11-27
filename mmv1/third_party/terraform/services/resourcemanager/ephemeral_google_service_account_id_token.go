@@ -62,6 +62,7 @@ func (p *googleEphemeralServiceAccountIdToken) Schema(ctx context.Context, req e
 				Optional:    true,
 				ElementType: types.StringType,
 				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1), // If a delegation chain is being used, we need at least one delegate!
 					setvalidator.ValueStringsAre(fwvalidators.ServiceAccountEmailValidator{}),
 				},
 			},
