@@ -12,6 +12,9 @@ For more information see
 [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html#IDToken).
 
 ## Example Usage - ServiceAccount JSON credential file.
+
+-> **Note:** If you run this example configuration you will be able to see ephemeral.google_service_account_id_token.oidc in terraform plan and apply terminal output but you will not see it in state, as ephemeral resources are excluded from state. In future, when write-only attributes are added to resources in the Google provider, ephemeral resources such as google_service_account_id_token could be used to set field values when creating managed resources.
+
   `google_service_account_id_token` will use the configured [provider credentials](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#credentials-1)
 
   ```hcl
@@ -21,6 +24,9 @@ For more information see
   ```
 
 ## Example Usage - Service Account Impersonation.
+
+-> **Note:** If you run this example configuration you will be able to see ephemeral.google_service_account_id_token.oidc in terraform plan and apply terminal output but you will not see it in state, as ephemeral resources are excluded from state. In future, when write-only attributes are added to resources in the Google provider, ephemeral resources such as google_service_account_id_token could be used to set field values when creating managed resources.
+
   Ephemeral resource `google_service_account_id_token` will use background impersonated credentials provided by [google_service_account_access_token](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/service_account_access_token).
 
   Note: to use the following, you must grant `target_service_account` the
