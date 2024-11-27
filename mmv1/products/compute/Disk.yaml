@@ -496,14 +496,17 @@ properties:
   - name: 'storagePool'
     type: String
     description: |
-      The URL of the storage pool in which the new disk is created.
+      The URL or the name of the storage pool in which the new disk is created.
       For example:
       * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
       * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+      * /zones/{zone}/storagePools/{storagePool}
+      * /{storagePool}
     required: false
     immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/storage_pool_full_url.tmpl'
   - name: 'accessMode'
     type: String
     description: |
