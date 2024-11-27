@@ -34,9 +34,7 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
     algorithm = "RSA_PKCS1_4096_SHA256"
   }
   user_defined_access_urls {
-    aia_issuing_certificate_urls = "http://example.com/ca.crt"
-    aia_issuing_certificate_urls = "http://example.com/anotherca.crt"
-    crl_access_urls = "http://example.com/crl1.crt"
-    crl_access_urls = "http://example.com/crl2.crt"
+    aia_issuing_certificate_urls = ["http://example.com/ca.crt", "http://example.com/anotherca.crt"]
+    crl_access_urls = ["http://example.com/crl1.crt", "http://example.com/crl2.crt"]
   }
 }
