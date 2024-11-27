@@ -11,10 +11,10 @@ Ephemeral resources are Terraform resources that are essentially temporary. They
 Ephemeral resources are available in Terraform v1.10 and later. For more information, see the [official HashiCorp documentation for Ephemeral Resources](https://developer.hashicorp.com/terraform/language/resources/ephemeral).
 
 To mark the launch of the ephemeral resources feature, the Google Cloud provider has added four ephemeral resources:
-- `google_service_account_access_token`
-- `google_service_account_id_token`
-- `google_service_account_jwt`
-- `google_service_account_key`
+- [`google_service_account_access_token`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_access_token)
+- [`google_service_account_id_token`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_id_token)
+- [`google_service_account_jwt`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_jwt)
+- [`google_service_account_key`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_key)
 
 These are based on existing data sources already in the provider. In future you may wish to update your configurations to use these ephemeral version, as they will allow you to avoid storing tokens and credentials values in your Terraform state.
 
@@ -26,7 +26,7 @@ Until then, ephemeral resources can only be used to pass values into the provide
 
 ### Testing out how ephemeral resources look like during `terraform plan` and `terraform apply`
 
-The documentation for the `google_service_account_key` ephemeral resource has a simple example that you can use to view how ephemeral resources behave during plan and apply operations:
+The [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_key) for the `google_service_account_key` ephemeral resource has a simple example that you can use to view how ephemeral resources behave during plan and apply operations:
 
 ```hcl
 resource "google_service_account" "myaccount" {
@@ -76,7 +76,7 @@ If you run the example using the local backend you can also inspect the state, w
 
 ### Testing out using ephemeral resources to configure the Google Cloud provider
 
-The documentation for the `google_service_account_access_token` ephemeral resource demonstrates how it can be used to configure the provider. Check that ephemeral resource's documentation for details about the IAM permissions required for this example to work:
+The [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_access_token) for the `google_service_account_access_token` ephemeral resource demonstrates how it can be used to configure the provider. Check that ephemeral resource's documentation for details about the IAM permissions required for this example to work:
 
 ```hcl
 provider "google" {
