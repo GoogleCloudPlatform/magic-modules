@@ -121,7 +121,10 @@ func (p *googleEphemeralServiceAccountIdToken) Open(ctx context.Context, req eph
 		tokenRequest := &iamcredentials.GenerateIdTokenRequest{
 			Audience:     targetAudience,
 			IncludeEmail: data.IncludeEmail.ValueBool(),
-			Delegates:    fwutils.StringSet(data.Delegates),
+		}
+		// Only add delegates if the list contains elements
+		if len(data.Delegates.Elements()) > 0 {
+			tokenRequest.Delegates = fwutils.StringSet(data.Delegates)
 		}
 		at, err := service.Projects.ServiceAccounts.GenerateIdToken(name, tokenRequest).Do()
 		if err != nil {
