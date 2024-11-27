@@ -1,9 +1,0 @@
-data "google_client_config" "current" {}
-
-resource "google_apigee_organization" "org" {
-  description         = "Terraform-provisioned basic Apigee Org without VPC Peering."
-  analytics_region    = "us-central1"
-  project_id          = data.google_client_config.current.project
-  disable_vpc_peering = true
-}
-

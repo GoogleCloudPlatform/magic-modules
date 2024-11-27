@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,158 +11,159 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Subnet'
-base_url: '{{parent}}/subnets'
-create_url: '{{parent}}/subnets/{{name}}?update_mask=ip_cidr_range'
-self_link: '{{parent}}/subnets/{{name}}'
-update_mask: true
-create_verb: :PATCH
-update_verb: :PATCH
-skip_delete: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.subnets'
 description: |
   Subnet in a private cloud. A Private Cloud contains two types of subnets: `management` subnets (such as vMotion) that
   are read-only,and `userDefined`, which can also be updated. This resource should be used to read and update `userDefined`
   subnets. To read `management` subnets, please utilize the subnet data source.
-async: !ruby/object:Api::OpAsync
-  actions: ['create', 'update']
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: "name"
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error"
-    message: "message"
-  include_project: true
-
-import_format: ["{{%parent}}/subnets/{{name}}"]
-id_format: "{{parent}}/subnets/{{name}}"
+references:
+  guides:
+  api: 'https://cloud.google.com/vmware-engine/docs/reference/rest/v1/projects.locations.privateClouds.subnets'
+docs:
+id_format: '{{parent}}/subnets/{{name}}'
+base_url: '{{parent}}/subnets'
+self_link: '{{parent}}/subnets/{{name}}'
+create_url: '{{parent}}/subnets/{{name}}?update_mask=ip_cidr_range'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+import_format:
+  - '{{%parent}}/subnets/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+  include_project: true
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "vmware_engine_subnet_user_defined"
-    skip_test: true   # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
-    primary_resource_id: "vmw-engine-subnet"
+  - name: 'vmware_engine_subnet_user_defined'
+    primary_resource_id: 'vmw-engine-subnet'
     vars:
-      private_cloud_id: "sample-pc"
-      management_cluster_id: "sample-mgmt-cluster"
-      network_id: "pc-nw"
-      subnet_id: "service-1"
+      private_cloud_id: 'sample-pc'
+      management_cluster_id: 'sample-mgmt-cluster'
+      network_id: 'pc-nw'
+      subnet_id: 'service-1'
     test_env_vars:
-      region: :REGION
-
+      region: 'REGION'
+ # update tests will take care of read and update. Parent PC creation is expensive and node reservation is required.
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: "parent"
-    immutable: true
-    required: true
-    url_param_only: true
+  - name: 'parent'
+    type: String
     description: |
       The resource name of the private cloud to create a new subnet in.
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-west1-a/privateClouds/my-cloud
 
-  - !ruby/object:Api::Type::String
-    name: "name"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       The ID of the subnet. For userDefined subnets, this name should be in the format of "service-n",
       where n ranges from 1 to 5.
 
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Creation time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and
       up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       Last updated time of this resource.
       A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
       fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
-  - !ruby/object:Api::Type::String
-    name: 'ipCidrRange'
-    required: true
-    send_empty_value: true
+    output: true
+  - name: 'ipCidrRange'
+    type: String
     description: |
       The IP address range of the subnet in CIDR format.
 
-  - !ruby/object:Api::Type::String
-    name: 'gatewayIp'
-    output: true
+    required: true
+    send_empty_value: true
+  - name: 'gatewayIp'
+    type: String
     description: |
       The IP address of the gateway of this subnet. Must fall within the IP prefix defined above.
 
-  - !ruby/object:Api::Type::String
-    name: 'gatewayId'
     output: true
+  - name: 'gatewayId'
+    type: String
     description: |
       The canonical identifier of the logical router that this subnet is attached to.
 
-  - !ruby/object:Api::Type::Array
-    name: 'dhcpAddressRanges'
     output: true
+  - name: 'dhcpAddressRanges'
+    type: Array
     description: |
       DHCP address ranges.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'firstAddress'
-          output: true
+        - name: 'firstAddress'
+          type: String
           description: |
             The first IP address of the range.
-        - !ruby/object:Api::Type::String
-          name: 'lastAddress'
           output: true
+        - name: 'lastAddress'
+          type: String
           description: |
             The last IP address of the range.
 
-  - !ruby/object:Api::Type::String
-    name: 'type'
-    output: true
+          output: true
+  - name: 'type'
+    type: String
     description: |
       The type of the subnet.
 
-  - !ruby/object:Api::Type::Boolean
-    name: standardConfig
     output: true
+  - name: 'standardConfig'
+    type: Boolean
     description: |
       Whether the NSX-T configuration in the backend follows the standard configuration supported by Google Cloud.
       If false, the subnet cannot be modified through Google Cloud, only through NSX-T directly.
 
-  - !ruby/object:Api::Type::String
-    name: 'state'
+    output: true
+  - name: 'state'
+    type: String
     description: |
       State of the subnet.
     output: true
-
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+  - name: 'uid'
+    type: String
     description: |
       System-generated unique identifier for the resource.
 
-  - !ruby/object:Api::Type::Integer
-    name: 'vlanId'
     output: true
+  - name: 'vlanId'
+    type: Integer
     description: |
       VLAN ID of the VLAN on which the subnet is configured.
+    output: true

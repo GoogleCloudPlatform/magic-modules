@@ -28,11 +28,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   if len(original) == 0 {
     return nil
   }
-    {{- else if $.Properties }}
+    {{- else if $.UserProperties }}
   original := v.(map[string]interface{})
     {{- end }}
   transformed := make(map[string]interface{})
-    {{- range $prop := $.Properties }}
+    {{- range $prop := $.UserProperties }}
       {{- if $prop.FlattenObject }}
     if {{ $prop.ApiName }} := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config); {{ $prop.ApiName }} != nil {
       obj := {{ $prop.ApiName }}.([]interface{})[0]
@@ -72,7 +72,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed = append(transformed, map[string]interface{}{
   {{- end }}
 
-  {{- range $prop := $.ItemType.Properties }}
+  {{- range $prop := $.ItemType.UserProperties }}
     {{- if not $prop.IgnoreRead }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
@@ -90,7 +90,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     original := raw.(map[string]interface{})
     transformed = append(transformed, map[string]interface{}{
       "{{ $.KeyName }}": k,
-    {{- range $prop := $.ValueType.Properties }}
+    {{- range $prop := $.ValueType.UserProperties }}
       "{{ underscore $prop.Name }}": flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config),
     {{- end }}
     })

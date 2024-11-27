@@ -107,7 +107,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	}
 
 	exitCode := 0
-	for githubTeam, _ := range githubTeamsSet {
+	for githubTeam := range githubTeamsSet {
 		members, err := gh.GetTeamMembers("GoogleCloudPlatform", githubTeam)
 		if err != nil {
 			fmt.Printf("Error fetching members for GoogleCloudPlatform/%s: %s", githubTeam, err)

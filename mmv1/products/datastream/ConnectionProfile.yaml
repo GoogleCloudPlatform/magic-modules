@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,36 +11,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ConnectionProfile'
-base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
-create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
-self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  A set of reusable connection configurations to be used as a source or destination for a stream.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/datastream/docs/create-connection-profiles'
   api: 'https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.connectionProfiles'
-description: |
-  A set of reusable connection configurations to be used as a source or destination for a stream.
-id_format: projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
+self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}',
-  ]
+  - 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_basic'
+  - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
     vars:
       connection_profile_id: 'my-profile'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_postgresql_private_connection'
-    external_providers: ["random", "time"]
+  - name: 'datastream_connection_profile_postgresql_private_connection'
     primary_resource_id: 'default'
-    # Random provider
-    skip_vcr: true
     vars:
       private_connection_id: 'my-connection'
       connection_profile_id: 'my-profile'
@@ -48,34 +60,32 @@ examples:
       database_instance_name: 'my-instance'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_full'
-    primary_resource_id:
-      'default'
+      'deletion_protection': 'false'
+    external_providers: ["random", "time"]
+    # Random provider
+    skip_vcr: true
+  - name: 'datastream_connection_profile_full'
+    primary_resource_id: 'default'
+    vars:
+      connection_profile_id: 'my-profile'
       # Workaround for https://github.com/hashicorp/terraform-provider-google/issues/12410
     ignore_read_extra:
       - 'forward_ssh_connectivity.0.password'
-    vars:
-      connection_profile_id: 'my-profile'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_postgres'
+  - name: 'datastream_connection_profile_postgres'
     primary_resource_id: 'default'
     vars:
       connection_profile_id: 'my-profile'
       database_instance_name: 'my-instance'
       deletion_protection: 'true'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      deletion_protection: 'false'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'datastream_connection_profile_sql_server'
+      'deletion_protection': 'false'
+    exclude_test: true
+  - name: 'datastream_connection_profile_sql_server'
     primary_resource_id: 'default'
-    skip_test: true
     vars:
       database_name: 'db'
       database_password: 'password'
@@ -85,327 +95,329 @@ examples:
       sql_server_name: 'sql-server'
       sql_server_root_password: 'root-password'
     test_vars_overrides:
-      deletion_protection: 'false'
+      'deletion_protection': 'false'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: connectionProfileId
+  - name: 'connectionProfileId'
+    type: String
     description: |-
       The connection profile identifier.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::Boolean
-    name: create_without_validation
+  - name: 'create_without_validation'
+    type: Boolean
     description: |-
       Create the connection profile without validating it.
-    required: false
-    default_value: false
-    immutable: true
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'location'
+    required: false
+    immutable: true
+    default_value: false
+  - name: 'location'
+    type: String
     description: |
       The name of the location this connection profile is located in.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: The resource's name.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: Labels.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+  - name: 'displayName'
+    type: String
     description: Display name.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'oracleProfile'
-    exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
+    required: true
+  - name: 'oracleProfile'
+    type: NestedObject
     description: |
       Oracle database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostname'
-        required: true
+      - name: 'hostname'
+        type: String
         description: |
           Hostname for the Oracle connection.
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 1521
+        required: true
+      - name: 'port'
+        type: Integer
         description: |
           Port for the Oracle connection.
-      - !ruby/object:Api::Type::String
-        name: 'username'
-        required: true
+        default_value: 1521
+      - name: 'username'
+        type: String
         description: |
           Username for the Oracle connection.
-      - !ruby/object:Api::Type::String
-        name: 'password'
         required: true
+      - name: 'password'
+        type: String
         description: |
           Password for the Oracle connection.
-        sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'databaseService'
         required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
+      - name: 'databaseService'
+        type: String
         description: |
           Database for the Oracle connection.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'connectionAttributes'
+        required: true
+      - name: 'connectionAttributes'
+        type: KeyValuePairs
         description: Connection string attributes
-  - !ruby/object:Api::Type::NestedObject
-    name: 'gcsProfile'
-    exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
+  - name: 'gcsProfile'
+    type: NestedObject
     description: |
       Cloud Storage bucket profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'bucket'
-        required: true
+      - name: 'bucket'
+        type: String
         description: |
           The Cloud Storage bucket name.
-      - !ruby/object:Api::Type::String
-        name: 'rootPath'
+        required: true
+      - name: 'rootPath'
+        type: String
         description: |
           The root path inside the Cloud Storage bucket.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'mysqlProfile'
-    exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
+  - name: 'mysqlProfile'
+    type: NestedObject
     description: |
       MySQL database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostname'
-        required: true
+      - name: 'hostname'
+        type: String
         description: |
           Hostname for the MySQL connection.
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 3306
+        required: true
+      - name: 'port'
+        type: Integer
         description: |
           Port for the MySQL connection.
-      - !ruby/object:Api::Type::String
-        name: 'username'
-        required: true
+        default_value: 3306
+      - name: 'username'
+        type: String
         description: |
           Username for the MySQL connection.
-      - !ruby/object:Api::Type::String
-        name: 'password'
         required: true
+      - name: 'password'
+        type: String
         description: |
           Password for the MySQL connection.
+        required: true
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.erb
-      - !ruby/object:Api::Type::NestedObject
-        name: 'sslConfig'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
+      - name: 'sslConfig'
+        type: NestedObject
         description: |
           SSL configuration for the MySQL connection.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'clientKey'
-            immutable: true
+          - name: 'clientKey'
+            type: String
             description: |
               PEM-encoded private key associated with the Client Certificate.
               If this field is used then the 'client_certificate' and the
               'ca_certificate' fields are mandatory.
+            immutable: true
             sensitive: true
-            custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_key.go.erb
-          - !ruby/object:Api::Type::Boolean
-            name: 'clientKeySet'
-            output: true
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_key.go.tmpl'
+          - name: 'clientKeySet'
+            type: Boolean
             description: |
               Indicates whether the clientKey field is set.
-          - !ruby/object:Api::Type::String
-            name: 'clientCertificate'
-            immutable: true
+            output: true
+          - name: 'clientCertificate'
+            type: String
             description: |
               PEM-encoded certificate that will be used by the replica to
               authenticate against the source database server. If this field
               is used then the 'clientKey' and the 'caCertificate' fields are
               mandatory.
+            immutable: true
             sensitive: true
-            custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_certificate.go.erb
-          - !ruby/object:Api::Type::Boolean
-            name: 'clientCertificateSet'
-            output: true
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_client_certificate.go.tmpl'
+          - name: 'clientCertificateSet'
+            type: Boolean
             description: |
               Indicates whether the clientCertificate field is set.
-          - !ruby/object:Api::Type::String
-            name: 'caCertificate'
-            immutable: true
+            output: true
+          - name: 'caCertificate'
+            type: String
             description: |
               PEM-encoded certificate of the CA that signed the source database
               server's certificate.
+            immutable: true
             sensitive: true
-            custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_ca_certificate.go.erb
-          - !ruby/object:Api::Type::Boolean
-            name: 'caCertificateSet'
-            output: true
+            custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_ssl_config_ca_certificate.go.tmpl'
+          - name: 'caCertificateSet'
+            type: Boolean
             description: |
               Indicates whether the clientKey field is set.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'bigqueryProfile'
+            output: true
+  - name: 'bigqueryProfile'
+    type: NestedObject
+    description: |
+      BigQuery warehouse profile.
     send_empty_value: true
     allow_empty_object: true
     exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
-    description: |
-      BigQuery warehouse profile.
-    properties: []
-  - !ruby/object:Api::Type::NestedObject
-    name: 'postgresqlProfile'
-    exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+    properties:
+      []
+  - name: 'postgresqlProfile'
+    type: NestedObject
     description: |
       PostgreSQL database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostname'
-        required: true
+      - name: 'hostname'
+        type: String
         description: |
           Hostname for the PostgreSQL connection.
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 5432
+        required: true
+      - name: 'port'
+        type: Integer
         description: |
           Port for the PostgreSQL connection.
-      - !ruby/object:Api::Type::String
-        name: 'username'
-        required: true
+        default_value: 5432
+      - name: 'username'
+        type: String
         description: |
           Username for the PostgreSQL connection.
-      - !ruby/object:Api::Type::String
-        name: 'password'
         required: true
+      - name: 'password'
+        type: String
         description: |
           Password for the PostgreSQL connection.
-        sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'database'
         required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+      - name: 'database'
+        type: String
         description: |
           Database for the PostgreSQL connection.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'sqlServerProfile'
-    exactly_one_of:
-      - oracle_profile
-      - gcs_profile
-      - mysql_profile
-      - bigquery_profile
-      - postgresql_profile
-      - sql_server_profile
+        required: true
+  - name: 'sqlServerProfile'
+    type: NestedObject
     description: |
       SQL Server database profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostname'
-        required: true
+      - name: 'hostname'
+        type: String
         description: |
           Hostname for the SQL Server connection.
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 1433
+        required: true
+      - name: 'port'
+        type: Integer
         description: |
           Port for the SQL Server connection.
-      - !ruby/object:Api::Type::String
-        name: 'username'
-        required: true
+        default_value: 1433
+      - name: 'username'
+        type: String
         description: |
           Username for the SQL Server connection.
-      - !ruby/object:Api::Type::String
-        name: 'password'
         required: true
+      - name: 'password'
+        type: String
         description: |
           Password for the SQL Server connection.
-        sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'database'
         required: true
+        sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+      - name: 'database'
+        type: String
         description: |
           Database for the SQL Server connection.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'forwardSshConnectivity'
+        required: true
+  - name: 'forwardSshConnectivity'
+    type: NestedObject
     description: |
       Forward SSH tunnel connectivity.
     conflicts:
       - private_connectivity
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'hostname'
-        required: true
+      - name: 'hostname'
+        type: String
         description: |
           Hostname for the SSH tunnel.
-      - !ruby/object:Api::Type::String
-        name: 'username'
         required: true
+      - name: 'username'
+        type: String
         description: |
           Username for the SSH tunnel.
-      - !ruby/object:Api::Type::Integer
-        name: 'port'
-        default_value: 22
+        required: true
+      - name: 'port'
+        type: Integer
         description: |
           Port for the SSH tunnel.
-      - !ruby/object:Api::Type::String
-        name: 'password'
-        immutable: true
+        default_value: 22
+      - name: 'password'
+        type: String
         description: |
           SSH password.
+        immutable: true
+        sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.private_key
-        sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_password.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'privateKey'
-        immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_password.go.tmpl'
+      - name: 'privateKey'
+        type: String
         description: |
           SSH private key.
+        immutable: true
+        sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.password
-        sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_private_key.go.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: 'privateConnectivity'
+        custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_forward_ssh_connectivity_private_key.go.tmpl'
+  - name: 'privateConnectivity'
+    type: NestedObject
     description: |
       Private connectivity.
     conflicts:
       - forward_ssh_connectivity
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'privateConnection'
-        required: true
+      - name: 'privateConnection'
+        type: String
         description: |
           A reference to a private connection resource. Format: `projects/{project}/locations/{location}/privateConnections/{name}`
+        required: true

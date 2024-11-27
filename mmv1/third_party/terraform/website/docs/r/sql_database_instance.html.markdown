@@ -197,6 +197,34 @@ resource "google_sql_database_instance" "main" {
 }
 ```
 
+### Cloud SQL Instance with PSC auto connections
+
+```hcl
+resource "google_sql_database_instance" "main" {
+  name             = "psc-enabled-main-instance"
+  database_version = "MYSQL_8_0"
+  settings {
+    tier    = "db-f1-micro"
+    ip_configuration {
+      psc_config {
+        psc_enabled = true
+        allowed_consumer_projects = ["allowed-consumer-project-name"]
+        psc_auto_connections {
+          consumer_network = "network-name"
+          consumer_service_project_id = "project-id"
+        }
+      }
+      ipv4_enabled = false
+    }
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+    availability_type = "REGIONAL"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -234,7 +262,9 @@ includes an up-to-date reference of supported versions.
     is not provided, the provider project is used.
 
 * `replica_configuration` - (Optional) The configuration for replication. The
-    configuration is detailed below. Valid only for MySQL instances.
+    configuration is detailed below. 
+
+* `replica_names` - (Optional, Computed) List of replica names. Can be updated.
 
 * `root_password` - (Optional) Initial root password. Can be updated. Required for MS SQL Server.
 
@@ -286,17 +316,19 @@ The `settings` block supports:
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `connector_enforcement` - (Optional) Specifies if connections must use Cloud SQL connectors.
+* `connector_enforcement` - (Optional) Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.
 
 * `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 
 * `enable_google_ml_integration` - (Optional) Enables [Cloud SQL instances to connect to Vertex AI](https://cloud.google.com/sql/docs/postgres/integrate-cloud-sql-with-vertex-ai) and pass requests for real-time predictions and insights. Defaults to `false`.
 
-* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`.
+* `enable_dataplex_integration` - (Optional) Enables [Cloud SQL instance integration with Dataplex](https://cloud.google.com/sql/docs/mysql/dataplex-catalog-integration). MySQL, Postgres and SQL Server instances are supported for this feature. Defaults to `false`.
+
+* `disk_autoresize` - (Optional) Enables auto-resizing of the storage size. Defaults to `true`. Note that if `disk_size` is set, future `terraform apply` calls will attempt to delete the instance in order to resize the disk to the value specified in disk_size if it has been resized. To avoid this, ensure that `lifecycle.ignore_changes` is applied to `disk_size`.
 
 * `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
-* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB.
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB. Note that this value will override the resizing from `disk_autoresize` if that feature is enabled. To avoid this, set `lifecycle.ignore_changes` on this field.
 
 * `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
 
@@ -325,9 +357,9 @@ The optional `settings.data_cache_config` subblock supports:
 
 The optional `settings.deny_maintenance_period` subblock supports:
 
-* `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+* `end_date` - (Required) "deny maintenance period" end date. If the year of the end date is empty, the year of the start date also must be empty. In this case, it means the no maintenance interval recurs every year. The date is in format yyyy-m-dd (the month is without leading zeros)i.e., 2020-1-01, or 2020-11-01, or mm-dd, i.e., 11-01
 
-* `start_date` - (Required) "deny maintenance period" start date. If the year of the start date is empty, the year of the end date also must be empty. In this case, it means the deny maintenance period recurs every year. The date is in format yyyy-mm-dd i.e., 2020-11-01, or mm-dd, i.e., 11-01
+* `start_date` - (Required) "deny maintenance period" start date. If the year of the start date is empty, the year of the end date also must be empty. In this case, it means the deny maintenance period recurs every year. The date is in format yyyy-m-dd (the month is without leading zeros)i.e., 2020-1-01, or 2020-11-01, or mm-dd, i.e., 11-01
 
 * `time` - (Required) Time in UTC when the "deny maintenance period" starts on startDate and ends on endDate. The time is in format: HH:mm:SS, i.e., 00:00:00
 
@@ -375,12 +407,9 @@ Specifying a network enables private IP.
 At least `ipv4_enabled` must be enabled or a `private_network` must be configured.
 This setting can be updated, but it cannot be removed after it is set.
 
-* `require_ssl` - (Optional, Deprecated) Whether SSL connections over IP are enforced or not. To change this field, also set the corresponding value in `ssl_mode`. It will be fully deprecated in a future major release. For now, please use `ssl_mode` with a compatible `require_ssl` value instead.
+* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. Supported values are `ALLOW_UNENCRYPTED_AND_ENCRYPTED`, `ENCRYPTED_ONLY`, and `TRUSTED_CLIENT_CERTIFICATE_REQUIRED` (not supported for SQL Server). See [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1/instances#ipconfiguration) for details.
 
-* `ssl_mode` - (Optional) Specify how SSL connection should be enforced in DB connections. This field provides more SSL enforcment options compared to `require_ssl`. To change this field, also set the correspoding value in `require_ssl`.
-    * For PostgreSQL instances, the value pairs are listed in the [API reference doc](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1beta4/instances#ipconfiguration) for `ssl_mode` field.
-    * For MySQL instances, use the same value pairs as the PostgreSQL instances.
-    * For SQL Server instances, set it to `ALLOW_UNENCRYPTED_AND_ENCRYPTED` when `require_ssl=false` and `ENCRYPTED_ONLY` otherwise.
+* `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
@@ -402,6 +431,12 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 * `psc_enabled` - (Optional) Whether PSC connectivity is enabled for this instance.
 
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
+
+* The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
+
+* `consumer_network` - "The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. For example, `projects/project1/global/networks/network1`. The consumer host project of this network might be different from the consumer service project."
+
+* `consumer_service_project_id` - (Optional) The project ID of consumer service project of this consumer endpoint.
 
 The optional `settings.location_preference` subblock supports:
 
@@ -450,7 +485,16 @@ The optional `settings.password_validation_policy` subblock for instances declar
 * `enable_password_policy` - Enables or disable the password validation policy.
 
 The optional `replica_configuration` block must have `master_instance_name` set
-to work, cannot be updated, and supports:
+to work, cannot be updated and supports:
+
+~> **Note:** `replica_configuration` field is not meant to be used if the master
+instance is a source representation instance. The configuration provided by this
+field can be set on the source representation instance directly. If this field
+is present when the master instance is a source representation instance, `dump_file_path` must be provided.
+
+* `cascadable_replica` - (Optional) Specifies if the replica is a cascadable replica. If true, instance must be in different region from primary.
+
+  ~> **NOTE:** Only supported for SQL Server database.
 
 * `ca_certificate` - (Optional) PEM representation of the trusted CA's x509
     certificate.
@@ -465,7 +509,8 @@ to work, cannot be updated, and supports:
     between connect retries. MySQL's default is 60 seconds.
 
 * `dump_file_path` - (Optional) Path to a SQL file in GCS from which replica
-    instances are created. Format is `gs://bucket/filename`.
+    instances are created. Format is `gs://bucket/filename`. Note, if the master
+    instance is a source representation instance this field must be present.
 
 * `failover_target` - (Optional) Specifies if the replica is the failover target.
     If the field is set to true the replica will be designated as a failover replica.
@@ -520,7 +565,7 @@ exported:
 * `connection_name` - The connection name of the instance to be used in
 connection strings. For example, when connecting with [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/connect-admin-proxy).
 
-* `dsn_name` - The DNS name of the instance. See [Connect to an instance using Private Service Connect](https://cloud.google.com/sql/docs/mysql/configure-private-service-connect#view-summary-information-cloud-sql-instances-psc-enabled) for more details.
+* `dns_name` - The DNS name of the instance. See [Connect to an instance using Private Service Connect](https://cloud.google.com/sql/docs/mysql/configure-private-service-connect#view-summary-information-cloud-sql-instances-psc-enabled) for more details.
 
 * `service_account_email_address` - The service account email address assigned to the
 instance.
@@ -572,6 +617,38 @@ performing filtering in a Terraform config.
 * `server_ca_cert.0.expiration_time` - Expiration time of the CA Cert.
 
 * `server_ca_cert.0.sha1_fingerprint` - SHA Fingerprint of the CA Cert.
+
+## Switchover (SQL Server Only)
+Users can perform a switchover on any direct `cascadable` replica by following the steps below.
+
+  ~>**WARNING:** Failure to follow these steps can lead to data loss (You will be warned during plan stage). To prevent data loss during a switchover, please verify your plan with the checklist below.
+
+For a more in-depth walkthrough with example code, see the [Switchover Guide](../guides/sql_instance_switchover.html.markdown)
+
+### Steps to Invoke Switchover
+
+Create a `cascadable` replica in a different region from the primary (`cascadable_replica` is set to true in `replica_configuration`)
+
+#### Invoking switchover in the replica resource:
+1. Change instance_type from `READ_REPLICA_INSTANCE` to `CLOUD_SQL_INSTANCE`
+2. Remove `master_instance_name`
+3. Remove `replica_configuration`
+4. Add current primary's name to the replica's `replica_names` list
+
+#### Updating the primary resource:
+1. Change `instance_type` from `CLOUD_SQL_INSTANCE` to `READ_REPLICA_INSTANCE`
+2. Set `master_instance_name` to the original replica (which will be primary after switchover)
+3. Set `replica_configuration` and set `cascadable_replica` to `true`
+4. Remove original replica from `replica_names`
+
+    ~> **NOTE**: Do **not** delete the replica_names field, even if it has no replicas remaining. Set replica_names = [ ] to indicate it having no replicas.
+
+#### Plan and verify that:
+- `terraform plan` outputs **"0 to add, 0 to destroy"**
+- `terraform plan` does not say **"must be replaced"** for any resource
+- Every resource **"will be updated in-place"**
+- Only the 2 instances involved in switchover have planned changes
+- (Recommended) Use `deletion_protection` on instances as a safety measure
 
 ## Timeouts
 

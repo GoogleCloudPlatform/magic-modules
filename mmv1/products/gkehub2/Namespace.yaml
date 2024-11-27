@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,129 +11,130 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Namespace'
-base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces'
-create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/?scope_namespace_id={{scope_namespace_id}}'
-update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
-self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Namespace represents a namespace across the Fleet.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Registering a Cluster': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
   api: 'https://cloud.google.com/anthos/fleet-management/docs/reference/rest/v1/projects.locations.scopes.namespaces'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+docs:
+id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+base_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces'
+self_link: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+create_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/?scope_namespace_id={{scope_namespace_id}}'
+update_url: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
     kind: 'gkehub#operation'
     path: 'name'
-    base_url: '{{op_id}}'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: 'true'
-    allowed:
-      - 'true'
-      - 'false'
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error/errors'
     message: 'message'
-autogen_async: true
+custom_code:
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'gkehub_namespace_basic'
-    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
+  - name: 'gkehub_namespace_basic'
     primary_resource_id: 'namespace'
+    primary_resource_name: 'fmt.Sprintf("basic%s", context["random_suffix"])'
     test_env_vars:
-      project: :PROJECT_NAME
+      project: 'PROJECT_NAME'
     ignore_read_extra:
       - 'scope'
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: 'projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}'
-import_format:
-  ['projects/{{project}}/locations/global/scopes/{{scope_id}}/namespaces/{{scope_namespace_id}}']
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'scope_id'
-    required: true
-    immutable: true
-    url_param_only: true
+  - name: 'scope_id'
+    type: String
     description: |
       Id of the scope
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'scopeNamespaceId'
-    description: |
-      The client-provided identifier of the namespace.
+    url_param_only: true
     required: true
     immutable: true
+properties:
+  - name: 'scopeNamespaceId'
+    type: String
+    description: |
+      The client-provided identifier of the namespace.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
     description: |
       The resource name for the namespace
-  - !ruby/object:Api::Type::String
-    name: 'uid'
     output: true
+  - name: 'uid'
+    type: String
     description: |
       Google-generated UUID for this resource.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    output: true
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Namespace was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Namespace was updated in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'deleteTime'
+  - name: 'deleteTime'
+    type: Time
     description: |
       Time the Namespace was deleted in UTC.
     output: true
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'scope'
+  - name: 'scope'
+    type: ResourceRef
     description: |
       The name of the Scope instance.
-    resource: 'Scope'
-    imports: 'name'
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
     required: true
     immutable: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'state'
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    resource: 'Scope'
+    imports: 'name'
+  - name: 'state'
+    type: NestedObject
     description: |
       State of the namespace resource.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'code'
+      - name: 'code'
+        type: Enum
         description: |
           Code describes the state of a Namespace resource.
         output: true
-        values:
-          - :CODE_UNSPECIFIED
-          - :CREATING
-          - :READY
-          - :DELETING
-          - :UPDATING
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'namespaceLabels'
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'namespaceLabels'
+    type: KeyValuePairs
     description: |
       Namespace-level cluster namespace labels. These labels are applied
       to the related namespace of the member clusters bound to the parent
       Scope. Scope-level labels (`namespace_labels` in the Fleet Scope
       resource) take precedence over Namespace-level labels if they share
       a key. Keys and values must be Kubernetes-conformant.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Labels for this Namespace.

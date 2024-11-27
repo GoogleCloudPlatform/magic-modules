@@ -1,5 +1,0 @@
-if v, ok := d.GetOkExists("pubsub_configs"); !tpgresource.IsEmptyValue(reflect.ValueOf(pubsubConfigsProp)) && (ok || !reflect.DeepEqual(v, pubsubConfigsProp)) {
-	log.Printf("[DEBUG] Calling update after create to patch in pubsub_configs")
-	// pubsub_configs cannot be added on create
-	return resourceSourceRepoRepositoryUpdate(d, meta)
-}

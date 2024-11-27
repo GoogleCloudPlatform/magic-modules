@@ -29,6 +29,7 @@
         "connectMode": "DIRECT_PEERING",
         "displayName": "Terraform Test Instance",
         "labels": {
+          "goog-terraform-provisioned": "true",
           "my_key": "my_val",
           "other_key": "other_val"
         },

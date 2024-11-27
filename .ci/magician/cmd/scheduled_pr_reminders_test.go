@@ -11,8 +11,9 @@ import (
 )
 
 func TestNotificationState(t *testing.T) {
-	firstCoreReviewer := membership.AvailableReviewers()[0]
-	secondCoreReviewer := membership.AvailableReviewers()[1]
+	availableReviewers := membership.AvailableReviewers()
+	firstCoreReviewer := availableReviewers[0]
+	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
 		pullRequest *github.PullRequest
 		issueEvents []*github.IssueEvent
@@ -786,14 +787,16 @@ func TestShouldNotify(t *testing.T) {
 }
 
 func TestFormatReminderComment(t *testing.T) {
-	firstCoreReviewer := membership.AvailableReviewers()[0]
-	secondCoreReviewer := membership.AvailableReviewers()[1]
+	availableReviewers := membership.AvailableReviewers()
+	firstCoreReviewer := availableReviewers[0]
+	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
 		pullRequest        *github.PullRequest
 		state              pullRequestReviewState
 		sinceDays          int
 		expectedStrings    []string
 		notExpectedStrings []string
+		currentReviewer    string
 	}{
 		// waitingForMerge
 		"waitingForMerge one week": {
@@ -805,7 +808,7 @@ func TestFormatReminderComment(t *testing.T) {
 					&github.User{Login: github.String("other-reviewer")},
 				},
 			},
-			state: waitingForMerge,
+			state:     waitingForMerge,
 			sinceDays: 5,
 			expectedStrings: []string{
 				"waiting for merge for 1 week",
@@ -933,6 +936,30 @@ func TestFormatReminderComment(t *testing.T) {
 				"@other-reviewer",
 			},
 		},
+		"waitingForReview three days with current reviewer": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String("pr-author")},
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},
+					&github.User{Login: github.String(secondCoreReviewer)},
+					&github.User{Login: github.String("other-reviewer")},
+				},
+			},
+			state:     waitingForReview,
+			sinceDays: 3,
+			expectedStrings: []string{
+				"waiting for review for 3 weekdays",
+				"disable-review-reminders",
+				"@" + secondCoreReviewer,
+			},
+			notExpectedStrings: []string{
+				"@GoogleCloudPlatform/terraform-team",
+				"@pr-author",
+				"@other-reviewer",
+				"@" + firstCoreReviewer,
+			},
+			currentReviewer: secondCoreReviewer,
+		},
 
 		// waitingForContributor
 		"waitingForContributor two weeks": {
@@ -1048,7 +1075,7 @@ func TestFormatReminderComment(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 
-			comment, err := formatReminderComment(tc.pullRequest, tc.state, tc.sinceDays)
+			comment, err := formatReminderComment(tc.pullRequest, tc.state, tc.sinceDays, tc.currentReviewer)
 			assert.Nil(t, err)
 
 			for _, s := range tc.expectedStrings {

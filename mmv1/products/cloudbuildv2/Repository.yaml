@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,96 +11,101 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Repository
-base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories
-create_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories?repositoryId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories/{{name}}
-immutable: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'Repository'
+description: "A repository associated to a parent connection."
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/build/docs'
   api: 'https://cloud.google.com/build/docs/api/reference/rest'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories'
+self_link: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/repositories?repositoryId={{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
-description: "A repository associated to a parent connection."
+  result:
+    resource_inside_response: false
+custom_code:
+  encoder: 'templates/terraform/encoders/cloudbuildv2_repository.go.tmpl'
 exclude_tgc: true
 legacy_long_form_project: true
 examples:
 # These tests depend on secrets stored in a separate project, so we prefer not
 # to show them in the docs.
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudbuildv2_repository_ghe'
+  - name: 'cloudbuildv2_repository_ghe'
     primary_resource_id: 'primary'
-    skip_docs: true
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudbuildv2_repository_github'
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
-    skip_docs: true
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudbuildv2_repository_gle'
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
-    skip_docs: true
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudbuildv2_repository_ghe_doc'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'cloudbuildv2_repository_github_doc'
-    skip_test: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/cloudbuildv2_repository.go.erb
+    exclude_docs: true
+  - name: 'cloudbuildv2_repository_ghe_doc'
+    exclude_test: true
+  - name: 'cloudbuildv2_repository_github_doc'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: The location for the resource
     url_param_only: true
     immutable: true
-    default_from_api: true  # EXTRACT_FROM_FIELD_IF_EMPTY
-  - !ruby/object:Api::Type::ResourceRef
-    name: parent_connection
-    resource: connection
-    imports: name
+ # EXTRACT_FROM_FIELD_IF_EMPTY
+    default_from_api: true
+  - name: 'parent_connection'
+    type: ResourceRef
     description: The connection for the resource
     url_param_only: true
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    resource: 'connection'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: Name of the repository.
     required: true
     immutable: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: remoteUri
+  - name: 'remoteUri'
+    type: String
     description: Required. Git Clone HTTPS URI.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: Output only. Server assigned timestamp for when the connection was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: Output only. Server assigned timestamp for when the connection was updated.
     output: true
-  - !ruby/object:Api::Type::KeyValueAnnotations
-    name: annotations
+  - name: 'annotations'
+    type: KeyValueAnnotations
     description: Allows clients to store small amounts of arbitrary data.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: etag
+  - name: 'etag'
+    type: String
     description: This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
     output: true

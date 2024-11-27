@@ -113,6 +113,10 @@ func (mr *mockRunner) WriteFile(name, data string) error {
 	return nil
 }
 
+func (mr *mockRunner) AppendFile(name, data string) error {
+	return nil
+}
+
 func (mr *mockRunner) Copy(src, dest string) error {
 	mr.calledMethods["Copy"] = append(mr.calledMethods["Copy"], ParameterList{src, dest})
 	return nil

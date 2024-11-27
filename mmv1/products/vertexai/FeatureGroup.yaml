@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,99 +11,95 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: FeatureGroup
-base_url: projects/{{project}}/locations/{{region}}/featureGroups
-create_url: projects/{{project}}/locations/{{region}}/featureGroups?featureGroupId={{name}}
-self_link: projects/{{project}}/locations/{{region}}/featureGroups/{{name}}
-update_verb: :PATCH
-update_mask: true
-create_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'FeatureGroup'
+description: Vertex AI Feature Group.
+references:
   guides:
     'Creating a Feature Group': 'https://cloud.google.com/vertex-ai/docs/featurestore/latest/create-featuregroup'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.featureGroups'
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-    - update
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/featureGroups'
+self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/featureGroups?featureGroupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: Vertex AI Feature Group.
-autogen_async: false
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: vertex_ai_feature_group
-    primary_resource_id: feature_group
-    ignore_read_extra:
-      - description
+  - name: 'vertex_ai_feature_group'
+    primary_resource_id: 'feature_group'
     vars:
-      job_id: job_load
-      feature_group_name: example_feature_group
+      job_id: 'job_load'
+      feature_group_name: 'example_feature_group'
+    ignore_read_extra:
+      - 'description'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of feature group. eg us-central1
     url_param_only: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: The resource name of the Feature Group.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: createTime
-    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'createTime'
+    type: String
     description: The timestamp of when the FeatureGroup was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: updateTime
     output: true
+  - name: 'updateTime'
+    type: String
     description: The timestamp of when the FeatureGroup was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: etag
-    description: Used to perform consistent read-modify-write updates.
     output: true
+  - name: 'etag'
+    type: String
+    description: Used to perform consistent read-modify-write updates.
     ignore_read: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: The labels with user-defined metadata to organize your FeatureGroup.
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: The description of the FeatureGroup.
     # When API starts returning description, this line should be removed.
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_feature_group_ignore_description.go.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: bigQuery
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_feature_group_ignore_description.go.tmpl'
+  - name: 'bigQuery'
+    type: NestedObject
     description: Indicates that features for this group come from BigQuery Table/View. By default treats the source as a sparse time series source, which is required to have an entityId and a feature_timestamp column in the source.
     update_mask_fields:
       - 'bigQuery.entityIdColumns'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: bigQuerySource
+      - name: 'bigQuerySource'
+        type: NestedObject
+        description: The BigQuery source URI that points to either a BigQuery Table or View.
         required: true
         immutable: true
-        description: The BigQuery source URI that points to either a BigQuery Table or View.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'inputUri'
-            required: true
+          - name: 'inputUri'
+            type: String
             description: 'BigQuery URI to a table, up to 2000 characters long. For example: `bq://projectId.bqDatasetId.bqTableId.`'
-      - !ruby/object:Api::Type::Array
-        name: entityIdColumns
+            required: true
+      - name: 'entityIdColumns'
+        type: Array
         description: Columns to construct entityId / row keys. If not provided defaults to entityId.
-        item_type: Api::Type::String
+        item_type:
+          type: String

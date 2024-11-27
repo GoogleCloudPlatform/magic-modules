@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,82 +11,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AuthorizedOrgsDesc'
-base_url: ''
-create_url: '{{parent}}/authorizedOrgsDescs'
-self_link: '{{name}}'
-update_verb: :PATCH
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'gcloud docs': 'https://cloud.google.com/beyondcorp-enterprise/docs/cross-org-authorization'
-  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.authorizedOrgsDescs'
 description: |
   An authorized organizations description describes a list of organizations
   (1) that have been authorized to use certain asset (for example, device) data
   owned by different organizations at the enforcement points, or (2) with certain
   asset (for example, device) have been authorized to access the resources in
   another organization at the enforcement points.
-docs: !ruby/object:Provider::Terraform::Docs
+references:
+  guides:
+    'gcloud docs': 'https://cloud.google.com/beyondcorp-enterprise/docs/cross-org-authorization'
+  api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.authorizedOrgsDescs'
+docs:
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
     in the provider configuration. Otherwise the ACM API will return a 403 error.
     Your account must have the `serviceusage.services.use` permission on the
     `billing_project` you defined.
-autogen_async: true
 id_format: '{{name}}'
-import_format: ['{{name}}']
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_authorized_orgs_desc_basic'
-    primary_resource_id: 'authorized-orgs-desc'
-    skip_test: true
+base_url: ''
+self_link: '{{name}}'
+create_url: '{{parent}}/authorizedOrgsDescs'
+update_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep_2_min.go.tmpl'
+  pre_update: 'templates/terraform/update_mask.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
-skip_sweeper: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-  pre_update: templates/terraform/update_mask.erb
-  post_create: templates/terraform/post_create/sleep_2_min.go.erb
-  custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
+exclude_sweeper: true
+examples:
+  - name: 'access_context_manager_authorized_orgs_desc_basic'
+    primary_resource_id: 'authorized-orgs-desc'
+    exclude_test: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    immutable: true
-    required: true
+  - name: 'parent'
+    type: String
     description: |
       Required. Resource name for the access policy which owns this `AuthorizedOrgsDesc`.
-    ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: name
-    immutable: true
     required: true
+    immutable: true
+    ignore_read: true
+  - name: 'name'
+    type: String
     description: |
       Resource name for the `AuthorizedOrgsDesc`. Format:
       `accessPolicies/{access_policy}/authorizedOrgsDescs/{authorized_orgs_desc}`.
       The `authorized_orgs_desc` component must begin with a letter, followed by
       alphanumeric characters or `_`.
       After you create an `AuthorizedOrgsDesc`, you cannot change its `name`.
-  - !ruby/object:Api::Type::Array
-    name: orgs
+    required: true
+    immutable: true
+  - name: 'orgs'
+    type: Array
     description: |
       The list of organization ids in this AuthorizedOrgsDesc.
       Format: `organizations/<org_number>`
       Example: `organizations/123456`
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Enum
-    name: assetType
-    immutable: true
+    item_type:
+      type: String
+  - name: 'assetType'
+    type: Enum
     description: |
       The type of entities that need to use the authorization relationship during
       evaluation, such as a device. Valid values are "ASSET_TYPE_DEVICE" and
       "ASSET_TYPE_CREDENTIAL_STRENGTH".
-    values:
-      - :ASSET_TYPE_DEVICE
-      - :ASSET_TYPE_CREDENTIAL_STRENGTH
-  - !ruby/object:Api::Type::Enum
-    name: authorizationDirection
     immutable: true
+    enum_values:
+      - 'ASSET_TYPE_DEVICE'
+      - 'ASSET_TYPE_CREDENTIAL_STRENGTH'
+  - name: 'authorizationDirection'
+    type: Enum
     description: |
       The direction of the authorization relationship between this organization
       and the organizations listed in the "orgs" field. The valid values for this
@@ -105,24 +122,25 @@ parameters:
       direction, organizations B and C must specify
       "AUTHORIZATION_DIRECTION_FROM" as the authorization direction in their
       "AuthorizedOrgsDesc" resource.
-    values:
-      - :AUTHORIZATION_DIRECTION_TO
-      - :AUTHORIZATION_DIRECTION_FROM
-  - !ruby/object:Api::Type::Enum
-    name: authorizationType
     immutable: true
+    enum_values:
+      - 'AUTHORIZATION_DIRECTION_TO'
+      - 'AUTHORIZATION_DIRECTION_FROM'
+  - name: 'authorizationType'
+    type: Enum
     description: |
       A granular control type for authorization levels. Valid value is "AUTHORIZATION_TYPE_TRUST".
-    values:
-      - :AUTHORIZATION_TYPE_TRUST
+    immutable: true
+    enum_values:
+      - 'AUTHORIZATION_TYPE_TRUST'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the AuthorizedOrgsDesc was created in UTC.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the AuthorizedOrgsDesc was updated in UTC.
     output: true

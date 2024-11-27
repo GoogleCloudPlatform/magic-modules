@@ -30,4 +30,7 @@
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
 		{{- end }}
 	{{- end }}
+	{{- if and $.HasNewLine (gt (len $.TestEnvVars) 0)}}
+	{{""}}
+	{{- end}}
 {{- end }}

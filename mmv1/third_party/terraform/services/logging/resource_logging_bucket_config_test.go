@@ -256,6 +256,7 @@ func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, rete
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
+	deletion_protection = false
 }
 
 resource "google_logging_folder_bucket_config" "basic" {
@@ -275,6 +276,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
@@ -294,6 +296,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 // time_sleep would allow for permissions to be granted before creating log bucket
@@ -323,6 +326,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "fixed_locked" {
@@ -349,6 +353,7 @@ resource "google_project" "default" {
 	name            = "%{project_name}"
 	org_id          = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "logging_service" {
@@ -503,6 +508,7 @@ func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
 				name       = "%{project_name}"
 				org_id     = "%{org_id}"
 				billing_account = "%{billing_account_name}"
+				deletion_policy = "DELETE"
 			}
 			
 			resource "google_logging_project_bucket_config" "basic" {
@@ -621,6 +627,7 @@ resource "google_project" "default" {
 	name            = "%{project_name}"
 	org_id          = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "basic" {

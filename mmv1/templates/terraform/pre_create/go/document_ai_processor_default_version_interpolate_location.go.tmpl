@@ -1,5 +1,0 @@
-if strings.Contains(url,"https://-"){
-	location := tpgresource.GetRegionFromRegionalSelfLink(url)
-	url = strings.TrimPrefix(url, "https://")
-	url = "https://" + location + url
-}

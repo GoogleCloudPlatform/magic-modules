@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,108 +11,107 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-name: Tensorboard
-base_url: projects/{{project}}/locations/{{region}}/tensorboards
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+---
+name: 'Tensorboard'
+description: |-
+  Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.tensorboards'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/tensorboards'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+  error:
     path: 'error'
     message: 'message'
-description: |-
-  Tensorboard is a physical database that stores users' training metrics. A default Tensorboard is provided in each region of a GCP project. If needed users can also create extra Tensorboards in their projects.
+custom_code:
+  custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_tensorboard'
+  - name: 'vertex_ai_tensorboard'
     primary_resource_id: 'tensorboard'
     vars:
       display_name: 'terraform'
     ignore_read_extra:
       - 'project'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_tensorboard_full'
+  - name: 'vertex_ai_tensorboard_full'
     primary_resource_id: 'tensorboard'
     vars:
       display_name: 'terraform'
       kms_key_name: 'kms-name'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/vertex_ai_tensorboard_import.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the tensorboard. eg us-central1
     url_param_only: true
     immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: Name of the Tensorboard.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+  - name: 'displayName'
+    type: String
     description: User provided name of this Tensorboard.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
+  - name: 'description'
+    type: String
     description: Description of this Tensorboard.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'encryptionSpec'
-    immutable: true
+  - name: 'encryptionSpec'
+    type: NestedObject
     description: |
       Customer-managed encryption key spec for a Tensorboard. If set, this Tensorboard and all sub-resources of this Tensorboard will be secured by this key.
+    immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyName'
-        required: true
+      - name: 'kmsKeyName'
+        type: String
         description: |
           The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
+        required: true
         immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'blobStoragePathPrefix'
+  - name: 'blobStoragePathPrefix'
+    type: String
     description:
       Consumer project Cloud Storage path prefix used to store blob data, which
       can either be a bucket or directory. Does not end with a '/'.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'runCount'
+  - name: 'runCount'
+    type: String
     description: The number of Runs stored in this Tensorboard.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp of when the Tensorboard was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::String
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp of when the Tensorboard was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       The labels with user-defined metadata to organize your Tensorboards.

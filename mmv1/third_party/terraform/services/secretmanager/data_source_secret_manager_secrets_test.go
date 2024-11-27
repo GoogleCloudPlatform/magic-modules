@@ -42,6 +42,10 @@ func TestAccDataSourceSecretManagerSecrets_basic(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 
@@ -52,6 +56,16 @@ resource "google_secret_manager_secret" "foo" {
       }
     }
   }
+
+  labels = {
+    label = "my-label"
+  }
+
+  annotations = {
+    key1 = "value1"
+  }
+
+  version_destroy_ttl = "360000s"
 }
 
 data "google_secret_manager_secrets" "foo" {
@@ -94,6 +108,10 @@ func TestAccDataSourceSecretManagerSecrets_filter(t *testing.T) {
 
 func testAccDataSourceSecretManagerSecrets_filter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_secret_manager_secret" "foo" {
   secret_id = "tf-test-secret-%{random_suffix}"
 
@@ -103,6 +121,14 @@ resource "google_secret_manager_secret" "foo" {
         location = "us-central1"
       }
     }
+  }
+
+  labels = {
+    label = "my-label"
+  }
+
+  annotations = {
+    key1 = "value1"
   }
 }
 
@@ -115,6 +141,14 @@ resource "google_secret_manager_secret" "bar" {
         location = "us-east5"
       }
     }
+  }
+
+  labels = {
+    label= "my-label2"
+  }
+
+  annotations = {
+    key1 = "value1" 
   }
 }
 

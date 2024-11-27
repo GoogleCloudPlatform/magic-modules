@@ -1,6 +1,0 @@
-resource "google_iam_workload_identity_pool" "<%= ctx[:primary_resource_id] %>" {
-  workload_identity_pool_id = "<%= ctx[:vars]["workload_identity_pool_id"] %>"
-  display_name              = "Name of pool"
-  description               = "Identity pool for automated test"
-  disabled                  = true
-}

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,111 +11,117 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
---- !ruby/object:Api::Resource
-name: InstanceConfig
-base_url: projects/{{project}}/instanceConfigs
-update_mask: true
-update_verb: :PATCH
+---
+name: 'InstanceConfig'
 description: |
   A possible configuration for a Cloud Spanner instance. Configurations
   define the geographic placement of nodes and their replication.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    Official Documentation: https://cloud.google.com/spanner/
-  api: https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instanceConfigs
-async: !ruby/object:Api::OpAsync
-  actions: [create, update]
-  operation: !ruby/object:Api::OpAsync::Operation
-    base_url: '{{op_id}}'
-  result: !ruby/object:Api::OpAsync::Result
-    resource_inside_response: true
-autogen_async: true
+    'Official Documentation': 'https://cloud.google.com/spanner/'
+  api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instanceConfigs'
+docs:
 id_format: '{{project}}/{{name}}'
+base_url: 'projects/{{project}}/instanceConfigs'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  - projects/{{project}}/instanceConfigs/{{name}}
+  - 'projects/{{project}}/instanceConfigs/{{name}}'
   - '{{project}}/{{name}}'
   - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  constants: 'templates/terraform/constants/spanner_instance_config.go.tmpl'
+  encoder: 'templates/terraform/encoders/spanner_instance_config.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/spanner_instance_config_update.go.tmpl'
+  decoder: 'templates/terraform/decoders/spanner_instance_config.go.tmpl'
+exclude_tgc: true
+# Sweeper skipped as this resource has customized deletion.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: spanner_instance_config_basic
-    primary_resource_id: example
+  - name: 'spanner_instance_config_basic'
+    primary_resource_id: 'example'
     vars:
       instance_config_name: '"custom-nam11-config"'
     test_vars_overrides:
-      instance_config_name: '"custom-tf-test-nam11-config"'
-# Sweeper skipped as this resource has customized deletion.
-skip_sweeper: true
-exclude_tgc: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/spanner_instance_config.go.erb
-  update_encoder: templates/terraform/update_encoder/spanner_instance_config_update.go.erb
-  constants: 'templates/terraform/constants/spanner_instance_config.go.erb'
-  decoder: templates/terraform/decoders/spanner_instance_config.go.erb
+      'instance_config_name': '"custom-tf-test-nam11-config"'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       A unique identifier for the instance configuration. Values are of the
       form projects/<project>/instanceConfigs/[a-z][-a-z0-9]*
-    immutable: true
     required: true
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: displayName
+  - name: 'displayName'
+    type: String
     description: |
       The name of this instance configuration as it appears in UIs.
     required: true
-  - !ruby/object:Api::Type::String
-    name: baseConfig
+  - name: 'baseConfig'
+    type: String
     description: |
       Base configuration name, e.g. nam3, based on which this configuration is created.
       Only set for user managed configurations.
       baseConfig must refer to a configuration of type GOOGLE_MANAGED in the same project as this configuration.
     immutable: true
     default_from_api: true
-    custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: configType
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/spanner_instance_config.go.tmpl'
+  - name: 'configType'
+    type: String
     description: |
       Output only. Whether this instance config is a Google or User Managed Configuration.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: replicas
+  - name: 'replicas'
+    type: Array
     description: |
       The geographic placement of nodes in this instance configuration and their replication properties.
-    immutable: true
-    required: true
     is_set: true
+    required: true
+    immutable: true
     set_hash_func: replicasHash
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: location
+        - name: 'location'
+          type: String
           description: |
             The location of the serving resources, e.g. "us-central1".
           immutable: true
-        - !ruby/object:Api::Type::Enum
-          name: type
+        - name: 'type'
+          type: Enum
           description: |
             Indicates the type of replica.  See the [replica types
             documentation](https://cloud.google.com/spanner/docs/replication#replica_types)
             for more details.
           immutable: true
-          values:
-            - :READ_WRITE
-            - :READ_ONLY
-            - :WITNESS
-        - !ruby/object:Api::Type::Boolean
-          name: defaultLeaderLocation
-          default_value: false
-          immutable: true
+          enum_values:
+            - 'READ_WRITE'
+            - 'READ_ONLY'
+            - 'WITNESS'
+        - name: 'defaultLeaderLocation'
+          type: Boolean
           description: |-
             If true, this location is designated as the default leader location where
             leader replicas are placed.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+          immutable: true
+          default_value: false
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

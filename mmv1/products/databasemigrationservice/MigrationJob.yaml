@@ -1,0 +1,286 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MigrationJob'
+description: 'A migration job definition.'
+references:
+  guides:
+    'Database Migration': 'https://cloud.google.com/database-migration/docs/'
+  api: 'https://cloud.google.com/database-migration/docs/reference/rest/v1/projects.locations.migrationJobs/create'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/migrationJobs'
+self_link: 'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/migrationJobs?migrationJobId={{migration_job_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/migrationJobs/{{migration_job_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+examples:
+  - name: 'database_migration_service_migration_job_mysql_to_mysql'
+    primary_resource_id: 'mysqltomysql'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - name: 'database_migration_service_migration_job_postgres_to_postgres'
+    primary_resource_id: 'psqltopsql'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_csql: 'destination-csql'
+      destination_cp: 'destination-cp'
+  - name: 'database_migration_service_migration_job_postgres_to_alloydb'
+    primary_resource_id: 'psqltoalloydb'
+    vars:
+      migration_id: 'my-migrationid'
+      source_csql: 'source-csql'
+      source_sqldb_cert: 'cert'
+      source_sqldb_user: 'username'
+      source_sqldb_pass: 'password'
+      source_cp: 'source-cp'
+      destination_alloydb: 'destination-alloydb'
+      destination_cp: 'destination-cp'
+parameters:
+  - name: 'migrationJobId'
+    type: String
+    description: |
+      The ID of the migration job.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location where the migration job should reside.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of this migration job resource in the form of projects/{project}/locations/{location}/migrationJobs/{migrationJob}.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The migration job display name.
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The timestamp when the resource was created. A timestamp in RFC3339 UTC 'Zulu' format, accurate to nanoseconds. Example: '2014-10-02T15:01:23.045123456Z'.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The resource labels for migration job to use to annotate any related underlying resources such as Compute Engine VMs.
+  - name: 'state'
+    type: Enum
+    description: |
+      The current migration job state.
+    output: true
+    enum_values:
+      - 'DRAFT'
+      - 'NOT_STARTED'
+      - 'RUNNING'
+      - 'COMPLETED'
+      - 'STOPPED'
+      - 'FAILED'
+  - name: 'phase'
+    type: Enum
+    description: |
+      The current migration job phase.
+    output: true
+    enum_values:
+      - 'FULL_DUMP'
+      - 'CDC'
+      - 'PROMOTE_IN_PROGRESS'
+      - 'WAITING_FOR_SOURCE_WRITES_TO_STOP'
+      - 'PREPARING_THE_DUMP'
+      - 'READY_FOR_PROMOTE'
+  - name: 'error'
+    type: NestedObject
+    description: |
+      Output only. The error details in case of state FAILED.
+    output: true
+    properties:
+      - name: 'code'
+        type: Integer
+        description: |
+          The status code, which should be an enum value of google.rpc.Code.
+        output: true
+      - name: 'message'
+        type: String
+        description: |
+          Human readable message indicating details about the current status.
+        output: true
+      - name: 'details'
+        type: Array
+        description: |
+          A list of messages that carry the error details.
+        output: true
+        item_type:
+          type: KeyValuePairs
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of the migration job.
+    required: true
+    immutable: true
+    enum_values:
+      - 'ONE_TIME'
+      - 'CONTINUOUS'
+  - name: 'source'
+    type: String
+    description: |
+      The name of the source connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{sourceConnectionProfile}.
+    required: true
+    immutable: true
+  - name: 'destination'
+    type: String
+    description: |
+      The name of the destination connection profile resource in the form of projects/{project}/locations/{location}/connectionProfiles/{destinationConnectionProfile}.
+    required: true
+    immutable: true
+  - name: 'dumpFlags'
+    type: NestedObject
+    description: |
+      The initial dump flags.
+    properties:
+      - name: 'dumpFlags'
+        type: Array
+        description: |
+          A list of dump flags
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                The name of the flag
+            - name: 'value'
+              type: String
+              description: |
+                The vale of the flag
+  - name: 'performanceConfig'
+    type: NestedObject
+    description: |
+      Data dump parallelism settings used by the migration.
+    properties:
+      - name: 'dumpParallelLevel'
+        type: Enum
+        description: |
+          Initial dump parallelism level.
+        enum_values:
+          - 'MIN'
+          - 'OPTIMAL'
+          - 'MAX'
+  - name: 'dumpPath'
+    type: String
+    description: |
+      The path to the dump file in Google Cloud Storage,
+      in the format: (gs://[BUCKET_NAME]/[OBJECT_NAME]).
+      This field and the "dump_flags" field are mutually exclusive.
+  - name: 'dumpType'
+    type: Enum
+    description: |
+      The type of the data dump. Supported for MySQL to CloudSQL for MySQL
+      migrations only.
+    enum_values:
+      - 'LOGICAL'
+      - 'PHYSICAL'
+  - name: 'staticIpConnectivity'
+    type: NestedObject
+    description: |
+      If set to an empty object (`{}`), the source database will allow incoming
+      connections from the public IP of the destination database.
+      You can retrieve the public IP of the Cloud SQL instance from the
+      Cloud SQL console or using Cloud SQL APIs.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'reverseSshConnectivity'
+      - 'vpcPeeringConnectivity'
+    properties:
+      []
+  - name: 'reverseSshConnectivity'
+    type: NestedObject
+    description: |
+      The details of the VPC network that the source database is located in.
+    exactly_one_of:
+      - 'staticIpConnectivity'
+      - 'vpcPeeringConnectivity'
+    properties:
+      - name: 'vmIp'
+        type: String
+        description: |
+          The IP of the virtual machine (Compute Engine) used as the bastion server
+          for the SSH tunnel.
+      - name: 'vmPort'
+        type: Integer
+        description: |
+          The forwarding port of the virtual machine (Compute Engine) used as the
+          bastion server for the SSH tunnel.
+      - name: 'vm'
+        type: String
+        description: |
+          The name of the virtual machine (Compute Engine) used as the bastion server
+          for the SSH tunnel.
+      - name: 'vpc'
+        type: String
+        description: |
+          The name of the VPC to peer with the Cloud SQL private network.
+  - name: 'vpcPeeringConnectivity'
+    type: NestedObject
+    description: |
+      The details of the VPC network that the source database is located in.
+    exactly_one_of:
+      - 'staticIpConnectivity'
+      - 'reverseSshConnectivity'
+    properties:
+      - name: 'vpc'
+        type: String
+        description: |
+          The name of the VPC network to peer with the Cloud SQL private network.

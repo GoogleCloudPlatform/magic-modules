@@ -11,96 +11,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DeploymentResourcePool'
-base_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
-create_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
-self_link: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools/{{name}}'
-# No method is not defined for DeploymentResourcePools
-immutable: true
-create_verb: :POST
-references: !ruby/object:Api::Resource::ReferenceLinks
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.deploymentResourcePools
-async: !ruby/object:Api::OpAsync
-  actions:
-    - create
-    - delete
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error'
-    message: 'message'
 description: |-
   'DeploymentResourcePool can be shared by multiple deployed models,
   whose underlying specification consists of dedicated resources.'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/wrap_object_with_deployment_resource_pool_id.go.erb
+references:
+  guides:
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.deploymentResourcePools'
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
+self_link: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/deploymentResourcePools'
+# No method is not defined for DeploymentResourcePools
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+  encoder: 'templates/terraform/encoders/wrap_object_with_deployment_resource_pool_id.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'vertex_ai_deployment_resource_pool'
+  - name: 'vertex_ai_deployment_resource_pool'
     primary_resource_id: 'deployment_resource_pool'
     vars:
-      deployment_resource_pool_id: example-deployment-resource-pool
+      deployment_resource_pool_id: 'example-deployment-resource-pool'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of deployment resource pool. eg us-central1
     url_param_only: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: The resource name of deployment resource pool. The maximum length is 63 characters, and valid characters are `/^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$/`.
-    immutable: true
     required: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: 'dedicatedResources'
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'dedicatedResources'
+    type: NestedObject
     description: The underlying dedicated resources that the deployment resource pool uses.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'machineSpec'
+      - name: 'machineSpec'
+        type: NestedObject
+        description: The specification of a single machine used by the prediction
         required: true
         immutable: true
-        description: The specification of a single machine used by the prediction
         properties:
-          - !ruby/object:Api::Type::String
-            name: machineType
+          - name: 'machineType'
+            type: String
             description: The type of the machine. See the [list of machine types supported for prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types).
             immutable: true
-          - !ruby/object:Api::Type::String
-            name: acceleratorType
+          - name: 'acceleratorType'
+            type: String
             description:
               The type of accelerator(s) that may be attached to the
               machine as per accelerator_count. See possible values
               [here](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#AcceleratorType).
-          - !ruby/object:Api::Type::Integer
-            name: acceleratorCount
+          - name: 'acceleratorCount'
+            type: Integer
             description: The number of accelerators to attach to the machine.
-      - !ruby/object:Api::Type::Integer
-        name: minReplicaCount
-        required: true
-        immutable: true
+      - name: 'minReplicaCount'
+        type: Integer
         description:
           The minimum number of machine replicas this DeployedModel will
           be always deployed on. This value must be greater than or equal
           to 1. If traffic against the DeployedModel increases, it may
           dynamically be deployed onto more replicas, and as traffic
           decreases, some of these extra replicas may be freed.
-      - !ruby/object:Api::Type::Integer
-        name: maxReplicaCount
+        required: true
         immutable: true
+      - name: 'maxReplicaCount'
+        type: Integer
         description:
           The maximum number of replicas this DeployedModel may be
           deployed on when the traffic against it increases. If the
@@ -115,12 +111,12 @@ properties:
           Specifically, you will be charged for max_replica_count * number
           of cores in the selected machine type) and (max_replica_count *
           number of GPUs per replica in the selected machine type).
-      - !ruby/object:Api::Type::Array
-        name: autoscalingMetricSpecs
         immutable: true
+      - name: 'autoscalingMetricSpecs'
+        type: Array
         description: A list of the metric specifications that overrides a resource utilization metric.
-        item_type: !ruby/object:Api::Type::NestedObject
-          name: autoscalingMetricSpecs
+        immutable: true
+        item_type:
           description:
             The metric specifications that overrides a resource
             utilization metric (CPU utilization, accelerator's duty cycle,
@@ -139,23 +135,24 @@ properties:
             autoscaling_metric_specs.metric_name to
             `aiplatform.googleapis.com/prediction/online/cpu/utilization`
             and autoscaling_metric_specs.target to `80`.
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: metricName
-              required: true
+            - name: 'metricName'
+              type: String
               description:
                 'The resource metric name. Supported metrics: For Online Prediction:
                 * `aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle`
                 * `aiplatform.googleapis.com/prediction/online/cpu/utilization`'
-            - !ruby/object:Api::Type::Integer
-              name: target
+              required: true
+            - name: 'target'
+              type: Integer
               description:
                 The target resource utilization in percentage (1% - 100%)
                 for the given metric; once the real usage deviates from
                 the target by a certain percentage, the machine replicas
                 change. The default value is 60 (representing 60%) if not
                 provided.
-  - !ruby/object:Api::Type::String
-    name: 'createTime'
-    output: true
+  - name: 'createTime'
+    type: String
     description: A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    output: true

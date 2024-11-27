@@ -24,6 +24,6 @@ Before you begin, set up Docker (including configuring it to [authenticate with 
    ```
 4. Update cloudbuild yaml files to reference the image you just pushed by adding the `:testing` suffix
 5. Update files that will cause the cloudbuild yaml changes (and therefore your changes) to be exercised
-   - Tip: Modifying `mmv1/third_party/terraform/services/compute/metadata.go.erb` will trigger builds for TPG, TPGB, and TGC.
+   - Tip: Modifying `mmv1/third_party/terraform/services/compute/metadata.go.tmpl` will trigger builds for TPG, TPGB, and TGC.
 6. Create a PR with these changes.
 7. Verify that the cloudbuild steps that should use your testing image _are_ using your testing image (in the Execution Details tab for the step.)

@@ -1,248 +1,291 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the 'License');
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'GrpcRoute'
-base_url: 'projects/{{project}}/locations/global/grpcRoutes'
-create_url: 'projects/{{project}}/locations/global/grpcRoutes?grpcRouteId={{name}}'
-self_link: 'projects/{{project}}/locations/global/grpcRoutes/{{name}}'
-min_version: beta
-update_verb: :PATCH
-update_mask: true
 description: |
   GrpcRoute is the resource defining how gRPC traffic routed by a Mesh or Gateway resource is routed.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
+  guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.grpcRoutes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/global/grpcRoutes'
+self_link: 'projects/{{project}}/locations/global/grpcRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/global/grpcRoutes?grpcRouteId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/grpcRoutes/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-import_format: ['projects/{{project}}/locations/global/grpcRoutes/{{name}}']
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'network_services_grpc_route_basic'
+  - name: 'network_services_grpc_route_basic'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'my-grpc-route'
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'network_services_grpc_route_matches_and_actions'
+  - name: 'network_services_grpc_route_matches_and_actions'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'my-grpc-route'
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'network_services_grpc_route_actions'
+  - name: 'network_services_grpc_route_actions'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'my-grpc-route'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    url_param_only: true
-    immutable: true
+  - name: 'name'
+    type: String
     description: |
       Name of the GrpcRoute resource.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+  - name: 'selfLink'
+    type: String
     description: |
       Server-defined URL of this resource.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the GrpcRoute was created in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the GrpcRoute was updated in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: Set of label tags associated with the GrpcRoute resource.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    min_version: 'beta'
+  - name: 'description'
+    type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - !ruby/object:Api::Type::Array
-    name: hostnames
-    item_type: Api::Type::String
+    min_version: 'beta'
+  - name: 'hostnames'
+    type: Array
     description: |
       Required. Service hostnames with an optional port for which this route describes traffic.
+    min_version: 'beta'
     required: true
-  - !ruby/object:Api::Type::Array
-    name: meshes
-    item_type: Api::Type::String
+    item_type:
+      type: String
+  - name: 'meshes'
+    type: Array
     description: |
       List of meshes this GrpcRoute is attached to, as one of the routing rules to route the requests served by the mesh.
-  - !ruby/object:Api::Type::Array
-    name: gateways
-    item_type: Api::Type::String
+    min_version: 'beta'
+    item_type:
+      type: String
+  - name: 'gateways'
+    type: Array
     description: |
       List of gateways this GrpcRoute is attached to, as one of the routing rules to route the requests served by the gateway.
-  - !ruby/object:Api::Type::Array
-    name: rules
+    min_version: 'beta'
+    item_type:
+      type: String
+  - name: 'rules'
+    type: Array
     description: |
       Rules that define how traffic is routed and handled.
+    min_version: 'beta'
     required: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Array
-          name: matches
+        - name: 'matches'
+          type: Array
           description: |
             Matches define conditions used for matching the rule against incoming gRPC requests.
-          item_type: !ruby/object:Api::Type::NestedObject
+          min_version: 'beta'
+          item_type:
+            type: NestedObject
             properties:
-              - !ruby/object:Api::Type::Array
-                name: headers
+              - name: 'headers'
+                type: Array
                 description: |
                   Specifies a list of HTTP request headers to match against.
-                item_type: !ruby/object:Api::Type::NestedObject
+                min_version: 'beta'
+                item_type:
+                  type: NestedObject
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: key
+                    - name: 'key'
+                      type: String
                       description: |
                         Required. The key of the header.
+                      min_version: 'beta'
                       required: true
-                    - !ruby/object:Api::Type::String
-                      name: value
+                    - name: 'value'
+                      type: String
                       description: |
                         Required. The value of the header.
+                      min_version: 'beta'
                       required: true
-                    - !ruby/object:Api::Type::Enum
-                      name: 'type'
+                    - name: 'type'
+                      type: Enum
                       description: |
                         The type of match.
-                      values:
-                        - :TYPE_UNSPECIFIED
-                        - :EXACT
-                        - :REGULAR_EXPRESSION
-                      default_value: :EXACT
-              - !ruby/object:Api::Type::NestedObject
-                name: method
+                      min_version: 'beta'
+                      default_value: "EXACT"
+                      enum_values:
+                        - 'TYPE_UNSPECIFIED'
+                        - 'EXACT'
+                        - 'REGULAR_EXPRESSION'
+              - name: 'method'
+                type: NestedObject
                 description: |
                   A gRPC method to match against. If this field is empty or omitted, will match all methods.
+                min_version: 'beta'
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: grpcService
+                  - name: 'grpcService'
+                    type: String
                     description: |
                       Required. Name of the service to match against.
+                    min_version: 'beta'
                     required: true
-                  - !ruby/object:Api::Type::String
-                    name: grpcMethod
+                  - name: 'grpcMethod'
+                    type: String
                     description: |
                       Required. Name of the method to match against.
+                    min_version: 'beta'
                     required: true
-                  - !ruby/object:Api::Type::Boolean
-                    name: caseSensitive
+                  - name: 'caseSensitive'
+                    type: Boolean
                     description: |
                       Specifies that matches are case sensitive. The default value is true.
+                    min_version: 'beta'
                     default_value: true
-        - !ruby/object:Api::Type::NestedObject
-          name: action
+        - name: 'action'
+          type: NestedObject
           description: |
             Required. A detailed rule defining how to route traffic.
+          min_version: 'beta'
           properties:
-            - !ruby/object:Api::Type::Array
-              name: destinations
+            - name: 'destinations'
+              type: Array
               description: |
                 The destination to which traffic should be forwarded.
-              item_type: !ruby/object:Api::Type::NestedObject
+              min_version: 'beta'
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::String
-                    name: serviceName
+                  - name: 'serviceName'
+                    type: String
                     description: |
                       The URL of a BackendService to route traffic to.
-                  - !ruby/object:Api::Type::Integer
-                    name: weight
+                    min_version: 'beta'
+                  - name: 'weight'
+                    type: Integer
                     description: |
                       Specifies the proportion of requests forwarded to the backend referenced by the serviceName field.
-            - !ruby/object:Api::Type::NestedObject
-              name: faultInjectionPolicy
+                    min_version: 'beta'
+            - name: 'faultInjectionPolicy'
+              type: NestedObject
               description: |
                 The specification for fault injection introduced into traffic to test the resiliency of clients to backend service failure.
+              min_version: 'beta'
               properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: delay
+                - name: 'delay'
+                  type: NestedObject
                   description: |
                     Specification of how client requests are delayed as part of fault injection before being sent to a destination.
+                  min_version: 'beta'
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: fixedDelay
+                    - name: 'fixedDelay'
+                      type: String
                       description: |
                         Specify a fixed delay before forwarding the request.
-                    - !ruby/object:Api::Type::Integer
-                      name: percentage
+                      min_version: 'beta'
+                    - name: 'percentage'
+                      type: Integer
                       description: |
                         The percentage of traffic on which delay will be injected.
-                - !ruby/object:Api::Type::NestedObject
-                  name: abort
+                      min_version: 'beta'
+                - name: 'abort'
+                  type: NestedObject
                   description: |
                     Specification of how client requests are aborted as part of fault injection before being sent to a destination.
+                  min_version: 'beta'
                   properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: httpStatus
+                    - name: 'httpStatus'
+                      type: Integer
                       description: |
                         The HTTP status code used to abort the request.
-                    - !ruby/object:Api::Type::Integer
-                      name: percentage
+                      min_version: 'beta'
+                    - name: 'percentage'
+                      type: Integer
                       description: |
                         The percentage of traffic which will be aborted.
-            - !ruby/object:Api::Type::String
-              name: timeout
+                      min_version: 'beta'
+            - name: 'timeout'
+              type: String
               description: |
                 Specifies the timeout for selected route.
-            - !ruby/object:Api::Type::NestedObject
-              name: retryPolicy
+              min_version: 'beta'
+            - name: 'retryPolicy'
+              type: NestedObject
               description: |
                 Specifies the retry policy associated with this route.
+              min_version: 'beta'
               properties:
-                - !ruby/object:Api::Type::Array
-                  name: retryConditions
+                - name: 'retryConditions'
+                  type: Array
                   description: |
                     Specifies one or more conditions when this retry policy applies.
-                  item_type: !ruby/object:Api::Type::Enum
-                    name: retryCondition
+                  min_version: 'beta'
+                  item_type:
+                    type: Enum
                     description: Condition when this retry policy applies.
-                    values:
-                      - :connect-failure
-                      - :refused-stream
-                      - :cancelled
-                      - :deadline-exceeded
-                      - :resource-exhausted
-                      - :unavailable
-                - !ruby/object:Api::Type::Integer
-                  name: numRetries
+                    enum_values:
+                      - 'connect-failure'
+                      - 'refused-stream'
+                      - 'cancelled'
+                      - 'deadline-exceeded'
+                      - 'resource-exhausted'
+                      - 'unavailable'
+                - name: 'numRetries'
+                  type: Integer
                   description: |
                     Specifies the allowed number of retries.
+                  min_version: 'beta'

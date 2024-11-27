@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/18936")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -63,6 +64,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -150,6 +152,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -189,6 +192,8 @@ resource "google_vpc_access_connector" "bar" {
   region = "us-central1"
   ip_cidr_range = "10.8.0.16/28"
   network = "default"
+  min_throughput  = 200
+  max_throughput = 300
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -269,6 +274,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {

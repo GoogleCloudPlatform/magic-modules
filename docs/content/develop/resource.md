@@ -1,6 +1,6 @@
 ---
 title: "Add or modify a resource"
-weight: 30
+weight: 13
 aliases:
   - /docs/how-to/add-mmv1-resource
   - /how-to/add-mmv1-resource
@@ -27,11 +27,11 @@ aliases:
 
 This page describes how to add a new resource to the `google` or `google-beta` Terraform provider using MMv1 and/or handwritten code.
 
-For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/get-started/how-magic-modules-works.md" >}}).
+For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/" >}}).
 
 ## Before you begin
 
-1. Complete the [Generate the providers]({{< ref "/get-started/generate-providers" >}}) quickstart to set up your environment and your Google Cloud project.
+1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```
    cd ~/magic-modules
@@ -46,7 +46,7 @@ For more information about types of resources and the generation process overall
 
 {{< tabs "resource" >}}
 {{< tab "MMv1" >}}
-1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/get-started/how-magic-modules-works.md#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
+1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
    ```yaml
    # Copyright 2024 Google Inc.
@@ -62,13 +62,13 @@ For more information about types of resources and the generation process overall
    # See the License for the specific language governing permissions and
    # limitations under the License.
 
-   --- !ruby/object:Api::Resource
+   ---
    # API resource name
    name: 'ResourceName'
    # Resource description for the provider documentation.
    description: |
      RESOURCE_DESCRIPTION
-   references: !ruby/object:Api::Resource::ReferenceLinks
+   references:
      guides:
       # Link to quickstart in the API's Guides section. For example:
       # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
@@ -92,7 +92,7 @@ For more information about types of resources and the generation process overall
    # If true, the resource and all its fields are considered immutable - that is,
    # only creatable, not updatable. Individual fields can override this if they
    # have a custom update method in the API.
-   # immutable: true
+   immutable: true
 
    # URL for the resource's standard Create method, including query parameters.
    # https://google.aip.dev/133
@@ -106,7 +106,7 @@ For more information about types of resources and the generation process overall
    # the field values from the resource at runtime.
    # update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
    # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
-   update_verb: :PATCH
+   update_verb: 'PATCH'
    # If true, the resource sets an `updateMask` query parameter listing modified
    # fields when updating the resource. If false, it does not.
    update_mask: true
@@ -115,23 +115,23 @@ For more information about types of resources and the generation process overall
    # the resource. If false, that code is not generated.
    autogen_async: true
    # Sets parameters for handling operations returned by the API.
-   async: !ruby/object:Api::OpAsync
+   async:
      # Overrides which API calls return operations. Default: ['create',
      # 'update', 'delete']
      # actions: ['create', 'update', 'delete']
-     operation: !ruby/object:Api::OpAsync::Operation
+     operation:
        base_url: '{{op_id}}'
 
    parameters:
-     - !ruby/object:Api::Type::String
-       name: 'location'
+     - name: 'location'
+       type: String
        required: true
        immutable: true
        url_param_only: true
        description: |
          LOCATION_DESCRIPTION
-     - !ruby/object:Api::Type::String
-       name: 'name'
+     - name: 'name'
+       type: String
        required: true
        immutable: true
        url_param_only: true
@@ -151,21 +151,20 @@ For more information about types of resources and the generation process overall
 > **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.
 
 1. Add the resource in MMv1.
-2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}})
+2. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}})
 3. From the beta provider, copy the files generated for the resource to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
    - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
-   - Sweepers: [`magic-modules/mmv1/third_party/terraform/utils`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/utils)
+   - Sweepers: Put to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and add `_sweeper` suffix to the filename
 4. Modify the Go code as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
    - Remove the comments at the top of the file.
    - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.erb`
-     - Add `<% autogen_exception -%>` to the top of the file
-     - Wrap each beta-only test in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
+     - Change the file suffix to `.go.tmpl`
+     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
     - [Add resource tests]({{< ref "/develop/test/test.md" >}})
@@ -189,8 +188,8 @@ additional work to implement.
 {{< tabs "MMv1 types" >}}
 {{< tab "Simple" >}}
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: String
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -218,8 +217,8 @@ Replace `String` in the field type with one of the following options:
 {{< /tab >}}
 {{< tab "Enum" >}}
 ```yaml
-- !ruby/object:Api::Type::Enum
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: Enum
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -232,15 +231,15 @@ Replace `String` in the field type with one of the following options:
   exactly_one_of:
     - field_one
     - nested_object.0.nested_field
-  values:
-    - :VALUE_ONE
-    - :VALUE_TWO
+  enum_values:
+    - 'VALUE_ONE'
+    - 'VALUE_TWO'
 ```
 {{< /tab >}}
 {{< tab "ResourceRef" >}}
 ```yaml
-- !ruby/object:Api::Type::ResourceRef
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: ResourceRef
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -259,8 +258,8 @@ Replace `String` in the field type with one of the following options:
 {{< /tab >}}
 {{< tab "Array" >}}
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: Array
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -274,21 +273,23 @@ Replace `String` in the field type with one of the following options:
     - field_one
     - nested_object.0.nested_field
   # Array of primitives
-  item_type: Api::Type::String
+  item_type: 
+    type: String
 
   # Array of nested objects
-  item_type: !ruby/object:Api::Type::NestedObject
+  item_type: 
+    type: NestedObject
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'FIELD_NAME'
+      - name: 'FIELD_NAME'
+        type: String
         description: |
           MULTI_LINE_FIELD_DESCRIPTION
 ```
 {{< /tab >}}
 {{< tab "NestedObject" >}}
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'API_FIELD_NAME'
+- name: 'API_FIELD_NAME'
+  type: NestedObject
   description: |
     MULTILINE_FIELD_DESCRIPTION
   min_version: beta
@@ -302,27 +303,29 @@ Replace `String` in the field type with one of the following options:
     - field_one
     - nested_object.0.nested_field
   properties:
-    - !ruby/object:Api::Type::String
-      name: 'FIELD_NAME'
+    - name: 'FIELD_NAME'
+      type: String
       description: |
         MULTI_LINE_FIELD_DESCRIPTION
 ```
 {{< /tab >}}
 {{< tab "Map" >}}
 ```yaml
-  - !ruby/object:Api::Type::Map
-    name: 'API_FIELD_NAME'
+  - name: 'API_FIELD_NAME'
+    type: Map
     description: |
       MULTILINE_FIELD_DESCRIPTION
-    key_name: KEY_NAME
+    key_name: 'KEY_NAME'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
-    value_type: !ruby/object:Api::Type::NestedObject
+    value_type:
+      name: mapObjectName
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'FIELD_NAME'
-          description: |
-            MULTI_LINE_FIELD_DESCRIPTION
+      - name: 'FIELD_NAME'
+        type: String
+        description: |
+          MULTI_LINE_FIELD_DESCRIPTION
 ```
 
 This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
@@ -350,7 +353,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
    - "Flatteners" convert API response data to Terraform resource data.
    - For top level fields, add a flattener. Call `d.Set()` on the flattened API response value to store it in Terraform state.
    - For other fields, add logic to the parent field's flattener to convert the value from the API response to the Terraform state value. Use a nested flattener for complex logic.
-4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.erb` and wrap the beta-only code in a version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`.
+4. If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
    - Add a new guard rather than adding the field to an existing guard; it is easier to read.
 {{< /tab >}}
 {{< /tabs >}}
@@ -367,30 +370,29 @@ IAM support for MMv1-generated resources is configured within the `ResourceName.
 1. Add the following top-level block to `ResourceName.yaml` directly above `parameters`.
 
 ```yaml
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+iam_policy:
   # Name of the field on the terraform IAM resources which references
   # the parent resource. Update to match the parent resource's name.
   parent_resource_attribute: 'resource_name'
   # Character preceding setIamPolicy in the full URL for the API method.
   # Usually `:`
   method_name_separator: ':'
-  # HTTP method for getIamPolicy. Usually :POST.
-  fetch_iam_policy_verb: :POST
-  # Overrides the HTTP method for setIamPolicy. Default: :POST
-  # set_iam_policy_verb: :POST
+  # HTTP method for getIamPolicy. Usually 'POST'.
+  fetch_iam_policy_verb: 'POST'
+  # Overrides the HTTP method for setIamPolicy. Default: 'POST'
+  # set_iam_policy_verb: 'POST'
 
   # Must match the parent resource's `import_format` (or `self_link` if
   # `import_format` is unset), but with the `parent_resource_attribute`
   # value substituted for the final field.
-  import_format: [
-    'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
-  ]
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/resourcenames/{{resource_name}}'
 
   # If IAM conditions are supported, set this attribute to indicate how the
-  # conditions should be passed to the API. Allowed values: :QUERY_PARAM,
-  # :REQUEST_BODY, :QUERY_PARAM_NESTED. Note: :QUERY_PARAM_NESTED should
+  # conditions should be passed to the API. Allowed values: 'QUERY_PARAM',
+  # 'REQUEST_BODY', 'QUERY_PARAM_NESTED'. Note: 'QUERY_PARAM_NESTED' should
   # only be used if the query param field contains a `.`
-  # iam_conditions_request_type: :REQUEST_BODY
+  # iam_conditions_request_type: 'REQUEST_BODY'
 
   # Marks IAM support as beta-only
   # min_version: beta
@@ -404,7 +406,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 
 ### Add support in MMv1
 
-1. Follow the MMv1 directions in [Add the resource]({{<ref "#add-the-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields:
+1. Follow the MMv1 directions in [Add a resource]({{<ref "#add-a-resource" >}}) to create a skeleton ResourceName.yaml file for the handwritten resource, but set only the following top-level fields:
    - `name`
    - `description` (required but unused)
    - `base_url` (set to URL of IAM parent resource)
@@ -418,7 +420,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 
 ### Convert to handwritten (not usually necessary)
 
-1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}})
+1. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}})
 2. From the beta provider, copy the files generated for the IAM resources to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
@@ -427,10 +429,9 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the comments at the top of the file.
    - If any of the added Go code is beta-only:
-     - Change the file suffix to `.go.erb`
-     - Add `<% autogen_exception -%>` to the top of the file
-     - Wrap each beta-only code block (including any imports) in a separate version guard: `<% unless version == 'ga' -%>...<% else -%>...<% end -%>`
-4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb)
+     - Change the file suffix to `.go.tmpl`
+     - Wrap each beta-only code block (including any imports) in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+4. Register the binding, member, and policy resources `handwrittenIAMResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 {{< /tab >}}
 {{< /tabs >}}
@@ -441,7 +442,7 @@ iam_policy: !ruby/object:Api::Resource::IamPolicy
 {{< tab "MMv1" >}}
 Documentation is autogenerated based on the resource and field configurations. To preview the documentation:
 
-1. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
+1. [Generate the providers]({{< ref "/develop/generate-providers.md" >}})
 2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -450,7 +451,7 @@ Documentation is autogenerated based on the resource and field configurations. T
 1. Open the resource documentation in [`magic-modules/third_party/terraform/website/docs/r/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r) using an editor of your choice.
    - The name of the file is the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
 2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/develop/handwritten-docs-style-guide" >}}).
-3. [Generate the providers]({{< ref "/get-started/generate-providers.md" >}})
+3. [Generate the providers]({{< ref "/develop/generate-providers.md" >}})
 4. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< /tabs >}}

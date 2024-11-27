@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,70 +11,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Subscription'
 description: |
   A named resource representing the stream of messages from a single,
   specific topic, to be delivered to the subscribing application.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Managing Subscriptions': 'https://cloud.google.com/pubsub/lite/docs/subscriptions'
   api: 'https://cloud.google.com/pubsub/lite/docs/reference/rest/v1/admin.projects.locations.subscriptions'
-base_url: projects/{{project}}/locations/{{zone}}/subscriptions
-create_url: projects/{{project}}/locations/{{zone}}/subscriptions?subscriptionId={{name}}
-update_verb: :PATCH
+docs:
+base_url: 'projects/{{project}}/locations/{{zone}}/subscriptions'
+create_url: 'projects/{{project}}/locations/{{zone}}/subscriptions?subscriptionId={{name}}'
+update_url: 'projects/{{project}}/locations/{{zone}}/subscriptions/{{name}}'
+update_verb: 'PATCH'
 update_mask: true
-update_url: projects/{{project}}/locations/{{zone}}/subscriptions/{{name}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/pubsub_lite.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'pubsub_lite_subscription_basic'
+  - name: 'pubsub_lite_subscription_basic'
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/pubsub_lite.erb
-
 parameters:
-  - !ruby/object:Api::Type::String
-    name: region
+  - name: 'region'
+    type: String
     description: The region of the pubsub lite topic.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: zone
+  - name: 'zone'
+    type: String
     description: The zone of the pubsub lite topic.
     url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: 'Name of the subscription.'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: templates/terraform/custom_expand/resource_from_self_link.go.erb
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'
 properties:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'topic'
-    resource: 'Topic'
-    imports: 'name'
+  - name: 'topic'
+    type: ResourceRef
     description: |
       A reference to a Topic resource.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: templates/terraform/custom_expand/computed_lite_subscription_topic.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: 'deliveryConfig'
+    custom_expand: 'templates/terraform/custom_expand/computed_lite_subscription_topic.tmpl'
+    resource: 'Topic'
+    imports: 'name'
+  - name: 'deliveryConfig'
+    type: NestedObject
     description: |
       The settings for this subscription's message delivery.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'deliveryRequirement'
-        required: true
+      - name: 'deliveryRequirement'
+        type: Enum
         description: |
           When this subscription should send messages to subscribers relative to messages persistence in storage.
-        values:
-          - :DELIVER_IMMEDIATELY
-          - :DELIVER_AFTER_STORED
-          - :DELIVERY_REQUIREMENT_UNSPECIFIED
+        required: true
+        enum_values:
+          - 'DELIVER_IMMEDIATELY'
+          - 'DELIVER_AFTER_STORED'
+          - 'DELIVERY_REQUIREMENT_UNSPECIFIED'

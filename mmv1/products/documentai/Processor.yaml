@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,57 +11,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Processor'
-base_url: 'projects/{{project}}/locations/{{location}}/processors'
-immutable: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/document-ai/docs/overview'
   api: 'https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations.processors'
-description: |
-  The first-class citizen for Document AI. Each processor defines how to extract structural information from a document.
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/processors'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'documentai_processor'
+  - name: 'documentai_processor'
     primary_resource_id: 'processor'
     vars:
       processor_name: 'test-processor'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'documentai_processor_eu'
+  - name: 'documentai_processor_eu'
     primary_resource_id: 'processor'
-    skip_docs: true
     vars:
       processor_name: 'test-processor'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: |
       The location of the resource.
-    immutable: true
     url_param_only: true
     required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name of the processor.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'type'
-    required: true
-    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'type'
+    type: String
     description: |
       The type of processor. For possible types see the [official list](https://cloud.google.com/document-ai/docs/reference/rest/v1/projects.locations/fetchProcessorTypes#google.cloud.documentai.v1.DocumentProcessorService.FetchProcessorTypes)
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
     required: true
     immutable: true
+  - name: 'displayName'
+    type: String
     description: |
       The display name. Must be unique.
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
+    required: true
     immutable: true
+  - name: 'kmsKeyName'
+    type: String
     description: |
       The KMS key used for encryption/decryption in CMEK scenarios. See https://cloud.google.com/security-key-management.
+    immutable: true

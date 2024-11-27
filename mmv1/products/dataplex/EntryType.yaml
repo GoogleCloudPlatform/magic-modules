@@ -11,134 +11,132 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EntryType'
+description: |
+ An Entry Type is a template for creating Entries.
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/entryTypes?entryTypeId={{entry_type_id}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
-description: |
- An Entry Type is a template for creating Entries.
-import_format: ['projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'entry_type_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}',
-      '{{entry_type_id}}',
-    ]
+    - 'projects/{{project}}/locations/{{location}}/entryTypes/{{entry_type_id}}'
+    - '{{entry_type_id}}'
+custom_code:
+examples:
+  - name: 'dataplex_entry_type_basic'
+    primary_resource_id: 'test_entry_type_basic'
+    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
+    vars:
+      entry_type_name: 'entry-type-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+  - name: 'dataplex_entry_type_full'
+    primary_resource_id: 'test_entry_type_full'
+    primary_resource_name: 'fmt.Sprintf("tf-test-entry-type%s", context["random_suffix"])'
+    vars:
+      entry_type_name: 'entry-type-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    url_param_only: true
-    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where entry type will be created in.
-  - !ruby/object:Api::Type::String
-    name: 'entryTypeId'
     url_param_only: true
     immutable: true
+  - name: 'entryTypeId'
+    type: String
     description: |
       The entry type id of the entry type.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the EntryType, of the form: projects/{project_number}/locations/{location_id}/entryTypes/{entry_type_id}
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+  - name: 'uid'
+    type: String
     description: |
       System generated globally unique ID for the EntryType. This ID will be different if the EntryType is deleted and re-created with the same name.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
     output: true
+  - name: 'createTime'
+    type: Time
     description: |
       The time when the EntryType was created.
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       The time when the EntryType was last updated.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    output: true
+  - name: 'description'
+    type: String
     description: |
       Description of the EntryType.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       User friendly display name.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-defined labels for the EntryType.
-  - !ruby/object:Api::Type::Array
-    name: 'typeAliases'
+  - name: 'typeAliases'
+    type: Array
     description: |
       Indicates the class this Entry Type belongs to, for example, TABLE, DATABASE, MODEL.
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'platform'
+    item_type:
+      type: String
+  - name: 'platform'
+    type: String
     description: |
       The platform that Entries of this type belongs to.
-  - !ruby/object:Api::Type::String
-    name: 'system'
+  - name: 'system'
+    type: String
     description: |
       The system that Entries of this type belongs to.
-  - !ruby/object:Api::Type::Array
-    name: 'requiredAspects'
+  - name: 'requiredAspects'
+    type: Array
     description: |
       AspectInfo for the entry type.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'type'
+        - name: 'type'
+          type: String
           description: |
             Required aspect type for the entry type.
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataplex_entry_type_basic'
-    primary_resource_id: 'test_entry_type_basic'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-type%s\",
-      context[\"random_suffix\"\
-      ])"
-    test_env_vars:
-      project_name: :PROJECT_NAME
-    vars:
-      entry_type_name: entry-type-basic
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataplex_entry_type_full'
-    primary_resource_id: 'test_entry_type_full'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-type%s\",
-      context[\"random_suffix\"\
-      ])"
-    test_env_vars:
-      project_name: :PROJECT_NAME
-    vars:
-      entry_type_name: entry-type-full

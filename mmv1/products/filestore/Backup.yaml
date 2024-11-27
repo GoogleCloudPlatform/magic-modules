@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,40 +11,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Backup'
-create_url: projects/{{project}}/locations/{{location}}/backups?backupId={{name}}
-self_link: projects/{{project}}/locations/{{location}}/backups/{{name}}
-base_url: projects/{{project}}/locations/{{location}}/backups
-update_verb: :PATCH
-update_mask: true
 description: |
   A Google Cloud Filestore backup.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/filestore/docs/backups'
     'Creating Backups': 'https://cloud.google.com/filestore/docs/create-backups'
   api: 'https://cloud.google.com/filestore/docs/reference/rest/v1/projects.locations.instances.backups'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/backups'
+self_link: 'projects/{{project}}/locations/{{location}}/backups/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/backups?backupId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
 mutex: 'filestore/{{project}}'
-error_abort_predicates: ['transport_tpg.Is429QuotaError']
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
+error_abort_predicates:
+
+  - 'transport_tpg.Is429QuotaError'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'filestore_backup_basic'
+  - name: 'filestore_backup_basic'
     primary_resource_id: 'backup'
     vars:
       backup_name: 'tf-fs-bkup'
       instance_name: 'tf-fs-inst'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
-    immutable: true
-    required: true
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name of the backup. The name must be unique within the specified instance.
 
@@ -54,75 +74,75 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       A description of the backup with 2048 characters or less. Requests with longer descriptions will be rejected.
-  - !ruby/object:Api::Type::Enum
-    name: 'state'
+  - name: 'state'
+    type: Enum
     description: |
       The backup state.
-    values:
-      - :STATE_UNSPECIFIED
-      - :FINALIZING
-      - :CREATING
-      - :READY
-      - :DELETING
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'FINALIZING'
+      - 'CREATING'
+      - 'READY'
+      - 'DELETING'
+  - name: 'createTime'
+    type: Time
     description: |
       The time when the snapshot was created in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
-  - !ruby/object:Api::Type::String
-    name: 'capacityGb'
+  - name: 'capacityGb'
+    type: String
     description: |
       The amount of bytes needed to allocate a full copy of the snapshot content.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'storageBytes'
+  - name: 'storageBytes'
+    type: String
     description: |
       The size of the storage used by the backup. As backups share storage, this number is expected to change with backup creation/deletion.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'sourceInstance'
+  - name: 'sourceInstance'
+    type: String
     description: |
       The resource name of the source Cloud Filestore instance, in the format projects/{projectId}/locations/{locationId}/instances/{instanceId}, used to create this backup.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'sourceFileShare'
+  - name: 'sourceFileShare'
+    type: String
     description: |
       Name of the file share in the source Cloud Filestore instance that the backup is created from.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'sourceInstanceTier'
+    immutable: true
+  - name: 'sourceInstanceTier'
+    type: Enum
     description: |
       The service tier of the source Cloud Filestore instance that this backup is created from.
-    values:
-      - :STANDARD
-      - :PREMIUM
-      - :BASIC_HDD
-      - :BASIC_SSD
-      - :HIGH_SCALE_SSD
-      - :ZONAL
-      - :REGIONAL
-      - :ENTERPRISE
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'downloadBytes'
+    enum_values:
+      - 'STANDARD'
+      - 'PREMIUM'
+      - 'BASIC_HDD'
+      - 'BASIC_SSD'
+      - 'HIGH_SCALE_SSD'
+      - 'ZONAL'
+      - 'REGIONAL'
+      - 'ENTERPRISE'
+  - name: 'downloadBytes'
+    type: String
     description: |
       Amount of bytes that will be downloaded if the backup is restored.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'kmsKeyName'
+  - name: 'kmsKeyName'
+    type: String
     description: |
       KMS key name used for data encryption.
     output: true

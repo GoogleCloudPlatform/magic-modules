@@ -14,42 +14,52 @@ To get more information about Environments, see:
 
 * [Cloud Composer documentation](https://cloud.google.com/composer/docs)
 * [Cloud Composer API documentation](https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments)
-* How-to Guides (Cloud Composer 1)
-  * [Creating environments](https://cloud.google.com/composer/docs/how-to/managing/creating)
-  * [Scaling environments](https://cloud.google.com/composer/docs/scale-environments)
-  * [Configuring Shared VPC for Composer Environments](https://cloud.google.com/composer/docs/how-to/managing/configuring-shared-vpc)
 * How-to Guides (Cloud Composer 2)
   * [Creating environments](https://cloud.google.com/composer/docs/composer-2/create-environments)
   * [Scaling environments](https://cloud.google.com/composer/docs/composer-2/scale-environments)
   * [Configuring Shared VPC for Composer Environments](https://cloud.google.com/composer/docs/composer-2/configure-shared-vpc)
+* How-to Guides (Cloud Composer 3)
+  * [Creating environments](https://cloud.google.com/composer/docs/composer-3/create-environments)
+  * [Scaling environments](https://cloud.google.com/composer/docs/composer-3/scale-environments)
+  * [Change environment networking type (Private or Public IP)](https://cloud.google.com/composer/docs/composer-3/change-networking-type)
+  * [Connect an environment to a VPC network](https://cloud.google.com/composer/docs/composer-3/connect-vpc-network)
 * [Apache Airflow Documentation](http://airflow.apache.org/)
 
-We **STRONGLY** recommend you read the [GCP
-guides](https://cloud.google.com/composer/docs/how-to) as the Environment resource requires a long
-deployment process and involves several layers of GCP infrastructure, including a Kubernetes Engine
-cluster, Cloud Storage, and Compute networking resources. Due to limitations of the API, Terraform
-will not be able to find or manage many of these underlying resources automatically. In particular:
-* Creating or updating an environment resource can take up to one hour. In addition, GCP may only
-  detect some errors in the configuration when they are used (e.g., ~40-50 minutes into the creation
-  process), and is prone to limited error reporting. If you encounter confusing or uninformative
-  errors, please verify your configuration is valid against GCP Cloud Composer before filing bugs
-  against the Terraform provider.
-* **Environments create Google Cloud Storage buckets that are not automatically cleaned up** on environment deletion. [More about Composer's use of Cloud
-  Storage](https://cloud.google.com/composer/docs/concepts/cloud-storage).
-* Please review the [known
-  issues](https://cloud.google.com/composer/docs/known-issues) for Composer if you are having
-  problems.
+-> **Note**
+  Cloud Composer 1 is in the post-maintenance mode. Google does 
+  not release any further updates to Cloud Composer 1, including new versions 
+  of Airflow, bugfixes, and security updates. We recommend using
+  Cloud Composer 2 or Cloud Composer 3 instead.
+
+Several special considerations apply to managing Cloud Composer environments 
+with Terraform:
+
+* The Environment resource is based on several layers of GCP infrastructure. 
+    Terraform does not manage these underlying resources. For example, in Cloud 
+    Composer 2, this includes a Kubernetes Engine cluster, Cloud Storage, and 
+    Compute networking resources.
+* Creating or updating an environment usually takes around 25 minutes.
+* In some cases errors in the configuration will be detected and reported only 
+    during the process of the environment creation. If you encounter such 
+    errors, please verify your configuration is valid against GCP Cloud Composer before filing bugs for the Terraform provider.
+* **Environments have Google Cloud Storage buckets that are not automatically 
+    deleted** with the environment.
+    See [Delete environments](https://cloud.google.com/composer/docs/composer-2/delete-environments)
+    for more information.
+* Please refer to
+    [Troubleshooting pages](https://cloud.devsite.corp.google.com/composer/docs/composer-2/troubleshooting-environment-creation) if you encounter
+    problems.
 
 ## Example Usage
 
-### Basic Usage (Cloud Composer 1)
+### Basic Usage (Cloud Composer 3)
 ```hcl
 resource "google_composer_environment" "test" {
   name   = "example-composer-env"
   region = "us-central1"
-  config {
+ config {
     software_config {
-      image_version = "composer-1-airflow-2"
+      image_version = "composer-3-airflow-2"
     }
   }
 }
@@ -68,51 +78,84 @@ resource "google_composer_environment" "test" {
 }
 ```
 
-### With GKE and Compute Resource Dependencies
-
-**NOTE** To use custom service accounts, you must give at least `role/composer.worker` to the service account used by the GKE Nodes on the Composer project.
-For more information, see the [Access Control](https://cloud.devsite.corp.google.com/composer/docs/how-to/access-control) page in the Cloud Composer documentation.
-You may need to assign additional roles depending on what the Airflow DAGs will be running.
-
-#### GKE and Compute Resource Dependencies (Cloud Composer 1)
-
+### Basic Usage (Cloud Composer 1)
 ```hcl
 resource "google_composer_environment" "test" {
   name   = "example-composer-env"
   region = "us-central1"
   config {
-    node_count = 4
-
-    node_config {
-      zone         = "us-central1-a"
-      machine_type = "n1-standard-1"
-
-      network    = google_compute_network.test.id
-      subnetwork = google_compute_subnetwork.test.id
-
-      service_account = google_service_account.test.name
-    }
-
-    database_config {
-      machine_type = "db-n1-standard-2"
-    }
-
-    web_server_config {
-      machine_type = "composer-n1-webserver-2"
+    software_config {
+      image_version = "composer-1-airflow-2"
     }
   }
 }
+```
 
-resource "google_compute_network" "test" {
-  name                    = "composer-test-network"
-  auto_create_subnetworks = false
+### With GKE and Compute Resource Dependencies
+
+-> **Note**
+  To use custom service accounts, you must give at least the
+  `role/composer.worker` role to the service account of the Cloud Composer 
+  environment. For more information, see the
+  [Access Control](https://cloud.google.com/composer/docs/how-to/access-control)
+  page in the Cloud Composer documentation.
+  You might need to assign additional roles depending on specific workflows 
+  that the Airflow DAGs will be running.
+
+#### GKE and Compute Resource Dependencies (Cloud Composer 3)
+
+```hcl
+provider "google" {
+  project = "example-project"
 }
 
-resource "google_compute_subnetwork" "test" {
-  name          = "composer-test-subnetwork"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.test.id
+resource "google_composer_environment" "test" {
+  name   = "example-composer-env-tf-c3"
+  region = "us-central1"
+  config {
+
+    software_config {
+      image_version = "composer-3-airflow-2"
+    }
+
+    workloads_config {
+      scheduler {
+        cpu        = 0.5
+        memory_gb  = 2
+        storage_gb = 1
+        count      = 1
+      }
+      triggerer {
+        cpu        = 0.5
+        memory_gb  = 1
+        count      = 1
+      }
+      dag_processor {
+        cpu        = 1
+        memory_gb  = 2
+        storage_gb = 1
+        count      = 1
+      }
+      web_server {
+        cpu        = 0.5
+        memory_gb  = 2
+        storage_gb = 1
+      }
+      worker {
+        cpu = 0.5
+        memory_gb  = 2
+        storage_gb = 1
+        min_count  = 1
+        max_count  = 3
+      }
+
+    }
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
+
+    node_config {
+      service_account = google_service_account.test.name
+    }
+  }
 }
 
 resource "google_service_account" "test" {
@@ -121,8 +164,9 @@ resource "google_service_account" "test" {
 }
 
 resource "google_project_iam_member" "composer-worker" {
-  role   = "roles/composer.worker"
-  member = "serviceAccount:${google_service_account.test.email}"
+  project = "your-project-id"
+  role    = "roles/composer.worker"
+  member  = "serviceAccount:${google_service_account.test.email}"
 }
 ```
 
@@ -130,7 +174,7 @@ resource "google_project_iam_member" "composer-worker" {
 
 ```hcl
 provider "google" {
-  project = "bigdata-writers"
+  project = "example-project"
 }
 
 resource "google_composer_environment" "test" {
@@ -198,6 +242,156 @@ resource "google_project_iam_member" "composer-worker" {
 }
 ```
 
+#### GKE and Compute Resource Dependencies (Cloud Composer 1)
+
+```hcl
+resource "google_composer_environment" "test" {
+  name   = "example-composer-env"
+  region = "us-central1"
+  config {
+    
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
+    
+    node_count = 4
+
+    node_config {
+      zone         = "us-central1-a"
+      machine_type = "n1-standard-1"
+
+      network    = google_compute_network.test.id
+      subnetwork = google_compute_subnetwork.test.id
+
+      service_account = google_service_account.test.name
+    }
+
+    database_config {
+      machine_type = "db-n1-standard-2"
+    }
+
+    web_server_config {
+      machine_type = "composer-n1-webserver-2"
+    }
+  }
+}
+
+resource "google_compute_network" "test" {
+  name                    = "composer-test-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+  name          = "composer-test-subnetwork"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test.id
+}
+
+resource "google_service_account" "test" {
+  account_id   = "composer-env-account"
+  display_name = "Test Service Account for Composer Environment"
+}
+
+resource "google_project_iam_member" "composer-worker" {
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+```
+
+### Cloud Composer 3 networking configuration
+
+In Cloud Composer 3, networking configuration is simplified compared to
+previous versions. You don't need to specify network ranges, and can attach
+custom VPC networks to your environment.
+
+-> **Note**
+  It's not possible to detach a VPC network using Terraform. Instead, you can
+  attach a different VPC network in its place, or detach the network using
+  other tools like Google Cloud CLI.
+
+Use Private IP networking:
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    enable_private_environment = true
+
+    # ... other configuration parameters
+  }
+}
+```
+
+Attach a custom VPC network (Cloud Composer creates a new network attachment):
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      network = "projects/example-project/global/networks/example-network"
+      subnetwork = "projects/example-project/regions/us-central1/subnetworks/example-subnetwork"
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
+Attach a custom VPC network (use existing network attachment):
+
+```hcl
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      composer_network_attachment = projects/example-project/regions/us-central1/networkAttachments/example-network-attachment
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
+If you specify an existing network attachment that you also manage in Terraform, then Terraform will revert changes
+to the attachment done by Cloud Composer when you apply configuration changes. As a result, the environment will no
+longer use the attachment. To address this problem, make sure that Terraform ignores changes to the
+`producer_accept_lists` parameter of the attachment, as follows:
+
+```hcl
+resource "google_compute_network_attachment" "example" {
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
+  }
+
+  # ... other configuration parameters
+}
+
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      composer_network_attachment = google_compute_network_attachment.example.id
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
 ### With Software (Airflow) Config
 
 ```hcl
@@ -206,8 +400,6 @@ resource "google_composer_environment" "test" {
   region = "us-central1"
 
   config {
-    software_config {
-      scheduler_count = 2 // only in Composer 1 with Airflow 2, use workloads_config in Composer 2
       airflow_config_overrides = {
         core-dags_are_paused_at_creation = "True"
       }
@@ -218,12 +410,13 @@ resource "google_composer_environment" "test" {
       }
 
       env_variables = {
-        FOO = "bar"
+        EXAMPLE_VARIABLE = "test"
       }
     }
   }
 }
 ```
+
 ## Argument Reference - Cloud Composer 1
 
 The following arguments are supported:
@@ -249,7 +442,7 @@ The following arguments are supported:
   Both keys and values must be <= 128 bytes in size.
 
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
-	Please refer to the field 'effective_labels' for all of the labels present on the resource.
+  Please refer to the field 'effective_labels' for all of the labels present on the resource.
 
 * `terraform_labels` -
   The combination of labels configured directly on the resource and default labels configured on the provider.
@@ -715,6 +908,24 @@ The following arguments are supported:
   for high resilience and `STANDARD_RESILIENCE` for standard
   resilience.
 
+* `data_retention_config` -
+  (Optional, Cloud Composer 2.0.23 or newer only)
+  Configuration setting for airflow data rentention mechanism. Structure is
+  [documented below](#nested_data_retention_config_c2).
+
+<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
+* `task_logs_retention_config` - 
+  (Optional)
+  The configuration setting for Task Logs. Structure is
+  [documented below](#nested_task_logs_retention_config_c2).
+
+<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
+* `storage_mode` - 
+  (Optional)
+  The mode of storage for Airflow workers task logs. Values for storage mode are 
+  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
+  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
+
 * `master_authorized_networks_config` -
   (Optional)
   Configuration options for the master authorized networks feature. Enabled
@@ -740,24 +951,6 @@ The following arguments are supported:
 * `cidr_block` -
   (Required)
   `cidr_block` must be specified in CIDR notation.
-
-* `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or newer only)
-  Configuration setting for airflow data rentention mechanism. Structure is
-  [documented below](#nested_data_retention_config_c2).
-
-<a name="nested_data_retention_config_c2"></a>The `data_retention_config` block supports:
-* `task_logs_retention_config` - 
-  (Optional)
-  The configuration setting for Task Logs. Structure is
-  [documented below](#nested_task_logs_retention_config_c2).
-
-<a name="nested_task_logs_retention_config_c2"></a>The `task_logs_retention_config` block supports:
-* `storage_mode` - 
-  (Optional)
-  The mode of storage for Airflow workers task logs. Values for storage mode are 
-  `CLOUD_LOGGING_ONLY` to only store logs in cloud logging and 
-  `CLOUD_LOGGING_AND_CLOUD_STORAGE` to store logs in cloud logging and cloud storage.
 
 
 <a name="nested_storage_config_c2"></a>The `storage_config` block supports:
@@ -866,15 +1059,13 @@ The following arguments are supported:
   version number or 'latest'.
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
   supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified.
-  **Important**: In-place upgrade is only available using `google-beta` provider. It's because updating the
-  `image_version` is still in beta. Using `google-beta` provider, you can upgrade in-place between minor or
+  **Important**: In-place upgrade is only available between minor or
   patch versions of Cloud Composer or Apache Airflow. For example, you can upgrade your environment from
   `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
   major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
 
 * `cloud_data_lineage_integration` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
+  (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and newer)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration_c2).
 
@@ -1095,8 +1286,6 @@ The `worker` block supports:
 
 ## Argument Reference - Cloud Composer 3
 
-**Please note: This documentation corresponds to Composer 3, which is not yet released.**
-
 The following arguments are supported:
 
 * `name` -
@@ -1143,11 +1332,11 @@ The following arguments are supported:
   The configuration settings for software (Airflow) inside the environment. Structure is [documented below](#nested_software_config_c3).
 
 * `enable_private_environment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   If true, a private Composer environment will be created.
 
 * `enable_private_builds_only` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   If true, builds performed during operations that install Python packages have only private connectivity to Google services.
   If false, the builds also have access to the internet.
 
@@ -1173,7 +1362,7 @@ The following arguments are supported:
   and `ENVIRONMENT_SIZE_LARGE`.
 
 * `data_retention_config` -
-  (Optional, Cloud Composer 2.0.23 or later only)
+  (Optional)
   Configuration setting for Airflow database retention mechanism. Structure is
   [documented below](#nested_data_retention_config_c3).
 
@@ -1217,7 +1406,7 @@ The following arguments are supported:
   network must also be provided and the subnetwork must belong to the enclosing environment's project and region.
 
 * `composer_network_attachment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   PSC (Private Service Connect) Network entry point. Customers can pre-create the Network Attachment 
   and point Cloud Composer environment to use. It is possible to share network attachment among many environments, 
   provided enough IP addresses are available.
@@ -1238,11 +1427,11 @@ The following arguments are supported:
   Cannot be updated.
 
 * `composer_internal_ipv4_cidr_block` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
-<a name="nested_software_config_c3">The `software_config` block supports:
+<a name="nested_software_config_c3"></a>The `software_config` block supports:
 
 * `airflow_config_overrides` -
   (Optional) Apache Airflow configuration properties to override. Property keys contain the section and property names,
@@ -1300,16 +1489,18 @@ The following arguments are supported:
   `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?(-build\.[0-9]+)?)`
   Example: composer-3-airflow-2.6.3-build.4
 
-  **Important**: In-place upgrade for Composer 3 is not yet supported.
+  **Important**: In-place upgrade in Composer 3 is only available between minor or patch versions of Apache Airflow.
+  You can also upgrade to a different Airflow build within the same version by specifying the build number.
+  For example, you can upgrade your environment from composer-3-airflow-2.6.x to composer-3-airflow-2.9.x,
+  or from composer-3-airflow-2.9.3-build.4 to composer-3-airflow-2.9.3-build.5.
 
 * `cloud_data_lineage_integration` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html),
-  Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
+  (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
   The configuration for Cloud Data Lineage integration. Structure is
   [documented below](#nested_cloud_data_lineage_integration_c3).
 
 * `web_server_plugins_mode` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   Web server plugins configuration. Can be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 <a name="nested_cloud_data_lineage_integration_c3"></a>The `cloud_data_lineage_integration` block supports:
@@ -1361,7 +1552,7 @@ The `workloads_config` block supports:
   Configuration for resources used by Airflow workers.
 
 * `dag_processor` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   Configuration for resources used by DAG processor.
 
 The `scheduler` block supports:
@@ -1478,9 +1669,9 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - Default is 60 minutes.
-- `update` - Default is 60 minutes.
-- `delete` - Default is 6 minutes.
+- `create` - Default is 120 minutes.
+- `update` - Default is 120 minutes.
+- `delete` - Default is 30 minutes.
 
 ## Import
 

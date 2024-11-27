@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,129 +12,132 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "Fleet"
-base_url: "projects/{{project}}/locations/global/fleets"
-create_url: "projects/{{project}}/locations/global/fleets"
-update_url: "projects/{{project}}/locations/global/fleets/default"
-self_link: "projects/{{project}}/locations/global/fleets/default"
-update_verb: :PATCH
-update_mask: true
+name: 'Fleet'
 description: |
   Fleet contains information about a group of clusters.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Registering a Cluster to a Fleet": "https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster"
-  api: "https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.fleets"
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: "gkehub#operation"
-    path: "name"
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: "response"
-    resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: "done"
-    complete: "true"
-    allowed:
-      - "true"
-      - "false"
-  error: !ruby/object:Api::OpAsync::Error
-    path: "error/errors"
-    message: "message"
+    'Registering a Cluster to a Fleet': 'https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster'
+  api: 'https://cloud.google.com/anthos/multicluster-management/reference/rest/v1/projects.locations.fleets'
+docs:
+id_format: 'projects/{{project}}/locations/global/fleets/default'
+base_url: 'projects/{{project}}/locations/global/fleets'
+self_link: 'projects/{{project}}/locations/global/fleets/default'
+create_url: 'projects/{{project}}/locations/global/fleets'
+update_url: 'projects/{{project}}/locations/global/fleets/default'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/fleets/default'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    kind: 'gkehub#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error/errors'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "gkehub_fleet_basic"
-    skip_test: true
-    primary_resource_id: "default"
-id_format: "projects/{{project}}/locations/global/fleets/default"
-import_format: ["projects/{{project}}/locations/global/fleets/default"]
+  - name: 'gkehub_fleet_basic'
+    primary_resource_id: 'default'
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: "displayName"
+  - name: 'displayName'
+    type: String
     description: |
       A user-assigned display name of the Fleet. When present, it must be between 4 to 30 characters.
       Allowed characters are: lowercase and uppercase letters, numbers, hyphen, single-quote, double-quote, space, and exclamation point.
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+  - name: 'createTime'
+    type: Time
     description: |
       The time the fleet was created, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+  - name: 'updateTime'
+    type: Time
     description: |
       The time the fleet was last updated, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "deleteTime"
+  - name: 'deleteTime'
+    type: Time
     description: |
       The time the fleet was deleted, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: "uid"
-    output: true
+  - name: 'uid'
+    type: String
     description: |
       Google-generated UUID for this resource. This is unique across all
       Fleet resources. If a Fleet resource is deleted and another
       resource with the same name is created, it gets a different uid.
-  - !ruby/object:Api::Type::NestedObject
-    name: "state"
+    output: true
+  - name: 'state'
+    type: NestedObject
     description: The state of the fleet resource.
     output: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: "code"
+      - name: 'code'
+        type: Enum
         description: Describes the state of a Fleet resource.
         output: true
-        values:
-          - CODE_UNSPECIFIED
-          - CREATING
-          - READY
-          - DELETING
-          - UPDATING
-  - !ruby/object:Api::Type::NestedObject
-    name: "defaultClusterConfig"
+        enum_values:
+          - 'CODE_UNSPECIFIED'
+          - 'CREATING'
+          - 'READY'
+          - 'DELETING'
+          - 'UPDATING'
+  - name: 'defaultClusterConfig'
+    type: NestedObject
     description: The default cluster configurations to apply across the fleet.
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: "binaryAuthorizationConfig"
+      - name: 'binaryAuthorizationConfig'
+        type: NestedObject
         description: Enable/Disable binary authorization features for the cluster.
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: "evaluationMode"
+          - name: 'evaluationMode'
+            type: Enum
             description: Mode of operation for binauthz policy evaluation.
-            values:
-              - DISABLED
-              - POLICY_BINDINGS
-          - !ruby/object:Api::Type::Array
-            name: "policyBindings"
+            enum_values:
+              - 'DISABLED'
+              - 'POLICY_BINDINGS'
+          - name: 'policyBindings'
+            type: Array
             description: Binauthz policies that apply to this cluster.
-            item_type: !ruby/object:Api::Type::NestedObject
+            item_type:
+              type: NestedObject
               properties:
-                - !ruby/object:Api::Type::String
-                  name: "name"
+                - name: 'name'
+                  type: String
                   description: |
                     The relative resource name of the binauthz platform policy to audit. GKE
                     platform policies have the following format:
                     `projects/{project_number}/platforms/gke/policies/{policy_id}`.
-      - !ruby/object:Api::Type::NestedObject
-        name: "securityPostureConfig"
+      - name: 'securityPostureConfig'
+        type: NestedObject
         description: Enable/Disable Security Posture features for the cluster.
         properties:
-          - !ruby/object:Api::Type::Enum
-            name: "mode"
+          - name: 'mode'
+            type: Enum
             description: Sets which mode to use for Security Posture features.
-            values:
-              - DISABLED
-              - BASIC
-              - ENTERPRISE
-          - !ruby/object:Api::Type::Enum
-            name: "vulnerabilityMode"
+            enum_values:
+              - 'DISABLED'
+              - 'BASIC'
+              - 'ENTERPRISE'
+          - name: 'vulnerabilityMode'
+            type: Enum
             description: Sets which mode to use for vulnerability scanning.
-            values:
-              - VULNERABILITY_DISABLED
-              - VULNERABILITY_BASIC
-              - VULNERABILITY_ENTERPRISE
+            enum_values:
+              - 'VULNERABILITY_DISABLED'
+              - 'VULNERABILITY_BASIC'
+              - 'VULNERABILITY_ENTERPRISE'

@@ -24,11 +24,13 @@ type GithubClient interface {
 	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
+	GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error)
 	GetUserType(user string) github.UserType
 	GetTeamMembers(organization, team string) ([]github.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error
+	UpdateComment(prNumber, comment string, id int) error
 	RequestPullRequestReviewers(prNumber string, reviewers []string) error
 	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
@@ -36,8 +38,7 @@ type GithubClient interface {
 }
 
 type CloudbuildClient interface {
-	ApproveCommunityChecker(prNumber, commitSha string) error
-	TriggerMMPresubmitRuns(commitSha string, substitutions map[string]string) error
+	ApproveDownstreamGenAndTest(prNumber, commitSha string) error
 }
 
 type ExecRunner interface {
@@ -48,6 +49,7 @@ type ExecRunner interface {
 	PushDir(path string) error
 	PopDir() error
 	WriteFile(name, data string) error
+	AppendFile(name, data string) error // Not used (yet).
 	Run(name string, args []string, env map[string]string) (string, error)
 	MustRun(name string, args []string, env map[string]string) string
 }

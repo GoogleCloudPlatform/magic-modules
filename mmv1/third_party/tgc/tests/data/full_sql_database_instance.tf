@@ -85,7 +85,7 @@ resource "google_sql_database_instance" "main" {
       }
       ipv4_enabled    = true
       private_network = google_compute_network.private_network.self_link
-      require_ssl     = true
+      ssl_mode        = "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
     }
     location_preference {
       follow_gae_application = "test-follow_gae_application"

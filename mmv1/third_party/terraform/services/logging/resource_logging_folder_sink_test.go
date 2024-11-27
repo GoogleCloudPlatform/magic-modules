@@ -400,6 +400,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -423,6 +424,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -446,6 +448,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -466,8 +469,9 @@ resource "google_storage_bucket" "log-bucket" {
 }
 
 resource "google_folder" "my-folder" {
-  display_name = "%s"
-    parent       = "%s"
+	display_name = "%s"
+	parent       = "%s"
+	deletion_protection = false
 }`, sinkName, bucketName, folderName, folderParent)
 }
 
@@ -489,6 +493,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -519,6 +524,7 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), bucketName, folderName, folderParent)
 }
@@ -545,6 +551,7 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
 }
 
@@ -566,6 +573,7 @@ resource "google_bigquery_dataset" "logging_sink" {
 resource "google_folder" "my-folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }`, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), bqDatasetID, folderName, folderParent)
 }
 
@@ -583,6 +591,7 @@ resource "google_logging_folder_sink" "intercept_update" {
 resource "google_folder" "intercept_folder" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, sinkName, envvar.GetTestProjectFromEnv(), envvar.GetTestProjectFromEnv(), intercept_children, folderName, folderParent)
 }

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,46 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Deployment'
 kind: 'deploymentmanager#deployment'
-base_url: projects/{{project}}/global/deployments
-self_link: projects/{{project}}/global/deployments/{{name}}
-create_url: projects/{{project}}/global/deployments?preview={{preview}}&createPolicy={{create_policy}}
-delete_url: projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}
-# A deployment is updatable, but we need to have custom update behavior.
-immutable: true
-update_verb: :PATCH
-update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
 description: |
   A collection of resources that are deployed and managed together using
   a configuration file
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    kind: 'deploymentmanager#operation'
-    path: 'name'
-    full_url: 'selfLink'
-    wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
-    path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
-    path: 'error/errors'
-    message: 'message'
-id_format: 'projects/{{project}}/deployments/{{name}}'
-import_format: ['projects/{{project}}/deployments/{{name}}']
-timeouts:
-  !ruby/object:Api::Timeouts  # Very long to support very long deployments
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     Deployment Manager shares similar behavior with Terraform as both
     products manage GCP resource lifecycle and state. This Terraform
@@ -64,38 +31,61 @@ docs: !ruby/object:Provider::Terraform::Docs
     deployments in preview as recreate-only for any update operation other
     than actually deploying an in-preview deployment (i.e. `preview=true` to
     `preview=false`).
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'deployment_manager_deployment_basic'
-    primary_resource_id: 'deployment'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
-      context[\"random_suffix\"\
-      ])"
-    vars:
-      deployment_name: 'my-deployment'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'deployment_manager_deployment_imports'
-    primary_resource_id: 'deployment'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-deployment-%s\",
-      context[\"random_suffix\"\
-      ])"
-    vars:
-      deployment_name: 'my-deployment'
-    skip_test: true
+id_format: 'projects/{{project}}/deployments/{{name}}'
+base_url: 'projects/{{project}}/global/deployments'
+self_link: 'projects/{{project}}/global/deployments/{{name}}'
+create_url: 'projects/{{project}}/global/deployments?preview={{preview}}&createPolicy={{create_policy}}'
+update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
+update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/global/deployments/{{name}}?deletePolicy={{delete_policy}}'
+# A deployment is updatable, but we need to have custom update behavior.
+immutable: true
+import_format:
+  - 'projects/{{project}}/deployments/{{name}}'
+ # Very long to support very long deployments
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    full_url: 'selfLink'
+    kind: 'deploymentmanager#operation'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'targetLink'
+    resource_inside_response: false
+  error:
+    path: 'error/errors'
+    message: 'message'
 custom_code:
-  !ruby/object:Provider::Terraform::CustomCode  # post-create failure: Delete deployment if an invalid deployment was created
-  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.erb'
   # Custom diff to force new if 'preview' is true
-  constants: 'templates/terraform/constants/deployment_manager_deployment.go.erb'
-custom_diff: [
-  'customDiffDeploymentManagerDeployment',
-]
+  constants: 'templates/terraform/constants/deployment_manager_deployment.go.tmpl'
+  # post-create failure: Delete deployment if an invalid deployment was created
+  post_create_failure: 'templates/terraform/post_create_failure/delete_on_failure.go.tmpl'
+custom_diff:
+  - 'customDiffDeploymentManagerDeployment'
+examples:
+  - name: 'deployment_manager_deployment_basic'
+    primary_resource_id: 'deployment'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
+    vars:
+      deployment_name: 'my-deployment'
+    exclude_test: true
+  - name: 'deployment_manager_deployment_imports'
+    primary_resource_id: 'deployment'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-deployment-%s", context["random_suffix"])'
+    vars:
+      deployment_name: 'my-deployment'
+    exclude_test: true
 parameters:
   # These properties are query parameters given on create/update/delete.
   # They should be tracked and updatable.
-  - !ruby/object:Api::Type::Enum
-    name: 'createPolicy'
+  - name: 'createPolicy'
+    type: Enum
     description: |
       Set the policy to use for creating new resources. Only used on
       create and update. Valid values are `CREATE_OR_ACQUIRE` (default) or
@@ -103,12 +93,12 @@ parameters:
       the deployment will fail. Note that updating this field does not
       actually affect the deployment, just how it is updated.
     url_param_only: true
-    default_value: :CREATE_OR_ACQUIRE
-    values:
-      - :ACQUIRE
-      - :CREATE_OR_ACQUIRE
-  - !ruby/object:Api::Type::Enum
-    name: 'deletePolicy'
+    default_value: "CREATE_OR_ACQUIRE"
+    enum_values:
+      - 'ACQUIRE'
+      - 'CREATE_OR_ACQUIRE'
+  - name: 'deletePolicy'
+    type: Enum
     description: |
       Set the policy to use for deleting new resources on update/delete.
       Valid values are `DELETE` (default) or `ABANDON`. If `DELETE`,
@@ -117,12 +107,13 @@ parameters:
       and is not actually deleted. Note that updating this field does not
       actually change the deployment, just how it is updated.
     url_param_only: true
-    default_value: :DELETE
-    values:
-      - :ABANDON
-      - :DELETE
-  - !ruby/object:Api::Type::Boolean
-    name: 'preview'
+    default_value: "DELETE"
+    enum_values:
+      - 'ABANDON'
+      - 'DELETE'
+    # Custom Update
+  - name: 'preview'
+    type: Boolean
     description: |
       If set to true, a deployment is created with "shell" resources
       that are not actually instantiated. This allows you to preview a
@@ -132,104 +123,101 @@ parameters:
       of a deployment in preview (unless updating to preview=false). Thus,
       Terraform will force-recreate deployments if either preview is updated
       to true or if other fields are updated while preview is true.
-    default_value: false
     url_param_only: true
-    # Custom Update
+    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
     update_id: '0_preview'
     fingerprint_name: 'fingerprint'
-    update_verb: :PATCH
-    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    default_value: false
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Unique name for the deployment
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    # Custom Update
+  - name: 'description'
+    type: String
     description: |
       Optional user-provided description of deployment.
-    # Custom Update
-    fingerprint_name: 'fingerprint'
+    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
     update_id: '1_non-preview'
-    update_verb: :PATCH
-    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
-  - !ruby/object:Api::Type::Array
-    name: 'labels'
+    fingerprint_name: 'fingerprint'
+    # Custom Update
+  - name: 'labels'
+    type: Array
     description: |
       Key-value pairs to apply to this labels.
-    send_empty_value: true
-    # Custom Update
-    fingerprint_name: 'fingerprint'
-    update_id: '1_non-preview'
-    update_verb: :PATCH
-    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
     is_set: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    send_empty_value: true
+    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
+    update_id: '1_non-preview'
+    fingerprint_name: 'fingerprint'
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'key'
+        - name: 'key'
+          type: String
           description: |
             Key for label.
-        - !ruby/object:Api::Type::String
-          name: 'value'
+        - name: 'value'
+          type: String
           description: |
             Value of label.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'target'
-    required: true
+    # Custom Update
+  - name: 'target'
+    type: NestedObject
     description: |
       Parameters that define your deployment, including the deployment
       configuration and relevant templates.
-    # Custom Update
-    fingerprint_name: 'fingerprint'
-    update_id: '1_non-preview'
-    update_verb: :PATCH
-    update_url: projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}
+    required: true
     ignore_read: true
+    update_url: 'projects/{{project}}/global/deployments/{{name}}?preview={{preview}}&createPolicy={{create_policy}}&deletePolicy={{delete_policy}}'
+    update_id: '1_non-preview'
+    fingerprint_name: 'fingerprint'
     properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: 'config'
-        required: true
+      - name: 'config'
+        type: NestedObject
         description: |
           The root configuration file to use for this deployment.
+        required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'content'
-            required: true
+          - name: 'content'
+            type: String
             description: |
               The full YAML contents of your configuration file.
-      - !ruby/object:Api::Type::Array
-        name: 'imports'
+            required: true
+      - name: 'imports'
+        type: Array
         description: |
           Specifies import files for this configuration. This can be
           used to import templates or other files. For example, you might
           import a text file in order to use the file in a template.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'content'
+            - name: 'content'
+              type: String
               description: |
                 The full contents of the template that you want to import.
-            - !ruby/object:Api::Type::String
-              name: 'name'
+            - name: 'name'
+              type: String
               description: |
                 The name of the template to import, as declared in the YAML
                 configuration.
-  - !ruby/object:Api::Type::String
-    name: 'deployment_id'
-    api_name: id
-    output: true
+  - name: 'deployment_id'
+    type: String
     description: |
       Unique identifier for deployment. Output only.
-  - !ruby/object:Api::Type::String
-    name: 'manifest'
+    api_name: id
     output: true
+  - name: 'manifest'
+    type: String
     description: |
       Output only. URL of the manifest representing the last manifest that
       was successfully deployed.
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
     output: true
+  - name: 'selfLink'
+    type: String
     description: |
       Output only. Server defined URL for the resource.
+    output: true

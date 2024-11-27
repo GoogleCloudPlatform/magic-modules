@@ -19,6 +19,8 @@ import (
 // Fields that should be ignored in import tests because they aren't returned
 // from GCP (and thus can't be imported)
 var ignoredReplicaConfigurationFields = []string{
+	"deletion_protection",
+	"root_password",
 	"replica_configuration.0.ca_certificate",
 	"replica_configuration.0.client_certificate",
 	"replica_configuration.0.client_key",
@@ -29,7 +31,7 @@ var ignoredReplicaConfigurationFields = []string{
 	"replica_configuration.0.ssl_cipher",
 	"replica_configuration.0.username",
 	"replica_configuration.0.verify_server_certificate",
-	"deletion_protection",
+	"replica_configuration.0.failover_target",
 }
 
 func TestAccSqlDatabaseInstance_basicInferredName(t *testing.T) {
@@ -428,7 +430,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_replica, databaseID, databaseID, databaseID, "true"),
-				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance.., invalid"),
+				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance"),
 			},
 			{
 				Config: fmt.Sprintf(
@@ -942,13 +944,11 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddAllowedConsumerProjects_th
 	})
 }
 
-func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
+func TestAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(t *testing.T) {
 	t.Parallel()
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
-	projectId := "psctestproject" + acctest.RandString(t, 10)
-	orgId := envvar.GetTestOrgFromEnv(t)
-	billingAccount := envvar.GetTestBillingAccountFromEnv(t)
+	projectId := envvar.GetTestProjectFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -956,7 +956,66 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName, projectId, orgId, billingAccount),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(t *testing.T) {
+	t.Parallel()
+
+	testId := "test-psc-auto-con" + acctest.RandString(t, 10)
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := envvar.GetTestProjectFromEnv()
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(instanceName, projectId, networkName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, true, network_short_link_name, projectId)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPSCEnabled_thenAddPscAutoConnections_thenRemovePscAutoConnections(t *testing.T) {
+	t.Parallel()
+
+	testId := "test-psc-auto-con" + acctest.RandString(t, 10)
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := envvar.GetTestProjectFromEnv()
+	networkName := acctest.BootstrapSharedTestNetwork(t, testId)
+	network_short_link_name := fmt.Sprintf("projects/%s/global/networks/%s", projectId, networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -966,8 +1025,19 @@ func TestAccSqlDatabaseInstance_basicInstance_thenPSCEnabled(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withoutAllowedConsumerProjects(instanceName, projectId, orgId, billingAccount),
-				ExpectError: regexp.MustCompile("PSC connectivity can not be enabled"),
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(instanceName, projectId, networkName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, true, network_short_link_name, projectId)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
 			},
 		},
 	})
@@ -988,7 +1058,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName, projectId, orgId, billingAccount),
-				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with public IP"),
+				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with only public IP"),
 			},
 		},
 	})
@@ -1419,6 +1489,38 @@ func TestAccSqlDatabaseInstance_EnableGoogleMlIntegration(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_EnableGoogleDataplexIntegration(t *testing.T) {
+	t.Parallel()
+
+	masterID := acctest.RandInt(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID, true),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID, false),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_insights(t *testing.T) {
 	t.Parallel()
 
@@ -1564,6 +1666,32 @@ func TestAccSQLDatabaseInstance_DenyMaintenancePeriod(t *testing.T) {
 	})
 }
 
+func TestAccSQLDatabaseInstance_DefaultEdition(t *testing.T) {
+	t.Parallel()
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	databaseVersion := "POSTGRES_16"
+	enterprisePlusTier := "db-perf-optimized-N-2"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_DefaultEdition(databaseName, databaseVersion, enterprisePlusTier),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_Edition(t *testing.T) {
 	t.Parallel()
 	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
@@ -1668,7 +1796,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 			{
 				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
 				ExpectError: regexp.MustCompile(
-					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache.., invalid", enterpriseInstanceName)),
+					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache", enterpriseInstanceName)),
 			},
 		},
 	})
@@ -1723,7 +1851,7 @@ func TestAccSqlDatabaseInstance_Postgres_Edition_Upgrade(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionUpgrade, enterpriseTier),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionUpgrade, enterpriseTier, "ENTERPRISE"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
 				),
@@ -1773,7 +1901,7 @@ func TestAccSqlDatabaseInstance_Edition_Downgrade(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_EditionConfig_noEdition(editionDowngrade, enterpriseTier),
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(editionDowngrade, enterpriseTier, "ENTERPRISE"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE"),
 				),
@@ -2039,6 +2167,41 @@ func TestAccSqlDatabaseInstance_rootPasswordShouldBeUpdatable(t *testing.T) {
 				Config: testGoogleSqlDatabaseInstance_updateRootPassword(databaseName, databaseVersion, ""),
 				ExpectError: regexp.MustCompile(
 					`Error, root password cannot be empty for SQL Server instance.`),
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_SqlServerTimezoneUpdate(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	rootPassword := acctest.RandString(t, 15)
+	timezone := "Eastern Standard Time"
+	timezoneUpdate := "Pacific Standard Time"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezone),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_SqlServerTimezone(instanceName, rootPassword, timezoneUpdate),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
 		},
 	})
@@ -2329,6 +2492,69 @@ func TestAccSqlDatabaseInstance_ReplicaPromoteSkippedWithNoMasterInstanceNameAnd
 	})
 }
 
+// Switchover between primary and cascadable replica sunny case
+func TestAccSqlDatabaseInstance_SwitchoverSuccess(t *testing.T) {
+	t.Parallel()
+	primaryName := "tf-test-sql-instance-" + acctest.RandString(t, 10)
+	replicaName := "tf-test-sql-instance-replica-" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName, replicaName),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-replica",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				// Split into two configs because current TestStep implementation checks diff before refreshing.
+				Config: googleSqlDatabaseInstance_switchoverOnReplica(primaryName, replicaName),
+			},
+			{
+				Config: googleSqlDatabaseInstance_updatePrimaryAfterSwitchover(primaryName, replicaName),
+			},
+			{
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
+			},
+			{
+				ResourceName:      "google_sql_database_instance.original-replica",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// original-replica is no longer a replica, but replica_configuration is O + C and cannot be unset
+				ImportStateVerifyIgnore: []string{"replica_configuration", "deletion_protection", "root_password"},
+			},
+			{
+				// Delete replica first so PostTestDestroy doesn't fail when deleting instances which have replicas. We've already validated switchover behavior, the remaining steps are cleanup
+				Config: googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName),
+				// We delete replica, but haven't updated the master's replica_names
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Remove replica from primary's resource
+				Config: googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()
 
@@ -2344,9 +2570,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 		// We don't do ImportStateVerify for the ssl_mode because of the implementation. The ssl_mode is expected to be discarded if the local state doesn't have it.
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2357,9 +2582,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ENCRYPTED_ONLY"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ENCRYPTED_ONLY"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ENCRYPTED_ONLY"),
 				),
 			},
@@ -2370,9 +2594,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, true, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "true"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"),
 				),
 			},
@@ -2383,9 +2606,8 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "settings.0.ip_configuration.0.ssl_mode"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, false, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
+				Config: testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName, databaseVersion, "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.require_ssl", "false"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.ssl_mode", "ALLOW_UNENCRYPTED_AND_ENCRYPTED"),
 				),
 			},
@@ -2399,7 +2621,77 @@ func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	})
 }
 
-func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, requireSsl bool, sslMode string) string {
+func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_basic3, databaseName),
+				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA")),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(t, 10)
+	resourceName := "google_sql_database_instance.instance"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, "GOOGLE_MANAGED_CAS_CA"),
+				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA")),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, serverCaMode string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "POSTGRES_15"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = "true"
+      server_ca_mode  = "%s"
+    }
+  }
+}
+`, databaseName, serverCaMode)
+}
+
+func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -2410,11 +2702,10 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-g1-small"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = %t
       ssl_mode = "%s"
     }
   }
-}`, databaseName, databaseVersion, requireSsl, sslMode)
+}`, databaseName, databaseVersion, sslMode)
 }
 
 func testAccSqlDatabaseInstance_sqlMysqlInstancePvpExample(context map[string]interface{}) string {
@@ -2498,7 +2789,7 @@ resource "google_sql_database_instance" "instance" {
     collation = "Polish_CI_AS"
     ip_configuration {
       ipv4_enabled = true
-      require_ssl = true
+      ssl_mode = "ENCRYPTED_ONLY"
     }
   }
 }
@@ -2549,6 +2840,19 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, endDate, startDate, time)
 }
 
+func testGoogleSqlDatabaseInstance_DefaultEdition(databaseName, databaseVersion, tier string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+  }
+}`, databaseName, databaseVersion, tier)
+}
+
 func testGoogleSqlDatabaseInstance_EditionConfig_noEdition(databaseName, tier string) string {
 	return fmt.Sprintf(`
 
@@ -2559,9 +2863,6 @@ resource "google_sql_database_instance" "instance" {
   deletion_protection = false
   settings {
     tier = "%s"
-     backup_configuration {
-      transaction_log_retention_days = 7
-     }    
   }
 }`, databaseName, tier)
 }
@@ -2577,6 +2878,9 @@ resource "google_sql_database_instance" "instance" {
   settings {
     tier = "%s"
     edition = "%s"
+	backup_configuration {
+	  transaction_log_retention_days = 7
+    }
   }
 }`, databaseName, tier, edition)
 }
@@ -2629,6 +2933,25 @@ resource "google_sql_database_instance" "instance" {
     }
   }
 }`, instanceName, tier, edition)
+}
+
+func testGoogleSqlDatabaseInstance_SqlServerTimezone(instance, rootPassword, timezone string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-central1"
+  database_version = "SQLSERVER_2017_STANDARD"
+  root_password    = "%s"
+  deletion_protection = false
+  settings {
+    tier = "db-custom-1-3840"
+    ip_configuration {
+      ipv4_enabled       = "true"
+    }
+    time_zone = "%s"
+  }
+}
+`, instance, rootPassword, timezone)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerAuditConfig(databaseName, rootPassword, bucketName, uploadInterval, retentionInterval string) string {
@@ -2970,6 +3293,147 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
+// Create SQL server primary with cascadable replica
+func testGoogleSqlDatabaseInstanceConfig_SqlServerwithCascadableReplica(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-east1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+
+  root_password = "sqlserver1"
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  master_instance_name = google_sql_database_instance.original-primary.name
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  replica_configuration {
+    cascadable_replica = true
+  }
+
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, primaryName, replicaName)
+}
+
+func googleSqlDatabaseInstance_switchoverOnReplica(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-east1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+
+  root_password = "sqlserver1"
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = [google_sql_database_instance.original-primary.name]
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, primaryName, replicaName)
+}
+
+func googleSqlDatabaseInstance_updatePrimaryAfterSwitchover(primaryName string, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  name                = "%s"
+  region              = "us-east1"
+  database_version    = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection = false
+  root_password = "sqlserver1"
+  instance_type = "READ_REPLICA_INSTANCE"
+  master_instance_name = "%s"
+  replica_configuration {
+	cascadable_replica = true
+  }
+  replica_names = []
+  settings {
+	tier              = "db-perf-optimized-N-2"
+	edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+  resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = [google_sql_database_instance.original-primary.name]
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, primaryName, replicaName, replicaName)
+}
+
+// After a switchover, the original-primary is now the replica and must be removed first.
+func googleSqlDatabaseInstance_deleteReplicasAfterSwitchover(primaryName, replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = ["%s"]
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+
+`, replicaName, primaryName)
+}
+
+// Update original-replica replica_names after deleting original-primary
+func googleSqlDatabaseInstance_removeReplicaFromPrimaryAfterSwitchover(replicaName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-replica" {
+  name                 = "%s"
+  region               = "us-west2"
+  database_version     = "SQLSERVER_2019_ENTERPRISE"
+  deletion_protection  = false
+  root_password = "sqlserver1"
+  instance_type = "CLOUD_SQL_INSTANCE"
+  replica_names = []
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, replicaName)
+}
+
 func testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "testproject" {
@@ -2977,6 +3441,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3004,6 +3469,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3037,6 +3503,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3070,6 +3537,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3104,6 +3572,7 @@ resource "google_project" "testproject" {
   project_id          = "%s"
   org_id              = "%s"
   billing_account     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -3165,6 +3634,111 @@ func verifyPscOperation(resourceName string, isPscConfigExpected bool, expectedP
 
 		return nil
 	}
+}
+
+func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, isPscAutoConnectionConfigExpected bool, expectedConsumerNetwork string, expectedConsumerProject string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		resource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", resourceName)
+		}
+
+		resourceAttributes := resource.Primary.Attributes
+		_, ok = resourceAttributes["settings.0.ip_configuration.#"]
+		if !ok {
+			return fmt.Errorf("settings.0.ip_configuration.# block is not present in state for %s", resourceName)
+		}
+
+		if isPscConfigExpected {
+			_, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.#"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config property is not present or set in state of %s", resourceName)
+			}
+
+			pscEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_enabled"]
+			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
+			if err != nil || pscEnabled != expectedPscEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
+			}
+
+			_, ok = resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.#"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections property is not present or set in state of %s", resourceName)
+			}
+
+			if isPscAutoConnectionConfigExpected {
+				consumerNetwork, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network"]
+				if !ok || consumerNetwork != expectedConsumerNetwork {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_network property is not present or set as expected in state of %s", resourceName)
+				}
+
+				consumerProject, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id"]
+				if !ok || consumerProject != expectedConsumerProject {
+					return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_auto_connections.0.consumer_service_project_id property is not present or set as expected in state of %s", resourceName)
+				}
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-west2"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, instanceName)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(instanceName string, projectId string, networkName string) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "testnetwork" {
+  name                    = "%s"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-west2"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			psc_auto_connections {
+				consumer_network = "projects/%s/global/networks/%s"
+				consumer_service_project_id = "%s"
+			}
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, networkName, instanceName, projectId, networkName, projectId)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
@@ -3958,6 +4532,22 @@ resource "google_sql_database_instance" "instance" {
 `, masterID, dbVersion, masterID, tier, enableGoogleMlIntegration)
 }
 
+func testGoogleSqlDatabaseInstance_EnableDataplexIntegration(masterID int, enableDataplexIntegration bool) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-%d"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  root_password		  = "rand-pwd-%d"
+  settings {
+    tier = "db-custom-2-10240"
+	enable_dataplex_integration = %t
+  }
+}
+`, masterID, masterID, enableDataplexIntegration)
+}
+
 func testGoogleSqlDatabaseInstance_BackupRetention(masterID int) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
@@ -4174,7 +4764,58 @@ func checkPromoteReplicaConfigurations(resourceName string) func(*terraform.Stat
 		if ok && replicaConfiguration != "" {
 			return fmt.Errorf("Error in replica promotion. replica_configuration should not be present in %s state.", resourceName)
 		}
+		return nil
+	}
+}
 
+// Check that original-replica is now the primary
+func checkSwitchoverOriginalReplicaConfigurations(replicaResourceName string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		replicaResource, ok := s.RootModule().Resources[replicaResourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", replicaResourceName)
+		}
+		replicaResourceAttributes := replicaResource.Primary.Attributes
+
+		replicaInstanceType, ok := replicaResourceAttributes["instance_type"]
+		if !ok {
+			return fmt.Errorf("Instance type is not present in state for %s", replicaResourceName)
+		}
+		if replicaInstanceType != "CLOUD_SQL_INSTANCE" {
+			return fmt.Errorf("Error in switchover. Original replica instance_type is %s, it should be CLOUD_SQL_INSTANCE.", replicaInstanceType)
+		}
+
+		replicaMasterInstanceName, ok := replicaResourceAttributes["master_instance_name"]
+		if ok && replicaMasterInstanceName != "" {
+			return fmt.Errorf("Error in switchover. master_instance_name should not be set on new primary")
+		}
+		return nil
+	}
+}
+
+// Check that original-primary is now a replica
+func checkSwitchoverOriginalPrimaryConfigurations(primaryResourceName string, replicaName string) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		primaryResource, ok := s.RootModule().Resources[primaryResourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", primaryResourceName)
+		}
+		primaryResourceAttributes := primaryResource.Primary.Attributes
+		primaryInstanceType, ok := primaryResourceAttributes["instance_type"]
+		if !ok {
+			return fmt.Errorf("Instance type is not present in state for %s", primaryResourceName)
+		}
+		if primaryInstanceType != "READ_REPLICA_INSTANCE" {
+			return fmt.Errorf("Error in switchover. Original primary instance_type is %s, it should be READ_REPLICA_INSTANCE.", primaryInstanceType)
+		}
+
+		primaryMasterInstanceName, ok := primaryResourceAttributes["master_instance_name"]
+		if !ok {
+			return fmt.Errorf("Master instance name is not present in state for %s", primaryResourceName)
+		}
+		if primaryMasterInstanceName != replicaName {
+			return fmt.Errorf("Error in switchover. master_instance_name should be %s", replicaName)
+		}
 		return nil
 	}
 }

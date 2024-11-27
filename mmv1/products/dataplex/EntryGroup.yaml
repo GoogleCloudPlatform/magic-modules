@@ -11,121 +11,117 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'EntryGroup'
+description: |
+  An Entry Group represents a logical grouping of one or more Entries.
+docs:
 base_url: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/entryGroups?entryGroupId={{entry_group_id}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
-description: |
-  An Entry Group represents a logical grouping of one or more Entries.
-import_format: ['projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}']
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 5
       update_minutes: 5
       delete_minutes: 5
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
+iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
-  fetch_iam_policy_verb: :GET
   parent_resource_attribute: 'entry_group_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}',
-      '{{entry_group_id}}',
-    ]
+    - 'projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}'
+    - '{{entry_group_id}}'
+custom_code:
+examples:
+  - name: 'dataplex_entry_group_basic'
+    primary_resource_id: 'test_entry_group_basic'
+    primary_resource_name: 'fmt.Sprintf("tf-test-entry-group%s", context["random_suffix"])'
+    vars:
+      entry_group_name: 'entry-group-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+  - name: 'dataplex_entry_group_full'
+    primary_resource_id: 'test_entry_group_full'
+    primary_resource_name: 'fmt.Sprintf("tf-test-entry-group%s", context["random_suffix"])'
+    vars:
+      entry_group_name: 'entry-group-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
-    url_param_only: true
-    immutable: true
+  - name: 'location'
+    type: String
     description: |
       The location where entry group will be created in.
-  - !ruby/object:Api::Type::String
-    name: 'entryGroupId'
     url_param_only: true
     immutable: true
+  - name: 'entryGroupId'
+    type: String
     description: |
       The entry group id of the entry group.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the EntryGroup, of the form: projects/{project_number}/locations/{location_id}/entryGroups/{entry_group_id}
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'uid'
-    output: true
+  - name: 'uid'
+    type: String
     description: |
       System generated globally unique ID for the EntryGroup. This ID will be different if the EntryGroup is deleted and re-created with the same name.
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
     output: true
+  - name: 'createTime'
+    type: Time
     description: |
       The time when the EntryGroup was created.
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
     output: true
+  - name: 'updateTime'
+    type: Time
     description: |
       The time when the EntryGroup was last updated.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    output: true
+  - name: 'description'
+    type: String
     description: |
       Description of the EntryGroup.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       User friendly display name.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-defined labels for the EntryGroup.
-  - !ruby/object:Api::Type::Enum
-    name: 'transferStatus'
-    output: true
+  - name: 'transferStatus'
+    type: Enum
     description: |
       Denotes the transfer status of the Entry Group. It is unspecified
       for Entry Group created from Dataplex API.
-    values:
-      - :TRANSFER_STATUS_UNSPECIFIED
-      - :TRANSFER_STATUS_MIGRATED
-      - :TRANSFER_STATUS_TRANSFERRED
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataplex_entry_group_basic'
-    primary_resource_id: 'test_entry_group_basic'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-group%s\",
-      context[\"random_suffix\"\
-      ])"
-    test_env_vars:
-      project_name: :PROJECT_NAME
-    vars:
-      entry_group_name: entry-group-basic
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dataplex_entry_group_full'
-    primary_resource_id: 'test_entry_group_full'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-entry-group%s\",
-      context[\"random_suffix\"\
-      ])"
-    test_env_vars:
-      project_name: :PROJECT_NAME
-    vars:
-      entry_group_name: entry-group-full
+    output: true
+    enum_values:
+      - 'TRANSFER_STATUS_UNSPECIFIED'
+      - 'TRANSFER_STATUS_MIGRATED'
+      - 'TRANSFER_STATUS_TRANSFERRED'

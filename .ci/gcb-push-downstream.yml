@@ -192,7 +192,6 @@ steps:
         - "GITHUB_TOKEN_DOWNSTREAMS"
         - "GOOGLE_BILLING_ACCOUNT"
         - "GOOGLE_CUST_ID"
-        - "GOOGLE_FIRESTORE_PROJECT"
         - "GOOGLE_IDENTITY_USER"
         - "GOOGLE_MASTER_BILLING_ACCOUNT"
         - "GOOGLE_ORG"
@@ -227,8 +226,6 @@ availableSecrets:
       env: GOOGLE_BILLING_ACCOUNT
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
-    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
-      env: GOOGLE_FIRESTORE_PROJECT
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
       env: GOOGLE_IDENTITY_USER
     - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest

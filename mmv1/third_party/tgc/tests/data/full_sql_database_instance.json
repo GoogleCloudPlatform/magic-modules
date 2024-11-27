@@ -64,7 +64,8 @@
               }
             ],
             "ipv4Enabled": true,
-            "requireSsl": true
+            "requireSsl": null,
+            "sslMode": "TRUSTED_CLIENT_CERTIFICATE_REQUIRED"
           },
           "locationPreference": {
             "followGaeApplication": "test-follow_gae_application",
@@ -97,6 +98,9 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "addressType": "INTERNAL",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "name": "private-ip-address",
         "prefixLength": 16,
         "purpose": "VPC_PEERING"

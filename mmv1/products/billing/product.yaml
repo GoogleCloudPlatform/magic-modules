@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,16 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-# "Billing" is already used by the Billing Budgets product, so we're
-# forced to use a fake name and to specify `legacy_name` to have all
-# resources in the `billing` namespace
-name: CoreBilling
-display_name: Cloud Billing
-legacy_name: billing
+---
+name: 'CoreBilling'
+legacy_name: 'billing'
+display_name: 'Cloud Billing'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://cloudbilling.googleapis.com/v1/
+  - name: 'ga'
+    base_url: 'https://cloudbilling.googleapis.com/v1/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'

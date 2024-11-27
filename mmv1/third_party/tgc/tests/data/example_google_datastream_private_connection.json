@@ -13,7 +13,9 @@
                 "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
             }
         },
-        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     },
     {
@@ -27,6 +29,7 @@
             "data": {
                 "displayName": "Connection profile",
                 "labels": {
+                    "goog-terraform-provisioned": "true",
                     "key": "value"
                 },
                 "vpcPeeringConfig": {
@@ -34,7 +37,9 @@
                 }
             }
         },
-        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
     }
 ]

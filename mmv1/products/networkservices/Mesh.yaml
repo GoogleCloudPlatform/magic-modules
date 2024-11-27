@@ -1,100 +1,110 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the 'License');
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an 'AS IS' BASIS,
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Mesh'
-base_url: 'projects/{{project}}/locations/global/meshes'
-create_url: 'projects/{{project}}/locations/global/meshes?meshId={{name}}'
-self_link: 'projects/{{project}}/locations/global/meshes/{{name}}'
-min_version: beta
-update_verb: :PATCH
-update_mask: true
 description: |
   Mesh represents a logical configuration grouping for workload to workload communication within a
   service mesh. Routes that point to mesh dictate how requests are routed within this logical
   mesh boundary.
-references: !ruby/object:Api::Resource::ReferenceLinks
+min_version: 'beta'
+references:
+  guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: 'name'
+docs:
+base_url: 'projects/{{project}}/locations/global/meshes'
+self_link: 'projects/{{project}}/locations/global/meshes/{{name}}'
+create_url: 'projects/{{project}}/locations/global/meshes?meshId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/global/meshes/{{name}}'
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
     base_url: '{{op_id}}'
+    path: 'name'
     wait_ms: 1000
-    timeouts: !ruby/object:Api::Timeouts
+    timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'response'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error'
     message: 'message'
-autogen_async: true
-import_format: ['projects/{{project}}/locations/global/meshes/{{name}}']
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'network_services_mesh_basic'
+  - name: 'network_services_mesh_basic'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'my-mesh'
-  - !ruby/object:Provider::Terraform::Examples
-    min_version: beta
-    name: 'network_services_mesh_no_port'
+  - name: 'network_services_mesh_no_port'
     primary_resource_id: 'default'
+    min_version: 'beta'
     vars:
       resource_name: 'my-mesh-noport'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    url_param_only: true
+  - name: 'name'
+    type: String
     description: |
       Short name of the Mesh resource to be created.
+    min_version: 'beta'
+    url_param_only: true
+    required: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+  - name: 'selfLink'
+    type: String
     description: |
       Server-defined URL of this resource.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: |
       Time the Mesh was created in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::Time
-    name: 'updateTime'
+  - name: 'updateTime'
+    type: Time
     description: |
       Time the Mesh was updated in UTC.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: Set of label tags associated with the Mesh resource.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    min_version: 'beta'
+  - name: 'description'
+    type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-  - !ruby/object:Api::Type::Integer
-    name: 'interceptionPort'
+    min_version: 'beta'
+  - name: 'interceptionPort'
+    type: Integer
     description: |
       Optional. If set to a valid TCP port (1-65535), instructs the SIDECAR proxy to listen on the
       specified port of localhost (127.0.0.1) address. The SIDECAR proxy will expect all traffic to
       be redirected to this port regardless of its actual ip:port destination. If unset, a port
       '15001' is used as the interception port. This will is applicable only for sidecar proxy
       deployments.
+    min_version: 'beta'

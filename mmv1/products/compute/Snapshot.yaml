@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,21 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Snapshot'
 kind: 'compute#snapshot'
-immutable: true
-base_url: projects/{{project}}/global/snapshots
-create_url: PRE_CREATE_REPLACE_ME/createSnapshot
-collection_url_key: 'items'
-has_self_link: true
-references: !ruby/object:Api::Resource::ReferenceLinks
-  guides:
-    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
-  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'name'
-  import_format: ['projects/{{project}}/global/snapshots/{{name}}', '{{name}}']
 description: |
   Represents a Persistent Disk Snapshot resource.
 
@@ -39,73 +27,83 @@ description: |
   Snapshots are incremental, so you can create regular snapshots on a
   persistent disk faster and at a much lower cost than if you regularly
   created a full image of the disk.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
+docs:
+base_url: 'projects/{{project}}/global/snapshots'
+has_self_link: true
+create_url: 'PRE_CREATE_REPLACE_ME/createSnapshot'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
 # operation. we'll leave the object as global operation and use the disk's
 # zonal operation for the create action.
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    full_url: 'selfLink'
     kind: 'compute#operation'
     path: 'name'
-    full_url: 'selfLink'
     wait_ms: 1000
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     path: 'targetLink'
-  status: !ruby/object:Api::OpAsync::Status
-    path: 'status'
-    complete: 'DONE'
-    allowed:
-      - 'PENDING'
-      - 'RUNNING'
-      - 'DONE'
-  error: !ruby/object:Api::OpAsync::Error
+    resource_inside_response: false
+  error:
     path: 'error/errors'
     message: 'message'
+collection_url_key: 'items'
+iam_policy:
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/global/snapshots/{{name}}'
+    - '{{name}}'
+custom_code:
+  decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'snapshot_basic'
+  - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-snapshot%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-snapshot%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'snapshot_chainname'
+  - name: 'snapshot_chainname'
     primary_resource_id: 'snapshot'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-snapshot-chainname%s\",
-      context[\"\
-      random_suffix\"])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-snapshot-chainname%s", context["random_suffix"])'
     vars:
       snapshot_name: 'my-snapshot'
       disk_name: 'debian-disk'
       chain_name: 'snapshot-chain'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/snapshot.go.erb
-  pre_create: templates/terraform/pre_create/compute_snapshot_precreate_url.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'sourceDisk'
-    resource: 'Disk'
-    imports: 'name'
+  - name: 'sourceDisk'
+    type: ResourceRef
     description: 'A reference to the disk used to create this snapshot.'
-    immutable: true
     required: true
+    immutable: true
     # ignore_read in providers - this is only used in Create
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'zone'
-    resource: 'Zone'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Disk'
     imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
     description: 'A reference to the zone where the disk is hosted.'
+    required: false
     immutable: true
     ignore_read: true
     default_from_api: true
-    required: false
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'snapshotEncryptionKey'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Zone'
+    imports: 'name'
+  - name: 'snapshotEncryptionKey'
+    type: NestedObject
     description: |
       Encrypts the snapshot using a customer-supplied encryption key.
 
@@ -121,69 +119,69 @@ parameters:
       then the snapshot will be encrypted using an automatically generated
       key and you do not need to provide a key to use the snapshot later.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'rawKey'
+      - name: 'rawKey'
+        type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         ignore_read: true
         sensitive: true
-        custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
-      - !ruby/object:Api::Type::String
-        name: 'sha256'
+        custom_flatten: 'templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
+      - name: 'sha256'
+        type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeySelfLink'
-        api_name: 'kmsKeyName'
+      - name: 'kmsKeySelfLink'
+        type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyServiceAccount'
+        api_name: kmsKeyName
+      - name: 'kmsKeyServiceAccount'
+        type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
     # ignore_read in providers - this is only used in Create
-  - !ruby/object:Api::Type::NestedObject
-    name: 'sourceDiskEncryptionKey'
+  - name: 'sourceDiskEncryptionKey'
+    type: NestedObject
     description: |
       The customer-supplied encryption key of the source snapshot. Required
       if the source snapshot is protected by a customer-supplied encryption
       key.
     ignore_read: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'rawKey'
+      - name: 'rawKey'
+        type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # The docs list this field but it is never returned.
         sensitive: true
-      - !ruby/object:Api::Type::String
-        name: 'kmsKeyServiceAccount'
+      - name: 'kmsKeyServiceAccount'
+        type: String
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'snapshot_id'
-    api_name: 'id'
+  - name: 'snapshot_id'
+    type: Integer
     description: 'The unique identifier for the resource.'
+    api_name: id
     output: true
   # 'status' not useful for object convergence.
-  - !ruby/object:Api::Type::Integer
-    name: 'diskSizeGb'
+  - name: 'diskSizeGb'
+    type: Integer
     description: 'Size of the snapshot, specified in GB.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'chainName'
+  - name: 'chainName'
+    type: String
     description: |
       Creates the new snapshot in the snapshot chain labeled with the
       specified name. The chain name must be 1-63 characters long and
@@ -191,10 +189,8 @@ properties:
       service owners who needs to create separate snapshot chains, for
       example, for chargeback tracking.  When you describe your snapshot
       resource, this field is visible only if it has a non-empty value.
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    required: true
-    immutable: true
+  - name: 'name'
+    type: String
     description: |
       Name of the resource; provided by the client when the resource is
       created. The name must be 1-63 characters long, and comply with
@@ -203,48 +199,54 @@ properties:
       first character must be a lowercase letter, and all following
       characters must be a dash, lowercase letter, or digit, except the last
       character, which cannot be a dash.
-  - !ruby/object:Api::Type::String
-    name: 'description'
+    required: true
     immutable: true
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
+    immutable: true
   # 'sourceDiskId' not useful for object convergence.
-  - !ruby/object:Api::Type::Integer
-    name: 'storageBytes'
+  - name: 'storageBytes'
+    type: Integer
     description: |
       A size of the storage used by the snapshot. As snapshots share
       storage, this number is expected to change with snapshot
       creation/deletion.
     output: true
   # 'storageBytesStatus' not useful for object convergence.
-  - !ruby/object:Api::Type::Array
-    name: 'storageLocations'
+  - name: 'storageLocations'
+    type: Array
     description: |
       Cloud Storage bucket storage location of the snapshot (regional or multi-regional).
     default_from_api: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Array
-    name: 'licenses'
-    output: true
+    item_type:
+      type: String
+  - name: 'licenses'
+    type: Array
     description: |
       A list of public visible licenses that apply to this snapshot. This
       can be because the original image had licenses attached (such as a
       Windows image).  snapshotEncryptionKey nested object Encrypts the
       snapshot using a customer-supplied encryption key.
-    item_type: !ruby/object:Api::Type::ResourceRef
+    output: true
+    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
+    item_type:
       name: 'license'
+      type: ResourceRef
+      description: 'A reference to a license associated with this snapshot'
       resource: 'License'
       imports: 'selfLink'
-      description: 'A reference to a license associated with this snapshot'
-    custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.erb'
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: Labels to apply to this Snapshot.
-    update_verb: :POST
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
-  - !ruby/object:Api::Type::Fingerprint
-    name: 'labelFingerprint'
+    update_verb: 'POST'
+  - name: 'labelFingerprint'
+    type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource. Used
       internally during updates.
+    output: true
     update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
-    update_verb: :POST
+    update_verb: 'POST'
+    key_expander: ''

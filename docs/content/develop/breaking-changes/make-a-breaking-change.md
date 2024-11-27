@@ -91,11 +91,11 @@ provider at runtime as well as in documentation.
 Set `deprecation_message` on the field. For example:
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'apiFieldName'
+- name: 'apiFieldName'
+  type: String
   description: |
     MULTILINE_FIELD_DESCRIPTION
-  deprecation_message: "`api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead."
+  deprecation_message: '`api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.'
 ```
 
 Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
@@ -174,7 +174,7 @@ or resource. It is also great to log warnings at runtime if possible.
 When working on your breaking change, make sure that your base branch
 is `FEATURE-BRANCH-major-release-{{% param "majorVersion" %}}`. This
 means that you will follow the standard
-[contribution process]({{< ref "/get-started/contribution-process" >}})
+[contribution process]({{< ref "/contribution-process" >}})
 with the following changes:
 
 1. Before you start, check out and sync your local `magic-modules` and provider

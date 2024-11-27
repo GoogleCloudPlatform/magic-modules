@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,33 +11,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'FhirStore'
 kind: 'healthcare#fhirStore'
-base_url: '{{dataset}}/fhirStores?fhirStoreId={{name}}'
-self_link: '{{dataset}}/fhirStores/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A FhirStore is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/fhir/STU3/)
   standard for Healthcare information exchange
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a FHIR store': 'https://cloud.google.com/healthcare/docs/how-tos/fhir'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.fhirStores'
+docs:
 id_format: '{{dataset}}/fhirStores/{{name}}'
-import_format: ['{{dataset}}/fhirStores/{{name}}']
-skip_sweeper: true
+base_url: '{{dataset}}/fhirStores?fhirStoreId={{name}}'
+self_link: '{{dataset}}/fhirStores/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{dataset}}/fhirStores/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/healthcare_fhir_store.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_fhir_store_basic'
+  - name: 'healthcare_fhir_store_basic'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_fhir_store_streaming_config'
+  - name: 'healthcare_fhir_store_streaming_config'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
@@ -45,41 +52,34 @@ examples:
       pubsub_topic: 'fhir-notifications'
       bq_dataset_name: 'bq_example_dataset'
     test_vars_overrides:
-      policyChanged:
-        ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare",
-        []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_fhir_store_notification_config'
+      'policyChanged': ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare", []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
+  - name: 'healthcare_fhir_store_notification_config'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
-    skip_docs: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_fhir_store_notification_configs'
+    exclude_docs: true
+  - name: 'healthcare_fhir_store_notification_configs'
     primary_resource_id: 'default'
     vars:
       dataset_name: 'example-dataset'
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
-  custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'dataset'
+  - name: 'dataset'
+    type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name for the FhirStore.
 
@@ -87,40 +87,40 @@ properties:
     required: true
     immutable: true
   # Version is duplicated because it is optional in beta but required in GA.
-  - !ruby/object:Api::Type::Enum
-    name: version
+  - name: 'version'
+    type: Enum
     description: |
       The FHIR specification version.
-    exact_version: beta
+    exact_version: 'beta'
     required: false
     immutable: true
-    default_value: :STU3
-    values:
-      - :DSTU2
-      - :STU3
-      - :R4
-  - !ruby/object:Api::Type::Enum
-    name: version
+    default_value: "STU3"
+    enum_values:
+      - 'DSTU2'
+      - 'STU3'
+      - 'R4'
+  - name: 'version'
+    type: Enum
     description: |
       The FHIR specification version.
     exact_version: ga
     required: true
     immutable: true
-    values:
-      - :DSTU2
-      - :STU3
-      - :R4
-  - !ruby/object:Api::Type::Enum
-    name: complexDataTypeReferenceParsing
+    enum_values:
+      - 'DSTU2'
+      - 'STU3'
+      - 'R4'
+  - name: 'complexDataTypeReferenceParsing'
+    type: Enum
     description: |
       Enable parsing of references within complex FHIR data types such as Extensions. If this value is set to ENABLED, then features like referential integrity and Bundle reference rewriting apply to all references. If this flag has not been specified the behavior of the FHIR store will not change, references in complex data types will not be parsed. New stores will have this value set to ENABLED by default after a notification period. Warning: turning on this flag causes processing existing resources to fail if they contain references to non-existent resources.
     default_from_api: true
-    values:
-      - :COMPLEX_DATA_TYPE_REFERENCE_PARSING_UNSPECIFIED
-      - :DISABLED
-      - :ENABLED
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableUpdateCreate'
+    enum_values:
+      - 'COMPLEX_DATA_TYPE_REFERENCE_PARSING_UNSPECIFIED'
+      - 'DISABLED'
+      - 'ENABLED'
+  - name: 'enableUpdateCreate'
+    type: Boolean
     description: |
       Whether this FHIR store has the updateCreate capability. This determines if the client can use an Update
       operation to create a new resource with a client-specified ID. If false, all IDs are server-assigned through
@@ -129,8 +129,8 @@ properties:
       identifiers, those IDs will be part of the FHIR resource path recorded in Cloud audit logs and Cloud Pub/Sub
       notifications.
     required: false
-  - !ruby/object:Api::Type::Boolean
-    name: 'disableReferentialIntegrity'
+  - name: 'disableReferentialIntegrity'
+    type: Boolean
     description: |
       Whether to disable referential integrity in this FHIR store. This field is immutable after FHIR store
       creation. The default value is false, meaning that the API will enforce referential integrity and fail the
@@ -141,8 +141,8 @@ properties:
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'disableResourceVersioning'
+  - name: 'disableResourceVersioning'
+    type: Boolean
     description: |
       Whether to disable resource versioning for this FHIR store. This field can not be changed after the creation
       of FHIR store. If set to false, which is the default behavior, all write operations will cause historical
@@ -153,8 +153,8 @@ properties:
       ** Changing this property may recreate the FHIR store (removing all data) **
     required: false
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableHistoryImport'
+  - name: 'enableHistoryImport'
+    type: Boolean
     description: |
       Whether to allow the bulk import API to accept history bundles and directly insert historical resource
       versions into the FHIR store. Importing resource histories creates resource interactions that appear to have
@@ -166,16 +166,15 @@ properties:
       ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
     required: false
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableHistoryModifications'
-    min_version: beta
+  - name: 'enableHistoryModifications'
+    type: Boolean
     description: |
       Whether to allow the ExecuteBundle API to accept history bundles, and directly insert and overwrite historical
       resource versions into the FHIR store. If set to false, using history bundles fails with an error.
+    min_version: 'beta'
     required: false
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    required: false
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize FHIR stores.
 
@@ -190,14 +189,14 @@ properties:
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
 
-  - !ruby/object:Api::Type::NestedObject
-    name: notificationConfig
-    deprecation_message: >-
-      `notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.
     required: false
+  - name: 'notificationConfig'
+    type: NestedObject
+    required: false
+    deprecation_message: '`notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.'
     properties:
-      - !ruby/object:Api::Type::String
-        name: pubsubTopic
+      - name: 'pubsubTopic'
+        type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
           PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -206,14 +205,14 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+  - name: 'selfLink'
+    type: String
     description: |
       The fully qualified name of this dataset
-    output: true
     ignore_read: true
-  - !ruby/object:Api::Type::Array
-    name: streamConfigs
+    output: true
+  - name: 'streamConfigs'
+    type: Array
     description: |-
       A list of streaming configs that configure the destinations of streaming export for every resource mutation in
       this FHIR store. Each store is allowed to have up to 10 streaming configs. After a new config is added, the next
@@ -221,92 +220,94 @@ properties:
       from the list, the server stops streaming to that location. Before adding a new config, you must add the required
       bigquery.dataEditor role to your project's Cloud Healthcare Service Agent service account. Some lag (typically on
       the order of dozens of seconds) is expected before the results show up in the streaming destination.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Array
-          name: 'resourceTypes'
+        - name: 'resourceTypes'
+          type: Array
           description: |
             Supply a FHIR resource type (such as "Patient" or "Observation"). See
             https://www.hl7.org/fhir/valueset-resource-types.html for a list of all FHIR resource types. The server treats
             an empty list as an intent to stream all the supported resource types in this FHIR store.
-          item_type: Api::Type::String
-        - !ruby/object:Api::Type::NestedObject
-          name: bigqueryDestination
-          required: true
+          item_type:
+            type: String
+        - name: 'bigqueryDestination'
+          type: NestedObject
           description: |
             The destination BigQuery structure that contains both the dataset location and corresponding schema config.
             The output is organized in one table per resource type. The server reuses the existing tables (if any) that
             are named after the resource types, e.g. "Patient", "Observation". When there is no existing table for a given
             resource type, the server attempts to create one.
             See the [streaming config reference](https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores#streamconfig) for more details.
+          required: true
           properties:
-            - !ruby/object:Api::Type::String
-              name: datasetUri
-              required: true
+            - name: 'datasetUri'
+              type: String
               description: |
                 BigQuery URI to a dataset, up to 2000 characters long, in the format bq://projectId.bqDatasetId
-            - !ruby/object:Api::Type::NestedObject
-              name: schemaConfig
               required: true
+            - name: 'schemaConfig'
+              type: NestedObject
               description: |
                 The configuration for the exported BigQuery schema.
+              required: true
               properties:
-                - !ruby/object:Api::Type::Enum
-                  name: schemaType
+                - name: 'schemaType'
+                  type: Enum
                   description: |
                     Specifies the output schema type.
                      * ANALYTICS: Analytics schema defined by the FHIR community.
                       See https://github.com/FHIR/sql-on-fhir/blob/master/sql-on-fhir.md.
                      * ANALYTICS_V2: Analytics V2, similar to schema defined by the FHIR community, with added support for extensions with one or more occurrences and contained resources in stringified JSON.
                      * LOSSLESS: A data-driven schema generated from the fields present in the FHIR data being exported, with no additional simplification.
-                  default_value: :ANALYTICS
-                  values:
-                    - :ANALYTICS
-                    - :ANALYTICS_V2
-                    - :LOSSLESS
-                - !ruby/object:Api::Type::Integer
-                  name: recursiveStructureDepth
-                  required: true
+                  default_value: "ANALYTICS"
+                  enum_values:
+                    - 'ANALYTICS'
+                    - 'ANALYTICS_V2'
+                    - 'LOSSLESS'
+                - name: 'recursiveStructureDepth'
+                  type: Integer
                   description: |
                     The depth for all recursive structures in the output analytics schema. For example, concept in the CodeSystem
                     resource is a recursive structure; when the depth is 2, the CodeSystem table will have a column called
                     concept.concept but not concept.concept.concept. If not specified or set to 0, the server will use the default
                     value 2. The maximum depth allowed is 5.
-                - !ruby/object:Api::Type::NestedObject
-                  name: lastUpdatedPartitionConfig
+                  required: true
+                - name: 'lastUpdatedPartitionConfig'
+                  type: NestedObject
                   description: |
                     The configuration for exported BigQuery tables to be partitioned by FHIR resource's last updated time column.
                   properties:
-                    - !ruby/object:Api::Type::Enum
-                      name: type
-                      required: true
+                    - name: 'type'
+                      type: Enum
                       description: |
                         Type of partitioning.
-                      values:
-                        - :PARTITION_TYPE_UNSPECIFIED
-                        - :HOUR
-                        - :DAY
-                        - :MONTH
-                        - :YEAR
-                    - !ruby/object:Api::Type::String
-                      name: expirationMs
+                      required: true
+                      enum_values:
+                        - 'PARTITION_TYPE_UNSPECIFIED'
+                        - 'HOUR'
+                        - 'DAY'
+                        - 'MONTH'
+                        - 'YEAR'
+                    - name: 'expirationMs'
+                      type: String
                       description: |
                         Number of milliseconds for which to keep the storage for a partition.
-  - !ruby/object:Api::Type::Boolean
-    name: defaultSearchHandlingStrict
+  - name: 'defaultSearchHandlingStrict'
+    type: Boolean
     description: |
       If true, overrides the default search behavior for this FHIR store to handling=strict which returns an error for unrecognized search parameters.
       If false, uses the FHIR specification default handling=lenient which ignores unrecognized search parameters.
       The handling can always be changed from the default on an individual API call by setting the HTTP header Prefer: handling=strict or Prefer: handling=lenient.
-  - !ruby/object:Api::Type::Array
-    name: notificationConfigs
+  - name: 'notificationConfigs'
+    type: Array
     description: |-
       A list of notifcation configs that configure the notification for every resource mutation in this FHIR store.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: pubsubTopic
-          required: true
+        - name: 'pubsubTopic'
+          type: String
           description: |
             The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
             PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -314,16 +315,17 @@ properties:
             was published. Notifications are only sent if the topic is non-empty. Topic names must be scoped to a
             project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
             Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
-        - !ruby/object:Api::Type::Boolean
-          name: sendFullResource
+          required: true
+        - name: 'sendFullResource'
+          type: Boolean
           description: |
             Whether to send full FHIR resource to this Pub/Sub topic for Create and Update operation.
             Note that setting this to true does not guarantee that all resources will be sent in the format of
             full FHIR resource. When a resource change is too large or during heavy traffic, only the resource name will be
             sent. Clients should always check the "payloadType" label from a Pub/Sub message to determine whether
             it needs to fetch the full resource as a separate operation.
-        - !ruby/object:Api::Type::Boolean
-          name: sendPreviousResourceOnDelete
+        - name: 'sendPreviousResourceOnDelete'
+          type: Boolean
           description: |
             Whether to send full FHIR resource to this Pub/Sub topic for deleting FHIR resource. Note that setting this to
             true does not guarantee that all previous resources will be sent in the format of full FHIR resource. When a

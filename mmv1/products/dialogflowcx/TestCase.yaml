@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,352 +11,352 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TestCase'
-base_url: '{{parent}}/testCases'
-update_verb: :PATCH
-update_mask: true
 description: |
   You can use the built-in test feature to uncover bugs and prevent regressions. A test execution verifies that agent responses have not changed for end-user inputs defined in the test case.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.testCases'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: '{{parent}}/testCases/{{name}}'
+base_url: '{{parent}}/testCases'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/testCases/{{name}}'
+timeouts:
   insert_minutes: 40
   update_minutes: 40
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_test_case_full'
+  - name: 'dialogflowcx_test_case_full'
     primary_resource_id: 'basic_test_case'
     vars:
       agent_name: 'dialogflowcx-agent'
-skip_sweeper: true
-id_format: '{{parent}}/testCases/{{name}}'
-import_format: ['{{%parent}}/testCases/{{name}}']
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    url_param_only: true
-    immutable: true
+  - name: 'parent'
+    type: String
     description: |
       The agent to create the test case for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the test case.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/testCases/<TestCase ID>.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::Array
-    name: 'tags'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'tags'
+    type: Array
     description: |
       Tags are short descriptions that users may apply to test cases for organizational and filtering purposes.
       Each tag should start with "#" and has a limit of 30 characters
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+    item_type:
+      type: String
+  - name: 'displayName'
+    type: String
     description: |
       The human-readable name of the test case, unique within the agent. Limit of 200 characters.
-    validation: !ruby/object:Provider::Terraform::Validation
+    required: true
+    validation:
       function: 'validation.StringLenBetween(0, 200)'
-  - !ruby/object:Api::Type::String
-    name: 'notes'
+  - name: 'notes'
+    type: String
     description: |
       Additional freeform notes about the test case. Limit of 400 characters.
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'validation.StringLenBetween(0, 400)'
-  - !ruby/object:Api::Type::NestedObject
-    name: 'testConfig'
+  - name: 'testConfig'
+    type: NestedObject
     description: |
       Config for the test case.
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'trackingParameters'
+      - name: 'trackingParameters'
+        type: Array
         description: |
           Session parameters to be compared when calculating differences.
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::String
-        name: 'flow'
+        item_type:
+          type: String
+      - name: 'flow'
+        type: String
         description: |
           Flow name to start the test case with.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
           Only one of flow and page should be set to indicate the starting point of the test case. If neither is set, the test case will start with start page on the default start flow.
         conflicts:
           - test_config.0.page
-      - !ruby/object:Api::Type::String
-        name: 'page'
+      - name: 'page'
+        type: String
         description: |
           The page to start the test case with.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
           Only one of flow and page should be set to indicate the starting point of the test case. If neither is set, the test case will start with start page on the default start flow.
         conflicts:
           - test_config.0.flow
-  - !ruby/object:Api::Type::Array
-    name: 'testCaseConversationTurns'
+  - name: 'testCaseConversationTurns'
+    type: Array
     description: |
       The conversation turns uttered when the test case was created, in chronological order. These include the canonical set of agent utterances that should occur when the agent is working properly.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::NestedObject
-          name: 'userInput'
+        - name: 'userInput'
+          type: NestedObject
           description: |
             The user input.
           properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'input'
+            - name: 'input'
+              type: NestedObject
               description: |
                 User input. Supports text input, event input, dtmf input in the test case.
               properties:
                 # Does not support intent or audio as of this writing. https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/ConversationTurn#userinput
-                - !ruby/object:Api::Type::String
-                  name: 'languageCode'
+                - name: 'languageCode'
+                  type: String
                   description: |
                     The language of the input. See [Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language) for a list of the currently supported language codes.
                     Note that queries in the same session do not necessarily need to specify the same language.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'text'
+                - name: 'text'
+                  type: NestedObject
                   description: |
                     The natural language text to be processed.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'text'
-                      required: true
+                    - name: 'text'
+                      type: String
                       description: |
                         The natural language text to be processed. Text length must not exceed 256 characters.
-                      validation: !ruby/object:Provider::Terraform::Validation
+                      required: true
+                      validation:
                         function: 'validation.StringLenBetween(0, 256)'
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'event'
+                - name: 'event'
+                  type: NestedObject
                   description: |
                     The event to be triggered.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'event'
-                      required: true
+                    - name: 'event'
+                      type: String
                       description: |
                         Name of the event.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'dtmf'
+                      required: true
+                - name: 'dtmf'
+                  type: NestedObject
                   description: |
                     The DTMF event to be handled.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'digits'
+                    - name: 'digits'
+                      type: String
                       description: |
                         The dtmf digits.
-                    - !ruby/object:Api::Type::String
-                      name: 'finishDigit'
+                    - name: 'finishDigit'
+                      type: String
                       description: |
                         The finish digit (if any).
             # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-            - !ruby/object:Api::Type::String
-              name: 'injectedParameters'
+            - name: 'injectedParameters'
+              type: String
               description: |
                 Parameters that need to be injected into the conversation during intent detection.
-              custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-              custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-              state_func:
-                'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                return s }'
-              validation: !ruby/object:Provider::Terraform::Validation
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
                 function: 'validation.StringIsJSON'
-            - !ruby/object:Api::Type::Boolean
-              name: 'isWebhookEnabled'
+            - name: 'isWebhookEnabled'
+              type: Boolean
               description: |
                 If webhooks should be allowed to trigger in response to the user utterance. Often if parameters are injected, webhooks should not be enabled.
-            - !ruby/object:Api::Type::Boolean
-              name: 'enableSentimentAnalysis'
+            - name: 'enableSentimentAnalysis'
+              type: Boolean
               description: |
                 Whether sentiment analysis is enabled.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'virtualAgentOutput'
+        - name: 'virtualAgentOutput'
+          type: NestedObject
           description: |
             The virtual agent output.
           properties:
             # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-            - !ruby/object:Api::Type::String
-              name: 'sessionParameters'
+            - name: 'sessionParameters'
+              type: String
               description: |
                 The session parameters available to the bot at this point.
-              custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-              custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-              state_func:
-                'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                return s }'
-              validation: !ruby/object:Provider::Terraform::Validation
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
                 function: 'validation.StringIsJSON'
-            - !ruby/object:Api::Type::NestedObject
-              name: 'triggeredIntent'
+            - name: 'triggeredIntent'
+              type: NestedObject
               description: |
                 The [Intent](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.intents#Intent) that triggered the response.
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'name'
+                - name: 'name'
+                  type: String
                   description: |
                     The unique identifier of the intent.
                     Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
-                - !ruby/object:Api::Type::String
-                  name: 'displayName'
-                  # Output only because you can't set it independently of name; if they don't match, displayName is ignored and may lead to spurious changes
-                  output: true
+                - name: 'displayName'
+                  type: String
                   description: |
                     The human-readable name of the intent, unique within the agent.
-            - !ruby/object:Api::Type::NestedObject
-              name: 'currentPage'
+                  # Output only because you can't set it independently of name; if they don't match, displayName is ignored and may lead to spurious changes
+                  output: true
+            - name: 'currentPage'
+              type: NestedObject
               description: |
                 The [Page](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows.pages#Page) on which the utterance was spoken.
               properties:
-                - !ruby/object:Api::Type::String
-                  name: 'name'
+                - name: 'name'
+                  type: String
                   description: |
                     The unique identifier of the page.
                     Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
-                - !ruby/object:Api::Type::String
-                  name: 'displayName'
-                  # Output only because you can't set it independently of name; if they don't match, displayName is ignored and may lead to spurious changes
-                  output: true
+                - name: 'displayName'
+                  type: String
                   description: |
                     The human-readable name of the page, unique within the flow.
-            - !ruby/object:Api::Type::Array
-              name: 'textResponses'
+                  output: true
+            - name: 'textResponses'
+              type: Array
               description: |
                 The text responses from the agent for the turn.
-              item_type: !ruby/object:Api::Type::NestedObject
+              item_type:
+                type: NestedObject
                 properties:
-                  - !ruby/object:Api::Type::Array
-                    name: 'text'
+                  - name: 'text'
+                    type: Array
                     description: |
                       A collection of text responses.
-                    item_type: Api::Type::String
-  - !ruby/object:Api::Type::Time
-    name: 'creationTime'
+                    item_type:
+                      type: String
+  - name: 'creationTime'
+    type: Time
     description: 'When the test was created. A timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'lastTestResult'
+  - name: 'lastTestResult'
+    type: NestedObject
     description: |
       The latest test result.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
+      - name: 'name'
+        type: String
         description: |
           The resource name for the test case result.
           Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/testCases/<TestCase ID>/results/<TestCaseResult ID>.
-      - !ruby/object:Api::Type::String
-        name: 'environment'
+      - name: 'environment'
+        type: String
         description: |
           Environment where the test was run. If not set, it indicates the draft environment.
-      - !ruby/object:Api::Type::Array
-        name: 'conversationTurns'
+      - name: 'conversationTurns'
+        type: Array
         description: |
           The conversation turns uttered during the test case replay in chronological order.
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::NestedObject
-              name: 'userInput'
+            - name: 'userInput'
+              type: NestedObject
               description: |
                 The user input.
               properties:
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'input'
+                - name: 'input'
+                  type: NestedObject
                   description: |
                     User input. Supports text input, event input, dtmf input in the test case.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'languageCode'
+                    - name: 'languageCode'
+                      type: String
                       description: |
                         The language of the input. See [Language Support](https://cloud.google.com/dialogflow/cx/docs/reference/language) for a list of the currently supported language codes.
                         Note that queries in the same session do not necessarily need to specify the same language.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'text'
+                    - name: 'text'
+                      type: NestedObject
                       description: |
                         The natural language text to be processed.
                       properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'text'
-                          required: true
+                        - name: 'text'
+                          type: String
                           description: |
                             The natural language text to be processed. Text length must not exceed 256 characters.
-                          validation: !ruby/object:Provider::Terraform::Validation
+                          required: true
+                          validation:
                             function: 'validation.StringLenBetween(0, 256)'
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'event'
+                    - name: 'event'
+                      type: NestedObject
                       description: |
                         The event to be triggered.
                       properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'event'
-                          required: true
+                        - name: 'event'
+                          type: String
                           description: |
                             Name of the event.
-                    - !ruby/object:Api::Type::NestedObject
-                      name: 'dtmf'
+                          required: true
+                    - name: 'dtmf'
+                      type: NestedObject
                       description: |
                         The DTMF event to be handled.
                       properties:
-                        - !ruby/object:Api::Type::String
-                          name: 'digits'
+                        - name: 'digits'
+                          type: String
                           description: |
                             The dtmf digits.
-                        - !ruby/object:Api::Type::String
-                          name: 'finishDigit'
+                        - name: 'finishDigit'
+                          type: String
                           description: |
                             The finish digit (if any).
                 # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                - !ruby/object:Api::Type::String
-                  name: 'injectedParameters'
+                - name: 'injectedParameters'
+                  type: String
                   description: |
                     Parameters that need to be injected into the conversation during intent detection.
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                  state_func:
-                    'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                    return s }'
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
                     function: 'validation.StringIsJSON'
-                - !ruby/object:Api::Type::Boolean
-                  name: 'isWebhookEnabled'
+                - name: 'isWebhookEnabled'
+                  type: Boolean
                   description: |
                     If webhooks should be allowed to trigger in response to the user utterance. Often if parameters are injected, webhooks should not be enabled.
-                - !ruby/object:Api::Type::Boolean
-                  name: 'enableSentimentAnalysis'
+                - name: 'enableSentimentAnalysis'
+                  type: Boolean
                   description: |
                     Whether sentiment analysis is enabled.
-            - !ruby/object:Api::Type::NestedObject
-              name: 'virtualAgentOutput'
+            - name: 'virtualAgentOutput'
+              type: NestedObject
               description: |
                 The virtual agent output.
               properties:
                 # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
-                - !ruby/object:Api::Type::String
-                  name: 'sessionParameters'
+                - name: 'sessionParameters'
+                  type: String
                   description: |
                     The session parameters available to the bot at this point.
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                  state_func:
-                    'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                    return s }'
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                  validation:
                     function: 'validation.StringIsJSON'
-                - !ruby/object:Api::Type::Array
-                  name: 'differences'
+                - name: 'differences'
+                  type: Array
                   description: |
                     The list of differences between the original run and the replay for this output, if any.
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::Enum
-                        name: 'type'
+                      - name: 'type'
+                        type: Enum
                         description: |
                           The type of diff.
                           * INTENT: The intent.
@@ -364,88 +364,88 @@ properties:
                           * PARAMETERS: The parameters.
                           * UTTERANCE: The message utterance.
                           * FLOW: The flow.
-                        values:
-                          - :INTENT
-                          - :PAGE
-                          - :PARAMETERS
-                          - :UTTERANCE
-                          - :FLOW
-                      - !ruby/object:Api::Type::String
-                        name: 'description'
+                        enum_values:
+                          - 'INTENT'
+                          - 'PAGE'
+                          - 'PARAMETERS'
+                          - 'UTTERANCE'
+                          - 'FLOW'
+                      - name: 'description'
+                        type: String
                         description: |
                           A human readable description of the diff, showing the actual output vs expected output.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'triggeredIntent'
+                - name: 'triggeredIntent'
+                  type: NestedObject
                   description: |
                     The [Intent](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.intents#Intent) that triggered the response.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'name'
+                    - name: 'name'
+                      type: String
                       description: |
                         The unique identifier of the intent.
                         Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/intents/<Intent ID>.
-                    - !ruby/object:Api::Type::String
-                      name: 'displayName'
+                    - name: 'displayName'
+                      type: String
                       description: |
                         The human-readable name of the intent, unique within the agent.
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'currentPage'
+                - name: 'currentPage'
+                  type: NestedObject
                   description: |
                     The [Page](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.flows.pages#Page) on which the utterance was spoken.
                   properties:
-                    - !ruby/object:Api::Type::String
-                      name: 'name'
+                    - name: 'name'
+                      type: String
                       description: |
                         The unique identifier of the page.
                         Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>/pages/<Page ID>.
-                    - !ruby/object:Api::Type::String
-                      name: 'displayName'
+                    - name: 'displayName'
+                      type: String
                       description: |
                         The human-readable name of the page, unique within the flow.
-                - !ruby/object:Api::Type::Array
-                  name: 'textResponses'
+                - name: 'textResponses'
+                  type: Array
                   description: |
                     The text responses from the agent for the turn.
-                  item_type: !ruby/object:Api::Type::NestedObject
+                  item_type:
+                    type: NestedObject
                     properties:
-                      - !ruby/object:Api::Type::Array
-                        name: 'text'
+                      - name: 'text'
+                        type: Array
                         description: |
                           A collection of text responses.
-                        item_type: Api::Type::String
-                - !ruby/object:Api::Type::NestedObject
-                  name: 'status'
+                        item_type:
+                          type: String
+                - name: 'status'
+                  type: NestedObject
                   description: |
                     Response error from the agent in the test result. If set, other output is empty.
                   properties:
-                    - !ruby/object:Api::Type::Integer
-                      name: 'code'
+                    - name: 'code'
+                      type: Integer
                       description: |
                         The status code, which should be an enum value of google.rpc.Code.
-                    - !ruby/object:Api::Type::String
-                      name: 'message'
+                    - name: 'message'
+                      type: String
                       description: |
                         A developer-facing error message.
-                    - !ruby/object:Api::Type::String
-                      name: 'details'
+                    - name: 'details'
+                      type: String
                       description: |
                         A JSON encoded list of messages that carry the error details.
-                      custom_expand: 'templates/terraform/custom_expand/json_value.erb'
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-                      state_func:
-                        'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v);
-                        return s }'
-                      validation: !ruby/object:Provider::Terraform::Validation
+                      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                      custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                      validation:
                         function: 'validation.StringIsJSON'
-      - !ruby/object:Api::Type::Enum
-        name: 'testResult'
+      - name: 'testResult'
+        type: Enum
         description: |
           Whether the test case passed in the agent environment.
           * PASSED: The test passed.
           * FAILED: The test did not pass.
-        values:
-          - :PASSED
-          - :FAILED
-      - !ruby/object:Api::Type::Time
-        name: 'testTime'
+        enum_values:
+          - 'PASSED'
+          - 'FAILED'
+      - name: 'testTime'
+        type: Time
         description: 'The time that the test was run. A timestamp in RFC3339 text format.'

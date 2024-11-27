@@ -8,9 +8,17 @@ aliases:
 # MMv1 field reference
 
 This page documents commonly-used properties for fields. For a full list of
-available properties, see [type.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.rb).
+available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.go).
 
 ## Shared properties
+
+### `name`
+Specifies the name of the field within Terraform. By default this will also 
+be the key for the field in the API request message, if a separate `api_name`
+is not declared using the corresponding property.
+
+### `type`
+Sets the expected data type of the field. All valid types are declared [here](https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673).
 
 ### `min_version: beta`
 Marks the field (and any subfields) as beta-only. Ensure a beta version block
@@ -44,13 +52,13 @@ update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}/
 
 ### `update_verb`
 If update_url is also set, overrides the verb used to update this specific
-field. Allowed values: :POST, :PUT, :PATCH. Default: Resource's update_verb
-(which defaults to :PUT if unset).
+field. Allowed values: 'POST', 'PUT', 'PATCH'. Default: Resource's update_verb
+(which defaults to 'PUT' if unset).
 
 Example:
 
 ```yaml
-update_verb: :POST
+update_verb: 'POST'
 ```
 
 ### `required`
@@ -81,7 +89,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/diffs#ignore_read" >}}).
 
 Example:
 
@@ -99,7 +107,7 @@ Nested fields currently
 [do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
 but can replicate the behavior by implementing a
 [`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
-that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.erb).
+that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.tmpl).
 Any fields using a custom flatten also need to be added to `ignore_read_extra`
 for any examples where the field is set.
 
@@ -112,7 +120,7 @@ ignore_read: true
 Example: Custom flatten
 
 ```go
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   return d.Get("password")
 }
 ```
@@ -156,6 +164,10 @@ for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
 `send_empty_value` and `default_from_api` cannot both be true on the same field.
 
+Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
+NestedObject fields will currently be sent as `null` if unset (rather than being
+omitted.)
+
 Example:
 
 ```yaml
@@ -171,9 +183,24 @@ all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
+- name: 'fieldOne'
+  type: String
   conflicts:
+    - field_two
+    - nested_object.0.nested_field
+```
+
+### `required_with`
+Specifies a list of fields (excluding the current field) that must all be specified
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: String
+  required_with:
     - field_two
     - nested_object.0.nested_field
 ```
@@ -186,8 +213,8 @@ must be set. Must be set separately on all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
+- name: 'fieldOne'
+  type: String
   exactly_one_of:
     - field_one
     - field_two
@@ -203,8 +230,8 @@ set separately on all listed fields. Not supported within
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
+- name: 'fieldOne'
+  type: String
   at_least_one_of:
     - field_one
     - field_two
@@ -213,9 +240,9 @@ Example:
 
 ### `diff_suppress_func`
 Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
-to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+to use for this field. In many cases, a [custom flattener]({{< ref "/develop/custom-code/#custom_flatten" >}})
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
-[Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
+[Fix diffs]({{< ref "/develop/diffs" >}}) for more information and best practices.
 
 The function specified can be a
 [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)
@@ -225,8 +252,8 @@ The function specified can be a
 Example:
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
+- name: 'fieldOne'
+  type: String
   diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 ```
 
@@ -258,18 +285,18 @@ elements in the array can be validated using [`item_validation`]({{<ref "/develo
 Example: Provider-specific function
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
-  validation: !ruby/object:Provider::Terraform::Validation
+- name: 'fieldOne'
+  type: String
+  validation:
     function: 'verify.ValidateBase64String'
 ```
 
 Example: Regex
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
-  validation: !ruby/object:Provider::Terraform::Validation
+- name: 'fieldOne'
+  type: String
+  validation:
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
 
@@ -280,9 +307,9 @@ recommended, because it makes it more difficult for users and maintainers to
 understand how the resource maps to the underlying API.
 
 ```yaml
-- !ruby/object:Api::Type::String
-  name: 'fieldOne'
-  api_name: 'otherFieldName'
+- name: 'fieldOne'
+  type: String
+  api_name: otherFieldName
 ```
 
 ### `url_param_only`
@@ -297,9 +324,8 @@ url_param_only: true
 
 ## `Enum` properties
 
-### `values`
-Enum only. Sets allowed values as ruby "literal constants" (prefixed with a
-colon). If the allowed values change frequently, use a String field instead
+### `enum_values`
+Enum only. If the allowed values change frequently, use a String field instead
 to allow better forwards-compatibility, and link to API documentation
 stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.
@@ -310,9 +336,9 @@ custom [`validation`]({{<ref "/develop/field-reference#validation" >}}) is provi
 Example:
 
 ```yaml
-values:
-  - :VALUE_ONE
-  - :VALUE_TWO
+enum_values:
+  - 'VALUE_ONE'
+  - 'VALUE_TWO'
 ```
 
 ## `Array` properties
@@ -325,27 +351,29 @@ define the attributes of the nested type.
 Example: Primitive value
 
 ```yaml
-item_type: Api::Type::String
+item_type:
+  type: String
 ```
 
 Example: Enum value
 
 ```yaml
-item_type: !ruby/object:Api::Type::Enum
-  name: 'required but unused'
+item_type:
+  type: Enum
   description: 'required but unused'
   values:
-    - :VALUE_ONE
-    - :VALUE_TWO
+    - 'VALUE_ONE'
+    - 'VALUE_TWO'
 ```
 
 Example: Nested object
 
 ```yaml
-item_type: !ruby/object:Api::Type::NestedObject
+item_type:
+  type: NestedObject
   properties:
-    - !ruby/object:Api::Type::String
-      name: 'FIELD_NAME'
+    - name: 'FIELD_NAME'
+      type: String
       description: |
         MULTI_LINE_FIELD_DESCRIPTION
 ```
@@ -361,35 +389,38 @@ values are correct.
 Example: Provider-specific function
 
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'fieldOne'
-  item_type: Api::Type::String
-  item_validation: !ruby/object:Provider::Terraform::Validation
+- name: 'fieldOne'
+  type: Array
+  item_type:
+    type: String
+  item_validation:
     function: 'verify.ValidateBase64String'
 ```
 
 Example: Regex
 
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'fieldOne'
-  item_type: Api::Type::String
-  item_validation: !ruby/object:Provider::Terraform::Validation
+- name: 'fieldOne'
+  type: Array
+  item_type:
+    type: String
+  item_validation:
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
 
 Example: Enum
 
 ```yaml
-- !ruby/object:Api::Type::Array
-  name: 'fieldOne'
-  item_type: !ruby/object:Api::Type::Enum
-    name: 'required but unused'
+- name: 'fieldOne'
+  type: Array
+  item_type:
+    type: Enum
     description: 'required but unused'
     values:
-      - :VALUE_ONE
-      - :VALUE_TWO
-  item_validation: 'customFunction'
+      - 'VALUE_ONE'
+      - 'VALUE_TWO'
+  item_validation: 
+    function: 'customFunction'
 ```
 
 
@@ -402,8 +433,8 @@ Example:
 
 ```yaml
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'FIELD_NAME'
+  - name: 'FIELD_NAME'
+    type: String
     description: |
       MULTI_LINE_FIELD_DESCRIPTION
 ```

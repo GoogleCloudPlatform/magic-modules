@@ -25,6 +25,9 @@ import (
 
 func TestExecRequestReviewer(t *testing.T) {
 	availableReviewers := github.AvailableReviewers()
+	if len(availableReviewers) < 3 {
+		t.Fatalf("not enough available reviewers (%v) to run TestExecRequestReviewer (need at least 3)", availableReviewers)
+	}
 	cases := map[string]struct {
 		pullRequest             github.PullRequest
 		requestedReviewers      []string

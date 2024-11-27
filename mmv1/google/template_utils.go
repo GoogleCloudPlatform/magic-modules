@@ -65,6 +65,7 @@ var TemplateFunctions = template.FuncMap{
 	"join":          strings.Join,
 	"lower":         strings.ToLower,
 	"upper":         strings.ToUpper,
+	"hasSuffix":     strings.HasSuffix,
 	"dict":          wrapMultipleParams,
 	"format2regex":  Format2Regex,
 	"hasPrefix":     strings.HasPrefix,

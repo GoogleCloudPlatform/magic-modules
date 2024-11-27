@@ -1,5 +1,0 @@
-resource "google_network_security_url_lists" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['resource_name'] %>"
-  location    = "us-central1"
-  values = ["www.example.com"]
-}

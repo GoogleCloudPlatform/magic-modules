@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,70 +11,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Service'
-base_url: '{{name}}'
-create_url: '{{namespace}}/services?serviceId={{service_id}}'
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  An individual service. A service contains a name and optional metadata.
+min_version: 'beta'
+references:
   guides:
     'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'
   api: 'https://cloud.google.com/service-directory/docs/reference/rest/v1beta1/projects.locations.namespaces.services'
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  skip_import_test: true
-  parent_resource_attribute: 'name'
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  set_iam_policy_verb: :POST
-min_version: beta
-description: |
-  An individual service. A service contains a name and optional metadata.
+docs:
+base_url: '{{name}}'
+self_link: '{{name}}'
+create_url: '{{namespace}}/services?serviceId={{service_id}}'
+update_verb: 'PATCH'
+update_mask: true
 import_format:
-  [
-    'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}',
-  ]
-skip_sweeper: true
+  - 'projects/{{project}}/locations/{{location}}/namespaces/{{namespace_id}}/services/{{service_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  exclude_import_test: true
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'name'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
+  custom_import: 'templates/terraform/custom_import/service_directory_service.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'service_directory_service_basic'
+  - name: 'service_directory_service_basic'
     primary_resource_id: 'example'
+    min_version: 'beta'
     vars:
       service_id: 'example-service'
       namespace_id: 'example-namespace'
-    min_version: beta
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/service_directory_service.go.erb
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'namespace'
+  - name: 'namespace'
+    type: String
     description: |
       The resource name of the namespace this service will belong to.
-    required: true
+    min_version: 'beta'
     url_param_only: true
+    required: true
     ignore_read: true
-  - !ruby/object:Api::Type::String
-    name: serviceId
+  - name: 'serviceId'
+    type: String
     description: |
       The Resource ID must be 1-63 characters long, including digits,
       lowercase letters or the hyphen character.
+    min_version: 'beta'
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       function: 'verify.ValidateRFC1035Name(2, 63)'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name for the service in the
       format `projects/*/locations/*/namespaces/*/services/*`.
+    min_version: 'beta'
     output: true
-  - !ruby/object:Api::Type::KeyValuePairs
-    name: 'metadata'
+  - name: 'metadata'
+    type: KeyValuePairs
     description: |
       Metadata for the service. This data can be consumed
       by service clients. The entire metadata dictionary may contain
       up to 2000 characters, spread across all key-value pairs.
       Metadata that goes beyond any these limits will be rejected.
+    min_version: 'beta'

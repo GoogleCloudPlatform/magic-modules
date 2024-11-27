@@ -38,13 +38,13 @@ var (
 	// used for flags
 	dryRun bool
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
 	waitingForContributorTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
 	waitingForMergeTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
 	waitingForReviewTemplate string
 )
 
@@ -66,11 +66,12 @@ var scheduledPrReminders = &cobra.Command{
 			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(nil).WithAuthToken(githubToken)
-		return execScheduledPrReminders(gh)
+		mgh := membership.NewClient(githubToken)
+		return execScheduledPrReminders(gh, mgh)
 	},
 }
 
-func execScheduledPrReminders(gh *github.Client) error {
+func execScheduledPrReminders(gh *github.Client, mgh GithubClient) error {
 	ctx := context.Background()
 	opt := &github.PullRequestListOptions{
 		State:       "open",
@@ -165,7 +166,14 @@ func execScheduledPrReminders(gh *github.Client) error {
 		)
 		sinceDays := businessDaysDiff(since, time.Now())
 		if shouldNotify(pr, state, sinceDays) {
-			comment, err := formatReminderComment(pr, state, sinceDays)
+			// Determine the current primary reviewer.
+			comments, err := mgh.GetPullRequestComments(fmt.Sprintf("%d", *pr.Number))
+			if err != nil {
+				return err
+			}
+			_, currentReviewer := membership.FindReviewerComment(comments)
+
+			reminderComment, err := formatReminderComment(pr, state, sinceDays, currentReviewer)
 			if err != nil {
 				fmt.Printf(
 					"%d/%d: PR %d: error rendering comment: %s\n",
@@ -177,7 +185,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 				continue
 			}
 			if dryRun {
-				fmt.Printf("DRY RUN: Would post comment: %s\n", comment)
+				fmt.Printf("DRY RUN: Would post comment: %s\n", reminderComment)
 			} else {
 				_, _, err := gh.Issues.CreateComment(
 					ctx,
@@ -185,11 +193,11 @@ func execScheduledPrReminders(gh *github.Client) error {
 					"magic-modules",
 					*pr.Number,
 					&github.IssueComment{
-						Body: github.String(comment),
+						Body: github.String(reminderComment),
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error posting comment to PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error posting comment to PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -208,7 +216,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error closing PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error closing PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -433,7 +441,7 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 	return false
 }
 
-func formatReminderComment(pullRequest *github.PullRequest, state pullRequestReviewState, sinceDays int) (string, error) {
+func formatReminderComment(pullRequest *github.PullRequest, state pullRequestReviewState, sinceDays int, currentReviewer string) (string, error) {
 	embeddedTemplate := ""
 	switch state {
 	case waitingForMerge:
@@ -454,11 +462,15 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 		panic(fmt.Sprintf("Unable to parse template for %s: %s", state.String(), err))
 	}
 
-	coreReviewers := []string{}
-	for _, reviewer := range pullRequest.RequestedReviewers {
-		if membership.IsCoreReviewer(*reviewer.Login) {
-			coreReviewers = append(coreReviewers, *reviewer.Login)
+	var coreReviewers []string
+	if currentReviewer == "" {
+		for _, reviewer := range pullRequest.RequestedReviewers {
+			if membership.IsCoreReviewer(*reviewer.Login) {
+				coreReviewers = append(coreReviewers, *reviewer.Login)
+			}
 		}
+	} else {
+		coreReviewers = append(coreReviewers, currentReviewer)
 	}
 
 	data := reminderCommentData{

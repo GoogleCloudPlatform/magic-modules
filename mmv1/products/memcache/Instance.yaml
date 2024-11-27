@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,218 +11,233 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Instance'
-create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
-self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
-base_url: projects/{{project}}/locations/{{region}}/instances
-update_verb: :PATCH
-update_mask: true
 description: |
   A Google Cloud Memcache instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/memcache/docs/creating-instances'
   api: 'https://cloud.google.com/memorystore/docs/memcached/reference/rest/v1/projects.locations.instances'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
+self_link: 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: true
+  error:
+    path: 'error'
+    message: 'message'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'memcache_instance_basic'
+  - name: 'memcache_instance_basic'
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
-    skip_test: true
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'memcache_instance_basic_test'
+    exclude_test: true
+  - name: 'memcache_instance_basic_test'
     primary_resource_id: 'instance'
     vars:
       instance_name: 'test-instance'
       network_name: 'test-network'
       address_name: 'address'
     test_vars_overrides:
-      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
-    skip_docs: true
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    exclude_docs: true
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'region'
+  - name: 'region'
+    type: String
     description: |
       The region of the Memcache instance. If it is not provided, the provider region is used.
-    immutable: true
     url_param_only: true
+    immutable: true
     default_from_api: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name of the instance.
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       A user-visible name for the instance.
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'memcacheNodes'
+  - name: 'memcacheNodes'
+    type: Array
     description: |
       Additional information about the instance state, if available.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'nodeId'
+        - name: 'nodeId'
+          type: String
           description:
             Identifier of the Memcached node. The node id does not include
             project or location like the Memcached instance name.
           output: true
-        - !ruby/object:Api::Type::String
-          name: 'zone'
+        - name: 'zone'
+          type: String
           description: Location (GCP Zone) for the Memcached node.
           output: true
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
+        - name: 'port'
+          type: Integer
           description: The port number of the Memcached server on this node.
           output: true
-        - !ruby/object:Api::Type::String
-          name: 'host'
+        - name: 'host'
+          type: String
           description:
             Hostname or IP address of the Memcached node used by the clients to
             connect to the Memcached server on this node.
           output: true
-        - !ruby/object:Api::Type::String
-          name: state
+        - name: 'state'
+          type: String
           description: Current state of the Memcached node.
           output: true
-  - !ruby/object:Api::Type::Time
-    name: 'createTime'
+  - name: 'createTime'
+    type: Time
     description: Creation timestamp in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'discoveryEndpoint'
+  - name: 'discoveryEndpoint'
+    type: String
     description: Endpoint for Discovery API
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Resource labels to represent user-provided metadata.
-  - !ruby/object:Api::Type::String
-    name: 'memcacheFullVersion'
-    output: true
+  - name: 'memcacheFullVersion'
+    type: String
     description: |
       The full version of memcached server running on this instance.
-  - !ruby/object:Api::Type::Array
-    name: 'zones'
-    immutable: true
+    output: true
+  - name: 'zones'
+    type: Array
     description: |
       Zones where memcache nodes should be provisioned.  If not
       provided, all zones will be used.
-    default_from_api: true
     is_set: true
-    item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'authorizedNetwork'
     immutable: true
+    default_from_api: true
+    item_type:
+      type: String
+  - name: 'authorizedNetwork'
+    type: String
     description: |
       The full name of the GCE network to connect the instance to.  If not provided,
       'default' will be used.
+    immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::Integer
-    name: nodeCount
+  - name: 'nodeCount'
+    type: Integer
     description: |
       Number of nodes in the memcache instance.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: memcacheVersion
+  - name: 'memcacheVersion'
+    type: Enum
     description: |
       The major version of Memcached software. If not provided, latest supported version will be used.
       Currently the latest supported major version is MEMCACHE_1_5. The minor version will be automatically
       determined by our system based on the latest supported minor version.
-    default_value: :MEMCACHE_1_5
-    values:
-      - :MEMCACHE_1_5
-      - :MEMCACHE_1_6_15
     update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}:upgrade'
-    update_verb: :POST
-  - !ruby/object:Api::Type::NestedObject
-    name: nodeConfig
+    update_verb: 'POST'
+    default_value: "MEMCACHE_1_5"
+    enum_values:
+      - 'MEMCACHE_1_5'
+      - 'MEMCACHE_1_6_15'
+  - name: 'nodeConfig'
+    type: NestedObject
     description: |
       Configuration for memcache nodes.
     required: true
     immutable: true
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: cpuCount
+      - name: 'cpuCount'
+        type: Integer
         description: |
           Number of CPUs per node.
         required: true
-      - !ruby/object:Api::Type::Integer
-        name: memorySizeMb
+      - name: 'memorySizeMb'
+        type: Integer
         description: |
           Memory size in Mebibytes for each memcache node.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: memcacheParameters
-    api_name: parameters
+  - name: 'memcacheParameters'
+    type: NestedObject
     description: |
       User-specified parameters for this memcache instance.
+    api_name: parameters
     immutable: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: id
-        output: true
+      - name: 'id'
+        type: String
         description: |
           This is a unique ID associated with this set of parameters.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: params
+        output: true
+      - name: 'params'
+        type: KeyValuePairs
         description: |
           User-defined set of parameters to use in the memcache process.
-  - !ruby/object:Api::Type::NestedObject
-    name: maintenancePolicy
+  - name: 'maintenancePolicy'
+    type: NestedObject
     description: |
       Maintenance policy for an instance.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'createTime'
-        output: true
+      - name: 'createTime'
+        type: String
         description: |
           Output only. The time when the policy was created.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits
-      - !ruby/object:Api::Type::String
-        name: 'updateTime'
         output: true
+      - name: 'updateTime'
+        type: String
         description: |
           Output only. The time when the policy was updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'description'
+        output: true
+      - name: 'description'
+        type: String
         description: |
           Optional. Description of what this policy is for.
           Create/Update methods return INVALID_ARGUMENT if the
           length is greater than 512.
-        validation: !ruby/object:Provider::Terraform::Validation
+        validation:
           function: 'validation.StringLenBetween(0, 512)'
-      - !ruby/object:Api::Type::Array
-        name: 'weeklyMaintenanceWindow'
+      - name: 'weeklyMaintenanceWindow'
+        type: Array
         description: |
           Required. Maintenance window that is applied to resources covered by this policy.
           Minimum 1. For the current version, the maximum number of weekly_maintenance_windows
           is expected to be one.
         required: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::Enum
-              name: 'day'
-              required: true
+            - name: 'day'
+              type: Enum
               description: |
                 Required. The day of week that maintenance updates occur.
                 - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
@@ -233,90 +248,91 @@ properties:
                 - FRIDAY: Friday
                 - SATURDAY: Saturday
                 - SUNDAY: Sunday
-              values:
-                - :DAY_OF_WEEK_UNSPECIFIED
-                - :MONDAY
-                - :TUESDAY
-                - :WEDNESDAY
-                - :THURSDAY
-                - :FRIDAY
-                - :SATURDAY
-                - :SUNDAY
-            - !ruby/object:Api::Type::String
-              name: 'duration'
               required: true
+              enum_values:
+                - 'DAY_OF_WEEK_UNSPECIFIED'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'duration'
+              type: String
               description: |
                 Required. The length of the maintenance window, ranging from 3 hours to 8 hours.
                 A duration in seconds with up to nine fractional digits,
                 terminated by 's'. Example: "3.5s".
-            - !ruby/object:Api::Type::NestedObject
-              name: 'startTime'
               required: true
-              allow_empty_object: true
-              send_empty_value: true
+            - name: 'startTime'
+              type: NestedObject
               description: |
                 Required. Start time of the window in UTC time.
+              required: true
+              send_empty_value: true
+              allow_empty_object: true
               properties:
-                - !ruby/object:Api::Type::Integer
-                  name: 'hours'
+                - name: 'hours'
+                  type: Integer
                   description: |
                     Hours of day in 24 hour format. Should be from 0 to 23.
                     An API may choose to allow the value "24:00:00" for scenarios like business closing time.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,23)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'minutes'
+                - name: 'minutes'
+                  type: Integer
                   description: |
                     Minutes of hour of day. Must be from 0 to 59.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,59)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'seconds'
+                - name: 'seconds'
+                  type: Integer
                   description: |
                     Seconds of minutes of the time. Must normally be from 0 to 59.
                     An API may allow the value 60 if it allows leap-seconds.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,60)'
-                - !ruby/object:Api::Type::Integer
-                  name: 'nanos'
+                - name: 'nanos'
+                  type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
-                  validation: !ruby/object:Provider::Terraform::Validation
+                  validation:
                     function: 'validation.IntBetween(0,999999999)'
-
-  - !ruby/object:Api::Type::NestedObject
-    name: maintenanceSchedule
+  - name: 'maintenanceSchedule'
+    type: NestedObject
     description: Output only. Published maintenance schedule.
     output: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'startTime'
-        output: true
+      - name: 'startTime'
+        type: String
         description: |
           Output only. The start time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'endTime'
         output: true
+      - name: 'endTime'
+        type: String
         description: |
           Output only. The end time of any upcoming scheduled maintenance for this instance.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-      - !ruby/object:Api::Type::String
-        name: 'scheduleDeadlineTime'
         output: true
+      - name: 'scheduleDeadlineTime'
+        type: String
         description: |
           Output only. The deadline that the maintenance schedule start time
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
-  - !ruby/object:Api::Type::Array
-    name: 'reservedIpRangeId'
-    immutable: true
+        output: true
+  - name: 'reservedIpRangeId'
+    type: Array
     description: |
       Contains the name of allocated IP address ranges associated with
       the private service access connection for example, "test-default"
       associated with IP range 10.0.0.0/29.
+    immutable: true
     ignore_read: true
-    item_type: Api::Type::String
+    item_type:
+      type: String

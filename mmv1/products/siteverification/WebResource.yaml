@@ -1,0 +1,106 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'WebResource'
+description: |
+  A web resource is a website or domain with verified ownership. Once your
+  ownership is verified you will be able to manage your website in the
+  [Google Search Console](https://www.google.com/webmasters/tools/).
+
+  ~> **Note:** The verification data (DNS `TXT` record, HTML file, `meta` tag, etc.)
+  must already exist before the web resource is created, and must be deleted before
+  the web resource is destroyed. The Google Site Verification API checks that the
+  verification data exists at creation time and does not exist at destruction time
+  and will fail if the required condition is not met.
+references:
+  guides:
+    'Getting Started': 'https://developers.google.com/site-verification/v1/getting_started'
+  api: 'https://developers.google.com/site-verification/v1'
+docs:
+id_format: 'webResource/{{web_resource_id}}'
+base_url: 'webResource'
+self_link: 'webResource/{{web_resource_id}}'
+create_url: 'webResource?verificationMethod={{verification_method}}'
+delete_url: 'webResource/{{web_resource_id}}'
+immutable: true
+timeouts:
+  insert_minutes: 60
+  update_minutes: 20
+  delete_minutes: 20
+identity:
+  - web_resource_id
+custom_code:
+error_retry_predicates:
+
+  - 'transport_tpg.IsSiteVerificationRetryableError'
+supports_indirect_user_project_override: true
+examples:
+  - name: 'site_verification_domain_record'
+    primary_resource_id: 'example'
+    vars:
+      managed_zone: 'example.com'
+      domain: 'www.example.com'
+      dns_name: 'www.example.com.'
+    exclude_test: true
+parameters:
+  - name: 'verification_method'
+    type: Enum
+    description: |
+      The verification method for the Site Verification system to use to verify
+      this site or domain.
+    url_param_only: true
+    required: true
+    immutable: true
+    enum_values:
+      - 'ANALYTICS'
+      - 'DNS_CNAME'
+      - 'DNS_TXT'
+      - 'FILE'
+      - 'META'
+      - 'TAG_MANAGER'
+properties:
+  - name: 'web_resource_id'
+    type: String
+    description: |
+      The string used to identify this web resource.
+    api_name: id
+    output: true
+  - name: 'site'
+    type: NestedObject
+    description: |
+      Container for the address and type of a site for which a verification token will be verified.
+    required: true
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          The type of resource to be verified.
+        required: true
+        enum_values:
+          - 'INET_DOMAIN'
+          - 'SITE'
+      - name: 'identifier'
+        type: String
+        description: |
+          The site identifier. If the type is set to SITE, the identifier is a URL. If the type is
+          set to INET_DOMAIN, the identifier is a domain name.
+        required: true
+  - name: 'owners'
+    type: Array
+    description: |
+      The email addresses of all direct, verified owners of this exact property. Indirect owners —
+      for example verified owners of the containing domain—are not included in this list.
+    output: true
+    item_type:
+      type: String

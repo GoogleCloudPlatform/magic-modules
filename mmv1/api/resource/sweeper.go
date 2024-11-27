@@ -14,14 +14,7 @@
 package resource
 
 type Sweeper struct {
-	//Google::YamlValidator
 	// The field checked by sweeper to determine
 	// eligibility for deletion for generated resources
 	SweepableIdentifierField string `yaml:"sweepable_identifier_field"`
 }
-
-// def validate
-//   super
-
-//   check :sweepable_identifier_field, type: String
-// end

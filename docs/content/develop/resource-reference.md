@@ -9,7 +9,7 @@ aliases:
 # MMv1 resource reference
 
 This page documents commonly-used properties for resources. For a full list of
-available properties, see [resource.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.rb).
+available properties, see [resource.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource.go).
 
 ## Basic
 
@@ -26,7 +26,9 @@ Example:
 ```yaml
 description: |
   This is a multi-line description
-  of a resource.
+  of a resource. All multi-line descriptions must follow
+  this format of using a vertical bar followed by a line-break,
+  with the remaining description being indented.
 ```
 
 ### `references`
@@ -39,10 +41,10 @@ Links to reference documentation for a resource. Contains two attributes:
 Example:
 
 ```yaml
-references: !ruby/object:Api::Resource::ReferenceLinks
-     guides:
-      'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-     api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups'
+references:
+  guides:
+    'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+  api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups'
 ```
 
 ### `min_version: beta`
@@ -59,7 +61,7 @@ documentation. Can contain two attributes:
 Example:
 
 ```yaml
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This is a multi-line warning and will be
     displayed on a yellow background.
@@ -97,7 +99,7 @@ If true, the resource and all its fields are considered immutable - that is,
 only creatable, not updatable. Individual fields can override this if they
 have a custom update method in the API.
 
-See [Best practices: ForceNew](https://googlecloudplatform.github.io/magic-modules/best-practices/#forcenew) for more information.
+See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
 Default: `false`
 
@@ -114,7 +116,7 @@ Overrides one or more timeouts, in minutes. All timeouts default to 20.
 Example:
 
 ```yaml
-timeouts: !ruby/object:Api::Timeouts
+timeouts:
   insert_minutes: 40
   update_minutes: 40
   delete_minutes: 40
@@ -135,12 +137,12 @@ create_url: 'projects/{{project}}/locations/{{location}}/resourcenames?resourceI
 ### `create_verb`
 
 Overrides the HTTP verb used to create a new resource.
-Allowed values: `:POST`, `:PUT`, `:PATCH`.
+Allowed values: `'POST'`, `'PUT'`, `'PATCH'`.
 
-Default: `:POST`
+Default: `'POST'`
 
 ```yaml
-create_verb: :PATCH
+create_verb: 'PATCH'
 ```
 
 ### `update_url`
@@ -155,14 +157,14 @@ update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 
 ### `update_verb`
 
-The HTTP verb used to update a resource. Allowed values: `:POST`, `:PUT`, `:PATCH`.
+The HTTP verb used to update a resource. Allowed values: `'POST'`, `'PUT'`, `'PATCH'`.
 
-Default: `:PUT`.
+Default: `'PUT'`.
 
 Example:
 
 ```yaml
-update_verb: :PATCH
+update_verb: 'PATCH'
 ```
 
 ### `update_mask`
@@ -193,14 +195,14 @@ delete_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 
 ### `delete_verb`
 Overrides the HTTP verb used to delete a resource.
-Allowed values: `:POST`, `:PUT`, `:PATCH`, `:DELETE`.
+Allowed values: `'POST'`, `'PUT'`, `'PATCH'`, `'DELETE'`.
 
-Default: `:DELETE`
+Default: `'DELETE'`
 
 Example:
 
 ```yaml
-delete_verb: :POST
+delete_verb: 'POST'
 ```
 
 ### `autogen_async`
@@ -229,12 +231,30 @@ Sets parameters for handling operations returned by the API. Can contain several
 Example:
 
 ```yaml
-async: !ruby/object:Api::OpAsync
+async:
   actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
+  operation:
     base_url: '{{op_id}}'
-  result: !ruby/object:Api::OpAsync::Result
+  result:
     resource_inside_response: true
+```
+
+### `error_retry_predicates`
+
+An array of function names that determine whether an error is retryable.
+
+```yaml
+error_retry_predicates:
+  - 'transport_tpg.IamMemberMissing'
+```
+
+### `error_abort_predicates`
+
+An array of function names that determine whether an error is not retryable.
+
+```yaml
+error_abort_predicates:
+  - 'transport_tpg.Is429QuotaError'
 ```
 
 ## IAM resources
@@ -243,37 +263,36 @@ async: !ruby/object:Api::OpAsync
 
 Allows configuration of generated IAM resources. Supports the following common
 attributes – for a full reference, see
-[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.rb):
+[iam_policy.rb ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/iam_policy.go):
 
 - `parent_resource_attribute`: Name of the field on the terraform IAM resources
   which references the parent resource.
 - `method_name_separator`: Character preceding setIamPolicy in the full URL for
   the API method. Usually `:`.
-- `fetch_iam_policy_verb`: HTTP method for getIamPolicy. Usually `:POST`.
-  Allowed values: `:GET`, `:POST`. Default: `:GET`
-- `set_iam_policy_verb`: HTTP method for getIamPolicy. Usually `:POST`.
-  Allowed values: :POST, :PUT. Default: :POST
+- `fetch_iam_policy_verb`: HTTP method for getIamPolicy. Usually `'POST'`.
+  Allowed values: `'GET'`, `'POST'`. Default: `'GET'`
+- `set_iam_policy_verb`: HTTP method for getIamPolicy. Usually `'POST'`.
+  Allowed values: `'POST'`, `'PUT'`. Default: `'POST'`
 - `import_format`: Must match the parent resource's `import_format` (or `self_link` if
   `import_format` is unset), but with the `parent_resource_attribute`
   value substituted for the final field.
 - `allowed_iam_role`: Valid IAM role that can be set by generated tests. Default: `'roles/viewer'`
 - `iam_conditions_request_type`: If IAM conditions are supported, set this attribute to indicate how the
-  conditions should be passed to the API. Allowed values: `:QUERY_PARAM`,
-  `:REQUEST_BODY`, `:QUERY_PARAM_NESTED`. Note: `:QUERY_PARAM_NESTED` should
+  conditions should be passed to the API. Allowed values: `'QUERY_PARAM'`,
+  `'REQUEST_BODY'`, `'QUERY_PARAM_NESTED'`. Note: `'QUERY_PARAM_NESTED'` should
   only be used if the query param field contains a `.`
 - `min_version: beta`: Marks IAM support as beta-only.
 
 Example:
 
 ```yaml
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+iam_policy:
   parent_resource_attribute: 'cloud_function'
   method_name_separator: ':'
   fetch_iam_policy_verb: :POST
-  import_format: [
-    'projects/{{project}}/locations/{{location}}/resourcenames/{{cloud_function}}',
-    '{{cloud_function}}'
-  ]
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/resourcenames/{{cloud_function}}',
+    - '{{cloud_function}}'
   allowed_iam_role: 'roles/viewer'
   iam_conditions_request_type: :REQUEST_BODY
   min_version: beta
@@ -294,10 +313,16 @@ curly braces are replaced with the field values from the resource at runtime.
 Example:
 
 ```yaml
-mutex: alloydb/instance/{{name}}
+mutex: 'alloydb/instance/{{name}}'
 ```
 
 ## Fields
+
+### `virtual_fields`
+
+Contains a list of [virtual_fields]({{< ref "/develop/client-side-fields" >}}). By convention,
+these should be fields that do not get sent to the API, and are instead used to modify
+the behavior of a Terraform resource such as `deletion_protection`.
 
 ### `parameters`
 
@@ -313,6 +338,6 @@ Example:
 
 ```yaml
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'fieldOne'
+  - name: 'fieldOne'
+    type: String
 ```

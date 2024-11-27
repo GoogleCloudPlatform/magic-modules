@@ -10,6 +10,7 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "labels": {
+          "goog-terraform-provisioned": "true",
           "test-name": "test-value"
         },
         "name": "test-instance",
@@ -32,6 +33,9 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "name": "debian-disk",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "sizeGb": 10,
         "sourceImage": "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
         "type": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-ssd",
