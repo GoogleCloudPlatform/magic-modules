@@ -43,7 +43,6 @@ For more information see
   ephemeral "google_service_account_id_token" "oidc" {
     provider = google.impersonated
     target_service_account = "impersonated-account@project.iam.gserviceaccount.com"
-    delegates = []
     include_email = true
     target_audience = "https://foo.bar/"
   }
