@@ -791,3 +791,21 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
+  - name: 'userDefinedAccessUrls'
+    type: NestedObject
+    description: |
+      Custom URLs for accessing content published by this CA, such as the CA certificate and CRLs, 
+      that can be specified by users.
+    properties:
+      - name: 'aiaIssuingCertificateUrls'
+        type: Array
+        description: |
+          A list of URLs where this CertificateAuthority's CA certificate is published that are specified by users. 
+        item_type:
+          type: String
+      - name: 'crlAccessUrls'
+        type: Array
+        description: |
+          A list of URLs where this CertificateAuthority's CRLs are published that are specified by users.
+        item_type:
+          type: String
