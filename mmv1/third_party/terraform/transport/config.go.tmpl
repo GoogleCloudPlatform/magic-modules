@@ -176,6 +176,45 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(output), nil
 }
 
+type ExternalCredentialsHcpTerraform struct {
+	Audience            string
+	ServiceAccountEmail string
+	IdentityToken    string
+}
+
+func ExpandExternalCredentialsHcpTerraformConfig(v interface{}) (*ExternalCredentialsHcpTerraform, error) {
+	if v == nil {
+		return nil, nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil, nil
+	}
+
+	config := &ExternalCredentialsHcpTerraform{}
+	cfgV := ls[0].(map[string]interface{})
+
+	audience, ok := cfgV["audience"]
+	if !ok || audience.(string) == "" {
+		return nil, errors.New("missing value for external_credentials_hcp_terraform.audience")
+	}
+	config.Audience = audience.(string)
+
+	email, ok := cfgV["service_account_email"]
+	if !ok || email.(string) == "" {
+		return nil, errors.New("missing value for external_credentials_hcp_terraform.service_account_email")
+	}
+	config.ServiceAccountEmail = email.(string)
+
+	jwt, ok := cfgV["identity_token"]
+	if !ok || jwt.(string) == "" {
+		return nil, errors.New("missing value for external_credentials_hcp_terraform.identity_token")
+	}
+	config.IdentityToken = jwt.(string)
+
+	return config, nil
+}
+
 // Config is the configuration structure used to instantiate the Google
 // provider.
 type Config struct {
@@ -184,6 +223,7 @@ type Config struct {
 	Credentials                               string
 	ImpersonateServiceAccount                 string
 	ImpersonateServiceAccountDelegates        []string
+	ExternalCredentialsHcpTerraform           *ExternalCredentialsHcpTerraform
 	Project                                   string
 	Region                                    string
 	BillingProject                            string

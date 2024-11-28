@@ -290,6 +290,14 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		config.Credentials = v.(string)
 	}
 
+	if v, ok := d.GetOk("external_credentials_hcp_terraform"); ok {
+		external, err := transport_tpg.ExpandExternalCredentialsHcpTerraformConfig(v)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		config.ExternalCredentialsHcpTerraform = external
+	}
+
 	// only check environment variables if neither value was set in config- this
 	// means config beats env var in all cases.
 	if config.AccessToken == "" && config.Credentials == "" {
