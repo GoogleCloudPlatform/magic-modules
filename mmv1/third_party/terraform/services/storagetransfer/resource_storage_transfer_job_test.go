@@ -373,6 +373,7 @@ func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 	t.Parallel()
 
 	testDataSinkName := acctest.RandString(t, 10)
+	otherDataSinkName := acctest.RandString(t, 10)
 	testTransferJobDescription := acctest.RandString(t, 10)
 	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", acctest.RandString(t, 10))
 
@@ -382,7 +383,15 @@ func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName),
+				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "root/", ""),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), otherDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "root/dir/", "object/"),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -974,7 +983,7 @@ resource "google_storage_transfer_job" "transfer_job" {
 `, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project)
 }
 
-func testAccStorageTransferJob_hdfsSource(project string, dataSinkBucketName string, transferJobDescription string, sourceAgentPoolName string) string {
+func testAccStorageTransferJob_hdfsSource(project string, dataSinkBucketName string, transferJobDescription string, sourceAgentPoolName string, hdfsPath string, gcsPath string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
@@ -1016,11 +1025,11 @@ resource "google_storage_transfer_job" "transfer_job" {
   transfer_spec {
     source_agent_pool_name = google_storage_transfer_agent_pool.foo.id
     hdfs_data_source {
-    	path = "/some/path"
+    	path = "%s"
     }
     gcs_data_sink {
       bucket_name = google_storage_bucket.data_sink.name
-      path  = "foo/bar/"
+      path  = "%s"
     }
   }
 
@@ -1048,7 +1057,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_project_iam_member.pubsub
   ]
 }
-`, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project)
+`, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project, hdfsPath, gcsPath)
 }
 
 func testAccStorageTransferJob_posixSink(project string, dataSourceBucketName string, transferJobDescription string, sinkAgentPoolName string) string {
