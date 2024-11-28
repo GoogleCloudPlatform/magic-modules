@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/api/firebase/v1beta1"
+	firebase "google.golang.org/api/firebase/v1beta1"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -29,8 +30,8 @@ func NewGoogleFirebaseAppleAppConfigDataSource() datasource.DataSource {
 
 // GoogleFirebaseAppleAppConfigDataSource defines the data source implementation
 type GoogleFirebaseAppleAppConfigDataSource struct {
-	client  *firebase.Service
-	project types.String
+	client         *firebase.Service
+	providerConfig *transport_tpg.Config
 }
 
 type GoogleFirebaseAppleAppConfigModel struct {
@@ -91,20 +92,20 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Configure(ctx context.Context, 
 		return
 	}
 
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
+	p, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
 
-	d.client = p.NewFirebaseClient(p.UserAgent, &resp.Diagnostics)
+	d.client = p.NewFirebaseClient(ctx, p.UserAgent)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	d.project = p.Project
+	d.providerConfig = p
 }
 
 func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -126,7 +127,7 @@ func (d *GoogleFirebaseAppleAppConfigDataSource) Read(ctx context.Context, req d
 	// Use provider_meta to set User-Agent
 	d.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, d.client.UserAgent)
 
-	data.Project = fwresource.GetProjectFramework(data.Project, d.project, &resp.Diagnostics)
+	data.Project = fwresource.GetProjectFramework(data.Project, types.StringValue(d.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}

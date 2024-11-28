@@ -33,6 +33,7 @@ create_url: 'v3/projects/{{project}}/services?serviceId={{service_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

@@ -100,6 +100,22 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Region'
     imports: 'name'
+  - name: 'snapshot'
+    type: ResourceRef
+    description: |
+      The source snapshot used to create this disk. You can provide this as
+      a partial or full URL to the resource. For example, the following are
+      valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/project/global/snapshots/snapshot`
+      * `projects/project/global/snapshots/snapshot`
+      * `global/snapshots/snapshot`
+      * `snapshot`
+    api_name: sourceSnapshot
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Snapshot'
+    imports: 'selfLink'
+properties:
   - name: 'diskEncryptionKey'
     type: NestedObject
     description: |
@@ -134,21 +150,6 @@ parameters:
         type: String
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
-  - name: 'snapshot'
-    type: ResourceRef
-    description: |
-      The source snapshot used to create this disk. You can provide this as
-      a partial or full URL to the resource. For example, the following are
-      valid values:
-
-      * `https://www.googleapis.com/compute/v1/projects/project/global/snapshots/snapshot`
-      * `projects/project/global/snapshots/snapshot`
-      * `global/snapshots/snapshot`
-      * `snapshot`
-    api_name: sourceSnapshot
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-    resource: 'Snapshot'
-    imports: 'selfLink'
   - name: 'sourceSnapshotEncryptionKey'
     type: NestedObject
     description: |
@@ -184,7 +185,6 @@ parameters:
       snapshot ID would identify the exact version of the snapshot that was
       used.
     output: true
-properties:
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |

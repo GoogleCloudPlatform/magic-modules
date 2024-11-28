@@ -121,9 +121,10 @@ locations. In contrast, in a regional cluster, cluster master nodes are present
 in multiple zones in the region. For that reason, regional clusters should be
 preferred.
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy
-the cluster. Unless this field is set to false in Terraform state, a
-`terraform destroy` or `terraform apply` that would delete the cluster will fail.
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from
+destroying the cluster.  Deleting this cluster via `terraform destroy` or
+`terraform apply` will only succeed if this field is `false` in the Terraform
+state.
 
 * `addons_config` - (Optional) The configuration for addons supported by GKE.
     Structure is [documented below](#nested_addons_config).
@@ -299,6 +300,9 @@ region are guaranteed to support the same version.
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
+
+* `control_plane_endpoints_config` - (Optional) Configuration for all of the cluster's control plane endpoints.
+    Structure is [documented below](#nested_control_plane_endpoints_config).
 
 * `private_cluster_config` - (Optional) Configuration for [private clusters](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters),
 clusters with private nodes. Structure is [documented below](#nested_private_cluster_config).
@@ -481,6 +485,11 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    GKE](https://cloud.google.com/kubernetes-engine/docs/add-on/ray-on-gke/how-to/collect-view-logs-metrics)
    for more information.
 
+*  `parallelstore_csi_driver_config` - (Optional) The status of the Parallelstore CSI driver addon,
+   which allows the usage of a Parallelstore instances as volumes.
+   It is disabled by default for Standard clusters; set `enabled = true` to enable.
+   It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
+   See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
 
 This example `addons_config` disables two addons:
 
@@ -812,6 +821,8 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `display_name` - (Optional) Field for users to identify CIDR blocks.
 
+* `private_endpoint_enforcement_enabled` - (Optional) Whether authorized networks is enforced on the private endpoint or not.
+
 <a name="nested_network_policy"></a>The `network_policy` block supports:
 
 * `provider` - (Optional) The selected network policy provider. Defaults to PROVIDER_UNSPECIFIED.
@@ -829,6 +840,11 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
     (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
+
+* `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
+    Accepted values are:
+    * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
+    * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
 
 * `ephemeral_storage_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Parameters for the ephemeral storage filesystem. If unspecified, ephemeral storage is backed by the boot disk. Structure is [documented below](#nested_ephemeral_storage_config).
 
@@ -884,8 +900,10 @@ gvnic {
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure [documented below](#nested_guest_accelerator).
-    To support removal of guest_accelerators in Terraform 0.12 this field is an
-    [Attribute as Block](/docs/configuration/attr-as-blocks.html)
+    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) 
+    is no longer supported for this field in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
+    To dynamically set a list of guest accelerators, use [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks).
+    To set an empty list, use a single `guest_accelerator` block with `count = 0`.
 
 * `image_type` - (Optional) The image type to use for this node. Note that changing the image type
     will delete and recreate all nodes in the node pool.
@@ -1093,6 +1111,8 @@ Structure is [documented below](#nested_node_kubelet_config).
 
 * `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools. Structure is [documented below](#nested_network_tags).
 
+* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` field is supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
+
 <a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
 
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
@@ -1158,6 +1178,16 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
+
+<a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
+
+* `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+
+The `control_plane_endpoints_config.dns_endpoint_config` block supports:
+
+* `endpoint` - (Output) The cluster's DNS endpoint.
+
+* `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 

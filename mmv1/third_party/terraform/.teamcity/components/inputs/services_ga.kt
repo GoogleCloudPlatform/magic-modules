@@ -296,6 +296,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Dataproc",
         "path" to "./google/services/dataproc"
     ),
+    "dataprocgdc" to mapOf(
+        "name" to "dataprocgdc",
+        "displayName" to "Dataproc on GDC",
+        "path" to "./google/services/dataprocgdc"
+    ),
     "dataprocmetastore" to mapOf(
         "name" to "dataprocmetastore",
         "displayName" to "Dataprocmetastore",
@@ -406,6 +411,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Firestore",
         "path" to "./google/services/firestore"
     ),
+    "gemini" to mapOf(
+        "name" to "gemini",
+        "displayName" to "Gemini",
+        "path" to "./google/services/gemini"
+    ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
         "displayName" to "Gkebackup",
@@ -435,6 +445,11 @@ var ServicesListGa = mapOf(
         "name" to "iam2",
         "displayName" to "Iam2",
         "path" to "./google/services/iam2"
+    ),
+    "iam3" to mapOf(
+        "name" to "iam3",
+        "displayName" to "Iam3",
+        "path" to "./google/services/iam3"
     ),
     "iambeta" to mapOf(
         "name" to "iambeta",
