@@ -13,6 +13,7 @@ type ProviderModel struct {
 	AccessToken                               types.String `tfsdk:"access_token"`
 	ImpersonateServiceAccount                 types.String `tfsdk:"impersonate_service_account"`
 	ImpersonateServiceAccountDelegates        types.List   `tfsdk:"impersonate_service_account_delegates"`
+	ExternalCredentialsHcpTerraform           types.List   `tfsdk:"external_credentials_hcp_terraform"`
 	Project                                   types.String `tfsdk:"project"`
 	BillingProject                            types.String `tfsdk:"billing_project"`
 	Region                                    types.String `tfsdk:"region"`
@@ -68,6 +69,13 @@ type ProviderBatching struct {
 var ProviderBatchingAttributes = map[string]attr.Type{
 	"send_after":      types.StringType,
 	"enable_batching": types.BoolType,
+}
+
+// ExternalCredentialsHcpTerraform is a model of the external_credentials_hcp_terraform block
+type ExternalCredentialsHcpTerraform struct {
+	Audience            types.String `tfsdk:"audience"`
+	ServiceAccountEmail types.String `tfsdk:"service_account_email"`
+	IdentityToken    types.String `tfsdk:"identity_token"`
 }
 
 // ProviderMetaModel describes the provider meta model
