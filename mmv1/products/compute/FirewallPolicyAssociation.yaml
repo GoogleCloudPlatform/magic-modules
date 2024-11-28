@@ -37,6 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  pre_read: 'templates/terraform/pre_read/compute_firewall_policy_association.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
 custom_diff:
