@@ -1,7 +1,7 @@
 ---
-page_title: "Using ephemeral resources in the Google provider"
+page_title: "Use ephemeral resources in the Google Cloud provider"
 description: |-
-  How to use ephemeral resources in the Google provider
+  How to use ephemeral resources in the Google Cloud provider
 ---
 
 # Ephemeral Resources in the Google Cloud provider
@@ -16,11 +16,11 @@ To mark the launch of the ephemeral resources feature, the Google Cloud provider
 - [`google_service_account_jwt`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_jwt)
 - [`google_service_account_key`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_key)
 
-These are based on existing data sources already in the provider. In future you may wish to update your configurations to use these ephemeral version, as they will allow you to avoid storing tokens and credentials values in your Terraform state.
+These are based on existing data sources already in the provider. In future you may wish to update your configurations to use these ephemeral versions, as they will allow you to avoid storing tokens and credentials values in your Terraform state.
 
-## Using the Google Cloud provider's new ephemeral resources
+## Use the Google Cloud provider's new ephemeral resources
 
-Ephemeral resources are a source of ephemeral data, and they can be referenced in your configuration just like the attributes of resources and data sources. A field, for example in a resource, that references an ephemeral resource must be capable of handling ephemeral data. Due to this, resources in the Google Cloud provider will need to be updated in future to have write-only attributes that are capable of using ephemeral data while not storing those values in the resource's state. 
+Ephemeral resources are a source of ephemeral data, and they can be referenced in your configuration just like the attributes of resources and data sources. However, a field that references an ephemeral resource must be capable of handling ephemeral data. Due to this, resources in the Google Cloud provider will need to be updated so they include write-only attributes that are capable of using ephemeral data while not storing those values in the resource's state. 
 
 Until then, ephemeral resources can only be used to pass values into the provider block, which is already capable of receiving ephemeral values. This is described in a section below.
 
@@ -74,7 +74,7 @@ Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 If you run the example using the local backend you can also inspect the state, where you will see that the ephemeral resource is not represented.
 
 
-### Test using ephemeral resources to configure the Google Cloud provider
+### Use ephemeral resources to configure the Google Cloud provider
 
 The [documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs/ephemeral-resources/service_account_access_token) for the `google_service_account_access_token` ephemeral resource demonstrates how it can be used to configure the provider. Check that ephemeral resource's documentation for details about the IAM permissions required for this example to work:
 
@@ -82,9 +82,6 @@ The [documentation](https://registry.terraform.io/providers/hashicorp/google/lat
 provider "google" {
 }
 
-data "google_client_config" "default" {
-  provider = google
-}
 
 ephemeral "google_service_account_access_token" "default" {
   provider               = google
