@@ -32,20 +32,13 @@ resource "google_apigee_environment" "apigee_environment" {
   display_name = "Apigee Environment"
 }
 
-resource "google_apigee_organization_keyvaluemaps" "apigee_organization_keyvaluemaps" {
+resource "google_apigee_organization_keyvaluemaps" "kvms" {
   org_id    = google_apigee_organization.apigee_org.id
   name      = "tf-test-org-kvms%{random_suffix}"
-  depends_on = [
-    google_apigee_organization.apigee_org
-    ]
 }
 
-resource "google_apigee_organization_keyvaluemaps_entries" "{{$.PrimaryResourceId}}" {
+resource "google_apigee_organization_keyvaluemaps_entries" "kvms" {
   org_keyvaluemap_id = google_apigee_organization_keyvaluemaps.apigee_organization_keyvaluemaps.id
   name               = "testName"
   value              = "testValue"
-  depends_on = [
-    google_apigee_organization.apigee_org,
-    google_apigee_organization_keyvaluemaps.apigee_organization_keyvaluemaps
-  ]
 }

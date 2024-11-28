@@ -25,7 +25,7 @@ resource "google_apigee_organization" "apigee_org" {
   depends_on         = [google_service_networking_connection.apigee_vpc_connection]
 }
 
-resource "google_apigee_organization_keyvaluemaps" "{{$.PrimaryResourceId}}" {
+resource "google_apigee_organization_keyvaluemaps" "kvms" {
   org_id    = google_apigee_organization.apigee_org.id
   name      = "tf-test-org-kvms%{random_suffix}"
 }
