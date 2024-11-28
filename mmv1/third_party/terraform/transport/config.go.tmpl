@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,6 +31,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	googleoauth "golang.org/x/oauth2/google"
+	externalaccount "golang.org/x/oauth2/google/externalaccount"
 	appengine "google.golang.org/api/appengine/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
@@ -180,6 +182,17 @@ type ExternalCredentialsHcpTerraform struct {
 	Audience            string
 	ServiceAccountEmail string
 	IdentityToken    string
+}
+
+var _ externalaccount.SubjectTokenSupplier = ExternalCredentialsHcpTerraform{}
+
+// SubjectToken returns the identity token passed to the provider as an argument from the config.
+// We do not interact with an external system to get a token.
+func (e ExternalCredentialsHcpTerraform) SubjectToken(ctx context.Context, options externalaccount.SupplierOptions) (string, error) {
+	if e.IdentityToken != "" {
+		return e.IdentityToken, nil
+	}
+	return "", errors.New("identity token unavailable in Config when configuring the provider")
 }
 
 func ExpandExternalCredentialsHcpTerraformConfig(v interface{}) (*ExternalCredentialsHcpTerraform, error) {
