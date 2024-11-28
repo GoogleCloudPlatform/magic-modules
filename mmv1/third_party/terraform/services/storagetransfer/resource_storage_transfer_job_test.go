@@ -383,7 +383,7 @@ func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "root/", ""),
+				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "/root/", ""),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -391,7 +391,7 @@ func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), otherDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "root/dir/", "object/"),
+				Config: testAccStorageTransferJob_hdfsSource(envvar.GetTestProjectFromEnv(), otherDataSinkName, testTransferJobDescription, testSourceAgentPoolName, "/root/dir/", "object/"),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
