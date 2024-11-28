@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -37,6 +38,7 @@ type GoogleProviderConfigPluginFrameworkDataSource struct {
 type GoogleProviderConfigPluginFrameworkModel struct {
 	Credentials                        types.String `tfsdk:"credentials"`
 	AccessToken                        types.String `tfsdk:"access_token"`
+	ExternalCredentialsHcpTerraform    types.Object `tfsdk:"external_credentials_hcp_terraform"`
 	ImpersonateServiceAccount          types.String `tfsdk:"impersonate_service_account"`
 	ImpersonateServiceAccountDelegates types.List   `tfsdk:"impersonate_service_account_delegates"`
 	Project                            types.String `tfsdk:"project"`
@@ -155,6 +157,29 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Schema(ctx context.Conte
 
 			// Note - this data source excludes the default and custom endpoints for individual services
 		},
+		Blocks: map[string]schema.Block{
+			"external_credentials_hcp_terraform": schema.SingleNestedBlock{
+				Description:         "The external_credentials_hcp_terraform block used to configure the provider.",
+				MarkdownDescription: "The external_credentials_hcp_terraform block used to configure the provider.",
+				Attributes: map[string]schema.Attribute{
+					"audience": schema.StringAttribute{
+						Description:         "The external_credentials_hcp_terraform.audience argument used to configure the provider.",
+						MarkdownDescription: "The external_credentials_hcp_terraform.audience argument used to configure the provider.",
+						Computed:            true,
+					},
+					"service_account_email": schema.StringAttribute{
+						Description:         "The external_credentials_hcp_terraform.service_account_email argument used to configure the provider.",
+						MarkdownDescription: "The external_credentials_hcp_terraform.service_account_email argument used to configure the provider.",
+						Computed:            true,
+					},
+					"identity_token": schema.StringAttribute{
+						Description:         "The external_credentials_hcp_terraform.identity_token argument used to configure the provider.",
+						MarkdownDescription: "The external_credentials_hcp_terraform.identity_token argument used to configure the provider.",
+						Computed:            true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -198,6 +223,13 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	//    - As a result we have to make conversions between type systems in the value assignments below
 	data.Credentials = types.StringValue(d.providerConfig.Credentials)
 	data.AccessToken = types.StringValue(d.providerConfig.AccessToken)
+
+	externalCredentialsHcpTerraform, di := convertExternalCredentialsHcpTerraform(d.providerConfig)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.ExternalCredentialsHcpTerraform = externalCredentialsHcpTerraform
+
 	data.ImpersonateServiceAccount = types.StringValue(d.providerConfig.ImpersonateServiceAccount)
 
 	delegateAttrs := make([]attr.Value, len(d.providerConfig.ImpersonateServiceAccountDelegates))
@@ -251,4 +283,18 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func convertExternalCredentialsHcpTerraform(config *transport_tpg.Config) (basetypes.ObjectValue, diag.Diagnostics) {
+	extCredAttrTypes := map[string]attr.Type{
+		"audience":              types.StringType,
+		"service_account_email": types.StringType,
+		"identity_token":        types.StringType,
+	}
+	extCredsAttrValues := map[string]attr.Value{
+		"audience":              types.StringValue(config.ExternalCredentialsHcpTerraform.Audience),
+		"service_account_email": types.StringValue(config.ExternalCredentialsHcpTerraform.ServiceAccountEmail),
+		"identity_token":        types.StringValue(config.ExternalCredentialsHcpTerraform.IdentityToken),
+	}
+	return types.ObjectValue(extCredAttrTypes, extCredsAttrValues)
 }
