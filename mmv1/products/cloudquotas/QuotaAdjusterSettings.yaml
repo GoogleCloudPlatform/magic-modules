@@ -19,7 +19,7 @@ min_version: beta
 references:
   guides:
     'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'
-  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1/projects.locations.'
+  api: 'https://cloud.google.com/docs/quotas/reference/rest/v1beta/projects.locations.quotaAdjusterSettings'
 docs:
 id_format: '{{parent}}/locations/global/quotaAdjusterSettings'
 base_url: '{{parent}}/locations/global/quotaAdjusterSettings'
