@@ -256,6 +256,51 @@ func TestAccDataprocCluster_withInternalIpOnlyTrueAndShieldedConfig(t *testing.T
 	})
 }
 
+func TestAccDataprocCluster_withConfidentialCompute(t *testing.T) {
+    t.Parallel()
+
+    var cluster dataproc.Cluster
+    rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	imageUri := "https://www.googleapis.com/compute/v1/projects/cloud-dataproc/global/images/dataproc-2-1-ubu20-20241026-165100-rc01"
+
+    acctest.VcrTest(t, resource.TestCase{
+        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+        ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+        Steps: []resource.TestStep{
+            {
+                Config: testAccDataprocCluster_withConfidentialCompute(rnd, subnetworkName, imageUri),
+                Check: resource.ComposeTestCheckFunc(
+                    testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.confidential", &cluster),
+
+                    // Check confidential compute
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.enable_confidential_compute", "true"),
+
+                    // Check master
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.master_config.0.machine_type", "n2d-standard-2"),
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.master_config.0.image_uri", imageUri),
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.master_config.0.min_cpu_platform", "AMD Rome"),
+
+                    // Check worker
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.worker_config.0.machine_type", "n2d-standard-2"),
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.worker_config.0.image_uri", imageUri),
+                    resource.TestCheckResourceAttr("google_dataproc_cluster.confidential",
+                        "cluster_config.0.worker_config.0.min_cpu_platform", "AMD Rome"),
+                ),
+            },
+        },
+    })
+}
+
 func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 	t.Parallel()
 
@@ -528,6 +573,29 @@ func TestAccDataprocCluster_spotWithInstanceFlexibilityPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.machine_types.0", "n2d-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_with_instance_flexibility_policy", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.0.rank", "3"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_spotOnDemandMixing(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_spotOnDemandMixing(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.spot_mixing", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_mixing", "cluster_config.0.preemptible_worker_config.0.preemptibility", "SPOT"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_mixing", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.provisioning_model_mix.0.standard_capacity_base", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.spot_mixing", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.provisioning_model_mix.0.standard_capacity_percent_above_base", "50"),
 				),
 			},
 		},
@@ -1515,6 +1583,36 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd, rnd, rnd, rnd)
 }
 
+func testAccDataprocCluster_withConfidentialCompute(rnd, subnetworkName string, imageUri string) string {
+    return fmt.Sprintf(`
+resource "google_dataproc_cluster" "confidential" {
+    name   = "tf-test-dproc-%s"
+    region = "us-central1"
+
+    cluster_config {
+        gce_cluster_config {
+			subnetwork = "%s"
+            confidential_instance_config {
+                enable_confidential_compute = true
+            }
+        }
+
+        master_config {
+            machine_type     = "n2d-standard-2"
+            image_uri        = "%s"
+            min_cpu_platform = "AMD Rome"
+        }
+
+        worker_config {
+            machine_type     = "n2d-standard-2"
+            image_uri        = "%s"
+            min_cpu_platform = "AMD Rome"
+        }
+    }
+}
+`, rnd, subnetworkName, imageUri, imageUri)
+}
+
 func testAccDataprocCluster_withMetadataAndTags(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
@@ -1947,6 +2045,50 @@ resource "google_dataproc_cluster" "spot_with_instance_flexibility_policy" {
         instance_selection_list {
           machine_types = ["n2d-standard-2"]
           rank          = 3
+        }
+      }
+    }
+  }
+}
+	`, rnd)
+}
+
+func testAccDataprocCluster_spotOnDemandMixing(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "spot_mixing" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      internal_ip_only = false
+    }
+    master_config {
+      num_instances = "1"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    worker_config {
+      num_instances = "2"
+      machine_type  = "e2-medium"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    preemptible_worker_config {
+      num_instances = "3"
+      preemptibility = "SPOT"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+      instance_flexibility_policy {
+        provisioning_model_mix {
+          standard_capacity_base = 1
+          standard_capacity_percent_above_base = 50
         }
       }
     }

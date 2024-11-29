@@ -535,7 +535,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Computed:     true,
-							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", "IPV6_ONLY", ""}, false),
+							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", ""}, false),
 							Description: `The stack type for this network interface to identify whether the IPv6 feature is enabled or not. If not specified, IPV4_ONLY will be used.`,
 						},
 
@@ -547,8 +547,7 @@ func ResourceComputeInstance() *schema.Resource {
 
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
-                            Optional:    true,
-							Computed:    true,
+                                                        Optional:    true,
 							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -3153,7 +3152,11 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
-			disk.InitializeParams.StoragePool = v.(string)
+			storagePoolUrl, err := expandStoragePool(v, d, config)
+			if err != nil {
+				return nil, fmt.Errorf("Error resolving storage pool name '%s': '%s'", v.(string), err)
+			}
+			disk.InitializeParams.StoragePool = storagePoolUrl.(string)
 		}
 	}
 
@@ -3250,6 +3253,10 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 		"size": disk.DiskSizeGb,
 	}
 	return result
+}
+
+func expandStoragePool(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return ExpandStoragePoolUrl(v, d, config)
 }
 
 func hash256(raw string) (string, error) {
