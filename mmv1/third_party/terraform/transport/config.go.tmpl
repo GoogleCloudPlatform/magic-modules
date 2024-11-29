@@ -1227,7 +1227,6 @@ type StaticTokenSource struct {
 // getExternalAccountConfig returns an externalaccount.Config based on the Config object.
 // The external account config is intended to be used to create a token source.
 func (c *Config) getExternalAccountConfig(clientScopes []string) externalaccount.Config {
-	// Token source is created using external credentials
 	eaConfig := externalaccount.Config{
 		Audience:         c.ExternalCredentialsHcpTerraform.Audience,
 		SubjectTokenType: "urn:ietf:params:oauth:token-type:jwt",
