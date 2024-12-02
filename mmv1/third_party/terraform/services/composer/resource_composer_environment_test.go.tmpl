@@ -1860,38 +1860,6 @@ resource "google_compute_subnetwork" "test" {
 `, name, network, subnetwork)
 }
 
-// use a separate network to avoid conflicts with other tests running in parallel
-// that use the default network/subnet
-resource "google_compute_network" "test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "test" {
-  name          = "%s"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.test.self_link
-}
-`, name, network, subnetwork)
-}
-
-// use a separate network to avoid conflicts with other tests running in parallel
-// that use the default network/subnet
-resource "google_compute_network" "test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "test" {
-  name          = "%s"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.test.self_link
-}
-`, name, network, subnetwork)
-}
-
 func testAccComposerEnvironment_encryptionCfg(pid, compVersion, airflowVersion, name, kmsKey, network, subnetwork string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -2463,23 +2431,6 @@ resource "google_compute_subnetwork" "test" {
 
 `, envName, compVersion, airflowVersion, network, subnetwork)
 }
-
-// use a separate network to avoid conflicts with other tests running in parallel
-// that use the default network/subnet
-resource "google_compute_network" "test" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "test" {
-  name          = "%s"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.test.self_link
-}
-`, name, network, subnetwork)
-}
-
 
 func testAccComposerEnvironment_updateComposerV2(name, network, subnetwork string) string {
 	return fmt.Sprintf(`
