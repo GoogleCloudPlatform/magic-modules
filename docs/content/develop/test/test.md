@@ -276,6 +276,38 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 
 Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP requests and responses) to reduce the time it takes to present results to contributors. However, not all resources or tests are possible to run in replaying mode. Incompatible tests should be skipped during VCR replaying mode. They will still run in our nightly test suite.
 
+{{< tabs "skipping-tests-in-vcr-replaying" >}}
+
+   {{< tab "Skip a generated test" >}}
+   Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
+
+   ```yaml
+   examples:
+   - name: 'bigtable_app_profile_anycluster'
+      ...
+
+      # bigtable instance does not use the shared HTTP client, this test creates an instance
+      skip_vcr: true
+   ```
+
+   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
+
+   {{< /tab >}}
+   {{< tab "Skip a handwritten test" >}}
+   Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
+
+   ```go
+   func TestAccPubsubTopic_update(t *testing.T) {
+         acctest.SkipIfVcr(t) // See: https://github.com/hashicorp/terraform-provider-google/issues/9999
+         acctest.VcrTest(t, resource.TestCase{ ... }
+   }
+   ```
+
+   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
+
+   {{< /tab >}}
+{{< /tabs >}}
+
 ### Reasons that tests are skipped in VCR replaying mode
 
 | Problem        | Possible symptoms you'll see    | How to fix/Other info  | Skip in VCR replaying? |
@@ -291,30 +323,6 @@ Some additional things to bear in mind are that VCR tests in REPLAYING mode will
 - Some acceptance tests use bootstrapping functions that ensure long-lived resources are present in a testing project before the provider is tested.
 
 These tests can still run in VCR replaying mode; however, REPLAYING mode can't be used as a way to completely avoid HTTP traffic generally or with GCP APIs.
-
-### How can tests be skipped in VCR mode?
-
-If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
-
-Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
-
-```yaml
-examples:
-  - name: 'bigtable_app_profile_anycluster'
-    ...
-
-    # bigtable instance does not use the shared HTTP client, this test creates an instance
-    skip_vcr: true
-```
-
-Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
-
-```go
-func TestAccPubsubTopic_update(t *testing.T) {
-      acctest.SkipIfVcr(t)
-      acctest.VcrTest(t, resource.TestCase{ ... }
-}
-```
 
 
 ## What's next?
