@@ -74,6 +74,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
@@ -83,6 +84,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
@@ -93,6 +95,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String
