@@ -1440,7 +1440,6 @@ linux_node_config {
 
 * `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
 
-* `cluster_tier` - (Output) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
 
 ## Attributes Reference
 
@@ -1490,6 +1489,8 @@ exported:
 * `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`. You can use this field to configure `membership_id` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
+
+* `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
 
 ## Timeouts
 

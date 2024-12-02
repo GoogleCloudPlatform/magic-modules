@@ -12834,6 +12834,15 @@ func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
+			{
+				Config: testAccContainerCluster_removeEnterpriseConfig(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_enterprise_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
 		},
 	})
 }
@@ -12841,21 +12850,39 @@ func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
 func testAccContainerCluster_updateEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string, desiredTier string) string {
         return fmt.Sprintf(`
 data "google_project" "project" {
-  project_id = "%s"             
-}                               
-                                
+  project_id = "%s"
+}
+
 resource "google_container_cluster" "with_enterprise_config" {
   name               = "%s"
   location           = "us-central1-a"
-  initial_node_count = 1        
-  enterprise_config {              
-    desired_tier = "%s"        
-  }                             
-  network    = "%s"             
-  subnetwork = "%s"             
-                                
+  initial_node_count = 1
+  enterprise_config {
+    desired_tier = "%s"
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
   deletion_protection = false
-}               
+}
 `, projectID, clusterName, desiredTier, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_removeEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string) string {
+        return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_enterprise_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, projectID, clusterName, networkName, subnetworkName)
 }  
 
