@@ -443,7 +443,7 @@ properties:
               - source_config.0.mysql_source_config.gtid
             description: |
               CDC reader reads from gtid based replication.
-            properties: []      
+            properties: []
       - name: 'oracleSourceConfig'
         type: NestedObject
         description: |
