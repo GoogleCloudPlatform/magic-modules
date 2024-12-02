@@ -213,8 +213,8 @@ properties:
                   type: ResourceRef
                   description: |
                     The URL of the reservation for this IP address.
-                  custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+                  #custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'
       - name: 'externalIp'
@@ -244,7 +244,7 @@ properties:
                   type: ResourceRef
                   description: |
                     The URL of the reservation for this IP address.
-                  custom_flatten: 'templates/terraform/custom_flatten/full_to_relative_path.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                  diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+                  #custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'
