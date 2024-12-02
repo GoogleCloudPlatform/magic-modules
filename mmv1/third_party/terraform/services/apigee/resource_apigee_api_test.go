@@ -114,9 +114,8 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_api" "test_apigee_api" {
   name            = "tf-test-apigee-api"
-  org_id          = google_project.project.project_id
+  org_id          = google_apigee_organization.apigee_org.id
   config_bundle   = "./test-fixtures/apigee_api_bundle.zip"
-  depends_on      = [google_apigee_organization.apigee_org]
 }
 `, context)
 }
@@ -133,7 +132,7 @@ func testAccCheckApigeeApiDestroyProducer(t *testing.T) func(s *terraform.State)
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org_id}}/apis/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}{{org_id}}/apis/{{name}}")
 			if err != nil {
 				return err
 			}
@@ -221,9 +220,8 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_api" "test_apigee_api" {
   name            = "tf-test-apigee-api"
-  org_id          = google_project.project.project_id
+  org_id          = google_apigee_organization.apigee_org.id
   config_bundle   = "./test-fixtures/apigee_api_bundle2.zip"
-  depends_on      = [google_apigee_organization.apigee_org]
 }
 `, context)
 }
