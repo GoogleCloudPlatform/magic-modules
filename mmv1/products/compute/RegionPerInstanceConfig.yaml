@@ -215,7 +215,7 @@ properties:
                   description: |
                     The URL of the reservation for this IP address.
                   diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-                  #custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'
       - name: 'externalIp'
@@ -246,6 +246,6 @@ properties:
                   description: |
                     The URL of the reservation for this IP address.
                   diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-                  #custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+                  custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                   resource: 'Address'
                   imports: 'selfLink'
