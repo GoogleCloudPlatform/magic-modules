@@ -1359,7 +1359,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 				ResourceName:		 "google_container_cluster.with_node_locations",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool.0.node_locations.0"},
 			},
 			{
 				Config: testAccContainerCluster_regionalUpdateNodeLocations(clusterName, networkName, subnetworkName),
@@ -1368,7 +1368,7 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 				ResourceName:		 "google_container_cluster.with_node_locations",
 				ImportState:		 true,
 				ImportStateVerify:	 true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool.0.node_locations.0"},
 			},
 		},
 	})

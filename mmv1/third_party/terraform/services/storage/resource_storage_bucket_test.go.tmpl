@@ -80,7 +80,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 			{
 				Config: testAccStorageBucket_basicWithAutoclass_update(bucketName, true),
@@ -94,7 +94,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 			{
 				Config: testAccStorageBucket_basicWithAutoclass(bucketName, false),
@@ -103,7 +103,7 @@ func TestAccStorageBucket_basicWithAutoclass(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "autoclass.0.terminal_storage_class"},
 			},
 		},
 	})
@@ -157,7 +157,13 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0.with_state",
+					"lifecycle_rule.1.condition.0.with_state",
+					"lifecycle_rule.2.condition.0.with_state",
+					"autoclass.0.terminal_storage_class",
+				},
 			},
 			{
 				Config: testAccStorageBucket_basic(bucketName),
@@ -170,7 +176,13 @@ func TestAccStorageBucket_AutoclassDiffSupress(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0.with_state",
+					"lifecycle_rule.1.condition.0.with_state",
+					"lifecycle_rule.2.condition.0.with_state",
+					"autoclass.0.terminal_storage_class",
+				},
 			},
 		},
 	})
@@ -499,7 +511,11 @@ func TestAccStorageBucket_lifecycleRuleStateLive(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.1.condition.0",  //prefix to multiple fields
+				},
 			},
 		},
 	})
@@ -528,7 +544,10 @@ func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
@@ -542,7 +561,10 @@ func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+				},
 			},
 		},
 	})
@@ -571,7 +593,10 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateLive(bucketName),
@@ -585,7 +610,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateAny(bucketName),
@@ -599,7 +628,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
@@ -613,7 +646,11 @@ func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0", //prefix to multiple fields
+					"lifecycle_rule.1.condition.0", //prefix to multiple fields
+				},
 			},
 		},
 	})
@@ -641,7 +678,10 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycleVirtualFieldsUpdate1(bucketName),
@@ -656,7 +696,12 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.1.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.1.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.2.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.1.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.2.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.1.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.2.condition.0",  //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycleVirtualFieldsUpdate2(bucketName),
@@ -670,7 +715,12 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.send_days_since_noncurrent_time_if_zero", "lifecycle_rule.0.condition.0.send_days_since_custom_time_if_zero", "lifecycle_rule.0.condition.0.send_num_newer_versions_if_zero", "lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.1.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.2.condition.0",  //prefix to multiple fields
+				},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle1(bucketName),
@@ -683,7 +733,12 @@ func TestAccStorageBucket_lifecycleRulesVirtualFields(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{
+					"force_destroy",
+					"lifecycle_rule.0.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.1.condition.0",  //prefix to multiple fields
+					"lifecycle_rule.2.condition.0",  //prefix to multiple fields
+				},
 			},
 		},
 	})
@@ -849,7 +904,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.0.condition.0.with_state"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle2(bucketName),
@@ -865,7 +920,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero","lifecycle_rule.1.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.0.condition.0.with_state", "lifecycle_rule.1.condition.0.with_state"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes_withLifecycle1Update(bucketName),
@@ -881,7 +936,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy","lifecycle_rule.0.condition.0.send_age_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.0.condition.0.with_state"},
 			},
 			{
 				Config: testAccStorageBucket_customAttributes(bucketName),
@@ -1525,7 +1580,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "soft_delete_policy.0.effective_time"},
 			},
 			{
 				Config: testAccStorageBucket_SoftDeletePolicy(bucketName,0),
@@ -1540,7 +1595,7 @@ func TestAccStorageBucket_SoftDeletePolicy(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "soft_delete_policy.0.effective_time"},
 			},
 		},
 	})

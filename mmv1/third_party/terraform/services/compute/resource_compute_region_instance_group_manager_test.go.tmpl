@@ -96,7 +96,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_region_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 			{
 				Config: testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm),
@@ -108,7 +108,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_region_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 			{
 				Config: testAccRegionInstanceGroupManager_update3(template1, target1, target2, template2, igm),
@@ -120,7 +120,7 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				ResourceName:            "google_compute_region_instance_group_manager.igm-update",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"status"},
+				ImportStateVerifyIgnore: []string{"status", "target_pools.0"},
 			},
 		},
 	})

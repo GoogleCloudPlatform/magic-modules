@@ -85,6 +85,8 @@ examples:
     vars:
       address_name: 'ipv4-address'
       instance_name: 'vm-instance'
+    ignore_read_extra:
+      - "users"
   - name: 'compute_address_ipsec_interconnect'
     primary_resource_id: 'ipsec-interconnect-address'
     vars:

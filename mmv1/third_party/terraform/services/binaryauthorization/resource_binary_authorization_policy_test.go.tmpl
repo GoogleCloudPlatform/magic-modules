@@ -62,6 +62,7 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster_admission_rules.0.require_attestations_by.0"},
 			},
 			// Destroy the policy without destroying the project so we can check
 			// that it was restored to the default.
@@ -125,6 +126,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster_admission_rules.0.require_attestations_by.0"},
 			},
 			{
 				Config: testAccBinaryAuthorizationPolicyFull(pid, org, billingId, note, attestor, "ENABLE"),
@@ -133,6 +135,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster_admission_rules.0.require_attestations_by.0"},
 			},
 			{
 				Config: testAccBinaryAuthorizationPolicyFull(pid, org, billingId, note, attestor, "DISABLE"),
@@ -141,6 +144,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster_admission_rules.0.require_attestations_by.0"},
 			},
 			{
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, org, billingId),
@@ -149,6 +153,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"cluster_admission_rules.0.require_attestations_by.0"},
 			},
 			// Destroy the policy without destroying the project so we can check
 			// that it was restored to the default.

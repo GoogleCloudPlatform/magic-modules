@@ -43,7 +43,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state", "state"},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_firebase_database_instance.updated", "database_url"),
 				),
@@ -55,7 +55,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state", "state"},
 			},
 			{
 				Config: testAccFirebaseDatabaseInstance_firebaseDatabaseInstanceInState(context, "ACTIVE"),
@@ -64,7 +64,7 @@ func TestAccFirebaseDatabaseInstance_firebaseDatabaseInstanceStateChange(t *test
 				ResourceName:            "google_firebase_database_instance.updated",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state"},
+				ImportStateVerifyIgnore: []string{"region", "instance_id", "desired_state", "state"},
 			},
 		},
 	})

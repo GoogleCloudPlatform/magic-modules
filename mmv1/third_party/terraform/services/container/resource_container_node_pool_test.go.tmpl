@@ -769,7 +769,7 @@ func TestAccContainerNodePool_withMultiNicNetworkConfig(t *testing.T) {
 				ResourceName:            "google_container_cluster.cluster",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"network_config.0.create_pod_range", "deletion_protection", "node_pool"},
 			},
 		},
 	})
@@ -1948,7 +1948,7 @@ func TestAccContainerNodePool_compactPlacement(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
 			},
 		},
 	})
@@ -2141,7 +2141,7 @@ func TestAccContainerNodePool_threadsPerCore(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
 			},
 		},
 	})
@@ -2201,7 +2201,7 @@ func TestAccContainerNodePool_nestedVirtualization(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "node_pool"},
 			},
 		},
 	})

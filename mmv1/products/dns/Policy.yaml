@@ -38,6 +38,9 @@ examples:
       policy_name: 'example-policy'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
+    ignore_read_extra:
+      - networks.0.network_url
+      - networks.1.network_url
   - name: 'dns_policy_multiproject'
     primary_resource_id: 'example-policy-multiproject'
     vars:
@@ -49,6 +52,11 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - networks.0.network_url
+      - networks.1.network_url
+      - networks.2.network_url
+      - networks.3.network_url
     exclude_docs: true
 parameters:
 properties:

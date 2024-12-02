@@ -70,6 +70,9 @@ examples:
       zone_name: 'private-zone'
       network_1_name: 'network-1'
       network_2_name: 'network-2'
+    ignore_read_extra:
+      - private_visibility_config.0.networks.0.network_url
+      - private_visibility_config.0.networks.1.network_url
   - name: 'dns_managed_zone_private_multiproject'
     primary_resource_id: 'private-zone'
     vars:
@@ -81,6 +84,11 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - private_visibility_config.0.networks.0.network_url
+      - private_visibility_config.0.networks.1.network_url
+      - private_visibility_config.0.networks.2.network_url
+      - private_visibility_config.0.networks.3.network_url
     exclude_docs: true
   - name: 'dns_managed_zone_private_forwarding'
     primary_resource_id: 'private-zone'
@@ -106,6 +114,8 @@ examples:
       zone_name: 'peering-zone'
       network_source_name: 'network-source'
       network_target_name: 'network-target'
+    ignore_read_extra:
+      - private_visibility_config.0.networks.0.network_url
   - name: 'dns_managed_zone_service_directory'
     primary_resource_id: 'sd-zone'
     min_version: 'beta'

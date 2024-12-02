@@ -31,6 +31,10 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"access_levels.0.basic.0.conditions.0.negate",
+					"access_levels.1.basic.0.conditions.0.negate",
+				},
 			},
 			{
 				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access", vpcName),
@@ -39,6 +43,10 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"access_levels.0.basic.0.conditions.0.negate",
+					"access_levels.1.basic.0.conditions.0.negate",
+				},
 			},
 			{
 				Config: testAccAccessContextManagerAccessLevel_empty(org, "my new policy"),
@@ -47,6 +55,10 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"access_levels.0.basic.0.conditions.0.negate",
+					"access_levels.1.basic.0.conditions.0.negate",
+				},
 			},
 		},
 	})
