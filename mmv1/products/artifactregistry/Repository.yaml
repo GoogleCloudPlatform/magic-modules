@@ -27,7 +27,6 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-  - '{{location}}/{{repository_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
