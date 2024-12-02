@@ -11,7 +11,6 @@ var (
 		"melinath":    {},
 		"ScottSuarez": {},
 		"shuyama1":    {},
-		"SarahFrench": {},
 		"roaks3":      {},
 		"zli82016":    {},
 		"trodge":      {},
@@ -95,11 +94,6 @@ var (
 			id:        "roaks3",
 			startDate: newDate(2024, 9, 13, pdtLoc),
 			endDate:   newDate(2024, 9, 20, pdtLoc),
-		},
-		{
-			id:        "SarahFrench",
-			startDate: newDate(2024, 11, 15, bstLoc),
-			endDate:   newDate(2024, 12, 2, bstLoc),
 		},
 		{
 			id:        "c2thorn",
