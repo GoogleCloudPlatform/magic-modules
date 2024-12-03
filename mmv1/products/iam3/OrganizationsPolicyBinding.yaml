@@ -17,8 +17,7 @@ description: A policy binding to an organizations
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
-  api: 'https://cloud.google.com/iam/docs/reference/rest/v3beta/organizations.locations.policyBindings'
-min_version: 'beta'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3/organizations.locations.policyBindings'
 id_format: 'organizations/{{organization}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
 base_url: 'organizations/{{organization}}/locations/{{location}}/policyBindings'
 self_link: 'organizations/{{organization}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
@@ -50,7 +49,6 @@ async:
   include_project: true
 examples:
   - name: 'iam_organizations_policy_binding'
-    min_version: 'beta'
     primary_resource_id: 'my-org-binding'
     test_env_vars:
       org_id: 'ORG_ID'
