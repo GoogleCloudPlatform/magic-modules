@@ -3,6 +3,7 @@ package bigquery_test
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -309,12 +310,12 @@ func TestAccBigQueryDatasetAccess_withCondition(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryDatasetAccess_withCondition(datasetID, saID),
-				Check:  testAccCheckBigQueryDatasetAccessPresent(t, "google_bigquery_dataset.dataset", expected),
+				Check:  testAccCheckBigQueryDatasetAccessPresentWithCondition(t, "google_bigquery_dataset.dataset", expected),
 			},
 			{
 				// Destroy step instead of CheckDestroy so we can check the access is removed without deleting the dataset
 				Config: testAccBigQueryDatasetAccess_destroy(datasetID, "dataset"),
-				Check:  testAccCheckBigQueryDatasetAccessAbsent(t, "google_bigquery_dataset.dataset", expected),
+				Check:  testAccCheckBigQueryDatasetAccessAbsentWithCondition(t, "google_bigquery_dataset.dataset", expected),
 			},
 		},
 	})
@@ -337,14 +338,22 @@ func TestAccBigQueryDatasetAccess_groupByEmailWithMixedCase(t *testing.T) {
 }
 
 func testAccCheckBigQueryDatasetAccessPresent(t *testing.T, n string, expected map[string]interface{}) resource.TestCheckFunc {
-	return testAccCheckBigQueryDatasetAccess(t, n, expected, true)
+	return testAccCheckBigQueryDatasetAccess(t, n, expected, true, false)
 }
 
 func testAccCheckBigQueryDatasetAccessAbsent(t *testing.T, n string, expected map[string]interface{}) resource.TestCheckFunc {
-	return testAccCheckBigQueryDatasetAccess(t, n, expected, false)
+	return testAccCheckBigQueryDatasetAccess(t, n, expected, false, false)
 }
 
-func testAccCheckBigQueryDatasetAccess(t *testing.T, n string, expected map[string]interface{}, expectPresent bool) resource.TestCheckFunc {
+func testAccCheckBigQueryDatasetAccessPresentWithCondition(t *testing.T, n string, expected map[string]interface{}) resource.TestCheckFunc {
+	return testAccCheckBigQueryDatasetAccess(t, n, expected, true, true)
+}
+
+func testAccCheckBigQueryDatasetAccessAbsentWithCondition(t *testing.T, n string, expected map[string]interface{}) resource.TestCheckFunc {
+	return testAccCheckBigQueryDatasetAccess(t, n, expected, false, true)
+}
+
+func testAccCheckBigQueryDatasetAccess(t *testing.T, n string, expected map[string]interface{}, expectPresent, withCondition bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -368,7 +377,15 @@ func testAccCheckBigQueryDatasetAccess(t *testing.T, n string, expected map[stri
 		}
 		access := ds["access"].([]interface{})
 		for _, a := range access {
-			if reflect.DeepEqual(a, expected) {
+			if withCondition {
+				accessEntry := a.(map[string]interface{})
+				if accessEntry["userByEmail"] == expected["userByEmail"] && strings.HasPrefix(accessEntry["role"].(string), "roles/bigquery.dataOwner_withcond_") {
+					if !expectPresent {
+						return fmt.Errorf("Found access %+v, expected not present", expected)
+					}
+					return nil
+				}
+			} else if reflect.DeepEqual(a, expected) {
 				if !expectPresent {
 					return fmt.Errorf("Found access %+v, expected not present", expected)
 				}
@@ -610,6 +627,7 @@ resource "google_bigquery_dataset_access" "withCondition" {
   dataset_id    = google_bigquery_dataset.dataset.dataset_id
   role          = "OWNER"
   user_by_email = google_service_account.bqowner.email
+  access_policy_version	= 3
   condition {
     title       = "test-condition"
     description = "Request after midnight of 2019-12-31"
