@@ -1,0 +1,7 @@
+{{ if ne $.TargetVersionName "ga" -}}
+resource: 'google_dataflow_flex_template_job'
+generation_type: 'handwritten'
+api_service_name: 'dataflow.googleapis.com'
+api_version: 'v1b3'
+api_resource_type_kind: 'Job'
+{{ end }}
