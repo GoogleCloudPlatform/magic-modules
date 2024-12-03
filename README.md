@@ -12,4 +12,6 @@ provider versions simultaneously. After sending a pull request against this repo
 complete output, running presubmit tests, and updating the providers following your
 change.
 
+Testing CI with Terraform 1.11.0
+
 For information on how to use or contribute to Magic Modules, see [the documentation](https://googlecloudplatform.github.io/magic-modules).
