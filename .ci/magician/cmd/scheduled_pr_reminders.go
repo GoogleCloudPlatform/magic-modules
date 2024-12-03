@@ -311,7 +311,6 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 	var earliestCommented *github.PullRequestReview
 
 	ignoreBy := map[string]struct{}{}
-	dismissedReviewer := map[string]struct{}{}
 	for _, review := range reviewsDesc {
 		if review.SubmittedAt.Before(*latestReviewRequest.CreatedAt.GetTime()) {
 			break
@@ -332,16 +331,12 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 		switch *review.State {
 		case "DISMISSED":
 			// ignore dismissed reviews
-			dismissedReviewer[reviewer] = struct{}{}
 			continue
 		case "APPROVED":
 			earliestApproved = review
 			// ignore all earlier reviews from this reviewer
 			ignoreBy[reviewer] = struct{}{}
 		case "CHANGES_REQUESTED":
-			if _, ok := dismissedReviewer[reviewer]; ok {
-				continue
-			}
 			earliestChangesRequested = review
 			// ignore all earlier reviews from this reviewer
 			ignoreBy[reviewer] = struct{}{}
