@@ -119,7 +119,7 @@ Some acceptance tests may be skipped in VCR and manual testing is required.
 &lt;/li>
 &lt;li>Check documentation to ensure
 &lt;ol>
-&lt;li>resouce-level and field-level documentation are generated correctly for MMv1-based resource&lt;/li>
+&lt;li>resource-level and field-level documentation are generated correctly for MMv1-based resource&lt;/li>
 &lt;li>documentation is added manually for handwritten resources.&lt;/li>
 &lt;/ol>
 &lt;/li>
