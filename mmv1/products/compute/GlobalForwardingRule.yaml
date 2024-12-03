@@ -485,6 +485,25 @@ properties:
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'networkTier'
+    type: Enum
+    description: |
+      This signifies the networking tier used for configuring
+      this load balancer and can only take the following values:
+      `PREMIUM`, `STANDARD`.
+
+      For regional ForwardingRule, the valid values are `PREMIUM` and
+      `STANDARD`. For GlobalForwardingRule, the valid value is
+      `PREMIUM`.
+
+      If this field is not specified, it is assumed to be `PREMIUM`.
+      If `IPAddress` is specified, this value must be equal to the
+      networkTier of the Address.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'PREMIUM'
+      - 'STANDARD'
   - name: 'serviceDirectoryRegistrations'
     type: Array
     description: |
