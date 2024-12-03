@@ -26,12 +26,12 @@ import (
 
 var (
 	// used for flags
-	backfillDate   string
+	backfillSince   string
 	backfillDryRun bool
 )
 
 var backfillIssueLabels = &cobra.Command{
-	Use:   "backfill-issue-labels [--dry-run] [--backfill-date=1973-01-01]",
+	Use:   "backfill-issue-labels [--dry-run] [--since=1973-01-01]",
 	Short: "Backfills labels on old issues",
 	Long:  "Backfills labels on old issues",
 	Args:  cobra.NoArgs,
@@ -51,7 +51,7 @@ func execBackfillIssueLabels() error {
 		return fmt.Errorf("building regex labels: %w", err)
 	}
 	repository := "hashicorp/terraform-provider-google"
-	issues, err := labeler.GetIssues(repository, backfillDate)
+	issues, err := labeler.GetIssues(repository, backfillSince)
 	if err != nil {
 		return fmt.Errorf("getting github issues: %w", err)
 	}
@@ -66,5 +66,5 @@ func execBackfillIssueLabels() error {
 func init() {
 	rootCmd.AddCommand(backfillIssueLabels)
 	backfillIssueLabels.Flags().BoolVar(&backfillDryRun, "dry-run", false, "Only log write actions instead of updating issues")
-	backfillIssueLabels.Flags().StringVar(&backfillDate, "backfill-date", "1973-01-01", "Only apply labels to issues filed after given date")
+	backfillIssueLabels.Flags().StringVar(&backfillSince, "since", "1973-01-01", "Only apply labels to issues filed after given date")
 }
