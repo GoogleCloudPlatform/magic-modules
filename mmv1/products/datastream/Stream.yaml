@@ -426,21 +426,21 @@ properties:
             send_empty_value: true
             validation:
               function: 'validation.IntAtLeast(0)'
-          - !ruby/object:Api::Type::NestedObject
-            name: 'binaryLogPosition'
-            allow_empty_object: true
-            send_empty_value: true
-            conflicts:
-              - source_config.0.mysql_source_config.binary_log_position
-            description: |
-              CDC reader reads from binary logs replication cdc method.
-            properties: []
-          - !ruby/object:Api::Type::NestedObject
-            name: 'gtid'
+          - name: 'binaryLogPosition'
+            type: NestedObject
             allow_empty_object: true
             send_empty_value: true
             conflicts:
               - source_config.0.mysql_source_config.gtid
+            description: |
+              CDC reader reads from binary logs replication cdc method.
+            properties: []
+          - name: 'gtid'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.mysql_source_config.binaryLogPosition
             description: |
               CDC reader reads from gtid based replication.
             properties: []
