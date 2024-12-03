@@ -11,7 +11,6 @@ var (
 		"melinath":    {},
 		"ScottSuarez": {},
 		"shuyama1":    {},
-		"SarahFrench": {},
 		"roaks3":      {},
 		"zli82016":    {},
 		"trodge":      {},
@@ -97,11 +96,6 @@ var (
 			endDate:   newDate(2024, 9, 20, pdtLoc),
 		},
 		{
-			id:        "SarahFrench",
-			startDate: newDate(2024, 11, 15, bstLoc),
-			endDate:   newDate(2024, 12, 2, bstLoc),
-		},
-		{
 			id:        "c2thorn",
 			startDate: newDate(2024, 10, 2, bstLoc),
 			endDate:   newDate(2024, 10, 14, bstLoc),
@@ -120,6 +114,11 @@ var (
 			id:        "shuyama1",
 			startDate: newDate(2024, 11, 26, pdtLoc),
 			endDate:   newDate(2024, 12, 4, pdtLoc),
+		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 11, 27, pdtLoc),
+			endDate:   newDate(2024, 12, 9, pdtLoc),
 		},
 	}
 )
