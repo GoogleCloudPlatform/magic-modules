@@ -26,7 +26,7 @@ import (
 
 var (
 	// used for flags
-	backfillSince   string
+	backfillSince  string
 	backfillDryRun bool
 )
 
