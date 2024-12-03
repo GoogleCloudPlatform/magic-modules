@@ -64,8 +64,6 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
-      'cloud_vm_cluster_id': '"ofake-vmcluster-basic"'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-basic"'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
@@ -78,8 +76,6 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
-      'cloud_vm_cluster_id': '"ofake-vmcluster-full"'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-full"'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
