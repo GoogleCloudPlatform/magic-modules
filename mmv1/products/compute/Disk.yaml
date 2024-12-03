@@ -163,6 +163,8 @@ properties:
   - name: 'diskEncryptionKey'
     type: NestedObject
     description: |
+      Description update for 1.11.0
+
       Encrypts the disk using a customer-supplied encryption key.
 
       After you encrypt a disk with a customer-supplied key, you must
