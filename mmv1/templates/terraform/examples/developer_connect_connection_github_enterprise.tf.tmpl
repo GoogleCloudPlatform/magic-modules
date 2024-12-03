@@ -3,10 +3,6 @@ resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
   connection_id = "{{index $.Vars "connection_name"}}"
 
   github_enterprise_config {
-    host_uri = "{{index $.Vars "host_uri_name"}}"
-
-    authorizer_credential {
-      oauth_token_secret_version = "projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"
-    }
+    host_uri = "https://ghe.proctor-staging-test.com"
   }
 }

@@ -14,13 +14,13 @@
 ---
 name: GitRepositoryLink
 description: A git repository link to a parent connection.
-base_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks
+base_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks
 immutable: true
-self_link: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
-create_url: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}
-id_format: projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+self_link: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+create_url: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks?gitRepositoryLinkId={{git_repository_link_id}}
+id_format: projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/connections/{{connection}}/gitRepositoryLinks/{{git_repository_link_id}}
+- projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}
 examples:
   # These tests depend on secrets stored in a separate project, so we prefer not
   # to show them in the docs.
@@ -37,7 +37,6 @@ examples:
     vars:
       connection_name: 'my-connection'
       git_repository_link_name: 'my-repository'
-      host_uri_name: 'https://devconnect-terraform.com'
     exclude_docs: true
   - name: 'developer_connect_git_repository_link_github_enterprise_doc'
     exclude_test: true
@@ -47,9 +46,6 @@ examples:
     vars:
       connection_name: 'tf-test-connection'
       git_repository_link_name: 'my-repository'
-      webhook_version: 'projects/terraform-proj/secrets/webhook-version/versions/latest'
-      read_cred: 'glpat-some-read-auth-credential'
-      auth_cred: 'glpat-some-auth-credential'
     exclude_docs: true
   - name: 'developer_connect_git_repository_link_gitlab_doc'
     exclude_test: true
@@ -59,10 +55,6 @@ examples:
     vars:
       connection_name: 'tf-test-connection'
       git_repository_link_name: 'my-repository'
-      host_uri_name: 'https://devconnect-terraform.com'
-      webhook_version: 'projects/terraform-proj/secrets/webhook-version/versions/latest'
-      read_cred: 'glpat-some-read-auth-credential'
-      auth_cred: 'glpat-some-auth-credential'
     exclude_docs: true
   - name: 'developer_connect_git_repository_link_gitlab_enterprise_doc'
     exclude_test: true

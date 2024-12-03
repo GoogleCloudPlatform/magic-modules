@@ -1,15 +1,14 @@
 resource "google_developer_connect_git_repository_link" "{{$.PrimaryResourceId}}" {
-  git_repository_link_id              = "{{index $.Vars "git_repository_link_name"}}"
+  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}"
   parent_connection = google_developer_connect_connection.github_conn.connection_id
-  clone_uri        = "https://github.com/gcb-developerconnect-robot/tf-demo.git"
-  location          = "us-central1"
-  annotations       = {}
-}
-
-resource "google_developer_connect_connection" "github_conn" {
-  
+  clone_uri = "https://github.com/gcb-developerconnect-robot/tf-demo.git"
   location = "us-central1"
-  connection_id     = "{{index $.Vars "connection_name"}}"
+  annotations = {}
+}
+  
+resource "google_developer_connect_connection" "github_conn" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
   disabled = false
 
   github_config {
@@ -21,3 +20,4 @@ resource "google_developer_connect_connection" "github_conn" {
     }
   }
 }
+

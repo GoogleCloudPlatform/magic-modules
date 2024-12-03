@@ -50,10 +50,6 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
-      host_uri_name: 'https://devconnect-terraform.com'
-      webhook_version: 'projects/terraform-proj/secrets/webhook-version/versions/latest'
-      read_cred: 'glpat-some-read-auth-credential'
-      auth_cred: 'glpat-some-auth-credential' 
   - name: 'developer_connect_connection_gitlab_enterprise_doc'
     exclude_test: true
 autogen_async: true
@@ -298,6 +294,7 @@ properties:
     Describes stage and necessary actions to be taken by the
     user to complete the installation. Used for GitHub and GitHub Enterprise
     based connections.
+  output: true
   properties:
   - name: message
     type: String
