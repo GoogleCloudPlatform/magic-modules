@@ -61,7 +61,6 @@ examples:
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
       'deletion_protection': 'false'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-basic"'
   - name: 'oracledatabase_cloud_exadata_infrastructure_full'
     primary_resource_id: 'my-cloud-exadata'
     vars:
@@ -73,7 +72,6 @@ examples:
     test_vars_overrides:
       'project': '"oci-terraform-testing"'
       'deletion_protection': 'false'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-full"'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
