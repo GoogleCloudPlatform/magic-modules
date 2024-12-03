@@ -1251,22 +1251,22 @@ func flattenMatchExprOptions(exprOptions *compute.SecurityPolicyRuleMatcherExprO
 		return nil
 	}
 
+  // We check if the API is returning a empty non-null value then we find the current value for this field in the rule config and check if its empty
+	if (tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.ActionTokenSiteKeys)) &&
+		tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.SessionTokenSiteKeys))) &&
+		verifyRulePriorityCompareEmptyValues(d, rulePriority, "recaptcha_options") {
+		return nil
+	}
+
 	data := map[string]interface{}{
-		"recaptcha_options": flattenMatchExprOptionsRecaptchaOptions(exprOptions.RecaptchaOptions, d, rulePriority),
+		"recaptcha_options": flattenMatchExprOptionsRecaptchaOptions(exprOptions.RecaptchaOptions),
 	}
 
 	return []map[string]interface{}{data}
 }
 
-func flattenMatchExprOptionsRecaptchaOptions(recaptchaOptions *compute.SecurityPolicyRuleMatcherExprOptionsRecaptchaOptions, d *schema.ResourceData, rulePriority int) []map[string]interface{} {
+func flattenMatchExprOptionsRecaptchaOptions(recaptchaOptions *compute.SecurityPolicyRuleMatcherExprOptionsRecaptchaOptions) []map[string]interface{} {
 	if recaptchaOptions == nil {
-		return nil
-	}
-
-	// We check if the API is returning a empty non-null value then we find the current value for this field in the rule config and check if its empty
-	if (tpgresource.IsEmptyValue(reflect.ValueOf(recaptchaOptions.ActionTokenSiteKeys)) &&
-		tpgresource.IsEmptyValue(reflect.ValueOf(recaptchaOptions.SessionTokenSiteKeys))) &&
-		verifyRulePriorityCompareEmptyValues(d, rulePriority, "recaptcha_options") {
 		return nil
 	}
 
