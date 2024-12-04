@@ -2,6 +2,7 @@ package bigquery_test
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -379,6 +380,7 @@ func testAccCheckBigQueryDatasetAccess(t *testing.T, n string, expected map[stri
 		for _, a := range access {
 			if withCondition {
 				accessEntry := a.(map[string]interface{})
+				log.Printf("Checking access entry %+v", accessEntry)
 				if accessEntry["userByEmail"] == expected["userByEmail"] && strings.HasPrefix(accessEntry["role"].(string), "roles/bigquery.dataOwner_withcond_") {
 					if !expectPresent {
 						return fmt.Errorf("Found access %+v, expected not present", expected)
