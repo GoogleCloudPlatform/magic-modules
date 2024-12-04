@@ -15,8 +15,8 @@
 name: Model
 base_url: projects/{{project}}/locations/{{region}}/models
 create_url: 'projects/{{project}}/locations/{{region}}/modelsPRE_CREATE_REPLACE_ME'
-delete_url: '{{name}}'
-self_link: '{{name}}'
+delete_url: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
+self_link: 'projects/{{project}}/locations/{{region}}/models/{{model_id}}'
 
 references:
   guides:
@@ -40,6 +40,8 @@ async:
   error:
     path: 'error'
     message: 'message'
+custom_diff:
+  - 'vertexAiModelDiffSuppress'
 custom_code:
   constants: templates/terraform/constants/vertex_ai_model.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
@@ -76,8 +78,6 @@ properties:
       The name of the Model. This value may be up to 60 characters, and
       valid characters are [a-z0-9_]. The first character cannot be a number.
     output: true
-    # url_param_only: true
-    custom_flatten: templates/terraform/custom_flatten/vertex_ai_name_from_model.go.tmpl
   - type: String
     name: 'description'
     description: Description of the Model.
@@ -85,7 +85,6 @@ properties:
   - type: String
     name: 'versionId'
     description: The version ID of the Model.
-    immutable: true
     output: true
   - type: String
     name: 'versionCreateTime'
@@ -142,7 +141,6 @@ properties:
             The ID of the export format.
         - type: Enum
           name: exportableContent
-          default_from_api: true
           immutable: true
           description: |
             The content of this Model that may be exported.
@@ -313,14 +311,11 @@ properties:
     ignore_read: true
   - type: Array
     name: 'versionAliases'
-    ignore_read: true
+    default_from_api: true
     description:
       user provided version aliases so that a model version can be referenced via alias.
     item_type:
       type: String
-  - type: KeyValueLabels
-    name: 'labels'
-    description: The labels with user-defined metadata to organize your Models.
   - type: NestedObject
     name: 'encryptionSpec'
     immutable: true
@@ -335,7 +330,6 @@ properties:
         immutable: true
   - type: NestedObject
     name: 'metadata'
-    ignore_read: true
     description: An additional information about the Index
     properties:
       - type: NestedObject
@@ -429,6 +423,10 @@ properties:
       The resource name of the Model to copy. That Model must be in the same Project
   - type: String
     name: 'modelId'
+    immutable: true
+    ignore_read: true
     default_from_api: true
+    # modelId is never returned from the API as a field, but we set its value from API-returned data when it's not
+    # provided by the user as an input
     description: |
       Copy sourceModel into a new Model with this ID. The ID will become the final component of the model resource name.
