@@ -12,8 +12,8 @@
 # limitations under the License.
 
 ---
-name: 'NetworkServicesPlugins'
-display_name: 'Network Services Plugins'
+name: 'ServiceExtensions'
+display_name: 'Network Services Service Extensions'
 versions:
   - name: 'beta'
     base_url: 'https://networkservices.googleapis.com/v1beta1/'

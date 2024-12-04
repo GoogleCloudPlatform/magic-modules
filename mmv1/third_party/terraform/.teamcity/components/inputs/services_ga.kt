@@ -551,10 +551,10 @@ var ServicesListGa = mapOf(
         "displayName" to "Networkservices",
         "path" to "./google/services/networkservices"
     ),
-    "networkservicesplugins" to mapOf(
-        "name" to "networkservicesplugins",
-        "displayName" to "Networkservicesplugins",
-        "path" to "./google/services/networkservicesplugins"
+    "serviceextensions" to mapOf(
+        "name" to "serviceextensions",
+        "displayName" to "Serviceextensions",
+        "path" to "./google/services/serviceextensions"
     ),
     "notebooks" to mapOf(
         "name" to "notebooks",

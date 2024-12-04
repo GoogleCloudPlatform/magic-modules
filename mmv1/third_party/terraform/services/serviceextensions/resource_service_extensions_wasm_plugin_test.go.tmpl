@@ -1,4 +1,4 @@
-package networkservicesplugins_test
+package serviceextensions_test
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
+func TestAccServiceExtensionsWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test requires a existing container image that contains the plugin code, published in an Artifact Registry repository.
 	t.Parallel()
 
@@ -20,22 +20,22 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginLogConfigUpdate(t *testin
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetworkServicesPluginsWasmPluginDestroyProducer(t),
+		CheckDestroy:             testAccCheckServiceExtensionsWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginBasicCreate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginBasicCreate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginLogConfigUpdate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginLogConfigUpdate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
@@ -44,7 +44,7 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginLogConfigUpdate(t *testin
 	})
 }
 
-func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
+func TestAccServiceExtensionsWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -56,22 +56,22 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(t *testing.
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetworkServicesPluginsWasmPluginDestroyProducer(t),
+		CheckDestroy:             testAccCheckServiceExtensionsWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionCreate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginVersionCreate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginVersionUpdate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
@@ -80,7 +80,7 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(t *testing.
 	})
 }
 
-func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
+func TestAccServiceExtensionsWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -92,31 +92,31 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigUpdate(t *testing.T
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetworkServicesPluginsWasmPluginDestroyProducer(t),
+		CheckDestroy:             testAccCheckServiceExtensionsWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginBasicCreate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginBasicCreate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "main_version_id", "name", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigDataUpdate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginConfigDataUpdate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels"},
 			},
 			{
-				Config: testAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigUriUpdate(context),
+				Config: testAccServiceExtensionsWasmPlugin_wasmPluginConfigUriUpdate(context),
 			},
 			{
-				ResourceName:            "google_network_services_plugins_wasm_plugin.wasm_plugin",
+				ResourceName:            "google_service_extensions_wasm_plugin.wasm_plugin",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels"},
@@ -125,9 +125,9 @@ func TestAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigUpdate(t *testing.T
 	})
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginBasicCreate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginBasicCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -158,9 +158,9 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginLogConfigUpdate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginLogConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -191,9 +191,9 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionCreate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginVersionCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -233,9 +233,9 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -274,11 +274,11 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigDataUpdate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginConfigDataUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" { provider = google-beta }
 
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
@@ -310,11 +310,11 @@ resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
 `, context)
 }
 
-func testAccNetworkServicesPluginsWasmPlugin_wasmPluginConfigUriUpdate(context map[string]interface{}) string {
+func testAccServiceExtensionsWasmPlugin_wasmPluginConfigUriUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" { provider = google-beta }
 
-resource "google_network_services_plugins_wasm_plugin" "wasm_plugin" {
+resource "google_service_extensions_wasm_plugin" "wasm_plugin" {
   provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
