@@ -2,6 +2,5 @@ if modelName, ok := res["model"].(string); ok && modelName != "" {
 	res["name"] = modelName
 }
 
-res["modelName"] = res["displayName"]
 
 return res, nil
