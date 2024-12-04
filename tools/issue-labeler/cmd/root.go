@@ -25,10 +25,7 @@ import (
 // rootCmd represents the base command when called without any subcommands
 
 var rootCmd = &cobra.Command{
-	Use: "issue-labeler",
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Inside rootCmd PersistentPreRun with args: %v\n", args)
-	},
+	Use:   "issue-labeler",
 	Short: "Tool for interacting with issue labels (specifically for services)",
 	Long:  `Tool for interacting with issue labels (specifically for services)`,
 }
