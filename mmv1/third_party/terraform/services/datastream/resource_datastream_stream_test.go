@@ -204,7 +204,9 @@ resource "google_datastream_stream" "default" {
     source_config {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
 
-        mysql_source_config {}
+        mysql_source_config {
+	  binary_log_position {}
+	}
     }
     destination_config {
         destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
