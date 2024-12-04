@@ -44,6 +44,6 @@ This page provides guidelines for reviewing a Magic Modules pull request (PR).
       {{< /hint >}}
    1. a significant number of preexisting tests have not been modified. Changing old tests often indicates a change is backwards incompatible.
 1. Check documentation to ensure
-   1. resouce-level and field-level documentation are generated correctly for MMv1-based resource
+   1. resource-level and field-level documentation are generated correctly for MMv1-based resource
    1. documentation is added manually for handwritten resources.   
 1. Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in [write release notes]({{< ref "release-notes" >}}) before merging the PR.
