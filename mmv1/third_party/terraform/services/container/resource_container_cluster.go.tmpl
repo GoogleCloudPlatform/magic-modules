@@ -1506,6 +1506,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_kubelet_config": schemaNodePoolAutoConfigNodeKubeletConfig(),
+						"linux_node_config":   schemaNodePoolAutoConfigLinuxNodeConfig(),
 						"network_tags": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -2250,6 +2251,7 @@ func ResourceContainerCluster() *schema.Resource {
 			"user_managed_keys_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				ForceNew:    true,
 				MaxItems:    1,
 				Description: `The custom keys configuration of the cluster.`,
 				Elem: &schema.Resource{
@@ -2823,6 +2825,34 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		err = ContainerOperationWait(config, op, project, location, "updating AdditionalPodRangesConfig", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{"{{"}}err{{"}}"}}", err)
+		}
+	}
+
+	if linuxNodeConfig, ok := d.GetOk("node_pool_auto_config.0.linux_node_config"); ok {
+		name := containerClusterFullName(project, location, clusterName)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodePoolAutoConfigLinuxNodeConfig: expandLinuxNodeConfig(linuxNodeConfig),
+			},
+		}
+
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() error {
+				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+				if config.UserProjectOverride {
+					clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+				}
+				op, err = clusterUpdateCall.Do()
+				return err
+			},
+		})
+		if err != nil {
+			return errwrap.Wrapf("Error updating LinuxNodeConfig: {{"{{"}}err{{"}}"}}", err)
+		}
+
+		err = ContainerOperationWait(config, op, project, location, "updating LinuxNodeConfig", userAgent, d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return errwrap.Wrapf("Error while waiting to update LinuxNodeConfig: {{"{{"}}err{{"}}"}}", err)
 		}
 	}
 
@@ -4294,20 +4324,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s fleet config has been updated", d.Id())
 	}
 
-	if d.HasChange("user_managed_keys_config") {
-		req := &container.UpdateClusterRequest{
-			Update: &container.ClusterUpdate{
-				UserManagedKeysConfig: expandUserManagedKeysConfig(d.Get("user_managed_keys_config")),
-			},
-		}
-		updateF := updateFunc(req, "updating GKE cluster user managed keys config.")
-		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s user managed key config has been updated to %#v", d.Id(), req.Update.UserManagedKeysConfig)
-	}
-
 	if d.HasChange("enable_k8s_beta_apis") {
 		log.Print("[INFO] Enable Kubernetes Beta APIs")
 		if v, ok := d.GetOk("enable_k8s_beta_apis"); ok {
@@ -4496,6 +4512,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s node pool auto config resource manager tags have been updated", d.Id())
+	}
+
+	if d.HasChange("node_pool_auto_config.0.linux_node_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredNodePoolAutoConfigLinuxNodeConfig: expandLinuxNodeConfig(
+					d.Get("node_pool_auto_config.0.linux_node_config"),
+				),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster node pool auto config linux node config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s node pool auto config linux_node_config parameters have been updated", d.Id())
 	}
 
 	d.Partial(false)
@@ -6691,11 +6725,22 @@ func flattenUserManagedKeysConfig(c *container.UserManagedKeysConfig) []map[stri
 		"control_plane_disk_encryption_key": c.ControlPlaneDiskEncryptionKey,
 		"gkeops_etcd_backup_encryption_key": c.GkeopsEtcdBackupEncryptionKey,
 	}
+	allEmpty := true
+	for _, v := range f {
+		if v.(string) != "" {
+			allEmpty = false
+		}
+	}
 	if len(c.ServiceAccountSigningKeys) != 0 {
 		f["service_account_signing_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountSigningKeys))
+		allEmpty = false
 	}
 	if len(c.ServiceAccountVerificationKeys) != 0 {
 		f["service_account_verification_keys"] = schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(c.ServiceAccountVerificationKeys))
+		allEmpty = false
+	}
+	if allEmpty {
+		return nil
 	}
 	return []map[string]interface{}{f}
 }
@@ -6777,6 +6822,11 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 	}
 	if c.ResourceManagerTags != nil {
 		result["resource_manager_tags"] = flattenResourceManagerTags(c.ResourceManagerTags)
+	}
+	if c.LinuxNodeConfig != nil {
+		result["linux_node_config"] = []map[string]interface{}{
+			{"cgroup_mode": c.LinuxNodeConfig.CgroupMode},
+		}
 	}
 
 	return []map[string]interface{}{result}

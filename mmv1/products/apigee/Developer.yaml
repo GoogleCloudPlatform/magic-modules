@@ -24,7 +24,7 @@ base_url: "developers"
 self_link: "{{org_id}}/developers/{{email}}"
 create_url: "{{org_id}}/developers"
 delete_url: "{{org_id}}/developers/{{email}}"
-update_mask: true
+update_mask: false
 immutable: false
 import_format:
   - "{{org_id}}/developers/{{email}}"
@@ -44,6 +44,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
   - name: "apigee_developer_with_attributes"
     vars:
       instance_name: "my-instance"
@@ -56,6 +57,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: "orgId"
     type: String
