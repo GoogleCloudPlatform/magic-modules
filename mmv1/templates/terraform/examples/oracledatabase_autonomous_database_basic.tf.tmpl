@@ -13,6 +13,7 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
     db_workload = "OLTP"
     license_type = "LICENSE_INCLUDED"
     }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 data "google_compute_network" "default" {

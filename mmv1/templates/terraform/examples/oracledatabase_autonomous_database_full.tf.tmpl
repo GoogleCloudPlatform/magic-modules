@@ -31,6 +31,7 @@ resource "google_oracle_database_autonomous_database" "{{$.PrimaryResourceId}}"{
     private_endpoint_ip    = "10.5.0.11"
     private_endpoint_label = "testhost"
   }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
 data "google_compute_network" "default" {

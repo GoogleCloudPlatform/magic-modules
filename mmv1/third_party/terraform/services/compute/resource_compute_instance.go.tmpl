@@ -60,6 +60,7 @@ var (
 		"advanced_machine_features.0.turbo_mode",
 		"advanced_machine_features.0.visible_core_count",
 		"advanced_machine_features.0.performance_monitoring_unit",
+		"advanced_machine_features.0.enable_uefi_networking",
 	}
 
 	bootDiskKeys = []string{
@@ -217,7 +218,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: bootDiskKeys,
 							Default:      true,
-							ForceNew:     true,
 							Description:  `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
 
@@ -1132,6 +1132,13 @@ be from 0 to 999,999,999 inclusive.`,
 							AtLeastOneOf: advancedMachineFeaturesKeys,
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
+						},
+						"enable_uefi_networking": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: advancedMachineFeaturesKeys,
+							Description:  `Whether to enable UEFI networking for the instance.`,
 						},
 					},
 				},
@@ -2494,6 +2501,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	// if any other boot_disk fields will be added here this should be wrapped in if d.HasChange("boot_disk")
+	if d.HasChange("boot_disk.0.auto_delete") {
+		op, err := config.NewComputeClient(userAgent).Instances.SetDiskAutoDelete(project, zone, instance.Name, d.Get("boot_disk.0.auto_delete").(bool), d.Get("boot_disk.0.device_name").(string)).Do()
+		if err != nil {
+			return fmt.Errorf("Error changing auto_delete: %s", err)
+		}
+		opErr := ComputeOperationWaitTime(config, op, project, "changing auto_delete", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
+	}
+
 	// d.HasChange("service_account") is oversensitive: see https://github.com/hashicorp/terraform/issues/17411
 	// Until that's fixed, manually check whether there is a change.
 	o, n := d.GetChange("service_account")
@@ -3152,7 +3171,11 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		}
 
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.storage_pool"); ok {
-			disk.InitializeParams.StoragePool = v.(string)
+			storagePoolUrl, err := expandStoragePool(v, d, config)
+			if err != nil {
+				return nil, fmt.Errorf("Error resolving storage pool name '%s': '%s'", v.(string), err)
+			}
+			disk.InitializeParams.StoragePool = storagePoolUrl.(string)
 		}
 	}
 
@@ -3249,6 +3272,10 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 		"size": disk.DiskSizeGb,
 	}
 	return result
+}
+
+func expandStoragePool(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return ExpandStoragePoolUrl(v, d, config)
 }
 
 func hash256(raw string) (string, error) {
