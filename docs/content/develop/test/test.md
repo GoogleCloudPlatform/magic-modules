@@ -26,7 +26,7 @@ For more information about testing, see the [official Terraform documentation](h
 
 ## Before you begin
 
-1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/get-started/how-magic-modules-works.md" >}}).
+1. Determine whether your resources is using [MMv1 generation or handwritten]({{<ref "/" >}}).
 2. If you are not adding tests to an in-progress PR, ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```bash
    cd ~/magic-modules
@@ -100,7 +100,7 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/resource
 > **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
 
 1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+2. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}}).
 3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
 4. Modify the tests as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
@@ -120,7 +120,7 @@ An update test is a test that creates the target resource and then makes updates
 
 {{< tabs "update" >}}
 {{< tab "MMv1" >}}
-1. [Generate the beta provider]({{< ref "/get-started/generate-providers.md" >}}).
+1. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
 2. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) as a new file call `*_test.go`.
 3. Using an editor of your choice, delete the `*DestroyProducer` function, and all but one test. The remaining test should be the "full" test, or if there is no "full" test, the "basic" test. This will be the starting point for your new update test.
 4. Modify the `TestAcc*` *test function* to support updates.
@@ -128,6 +128,7 @@ An update test is a test that creates the target resource and then makes updates
    - Copy the 2 `TestStep` blocks and paste them immediately after, so that there are 4 total test steps.
    - Change the suffix of the first `Config` value to `_full` (or `_basic`).
    - Change the suffix of the second `Config` value to `_update`.
+   - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
    func TestAccPubsubTopic_update(t *testing.T) {
@@ -143,6 +144,11 @@ An update test is a test that creates the target resource and then makes updates
             },
             {
                Config: testAccPubsubTopic_update(...),
+               ConfigPlanChecks: resource.ConfigPlanChecks{
+                  PreApply: []plancheck.PlanCheck{
+                     plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                  },
+               },
             },
             {
                ...
@@ -266,6 +272,59 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
+## Skip tests in VCR replaying mode
+
+Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP requests and responses) to reduce the time it takes to present results to contributors. However, not all resources or tests are possible to run in replaying mode. Incompatible tests should be skipped during VCR replaying mode. They will still run in our nightly test suite.
+
+{{< tabs "skipping-tests-in-vcr-replaying" >}}
+
+   {{< tab "Skip a generated test" >}}
+   Skipping acceptance tests that are generated from example files can be achieved by adding `skip_vcr: true` in the example's YAML:
+
+   ```yaml
+   examples:
+   - name: 'bigtable_app_profile_anycluster'
+      ...
+
+      # bigtable instance does not use the shared HTTP client, this test creates an instance
+      skip_vcr: true
+   ```
+
+   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
+
+   {{< /tab >}}
+   {{< tab "Skip a handwritten test" >}}
+   Skipping acceptance tests that are handwritten can be achieved by adding `acctest.SkipIfVcr(t)` at the start of the test:
+
+   ```go
+   func TestAccPubsubTopic_update(t *testing.T) {
+         acctest.SkipIfVcr(t) // See: https://github.com/hashicorp/terraform-provider-google/issues/9999
+         acctest.VcrTest(t, resource.TestCase{ ... }
+   }
+   ```
+
+   If you skip a test in VCR mode, include a code comment explaining the reason for skipping (for example, a link to a GitHub issue.)
+
+   {{< /tab >}}
+{{< /tabs >}}
+
+### Reasons that tests are skipped in VCR replaying mode
+
+| Problem                                          | How to fix/Other info  | Skip in VCR replaying? |
+| ------------------------------------------------ | ---------------------- |------------- |
+| *Incorrect or insufficient data is present in VCR recordings to replay tests*.  Tests will fail with `Requested interaction not found` errors during REPLAYING mode | Make sure that you're not introducing randomness into the test, e.g. by unnecessarily using the random provider to set a resource's name.| If you cannot avoid this issue you should skip the test, but try to ensure that it cannot be fixed first.|
+*Bigtable acceptance tests aren't working in VCR mode*. `Requested interaction not found` errors are seen during Bigtable tests run in REPLAYING mode | Currently the provider uses a separate client than the rest of the provider to interact with the Bigtable API. As HTTP traffic to the Bigtable API doesn't go via the shared client it cannot be recorded in RECORDING mode.| Skip the test in VCR for Bigtable. |
+| *Using multiple provider aliases doesn't work in VCR*. You may have two instances of the google provider in the test config but one of them doesn't seem to be using its provider arguments - for example, using the wrong default project. | See this GitHub issue: https://github.com/hashicorp/terraform-provider-google/issues/20019 . The problem is that, due to how the VCR system works, one provider instance will be configured and the other will be forced to reuse the first instance's configuration, despite them being given different provider arguments. |  Skip the test in VCR is using aliases is unavoidable. |
+| *Using multiple versions of the google/google-beta provider in a single test isn't working in VCR*. Unexpected test failures may occur during tests in REPLAYING mode where `ExternalProviders` is used to pull in past versions of the google/google-beta provider. | When ExternalProviders is used to pulling in other versions of the provider, any HTTP traffic through the external provider will not be recorded. If the HTTP traffic produces an unexpected result or returns an API error then the test will fail in REPLAYING mode. | Skip the test in VCR when testing the current provider behaviour versus previous released versions. |
+
+Some additional things to bear in mind are that VCR tests in REPLAYING mode will still interact with GCP APIs somewhat. For example:
+
+- When the provider is configured it will use credentials to obtain access tokens from GCP
+- Some acceptance tests use bootstrapping functions that ensure long-lived resources are present in a testing project before the provider is tested.
+
+These tests can still run in VCR replaying mode; however, REPLAYING mode can't be used as a way to completely avoid HTTP traffic generally or with GCP APIs.
+
+
 ## What's next?
 
-- [Run your tests]({{< ref "/develop/test/run-tests.md" >}})
+- [Run your tests]({{< ref "/develop/test/run-tests" >}})

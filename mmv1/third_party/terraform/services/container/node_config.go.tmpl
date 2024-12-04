@@ -806,6 +806,13 @@ func schemaNodeConfig() *schema.Schema {
 						ForceNew: true,
 						Description: `If enabled boot disks are configured with confidential mode.`,
 				},
+				"local_ssd_encryption_mode": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					ForceNew:         true,
+					ValidateFunc:     validation.StringInSlice([]string{"STANDARD_ENCRYPTION", "EPHEMERAL_KEY_ENCRYPTION"}, false),
+					Description:      `LocalSsdEncryptionMode specified the method used for encrypting the local SSDs attached to the node.`,
+				},
 			},
 		},
 	}
@@ -823,6 +830,29 @@ func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"insecure_kubelet_readonly_port_enabled": schemaInsecureKubeletReadonlyPortEnabled(),
+			},
+		},
+	}
+}
+
+// Separate since this currently only supports a single value -- a subset of
+// the overall LinuxNodeConfig
+func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: `Linux node configuration options.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"cgroup_mode": {
+					Type:             schema.TypeString,
+					Optional:         true,
+					Computed:         true,
+					ValidateFunc:     validation.StringInSlice([]string{"CGROUP_MODE_UNSPECIFIED", "CGROUP_MODE_V1", "CGROUP_MODE_V2"}, false),
+					Description:      `cgroupMode specifies the cgroup mode to be used on the node.`,
+					DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("CGROUP_MODE_UNSPECIFIED"),
+				},
 			},
 		},
 	}
@@ -1158,6 +1188,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v,ok := nodeConfig["enable_confidential_storage"]; ok {
 		nc.EnableConfidentialStorage = v.(bool)
+	}
+
+	if v,ok := nodeConfig["local_ssd_encryption_mode"]; ok {
+		nc.LocalSsdEncryptionMode = v.(string)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
@@ -1550,6 +1584,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"fast_socket":               flattenFastSocket(c.FastSocket),
 		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
 		"enable_confidential_storage": c.EnableConfidentialStorage,
+		"local_ssd_encryption_mode":      c.LocalSsdEncryptionMode,
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -2042,6 +2077,42 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 		}
 
+		if d.HasChange(prefix + "node_config.0.containerd_config") {
+			if _, ok := d.GetOk(prefix + "node_config.0.containerd_config"); ok {
+				req := &container.UpdateNodePoolRequest{
+					Name: name,
+					ContainerdConfig: expandContainerdConfig(d.Get(prefix + "node_config.0.containerd_config")),
+				}
+				if req.ContainerdConfig == nil {
+					req.ContainerdConfig = &container.ContainerdConfig{}
+					req.ForceSendFields = []string{"ContainerdConfig"}
+				}
+				updateF := func() error {
+					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					if config.UserProjectOverride {
+						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					}
+					op, err := clusterNodePoolsUpdateCall.Do()
+					if err != nil {
+						return err
+					}
+
+					// Wait until it's updated
+					return ContainerOperationWait(config, op,
+						nodePoolInfo.project,
+						nodePoolInfo.location,
+						"updating GKE node pool containerd_config", userAgent,
+						timeout)
+				}
+
+				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+						return err
+				}
+
+				log.Printf("[INFO] Updated containerd_config for node pool %s", name)
+			}
+		}
+
 		if d.HasChange("node_config.0.disk_size_gb") ||
 			d.HasChange("node_config.0.disk_type") ||
 			d.HasChange("node_config.0.machine_type") ||
@@ -2161,7 +2232,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.Tags = ntags
 			}
 
-		    // sets tags to the empty list when user removes a previously defined list of tags entriely
+			// sets tags to the empty list when user removes a previously defined list of tags entriely
 			// aka the node pool goes from having tags to no longer having any
 			if req.Tags == nil {
 				tags := []string{}

@@ -81,6 +81,12 @@ examples:
       database_id: 'database-id-vector'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_name_descending'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'name'
@@ -175,5 +181,6 @@ properties:
               properties:
  # Meant to be an empty object with no properties.
                 []
-    # Single field indexes _exist_, but the API only lets us manage composite ones.
-    min_size: 2
+    # Most composite indexes require at least two fields, but it is possible
+    # for a user to require a single field index such as `__name__ DESC`.
+    min_size: 1

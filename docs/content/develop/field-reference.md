@@ -12,6 +12,14 @@ available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/m
 
 ## Shared properties
 
+### `name`
+Specifies the name of the field within Terraform. By default this will also 
+be the key for the field in the API request message, if a separate `api_name`
+is not declared using the corresponding property.
+
+### `type`
+Sets the expected data type of the field. All valid types are declared [here](https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673).
+
 ### `min_version: beta`
 Marks the field (and any subfields) as beta-only. Ensure a beta version block
 is present in provider.yaml. Do not use if an ancestor field (or the overall
@@ -81,7 +89,7 @@ state. See
 for more information.
 
 Sensitive fields are often not returned by the API (because they are sensitive).
-In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/permadiff#ignore_read" >}}).
+In this case, the field will also need to use [`ignore_read` or a `custom_flatten` function]({{< ref "/develop/diffs#ignore_read" >}}).
 
 Example:
 
@@ -182,6 +190,21 @@ Example:
     - nested_object.0.nested_field
 ```
 
+### `required_with`
+Specifies a list of fields (excluding the current field) that must all be specified
+if at least one is specified. Must be set separately on all listed fields. Not supported within
+[lists of nested objects](https://github.com/hashicorp/terraform-plugin-sdk/issues/470#issue-630928923).
+
+Example:
+
+```yaml
+- name: 'fieldOne'
+  type: String
+  required_with:
+    - field_two
+    - nested_object.0.nested_field
+```
+
 ### `exactly_one_of`
 Specifies a list of fields (including the current field) of which exactly one
 must be set. Must be set separately on all listed fields. Not supported within
@@ -217,9 +240,9 @@ Example:
 
 ### `diff_suppress_func`
 Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
-to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+to use for this field. In many cases, a [custom flattener]({{< ref "/develop/custom-code/#custom_flatten" >}})
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
-[Fix a permadiff]({{< ref "/develop/permadiff.md" >}}) for more information and best practices.
+[Fix diffs]({{< ref "/develop/diffs" >}}) for more information and best practices.
 
 The function specified can be a
 [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)

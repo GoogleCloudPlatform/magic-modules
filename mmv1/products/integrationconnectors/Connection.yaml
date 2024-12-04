@@ -215,12 +215,12 @@ properties:
         - name: 'encryptionKeyValue'
           type: NestedObject
           description: |
-            Encription key value of configVariable.
+            Encryption key value of configVariable.
           properties:
             - name: 'type'
               type: Enum
               description: |
-                Type of Encription Key
+                Type of Encryption Key
               required: true
               enum_values:
                 - 'GOOGLE_MANAGED'
@@ -287,12 +287,12 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable.
+                Encryption key value of configVariable.
               properties:
                 - name: 'type'
                   type: Enum
                   description: |
-                    Type of Encription Key
+                    Type of Encryption Key
                   required: true
                   enum_values:
                     - 'GOOGLE_MANAGED'
@@ -691,12 +691,12 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable
+                Encryption key value of configVariable
               properties:
                 - name: 'type'
                   type: Enum
                   description: |
-                    Type of Encription Key
+                    Type of Encryption Key
                   enum_values:
                     - 'GOOGLE_MANAGED'
                     - 'CUSTOMER_MANAGED'
@@ -810,12 +810,12 @@ properties:
                 - name: 'encryptionKeyValue'
                   type: NestedObject
                   description: |
-                    Encription key value of configVariable
+                    Encryption key value of configVariable
                   properties:
                     - name: 'type'
                       type: Enum
                       description: |
-                        Type of Encription Key
+                        Type of Encryption Key
                       enum_values:
                         - 'GOOGLE_MANAGED'
                         - 'CUSTOMER_MANAGED'
@@ -890,7 +890,7 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable.
+                Encryption key value of configVariable.
               properties:
                 - name: 'type'
                   type: Enum

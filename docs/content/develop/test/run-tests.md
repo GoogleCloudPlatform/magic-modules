@@ -15,7 +15,7 @@ aliases:
 
 ## Before you begin
 
-[Generate the modified provider(s)]({{< ref "/get-started/generate-providers" >}})
+[Generate the modified provider(s)]({{< ref "/develop/generate-providers" >}})
 
 
 1. Set up application default credentials for Terraform
@@ -112,6 +112,13 @@ aliases:
 {{< /tab >}}
 
 {{< /tabs >}}
+
+### Common errors
+
+- `After applying this test step, the plan was not empty.`
+  - See [Fix diffs]({{< ref "/develop/diffs" >}}).
+- `Blocks of type "FIELD_NAME" are not expected here`
+  - The field does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/develop/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
 
 ## Optional: Test with different `terraform` versions
 
@@ -236,7 +243,7 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 
 ### Run manual tests
 
-1. [Generate the provider(s) you want to test]({{< ref "/get-started/generate-providers" >}})
+1. [Generate the provider(s) you want to test]({{< ref "/develop/generate-providers" >}})
 2. Build the provider(s) you want to test
 
     ```bash
