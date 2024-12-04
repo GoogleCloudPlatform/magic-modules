@@ -235,13 +235,11 @@ resource "google_datastream_stream" "default" {
     }
 	%{lifecycle_block}
 }
-`, context)
-}
 
 resource "google_datastream_stream" "gtid" {
-    stream_id = "tf-test-my-stream%{random_suffix}"
+    stream_id = "tf-test-my-stream-gtid%{random_suffix}"
     location = "us-central1"
-    display_name = "my stream update"
+    display_name = "my gtid stream update"
     desired_state = "%{desired_state}"
     create_without_validation = true
 
