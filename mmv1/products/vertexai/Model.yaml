@@ -41,17 +41,27 @@ async:
     path: 'error'
     message: 'message'
 custom_code:
-  encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
+  constants: templates/terraform/constants/vertex_ai_model.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
+  encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
 examples:
-  - name: 'vertex_ai_model_source_basic'
+  - name: 'vertex_ai_model_source_basic_1'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'vertex_ai_model_source_basic_2'
     exclude_import_test: true
     primary_resource_id: 'model'
     vars:
       model_id: 'test-model'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    exclude_test: true
 parameters:
   - type: String
     name: region
@@ -71,7 +81,7 @@ properties:
   - type: String
     name: 'description'
     description: Description of the Model.
-    immutable: true
+    default_from_api: true
   - type: String
     name: 'versionId'
     description: The version ID of the Model.
