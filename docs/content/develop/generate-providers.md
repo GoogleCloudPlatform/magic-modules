@@ -1,6 +1,6 @@
 ---
 title: "Generate the providers"
-weight: 19
+weight: 110
 aliases:
   - /docs/getting-started/setup
   - /getting-started/setup
