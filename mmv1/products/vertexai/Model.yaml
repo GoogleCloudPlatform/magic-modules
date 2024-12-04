@@ -49,6 +49,12 @@ custom_code:
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
   post_create: templates/terraform/post_create/vertex_ai_models.go.tmpl
 examples:
+  - name: 'vertex_ai_model_upload_basic'
+    exclude_import_test: true
+    primary_resource_id: 'model'
+    vars:
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
   - name: 'vertex_ai_model_source_basic_1'
     exclude_import_test: true
     primary_resource_id: 'model'

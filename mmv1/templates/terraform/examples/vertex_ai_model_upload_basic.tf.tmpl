@@ -1,4 +1,4 @@
-resource "google_vertex_ai_models" "<%= ctx[:primary_resource_id] %>" {
+resource "google_vertex_ai_model" "<%= ctx[:primary_resource_id] %>" {
   model_name = "<%= ctx[:vars]['display_name'] %>"
   description  = "basic upload model"
 
