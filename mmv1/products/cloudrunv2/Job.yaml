@@ -198,7 +198,7 @@ properties:
   - name: 'expireTime'
     type: Time
     description: |-
-      For a deleted resource, the time after which it will be permamently deleted.
+      For a deleted resource, the time after which it will be permanently deleted.
     output: true
   - name: 'creator'
     type: String

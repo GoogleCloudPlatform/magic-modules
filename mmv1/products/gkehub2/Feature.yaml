@@ -484,7 +484,7 @@ properties:
                         type: Enum
                         description: 'Configures the manner in which the template library is installed on the cluster.'
                         enum_values:
-                          - 'INSTALATION_UNSPECIFIED'
+                          - 'INSTALLATION_UNSPECIFIED'
                           - 'NOT_INSTALLED'
                           - 'ALL'
                   - name: 'bundles'
