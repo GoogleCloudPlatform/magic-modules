@@ -805,6 +805,7 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+      - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
     description: |
