@@ -25,7 +25,7 @@ import (
 // rootCmd represents the base command when called without any subcommands
 
 var rootCmd = &cobra.Command{
-	Use: "issue-labeler",
+	Use:   "issue-labeler",
 	Short: "Tool for interacting with issue labels (specifically for services)",
 	Long:  `Tool for interacting with issue labels (specifically for services)`,
 }
