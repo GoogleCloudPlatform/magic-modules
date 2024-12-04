@@ -1,6 +1,6 @@
 ---
 title: "Overview"
-weight: 20
+weight: 10
 aliases:
   - /docs/how-to/types-of-resources
   - /how-to/types-of-resources
