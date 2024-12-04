@@ -48,16 +48,7 @@ var vcrMergeEapCmd = &cobra.Command{
 
 func execVCRMergeEAP(gh GithubClient, clNumber, baseBranch string, runner source.Runner) error {
 	head := "auto-cl-" + clNumber
-	var branchPath string
-	if baseBranch != "main" {
-		branchPath = "/refs/heads/" + baseBranch
-	}
-	mergeCassettes(
-		"gs://ci-vcr-cassettes/private",
-		branchPath,
-		fmt.Sprintf("refs/heads/%s", head),
-		runner,
-	)
+	mergeCassettes("gs://ci-vcr-cassettes/private", baseBranch, fmt.Sprintf("refs/heads/%s", head), runner)
 	return nil
 }
 
