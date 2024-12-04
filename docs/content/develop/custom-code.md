@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 15
+weight: 70
 ---
 
 # Add custom resource code

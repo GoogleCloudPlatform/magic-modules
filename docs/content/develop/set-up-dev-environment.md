@@ -1,6 +1,6 @@
 ---
 title: "Set up your development environment"
-weight: 12
+weight: 10
 ---
 
 # Set up your development environment

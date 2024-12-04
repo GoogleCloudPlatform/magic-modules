@@ -1,6 +1,6 @@
 ---
 title: "MMv1 resource reference"
-weight: 32
+weight: 130
 aliases:
   - /reference/resource-reference
   - /reference/iam-policy-reference
