@@ -1333,8 +1333,6 @@ properties:
         type: Enum
         description: |
           The algorithm used for subsetting.
-        default_value: 'NONE'
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
-          - 'NONE'

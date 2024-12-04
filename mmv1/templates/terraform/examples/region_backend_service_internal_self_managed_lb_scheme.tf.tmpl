@@ -4,7 +4,6 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
   health_checks                   = [google_compute_region_health_check.health_check.id]
 
   load_balancing_scheme = "INTERNAL_SELF_MANAGED"
-  protocol              = "HTTP"
 }
 
 resource "google_compute_region_health_check" "health_check" {
