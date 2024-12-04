@@ -26,4 +26,13 @@
  &lt;strong>Note:&lt;/strong> This page covers best practices guidance for the Terraform provider for Google Cloud, which is used to ensure a consistent UX for Terraform users across providers or GCP users across the Google provider. Generally, this guidance should be followed and exceptions should be clearly demarcated / discussed.
 &lt;/blockquote>
 
-&lt;p>The new labels model and the new annotations model are introduced in &lt;a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider">Terraform provider for Google Cloud 5.0.0&lt;/a>.&lt;/p></description></item></channel></rss>
+&lt;p>The new labels model and the new annotations model are introduced in &lt;a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade#provider">Terraform provider for Google Cloud 5.0.0&lt;/a>.&lt;/p></description></item><item><title>Common resource patterns</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/common-resource-patterns/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/common-resource-patterns/</guid><description>&lt;h1 id="common-resource-patterns">
+ Common resource patterns
+ &lt;a class="anchor" href="#common-resource-patterns">#&lt;/a>
+&lt;/h1>
+&lt;h2 id="singletons">
+ Singletons
+ &lt;a class="anchor" href="#singletons">#&lt;/a>
+&lt;/h2>
+&lt;p>Singletons are resources – often config or settings objects – that can only exist once. In some cases, it may be possible to create and delete the resource (but only one can exist at a time); in other cases the resource &lt;em>always&lt;/em> exists and can only be read and updated.&lt;/p>
+&lt;p>Implementing resources like this may require some or all of the following:&lt;/p></description></item></channel></rss>
