@@ -1,7 +1,7 @@
 
 {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-// diffsupress for hyperdisk provisioned_iops
-func hyperDiskIopsUpdateDiffSupress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+// diffsuppress for hyperdisk provisioned_iops
+func hyperDiskIopsUpdateDiffSuppress(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if !strings.Contains(d.Get("type").(string), "hyperdisk") {
 		resourceSchema := ResourceComputeDisk().Schema
 		for field := range resourceSchema {
@@ -24,8 +24,8 @@ func AlwaysDiffSuppress(_, _, _ string, _ *schema.ResourceData) bool {
 }
 {{- end }}
 
-// diffsupress for beta and to check change in source_disk attribute
-func sourceDiskDiffSupress(_, old, new string, _ *schema.ResourceData) bool {
+// diffsuppress for beta and to check change in source_disk attribute
+func sourceDiskDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	s1 := strings.TrimPrefix(old, "https://www.googleapis.com/compute/beta")
 	s2 := strings.TrimPrefix(new, "https://www.googleapis.com/compute/v1")
 	if strings.HasSuffix(s1, s2) {
