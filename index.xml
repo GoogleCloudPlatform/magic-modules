@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Overview on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/</link><description>Recent content in Overview on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/index.xml" rel="self" type="application/rss+xml"/><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/test/test/</guid><description>&lt;h1 id="add-resource-tests">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Overview on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/</link><description>Recent content in Overview on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/index.xml" rel="self" type="application/rss+xml"/><item><title>Add resource tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/test/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/test/</guid><description>&lt;h1 id="add-resource-tests">
  Add resource tests
  &lt;a class="anchor" href="#add-resource-tests">#&lt;/a>
 &lt;/h1>
@@ -36,9 +36,9 @@
 &lt;/h2>
 &lt;ol>
 &lt;li>A reviewer will automatically be assigned to your PR.&lt;/li>
-&lt;li>Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">VCR tests&lt;/a> can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
+&lt;li>Creating a new pull request or pushing a new commit automatically triggers our CI pipelines and workflows. After CI starts, downstream diff generation takes about 10 minutes; &lt;a href="https://googlecloudplatform.github.io/magic-modules/test/test/">VCR tests&lt;/a> can take up to 2 hours. If you are a community contributor, some tests will only run after approval from a reviewer.
 &lt;ul>
-&lt;li>While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We &lt;strong>strongly&lt;/strong> recommend you &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">test your changes locally before pushing&lt;/a> even after the initial change.&lt;/li>
+&lt;li>While convenient, relying on CI to test iterative changes to PRs often adds extreme latency to reviews if there are errors in test configurations or at runtime. We &lt;strong>strongly&lt;/strong> recommend you &lt;a href="https://googlecloudplatform.github.io/magic-modules/test/run-tests/">test your changes locally before pushing&lt;/a> even after the initial change.&lt;/li>
 &lt;li>VCR tests will first attempt to play back recorded HTTP requests (REPLAYING mode). If any tests fail, they will run in RECORDING mode to generate a new cassette; then, the same tests will run again in REPLAYING mode to detect any nondeterministic behavior in the test (which can cause flaky tests.)&lt;/li>
 &lt;/ul>
 &lt;/li>
@@ -155,51 +155,7 @@ such as &lt;code>gcloud&lt;/code> or Cloud Console.&lt;/li>
 &lt;/ul>
 &lt;p>This document lists many types of breaking changes but may not be entirely
 comprehensive. Some types of changes that would normally be &amp;ldquo;breaking&amp;rdquo; may
-have specific mitigating circumstances that make them non-breaking.&lt;/p></description></item><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribution-process/</guid><description>&lt;h1 id="contribution-process">
- Contribution process
- &lt;a class="anchor" href="#contribution-process">#&lt;/a>
-&lt;/h1>
-&lt;p>This page explains how you can contribute code and documentation to the	&lt;code>magic-modules&lt;/code> repository.&lt;/p>
-&lt;h2 id="before-you-begin">
- Before you begin
- &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
-&lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
-&lt;ul>
-&lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="contribute-code">
- Contribute code
- &lt;a class="anchor" href="#contribute-code">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
-&lt;li>Make the code change. For example:
-&lt;ul>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-resource/">Add a resource&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">Add resource tests&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">Make a breaking change&lt;/a>&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
-&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
-&lt;/ol>
-&lt;h2 id="after-your-change-is-merged">
- After your change is merged
- &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
-&lt;/h2>
-&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Add a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</guid><description>&lt;h1 id="add-a-resource">
+have specific mitigating circumstances that make them non-breaking.&lt;/p></description></item><item><title>Add a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</guid><description>&lt;h1 id="add-a-resource">
  Add a resource
  &lt;a class="anchor" href="#add-a-resource">#&lt;/a>
 &lt;/h1>
@@ -232,7 +188,51 @@ git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git check
  &lt;label for="tabs-resource-0">MMv1&lt;/label>
  &lt;div class="book-tabs-content markdown-inner">&lt;ol>
 &lt;li>
-&lt;p>Using an editor of your choice, in the appropriate &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">product folder&lt;/a>, create a file called &lt;code>RESOURCE_NAME.yaml&lt;/code>. Replace &lt;code>RESOURCE_NAME&lt;/code> with the name of the API resource you are adding support for. For example, a configuration file for &lt;a href="https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses">NatAddress&lt;/a> would be called &lt;code>NatAddress.yaml&lt;/code>.&lt;/p></description></item><item><title>Deletion behaviors</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</guid><description>&lt;h1 id="deletion-behaviors">
+&lt;p>Using an editor of your choice, in the appropriate &lt;a href="https://googlecloudplatform.github.io/magic-modules/#mmv1">product folder&lt;/a>, create a file called &lt;code>RESOURCE_NAME.yaml&lt;/code>. Replace &lt;code>RESOURCE_NAME&lt;/code> with the name of the API resource you are adding support for. For example, a configuration file for &lt;a href="https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses">NatAddress&lt;/a> would be called &lt;code>NatAddress.yaml&lt;/code>.&lt;/p></description></item><item><title>Contribution process</title><link>https://googlecloudplatform.github.io/magic-modules/contribution-process/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribution-process/</guid><description>&lt;h1 id="contribution-process">
+ Contribution process
+ &lt;a class="anchor" href="#contribution-process">#&lt;/a>
+&lt;/h1>
+&lt;p>This page explains how you can contribute code and documentation to the	&lt;code>magic-modules&lt;/code> repository.&lt;/p>
+&lt;h2 id="before-you-begin">
+ Before you begin
+ &lt;a class="anchor" href="#before-you-begin">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>Familiarize yourself with &lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow">GitHub flow&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork&lt;/a> the &lt;code>Magic Modules&lt;/code> repository into your GitHub account&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>Check whether the feature you want to work on has already been &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">requested in the issue tracker&lt;/a>.
+&lt;ul>
+&lt;li>If there&amp;rsquo;s an issue and it already has a dedicated assignee, this indicates that someone might have already started to work on a solution. Otherwise, you&amp;rsquo;re welcome to work on the issue.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="contribute-code">
+ Contribute code
+ &lt;a class="anchor" href="#contribute-code">#&lt;/a>
+&lt;/h2>
+&lt;ol>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
+&lt;li>Make the code change. For example:
+&lt;ul>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-resource/">Add a resource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/test/test/">Add resource tests&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">Make a breaking change&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
+&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
+&lt;/ol>
+&lt;h2 id="after-your-change-is-merged">
+ After your change is merged
+ &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
+&lt;/h2>
+&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Deletion behaviors</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/</guid><description>&lt;h1 id="deletion-behaviors">
  Deletion behaviors
  &lt;a class="anchor" href="#deletion-behaviors">#&lt;/a>
 &lt;/h1>
@@ -244,7 +244,7 @@ git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git check
  Mitigating data loss risk via deletion_protection
  &lt;a class="anchor" href="#deletion_protection">#&lt;/a>
 &lt;/h2>
-&lt;p>Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a &lt;code>deletion_protection&lt;/code> field that prevents the resource from being deleted if enabled.&lt;/p></description></item><item><title>Make a breaking change</title><link>https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/</guid><description>Guidance on making a breaking changes</description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/test/run-tests/</guid><description>&lt;h1 id="run-tests">
+&lt;p>Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a &lt;code>deletion_protection&lt;/code> field that prevents the resource from being deleted if enabled.&lt;/p></description></item><item><title>Make a breaking change</title><link>https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/</guid><description>Guidance on making a breaking changes</description></item><item><title>Run tests</title><link>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/test/run-tests/</guid><description>&lt;h1 id="run-tests">
  Run tests
  &lt;a class="anchor" href="#run-tests">#&lt;/a>
 &lt;/h1>
