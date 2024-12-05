@@ -1,6 +1,6 @@
 ---
 title: "Add resource tests"
-weight: 20
+weight: 10
 aliases:
   - /docs/how-to/add-mmv1-test
   - /how-to/add-mmv1-test

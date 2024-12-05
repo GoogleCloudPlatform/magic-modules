@@ -1,6 +1,6 @@
 ---
 title: "Run tests"
-weight: 10
+weight: 20
 aliases:
   - /docs/getting-started/run-provider-tests
   - /docs/getting-started/use-built-provider
