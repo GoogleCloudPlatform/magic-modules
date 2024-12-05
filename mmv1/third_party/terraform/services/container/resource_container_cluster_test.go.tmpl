@@ -508,7 +508,6 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -540,7 +539,6 @@ func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 	t.Parallel()
@@ -768,7 +766,6 @@ resource "google_container_cluster" "cluster" {
 `, clusterName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -829,7 +826,6 @@ resource "google_container_cluster" "cluster" {
 }
 `, clusterName, clusterName, enabled)
 }
-{{- end }}
 
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
