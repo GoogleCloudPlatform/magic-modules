@@ -25,7 +25,7 @@ This page explains how you can contribute code and documentation to the	`magic-m
 1. [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}})
 1. [Create a new branch for your change](https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch)
 1. Make the code change. For example:
-   + [Add or modify a resource]({{< ref "/develop/add-resource" >}})
+   + [Add a resource]({{< ref "/develop/add-resource" >}})
    + [Add resource tests]({{< ref "/develop/test/test" >}})
    + [Add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
    + [Promote to GA]({{< ref "/develop/promote-to-ga" >}})
