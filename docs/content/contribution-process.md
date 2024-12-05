@@ -29,7 +29,7 @@ This page explains how you can contribute code and documentation to the	`magic-m
    + [Add resource tests]({{< ref "/test/test" >}})
    + [Add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
    + [Promote to GA]({{< ref "/develop/promote-to-ga" >}})
-   + [Make a breaking change]({{< ref "/develop/breaking-changes/make-a-breaking-change" >}})
+   + [Make a breaking change]({{< ref "/breaking-changes/make-a-breaking-change" >}})
 1. [Generate the providers]({{< ref "/develop/generate-providers" >}}) that include your change.
 1. [Run provider tests locally]({{< ref "/test/run-tests" >}}) that are relevant to the change you made
 1. [Create a pull request (PR)]({{< ref "/contribute/create-pr" >}})
