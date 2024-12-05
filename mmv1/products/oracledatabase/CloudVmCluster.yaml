@@ -68,8 +68,8 @@ examples:
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
       # As a result these resources are not sweepable
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      cloud_vm_cluster_id: '"ofake-tf-test-basic-%{random_suffix}"'
-      cloud_exadata_infrastructure_id: '"ofake-tf-test-basic-%{random_suffix}"'
+      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-basic-%s", acctest.RandString(t, 10))'
+      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-basic-%s", acctest.RandString(t, 10))'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
@@ -86,8 +86,8 @@ examples:
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
       # As a result these resources are not sweepable
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
-      cloud_vm_cluster_id: '"ofake-tf-test-full-%{random_suffix}"'
-      cloud_exadata_infrastructure_id: '"ofake-tf-test-full-%{random_suffix}"'
+      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-full-%s", acctest.RandString(t, 10))'
+      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-full-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
