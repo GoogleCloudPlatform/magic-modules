@@ -161,7 +161,6 @@ properties:
                         Specifies networking queue count for TPU VM instance's network interface.
                       required: false
                       immutable: true
-                      default_from_api: true
                 - name: 'networkConfigs'
                   type: Array
                   description: |
@@ -208,4 +207,3 @@ properties:
                           Specifies networking queue count for TPU VM instance's network interface.
                         required: false
                         immutable: true
-                        default_from_api: true
