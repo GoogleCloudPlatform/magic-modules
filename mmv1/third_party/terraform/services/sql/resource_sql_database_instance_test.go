@@ -1771,7 +1771,7 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
 				),
-			},			
+			},
 		},
 	})
 }
@@ -1810,7 +1810,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},			
+			},
 			{
 				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE", true),
 				ExpectError: regexp.MustCompile(
