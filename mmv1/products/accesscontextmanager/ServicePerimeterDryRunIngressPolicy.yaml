@@ -28,6 +28,9 @@ description: |
   ~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
   from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
   is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+  ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
+  the service perimeter resource must have a `lifecycle` block with `ignore_changes = [spec[0].ingress_policies]` so
+  they don't fight over which ingress rules should be in the policy.
 references:
   guides:
     'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
@@ -110,12 +113,15 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
-          A list of identities that are allowed access through this ingress policy.
-          Should be in the format of email address. The email address should represent
-          individual user or service account only.
+          Identities can be an individual user, service account, Google group,
+          or third-party identity. For third-party identity, only single identities
+          are supported and other identity types are not supported.The v1 identities
+          that have the prefix user, group and serviceAccount in
+          https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
       - name: 'sources'
@@ -163,7 +169,7 @@ properties:
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'operations'

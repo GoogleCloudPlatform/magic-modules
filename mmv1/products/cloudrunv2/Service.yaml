@@ -245,7 +245,7 @@ properties:
   - name: 'expireTime'
     type: Time
     description: |-
-      For a deleted resource, the time after which it will be permamently deleted.
+      For a deleted resource, the time after which it will be permanently deleted.
     output: true
   - name: 'creator'
     type: String
@@ -1116,6 +1116,13 @@ properties:
     type: String
     description: |
       The main URI in which this Service is serving traffic.
+    output: true
+  - name: 'urls'
+    type: Array
+    item_type:
+      type: String
+    description: |-
+      All URLs serving traffic for this Service.
     output: true
   - name: 'reconciling'
     type: Boolean

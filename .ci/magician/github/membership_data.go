@@ -11,7 +11,6 @@ var (
 		"melinath":    {},
 		"ScottSuarez": {},
 		"shuyama1":    {},
-		"SarahFrench": {},
 		"roaks3":      {},
 		"zli82016":    {},
 		"trodge":      {},
@@ -88,18 +87,13 @@ var (
 		},
 		{
 			id:        "trodge",
-			startDate: newDate(2024, 10, 23, pdtLoc),
-			endDate:   newDate(2024, 10, 25, pdtLoc),
+			startDate: newDate(2024, 12, 5, pdtLoc),
+			endDate:   newDate(2024, 12, 8, pdtLoc),
 		},
 		{
 			id:        "roaks3",
 			startDate: newDate(2024, 9, 13, pdtLoc),
 			endDate:   newDate(2024, 9, 20, pdtLoc),
-		},
-		{
-			id:        "SarahFrench",
-			startDate: newDate(2024, 11, 1, bstLoc),
-			endDate:   newDate(2024, 11, 4, bstLoc),
 		},
 		{
 			id:        "c2thorn",
@@ -115,6 +109,16 @@ var (
 			id:        "c2thorn",
 			startDate: newDate(2024, 11, 1, pdtLoc),
 			endDate:   newDate(2024, 11, 11, pdtLoc),
+		},
+		{
+			id:        "shuyama1",
+			startDate: newDate(2024, 11, 26, pdtLoc),
+			endDate:   newDate(2024, 12, 4, pdtLoc),
+		},
+		{
+			id:        "c2thorn",
+			startDate: newDate(2024, 11, 27, pdtLoc),
+			endDate:   newDate(2024, 12, 9, pdtLoc),
 		},
 	}
 )

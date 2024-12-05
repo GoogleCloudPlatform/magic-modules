@@ -415,6 +415,32 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withLocalSsdEncryptionMode(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withLocalSsdEncryptionMode(clusterName, npName, networkName, subnetworkName, "EPHEMERAL_KEY_ENCRYPTION"),
+			},
+			{
+				ResourceName:            "google_container_cluster.local_ssd_encryption_mode",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
 
@@ -482,7 +508,6 @@ func TestAccContainerCluster_withMultiNetworking(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -514,7 +539,6 @@ func TestAccContainerCluster_withFQDNNetworkPolicy(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withAdditiveVPC(t *testing.T) {
 	t.Parallel()
@@ -742,7 +766,6 @@ resource "google_container_cluster" "cluster" {
 `, clusterName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withFQDNNetworkPolicy(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -803,7 +826,6 @@ resource "google_container_cluster" "cluster" {
 }
 `, clusterName, clusterName, enabled)
 }
-{{- end }}
 
 func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 	t.Parallel()
@@ -3760,13 +3782,14 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	pid := envvar.GetTestProjectFromEnv()
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_forSecretManagerConfig(pid, clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -3775,7 +3798,7 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withSecretManagerConfigEnabled(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withSecretManagerConfigEnabled(pid, clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -3784,16 +3807,7 @@ func TestAccContainerCluster_withSecretManagerConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withSecretManagerConfigUpdated(clusterName, networkName, subnetworkName),
-			},
-			{
-				ResourceName:            "google_container_cluster.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			{
-				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_withSecretManagerConfigUpdated(pid, clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -5240,7 +5254,8 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
-				Config:		testAccContainerCluster_withFleetConfig(clusterName, "random-project", networkName, subnetworkName),
+				// This project must exist, though no permissions are needed on it.
+				Config:		testAccContainerCluster_withFleetConfig(clusterName, "tdx-guest-images", networkName, subnetworkName),
 				ExpectError: regexp.MustCompile(`changing existing fleet host project is not supported`),
 			},
 			{
@@ -5965,6 +5980,26 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
+func testAccContainerCluster_forSecretManagerConfig(projectID, name, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network            = "%s"
+  subnetwork         = "%s"
+
+  deletion_protection = false
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+}
+`, projectID, name, networkName, subnetworkName)
+}
+
 func testAccContainerCluster_networkingModeRoutes(firstName, secondName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -6446,6 +6481,32 @@ resource "google_container_cluster" "confidential_nodes" {
   deletion_protection = false
 }
 `, clusterName, npName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withLocalSsdEncryptionMode(clusterName, npName, networkName, subnetworkName, mode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "local_ssd_encryption_mode" {
+  name               = "%s"
+  location           = "us-central1-a"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "n1-standard-2"
+	  local_ssd_count = 1
+	  local_ssd_encryption_mode = "%s"
+    }
+  }
+
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, clusterName, npName, mode, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName, subnetworkName string) string {
@@ -10518,8 +10579,11 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withSecretManagerConfigEnabled(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withSecretManagerConfigEnabled(projectID, name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -10530,12 +10594,18 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 }
-`, name, networkName, subnetworkName)
+`, projectID, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withSecretManagerConfigUpdated(name, networkName, subnetworkName string) string {
+func testAccContainerCluster_withSecretManagerConfigUpdated(projectID, name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
 resource "google_container_cluster" "primary" {
   name               = "%s"
   location           = "us-central1-a"
@@ -10547,8 +10617,11 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
 }
-`, name, networkName, subnetworkName)
+`, projectID, name, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string) string {
@@ -11111,7 +11184,7 @@ func testAccContainerCluster_additional_pod_ranges_config(name string, nameCount
 	    master_ipv4_cidr_block  = "172.16.0.0/28"
 	  }
 
-	  # supresses permadiff
+	  # suppresses permadiff
 	  dns_config {
 	    cluster_dns        = "CLOUD_DNS"
 	    cluster_dns_domain = "cluster.local"
@@ -12649,3 +12722,163 @@ resource "google_container_cluster" "primary" {
   }
 }`, name, enabled)
 }
+
+func TestAccContainerCluster_withCgroupMode(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withCgroupMode(clusterName, "CGROUP_MODE_V2"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool_auto_config.0.linux_node_config.0.cgroup_mode"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool_auto_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_V2"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withCgroupModeUpdate(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_autopilot_minimal(clusterName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withCgroupMode(clusterName, "CGROUP_MODE_V2"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_container_cluster.primary", "node_pool_auto_config.0.linux_node_config.0.cgroup_mode"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "node_pool_auto_config.0.linux_node_config.0.cgroup_mode", "CGROUP_MODE_V2"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withCgroupMode(name string, cgroupMode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  enable_autopilot    = true
+  deletion_protection = false
+  node_pool_auto_config {
+    linux_node_config {
+      cgroup_mode = "%s"
+    }
+  }
+}
+  `, name, cgroupMode)
+}
+
+func TestAccContainerCluster_withEnterpriseConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	pid := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_updateEnterpriseConfig(pid, clusterName, networkName, subnetworkName, "STANDARD"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_enterprise_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_updateEnterpriseConfig(pid, clusterName, networkName, subnetworkName, "ENTERPRISE"),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_enterprise_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_removeEnterpriseConfig(pid, clusterName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_enterprise_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_updateEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string, desiredTier string) string {
+        return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_enterprise_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  enterprise_config {
+    desired_tier = "%s"
+  }
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, projectID, clusterName, desiredTier, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_removeEnterpriseConfig(projectID, clusterName, networkName, subnetworkName string) string {
+        return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_container_cluster" "with_enterprise_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network    = "%s"
+  subnetwork = "%s"
+
+  deletion_protection = false
+}
+`, projectID, clusterName, networkName, subnetworkName)
+}  
+
