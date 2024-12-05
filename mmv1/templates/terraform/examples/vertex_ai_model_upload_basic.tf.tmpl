@@ -1,5 +1,6 @@
 resource "google_vertex_ai_model" "{{$.PrimaryResourceId}}" {
   model_name = "{{index $.Vars "model_name"}}"
+  description  = "basic upload model"
 
   version_aliases = ["v2beta1"]
   model_id = "id_upload_test"
