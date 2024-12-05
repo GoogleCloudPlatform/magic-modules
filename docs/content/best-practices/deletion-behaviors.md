@@ -37,3 +37,7 @@ Some resources need to let users control the actions taken add deletion time. Fo
 One common example is `ABANDON`, which is useful if the resource is safe to delete from Terraform but could cause problems if deleted from the API - for example, `google_bigtable_gc_policy` deletion can fail in replicated instances. `ABANDON` indicates that attempts to delete the resource should remove it from state without actually deleting it.
 
 See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for information about adding `deletion_policy` fields.
+
+## Exclude deletion {#exclude_delete}
+
+Some resources do not support deletion in the API and can only be removed from state. For these resources, the best practice is to set [`exclude_delete: true`]({{< ref "/develop/resource-reference#exclude_delete" >}}) on the resource.
