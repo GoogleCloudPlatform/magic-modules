@@ -87,8 +87,8 @@ var (
 		},
 		{
 			id:        "trodge",
-			startDate: newDate(2024, 10, 23, pdtLoc),
-			endDate:   newDate(2024, 10, 25, pdtLoc),
+			startDate: newDate(2024, 12, 5, pdtLoc),
+			endDate:   newDate(2024, 12, 8, pdtLoc),
 		},
 		{
 			id:        "roaks3",

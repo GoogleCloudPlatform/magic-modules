@@ -1,6 +1,6 @@
 ---
 title: "Promote to GA"
-weight: 16
+weight: 80
 ---
 
 # Promote from beta to GA

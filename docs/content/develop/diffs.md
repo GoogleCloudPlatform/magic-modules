@@ -1,6 +1,6 @@
 ---
 title: "Fix diffs"
-weight: 18
+weight: 100
 aliases:
   - /develop/permadiff
 ---
