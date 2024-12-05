@@ -72,3 +72,4 @@ properties:
     enum_values:
       - 'CA_STANDARD'
       - 'CA_ENTERPRISE_PAYGO'
+      - 'CA_ENTERPRISE_ANNUAL'
