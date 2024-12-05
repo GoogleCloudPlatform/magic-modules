@@ -95,12 +95,12 @@ A create test is a test that creates the target resource and immediately destroy
    - Add `min_version: 'beta'` to the `examples` block in `RESOURCE_NAME.yaml`.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
-This section assumes you've used the [Add a resource]({{< ref "/develop/resource.md" >}}) guide to create your handwritten resource, and you have a working MMv1 config.
+This section assumes you've used the [Add a resource]({{< ref "/develop/add-resource" >}}) guide to create your handwritten resource, and you have a working MMv1 config.
 
 > **Note:** If not, you can create one now, or skip this guide and construct the test by hand. Writing tests by hand can sometimes be a better option if there is a similar test you can copy from.
 
 1. Add the test in MMv1. Repeat for all the create tests you will need.
-2. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}}).
+2. [Generate the beta provider]({{< ref "/develop/generate-providers" >}}).
 3. From the beta provider, copy and paste the generated `*_generated_test.go` file into the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services/) as a new file call `*_test.go`.
 4. Modify the tests as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`

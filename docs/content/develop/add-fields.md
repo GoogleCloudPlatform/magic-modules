@@ -17,7 +17,7 @@ For more information about types of resources and the generation process overall
 ## Before you begin
 
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
-1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/resource" >}}).
+1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/add-resource" >}}).
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```
    cd ~/magic-modules

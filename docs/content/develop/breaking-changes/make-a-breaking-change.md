@@ -115,7 +115,7 @@ The deprecation message will automatically show up in the resource documentation
    ```
    Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
    deprecation.
-2. Update the [documentation for the field]({{< ref "/develop/resource#add-documentation" >}}) to include the deprecation notice. For example:
+2. Update the [documentation for the field]({{< ref "/develop/add-documentation" >}}) to include the deprecation notice. For example:
 
    ```markdown
    * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
@@ -207,4 +207,4 @@ and other upgrade guides for examples.
 
 ## What's next?
 
-- [Run tests]({{< ref "/develop/test/run-tests.md" >}})
+[Run tests]({{< ref "/develop/test/run-tests" >}})
