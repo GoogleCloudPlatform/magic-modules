@@ -28,7 +28,7 @@ For more information about types of resources and the generation process overall
 {{< tab "MMv1" >}}
 To preview the documentation:
 
-1. [Generate the providers]({{< ref "/develop/generate-providers.md" >}})
+1. [Generate the providers]({{< ref "/develop/generate-providers" >}})
 2. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -38,7 +38,7 @@ To preview the documentation:
 1. Open the resource documentation in [`magic-modules/third_party/terraform/website/docs/r/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r) using an editor of your choice.
    - The name of the file is the name of the resource without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
 2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/develop/handwritten-docs-style-guide" >}}).
-3. [Generate the providers]({{< ref "/develop/generate-providers.md" >}})
+3. [Generate the providers]({{< ref "/develop/generate-providers" >}})
 4. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
 {{< /tab >}}
 {{< /tabs >}}
@@ -46,5 +46,5 @@ To preview the documentation:
 ## What's next?
 
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
-+ [Add tests]({{< ref "/develop/test/test" >}})
-+ [Run tests]({{< ref "/develop/test/run-tests" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})

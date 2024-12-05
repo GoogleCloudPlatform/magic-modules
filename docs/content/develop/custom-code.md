@@ -37,7 +37,7 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
   CustomizeDiff functions, and so on.
 - Methods
 
-Any custom functions added should have thorough [unit tests]({{< ref "/develop/test/test#add-unit-tests" >}}).
+Any custom functions added should have thorough [unit tests]({{< ref "/test/test#add-unit-tests" >}}).
 
 ## Modify the API request or response
 
@@ -268,5 +268,5 @@ See [Add documentation (Handwritten)]({{< ref "/develop/add-documentation" >}}) 
 
 ## What's next?
 
-+ [Add tests]({{< ref "/develop/test/test" >}})
-+ [Run tests]({{< ref "/develop/test/run-tests" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})
