@@ -70,7 +70,7 @@
 &lt;li>features added to the GA provider are also included in the beta provider &amp;ndash; beta should be a strict superset of GA.&lt;/li>
 &lt;/ul>
 &lt;/li>
-&lt;li>no &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/make-a-breaking-change/">breaking changes&lt;/a> are introduced without a valid justification. Add the &lt;code>override-breaking-change&lt;/code> label if there is a valid justification.
+&lt;li>no &lt;a href="https://googlecloudplatform.github.io/magic-modules/breaking-changes/make-a-breaking-change/">breaking changes&lt;/a> are introduced without a valid justification. Add the &lt;code>override-breaking-change&lt;/code> label if there is a valid justification.
 &lt;ul>
 &lt;li>remember to check for changes in default behaviour like changing the flags on delete!&lt;/li>
 &lt;/ul>
