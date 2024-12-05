@@ -21,7 +21,7 @@ aliases:
   - /how-to
   - /docs/getting-started/provider-documentation
   - /getting-started/provider-documentation
-  - /docs/develop/resource
+  - /develop/resource
 ---
 
 # Add a resource
