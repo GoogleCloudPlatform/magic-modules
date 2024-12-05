@@ -35,7 +35,6 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
-      host_uri_name: 'https://devconnect-terraform.com' 
   - name: 'developer_connect_connection_github_enterprise_doc'
     exclude_test: true
   - name: 'developer_connect_connection_gitlab'
