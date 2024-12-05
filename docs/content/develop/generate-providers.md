@@ -19,7 +19,7 @@ provider changes to the `google` and `google-beta` Terraform providers.
 
 1. [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}).
 1. Update `magic-modules` as needed. These updates could be any of the following changes:
-  + [Adding or modifying a resource]({{< ref "/develop/resource" >}}).
+  + [Adding a resource]({{< ref "/develop/add-resource" >}}).
   + [Adding a datasource]({{< ref "/develop/add-handwritten-datasource" >}}).
   + [Adding custom resource code]({{< ref "/develop/custom-code" >}}).
   + [Promoting a resource to GA]({{< ref "/develop/promote-to-ga" >}}).

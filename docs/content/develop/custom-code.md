@@ -264,9 +264,9 @@ docs:
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```
 
-See [Add documentation (Handwritten)]({{< ref "/develop/resource#add-documentation" >}}) for more information about what to include in the field documentation.
+See [Add documentation (Handwritten)]({{< ref "/develop/add-documentation" >}}) for more information about what to include in the field documentation.
 
 ## What's next?
 
-- [Add tests]({{< ref "/develop/test/test.md" >}})
-- [Run tests]({{< ref "/develop/test/run-tests.md" >}})
++ [Add tests]({{< ref "/develop/test/test" >}})
++ [Run tests]({{< ref "/develop/test/run-tests" >}})
