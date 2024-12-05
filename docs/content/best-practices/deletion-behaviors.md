@@ -13,7 +13,7 @@ weight: 20
 
 Some resources, such as databases, have a significant risk of unrecoverable data loss if the resource is accidentally deleted due to a change to a ForceNew field. For these resources, the best practice is to add a `deletion_protection` field that prevents the resource from being deleted if enabled.
 
-`deletion_protection` fields  generally need to be added with a default of `false` that can be changed to `true` in the next major release, because adding deletion protection is a [major behavioral change]({{< ref "/develop/breaking-changes/breaking-changes/#resource-level-breaking-changes" >}}). Exceptions to this are:
+`deletion_protection` fields  generally need to be added with a default of `false` that can be changed to `true` in the next major release, because adding deletion protection is a [major behavioral change]({{< ref "/breaking-changes/breaking-changes/#resource-level-breaking-changes" >}}). Exceptions to this are:
 
 - The API has a deletion protection field that defaults to enabled on the API side
 - The `deletion_protection` field is being added at the same time as the resource
