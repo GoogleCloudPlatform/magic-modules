@@ -53,8 +53,8 @@ examples:
     exclude_import_test: true
     primary_resource_id: 'model'
     vars:
-    test_env_vars:
       project_name: 'PROJECT_NAME'
+      model_name: 'MODEL_NAME'
   - name: 'vertex_ai_model_source_basic_1'
     exclude_import_test: true
     primary_resource_id: 'model'
@@ -109,6 +109,7 @@ properties:
       The description of this version
   - type: String
     name: 'metadataSchemaUri'
+    ignore_read: true
     immutable: true
     description: |
       Points to a YAML file stored on Google Cloud Storage describing additional information about the Model, that is specific to it.
@@ -317,9 +318,9 @@ properties:
     ignore_read: true
   - type: Array
     name: 'versionAliases'
-    default_from_api: true
     description:
       user provided version aliases so that a model version can be referenced via alias.
+    ignore_read: true
     item_type:
       type: String
   - type: NestedObject
@@ -334,91 +335,9 @@ properties:
           Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
           Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. The key needs to be in the same region as where the resource is created.
         immutable: true
-  - type: NestedObject
-    name: 'metadata'
-    description: An additional information about the Index
-    properties:
-      - type: NestedObject
-        name: 'config'
-        immutable: true
-        description: The configuration of the Matching Engine Index.
-        properties:
-          - type: Integer
-            name: 'dimensions'
-            description: The number of dimensions of the input vectors.
-            required: true
-          - type: Integer
-            name: 'approximateNeighborsCount'
-            description: |-
-              The default number of neighbors to find via approximate search before exact reordering is
-              performed. Exact reordering is a procedure where results returned by an
-              approximate search algorithm are reordered via a more expensive distance computation.
-              Required if tree-AH algorithm is used.
-          - type: String
-            name: 'shardSize'
-            description: |-
-              Index data is split into equal parts to be processed. These are called "shards".
-              The shard size must be specified when creating an index. The value must be one of the followings:
-              * SHARD_SIZE_SMALL: Small (2GB)
-              * SHARD_SIZE_MEDIUM: Medium (20GB)
-              * SHARD_SIZE_LARGE: Large (50GB)
-            immutable: true
-            default_from_api: true
-          - type: String
-            name: 'distanceMeasureType'
-            description: |-
-              The distance measure used in nearest neighbor search. The value must be one of the followings:
-              * SQUARED_L2_DISTANCE: Euclidean (L_2) Distance
-              * L1_DISTANCE: Manhattan (L_1) Distance
-              * COSINE_DISTANCE: Cosine Distance. Defined as 1 - cosine similarity.
-              * DOT_PRODUCT_DISTANCE: Dot Product Distance. Defined as a negative of the dot product
-            default_value: 'DOT_PRODUCT_DISTANCE'
-          - type: String
-            name: 'featureNormType'
-            description: |-
-              Type of normalization to be carried out on each vector. The value must be one of the followings:
-              * UNIT_L2_NORM: Unit L2 normalization type
-              * NONE: No normalization type is specified.
-            default_value: 'NONE'
-            ignore_read: true
-          - type: NestedObject
-            name: 'algorithmConfig'
-            description:
-              The configuration with regard to the algorithms used for efficient
-              search.
-            properties:
-              - type: NestedObject
-                name: 'treeAhConfig'
-                exactly_one_of:
-                  - treeAhConfig
-                  - bruteForceConfig
-                description: |-
-                  Configuration options for using the tree-AH algorithm (Shallow tree + Asymmetric Hashing).
-                  Please refer to this paper for more details: https://arxiv.org/abs/1908.10396
-                properties:
-                  - type: Integer
-                    name: 'leafNodeEmbeddingCount'
-                    description:
-                      Number of embeddings on each leaf node. The default value
-                      is 1000 if not set.
-                    default_value: 1000
-                  - type: Integer
-                    name: 'leafNodesToSearchPercent'
-                    description: |-
-                      The default percentage of leaf nodes that any query may be searched. Must be in
-                      range 1-100, inclusive. The default value is 10 (means 10%) if not set.
-                    default_value: 10
-              - type: NestedObject
-                name: 'bruteForceConfig'
-                allow_empty_object: true
-                send_empty_value: true
-                properties: []
-                exactly_one_of:
-                  - treeAhConfig
-                  - bruteForceConfig
-                description: |-
-                  Configuration options for using brute force search, which simply implements the
-                  standard linear search in the database for each query.
+  - name: 'metadata'
+    type: KeyValuePairs
+    description: An additional information about the Model; the schema of the metadata can be found in metadataSchemaUri. Unset if the Model does not have any additional information.
   - type: String
     name: 'sourceModel'
     default_from_api: true
