@@ -207,4 +207,4 @@ and other upgrade guides for examples.
 
 ## What's next?
 
-[Run tests]({{< ref "/develop/test/run-tests" >}})
+[Run tests]({{< ref "/test/run-tests" >}})

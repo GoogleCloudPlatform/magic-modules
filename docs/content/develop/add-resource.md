@@ -146,13 +146,13 @@ For more information about types of resources and the generation process overall
 3. Modify the template as needed to match the API resource's documented behavior.
 4. Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.
 
-> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/develop/resource-reference.md" >}}).
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/develop/resource-reference" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 > **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.
 
 1. Add the resource in MMv1.
-2. [Generate the beta provider]({{< ref "/develop/generate-providers.md" >}})
+2. [Generate the beta provider]({{< ref "/develop/generate-providers" >}})
 3. From the beta provider, copy the files generated for the resource to the following locations:
    - Resource: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services)
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
@@ -168,8 +168,8 @@ For more information about types of resources and the generation process overall
 5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.
-    - [Add resource tests]({{< ref "/develop/test/test.md" >}})
-    - [Add IAM support]({{<ref "#add-iam-support" >}})
+    - [Add resource tests]({{< ref "/test/test" >}})
+    - [Add IAM support]({{<ref "/develop/add-iam-support" >}})
 7. Delete the MMv1 configuration file.
 {{< /tab >}}
 {{< /tabs >}}
@@ -180,5 +180,5 @@ For more information about types of resources and the generation process overall
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
 + [Add documentation]({{< ref "/develop/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
-+ [Add tests]({{< ref "/develop/test/test" >}})
-+ [Run tests]({{< ref "/develop/test/run-tests" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})

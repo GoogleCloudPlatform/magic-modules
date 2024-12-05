@@ -91,6 +91,6 @@ ulimit -n 8192
 
 ## What's next
 
-+ [Learn how to add resource tests]({{< ref "/develop/test/test" >}})
-+ [Learn how to run tests]({{< ref "/develop/test/run-tests" >}})
++ [Learn how to add resource tests]({{< ref "/test/test" >}})
++ [Learn how to run tests]({{< ref "/test/run-tests" >}})
 + [Learn about `make` commands]({{< ref "/reference/make-commands" >}})
