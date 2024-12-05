@@ -169,7 +169,6 @@ properties:
         required: false
         min_version: 'beta'
         immutable: true
-        default_from_api: true
   - name: 'networkConfigs'
     type: Array
     description: |
@@ -221,7 +220,6 @@ properties:
           required: false
           min_version: 'beta'
           immutable: true
-          default_from_api: true
   - name: 'serviceAccount'
     type: NestedObject
     description: |
