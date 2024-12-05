@@ -183,7 +183,7 @@ have specific mitigating circumstances that make them non-breaking.&lt;/p></desc
 &lt;li>&lt;a href="https://docs.github.com/en/get-started/quickstart/github-flow#create-a-branch">Create a new branch for your change&lt;/a>&lt;/li>
 &lt;li>Make the code change. For example:
 &lt;ul>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Add or modify a resource&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-resource/">Add a resource&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/test/test/">Add resource tests&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Add a datasource&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promote to GA&lt;/a>&lt;/li>
@@ -199,9 +199,9 @@ have specific mitigating circumstances that make them non-breaking.&lt;/p></desc
  After your change is merged
  &lt;a class="anchor" href="#after-your-change-is-merged">#&lt;/a>
 &lt;/h2>
-&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Add or modify a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/resource/</guid><description>&lt;h1 id="add-or-modify-a-resource">
- Add or modify a resource
- &lt;a class="anchor" href="#add-or-modify-a-resource">#&lt;/a>
+&lt;p>After your change is merged, it can take a week or longer to be released to customers.&lt;/p></description></item><item><title>Add a resource</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-resource/</guid><description>&lt;h1 id="add-a-resource">
+ Add a resource
+ &lt;a class="anchor" href="#add-a-resource">#&lt;/a>
 &lt;/h1>
 &lt;p>This page describes how to add a new resource to the &lt;code>google&lt;/code> or &lt;code>google-beta&lt;/code> Terraform provider using MMv1 and/or handwritten code.&lt;/p>
 &lt;p>For more information about types of resources and the generation process overall, see &lt;a href="https://googlecloudplatform.github.io/magic-modules/">How Magic Modules works&lt;/a>.&lt;/p>
@@ -220,9 +220,9 @@ cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
 git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
 &lt;/code>&lt;/pre>&lt;/li>
 &lt;/ol>
-&lt;h2 id="add-a-resource">
+&lt;h2 id="add-a-resource-1">
  Add a resource
- &lt;a class="anchor" href="#add-a-resource">#&lt;/a>
+ &lt;a class="anchor" href="#add-a-resource-1">#&lt;/a>
 &lt;/h2>
 
 
@@ -521,7 +521,7 @@ provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/c
 &lt;li>Update &lt;code>magic-modules&lt;/code> as needed. These updates could be any of the following changes:&lt;/li>
 &lt;/ol>
 &lt;ul>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/resource/">Adding or modifying a resource&lt;/a>.&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-resource/">Adding a resource&lt;/a>.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/add-handwritten-datasource/">Adding a datasource&lt;/a>.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/custom-code/">Adding custom resource code&lt;/a>.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promoting a resource to GA&lt;/a>.&lt;/li>
