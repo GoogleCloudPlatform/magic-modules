@@ -64,8 +64,12 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
-      cloud_vm_cluster_id: '"ofake-vmcluster-basic-%{random_suffix}"'
-      cloud_exadata_infrastructure_id: '"ofake-vmcluster-basic-%{random_suffix}"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      cloud_vm_cluster_id: '"ofake-tf-test-basic-%{random_suffix}"'
+      cloud_exadata_infrastructure_id: '"ofake-tf-test-basic-%{random_suffix}"'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
@@ -78,8 +82,12 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
       'project': '"oci-terraform-testing"'
-      cloud_vm_cluster_id: '"ofake-vmcluster-full-%{random_suffix}"'
-      cloud_exadata_infrastructure_id: '"ofake-vmcluster-full-%{random_suffix}"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      cloud_vm_cluster_id: '"ofake-tf-test-full-%{random_suffix}"'
+      cloud_exadata_infrastructure_id: '"ofake-tf-test-full-%{random_suffix}"'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
