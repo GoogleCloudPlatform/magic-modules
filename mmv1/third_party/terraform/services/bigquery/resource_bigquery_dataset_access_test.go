@@ -616,7 +616,6 @@ resource "google_bigquery_dataset_access" "withCondition" {
   dataset_id    = google_bigquery_dataset.dataset.dataset_id
   role          = "OWNER"
   user_by_email = google_service_account.bqowner.email
-  access_policy_version	= 3
   condition {
     title       = "test-condition"
     description = "Request after midnight of 2019-12-31"

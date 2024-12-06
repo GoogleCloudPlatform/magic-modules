@@ -32,8 +32,8 @@ docs:
     You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
-base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
-self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
+base_url: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
+self_link: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
 create_verb: 'PATCH'
 delete_verb: 'PATCH'
 immutable: true
@@ -62,8 +62,6 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigquery_dataset_access.go.tmpl'
   constants: 'templates/terraform/constants/bigquery_dataset_access.go.tmpl'
   post_create: 'templates/terraform/post_create/bigquery_dataset_access.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/bigquery_dataset_access.go.tmpl'
-  pre_read: 'templates/terraform/pre_read/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
 exclude_sweeper: true
 error_retry_predicates:
@@ -329,21 +327,3 @@ properties:
         description: |
           String indicating the location of the expression for error reporting, e.g. a file
           name and a position in the file.
-  - name: 'accessPolicyVersion'
-    type: Integer
-    url_param_only: true
-    description: |
-      The version of the provided access policy schema. Valid values
-      are 0, 1, and 3. Requests specifying an invalid value will be rejected.
-      This version refers to the schema version of the access policy and not
-      the version of access policy. This field's value can be equal or more
-      than the access policy schema provided in the request. For example,
-      * Operations updating conditional access policy binding in datasets must
-      specify version 3. Some of the operations are : - Adding a new access
-      policy entry with condition. - Removing an access policy entry with condition.
-      - Updating an access policy entry with condition. * But dataset with no
-      conditional role bindings in access policy may specify any valid value or
-      leave the field unset. If unset or if 0 or 1 value is used for dataset with
-      conditional bindings, request will be rejected. This field will be maped to
-      IAM Policy version (https://cloud.google.com/iam/docs/policies#versions)
-      and will be used to set policy in IAM
