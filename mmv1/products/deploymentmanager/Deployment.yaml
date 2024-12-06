@@ -53,8 +53,6 @@ async:
   operation:
     full_url: 'selfLink'
     kind: 'deploymentmanager#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
     path: 'targetLink'
     resource_inside_response: false

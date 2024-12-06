@@ -52,9 +52,7 @@ async:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
-    path: name
     base_url: "{{op_id}}"
-    wait_ms: 1000
   actions:
     - create
     - delete
