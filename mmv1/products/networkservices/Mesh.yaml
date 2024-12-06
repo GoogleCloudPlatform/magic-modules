@@ -76,13 +76,12 @@ parameters:
     min_version: 'beta'
     url_param_only: true
     required: true
-   - name: 'location'
+  - name: 'location'
     type: String
     description: |
       Location (region) of the Mesh resource to be created. Defaults to global if omitted.
     min_version: 'beta'
     url_param_only: true
-    required: true
     immutable: true
     default_value: 'global'
 properties:
