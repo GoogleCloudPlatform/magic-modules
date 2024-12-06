@@ -76,8 +76,6 @@ type OpAsync struct {
 }
 
 type OpAsyncOperation struct {
-	Kind string `yaml:"kind,omitempty"`
-
 	BaseUrl string `yaml:"base_url,omitempty"`
 
 	// Use this if the resource includes the full operation url.
