@@ -40,11 +40,7 @@ async:
       update_minutes: 5
       delete_minutes: 5
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'integration_connectors_managed_zone'

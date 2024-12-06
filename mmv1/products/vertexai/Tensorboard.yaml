@@ -34,11 +34,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/vertex_ai_tensorboard_import.go.tmpl'
 examples:

@@ -35,11 +35,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'

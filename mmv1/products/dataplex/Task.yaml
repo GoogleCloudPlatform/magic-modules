@@ -46,11 +46,7 @@ async:
       update_minutes: 5
       delete_minutes: 5
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'task_id'

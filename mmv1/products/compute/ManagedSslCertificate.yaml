@@ -62,11 +62,7 @@ async:
       # on the provisioning process either succeeding or failing completely.
       delete_minutes: 30
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_managed_ssl_certificate.go.tmpl'

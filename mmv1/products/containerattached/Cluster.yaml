@@ -42,11 +42,7 @@ async:
   operation:
     full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
   pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'

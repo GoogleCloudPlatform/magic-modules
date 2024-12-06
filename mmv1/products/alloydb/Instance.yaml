@@ -44,11 +44,7 @@ async:
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
   include_project: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_instance.go.tmpl'

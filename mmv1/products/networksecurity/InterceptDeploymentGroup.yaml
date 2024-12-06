@@ -35,11 +35,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'network_security_intercept_deployment_group_basic'

@@ -41,11 +41,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'gkehub#operation'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 examples:
   - name: 'gkehub_fleet_basic'

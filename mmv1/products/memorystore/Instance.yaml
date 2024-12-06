@@ -34,11 +34,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'

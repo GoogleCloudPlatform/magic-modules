@@ -36,11 +36,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'iam_deny_policy_basic'

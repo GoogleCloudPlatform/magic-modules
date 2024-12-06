@@ -41,11 +41,7 @@ async:
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'network_security_gateway_security_policy_basic'

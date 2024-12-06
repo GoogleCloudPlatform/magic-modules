@@ -60,10 +60,6 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
-    path: response
-  error:
-    path: error
-    message: message
   include_project: false
 iam_policy:
   min_version: 'beta'

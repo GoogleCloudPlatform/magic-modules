@@ -43,11 +43,7 @@ async:
       update_minutes: 20
       delete_minutes: 20
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 schema_version: 1
 state_upgraders: true

@@ -41,11 +41,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - name
 nested_query:

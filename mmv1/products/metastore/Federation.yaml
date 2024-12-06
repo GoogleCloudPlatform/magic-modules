@@ -34,11 +34,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   exclude_import_test: true
   method_name_separator: ':'

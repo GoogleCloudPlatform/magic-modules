@@ -43,11 +43,7 @@ async:
       update_minutes: 480
       delete_minutes: 480
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'edgecontainer_cluster'

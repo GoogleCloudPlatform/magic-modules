@@ -41,11 +41,7 @@ async:
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'network_services_edge_cache_origin_basic'

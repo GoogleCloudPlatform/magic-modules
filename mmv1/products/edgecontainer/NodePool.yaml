@@ -43,11 +43,7 @@ async:
       update_minutes: 480
       delete_minutes: 480
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   # Skip the node-pool test as we only have limited machine resources

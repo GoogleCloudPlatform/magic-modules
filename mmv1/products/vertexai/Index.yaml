@@ -34,11 +34,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
 examples:

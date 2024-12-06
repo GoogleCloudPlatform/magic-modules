@@ -41,11 +41,7 @@ async:
       update_minutes: 90
       delete_minutes: 90
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 error_abort_predicates:
 

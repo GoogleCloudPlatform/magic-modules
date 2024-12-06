@@ -41,11 +41,7 @@ async:
       update_minutes: 20
       delete_minutes: 20
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'

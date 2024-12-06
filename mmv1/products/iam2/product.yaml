@@ -27,8 +27,4 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'

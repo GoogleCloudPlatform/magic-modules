@@ -41,11 +41,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'database_migration_service_migration_job_mysql_to_mysql'
