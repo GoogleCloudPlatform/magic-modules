@@ -327,7 +327,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
 
-									{{ if ne $.TargetVersionName `ga` -}}
 									"enforce_on_key_configs": {
 										Type:        schema.TypeList,
 										Description: `Enforce On Key Config of this security policy`,
@@ -348,7 +347,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 											},
 										},
 									},
-									{{- end }}
 
 									"ban_threshold": {
 										Type:        schema.TypeList,
@@ -907,72 +905,6 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	{{ if eq $.TargetVersionName `ga` }}
-	if d.HasChange("rule") {
-		o, n := d.GetChange("rule")
-		oSet := o.(*schema.Set)
-		nSet := n.(*schema.Set)
-
-		oPriorities := map[int64]bool{}
-		nPriorities := map[int64]bool{}
-		for _, rule := range oSet.List() {
-			oPriorities[int64(rule.(map[string]interface{})["priority"].(int))] = true
-		}
-
-		for _, rule := range nSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			nPriorities[priority] = true
-			if !oPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-				// If the rule is in new and its priority does not exist in old, then add it.
-				op, err := client.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			} else if !oSet.Contains(rule) {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
-				op, err := client.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		for _, rule := range oSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			if !nPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule's priority is in old but not new, remove it.
-				op, err := client.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	{{- else }}
 	if d.HasChange("rule") {
 		o, n := d.GetChange("rule")
 		oSet := o.(*schema.Set)
@@ -1073,7 +1005,6 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			}
 		}
 	}
-	{{- end }}
 
 	return resourceComputeSecurityPolicyRead(d, meta)
 }
@@ -1625,9 +1556,7 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:         data["conform_action"].(string),
 		EnforceOnKey:          data["enforce_on_key"].(string),
 		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
-		{{- if ne $.TargetVersionName "ga" }}
 		EnforceOnKeyConfigs:   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
-		{{- end }}
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
 		{{- if eq $.TargetVersionName "ga" }}
@@ -1650,7 +1579,6 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
 	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
 
@@ -1669,7 +1597,6 @@ func expandSecurityPolicyEnforceOnKeyConfigsFields(raw interface{}) *compute.Sec
 		EnforceOnKeyName: data["enforce_on_key_name"].(string),
 	}
 }
-{{- end }}
 
 func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
 	if conf == nil {
@@ -1683,9 +1610,7 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"conform_action":          conf.ConformAction,
 		"enforce_on_key":          conf.EnforceOnKey,
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
-		{{- if ne $.TargetVersionName "ga" }}
 		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
-		{{- end }}
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
@@ -1718,7 +1643,6 @@ func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecurityPolicyEnforceOnKeyConfigs(conf []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) []map[string]interface{} {
 	if conf == nil || len(conf) == 0 {
 		return nil
@@ -1741,7 +1665,6 @@ func flattenSecurityPolicyEnforceOnKeyConfigsFields(conf *compute.SecurityPolicy
 		"enforce_on_key_type": conf.EnforceOnKeyType,
 	}
 }
-{{- end }}
 
 func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
 	if conf == nil {

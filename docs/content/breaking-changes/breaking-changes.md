@@ -5,6 +5,7 @@ aliases:
 - /docs/content/develop/breaking-changes
 - /reference/breaking-change-detector
 - /develop/breaking-changes
+- /develop/breaking-changes/breaking-changes
 
 ---
 
@@ -25,7 +26,7 @@ comprehensive. Some types of changes that would normally be "breaking" may
 have specific mitigating circumstances that make them non-breaking.
 
 For more information, see
-[Make a breaking change]({{< ref "/develop/breaking-changes/make-a-breaking-change" >}}).
+[Make a breaking change]({{< ref "/breaking-changes/make-a-breaking-change" >}}).
 
 ## Provider-level breaking changes
 

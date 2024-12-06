@@ -9,6 +9,7 @@ aliases:
   - /getting-started/run-provider-tests
   - /getting-started/use-built-provider
   - /develop/run-tests
+  - /develop/test/run-tests
 ---
 
 # Run tests
@@ -118,7 +119,7 @@ aliases:
 - `After applying this test step, the plan was not empty.`
   - See [Fix diffs]({{< ref "/develop/diffs" >}}).
 - `Blocks of type "FIELD_NAME" are not expected here`
-  - The field does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/develop/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
+  - The field does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
 
 ## Optional: Test with different `terraform` versions
 
@@ -134,7 +135,7 @@ Tests will use whatever version of the `terraform` binary is found on your `PATH
 
     Replace `VERSION` with the version you want to test.
 
-1. Run automated tests following the [earlier section]({{< ref "/develop/test/run-tests#run-automated-tests" >}}).
+1. Run automated tests following the [earlier section]({{< ref "/test/run-tests#run-automated-tests" >}}).
 
 ## Optional: Test manually
 
@@ -296,4 +297,5 @@ To stop using developer overrides, stop setting `TF_CLI_CONFIG_FILE` in the comm
 Terraform will resume its normal behaviour of pulling published provider versions from the public Registry. Any version constraints in your Terraform configuration will come back into effect. Also, you may need to run `terraform init` to download the required version of the provider into your project directory if you haven't already.
 
 ## What's next?
-- [Create a pull request]({{< ref "/contribute/create-pr" >}})
+
+[Create a pull request]({{< ref "/contribute/create-pr" >}})

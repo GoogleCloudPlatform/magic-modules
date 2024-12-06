@@ -6,13 +6,14 @@ summary: "Guidance on making a breaking changes"
 weight: 20
 aliases:
 - /develop/make-a-breaking-change
+- /develop/breaking-changes/make-a-breaking-change
 ---
 
 # Make a breaking change
 
 A "breaking change" is any change that requires an end user to modify any
 previously-valid configuration after a provider upgrade. For more information,
-see [Types of breaking changes]({{< ref "/develop/breaking-changes" >}}).
+see [Types of breaking changes]({{< ref "/breaking-changes/breaking-changes" >}}).
 
 The `google` and `google-beta` providers are both considered "stable surfaces"
 for the purpose of releases, which means that neither provider allows breaking
@@ -115,7 +116,7 @@ The deprecation message will automatically show up in the resource documentation
    ```
    Replace the second sentence with an appropriate short description of the replacement path and/or the reason for
    deprecation.
-2. Update the [documentation for the field]({{< ref "/develop/resource#add-documentation" >}}) to include the deprecation notice. For example:
+2. Update the [documentation for the field]({{< ref "/develop/add-documentation" >}}) to include the deprecation notice. For example:
 
    ```markdown
    * `api_field_name` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Deprecated) FIELD_DESCRIPTION. `api_field_name` is deprecated and will be removed in a future major release. Use `other_field_name` instead.
@@ -207,4 +208,4 @@ and other upgrade guides for examples.
 
 ## What's next?
 
-- [Run tests]({{< ref "/develop/test/run-tests.md" >}})
+[Run tests]({{< ref "/test/run-tests" >}})
