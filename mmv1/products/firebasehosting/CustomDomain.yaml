@@ -44,11 +44,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   post_create: 'templates/terraform/post_create/firebasehosting_custom_domain_wait_dns_verification.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/firebasehosting_custom_domain_soft_delete.go.tmpl'

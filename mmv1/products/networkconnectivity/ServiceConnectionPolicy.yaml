@@ -42,11 +42,7 @@ async:
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
 examples:

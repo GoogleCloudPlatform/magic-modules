@@ -39,11 +39,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 examples:
   - name: 'iam_projects_policy_binding'
     primary_resource_id: 'my-project-binding'

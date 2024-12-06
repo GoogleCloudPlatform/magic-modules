@@ -48,11 +48,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/replace_all_access_levels_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'

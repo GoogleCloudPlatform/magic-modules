@@ -44,11 +44,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'cloud_function'

@@ -47,11 +47,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/firestore_field.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/firestore_field_delete.go.tmpl'

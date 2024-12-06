@@ -32,11 +32,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/resource_compute_network_firewall_policy_with_rules.go.tmpl'
   encoder: 'templates/terraform/encoders/resource_compute_network_firewall_policy_with_rules.go.tmpl'

@@ -54,11 +54,7 @@ async:
       update_minutes: 20
       delete_minutes: 20
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'versions'
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/appversion_delete.go.tmpl'

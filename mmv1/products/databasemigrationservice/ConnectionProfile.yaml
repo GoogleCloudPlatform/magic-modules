@@ -41,11 +41,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'database_migration_service_connection_profile_cloudsql'

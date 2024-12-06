@@ -42,11 +42,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'gkehub#operation'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true

@@ -38,11 +38,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'vertex_ai_featureonlinestore_featureview'

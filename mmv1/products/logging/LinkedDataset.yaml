@@ -39,11 +39,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/logging_linked_dataset.go.tmpl'
 # Skip sweeper gen since this is a child resource.

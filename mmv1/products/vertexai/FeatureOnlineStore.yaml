@@ -34,11 +34,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
 examples:

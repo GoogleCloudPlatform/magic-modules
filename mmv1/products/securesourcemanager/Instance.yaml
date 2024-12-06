@@ -41,11 +41,7 @@ async:
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/securesourcemanager.instanceManager'

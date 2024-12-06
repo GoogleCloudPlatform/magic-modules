@@ -31,11 +31,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 legacy_long_form_project: true
 examples:

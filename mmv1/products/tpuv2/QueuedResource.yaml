@@ -31,17 +31,9 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
   status:
-    path: 'done'
     complete: true
-    allowed:
-      - true
-      - false
-  error:
-    path: 'error'
-    message: 'message'
 examples:
   - name: 'tpu_v2_queued_resource_basic'
     primary_resource_id: 'qr'

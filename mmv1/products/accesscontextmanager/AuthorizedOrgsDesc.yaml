@@ -48,11 +48,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep_2_min.go.tmpl'

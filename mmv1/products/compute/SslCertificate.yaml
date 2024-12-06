@@ -46,11 +46,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'

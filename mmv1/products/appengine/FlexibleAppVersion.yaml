@@ -48,11 +48,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'appengine#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'versions'
 custom_code:
   encoder: 'templates/terraform/encoders/flex_app_version.go.tmpl'

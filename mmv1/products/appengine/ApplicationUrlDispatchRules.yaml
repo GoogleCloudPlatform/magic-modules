@@ -41,11 +41,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   test_check_destroy: 'templates/terraform/custom_check_destroy/appengine.go.tmpl'
 exclude_sweeper: true

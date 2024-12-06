@@ -35,11 +35,7 @@ async:
     base_url: 'projects/{{project}}/operations/{{op_id}}'
     kind: 'sql#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'

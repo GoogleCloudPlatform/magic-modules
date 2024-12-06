@@ -36,11 +36,7 @@ async:
     base_url: '{{op_id}}'
     kind: 'gkeonprem#operation'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 taint_resource_on_failed_create: true
 examples:

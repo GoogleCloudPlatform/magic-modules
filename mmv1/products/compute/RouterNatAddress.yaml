@@ -46,11 +46,7 @@ async:
     base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
     kind: 'compute#operation'
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'nats'
 identity:
   - routerNat

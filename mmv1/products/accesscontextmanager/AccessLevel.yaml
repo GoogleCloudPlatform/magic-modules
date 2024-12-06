@@ -52,11 +52,7 @@ async:
   operation:
     base_url: '{{op_id}}'
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
