@@ -68,6 +68,7 @@ examples:
     vars:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
+      database_name: 'mydatabase'
       deletion_protection: 'true'
     ignore_read_extra:
       - 'deletion_protection'
