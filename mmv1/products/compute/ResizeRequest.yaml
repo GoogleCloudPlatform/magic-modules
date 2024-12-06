@@ -48,7 +48,6 @@ async:
   # actions: ['create', 'update', 'delete']
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
   result:
     resource_inside_response: false
 ### Update method ###

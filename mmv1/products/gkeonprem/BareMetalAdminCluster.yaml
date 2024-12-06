@@ -34,7 +34,6 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkeonprem#operation'
   result:
     resource_inside_response: true
 custom_code:

@@ -24,6 +24,5 @@ async:
   type: "OpAsync"
   operation:
     base_url: 'projects/{{project}}/operations/{{op_id}}'
-    kind: 'sql#operation'
   result:
     resource_inside_response: false

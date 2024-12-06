@@ -32,8 +32,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-  status:
-    complete: true
 examples:
   - name: 'tpu_v2_queued_resource_basic'
     primary_resource_id: 'qr'
