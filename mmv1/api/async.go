@@ -83,11 +83,7 @@ type OpAsync struct {
 type OpAsyncOperation struct {
 	Kind string `yaml:"kind,omitempty"`
 
-	Path string `yaml:"path,omitempty"`
-
 	BaseUrl string `yaml:"base_url,omitempty"`
-
-	WaitMs int `yaml:"wait_ms,omitempty"`
 
 	// Use this if the resource includes the full operation url.
 	FullUrl string `yaml:"full_url,omitempty"`

@@ -55,8 +55,6 @@ async:
   operation:
     base_url: '{{op_id}}'
     kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30

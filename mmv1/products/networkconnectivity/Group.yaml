@@ -26,9 +26,7 @@ references:
 async:
   type: 'OpAsync'
   operation:
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
   result:
     path: 'targetLink'
   error:
