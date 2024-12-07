@@ -163,7 +163,7 @@ properties:
       - linked_vpc_network
       - linked_producer_vpc_network
     update_mask_fields:
-      - "linkedInterconnectAttachments.includeImportRanges'
+      - 'linkedInterconnectAttachments.includeImportRanges'
     properties:
       - name: 'uris'
         type: Array
