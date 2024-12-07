@@ -112,6 +112,15 @@ func TestAccNetworkConnectivitySpoke_RouterApplianceHandWritten(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1(context),
+			},
+			{
+				ResourceName:            "google_network_connectivity_spoke.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -141,6 +150,15 @@ func TestAccNetworkConnectivitySpoke_RouterApplianceHandWrittenLongForm(t *testi
 			},
 			{
 				Config: testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate0LongForm(context),
+			},
+			{
+				ResourceName:            "google_network_connectivity_spoke.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1LongForm(context),
 			},
 			{
 				ResourceName:            "google_network_connectivity_spoke.primary",
@@ -244,8 +262,8 @@ resource "google_compute_subnetwork" "subnetwork" {
   network       = google_compute_network.network.self_link
 }
 
-resource "google_compute_instance" "instance" {
-  name         = "tf-test-instance%{random_suffix}"
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
   machine_type = "e2-medium"
   can_ip_forward = true
   zone         = "%{zone}"
@@ -276,14 +294,14 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
   location = "%{region}"
-  description = "A sample spoke with a linked routher appliance instance"
+  description = "A sample spoke with a single linked routher appliance instance"
   labels = {
     label-one = "value-one"
   }
   hub =  google_network_connectivity_hub.basic_hub.id
   linked_router_appliance_instances {
     instances {
-        virtual_machine = google_compute_instance.instance.self_link
+        virtual_machine = google_compute_instance.router-instance1.self_link
         ip_address = "10.0.0.2"
     }
     site_to_site_data_transfer = true
@@ -307,8 +325,8 @@ resource "google_compute_subnetwork" "subnetwork" {
   network       = google_compute_network.network.self_link
 }
 
-resource "google_compute_instance" "instance" {
-  name         = "tf-test-instance%{random_suffix}"
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
   machine_type = "e2-medium"
   can_ip_forward = true
   zone         = "%{zone}"
@@ -339,14 +357,14 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
   location = "%{region}"
-  description = "An UPDATED sample spoke with a linked routher appliance instance"
+  description = "An UPDATED sample spoke with a single linked routher appliance instance"
   labels = {
     label-two = "value-two"
   }
   hub = google_network_connectivity_hub.basic_hub.id
   linked_router_appliance_instances {
     instances {
-        virtual_machine = google_compute_instance.instance.self_link
+        virtual_machine = google_compute_instance.router-instance1.self_link
         ip_address = "10.0.0.2"
     }
     site_to_site_data_transfer = true
@@ -354,6 +372,96 @@ resource "google_network_connectivity_spoke" "primary" {
 }
 `, context)
 }
+
+func testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_compute_network" "network" {
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "tf-test-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/28"
+  region        = "%{region}"
+  network       = google_compute_network.network.self_link
+}
+
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
+  machine_type = "e2-medium"
+  can_ip_forward = true
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    network_ip = "10.0.0.2"
+    access_config {
+        network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_compute_instance" "router-instance2" {
+  name         = "tf-test-router-instance2%{random_suffix}"
+  machine_type = "e2-medium"
+  can_ip_forward = true
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    network_ip = "10.0.0.3"
+    access_config {
+        network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_network_connectivity_hub" "basic_hub" {
+  name        = "tf-test-hub%{random_suffix}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+}
+
+resource "google_network_connectivity_spoke" "primary" {
+  name = "tf-test-name%{random_suffix}"
+  location = "%{region}"
+  description = "An UPDATED sample spoke with two linked routher appliance instances"
+  labels = {
+    label-two = "value-two"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_router_appliance_instances {
+    instances {
+        virtual_machine = google_compute_instance.router-instance1.self_link
+        ip_address = "10.0.0.2"
+    }
+    instances {
+        virtual_machine = google_compute_instance.router-instance2.self_link
+        ip_address = "10.0.0.3"
+    }
+    include_import_ranges = ["ALL_IPV4_RANGES"]
+    site_to_site_data_transfer = true
+  }
+}
+`, context)
+}
+
 func testAccNetworkConnectivitySpoke_LinkedVPCNetworkHandWrittenLongForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 
@@ -510,8 +618,8 @@ resource "google_compute_subnetwork" "subnetwork" {
   network       = google_compute_network.network.self_link
 }
 
-resource "google_compute_instance" "instance" {
-  name         = "tf-test-instance%{random_suffix}"
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
   machine_type = "e2-medium"
   can_ip_forward = true
   zone         = "%{zone}"
@@ -549,9 +657,98 @@ resource "google_network_connectivity_spoke" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   linked_router_appliance_instances {
     instances {
-        virtual_machine = google_compute_instance.instance.self_link
+        virtual_machine = google_compute_instance.router-instance1.self_link
         ip_address = "10.0.0.2"
     }
+    site_to_site_data_transfer = true
+  }
+}
+`, context)
+}
+
+func testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1LongForm(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_compute_network" "network" {
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "tf-test-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/28"
+  region        = "%{region}"
+  network       = google_compute_network.network.self_link
+}
+
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
+  machine_type = "e2-medium"
+  can_ip_forward = true
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    network_ip = "10.0.0.2"
+    access_config {
+        network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_compute_instance" "router-instance2" {
+  name         = "tf-test-router-instance2%{random_suffix}"
+  machine_type = "e2-medium"
+  can_ip_forward = true
+  zone         = "%{zone}"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    network_ip = "10.0.0.3"
+    access_config {
+        network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_network_connectivity_hub" "basic_hub" {
+  name        = "tf-test-hub%{random_suffix}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+}
+
+resource "google_network_connectivity_spoke" "primary" {
+  name = "tf-test-name%{random_suffix}"
+  location = "%{region}"
+  description = "An UPDATED sample spoke with a linked routher appliance instance"
+  labels = {
+    label-two = "value-two"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_router_appliance_instances {
+    instances {
+        virtual_machine = google_compute_instance.router-instance1.self_link
+        ip_address = "10.0.0.2"
+    }
+    instances {
+        virtual_machine = google_compute_instance.router-instance2.self_link
+        ip_address = "10.0.0.3"
+    }
+    include_import_ranges = ["ALL_IPV4_RANGES"]
     site_to_site_data_transfer = true
   }
 }
