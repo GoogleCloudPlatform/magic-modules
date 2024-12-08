@@ -123,4 +123,21 @@
 		}
 	}
 
+	if d.HasChange("reservation_sharing_policy") {
+		// Get name.
+		nameProp, err := expandComputeReservationName(d.Get("name"), d, config)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid value for name: %s", err)
+		} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+			newObj["name"] = nameProp
+		}
+
+		policyProp, err := expandComputeReservationReservationSharingPolicy(d.Get("reservation_sharing_policy"), d, config)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid value for reservationSharingPolicy: %s", err)
+		} else if v, ok := d.GetOkExists("reservation_sharing_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(policyProp)) && (ok || !reflect.DeepEqual(v, policyProp)) {
+			newObj["reservationSharingPolicy"] = policyProp
+		}
+	}
+
 	return newObj, nil
