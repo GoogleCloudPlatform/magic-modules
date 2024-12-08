@@ -24,6 +24,7 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 	cmd.AddCommand(newBreakingChangesCmd(o))
 	cmd.AddCommand(newChangedSchemaResourcesCmd(o))
 	cmd.AddCommand(newDetectMissingTestsCmd(o))
+	cmd.AddCommand(newDetectMissingDocsCmd(o))
 	return cmd, o, nil
 }
 
