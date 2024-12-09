@@ -63,6 +63,7 @@ examples:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
       database_name: 'mydatabase'
+      endpoint_name: 'myendpoint'
       deletion_protection: 'true'
     ignore_read_extra:
       - 'deletion_protection'
@@ -70,6 +71,7 @@ examples:
       project: '"oci-terraform-testing"'
       deletion_protection: 'false'
       database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
+      endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
