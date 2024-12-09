@@ -555,8 +555,8 @@ resource "google_compute_subnetwork" "subnetwork" {
   network       = google_compute_network.network.self_link
 }
 
-resource "google_compute_instance" "instance" {
-  name         = "tf-test-instance%{random_suffix}"
+resource "google_compute_instance" "router-instance1" {
+  name         = "tf-test-router-instance1%{random_suffix}"
   machine_type = "e2-medium"
   can_ip_forward = true
   zone         = "%{zone}"
@@ -587,14 +587,14 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
   location = "%{region}"
-  description = "A sample spoke with a linked routher appliance instance"
+  description = "A sample spoke with a single linked routher appliance instance"
   labels = {
     label-one = "value-one"
   }
   hub =  google_network_connectivity_hub.basic_hub.id
   linked_router_appliance_instances {
     instances {
-        virtual_machine = google_compute_instance.instance.self_link
+        virtual_machine = google_compute_instance.router-instance1.self_link
         ip_address = "10.0.0.2"
     }
     site_to_site_data_transfer = true
@@ -650,7 +650,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
   location = "%{region}"
-  description = "An UPDATED sample spoke with a linked routher appliance instance"
+  description = "An UPDATED sample spoke with a single linked routher appliance instance"
   labels = {
     label-two = "value-two"
   }
@@ -734,7 +734,7 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "primary" {
   name = "tf-test-name%{random_suffix}"
   location = "%{region}"
-  description = "An UPDATED sample spoke with a linked routher appliance instance"
+  description = "An UPDATED sample spoke with two linked routher appliance instances"
   labels = {
     label-two = "value-two"
   }
