@@ -37,6 +37,5 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
-        if: github.event.issue.state == 'open'
         run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
 
