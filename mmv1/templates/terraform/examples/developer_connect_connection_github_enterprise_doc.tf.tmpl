@@ -1,16 +1,16 @@
-resource "google_secret_manager_secret" "github-token-secret" {
+resource "google_secret_manager_secret" "github-enterprise-token-secret" {
 
-  secret_id = "github-token-secret"
+  secret_id = "github-enterprise-token-secret"
 
   replication {
     auto {}
   }
 }
 
-resource "google_secret_manager_secret_version" "github-token-secret-version" {
+resource "google_secret_manager_secret_version" "github-enterprise-token-secret-version" {
 
-  secret = google_secret_manager_secret.github-token-secret.id
-  secret_data = file("my-github-token.txt")
+  secret = google_secret_manager_secret.github-enterprise-token-secret.id
+  secret_data = file("my-github-enterprise-token.txt")
 }
 
 data "google_iam_policy" "p4sa-secretAccessor" {
@@ -23,7 +23,7 @@ data "google_iam_policy" "p4sa-secretAccessor" {
 
 resource "google_secret_manager_secret_iam_policy" "policy" {
   
-  secret_id = google_secret_manager_secret.github-token-secret.secret_id
+  secret_id = google_secret_manager_secret.github-enterprise-token-secret.secret_id
   policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
 }
 
@@ -32,11 +32,11 @@ resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "my-connection"
 
-  github_config {
-    github_app = "DEVELOPER_CONNECT"
+  github_enterprise_config {
+    host_uri = "https://devconnect-terraform.com"
     app_installation_id = 123123
     authorizer_credential {
-      oauth_token_secret_version = google_secret_manager_secret_version.github-token-secret-version.id
+      oauth_token_secret_version = google_secret_manager_secret_version.github-enterprise-token-secret-version.id
     }
   }
 }
