@@ -1,0 +1,6 @@
+resource "google_gemini_code_repository_index" "example" {
+  provider = google-beta
+  location = "us-central1"
+  code_repository_index_id = "{{index $.Vars "cri_id"}}"
+  kms_key = "projects/projectExample/locations/locationExample/keyRings/keyRingExample/cryptoKeys/cryptoKeyExample"
+}

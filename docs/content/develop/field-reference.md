@@ -1,6 +1,6 @@
 ---
 title: "MMv1 field reference"
-weight: 31
+weight: 120
 aliases:
   - /reference/field-reference
 ---
@@ -11,6 +11,14 @@ This page documents commonly-used properties for fields. For a full list of
 available properties, see [type.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/type.go).
 
 ## Shared properties
+
+### `name`
+Specifies the name of the field within Terraform. By default this will also 
+be the key for the field in the API request message, if a separate `api_name`
+is not declared using the corresponding property.
+
+### `type`
+Sets the expected data type of the field. All valid types are declared [here](https://github.com/GoogleCloudPlatform/magic-modules/blob/d7777055cb7618648725abd16d3b05e5c138fc56/mmv1/api/type.go#L673).
 
 ### `min_version: beta`
 Marks the field (and any subfields) as beta-only. Ensure a beta version block
@@ -232,7 +240,7 @@ Example:
 
 ### `diff_suppress_func`
 Specifies the name of a [diff suppress function](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#diffsuppressfunc)
-to use for this field. In many cases, a [custom flattener](https://googlecloudplatform.github.io/magic-modules/develop/custom-code/#custom_flatten)
+to use for this field. In many cases, a [custom flattener]({{< ref "/develop/custom-code/#custom_flatten" >}})
 is preferred because it will allow the user to see a clearer diff when the field actually is being changed. See
 [Fix diffs]({{< ref "/develop/diffs" >}}) for more information and best practices.
 

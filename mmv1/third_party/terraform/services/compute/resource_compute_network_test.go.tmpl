@@ -224,7 +224,7 @@ func TestAccComputeNetwork_networkProfile(t *testing.T) {
 
    var network compute.Network
    suffixName := acctest.RandString(t, 10)
-   networkName := fmt.Sprintf("tf-network-profile-%s", suffixName)
+   networkName := fmt.Sprintf("tf-test-network-profile-%s", suffixName)
    projectId := envvar.GetTestProjectFromEnv()
    profileURL := fmt.Sprintf("https://www.googleapis.com/compute/beta/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
 
@@ -262,7 +262,7 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 			{
 				Config: testAccComputeNetwork_basic(networkName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("^\\d{1,}$")),
+					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("^\\d{16,48}$")),
 					resource.TestCheckResourceAttr("google_compute_network.bar", "id", networkId),
 				),
 			},

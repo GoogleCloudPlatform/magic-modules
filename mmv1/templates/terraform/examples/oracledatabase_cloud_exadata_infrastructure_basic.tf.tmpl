@@ -8,4 +8,6 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResou
     compute_count= "2"
     storage_count= "3"
   }
+
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

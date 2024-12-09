@@ -1,0 +1,132 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MirroringEndpointGroupAssociation'
+description: Creates an association between a VPC and a mirroring endpoint group in order to mirror traffic in that VPC.
+min_version: 'beta'
+references:
+  guides:
+    'Mirroring endpoint group association overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview#mirroring-endpoint-group-association'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1beta1/projects.locations.mirroringEndpointGroupAssociations'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations'
+self_link: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations?mirroringEndpointGroupAssociationId={{mirroring_endpoint_group_association_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+examples:
+  - name: 'network_security_mirroring_endpoint_group_association_basic'
+    config_path: 'templates/terraform/examples/network_security_mirroring_endpoint_group_association_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      producer_network_name: 'example-prod-network'
+      consumer_network_name: 'example-cons-network'
+      deployment_group_id: 'example-dg'
+      endpoint_group_id: 'example-eg'
+      endpoint_group_association_id: 'example-ega'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Resource ID segment making up resource `name`. It identifies the resource
+    within its parent collection as described in https://google.aip.dev/122. See documentation
+    for resource type `networksecurity.googleapis.com/MirroringEndpointGroupAssociation`. '
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'mirroringEndpointGroupAssociationId'
+    type: String
+    description: "Optional. Id of the requesting object\nIf auto-generating Id server-side,
+    remove this field and\nmirroring_endpoint_group_association_id from the method_signature
+    of Create\nRPC "
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: 'Immutable. Identifier. The name of the MirroringEndpointGroupAssociation. '
+    min_version: 'beta'
+    immutable: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: 'Output only. [Output only] Create time stamp '
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Output only. [Output only] Update time stamp '
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Optional. Labels as key value pairs '
+    min_version: 'beta'
+  - name: 'mirroringEndpointGroup'
+    type: String
+    description: "Required. Immutable. The Mirroring Endpoint Group that this resource
+    is connected to. Format\nis:\n`projects/{project}/locations/global/mirroringEndpointGroups/{mirroringEndpointGroup}` "
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'network'
+    type: String
+    description: "Required. Immutable. The VPC network associated. Format:\nprojects/{project}/global/networks/{network}. "
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'locationsDetails'
+    type: Array
+    description: 'Output only. The list of locations that this association is in and
+    its details. '
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'location'
+          type: String
+          description: 'Output only. The cloud location. '
+          min_version: 'beta'
+          output: true
+        - name: 'state'
+          type: String
+          description: "Output only. The association state in this location. \n
+        Possible values:\n STATE_UNSPECIFIED\nACTIVE\nOUT_OF_SYNC"
+          min_version: 'beta'
+          output: true
+  - name: 'state'
+    type: String
+    description: "Output only. Current state of the endpoint group association. \n
+    Possible values:\n STATE_UNSPECIFIED\nACTIVE\nCREATING\nDELETING\nCLOSED\nOUT_OF_SYNC\nDELETE_FAILED"
+    min_version: 'beta'
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: "Output only. Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
+    min_version: 'beta'
+    output: true

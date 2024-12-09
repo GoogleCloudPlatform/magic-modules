@@ -214,7 +214,7 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
         kubernetes_software_config {
           component_version = {
-            "SPARK" : "3.1-dataproc-7"
+            "SPARK" : "3.5-dataproc-17"
           }
 
           properties = {
@@ -447,6 +447,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `node_group_affinity` - (Optional) Node Group Affinity for sole-tenant clusters.
     * `node_group_uri` - (Required) The URI of a sole-tenant node group resource that the cluster will be created on.
+
+* `confidential_instance_config` - (Optional) Confidential Instance Config for clusters using [Confidential VMs](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/confidential-compute)
+    * `enable_confidential_compute` - (Optional) Defines whether the instance should have confidential compute enabled.
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 

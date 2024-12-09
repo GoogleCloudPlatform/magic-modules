@@ -1,6 +1,6 @@
 ---
 title: Handwritten docs style guide
-weight: 200
+weight: 140
 ---
 
 # Handwritten documentation style guide

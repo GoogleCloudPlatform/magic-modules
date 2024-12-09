@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
@@ -198,7 +192,7 @@ properties:
   - name: 'expireTime'
     type: Time
     description: |-
-      For a deleted resource, the time after which it will be permamently deleted.
+      For a deleted resource, the time after which it will be permanently deleted.
     output: true
   - name: 'creator'
     type: String

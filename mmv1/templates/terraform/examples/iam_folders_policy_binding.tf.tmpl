@@ -1,5 +1,4 @@
 resource "google_iam_principal_access_boundary_policy" "pab_policy" {
-  provider = google-beta
   organization   = "{{index $.TestEnvVars "org_id"}}"
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"
@@ -7,7 +6,6 @@ resource "google_iam_principal_access_boundary_policy" "pab_policy" {
 }
 
 resource "google_folder" "folder" {
-  provider = google-beta
   display_name        = "{{index $.Vars "folder_name"}}"
   parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
@@ -19,7 +17,6 @@ resource "time_sleep" "wait_120s" {
 }
 
 resource "google_iam_folders_policy_binding" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   folder         = google_folder.folder.folder_id
   location       = "global"
   display_name   = "{{index $.Vars "display_name"}}"

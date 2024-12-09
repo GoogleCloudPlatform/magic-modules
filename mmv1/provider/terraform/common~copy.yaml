@@ -102,6 +102,20 @@
 <% end -%>
 
 <%
+  Dir["third_party/terraform/fwutils/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwutils/<%= fname -%>': 'third_party/terraform/fwutils/<%= fname -%>'
+<% end -%>
+
+<%
+  Dir["third_party/terraform/fwvalidators/*.go"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/fwvalidators/<%= fname -%>': 'third_party/terraform/fwvalidators/<%= fname -%>'
+<% end -%>
+
+<%
   Dir["third_party/terraform/fwtransport/*.go"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>

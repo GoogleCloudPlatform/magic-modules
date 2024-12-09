@@ -1,4 +1,4 @@
-func {{$.ResourceName}}EgressToResourcesDiffSupressFunc(_, _, _ string, d *schema.ResourceData) bool {
+func {{$.ResourceName}}EgressToResourcesDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
     old, new := d.GetChange("egress_to.0.resources")
 
     oldResources, err := tpgresource.InterfaceSliceToStringSlice(old)
@@ -19,7 +19,7 @@ func {{$.ResourceName}}EgressToResourcesDiffSupressFunc(_, _, _ string, d *schem
     return slices.Equal(oldResources, newResources)
 }
 
-func {{$.ResourceName}}IngressToResourcesDiffSupressFunc(_, _, _ string, d *schema.ResourceData) bool {
+func {{$.ResourceName}}IngressToResourcesDiffSuppressFunc(_, _, _ string, d *schema.ResourceData) bool {
     old, new := d.GetChange("ingress_to.0.resources")
 
     oldResources, err := tpgresource.InterfaceSliceToStringSlice(old)
@@ -40,7 +40,7 @@ func {{$.ResourceName}}IngressToResourcesDiffSupressFunc(_, _, _ string, d *sche
     return slices.Equal(oldResources, newResources)
 }
 
-func {{$.ResourceName}}IdentityTypeDiffSupressFunc(_, old, new string, _ *schema.ResourceData) bool {
+func {{$.ResourceName}}IdentityTypeDiffSuppressFunc(_, old, new string, _ *schema.ResourceData) bool {
     if old == "" && new == "IDENTITY_TYPE_UNSPECIFIED" {
        return true
     }
