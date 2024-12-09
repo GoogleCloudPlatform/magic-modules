@@ -67,7 +67,7 @@ parameters:
     immutable: true
   - name: 'interceptDeploymentId'
     type: String
-    description: "Required. Id of the requesting object\nIf auto-generating Id server-side,
+    description: "Id of the requesting object\nIf auto-generating Id server-side,
     remove this field and\nintercept_deployment_id from the method_signature of Create
     RPC "
     min_version: 'beta'
@@ -77,17 +77,17 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: 'Output only. Identifier. The name of the InterceptDeployment. '
+    description: 'Identifier. The name of the InterceptDeployment. '
     min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
-    description: 'Output only. [Output only] Create time stamp '
+    description: 'Create time stamp '
     min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
-    description: 'Output only. [Output only] Update time stamp '
+    description: 'Update time stamp '
     min_version: 'beta'
     output: true
   - name: 'labels'
@@ -96,26 +96,26 @@ properties:
     min_version: 'beta'
   - name: 'forwardingRule'
     type: String
-    description: "Required. Immutable. The regional load balancer which the intercepted
+    description: "Immutable. The regional load balancer which the intercepted
     traffic should be forwarded\nto. Format is:\nprojects/{project}/regions/{region}/forwardingRules/{forwardingRule} "
     min_version: 'beta'
     required: true
     immutable: true
   - name: 'interceptDeploymentGroup'
     type: String
-    description: "Required. Immutable. The Intercept Deployment Group that this resource
+    description: "Immutable. The Intercept Deployment Group that this resource
     is part of. Format is:\n`projects/{project}/locations/global/interceptDeploymentGroups/{interceptDeploymentGroup}` "
     min_version: 'beta'
     required: true
     immutable: true
   - name: 'state'
     type: String
-    description: "Output only. Current state of the deployment. \n Possible values:\n
+    description: "Current state of the deployment. \n Possible values:\n
     STATE_UNSPECIFIED\nACTIVE\nCREATING\nDELETING\nOUT_OF_SYNC\nDELETE_FAILED"
     min_version: 'beta'
     output: true
   - name: 'reconciling'
     type: Boolean
-    description: "Output only. Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
+    description: "Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
     min_version: 'beta'
     output: true
