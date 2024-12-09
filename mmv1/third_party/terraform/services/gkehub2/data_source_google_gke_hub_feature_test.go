@@ -5,52 +5,42 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataSourceGoogleGKEHub2Feature_basic(t *testing.T) {
+func TestAccDataSourceGoogleGkeHubFeature_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckGKEHub2FeatureDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		Providers:    acctest.TestAccProviders,
+		CheckDestroy: testAccCheckGoogleGkeHubFeatureDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleGKEHub2Feature_basic(context),
+				Config: testAccDataSourceGoogleGkeHubFeature_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_gke_hub_feature.feature", "google_gke_hub_feature.feature"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_gke_hub_feature.example", "google_gke_hub_feature.example"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceGoogleGKEHub2Feature_basic(context map[string]interface{}) string {
+func testAccDataSourceGoogleGkeHubFeature_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {}
-
-resource "google_gke_hub_feature" "feature" {
-  name = "servicemesh"
-  location = "global"
-  project = data.google_project.project.project_id
-
-  depends_on = [time_sleep.wait_for_gkehub_enablement]
+resource "google_gke_hub_feature" "example" {
+  location = "us-central1"
+  project  = "%{project}"
+  name     = "configmanagement"
 }
 
-data "google_gke_hub_feature" "feature" {
+data "google_gke_hub_feature" "example" {
   location = google_gke_hub_feature.feature.location
-  project = data.google_project.project.project_id
-  feature = google_gke_hub_feature.feature.name
+  project  = google_gke_hub_feature.feature.project
+  name     = google_gke_hub_feature.feature.name
 }
 `, context)
 }

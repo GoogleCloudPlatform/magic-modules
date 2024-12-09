@@ -12,7 +12,7 @@ func DataSourceGoogleGkeHubFeature() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceGKEHub2Feature().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "project")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "feature")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
 		Read:   dataSourceGoogleGkeHubFeatureRead,
@@ -23,7 +23,7 @@ func DataSourceGoogleGkeHubFeature() *schema.Resource {
 func dataSourceGoogleGkeHubFeatureRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/features/{{feature}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/features/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
