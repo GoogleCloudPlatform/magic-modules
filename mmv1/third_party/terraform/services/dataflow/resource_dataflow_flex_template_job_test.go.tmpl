@@ -136,6 +136,9 @@ func TestAccDataflowFlexTemplateJob_FullUpdate(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+		    "time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_dataflowFlexTemplateJobFull(job, bucket, topic, randStr),
@@ -870,7 +873,13 @@ resource "google_storage_bucket_object" "schema" {
 EOF
 }
 
+resource "time_sleep" "wait_bind_iam_roles" {
+  depends_on = [google_project_iam_member.dataflow-worker, google_project_iam_member.dataflow-storage]
+  create_duration = "300s"
+}
+
 resource "google_dataflow_flex_template_job" "flex_job_fullupdate" {
+  depends_on = [time_sleep.wait_bind_iam_roles]
   name = "%s"
   container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
   on_delete = "cancel"
