@@ -122,6 +122,11 @@ properties:
     immutable: true
     resource: 'hub'
     imports: 'name'
+  - name: 'group'
+    type: String
+    description: The name of the group that this spoke is associated with.
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
   - name: 'linkedVpnTunnels'
     type: NestedObject
     description: The URIs of linked VPN tunnel resources
