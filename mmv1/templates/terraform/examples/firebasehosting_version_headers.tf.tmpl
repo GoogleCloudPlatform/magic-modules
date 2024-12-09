@@ -9,6 +9,7 @@ resource "google_firebase_hosting_version" "default" {
   site_id  = google_firebase_hosting_site.default.site_id
   config {
     headers {
+      # Also okay to use regex
       glob = "/headers/**"
       headers = {
         my-header = "my-value"
