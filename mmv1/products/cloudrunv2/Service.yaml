@@ -164,12 +164,10 @@ examples:
   - name: 'cloudrunv2_service_function'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
       bucket_name: 'gcf-source'
       zip_path: 'function_source.zip'
-      pool: 'worker-pool'
       sa_name: 'build-sa'
     ignore_read_extra:
       - 'deletion_protection'
