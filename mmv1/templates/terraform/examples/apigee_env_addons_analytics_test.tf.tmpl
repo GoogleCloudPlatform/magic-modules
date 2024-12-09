@@ -59,6 +59,7 @@ resource "google_apigee_organization" "apigee_org" {
 resource "google_apigee_environment" "{{$.PrimaryResourceId}}" {
   org_id       = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
+  type         = "COMPREHENSIVE"
   description  = "Apigee Environment"
   display_name = "environment-1"
 }
