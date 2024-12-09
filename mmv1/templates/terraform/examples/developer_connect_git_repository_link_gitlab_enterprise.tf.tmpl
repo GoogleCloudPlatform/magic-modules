@@ -4,6 +4,7 @@ resource "google_developer_connect_git_repository_link" "{{$.PrimaryResourceId}}
   clone_uri = "https://gle-us-central1.gcb-test.com/test-group/inarayanan-test.git"
   location = "us-central1"
   annotations = {}
+  labels = {}
 }
 
 resource "google_developer_connect_connection" "gitlab_enterprise_conn" {

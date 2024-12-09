@@ -300,13 +300,11 @@ properties:
     description: |-
       Output only. Message of what the user should do next to continue the installation.
       Empty string if the installation is already complete.
-    output: true
   - name: actionUri
     type: String
     description: |-
       Output only. Link to follow for next action. Empty string if the installation is already
       complete.
-    output: true
   - name: stage
     type: String
     description: |-

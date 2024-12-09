@@ -4,6 +4,7 @@ resource "google_developer_connect_git_repository_link" "{{$.PrimaryResourceId}}
   clone_uri = "https://github.com/gcb-developerconnect-robot/tf-demo.git"
   location = "us-central1"
   annotations = {}
+  labels = {}
 }
   
 resource "google_developer_connect_connection" "github_conn" {
