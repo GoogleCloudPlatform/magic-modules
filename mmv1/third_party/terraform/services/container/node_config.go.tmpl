@@ -2029,6 +2029,9 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 // node pool updates in `resource_container_cluster`
 func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Config, nodePoolInfo *NodePoolInformation, prefix, name string, timeout time.Duration) error {
 
+	// Cluster write-lock will be acquired when update function is called, and read-lock will be acquired when
+	// waiting for operation to finish.
+	clusterLockKey := nodePoolInfo.clusterLockKey()
 	// Nodepool write-lock will be acquired when update function is called.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
 
@@ -2052,14 +2055,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				updateF := func() error {
+					transport_tpg.MutexStore.Lock(clusterLockKey)
 					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
 						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 					}
 					op, err := clusterNodePoolsUpdateCall.Do()
 					if err != nil {
+						transport_tpg.MutexStore.Unlock(clusterLockKey)
 						return err
 					}
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
+					transport_tpg.MutexStore.RLock(clusterLockKey)
+					defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 					// Wait until it's updated
 					return ContainerOperationWait(config, op,
@@ -2088,14 +2096,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 					req.ForceSendFields = []string{"ContainerdConfig"}
 				}
 				updateF := func() error {
+					transport_tpg.MutexStore.Lock(clusterLockKey)
 					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
 						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 					}
 					op, err := clusterNodePoolsUpdateCall.Do()
 					if err != nil {
+						transport_tpg.MutexStore.Unlock(clusterLockKey)
 						return err
 					}
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
+					transport_tpg.MutexStore.RLock(clusterLockKey)
+					defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 					// Wait until it's updated
 					return ContainerOperationWait(config, op,
@@ -2135,14 +2148,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2191,14 +2209,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2243,14 +2266,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2285,14 +2313,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2321,14 +2354,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2359,14 +2397,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2393,14 +2436,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(nodePoolInfo.parent(), req)
 				if config.UserProjectOverride {
 					clusterUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2426,6 +2474,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"WorkloadMetadataConfig"}
 			}
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
@@ -2433,8 +2482,12 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				op, err := clusterNodePoolsUpdateCall.Do()
 
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2459,14 +2512,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				},
 			}
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2494,14 +2552,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"KubeletConfig"}
 			}
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2528,14 +2591,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				req.ForceSendFields = []string{"LinuxNodeConfig"}
 			}
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
@@ -2563,14 +2631,19 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 			}
 			updateF := func() error {
+				transport_tpg.MutexStore.Lock(clusterLockKey)
 				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
 				if config.UserProjectOverride {
 					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 				}
 				op, err := clusterNodePoolsUpdateCall.Do()
 				if err != nil {
+					transport_tpg.MutexStore.Unlock(clusterLockKey)
 					return err
 				}
+				transport_tpg.MutexStore.Unlock(clusterLockKey)
+				transport_tpg.MutexStore.RLock(clusterLockKey)
+				defer transport_tpg.MutexStore.RUnlock(clusterLockKey)
 
 				// Wait until it's updated
 				return ContainerOperationWait(config, op,
