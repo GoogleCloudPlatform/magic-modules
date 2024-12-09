@@ -33,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
