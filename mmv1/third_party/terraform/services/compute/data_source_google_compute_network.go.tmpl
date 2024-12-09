@@ -33,6 +33,7 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 			"numeric_id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Deprecated: "`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.",
 			},
 
 			"gateway_ipv4": {
