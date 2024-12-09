@@ -251,7 +251,7 @@ properties:
             type: Boolean
             description: |
               Whether to perform a 'guest aware' snapshot.
-            send_empty_value: true
+            send_empty_value: false
             at_least_one_of:
               - 'snapshot_schedule_policy.0.snapshot_properties.0.labels'
               - 'snapshot_schedule_policy.0.snapshot_properties.0.storage_locations'
