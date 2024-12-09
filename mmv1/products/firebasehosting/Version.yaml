@@ -46,6 +46,13 @@ examples:
       site_id: 'site-id'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firebasehosting_version_headers'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
   - name: 'firebasehosting_version_path'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -228,4 +235,35 @@ properties:
                 }
                 ```
               min_version: 'beta'
+              required: true
+      - name: 'headers'
+        type: Array
+        description: |
+         An array of objects, where each object specifies a URL pattern that, if matched to the request URL path, 
+         triggers Hosting to apply the specified custom response headers.
+        item_type:
+          description: |
+            A Header specifies a URL pattern that, if matched to the request URL path, triggers Hosting
+            to apply the specified custom response headers.
+          type: NestedObject
+          properties:
+            - name: 'glob'
+              type: String
+              description:
+                The user-supplied glob to match against the request URL path.
+              exactly_one_of:
+                - 'glob'
+                - 'regex'
+            - name: 'regex'
+              type: String
+              description:
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
+              exactly_one_of:
+                - 'glob'
+                - 'regex'
+            - name: 'headers'
+              type: KeyValuePairs
+              description: |
+                The additional headers to add to the response. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
               required: true
