@@ -59,11 +59,10 @@ terraform build provider:
 	make tpgtools
 
 mmv1:
+	# Chaining these with "&&" is critical so this will exit non-0 if the first
+	# command fails, since we're not forcing bash and errexit / pipefail here.
 	cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
-			# Chaining these with "&&" is critical here to prevent this
-			# from exiting 0 on failure of the first command, since we're
-			# not forcing bash and errexit / pipefail here. 
 			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
 			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
 		else \
