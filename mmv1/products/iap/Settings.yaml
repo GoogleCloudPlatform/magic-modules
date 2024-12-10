@@ -20,9 +20,6 @@ references:
     'Customizing IAP': 'https://cloud.google.com/iap/docs/customizing'
   api: 'https://cloud.google.com/iap/docs/reference/rest/v1/IapSettings'
 docs:
-  note: |
-    * loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
-    * Enabling gcipSetting significantly changes the way IAP authenticates users. Identity Platform does not support IAM, so IAP will not enforce any IAM policies for requests to your application.
 id_format: '{{name}}/iapSettings'
 base_url: '{{name}}:iapSettings'
 self_link: '{{name}}:iapSettings'
@@ -75,9 +72,9 @@ properties:
     properties:
       - name: 'gcipSettings'
         type: NestedObject
-        custom_expand: 'templates/terraform/custom_expand/iap_settings_gcip_settings.go.tmpl'
         description: |
           GCIP claims and endpoint configurations for 3p identity providers.
+          * Enabling gcipSetting significantly changes the way IAP authenticates users. Identity Platform does not support IAM, so IAP will not enforce any IAM policies for requests to your application.
         properties:
           - name: 'tenantIds'
             type: Array
@@ -112,13 +109,13 @@ properties:
         properties:
           - name: 'loginHint'
             type: String
-            custom_expand: 'templates/terraform/custom_expand/iap_settings_login_hint.go.tmpl'
             description: |
               Domain hint to send as hd=? parameter in OAuth request flow.
               Enables redirect to primary IDP by skipping Google's login screen.
               (https://developers.google.com/identity/protocols/OpenIDConnect#hd-param)
               Note: IAP does not verify that the id token's hd claim matches this value
               since access behavior is managed by IAM policies.
+              * loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
           - name: 'programmaticClients'
             type: Array
             description: |
