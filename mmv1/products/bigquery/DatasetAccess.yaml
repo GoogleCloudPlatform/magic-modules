@@ -32,7 +32,7 @@ docs:
     You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
-base_url: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
+base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
 create_verb: 'PATCH'
 delete_verb: 'PATCH'
