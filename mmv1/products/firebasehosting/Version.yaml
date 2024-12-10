@@ -140,45 +140,45 @@ properties:
               description:
                 The user-supplied glob to match against the request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'regex'
               type: String
               description:
                 The user-supplied RE2 regular expression to match against the
                 request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'path'
               type: String
               description:
                 The URL path to rewrite the request to.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
             - name: 'function'
               type: String
               description:
                 The function to proxy requests to. Must match the exported
                 function name exactly.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
             - name: 'run'
               type: NestedObject
               description: The request will be forwarded to Cloud Run.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
               properties:
                 - name: 'serviceId'
                   type: String
@@ -208,18 +208,18 @@ properties:
               description:
                 The user-supplied glob to match against the request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'regex'
               type: String
               description:
                 The user-supplied RE2 regular expression to match against the
                 request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'statusCode'
               type: Integer
               description:
@@ -258,17 +258,17 @@ properties:
               type: String
               description:
                 The user-supplied glob to match against the request URL path.
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'regex'
               type: String
               description:
                 The user-supplied RE2 regular expression to match against the
                 request URL path.
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'headers'
               type: KeyValuePairs
               description: |
