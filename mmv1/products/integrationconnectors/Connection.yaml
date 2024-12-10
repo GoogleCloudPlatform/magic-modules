@@ -35,18 +35,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 50
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/integration_connectors_connection.go.tmpl'
   post_create: 'templates/terraform/post_create/integration_connectors_connection.go.tmpl'
@@ -215,12 +209,12 @@ properties:
         - name: 'encryptionKeyValue'
           type: NestedObject
           description: |
-            Encription key value of configVariable.
+            Encryption key value of configVariable.
           properties:
             - name: 'type'
               type: Enum
               description: |
-                Type of Encription Key
+                Type of Encryption Key
               required: true
               enum_values:
                 - 'GOOGLE_MANAGED'
@@ -287,12 +281,12 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable.
+                Encryption key value of configVariable.
               properties:
                 - name: 'type'
                   type: Enum
                   description: |
-                    Type of Encription Key
+                    Type of Encryption Key
                   required: true
                   enum_values:
                     - 'GOOGLE_MANAGED'
@@ -691,12 +685,12 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable
+                Encryption key value of configVariable
               properties:
                 - name: 'type'
                   type: Enum
                   description: |
-                    Type of Encription Key
+                    Type of Encryption Key
                   enum_values:
                     - 'GOOGLE_MANAGED'
                     - 'CUSTOMER_MANAGED'
@@ -810,12 +804,12 @@ properties:
                 - name: 'encryptionKeyValue'
                   type: NestedObject
                   description: |
-                    Encription key value of configVariable
+                    Encryption key value of configVariable
                   properties:
                     - name: 'type'
                       type: Enum
                       description: |
-                        Type of Encription Key
+                        Type of Encryption Key
                       enum_values:
                         - 'GOOGLE_MANAGED'
                         - 'CUSTOMER_MANAGED'
@@ -890,7 +884,7 @@ properties:
             - name: 'encryptionKeyValue'
               type: NestedObject
               description: |
-                Encription key value of configVariable.
+                Encryption key value of configVariable.
               properties:
                 - name: 'type'
                   type: Enum
