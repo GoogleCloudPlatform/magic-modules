@@ -61,6 +61,7 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
         subProject(googleSubProjectGa(allConfig))
         subProject(googleSubProjectBeta(allConfig))
         subProject(projectSweeperSubProject(allConfig))
+        subProject(featureBranchEphemeralWriteOnlySubProject(allConfig))
 
         // Feature branch-testing projects - these will be added and removed as needed
 
