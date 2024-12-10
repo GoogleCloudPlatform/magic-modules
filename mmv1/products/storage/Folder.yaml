@@ -43,6 +43,15 @@ references:
     'Official Documentation': 'https://cloud.google.com/storage/docs/folders-overview'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/folders'
 custom_code:
+  custom_import: templates/terraform/custom_import/storage_folder.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_folder_update.go.tmpl
+  custom_delete: templates/terraform/custom_delete/storage_folder_delete.go.tmpl
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      If set to true, folder will be force destroyed.
+    type: Boolean
+    default_value: false
 parameters:
   - name: 'bucket'
     resource: 'Bucket'
@@ -60,7 +69,7 @@ parameters:
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
     validation:
-      regex: '/$'
+      regex: '/$'  
 properties:
   - name: createTime
     type: String
