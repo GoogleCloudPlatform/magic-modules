@@ -224,7 +224,7 @@ func TestAccComputeNetwork_networkProfile(t *testing.T) {
 
    var network compute.Network
    suffixName := acctest.RandString(t, 10)
-   networkName := fmt.Sprintf("tf-network-profile-%s", suffixName)
+   networkName := fmt.Sprintf("tf-test-network-profile-%s", suffixName)
    projectId := envvar.GetTestProjectFromEnv()
    profileURL := fmt.Sprintf("https://www.googleapis.com/compute/beta/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
 
