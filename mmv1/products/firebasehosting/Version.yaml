@@ -53,6 +53,13 @@ examples:
       site_id: 'site-id'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firebasehosting_version_headers_regex'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
   - name: 'firebasehosting_version_path'
     primary_resource_id: 'default'
     min_version: 'beta'
