@@ -18,7 +18,7 @@ resource "google_secure_source_manager_repository" "repository" {
 }
 
 resource "google_secure_source_manager_hook" "basic" {
-    branch_rule_id = "{{index $.Vars "branch_rule_id"}}"
+    hook_id = "{{index $.Vars "hook_id"}}"
     repository_id = google_secure_source_manager_repository.repository.repository_id
     location = google_secure_source_manager_repository.repository.location
     target_uri = "https://www.example.com"
