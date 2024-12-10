@@ -11,10 +11,16 @@ resource "google_network_connectivity_hub" "basic_hub" {
   }
 }
 
+resource "google_network_connectivity_group" "default_group"  {
+ hub         = google_network_connectivity_hub.basic_hub.id
+ name        = "default"
+ description = "A sample hub group"
+}
+
 resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
   name = "{{index $.Vars "spoke_name"}}"
   location = "global"
-  description = "A sample spoke with a linked router appliance instance"
+  description = "A sample spoke with a linked VPC"
   labels = {
     label-one = "value-one"
   }
@@ -25,9 +31,10 @@ resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
       "10.10.0.0/16"
     ]
     include_export_ranges = [
-      "198.51.100.0/23", 
+      "198.51.100.0/23",
       "10.0.0.0/8"
     ]
     uri = google_compute_network.network.self_link
   }
+  group = google_network_connectivity_group.default_group.id
 }
