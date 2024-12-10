@@ -7,11 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/bigquery"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/iterator"
+	"google.golang.org/api/bigquery/v2"
 )
 
 func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
@@ -68,27 +67,22 @@ func cleanupBigQueryDatasets(t *testing.T, prefix string) {
 	ctx := context.Background()
 	projectID := envvar.ProjectID()
 
-	client, err := bigquery.NewClient(ctx, projectID)
+	service, err := bigquery.NewService(ctx)
 	if err != nil {
-		t.Fatalf("Failed to create BigQuery client: %v", err)
+		t.Fatalf("Failed to create BigQuery service: %v", err)
 	}
-	defer client.Close()
 
-	it := client.Datasets(ctx)
-	for {
-		dataset, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Fatalf("Failed to list datasets: %v", err)
-		}
+	datasetListCall := service.Datasets.List(projectID)
+	datasets, err := datasetListCall.Do()
+	if err != nil {
+		t.Fatalf("Failed to list datasets: %v", err)
+	}
 
-		// Delete datasets that start with the specified prefix
-		if strings.HasPrefix(dataset.DatasetID, prefix) {
-			log.Printf("Deleting existing dataset with prefix %s: %s", prefix, dataset.DatasetID)
-			if err := client.Dataset(dataset.DatasetID).DeleteWithContents(ctx); err != nil {
-				t.Fatalf("Failed to delete dataset %s: %v", dataset.DatasetID, err)
+	for _, dataset := range datasets.Datasets {
+		if strings.HasPrefix(dataset.Id, prefix) {
+			log.Printf("Deleting existing dataset with prefix %s: %s", prefix, dataset.Id)
+			if err := service.Datasets.Delete(projectID, dataset.DatasetReference.DatasetId).Do(); err != nil {
+				t.Fatalf("Failed to delete dataset %s: %v", dataset.Id, err)
 			}
 		}
 	}
@@ -174,5 +168,6 @@ resource "time_sleep" "wait_for_cleanup" {
 	create_duration = "3m"
 	depends_on = [google_scc_project_scc_big_query_export.default]
 }
+
 `, context)
 }
