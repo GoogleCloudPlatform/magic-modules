@@ -125,7 +125,6 @@ properties:
   - name: 'linkedVpnTunnels'
     type: NestedObject
     description: The URIs of linked VPN tunnel resources
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
@@ -156,7 +155,6 @@ properties:
   - name: 'linkedInterconnectAttachments'
     type: NestedObject
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
-    immutable: true
     conflicts:
       - linked_vpn_tunnels
       - linked_router_appliance_instances
