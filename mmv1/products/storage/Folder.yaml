@@ -34,7 +34,6 @@ examples:
       bucket_name: 'my-bucket'
     ignore_read_extra:
       - 'force_destroy'
-      - 'recursive'
 description: |
   A Google Cloud Storage Folder.
 
