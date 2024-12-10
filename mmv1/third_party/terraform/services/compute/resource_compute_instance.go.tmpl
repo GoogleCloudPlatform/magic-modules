@@ -60,6 +60,7 @@ var (
 		"advanced_machine_features.0.turbo_mode",
 		"advanced_machine_features.0.visible_core_count",
 		"advanced_machine_features.0.performance_monitoring_unit",
+		"advanced_machine_features.0.enable_uefi_networking",
 	}
 
 	bootDiskKeys = []string{
@@ -217,7 +218,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: bootDiskKeys,
 							Default:      true,
-							ForceNew:     true,
 							Description:  `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
 
@@ -1132,6 +1132,13 @@ be from 0 to 999,999,999 inclusive.`,
 							AtLeastOneOf: advancedMachineFeaturesKeys,
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
+						},
+						"enable_uefi_networking": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: advancedMachineFeaturesKeys,
+							Description:  `Whether to enable UEFI networking for the instance.`,
 						},
 					},
 				},
@@ -2491,6 +2498,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				return opErr
 			}
 			log.Printf("[DEBUG] Successfully attached disk %s", disk.Source)
+		}
+	}
+
+	// if any other boot_disk fields will be added here this should be wrapped in if d.HasChange("boot_disk")
+	if d.HasChange("boot_disk.0.auto_delete") {
+		op, err := config.NewComputeClient(userAgent).Instances.SetDiskAutoDelete(project, zone, instance.Name, d.Get("boot_disk.0.auto_delete").(bool), d.Get("boot_disk.0.device_name").(string)).Do()
+		if err != nil {
+			return fmt.Errorf("Error changing auto_delete: %s", err)
+		}
+		opErr := ComputeOperationWaitTime(config, op, project, "changing auto_delete", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
 		}
 	}
 

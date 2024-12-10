@@ -149,7 +149,7 @@ properties:
   - name: 'kdcHostname'
     type: String
     description: |
-      Hostname of the Active Directory server used as Kerberos Key Distribution Center. Only requried for volumes using kerberized NFSv4.1
+      Hostname of the Active Directory server used as Kerberos Key Distribution Center. Only required for volumes using kerberized NFSv4.1
     required: false
   - name: 'kdcIp'
     type: String

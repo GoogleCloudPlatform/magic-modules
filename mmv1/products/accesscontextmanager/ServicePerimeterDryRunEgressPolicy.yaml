@@ -57,14 +57,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - egressFrom
   - egressTo
@@ -111,7 +105,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
-        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
@@ -161,7 +155,7 @@ properties:
           then this `EgressTo` rule will authorize access to all resources outside
           the perimeter.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_egress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterDryRunEgressPolicyEgressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunEgressPolicyEgressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'externalResources'
