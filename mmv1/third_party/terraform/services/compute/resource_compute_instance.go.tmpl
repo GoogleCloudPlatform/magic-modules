@@ -1007,7 +1007,7 @@ be from 0 to 999,999,999 inclusive.`,
 				Type:        	  schema.TypeList,
 				Optional:    	  true,
 				ForceNew:    	  true,
-				DiffSuppressFunc: scratchDiskDiffSuppress
+				DiffSuppressFunc: scratchDiskDiffSuppress,
 				Description: 	  `The scratch disks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
