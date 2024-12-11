@@ -7,11 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/bigquery"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	bigquery "google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T) {
@@ -22,7 +23,15 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	// Run cleanup before the test starts
-	cleanupBigQueryDatasets(t, "tf_test_")
+	// cleanupBigQueryDatasets(t, "tf_test_")
+
+	ctx := context.Background()
+	projectID := envvar.GetTestProjectFromEnv()
+	credentialsFile := "path/to/credentials.json"
+	err := cleanupOrganizationBigQueryExportsDatasets(ctx, "tf_test_", projectID, credentialsFile)
+	if err != nil {
+		t.Fatalf("Cleanup failed: %v", err)
+	}
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
@@ -65,34 +74,36 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 	})
 }
 
-func cleanupBigQueryDatasets(t *testing.T, prefix string) {
-	ctx := context.Background()
-	projectID := envvar.ProjectID()
+func cleanupOrganizationBigQueryExportsDatasets(ctx context.Context, prefix string, projectID string, credentialsFile string) error {
 
-	client, err := bigquery.NewClient(ctx, projectID)
+	service, err := bigquery.NewService(ctx, option.WithCredentialsFile(credentialsFile))
+
 	if err != nil {
-		t.Fatalf("Failed to create BigQuery client: %v", err)
+		return fmt.Errorf("failed to create BigQuery service: %v", err)
 	}
-	defer client.Close()
 
-	it := client.Datasets(ctx)
-	for {
-		dataset, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			t.Fatalf("Failed to list datasets: %v", err)
-		}
+	datasetsService := bigquery.NewDatasetsService(service)
+	datasetsListCall := datasetsService.List(projectID)
+	datasets, err := datasetsListCall.Do()
 
-		// Delete datasets that start with the specified prefix
-		if strings.HasPrefix(dataset.DatasetID, prefix) {
-			log.Printf("Deleting existing dataset with prefix %s: %s", prefix, dataset.DatasetID)
-			if err := client.Dataset(dataset.DatasetID).DeleteWithContents(ctx); err != nil {
-				t.Fatalf("Failed to delete dataset %s: %v", dataset.DatasetID, err)
+	if err != nil {
+		return fmt.Errorf("failed to list datasets: %v", err)
+	}
+
+	for _, dataset := range datasets.Datasets {
+
+		if strings.HasPrefix(dataset.Id, prefix) {
+
+			log.Printf("Deleting dataset with ID: %s", dataset.Id)
+
+			err := datasetsService.Delete(projectID, dataset.Id).DeleteContents(true).Do()
+
+			if err != nil {
+				return fmt.Errorf("failed to delete dataset %s: %v", dataset.Id, err)
 			}
 		}
 	}
+	return nil
 }
 
 func testAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(context map[string]interface{}) string {
@@ -161,6 +172,11 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_bigquery_dataset.default]
+	create_duration = "6m"
+}
+
 resource "google_scc_v2_organization_scc_big_query_exports" "default" {
   name		   = "%{name}"
   big_query_export_id    = "%{big_query_export_id}"
@@ -169,6 +185,8 @@ resource "google_scc_v2_organization_scc_big_query_exports" "default" {
   location     = "global"
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+
+  depends_on = [time_sleep.wait_1_minute]  
 }
 
 resource "time_sleep" "wait_for_cleanup" {
