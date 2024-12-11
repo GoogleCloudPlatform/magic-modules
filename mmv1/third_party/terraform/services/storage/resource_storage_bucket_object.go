@@ -3,8 +3,8 @@ package storage
 
 import (
 	"bytes"
-	"fmt"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -25,10 +25,10 @@ import (
 
 func ResourceStorageBucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceStorageBucketObjectCreate,
-		Read:   resourceStorageBucketObjectRead,
-		Update: resourceStorageBucketObjectUpdate,
-		Delete: resourceStorageBucketObjectDelete,
+		Create:        resourceStorageBucketObjectCreate,
+		Read:          resourceStorageBucketObjectRead,
+		Update:        resourceStorageBucketObjectUpdate,
+		Delete:        resourceStorageBucketObjectDelete,
 		CustomizeDiff: resourceStorageBucketObjectCustomizeDiff,
 
 		Timeouts: &schema.ResourceTimeout{
