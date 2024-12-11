@@ -48,6 +48,8 @@ async:
     message: 'message'
 collection_url_key: 'items'
 custom_code:
+schema_version: 1
+state_upgraders: true
 examples:
   - name: 'ha_vpn_gateway_basic'
     primary_resource_id: 'ha_gateway1'
@@ -140,6 +142,7 @@ properties:
     description: |
       The IP family of the gateway IPs for the HA-VPN gateway interfaces. If not specified, IPV4 will be used.
     immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
     default_value: "IPV4"
     enum_values:
       - 'IPV4'
