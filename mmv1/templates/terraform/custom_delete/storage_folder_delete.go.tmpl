@@ -3,6 +3,11 @@ name := d.Get("name").(string)
 
 var listError, deleteObjectError error
 for deleteObjectError == nil {
+    if !d.Get("force_destroy").(bool) {
+        deleteErr := fmt.Errorf("Error trying to delete folder %s containing objects without force_destroy set to true", bucket)
+        log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+        return deleteErr
+    }
     res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(name).Do()
     if err != nil {
         log.Printf("Error listing contents of bucket %s: %v", bucket, err)
@@ -12,12 +17,6 @@ for deleteObjectError == nil {
 
     if len(res.Items) == 0 {
         break // 0 items, folder empty
-    }
-
-    if !d.Get("force_destroy").(bool) {
-        deleteErr := fmt.Errorf("Error trying to delete folder %s containing objects without force_destroy set to true", bucket)
-        log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
-        return deleteErr
     }
     // GCS requires that a folder be empty (have no objects or object
     // versions) before it can be deleted.
