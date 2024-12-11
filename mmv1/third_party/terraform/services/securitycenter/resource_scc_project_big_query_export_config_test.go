@@ -2,7 +2,6 @@ package securitycenter_test
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -20,8 +19,15 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 	datasetID := "tf_test_" + randomSuffix
 	orgID := envvar.GetTestOrgFromEnv(t)
 
+	// Setup test context
+	ctx := context.Background()
+	projectID := envvar.GetTestProjectFromEnv()
+	location := "US"
+
 	// Run cleanup before the test starts
-	cleanupBigQueryDatasets(t, "tf_test_")
+	if err := cleanupProjectBigQueryDatasets(ctx, projectID, "tf_test_", location); err != nil {
+		t.Fatalf("Failed to clean up BigQuery datasets: %v", err)
+	}
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
@@ -63,29 +69,30 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 	})
 }
 
-func cleanupBigQueryDatasets(t *testing.T, prefix string) {
-	ctx := context.Background()
-	projectID := envvar.ProjectID()
-
+func cleanupProjectBigQueryDatasets(ctx context.Context, projectID, prefix, location string) error {
 	service, err := bigquery.NewService(ctx)
 	if err != nil {
-		t.Fatalf("Failed to create BigQuery service: %v", err)
+		return err
 	}
 
-	datasetListCall := service.Datasets.List(projectID)
-	datasets, err := datasetListCall.Do()
+	listCall := service.Datasets.List(projectID)
+	response, err := listCall.Do()
 	if err != nil {
-		t.Fatalf("Failed to list datasets: %v", err)
+		return err
 	}
 
-	for _, dataset := range datasets.Datasets {
-		if strings.HasPrefix(dataset.Id, prefix) {
-			log.Printf("Deleting existing dataset with prefix %s: %s", prefix, dataset.Id)
-			if err := service.Datasets.Delete(projectID, dataset.DatasetReference.DatasetId).Do(); err != nil {
-				t.Fatalf("Failed to delete dataset %s: %v", dataset.Id, err)
+	for _, dataset := range response.Datasets {
+		datasetID := dataset.DatasetReference.DatasetId
+		if strings.HasPrefix(datasetID, prefix) {
+			log.Printf("Deleting dataset with ID: %s", datasetID)
+			deleteCall := service.Datasets.Delete(projectID, datasetID).DeleteContents(true)
+			if err := deleteCall.Context(ctx).Do(); err != nil {
+				log.Printf("Failed to delete dataset %s: %v", datasetID, err)
 			}
 		}
 	}
+
+	return nil
 }
 
 func testAccSecurityCenterProjectBigQueryExportConfig_basic(context map[string]interface{}) string {
@@ -156,12 +163,22 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
+resource "time_sleep" "wait_x_minutes" {
+	depends_on = [google_bigquery_dataset.default]
+	create_duration = "6m"
+	# need to wait for destruction due to
+	# 'still in use' error from api
+	destroy_duration = "1m"
+}
+
 resource "google_scc_project_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
   dataset      = google_bigquery_dataset.default.id
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+
+  depends_on = [time_sleep.wait_x_minutes]
 }
 
 resource "time_sleep" "wait_for_cleanup" {

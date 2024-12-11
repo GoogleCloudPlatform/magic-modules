@@ -24,9 +24,9 @@ func TestAccSecurityCenterOrganizationBigQueryExportConfig_basic(t *testing.T) {
 
 	// Run cleanup before the test starts
 	ctx := context.Background()
-	projectID := envvar.ProjectID()
+	projectID := envvar.GetTestProjectFromEnv()
 	credentialsFile := "path/to/credentials.json"
-	err := cleanupBigQueryDatasets(ctx, "tf_test_", projectID, credentialsFile)
+	err := cleanupOrganizationBigQueryDatasets(ctx, "tf_test_", projectID, credentialsFile)
 	if err != nil {
 		t.Fatalf("Cleanup failed: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestAccSecurityCenterOrganizationBigQueryExportConfig_basic(t *testing.T) {
 	})
 }
 
-func cleanupBigQueryDatasets(ctx context.Context, prefix string, projectID string, credentialsFile string) error {
+func cleanupOrganizationBigQueryDatasets(ctx context.Context, prefix string, projectID string, credentialsFile string) error {
 	service, err := bigquery.NewService(ctx, option.WithCredentialsFile(credentialsFile))
 	if err != nil {
 		return fmt.Errorf("failed to create BigQuery service: %v", err)
@@ -162,12 +162,19 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
+resource "time_sleep" "wait_1_minute" {
+	depends_on = [google_bigquery_dataset.default]
+	create_duration = "6m"
+}
+
 resource "google_scc_organization_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   organization = "%{org_id}"
   dataset      = google_bigquery_dataset.default.id
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+
+  depends_on = [time_sleep.wait_1_minute]
 }
 
 resource "time_sleep" "wait_for_cleanup" {
