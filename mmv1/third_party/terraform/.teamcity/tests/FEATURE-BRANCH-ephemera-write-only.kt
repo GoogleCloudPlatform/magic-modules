@@ -10,7 +10,7 @@ package tests
 import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
 import org.junit.Assert
 import org.junit.Test
-import projects.feature_branches.featureBranchEphemeralResources
+import projects.feature_branches.featureBranchEphemeralWriteOnly
 import projects.googleCloudRootProject
 
 class FeatureBranchEphemeralWriteOnlySubProject {
@@ -19,7 +19,7 @@ class FeatureBranchEphemeralWriteOnlySubProject {
         val root = googleCloudRootProject(testContextParameters())
 
         // Find feature branch project
-        val project = getSubProject(root, featureBranchEphemeralResources)
+        val project = getSubProject(root, featureBranchEphemeralWriteOnly  )
 
         // All builds using the HashiCorp owned GitHub repos
         val hashiBuilds = project.buildTypes.filter { bt ->
@@ -48,10 +48,10 @@ class FeatureBranchEphemeralWriteOnlySubProject {
             )
 
             // Check that triggered builds are being run on the feature branch
-            val isCorrectBranch: Boolean = schedulingTrigger.branchFilter == "+:refs/heads/$featureBranchEphemeralResources"
+            val isCorrectBranch: Boolean = schedulingTrigger.branchFilter == "+:refs/heads/$featureBranchEphemeralWriteOnly"
 
             Assert.assertTrue(
-                "Build configuration `${bt.name}` is using the $featureBranchEphemeralResources branch filter",
+                "Build configuration `${bt.name}` is using the $featureBranchEphemeralWriteOnly branch filter",
                 isCorrectBranch
             )
         }
@@ -62,7 +62,7 @@ class FeatureBranchEphemeralWriteOnlySubProject {
         val root = googleCloudRootProject(testContextParameters())
 
         // Find feature branch project
-        val project = getSubProject(root, featureBranchEphemeralResources)
+        val project = getSubProject(root, featureBranchEphemeralWriteOnly)
 
         // All builds using the HashiCorp owned GitHub repos
         val magicianBuilds = project.buildTypes.filter { bt ->
