@@ -87,6 +87,13 @@ examples:
       hub_name: "hub-basic"
       spoke_name: "vpc-spoke"
       producer_spoke_name: "producer-spoke"
+  - name: 'network_connectivity_spoke_center_group'
+    primary_resource_id: 'primary'
+    vars:
+      hub_name: "hub-basic"
+      spoke_name: "vpc-spoke"
+      auto_accept_project_1_name: "foo"
+      auto_accept_project_2_name: "bar"
 parameters:
   - name: 'location'
     type: String
@@ -121,6 +128,12 @@ properties:
     required: true
     immutable: true
     resource: 'hub'
+    imports: 'name'
+  - name: 'group'
+    type: ResourceRef
+    description: Optional. The name of the group that this spoke is associated with.
+    immutable: true
+    resource: 'group'
     imports: 'name'
   - name: 'linkedVpnTunnels'
     type: NestedObject
