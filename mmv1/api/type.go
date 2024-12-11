@@ -363,6 +363,10 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
+	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+		log.Fatalf("Property %s cannot be write_only and computed at the same time in resource %s", t.Name, rName)
+	}
+
 	t.validateLabelsField()
 
 	switch {

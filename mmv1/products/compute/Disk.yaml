@@ -84,9 +84,6 @@ examples:
     vars:
       disk_name: 'test-disk-features'
 parameters:
-  - name: 'rootWriteTest'
-    type: String
-    write_only: true
   - name: 'zone'
     type: ResourceRef
     description: 'A reference to the zone where the disk resides.'
@@ -179,16 +176,6 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
-        conflicts:
-          - diskEncryptionKey.0.raw_key_wo
-      - name: 'rawKey_wo'
-        type: String
-        description: |
-          Specifies a 256-bit customer-supplied encryption key, encoded in
-          RFC 4648 base64 to either encrypt or decrypt this resource.
-        write_only: true
-        conflicts:
-          - diskEncryptionKey.0.raw_key
       - name: 'rsaEncryptedKey'
         type: String
         description: |
