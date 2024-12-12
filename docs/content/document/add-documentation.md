@@ -2,7 +2,7 @@
 title: "Add documentation"
 weight: 10
 aliases:
-  - /docs/develop/add-documentation
+  - /develop/add-documentation
 ---
 
 # Add documentation
