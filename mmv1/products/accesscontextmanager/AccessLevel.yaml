@@ -275,7 +275,7 @@ properties:
                         required: true
                       - name: 'vpcIpSubnetworks'
                         type: Array
-                        description: 'CIDR block IP subnetwork specification. Must be IPv4.'
+                        description: 'A list of CIDR block IP subnetwork specification. Must be IPv4.'
                         item_type:
                           type: String
         min_size: 1
