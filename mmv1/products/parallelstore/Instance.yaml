@@ -149,7 +149,7 @@ properties:
   - name: 'network'
     type: String
     description: |
-      Required. Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
+      Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the instance is connected.
     immutable: true
   - name: 'reservedIpRange'
