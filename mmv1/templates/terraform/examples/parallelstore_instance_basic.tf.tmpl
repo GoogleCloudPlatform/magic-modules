@@ -5,7 +5,7 @@ resource "google_parallelstore_instance" "{{$.PrimaryResourceId}}" {
   capacity_gib = 12000
   network = google_compute_network.network.name
   file_stripe_level = "FILE_STRIPE_LEVEL_MIN"
-  deployment_type = "SCRATCH"
+  directory_stripe_level = "DIRECTORY_STRIPE_LEVEL_MIN"
   labels = {
     test = "value"
   }
@@ -16,6 +16,7 @@ resource "google_compute_network" "network" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = true
   mtu = 8896
+  provider = google-beta
 }
 
 # Create an IP address
