@@ -16,7 +16,7 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 func testAccAccessContextManagerServicePerimeters_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-  projectNumber := envvar.GetTestProjectNumberFromEnv(t)
+	projectNumber := envvar.GetTestProjectNumberFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
