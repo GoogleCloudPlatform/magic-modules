@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/iterator"
 )
 
 func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T) {
@@ -26,8 +25,7 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 	// Run cleanup before the test starts
 	ctx := context.Background()
 	projectID := envvar.GetTestProjectFromEnv()
-	credentialsFile := "path/to/credentials.json"
-	err := cleanupOrganizationBigQueryDatasets(ctx, "tf_test_", projectID, credentialsFile)
+	err := cleanupOrganizationBigQueryDatasets(ctx, "tf_test_", projectID)
 	if err != nil {
 		t.Fatalf("Cleanup failed: %v", err)
 	}
@@ -73,9 +71,9 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 	})
 }
 
-func cleanupOrganizationBigQueryDatasets(ctx context.Context, prefix string, projectID string, credentialsFile string) error {
+func cleanupOrganizationBigQueryDatasets(ctx context.Context, prefix string, projectID string) error {
 
-	service, err := bigquery.NewService(ctx, option.WithCredentialsFile(credentialsFile))
+	service, err := bigquery.NewService(ctx)
 
 	if err != nil {
 		return fmt.Errorf("failed to create BigQuery service: %v", err)
