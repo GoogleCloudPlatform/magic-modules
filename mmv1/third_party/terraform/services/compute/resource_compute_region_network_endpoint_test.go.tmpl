@@ -147,8 +147,6 @@ resource "google_compute_region_network_endpoint" "add2" {
 `, context) + testAccComputeRegionNetworkEndpoint_noRegionNetworkEndpoints(context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
-
 func TestAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapExample(t *testing.T) {
 	t.Parallel()
 
@@ -249,7 +247,6 @@ resource "google_compute_region_network_endpoint" "region_network_endpoint_portm
 }
 `, context) + testAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapNoEndpointExample(context)
 }
-{{- end }}
 
 func testAccComputeRegionNetworkEndpoint_noRegionNetworkEndpoints(context map[string]interface{}) string {
 	return acctest.Nprintf(`
