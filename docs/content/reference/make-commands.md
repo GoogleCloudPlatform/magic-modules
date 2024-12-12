@@ -1,6 +1,6 @@
 ---
 title: "make commands"
-weight: 10
+weight: 30
 ---
 # `make` commands reference
 
