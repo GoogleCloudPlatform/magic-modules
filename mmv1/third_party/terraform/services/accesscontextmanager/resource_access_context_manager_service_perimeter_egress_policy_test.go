@@ -22,7 +22,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
-	projectNumber := envvar.GetTestProjectFromEnv(t)
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

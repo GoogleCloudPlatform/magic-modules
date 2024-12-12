@@ -16,7 +16,7 @@ import (
 // can exist, they need to be run serially. See AccessPolicy for the test runner.
 func testAccAccessContextManagerServicePerimeters_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	projectNumber := envvar.GetTestProjectNumberFromEnv(t)
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -381,7 +381,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     }
   }
 }
-`, org, policyTitle, levelTitleName, levelTitleName, org, perimeterTitleName1, perimeterTitleName1, perimeterTitleName2, perimeterTitleName2, perimeterTitleName3, perimeterTitleName3, perimeterTitleName4, perimeterTitleName4, projectNumber, projectNumber)
+`, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName1, perimeterTitleName1, perimeterTitleName2, perimeterTitleName2, perimeterTitleName3, perimeterTitleName3, perimeterTitleName4, perimeterTitleName4, projectNumber, projectNumber)
 }
 
 func testAccAccessContextManagerServicePerimeters_empty(org, policyTitle, levelTitleName string) string {
