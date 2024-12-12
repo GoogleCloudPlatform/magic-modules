@@ -1,0 +1,76 @@
+resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}}" {
+  cluster = "{{index $.Vars "cluster_name"}}"
+  cluster_endpoints = {
+    connections {
+      pscConnection {
+        pscConnectionId = google_compute_forwarding_rule.forwarding_rule1_network1.pscConnectionId
+        address = ip11.address
+        forwardingRule = google_compute_forwarding_rule.forwarding_rule1_network1.id
+        network = google_compute_forwarding_rule.forwarding_rule1_network1.network
+        serviceAttachment = google_compute_forwarding_rule.forwarding_rule1_network1.target
+      }
+    }
+    connections {
+      pscConnection {
+        pscConnectionId = google_compute_forwarding_rule.forwarding_rule2_network1.pscConnectionId
+        address = ip12.address
+        forwardingRule = google_compute_forwarding_rule.forwarding_rule2_network1.id
+        network = google_compute_forwarding_rule.forwarding_rule2_network1.network
+        serviceAttachment = google_compute_forwarding_rule.forwarding_rule2_network1.target
+      }
+    }
+  }
+}
+resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
+  name                   = "forwardingRule11"
+  region                 = "us-central1"
+  ip_address             = google_compute_address.ip11.id
+  load_balancing_scheme  = ""
+  network                = google_compute_network.network1.id
+  target = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
+}
+
+resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
+  name                   = "forwardingRule12"
+  region                 = "us-central1"
+  ip_address             = google_compute_address.ip12.id
+  load_balancing_scheme  = ""
+  network                = google_compute_network.network1.id
+  target = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment
+}
+
+resource "google_compute_address" "ip11" {
+  name         = "ip11"
+  region       = "us-central1"
+  subnetwork   = google_compute_subnetwork.subnet11.id
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+
+resource "google_compute_address" "ip12" {
+  name         = "ip12"
+  region       = "us-central1"
+  subnetwork   = google_compute_subnetwork.subnet11.id
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+
+resource "google_compute_subnetwork" "subnet11" {
+  name          = "{{index $.Vars "subnet_name"}}"
+  ip_cidr_range = "10.0.0.248/29"
+  region        = "us-central1"
+  network       = google_compute_network.network1.id
+}
+
+resource "google_compute_network" "network1" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+// redis cluster without endpoint
+resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
+  name           = "{{index $.Vars "cluster_name"}}"
+  shard_count    = 3
+  region = "us-central1"
+  replica_count = 0
+}
