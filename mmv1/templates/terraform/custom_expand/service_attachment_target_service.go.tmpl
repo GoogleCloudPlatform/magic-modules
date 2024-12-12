@@ -1,10 +1,7 @@
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	resource := strings.Split(v.(string), "/")
     resourceKind := resource[len(resource)-2]
-    resourceBound := "region"
-    if resourceKind != "forwardingRules" {
-        resourceBound = "locations"
-    }
+    resourceBound := resource[len(resource)-4]
     
     _, err := tpgresource.ParseRegionalFieldValue(resourceKind, v.(string), "project", resourceBound, "zone", d, config, true)
 	if err != nil {
