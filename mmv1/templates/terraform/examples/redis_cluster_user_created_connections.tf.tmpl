@@ -2,21 +2,21 @@ resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}
   cluster = "{{index $.Vars "cluster_name"}}"
   cluster_endpoints {
     connections {
-      pscConnection {
-        pscConnectionId = google_compute_forwarding_rule.forwarding_rule1_network1.pscConnectionId
+      psc_connection {
+        psc_connection_id = google_compute_forwarding_rule.forwarding_rule1_network1.pscConnectionId
         address = ip11.address
-        forwardingRule = google_compute_forwarding_rule.forwarding_rule1_network1.id
+        forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network1.id
         network = google_compute_forwarding_rule.forwarding_rule1_network1.network
-        serviceAttachment = google_compute_forwarding_rule.forwarding_rule1_network1.target
+        service_attachment = google_compute_forwarding_rule.forwarding_rule1_network1.target
       }
     }
     connections {
-      pscConnection {
-        pscConnectionId = google_compute_forwarding_rule.forwarding_rule2_network1.pscConnectionId
+      psc_connection {
+        psc_connection_id = google_compute_forwarding_rule.forwarding_rule2_network1.pscConnectionId
         address = ip12.address
-        forwardingRule = google_compute_forwarding_rule.forwarding_rule2_network1.id
+        forwarding_rule = google_compute_forwarding_rule.forwarding_rule2_network1.id
         network = google_compute_forwarding_rule.forwarding_rule2_network1.network
-        serviceAttachment = google_compute_forwarding_rule.forwarding_rule2_network1.target
+        service_attachment = google_compute_forwarding_rule.forwarding_rule2_network1.target
       }
     }
   }
