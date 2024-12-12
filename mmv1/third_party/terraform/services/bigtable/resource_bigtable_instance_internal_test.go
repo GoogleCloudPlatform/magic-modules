@@ -160,7 +160,7 @@ func TestUnitBigtable_flattenBigtableCluster(t *testing.T) {
 				"kms_key_name": "KMS",
 				"state":        "CREATING",
 				"autoscaling_config": []map[string]interface{}{
-					map[string]interface{}{
+					{
 						"min_nodes":      3,
 						"max_nodes":      7,
 						"cpu_target":     50,
