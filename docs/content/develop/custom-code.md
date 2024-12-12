@@ -264,7 +264,7 @@ docs:
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```
 
-See [Add documentation (Handwritten)]({{< ref "/develop/add-documentation" >}}) for more information about what to include in the field documentation.
+See [Add documentation (Handwritten)]({{< ref "/document/add-documentation" >}}) for more information about what to include in the field documentation.
 
 ## What's next?
 

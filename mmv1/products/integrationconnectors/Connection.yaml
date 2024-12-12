@@ -137,7 +137,7 @@ properties:
   - name: 'description'
     type: String
     description: |
-      An arbitrary description for the Conection.
+      An arbitrary description for the Connection.
   - name: 'labels'
     type: KeyValueLabels
     description: |
