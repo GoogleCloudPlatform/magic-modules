@@ -148,7 +148,6 @@ properties:
       type: String
   - name: 'network'
     type: String
-    required: true
     description: |
       Required. Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the instance is connected.
