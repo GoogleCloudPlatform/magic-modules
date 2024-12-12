@@ -103,5 +103,17 @@ Not currently available publicly.`,
 }
 
 func ResourceComputeHaVpnGatewayUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	return tpgresource.TerraformLabelsStateUpgrade(rawState)
+    log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
+
+
+    // Check if "gateway_ip_version" already exists
+    if _, ok := rawState["gateway_ip_version"]; !ok {
+        // Add the missing attribute with the default value
+        rawState["gateway_ip_version"] = "IPV4" 
+    } else {
+        log.Printf("[DEBUG] 'gateway_ip_version' already exists: %#v", rawState["gateway_ip_version"])
+    }
+
+    log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+    return rawState, nil 
 }
