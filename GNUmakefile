@@ -75,7 +75,7 @@ tpgtools:
 clean-provider:
 	cd $(OUTPUT_PATH);\
 		go mod download;\
-		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "CODEOWNERS" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
 
 clean-tgc:
 	cd $(OUTPUT_PATH);\
@@ -85,11 +85,14 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
 		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./v6/pkg/cai2hcl/*;\
+		rm -rf ./v6/pkg/tfplan2cai/*;\
 
 tgc:
 	cd mmv1;\
-		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
-		go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_v6 --output $(OUTPUT_PATH)/v6/pkg $(mmv1_compile);\
 
 tf-oics:
 	cd mmv1;\

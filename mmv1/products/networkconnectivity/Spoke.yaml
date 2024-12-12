@@ -33,14 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 legacy_long_form_project: true
 examples:
@@ -131,12 +125,13 @@ properties:
   - name: 'linkedVpnTunnels'
     type: NestedObject
     description: The URIs of linked VPN tunnel resources
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedVpnTunnels.includeImportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -160,12 +155,13 @@ properties:
   - name: 'linkedInterconnectAttachments'
     type: NestedObject
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
-    immutable: true
     conflicts:
       - linked_vpn_tunnels
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedInterconnectAttachments.includeImportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -189,12 +185,14 @@ properties:
   - name: 'linkedRouterApplianceInstances'
     type: NestedObject
     description: The URIs of linked Router appliance resources
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_vpn_tunnels
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedRouterApplianceInstances.instances'
+      - 'linkedRouterApplianceInstances.includeImportRanges'
     properties:
       - name: 'instances'
         type: Array
@@ -209,11 +207,13 @@ properties:
               type: String
               description: The URI of the virtual machine resource
               immutable: true
+              required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'ipAddress'
               type: String
               description: The IP address on the VM to use for peering.
               immutable: true
+              required: true
       - name: 'siteToSiteDataTransfer'
         type: Boolean
         description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.

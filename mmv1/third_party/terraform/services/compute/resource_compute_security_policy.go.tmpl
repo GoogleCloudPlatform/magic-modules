@@ -24,6 +24,26 @@ import (
 {{- end }}
 )
 
+func verifyRulePriorityCompareEmptyValues(d *schema.ResourceData, rulePriority int, schemaKey string) bool {
+	if schemaRules, ok := d.GetOk("rule"); ok {
+		for _, itemRaw := range schemaRules.(*schema.Set).List() {
+			if itemRaw == nil {
+				continue
+			}
+			item := itemRaw.(map[string]interface{})
+
+			schemaPriority := item["priority"].(int)
+			if rulePriority == schemaPriority {
+				if tpgresource.IsEmptyValue(reflect.ValueOf(item[schemaKey])) {
+					return true
+				}
+				break
+			}
+		}
+	}
+	return false
+}
+
 // IsEmptyValue does not consider a empty PreconfiguredWafConfig object as empty so we check it's nested values
 func preconfiguredWafConfigIsEmptyValue(config *compute.SecurityPolicyRulePreconfiguredWafConfig) bool {
 	if (tpgresource.IsEmptyValue(reflect.ValueOf(config.Exclusions)) &&
@@ -327,7 +347,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
 									},
 
-									{{ if ne $.TargetVersionName `ga` -}}
 									"enforce_on_key_configs": {
 										Type:        schema.TypeList,
 										Description: `Enforce On Key Config of this security policy`,
@@ -348,7 +367,6 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 											},
 										},
 									},
-									{{- end }}
 
 									"ban_threshold": {
 										Type:        schema.TypeList,
@@ -546,6 +564,80 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 										Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PREMIUM"}, false),
 										Description: `Rule visibility. Supported values include: "STANDARD", "PREMIUM".`,
+									},
+									"threshold_configs": {
+										Type: schema.TypeList,
+										Description: `Configuration options for layer7 adaptive protection for various customizable thresholds.`,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type: schema.TypeString,
+													Required: true,
+													Description: `The name must be 1-63 characters long, and comply with RFC1035. The name must be unique within the security policy.`,
+													ValidateFunc: validation.StringLenBetween(1, 63),
+												},
+												"auto_deploy_load_threshold": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatAtLeast(0.0),
+												},
+												"auto_deploy_confidence_threshold": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatBetween(0.0, 1.0),
+												},
+												"auto_deploy_impacted_baseline_threshold": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatBetween(0.0, 1.0),
+												},
+												"auto_deploy_expiration_sec": {
+													Type: schema.TypeInt,
+													Optional: true,
+													ValidateFunc: validation.IntBetween(1, 7776000),
+												},
+												"detection_load_threshold": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatAtLeast(0.0),
+												},
+												"detection_absolute_qps": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatAtLeast(0.0),
+												},
+												"detection_relative_to_baseline_qps": {
+													Type: schema.TypeFloat,
+													Optional: true,
+													ValidateFunc: validation.FloatAtLeast(1.0),
+												},
+												"traffic_granularity_configs": {
+													Type: schema.TypeList,
+													Optional: true,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"type": {
+																Type: schema.TypeString,
+																Required: true,
+																Description: `Type of this configuration.`,
+																ValidateFunc: validation.StringInSlice([]string{"HTTP_HEADER_HOST", "HTTP_PATH"}, false),
+															},
+															"value": {
+																Type: schema.TypeString,
+																Optional: true,
+																Description: `Requests that match this value constitute a granular traffic unit.`,
+															},
+															"enable_each_unique_value": {
+																Type: schema.TypeBool,
+																Optional: true,
+																Description: `If enabled, traffic matching each unique value for the specified type constitutes a separate traffic unit. It can only be set to true if value is empty.`,
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -833,72 +925,6 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	{{ if eq $.TargetVersionName `ga` }}
-	if d.HasChange("rule") {
-		o, n := d.GetChange("rule")
-		oSet := o.(*schema.Set)
-		nSet := n.(*schema.Set)
-
-		oPriorities := map[int64]bool{}
-		nPriorities := map[int64]bool{}
-		for _, rule := range oSet.List() {
-			oPriorities[int64(rule.(map[string]interface{})["priority"].(int))] = true
-		}
-
-		for _, rule := range nSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			nPriorities[priority] = true
-			if !oPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-				// If the rule is in new and its priority does not exist in old, then add it.
-				op, err := client.SecurityPolicies.AddRule(project, sp, expandSecurityPolicyRule(rule)).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			} else if !oSet.Contains(rule) {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule is in new, and its priority is in old, but its hash is different than the one in old, update it.
-				op, err := client.SecurityPolicies.PatchRule(project, sp, expandSecurityPolicyRule(rule)).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		for _, rule := range oSet.List() {
-			priority := int64(rule.(map[string]interface{})["priority"].(int))
-			if !nPriorities[priority] {
-				client := config.NewComputeClient(userAgent)
-
-				// If the rule's priority is in old but not new, remove it.
-				op, err := client.SecurityPolicies.RemoveRule(project, sp).Priority(priority).Do()
-
-				if err != nil {
-					return errwrap.Wrapf(fmt.Sprintf("Error updating SecurityPolicy %q: {{"{{"}}err{{"}}"}}", sp), err)
-				}
-
-				err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Updating SecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	{{- else }}
 	if d.HasChange("rule") {
 		o, n := d.GetChange("rule")
 		oSet := o.(*schema.Set)
@@ -999,7 +1025,6 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 			}
 		}
 	}
-	{{- end }}
 
 	return resourceComputeSecurityPolicyRead(d, meta)
 }
@@ -1188,7 +1213,7 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule, d *schema.R
 			"priority":                 rule.Priority,
 			"action":                   rule.Action,
 			"preview":                  rule.Preview,
-			"match":                    flattenMatch(rule.Match),
+			"match":                    flattenMatch(rule.Match, d, int(rule.Priority)),
 			"preconfigured_waf_config": flattenPreconfiguredWafConfig(rule.PreconfiguredWafConfig, d, int(rule.Priority)),
 			"rate_limit_options":	      flattenSecurityPolicyRuleRateLimitOptions(rule.RateLimitOptions),
 			"redirect_options":         flattenSecurityPolicyRedirectOptions(rule.RedirectOptions),
@@ -1199,7 +1224,7 @@ func flattenSecurityPolicyRules(rules []*compute.SecurityPolicyRule, d *schema.R
 	return rulesSchema
 }
 
-func flattenMatch(match *compute.SecurityPolicyRuleMatcher) []map[string]interface{} {
+func flattenMatch(match *compute.SecurityPolicyRuleMatcher, d *schema.ResourceData, rulePriority int) []map[string]interface{} {
 	if match == nil {
 		return nil
 	}
@@ -1208,7 +1233,7 @@ func flattenMatch(match *compute.SecurityPolicyRuleMatcher) []map[string]interfa
 		"versioned_expr": match.VersionedExpr,
 		"config":         flattenMatchConfig(match.Config),
 		"expr":           flattenMatchExpr(match),
-		"expr_options":   flattenMatchExprOptions(match.ExprOptions),
+		"expr_options":   flattenMatchExprOptions(match.ExprOptions, d, rulePriority),
 	}
 
 	return []map[string]interface{}{data}
@@ -1226,8 +1251,15 @@ func flattenMatchConfig(conf *compute.SecurityPolicyRuleMatcherConfig) []map[str
 	return []map[string]interface{}{data}
 }
 
-func flattenMatchExprOptions(exprOptions *compute.SecurityPolicyRuleMatcherExprOptions) []map[string]interface{} {
+func flattenMatchExprOptions(exprOptions *compute.SecurityPolicyRuleMatcherExprOptions, d *schema.ResourceData, rulePriority int) []map[string]interface{} {
 	if exprOptions == nil {
+		return nil
+	}
+
+  // We check if the API is returning a empty non-null value then we find the current value for this field in the rule config and check if its empty
+	if (tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.ActionTokenSiteKeys)) &&
+		tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.SessionTokenSiteKeys))) &&
+		verifyRulePriorityCompareEmptyValues(d, rulePriority, "recaptcha_options") {
 		return nil
 	}
 
@@ -1272,22 +1304,9 @@ func flattenPreconfiguredWafConfig(config *compute.SecurityPolicyRulePreconfigur
 		return nil
 	}
 
-	// We find the current value for this field in the config and check if its empty, then check if the API is returning a empty non-null value
-	if schemaRules, ok := d.GetOk("rule"); ok {
-		for _, itemRaw := range schemaRules.(*schema.Set).List() {
-			if itemRaw == nil {
-				continue
-			}
-			item := itemRaw.(map[string]interface{})
-
-			schemaPriority := item["priority"].(int)
-			if rulePriority == schemaPriority {
-				if preconfiguredWafConfigIsEmptyValue(config) && tpgresource.IsEmptyValue(reflect.ValueOf(item["preconfigured_waf_config"])) {
-					return nil
-				}
-				break
-			}
-		}
+	// We check if the API is returning a empty non-null value then we find the current value for this field in the rule config and check if its empty
+	if preconfiguredWafConfigIsEmptyValue(config) && verifyRulePriorityCompareEmptyValues(d, rulePriority, "preconfigured_waf_config") {
+		return nil
 	}
 
 	data := map[string]interface{}{
@@ -1403,8 +1422,45 @@ func expandLayer7DdosDefenseConfig(configured []interface{}) *compute.SecurityPo
 	return &compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfig{
 		Enable: data["enable"].(bool),
 		RuleVisibility: data["rule_visibility"].(string),
+		ThresholdConfigs: expandThresholdConfigs(data["threshold_configs"].([]interface{})),
 		ForceSendFields: []string{"Enable"},
 	}
+}
+
+func expandThresholdConfigs(configured []interface{}) []*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfig{
+	params := make([]*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfig, 0, len(configured))
+	for _, raw := range configured {
+		params = append(params, expandThresholdConfig(raw))
+	}
+	return params
+}
+
+func expandThresholdConfig(configured interface{}) *compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfig{
+	data := configured.(map[string]interface{})
+	return &compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfig{
+		AutoDeployConfidenceThreshold:       data["auto_deploy_confidence_threshold"].(float64),
+		AutoDeployExpirationSec:             int64(data["auto_deploy_expiration_sec"].(int)),
+		AutoDeployImpactedBaselineThreshold: data["auto_deploy_impacted_baseline_threshold"].(float64),
+		AutoDeployLoadThreshold:             data["auto_deploy_load_threshold"].(float64),
+		DetectionAbsoluteQps:                data["detection_absolute_qps"].(float64),
+		DetectionLoadThreshold:              data["detection_load_threshold"].(float64),
+		DetectionRelativeToBaselineQps:      data["detection_relative_to_baseline_qps"].(float64),
+		Name:                                data["name"].(string),
+		TrafficGranularityConfigs:           expandTrafficGranularityConfig(data["traffic_granularity_configs"].([]interface{})),
+	}
+}
+
+func expandTrafficGranularityConfig(configured []interface{}) []*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfigTrafficGranularityConfig{
+	params := make([]*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfigTrafficGranularityConfig, 0, len(configured))
+	for _, raw := range configured {
+		data := raw.(map[string]interface{})
+		params = append(params, &compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfigTrafficGranularityConfig{
+			EnableEachUniqueValue: data["enable_each_unique_value"].(bool),
+			Type:                  data["type"].(string),
+			Value:                 data["value"].(string),
+		})
+	}
+	return params
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -1446,9 +1502,42 @@ func flattenLayer7DdosDefenseConfig(conf *compute.SecurityPolicyAdaptiveProtecti
 	data := map[string]interface{}{
 		"enable": conf.Enable,
 		"rule_visibility": conf.RuleVisibility,
+		"threshold_configs": flattenThresholdConfigs(conf.ThresholdConfigs),
 	}
 
 	return []map[string]interface{}{data}
+}
+
+func flattenThresholdConfigs(conf []*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfig)[]map[string]interface{} {
+	configs := make([]map[string]interface{}, 0, len(conf))
+	for _, field := range conf {
+		data := map[string]interface{}{
+			"name": field.Name,
+			"auto_deploy_load_threshold": field.AutoDeployLoadThreshold,
+			"auto_deploy_confidence_threshold": field.AutoDeployConfidenceThreshold,
+			"auto_deploy_impacted_baseline_threshold": field.AutoDeployImpactedBaselineThreshold,
+			"auto_deploy_expiration_sec": field.AutoDeployExpirationSec,
+			"detection_load_threshold": field.DetectionLoadThreshold,
+			"detection_absolute_qps": field.DetectionAbsoluteQps,
+			"detection_relative_to_baseline_qps": field.DetectionRelativeToBaselineQps,
+			"traffic_granularity_configs": flattenTrafficGranularityConfigs(field.TrafficGranularityConfigs),
+		}
+		configs = append(configs, data)
+	}
+	return configs
+}
+
+func flattenTrafficGranularityConfigs(conf []*compute.SecurityPolicyAdaptiveProtectionConfigLayer7DdosDefenseConfigThresholdConfigTrafficGranularityConfig)[]map[string]interface{} {
+	configs := make([]map[string]interface{}, 0, len(conf))
+	for _, field := range conf {
+		data := map[string]interface{}{
+			"type": field.Type,
+			"value": field.Value,
+			"enable_each_unique_value": field.EnableEachUniqueValue,
+		}
+		configs = append(configs, data)
+	}
+	return configs
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -1481,9 +1570,7 @@ func expandSecurityPolicyRuleRateLimitOptions(configured []interface{}) *compute
 		ConformAction:         data["conform_action"].(string),
 		EnforceOnKey:          data["enforce_on_key"].(string),
 		EnforceOnKeyName:      data["enforce_on_key_name"].(string),
-		{{- if ne $.TargetVersionName "ga" }}
 		EnforceOnKeyConfigs:   expandSecurityPolicyEnforceOnKeyConfigs(data["enforce_on_key_configs"].([]interface{})),
-		{{- end }}
 		BanDurationSec:        int64(data["ban_duration_sec"].(int)),
 		ExceedRedirectOptions: expandSecurityPolicyRuleRedirectOptions(data["exceed_redirect_options"].([]interface{})),
 		{{- if eq $.TargetVersionName "ga" }}
@@ -1506,7 +1593,6 @@ func expandThreshold(configured []interface{}) *compute.SecurityPolicyRuleRateLi
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func expandSecurityPolicyEnforceOnKeyConfigs(configured []interface{}) []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig {
 	params := make([]*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig, 0, len(configured))
 
@@ -1525,7 +1611,6 @@ func expandSecurityPolicyEnforceOnKeyConfigsFields(raw interface{}) *compute.Sec
 		EnforceOnKeyName: data["enforce_on_key_name"].(string),
 	}
 }
-{{- end }}
 
 func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleRateLimitOptions) []map[string]interface{} {
 	if conf == nil {
@@ -1539,9 +1624,7 @@ func flattenSecurityPolicyRuleRateLimitOptions(conf *compute.SecurityPolicyRuleR
 		"conform_action":          conf.ConformAction,
 		"enforce_on_key":          conf.EnforceOnKey,
 		"enforce_on_key_name":     conf.EnforceOnKeyName,
-		{{- if ne $.TargetVersionName "ga" }}
 		"enforce_on_key_configs": flattenSecurityPolicyEnforceOnKeyConfigs(conf.EnforceOnKeyConfigs),
-		{{- end }}
 		"ban_duration_sec":        conf.BanDurationSec,
 		"exceed_redirect_options": flattenSecurityPolicyRedirectOptions(conf.ExceedRedirectOptions),
 	}
@@ -1574,7 +1657,6 @@ func expandSecurityPolicyRuleRedirectOptions(configured []interface{}) *compute.
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenSecurityPolicyEnforceOnKeyConfigs(conf []*compute.SecurityPolicyRuleRateLimitOptionsEnforceOnKeyConfig) []map[string]interface{} {
 	if conf == nil || len(conf) == 0 {
 		return nil
@@ -1597,7 +1679,6 @@ func flattenSecurityPolicyEnforceOnKeyConfigsFields(conf *compute.SecurityPolicy
 		"enforce_on_key_type": conf.EnforceOnKeyType,
 	}
 }
-{{- end }}
 
 func flattenSecurityPolicyRedirectOptions(conf *compute.SecurityPolicyRuleRedirectOptions) []map[string]interface{} {
 	if conf == nil {

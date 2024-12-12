@@ -27,7 +27,6 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-  - '{{repository_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -38,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
@@ -63,6 +56,12 @@ custom_code:
   pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 examples:
   - name: 'artifact_registry_repository_basic'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository'
+  - name: 'artifact_registry_repository_multi_region'
     primary_resource_id: 'my-repo'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
@@ -184,16 +183,31 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_common_repository_with_artifact_registry_uri'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-common-remote'
+      desc: 'example remote common repository with docker upstream'
+      upstream_repository_id: 'example-upstream-repo'
+      upstream_repository_desc: 'example upstream repository'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_remote_common_repository_with_custom_upstream'
+    primary_resource_id: 'my-repo'
+    vars:
+      repository_id: 'example-docker-custom-remote'
+      desc: 'example remote custom docker repository with credentials'
+      secret_id: 'example-secret'
+      secret_resource_id: 'example-remote-secret'
+      username: 'remote-username'
+      secret_data: 'remote-password'
+    ignore_read_extra:
+      # Ignore this field as it is INPUT_ONLY. AR will not return this in the
+      # response.
+      - 'remote_repository_config.0.disable_upstream_validation'
 parameters:
-properties:
-  - name: 'name'
-    type: String
-    description: |-
-      The name of the repository, for example:
-      "repo1"
-    output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'repository_id'
     type: String
     description: |-
@@ -205,12 +219,26 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'location'
     type: String
-    description: |
-      The name of the location this repository is located in.
+    description: |-
+      The name of the repository's location. In addition to specific regions,
+      special values for multi-region locations are `asia`, `europe`, and `us`.
+      See [here](https://cloud.google.com/artifact-registry/docs/repositories/repo-locations),
+      or use the
+      [google_artifact_registry_locations](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/artifact_registry_locations)
+      data source for possible values.
     url_param_only: true
     required: false
     immutable: true
     default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The name of the repository, for example:
+      "repo1"
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'format'
     type: String
     description: |-
@@ -482,7 +510,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.public_repository
@@ -521,7 +549,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.public_repository
@@ -560,7 +588,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.public_repository
@@ -599,7 +627,7 @@ properties:
           - name: 'customRepository'
             type: NestedObject
             description: |-
-              Settings for a remote repository with a custom uri.
+              [Deprecated, please use commonRepository instead] Settings for a remote repository with a custom uri.
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.public_repository
@@ -665,7 +693,10 @@ properties:
           - name: 'uri'
             type: String
             description: |-
-              Specific uri to the Artifact Registory repository, e.g. `projects/UPSTREAM_PROJECT_ID/locations/REGION/repositories/UPSTREAM_REPOSITORY`
+              One of:
+              a. Artifact Registry Repository resource, e.g. `projects/UPSTREAM_PROJECT_ID/locations/REGION/repositories/UPSTREAM_REPOSITORY`
+              b. URI to the registry, e.g. `"https://registry-1.docker.io"`
+              c. URI to Artifact Registry Repository, e.g. `"https://REGION-docker.pkg.dev/UPSTREAM_PROJECT_ID/UPSTREAM_REPOSITORY"`
             immutable: true
             required: true
       - name: 'upstreamCredentials'
