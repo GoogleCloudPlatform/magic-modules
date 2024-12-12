@@ -18,6 +18,7 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	tpgservicenetworking "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
@@ -35,6 +36,11 @@ import (
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
+
+var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
+var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
+
+
 var SharedCryptoKey = map[string]string{
 	"ENCRYPT_DECRYPT":    "tftest-shared-key-1",
 	"ASYMMETRIC_SIGN":    "tftest-shared-sign-key-1",
@@ -45,6 +51,10 @@ type BootstrappedKMS struct {
 	*cloudkms.KeyRing
 	*cloudkms.CryptoKey
 	CryptoKeyVersions []*cloudkms.CryptoKeyVersion
+}
+
+type BootstrappedKMSAutokey struct {
+	*cloudkms.KeyHandle
 }
 
 func BootstrapKMSKey(t *testing.T) BootstrappedKMS {
@@ -74,6 +84,66 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 **/
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
+}
+
+func BootstrapKMSAutokeyKeyHandle(t *testing.T) BootstrappedKMSAutokey {
+	return BootstrapKMSAutokeyKeyHandleWithLocation(t, "global")
+}
+
+func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) BootstrappedKMSAutokey {
+	config := BootstrapConfig(t)
+	if config == nil {
+		return BootstrappedKMSAutokey{
+		    &cloudkms.KeyHandle{},
+		}
+	}
+
+	projectID := envvar.GetTestProjectFromEnv()
+	keyHandleParent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+	keyHandleName := fmt.Sprintf("%s/keyHandles/%s", keyHandleParent, DefaultKeyHandleName)
+
+	kmsClient := config.NewKmsClient(config.UserAgent)
+	// Get or Create the hard coded keyHandle for testing
+	keyHandle, err := kmsClient.Projects.Locations.KeyHandles.Get(keyHandleName).Do()
+
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			newKeyHandle := cloudkms.KeyHandle{
+				ResourceTypeSelector: DefaultKeyHandleResourceType,
+			}
+
+			keyHandleOp, err := kmsClient.Projects.Locations.KeyHandles.Create(keyHandleParent, &newKeyHandle).KeyHandleId(DefaultKeyHandleName).Do()
+			if err != nil {
+				t.Errorf("Unable to bootstrap KMS keyHandle. Cannot create new KeyHandle: %s", err)
+			}
+
+			opAsMap, err := tpgresource.ConvertToMap(keyHandleOp)	
+			if err != nil {
+				t.Errorf("Unable to bootstrap KMS keyHandle. Cannot create new KeyHandle: %s", err)
+			}
+
+			var response map[string]interface{}
+			err = kms.KMSOperationWaitTimeWithResponse(config, opAsMap, &response, projectID, "creating keyHandle", config.UserAgent, time.Duration(5)*time.Minute)
+			if err != nil {
+				t.Errorf("Unable to bootstrap KMS keyHandle. Cannot create new KeyHandle: %s", err)
+			}
+			keyHandle = &cloudkms.KeyHandle {
+				Name: response["name"].(string),
+				KmsKey: response["kmsKey"].(string),
+				ResourceTypeSelector: response["resourceTypeSelector"].(string),
+			}
+		} else {
+			t.Errorf("Unable to bootstrap KMS keyHandle. Cannot call KeyHandle service: %s", err)
+		}
+	}
+
+	if keyHandle == nil {
+		t.Fatalf("Unable to bootstrap KMS keyHandle. KeyHandle is nil!")
+	}
+
+	return BootstrappedKMSAutokey{
+		keyHandle,
+	}
 }
 
 func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
@@ -154,7 +224,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		keyRing,
 		cryptoKey,
 		ckvResp.CryptoKeyVersions,
-	}
+			}
 }
 
 var serviceAccountPrefix = "tf-bootstrap-sa-"
