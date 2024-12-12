@@ -2,7 +2,7 @@
 title: Handwritten docs style guide
 weight: 20
 aliases:
-  - /docs/develop/handwritten-docs-style-guide
+  - /develop/handwritten-docs-style-guide
 ---
 
 # Handwritten documentation style guide
