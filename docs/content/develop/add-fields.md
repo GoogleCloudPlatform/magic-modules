@@ -210,7 +210,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 ## What's next?
 
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
-+ [Add documentation]({{< ref "/develop/add-documentation" >}})
++ [Add documentation]({{< ref "/document/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Add tests]({{< ref "/test/test" >}})
 + [Run tests]({{< ref "/test/run-tests" >}})

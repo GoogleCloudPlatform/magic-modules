@@ -178,7 +178,7 @@ For more information about types of resources and the generation process overall
 
 + [Add a field to an existing resource]({{< ref "/develop/add-fields" >}})
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
-+ [Add documentation]({{< ref "/develop/add-documentation" >}})
++ [Add documentation]({{< ref "/document/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Add tests]({{< ref "/test/test" >}})
 + [Run tests]({{< ref "/test/run-tests" >}})
