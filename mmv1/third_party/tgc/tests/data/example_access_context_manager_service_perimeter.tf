@@ -60,7 +60,10 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
         sources {
           access_level = "accessPolicies/987654/accessLevels/restrict_storage"
         }
-	source_restriction = "SOURCE_RESTRICTION_ENABLED"
+        sources {
+          resource = "projects/4321"
+        }
+	      source_restriction = "SOURCE_RESTRICTION_ENABLED"
         identity_type = "ANY_USER_ACCOUNT"
       }
     }
