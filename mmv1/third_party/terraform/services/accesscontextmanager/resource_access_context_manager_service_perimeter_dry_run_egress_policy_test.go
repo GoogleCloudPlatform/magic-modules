@@ -128,7 +128,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
   	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
 }
 
-resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access1" {
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access3" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
 	egress_from {
 		sources {
