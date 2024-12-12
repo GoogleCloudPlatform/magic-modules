@@ -37,13 +37,6 @@ async:
     resource_inside_response: true
 custom_code:
 examples:
-  - name: 'parallelstore_instance_basic_beta'
-    primary_resource_id: 'instance'
-    min_version: 'beta'
-    vars:
-      name: 'instance'
-      network_name: 'network'
-      address_name: 'address'
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
     vars:
@@ -148,9 +141,8 @@ properties:
       type: String
   - name: 'network'
     type: String
-    required: true
     description: |
-      Required. Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
+      Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the instance is connected.
     immutable: true
   - name: 'reservedIpRange'
@@ -192,12 +184,3 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MIN
         DIRECTORY_STRIPE_LEVEL_BALANCED
         DIRECTORY_STRIPE_LEVEL_MAX
-  - name: deploymentType
-    type: String
-    min_version: 'beta'
-    description: |
-      Parallelstore Instance deployment type.
-        Possible values:
-        DEPLOYMENT_TYPE_UNSPECIFIED
-        SCRATCH
-        PERSISTENT
