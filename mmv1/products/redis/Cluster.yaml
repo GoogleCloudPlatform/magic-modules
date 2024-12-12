@@ -712,14 +712,13 @@ properties:
     default_from_api: true
     item_type:
       type: Array
-      name: clusterEndpoint
       description: |
         ClusterEndpoint consists of PSC connections that are created 
         as a group in each VPC network for accessing the cluster. In each group,
         there shall be one connection for each service attachment in the cluster.
       item_type:
         type: NestedObject
-        name: connections
+        name: 'connections'
         properties:
           - name: 'pscAutoConnection'
             type: NestedObject
