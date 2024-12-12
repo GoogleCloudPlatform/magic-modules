@@ -121,9 +121,10 @@ locations. In contrast, in a regional cluster, cluster master nodes are present
 in multiple zones in the region. For that reason, regional clusters should be
 preferred.
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy
-the cluster. Unless this field is set to false in Terraform state, a
-`terraform destroy` or `terraform apply` that would delete the cluster will fail.
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from
+destroying the cluster.  Deleting this cluster via `terraform destroy` or
+`terraform apply` will only succeed if this field is `false` in the Terraform
+state.
 
 * `addons_config` - (Optional) The configuration for addons supported by GKE.
     Structure is [documented below](#nested_addons_config).
@@ -371,7 +372,7 @@ subnetwork in which the cluster's instances are launched.
 * `enable_multi_networking` - (Optional)
     Whether multi-networking is enabled for this cluster.
 
-* `enable_fqdn_network_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `enable_fqdn_network_policy` - (Optional)
     Whether FQDN Network Policy is enabled on this cluster. Users who enable this feature for existing Standard clusters must restart the GKE Dataplane V2 `anetd` DaemonSet after enabling it. See the [Enable FQDN Network Policy in an existing cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/fqdn-network-policies#enable_fqdn_network_policy_in_an_existing_cluster) for more information.
 
 * `private_ipv6_google_access` - (Optional)
@@ -403,6 +404,10 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `workload_alts_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
   Configuration for [direct-path (via ALTS) with workload identity.](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#workloadaltsconfig). Structure is [documented below](#nested_workload_alts_config).
+
+* `enterprise_config` - (Optional)
+  Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config).
+
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
@@ -596,7 +601,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `disk_size` - (Optional) Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB. Defaults to `100`
 
-* `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd' or 'pd-balanced'). Defaults to `pd-standard`
+* `disk_type` - (Optional) Type of the disk attached to each node (e.g. 'pd-standard', 'pd-ssd', 'pd-balanced', or 'hyperdisk-balanced'). Defaults to `hyperdisk-balanced` if `hyperdisk-balanced` is supported and `pd-balanced` is not supported for the machine type; otherwise defaults to `pd-balanced`.
 
 * `image_type` - (Optional) The default image type used by NAP once a new node pool is being created. Please note that according to the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning#default-image-type) the value must be one of the [COS_CONTAINERD, COS, UBUNTU_CONTAINERD, UBUNTU]. __NOTE__ : COS AND UBUNTU are deprecated as of `GKE 1.24`
 
@@ -1110,6 +1115,8 @@ Structure is [documented below](#nested_node_kubelet_config).
 
 * `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools. Structure is [documented below](#nested_network_tags).
 
+* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` field is supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
+
 <a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
 
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
@@ -1430,6 +1437,11 @@ linux_node_config {
 
 * `enable_alts` - (Required) Whether the alts handshaker should be enabled or not for direct-path. Requires Workload Identity ([workloadPool]((#nested_workload_identity_config)) must be non-empty).
 
+<a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
+
+* `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -1478,6 +1490,8 @@ exported:
 * `fleet.0.membership_id` - The short name of the fleet membership, extracted from `fleet.0.membership`. You can use this field to configure `membership_id` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
 
 * `fleet.0.membership_location` - The location of the fleet membership,  extracted from `fleet.0.membership`. You can use this field to configure `membership_location` under [google_gkehub_feature_membership](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature_membership).
+
+* `enterprise_config.0.cluster_tier` - The effective tier of the cluster.
 
 ## Timeouts
 

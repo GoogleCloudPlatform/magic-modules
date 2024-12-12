@@ -326,10 +326,12 @@ is desired, you will need to modify your state file manually using
 * `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
     Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
 
-* `storage_pool` - (Optional) The URL of the storage pool in which the new disk is created.
+* `storage_pool` - (Optional) The URL or the name of the storage pool in which the new disk is created.
     For example:
     * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
     * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+    * /zones/{zone}/storagePools/{storagePool}
+    * /{storagePool}
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -399,7 +401,7 @@ is desired, you will need to modify your state file manually using
 
 * `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
-* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
+* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
 Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
@@ -574,6 +576,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `visible_core_count` - (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
+
+* `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 

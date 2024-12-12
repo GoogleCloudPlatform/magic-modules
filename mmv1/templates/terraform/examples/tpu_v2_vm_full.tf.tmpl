@@ -27,6 +27,7 @@ resource "google_tpu_v2_vm" "{{$.PrimaryResourceId}}" {
     enable_external_ips = true
     network             = google_compute_network.network.id
     subnetwork          = google_compute_subnetwork.subnet.id
+    queue_count         = 32
   }
   
   scheduling_config {

@@ -430,7 +430,7 @@ func TestAccSqlDatabaseInstance_replica(t *testing.T) {
 			{
 				Config: fmt.Sprintf(
 					testGoogleSqlDatabaseInstance_replica, databaseID, databaseID, databaseID, "true"),
-				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance.., invalid"),
+				ExpectError: regexp.MustCompile("Error, failed to create instance tf-test-\\d+-2: googleapi: Error 400: Invalid request: Invalid flag for instance role: Backups cannot be enabled for read replica instance"),
 			},
 			{
 				Config: fmt.Sprintf(
@@ -1058,7 +1058,7 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enable(instanceName, projectId, orgId, billingAccount),
-				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with public IP"),
+				ExpectError: regexp.MustCompile("PSC connectivity cannot be enabled together with only public IP"),
 			},
 		},
 	})
@@ -1755,9 +1755,9 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName),
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName, false),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "false"),
 				),
 			},
 			{
@@ -1765,6 +1765,12 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName, true),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
 			},
 		},
 	})
@@ -1782,7 +1788,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS", true),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
 				),
@@ -1794,9 +1800,21 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS", false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE", true),
 				ExpectError: regexp.MustCompile(
-					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache.., invalid", enterpriseInstanceName)),
+					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache", enterpriseInstanceName)),
 			},
 		},
 	})
@@ -1824,7 +1842,7 @@ func TestAccSqlDatabaseInstance_Mysql_Edition_Upgrade(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(editionUpgrade),
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(editionUpgrade, true),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
@@ -2899,7 +2917,7 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, tier)
 }
 
-func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string) string {
+func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string, datacache bool) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
@@ -2911,13 +2929,13 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-perf-optimized-N-2"
     edition = "ENTERPRISE_PLUS"
     data_cache_config {
-        data_cache_enabled = true
+        data_cache_enabled = "%t"
     }
   }
-}`, instanceName)
+}`, instanceName, datacache)
 }
 
-func testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(instanceName, tier, edition string) string {
+func testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(instanceName, tier, edition string, datacache bool) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
@@ -2929,10 +2947,10 @@ resource "google_sql_database_instance" "instance" {
     tier = "%s"
     edition = "%s"
     data_cache_config {
-        data_cache_enabled = true
+        data_cache_enabled = "%t"
     }
   }
-}`, instanceName, tier, edition)
+}`, instanceName, tier, edition, datacache)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerTimezone(instance, rootPassword, timezone string) string {

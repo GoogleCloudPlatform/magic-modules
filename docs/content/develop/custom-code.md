@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 39
+weight: 70
 ---
 
 # Add custom resource code
@@ -17,7 +17,7 @@ custom_code:
 
 By convention, the template files are stored in a directory matching the type of custom code, and the name of the file includes the resource (and, if relevant, field) impacted by the custom code. Like handwritten resource and test code, custom code is written as go templates which render go code.
 
-When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/get-started/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
+When in doubt about the behavior of custom code, write the custom code, [generate the providers]({{< ref "/develop/generate-providers" >}}), and inspect what changed in the providers using `git diff`.
 
 The following sections describe types of custom code in more detail.
 
@@ -32,12 +32,12 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as [diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
-  [validation functions]({{<ref "/develop/field-reference#validation" >}}),
+- Functions, such as [diff suppress functions]({{<ref "/reference/field-reference#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/reference/field-reference#validation" >}}),
   CustomizeDiff functions, and so on.
 - Methods
 
-Any custom functions added should have thorough [unit tests]({{< ref "/develop/test/test#add-unit-tests" >}}).
+Any custom functions added should have thorough [unit tests]({{< ref "/test/test#add-unit-tests" >}}).
 
 ## Modify the API request or response
 
@@ -264,9 +264,9 @@ docs:
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```
 
-See [Add documentation (Handwritten)]({{< ref "/develop/resource#add-documentation" >}}) for more information about what to include in the field documentation.
+See [Add documentation (Handwritten)]({{< ref "/document/add-documentation" >}}) for more information about what to include in the field documentation.
 
 ## What's next?
 
-- [Add tests]({{< ref "/develop/test/test.md" >}})
-- [Run tests]({{< ref "/develop/test/run-tests.md" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})
