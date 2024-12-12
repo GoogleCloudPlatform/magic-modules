@@ -1,6 +1,6 @@
 resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}}" {
   cluster = "{{index $.Vars "cluster_name"}}"
-  cluster_endpoints = {
+  cluster_endpoints {
     connections {
       pscConnection {
         pscConnectionId = google_compute_forwarding_rule.forwarding_rule1_network1.pscConnectionId
