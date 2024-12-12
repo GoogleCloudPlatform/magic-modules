@@ -28,9 +28,9 @@ func dataSourceGoogleKmsKeyHandleRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 	keyHandleId := KmsKeyHandleId{
-		Name: d.Get("name").(string),	
-		Location: d.Get("location").(string),	
-		Project: project,
+		Name:     d.Get("name").(string),
+		Location: d.Get("location").(string),
+		Project:  project,
 	}
 	id := keyHandleId.KeyHandleId()
 	d.SetId(id)
