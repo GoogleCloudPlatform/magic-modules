@@ -242,6 +242,9 @@ resource "google_compute_reservation" "gce_reservation" {
       project_id = google_project.guest_project_third.project_id
     }
   }
+  reservation_sharing_policy {
+    service_share_type = "ALLOW_ALL"
+  }
   depends_on = [google_organization_policy.shared_reservation_org_policy,google_project_service.compute,google_project_service.compute_second_project,google_project_service.compute_third_project]
 }
 `, context)
