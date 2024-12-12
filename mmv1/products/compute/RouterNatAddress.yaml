@@ -13,6 +13,7 @@
 
 ---
 name: 'RouterNatAddress'
+api_resource_type_kind: Router
 description: |
   A resource used to set the list of IP addresses to be used in a NAT service and manage the draining of destroyed IPs.
 
@@ -43,15 +44,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/regions/{{regions}}/operations/{{op_id}}'
-    kind: 'compute#operation'
-    path: 'routerNat'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'nats'
 identity:
   - routerNat

@@ -39,14 +39,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'env_id'
@@ -74,6 +68,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_basic_deployment_apiproxy_type_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
@@ -83,6 +78,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
@@ -93,6 +89,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String
@@ -114,13 +111,13 @@ properties:
     description: |
       Display name of the environment.
     required: false
-    immutable: true
+    immutable: false
   - name: 'description'
     type: String
     description: |
       Description of the environment.
     required: false
-    immutable: true
+    immutable: false
   - name: 'deploymentType'
     type: Enum
     description: |

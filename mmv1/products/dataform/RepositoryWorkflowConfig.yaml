@@ -13,6 +13,7 @@
 
 ---
 name: 'RepositoryWorkflowConfig'
+api_resource_type_kind: WorkflowConfig
 description: |-
   A resource represents a Dataform workflow configuration
 min_version: 'beta'

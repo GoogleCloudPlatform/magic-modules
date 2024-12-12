@@ -108,6 +108,14 @@ func GetRandomReviewer() string {
 	return reviewer
 }
 
+// Return a random reviewer other than the old reviewer
+func GetNewRandomReviewer(oldReviewer string) string {
+	availableReviewers := AvailableReviewers()
+	availableReviewers = utils.Removes(availableReviewers, []string{oldReviewer})
+	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
+	return reviewer
+}
+
 func AvailableReviewers() []string {
 	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers)
 }

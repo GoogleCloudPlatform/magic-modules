@@ -13,6 +13,7 @@
 
 ---
 name: 'Network'
+api_resource_type_kind: VmwareEngineNetwork
 description: |
   Provides connectivity for VMware Engine private clouds.
 references:
@@ -36,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 # There is a handwritten sweeper that provides a list of locations to sweep
 exclude_sweeper: true

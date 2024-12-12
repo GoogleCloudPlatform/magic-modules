@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
@@ -127,7 +121,6 @@ examples:
   - name: 'cloudrunv2_service_multicontainer'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -246,7 +239,7 @@ properties:
   - name: 'expireTime'
     type: Time
     description: |-
-      For a deleted resource, the time after which it will be permamently deleted.
+      For a deleted resource, the time after which it will be permanently deleted.
     output: true
   - name: 'creator'
     type: String
@@ -837,7 +830,6 @@ properties:
               type: NestedObject
               description: |-
                 Ephemeral storage used as a shared volume.
-              min_version: 'beta'
               # exactly_one_of:
               #   - template.0.volumes.0.secret
               #   - template.0.volumes.0.cloudSqlInstance
@@ -873,6 +865,14 @@ properties:
                   type: Boolean
                   description: If true, mount the GCS bucket as read-only
                   required: false
+                - name: 'mountOptions'
+                  min_version: 'beta'
+                  type: Array
+                  description: |
+                    A list of flags to pass to the gcsfuse command for configuring this volume.
+                    Flags should be passed without leading dashes.
+                  item_type:
+                    type: String
             - name: 'nfs'
               type: NestedObject
               description: Represents an NFS mount.
@@ -1110,6 +1110,13 @@ properties:
     type: String
     description: |
       The main URI in which this Service is serving traffic.
+    output: true
+  - name: 'urls'
+    type: Array
+    item_type:
+      type: String
+    description: |-
+      All URLs serving traffic for this Service.
     output: true
   - name: 'reconciling'
     type: Boolean

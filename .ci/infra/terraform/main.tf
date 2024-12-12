@@ -57,6 +57,12 @@ resource "google_organization_iam_member" "sa_billing_viewer" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_chronicle_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/chronicle.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_cloudkms_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/cloudkms.admin"
@@ -159,6 +165,12 @@ resource "google_organization_iam_member" "sa_securitycenter_bigquery_exports_ed
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/iam.principalAccessBoundaryAdmin"
+  member = google_service_account.sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -211,6 +223,8 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
+    "chronicle.googleapis.com",
+    "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",

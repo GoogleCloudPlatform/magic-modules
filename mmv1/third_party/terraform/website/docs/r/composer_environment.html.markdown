@@ -363,6 +363,35 @@ resource "google_composer_environment" "example" {
 }
 ```
 
+If you specify an existing network attachment that you also manage in Terraform, then Terraform will revert changes
+to the attachment done by Cloud Composer when you apply configuration changes. As a result, the environment will no
+longer use the attachment. To address this problem, make sure that Terraform ignores changes to the
+`producer_accept_lists` parameter of the attachment, as follows:
+
+```hcl
+resource "google_compute_network_attachment" "example" {
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
+  }
+
+  # ... other configuration parameters
+}
+
+resource "google_composer_environment" "example" {
+  name = "example-environment"
+  region = "us-central1"
+
+  config {
+
+    node_config {
+      composer_network_attachment = google_compute_network_attachment.example.id
+    }
+
+    # ... other configuration parameters
+  }
+}
+```
+
 ### With Software (Airflow) Config
 
 ```hcl
@@ -1030,8 +1059,7 @@ The following arguments are supported:
   version number or 'latest'.
   The Apache Airflow portion of the image version is a full semantic version that points to one of the
   supported Apache Airflow versions, or an alias in the form of only major or major.minor versions specified.
-  **Important**: In-place upgrade is only available using `google-beta` provider. It's because updating the
-  `image_version` is still in beta. Using `google-beta` provider, you can upgrade in-place between minor or
+  **Important**: In-place upgrade is only available between minor or
   patch versions of Cloud Composer or Apache Airflow. For example, you can upgrade your environment from
   `composer-1.16.x` to `composer-1.17.x`, or from `airflow-2.1.x` to `airflow-2.2.x`. You cannot upgrade between
   major Cloud Composer or Apache Airflow versions (from `1.x.x` to `2.x.x`). To do so, create a new environment.
@@ -1304,11 +1332,11 @@ The following arguments are supported:
   The configuration settings for software (Airflow) inside the environment. Structure is [documented below](#nested_software_config_c3).
 
 * `enable_private_environment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   If true, a private Composer environment will be created.
 
 * `enable_private_builds_only` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   If true, builds performed during operations that install Python packages have only private connectivity to Google services.
   If false, the builds also have access to the internet.
 
@@ -1378,7 +1406,7 @@ The following arguments are supported:
   network must also be provided and the subnetwork must belong to the enclosing environment's project and region.
 
 * `composer_network_attachment` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   PSC (Private Service Connect) Network entry point. Customers can pre-create the Network Attachment 
   and point Cloud Composer environment to use. It is possible to share network attachment among many environments, 
   provided enough IP addresses are available.
@@ -1399,7 +1427,7 @@ The following arguments are supported:
   Cannot be updated.
 
 * `composer_internal_ipv4_cidr_block` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   /20 IPv4 cidr range that will be used by Composer internal components.
   Cannot be updated.
 
@@ -1461,7 +1489,10 @@ The following arguments are supported:
   `composer-(([0-9]+)(\.[0-9]+\.[0-9]+(-preview\.[0-9]+)?)?|latest)-airflow-(([0-9]+)((\.[0-9]+)(\.[0-9]+)?)?(-build\.[0-9]+)?)`
   Example: composer-3-airflow-2.6.3-build.4
 
-  **Important**: In-place upgrade for Composer 3 is not yet supported.
+  **Important**: In-place upgrade in Composer 3 is only available between minor or patch versions of Apache Airflow.
+  You can also upgrade to a different Airflow build within the same version by specifying the build number.
+  For example, you can upgrade your environment from composer-3-airflow-2.6.x to composer-3-airflow-2.9.x,
+  or from composer-3-airflow-2.9.3-build.4 to composer-3-airflow-2.9.3-build.5.
 
 * `cloud_data_lineage_integration` -
   (Optional, Cloud Composer environments in versions composer-2.1.2-airflow-*.*.* and later)
@@ -1469,7 +1500,7 @@ The following arguments are supported:
   [documented below](#nested_cloud_data_lineage_integration_c3).
 
 * `web_server_plugins_mode` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   Web server plugins configuration. Can be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'.
 
 <a name="nested_cloud_data_lineage_integration_c3"></a>The `cloud_data_lineage_integration` block supports:
@@ -1521,7 +1552,7 @@ The `workloads_config` block supports:
   Configuration for resources used by Airflow workers.
 
 * `dag_processor` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html), Cloud Composer 3 only)
+  (Optional, Cloud Composer 3 only)
   Configuration for resources used by DAG processor.
 
 The `scheduler` block supports:
@@ -1638,9 +1669,9 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options: configuration options:
 
-- `create` - Default is 60 minutes.
-- `update` - Default is 60 minutes.
-- `delete` - Default is 6 minutes.
+- `create` - Default is 120 minutes.
+- `update` - Default is 120 minutes.
+- `delete` - Default is 30 minutes.
 
 ## Import
 

@@ -13,6 +13,7 @@
 
 ---
 name: 'FeatureOnlineStoreFeatureview'
+api_resource_type_kind: FeatureView
 description: |-
   FeatureView is representation of values that the FeatureOnlineStore will serve based on its syncConfig.
 references:
@@ -36,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'vertex_ai_featureonlinestore_featureview'

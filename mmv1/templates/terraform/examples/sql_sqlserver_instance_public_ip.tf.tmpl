@@ -17,5 +17,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
       ipv4_enabled = true
     }
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }

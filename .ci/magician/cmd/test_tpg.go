@@ -17,9 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"magician/github"
 	"os"
-	"github.com/spf13/cobra"
 )
 
 type ttGithub interface {
@@ -73,7 +73,7 @@ func execTestTPG(version, commit, pr string, gh ttGithub) error {
 
 	commitShaOrBranchUpstream := string(content)
 
-	if commitShaOrBranchUpstream == ""{
+	if commitShaOrBranchUpstream == "" {
 		// fall back to branch if commit SHA can't be found
 		commitShaOrBranchUpstream = "auto-pr-" + pr
 	}

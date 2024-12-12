@@ -28,7 +28,7 @@ func TestExecTestTGC(t *testing.T) {
 	execTestTGC("sha1", "pr1", gh)
 
 	method := "CreateWorkflowDispatchEvent"
-	expected := [][]any{{"test-tgc.yml", map[string]any{"tpgb-branch": "auto-pr-pr1", "tgc-branch": "auto-pr-pr1", "pr-number":"pr1", "owner": "modular-magician", "repo": "terraform-google-conversion", "sha": "sha1"}}}
+	expected := [][]any{{"test-tgc.yml", map[string]any{"tpgb-branch": "auto-pr-pr1", "tgc-branch": "auto-pr-pr1", "pr-number": "pr1", "owner": "modular-magician", "repo": "terraform-google-conversion", "sha": "sha1"}}}
 	if calls, ok := gh.calledMethods[method]; !ok {
 		t.Fatal("Workflow dispatch event not created")
 	} else if !reflect.DeepEqual(calls, expected) {

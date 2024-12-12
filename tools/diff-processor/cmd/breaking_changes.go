@@ -10,8 +10,8 @@ import (
 	"os"
 	"sort"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/breaking_changes"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/spf13/cobra"
 )
 

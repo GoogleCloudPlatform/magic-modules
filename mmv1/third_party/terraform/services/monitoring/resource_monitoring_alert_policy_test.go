@@ -399,7 +399,8 @@ resource "google_monitoring_alert_policy" "log" {
     notification_rate_limit {
       period = "300s"
     }
-    auto_close = "2000s"
+    auto_close           = "2000s"
+    notification_prompts = ["OPENED"]
   }
 
   severity     = "WARNING"
@@ -460,6 +461,7 @@ resource "google_monitoring_alert_policy" "promql" {
       }
       alert_rule      = "AlwaysOn"
       rule_group      = "abc"
+      disable_metric_validation = true
     }
   }
 

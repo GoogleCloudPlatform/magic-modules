@@ -52,11 +52,13 @@ jobs:
       - name: Check that new services have been added to the TeamCity configuration code
         if: steps.generate.outcome == 'success'
         run: |
-          # Create lists of service packages in providers
-          ls ${{env.GOOGLE_REPO_PATH}}/google/services > tools/teamcity-diff-check/services_ga.txt
-          ls ${{env.GOOGLE_BETA_REPO_PATH}}/google-beta/services > tools/teamcity-diff-check/services_beta.txt
+          # Create lists of service packages in providers. Need to cd into repos where go.mod is to do this command.
+          cd ${{env.GOOGLE_REPO_PATH}}
+          go list -f '{{.Name}}' ${{env.GOOGLE_REPO_PATH}}/google/services/... > $GITHUB_WORKSPACE/provider_services_ga.txt
+          cd ${{env.GOOGLE_BETA_REPO_PATH}}
+          go list -f '{{.Name}}' ${{env.GOOGLE_BETA_REPO_PATH}}/google-beta/services/... > $GITHUB_WORKSPACE/provider_services_beta.txt
 
           # Run tool to compare service packages in the providers vs those listed in TeamCity config files
-          cd tools/teamcity-diff-check
-          go run main.go -service_file=services_ga
-          go run main.go -service_file=services_beta
+          cd $GITHUB_WORKSPACE
+          go run ./tools/teamcity-diff-check/main.go -version=ga -provider_services=./provider_services_ga.txt -teamcity_services=./mmv1/third_party/terraform/.teamcity/components/inputs/services_ga.kt
+          go run ./tools/teamcity-diff-check/main.go -version=beta -provider_services=./provider_services_beta.txt -teamcity_services=./mmv1/third_party/terraform/.teamcity/components/inputs/services_beta.kt

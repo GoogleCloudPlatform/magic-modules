@@ -135,8 +135,7 @@ func (vt *Tester) SetRepoPath(version provider.Version, repoPath string) {
 // Fetch the cassettes for the current version if not already fetched.
 // Should be run from the base dir.
 func (vt *Tester) FetchCassettes(version provider.Version, baseBranch, head string) error {
-	_, ok := vt.cassettePaths[version]
-	if ok {
+	if _, cassettesAlreadyFetched := vt.cassettePaths[version]; cassettesAlreadyFetched {
 		return nil
 	}
 	cassettePath := filepath.Join(vt.baseDir, "cassettes", version.String())
@@ -195,7 +194,7 @@ type RunOptions struct {
 // Run the vcr tests in the given mode and provider version and return the result.
 // This will overwrite any existing logs for the given mode and version.
 func (vt *Tester) Run(opt RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
+	logPath, err := vt.makeLogPath(opt.Mode, opt.Version)
 	if err != nil {
 		return Result{}, err
 	}
@@ -246,17 +245,19 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       opt.Mode.Upper(),
-		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParallelism),
-		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
-		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          strings.Join(opt.TestDirs, " "),
-		"TF_LOG":                         "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":           "INFO",
-		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                         "1",
-		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+		"VCR_PATH":                 cassettePath,
+		"VCR_MODE":                 opt.Mode.Upper(),
+		"ACCTEST_PARALLELISM":      strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
+		"TF_LOG":                   "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":     "INFO",
+		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                   "1",
+		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+	}
+	if vt.saKeyPath != "" {
+		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
 	}
 	for ev, val := range vt.env {
 		env[ev] = val
@@ -299,7 +300,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 }
 
 func (vt *Tester) RunParallel(opt RunOptions) (Result, error) {
-	logPath, err := vt.getLogPath(opt.Mode, opt.Version)
+	logPath, err := vt.makeLogPath(opt.Mode, opt.Version)
 	if err != nil {
 		return Result{}, err
 	}
@@ -391,17 +392,19 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-vet=off",
 	}
 	env := map[string]string{
-		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       mode.Upper(),
-		"ACCTEST_PARALLELISM":            "1",
-		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
-		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          testDir,
-		"TF_LOG":                         "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":           "INFO",
-		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                         "1",
-		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+		"VCR_PATH":                 cassettePath,
+		"VCR_MODE":                 mode.Upper(),
+		"ACCTEST_PARALLELISM":      "1",
+		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":    testDir,
+		"TF_LOG":                   "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":     "INFO",
+		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                   "1",
+		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+	}
+	if vt.saKeyPath != "" {
+		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
 	}
 	for ev, val := range vt.env {
 		env[ev] = val
@@ -427,7 +430,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	wg.Done()
 }
 
-func (vt *Tester) getLogPath(mode Mode, version provider.Version) (string, error) {
+func (vt *Tester) makeLogPath(mode Mode, version provider.Version) (string, error) {
 	lgky := logKey{mode, version}
 	logPath, ok := vt.logPaths[lgky]
 	if !ok {
@@ -463,6 +466,10 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	if !ok {
 		return fmt.Errorf("no log path found for mode %s and version %s", opts.Mode.Lower(), opts.Version)
 	}
+	var suffix string
+	if opts.AfterRecording {
+		suffix = "_after_recording"
+	}
 	args := []string{
 		"-h",
 		"Content-Type:text/plain",
@@ -470,15 +477,11 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		"cp",
 		"-r",
 		filepath.Join(vt.baseDir, "testlogs", fmt.Sprintf("%s_test.log", opts.Mode.Lower())),
-		bucketPath + "build-log/",
+		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
 	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
-	}
-	var suffix string
-	if opts.AfterRecording {
-		suffix = "_after_recording"
 	}
 	if opts.Parallel {
 		args := []string{
@@ -535,6 +538,9 @@ func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
 
 // Deletes the service account key.
 func (vt *Tester) Cleanup() error {
+	if vt.saKeyPath == "" {
+		return nil
+	}
 	if err := vt.rnr.RemoveAll(vt.saKeyPath); err != nil {
 		return err
 	}
