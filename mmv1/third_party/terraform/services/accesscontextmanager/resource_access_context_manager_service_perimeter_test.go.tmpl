@@ -39,7 +39,7 @@ func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 
 func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	projectNumber := envvar.GetTestProjectNumberFromEnv(t)
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
