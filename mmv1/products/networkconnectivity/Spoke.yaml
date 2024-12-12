@@ -47,9 +47,9 @@ examples:
   - name: 'network_connectivity_spoke_linked_vpc_network_group'
     primary_resource_id: 'primary'
     vars:
-      network_name: 'net'
-      hub_name: 'hub1'
-      spoke_name: 'spoke1'
+      network_name: 'net-spoke'
+      hub_name: 'hub1-spoke'
+      spoke_name: 'group-spoke1'
   - name: 'network_connectivity_spoke_router_appliance_basic'
     primary_resource_id: 'primary'
     vars:
@@ -131,6 +131,7 @@ properties:
   - name: 'group'
     type: String
     description: The name of the group that this spoke is associated with.
+    immutable: true
     default_from_api: true
   - name: 'linkedVpnTunnels'
     type: NestedObject
