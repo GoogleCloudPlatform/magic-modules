@@ -16,7 +16,6 @@ resource "google_compute_network" "network" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = true
   mtu = 8896
-  provider = google-beta
 }
 
 # Create an IP address
