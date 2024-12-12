@@ -364,7 +364,11 @@ func (t *Type) Validate(rName string) {
 	}
 
 	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
-		log.Fatalf("Property %s cannot be write_only and computed at the same time in resource %s", t.Name, rName)
+		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
+	}
+
+	if t.WriteOnly && t.Sensitive {
+		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
 	}
 
 	t.validateLabelsField()
