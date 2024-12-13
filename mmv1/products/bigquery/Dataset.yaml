@@ -85,11 +85,6 @@ examples:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
     exclude_docs: true
-  - name: 'bigquery_dataset_external_reference_aws_test'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
-    exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
     vars:
