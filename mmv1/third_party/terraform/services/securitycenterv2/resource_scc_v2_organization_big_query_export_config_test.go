@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	bigquery "google.golang.org/api/bigquery/v2"
-	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"

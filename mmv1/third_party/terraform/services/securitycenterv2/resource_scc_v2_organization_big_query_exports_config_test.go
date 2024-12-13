@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	bigquery "google.golang.org/api/bigquery/v2"
-	"google.golang.org/api/option"
 )
 
 func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T) {
