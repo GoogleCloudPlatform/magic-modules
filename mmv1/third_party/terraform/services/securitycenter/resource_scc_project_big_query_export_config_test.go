@@ -46,7 +46,7 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:  testAccSecurityCenterProjectBigQueryExportConfig_basic(context),
+				Config: testAccSecurityCenterProjectBigQueryExportConfig_basic(context),
 			},
 			{
 				ResourceName:            "google_scc_project_scc_big_query_export.default",
@@ -55,7 +55,7 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"update_time", "project"},
 			},
 			{
-				Config:  testAccSecurityCenterProjectBigQueryExportConfig_update(context),
+				Config: testAccSecurityCenterProjectBigQueryExportConfig_update(context),
 			},
 			{
 				ResourceName:            "google_scc_project_scc_big_query_export.default",
