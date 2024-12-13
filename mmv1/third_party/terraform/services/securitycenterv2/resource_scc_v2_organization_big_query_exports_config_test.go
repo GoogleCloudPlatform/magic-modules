@@ -47,7 +47,6 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config:  testAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(context),
-				Destroy: true,
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
@@ -57,7 +56,6 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportsConfig_basic(t *testing.T
 			},
 			{
 				Config:  testAccSecurityCenterV2OrganizationBigQueryExportsConfig_update(context),
-				Destroy: true,
 			},
 			{
 				ResourceName:            "google_scc_v2_organization_scc_big_query_exports.default",
