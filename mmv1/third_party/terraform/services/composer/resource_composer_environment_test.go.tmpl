@@ -3350,6 +3350,44 @@ resource "google_compute_subnetwork" "test" {
 `, name, networkAttachment, network, subnetwork)
 }
 
+func testAccComposerEnvironmentComposer3_databaseRetention(name, network, subnetwork string) string {
+	return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name   = "%s"
+  region = "us-central1"
+  config {
+    software_config {
+      image_version = "composer-3-airflow-2"
+    }
+    node_config {
+      network    = google_compute_network.test.id
+      subnetwork = google_compute_subnetwork.test.id
+    }
+	data_retention_config {
+      airflow_metadata_retention_config {
+        retention_mode = "RETENTION_MODE_ENABLED"
+        retention_days = 61
+      }
+    }
+  }
+}
+
+// use a separate network to avoid conflicts with other tests running in parallel
+// that use the default network/subnet
+resource "google_compute_network" "test" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "test" {
+  name          = "%s"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.test.self_link
+}
+`, name, network, subnetwork)
+}
+
 // WARNING: This is not actually a check and is a terrible clean-up step because Composer Environments
 // have a bug that hasn't been fixed. Composer will add firewalls to non-default networks for environments
 // but will not remove them when the Environment is deleted.
