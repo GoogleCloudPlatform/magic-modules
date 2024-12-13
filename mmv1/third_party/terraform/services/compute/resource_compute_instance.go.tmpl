@@ -60,6 +60,7 @@ var (
 		"advanced_machine_features.0.turbo_mode",
 		"advanced_machine_features.0.visible_core_count",
 		"advanced_machine_features.0.performance_monitoring_unit",
+		"advanced_machine_features.0.enable_uefi_networking",
 	}
 
 	bootDiskKeys = []string{
@@ -217,7 +218,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:     true,
 							AtLeastOneOf: bootDiskKeys,
 							Default:      true,
-							ForceNew:     true,
 							Description:  `Whether the disk will be auto-deleted when the instance is deleted.`,
 						},
 
@@ -815,7 +815,6 @@ func ResourceComputeInstance() *schema.Resource {
 			"metadata_startup_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `Metadata startup scripts made available within the instance.`,
 			},
 
@@ -1133,6 +1132,13 @@ be from 0 to 999,999,999 inclusive.`,
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
+						"enable_uefi_networking": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: advancedMachineFeaturesKeys,
+							Description:  `Whether to enable UEFI networking for the instance.`,
+						},
 					},
 				},
 			},
@@ -1315,6 +1321,9 @@ be from 0 to 999,999,999 inclusive.`,
 				},
 				suppressEmptyGuestAcceleratorDiff,
 			),
+			customdiff.ForceNewIf("metadata_startup_script", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+				return isGracefulMetadataStartupSwitch(d)
+			}),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
@@ -2494,6 +2503,18 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
+	// if any other boot_disk fields will be added here this should be wrapped in if d.HasChange("boot_disk")
+	if d.HasChange("boot_disk.0.auto_delete") {
+		op, err := config.NewComputeClient(userAgent).Instances.SetDiskAutoDelete(project, zone, instance.Name, d.Get("boot_disk.0.auto_delete").(bool), d.Get("boot_disk.0.device_name").(string)).Do()
+		if err != nil {
+			return fmt.Errorf("Error changing auto_delete: %s", err)
+		}
+		opErr := ComputeOperationWaitTime(config, op, project, "changing auto_delete", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
+	}
+
 	// d.HasChange("service_account") is oversensitive: see https://github.com/hashicorp/terraform/issues/17411
 	// Until that's fixed, manually check whether there is a change.
 	o, n := d.GetChange("service_account")
@@ -2975,6 +2996,52 @@ func suppressEmptyGuestAcceleratorDiff(_ context.Context, d *schema.ResourceDiff
 	}
 
 	return nil
+}
+
+// Function checks whether a graceful switch (without ForceNew) is available
+// between `metadata_startup_script` and `metadata.startup-script`.
+// Graceful switch can be executed in two situations:
+// 1. When `metadata_startup_script` is created with the old value of
+// `metadata.startup-script`.
+// 2. When `metadata_startup_script` is deleted and the old value remains in
+// `metadata.startup-script`
+// For all other changes in `metadata_startup_script`, function sets ForceNew.
+func isGracefulMetadataStartupSwitch(d *schema.ResourceDiff) bool {
+	oldMd, newMd := d.GetChange("metadata")
+	oldMdMap := oldMd.(map[string]interface{})
+	newMdMap := newMd.(map[string]interface{})
+
+	//No new and old metadata
+	if len(oldMdMap) == 0 && len(newMdMap) == 0 {
+		return true
+	}
+
+	oldMds, newMds := d.GetChange("metadata_startup_script")
+	vMdOld, okOld := oldMdMap["startup-script"]
+	vMdNew, okNew := newMdMap["startup-script"]
+
+	// metadata_startup_script is created
+	if oldMds == "" {
+		if !okOld {
+			return true
+		} else if newMds == vMdOld {
+			return false
+		} else {
+			return true
+		}
+	}
+	// metadata_startup_script is deleted
+	if newMds == "" {
+		if !okNew {
+			return true
+		} else if oldMds == vMdNew {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	return true
 }
 
 func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) error {

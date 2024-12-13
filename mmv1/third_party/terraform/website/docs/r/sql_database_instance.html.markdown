@@ -240,8 +240,8 @@ The following arguments are supported:
 * `database_version` - (Required) The MySQL, PostgreSQL or
 SQL Server version to use. Supported values include `MYSQL_5_6`,
 `MYSQL_5_7`, `MYSQL_8_0`, `POSTGRES_9_6`,`POSTGRES_10`, `POSTGRES_11`,
-`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `POSTGRES_15`, `SQLSERVER_2017_STANDARD`,
-`SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
+`POSTGRES_12`, `POSTGRES_13`, `POSTGRES_14`, `POSTGRES_15`, `POSTGRES_16`, `POSTGRES_17`,
+`SQLSERVER_2017_STANDARD`, `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`.
 `SQLSERVER_2019_STANDARD`, `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`,
 `SQLSERVER_2019_WEB`.
 [Database Version Policies](https://cloud.google.com/sql/docs/db-versions)
@@ -262,7 +262,7 @@ includes an up-to-date reference of supported versions.
     is not provided, the provider project is used.
 
 * `replica_configuration` - (Optional) The configuration for replication. The
-    configuration is detailed below. 
+    configuration is detailed below.
 
 * `replica_names` - (Optional, Computed) List of replica names. Can be updated.
 
@@ -316,7 +316,7 @@ The `settings` block supports:
 
 * `collation` - (Optional) The name of server instance collation.
 
-* `connector_enforcement` - (Optional) Enables the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections. If enabled, all the direct connections are rejected.
+* `connector_enforcement` - (Optional) Control the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections, can be `REQUIRED` or `NOT_REQUIRED`. If enabled, all the direct connections are rejected.
 
 * `deletion_protection_enabled` - (Optional) Enables deletion protection of an instance at the GCP level. Enabling this protection will guard against accidental deletion across all surfaces (API, gcloud, Cloud Console and Terraform) by enabling the [GCP Cloud SQL instance deletion protection](https://cloud.google.com/sql/docs/postgres/deletion-protection). Terraform provider support was introduced in version 4.48.0. Defaults to `false`.
 

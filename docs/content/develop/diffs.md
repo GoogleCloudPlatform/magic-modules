@@ -1,6 +1,6 @@
 ---
 title: "Fix diffs"
-weight: 18
+weight: 100
 aliases:
   - /develop/permadiff
 ---
@@ -19,7 +19,7 @@ The sections below describe in more detail how to address a number of different 
 
 ## API returns default value for unset field {#default}
 
-For new fields, if possible, set a client-side default that matches the API default. This will prevent the diff and will allow users to accurately see what the end state will be if the field is not set in their configuration. A client-side default should only be used if the API sets the same default value in all cases and the default value will be stable over time. Changing a client-side default is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}).
+For new fields, if possible, set a client-side default that matches the API default. This will prevent the diff and will allow users to accurately see what the end state will be if the field is not set in their configuration. A client-side default should only be used if the API sets the same default value in all cases and the default value will be stable over time. Changing a client-side default is a [breaking change]({{< ref "/breaking-changes/breaking-changes" >}}).
 
 {{< tabs "default_value" >}}
 {{< tab "MMv1" >}}
@@ -176,7 +176,7 @@ See [SDKv2 Schema Behaviors - DiffSuppressFunc ↗](https://developer.hashicorp.
 
 ## API field that is never included in the response {#ignore_read}
 
-This is common for fields that store credentials or similar information. Such fields should also be marked as [`sensitive`]({{< ref "/develop/field-reference#sensitive" >}}).
+This is common for fields that store credentials or similar information. Such fields should also be marked as [`sensitive`]({{< ref "/reference/field-reference#sensitive" >}}).
 
 In the flattener for the field, return the value of the field in the user's configuration.
 
@@ -299,4 +299,4 @@ func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config 
 {{< /tab >}}
 {{< /tabs >}}
 
-For other Array fields, convert the field to a Set – this is a [breaking change]({{< ref "/develop/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
+For other Array fields, convert the field to a Set – this is a [breaking change]({{< ref "/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
