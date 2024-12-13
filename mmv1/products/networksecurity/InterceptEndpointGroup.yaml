@@ -54,18 +54,14 @@ examples:
 parameters:
   - name: 'location'
     type: String
-    description: 'Resource ID segment making up resource `name`. It identifies the resource
-    within its parent collection as described in https://google.aip.dev/122. See documentation
-    for resource type `networksecurity.googleapis.com/InterceptEndpointGroup`. '
+    description: 'The location of the Intercept Endpoint Group, currently restricted to `global`.'
     min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
   - name: 'interceptEndpointGroupId'
     type: String
-    description: "Id of the requesting object\nIf auto-generating Id server-side,
-    remove this field and\nintercept_endpoint_group_id from the method_signature of
-    Create RPC "
+    description: "ID of the Intercept Endpoint Group."
     min_version: 'beta'
     url_param_only: true
     required: true
@@ -73,27 +69,27 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: 'Identifier. The name of the InterceptEndpointGroup. '
+    description: 'Identifier. The name of the Intercept Endpoint Group.'
     min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
-    description: 'Create time stamp '
+    description: 'Create time stamp.'
     min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
-    description: 'Update time stamp '
+    description: 'Update time stamp.'
     min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: 'Optional. Labels as key value pairs '
+    description: 'Optional. Labels as key value pairs'
     min_version: 'beta'
   - name: 'interceptDeploymentGroup'
     type: String
     description: "Immutable. The Intercept Deployment Group that this resource
-    is connected to. Format\nis:\n`projects/{project}/locations/global/interceptDeploymentGroups/{interceptDeploymentGroup}` "
+    is connected to. Format\nis:\n`projects/{project}/locations/global/interceptDeploymentGroups/{interceptDeploymentGroup}`"
     min_version: 'beta'
     required: true
     immutable: true
@@ -105,6 +101,6 @@ properties:
     output: true
   - name: 'reconciling'
     type: Boolean
-    description: "Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
+    description: "Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128."
     min_version: 'beta'
     output: true
