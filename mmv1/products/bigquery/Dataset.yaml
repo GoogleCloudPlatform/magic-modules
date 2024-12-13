@@ -26,6 +26,7 @@ docs:
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
 base_url: 'projects/{{project}}/datasets'
+cai_base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
 id_format: 'projects/{{project}}/datasets/{{dataset_id}}'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
 has_self_link: true
