@@ -1,13 +1,8 @@
 package securitycenterv2_test
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"strings"
 	"testing"
-
-	bigquery "google.golang.org/api/bigquery/v2"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -20,14 +15,6 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 	randomSuffix := acctest.RandString(t, 10)
 	datasetID := "tf_test_" + randomSuffix
 	orgID := envvar.GetTestOrgFromEnv(t)
-
-	// Run cleanup before the test starts
-	ctx := context.Background()
-	projectID := envvar.GetTestProjectFromEnv()
-	err := cleanupOrganizationBigQueryDatasets(ctx, "tf_test_", projectID)
-	if err != nil {
-		t.Fatalf("Cleanup failed: %v", err)
-	}
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
@@ -66,38 +53,6 @@ func TestAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(t *testing.T)
 			},
 		},
 	})
-}
-
-func cleanupOrganizationBigQueryDatasets(ctx context.Context, prefix string, projectID string) error {
-
-	service, err := bigquery.NewService(ctx)
-
-	if err != nil {
-		return fmt.Errorf("failed to create BigQuery service: %v", err)
-	}
-
-	datasetsService := bigquery.NewDatasetsService(service)
-	datasetsListCall := datasetsService.List(projectID)
-	datasets, err := datasetsListCall.Do()
-
-	if err != nil {
-		return fmt.Errorf("failed to list datasets: %v", err)
-	}
-
-	for _, dataset := range datasets.Datasets {
-
-		if strings.HasPrefix(dataset.Id, prefix) {
-
-			log.Printf("Deleting dataset with ID: %s", dataset.Id)
-
-			err := datasetsService.Delete(projectID, dataset.Id).DeleteContents(true).Do()
-
-			if err != nil {
-				return fmt.Errorf("failed to delete dataset %s: %v", dataset.Id, err)
-			}
-		}
-	}
-	return nil
 }
 
 func testAccSecurityCenterV2OrganizationBigQueryExportConfig_basic(context map[string]interface{}) string {
@@ -139,7 +94,7 @@ resource "google_scc_v2_organization_scc_big_query_export" "default" {
 }
 
 resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "3m"
+	create_duration = "6m"
 	depends_on = [google_scc_v2_organization_scc_big_query_export.default]
 }
 `, context)
@@ -184,7 +139,7 @@ resource "google_scc_v2_organization_scc_big_query_export" "default" {
 }
 
 resource "time_sleep" "wait_for_cleanup" {
-	create_duration = "3m"
+	create_duration = "6m"
 	depends_on = [google_scc_v2_organization_scc_big_query_export.default]
 }
 `, context)
