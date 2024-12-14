@@ -42,9 +42,6 @@ var SharedKeyRing = "tftest-shared-keyring-1"
 
 {{ if ne $.TargetVersionName `ga` -}}
 
-var DefaultAutokeyTestFolderName = "autokeytestfolder-5ab87"
-var DefaultAutokeyTestKmsProject = "autokeytestkmsproject-5ab87"
-var DefaultAutokeyTestResourceProject = "autokeytestresproject-5ab87"
 var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
 var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
 var CloudKmsSrviceName = "cloudkms.googleapis.com"
@@ -170,18 +167,23 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 }
 
 func setupAutokeyTestResources(t *testing.T, config *transport_tpg.Config) (*resourceManagerV3.Folder, *cloudresourcemanager.Project, *cloudresourcemanager.Project) {
+	projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	defaultAutokeyTestFolderName := fmt.Sprintf("autokeytest-%s-fd", projectIDSuffix)
+	defaultAutokeyTestKmsProject := fmt.Sprintf("test-kms-%s-prj", projectIDSuffix)
+	defaultAutokeyTestResourceProject := fmt.Sprintf("test-res-%s-prj", projectIDSuffix)
+
 	curUserEmail, err := transport_tpg.GetCurrentUserEmail(config, config.UserAgent)
 	if err != nil {
 		t.Errorf("unable to bootstrap KMS keyHandle. Cannot get current usr: %s", err)
 	}
 	// create a folder to configure autokey config and resource folder
-	autokeyFolder := BootstrapFolder(t, DefaultAutokeyTestFolderName)
+	autokeyFolder := BootstrapFolder(t, defaultAutokeyTestFolderName)
 	parent := &cloudresourcemanager.ResourceId{
 		Type: "folder",
 		Id:   strings.Split(autokeyFolder.Name, "/")[1],
 	}
 	// create and setup kms project for hosting keyring and keys for autokey
-	kmsProject := BootstrapProjectWithParent(t, DefaultAutokeyTestKmsProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{CloudKmsSrviceName})
+	kmsProject := BootstrapProjectWithParent(t, defaultAutokeyTestKmsProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{CloudKmsSrviceName})
 	kmsProjectID := fmt.Sprintf("projects/%s", kmsProject.ProjectId)
 	kmsSAEmail, err := GenerateCloudKmsServiceIdentity(config, fmt.Sprintf("%v", kmsProject.ProjectNumber))
 	if err != nil {
@@ -201,7 +203,7 @@ func setupAutokeyTestResources(t *testing.T, config *transport_tpg.Config) (*res
 	}
 
 	// create and setup resource folder to host keyhandle
-	resourceProject := BootstrapProjectWithParent(t, DefaultAutokeyTestResourceProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{})
+	resourceProject := BootstrapProjectWithParent(t, defaultAutokeyTestResourceProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{})
 	return autokeyFolder, kmsProject, resourceProject
 }
 
