@@ -13,7 +13,8 @@ import (
 	// For beta tests only
 	"net/http"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
-    tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 
 {{- end }}
 
@@ -21,7 +22,6 @@ import (
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	tpgservicenetworking "github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
@@ -40,12 +40,16 @@ import (
 
 var SharedKeyRing = "tftest-shared-keyring-1"
 
+{{ if ne $.TargetVersionName `ga` -}}
+
 var DefaultAutokeyTestFolderName = "autokeytestfolder-5ab87"
 var DefaultAutokeyTestKmsProject = "autokeytestkmsproject-5ab87"
 var DefaultAutokeyTestResourceProject = "autokeytestresproject-5ab87"
 var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
 var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
 var CloudKmsSrviceName = "cloudkms.googleapis.com"
+
+{{- end }}
 
 
 var SharedCryptoKey = map[string]string{
@@ -58,10 +62,6 @@ type BootstrappedKMS struct {
 	*cloudkms.KeyRing
 	*cloudkms.CryptoKey
 	CryptoKeyVersions []*cloudkms.CryptoKeyVersion
-}
-
-type BootstrappedKMSAutokey struct {
-	*cloudkms.KeyHandle
 }
 
 func BootstrapKMSKey(t *testing.T) BootstrappedKMS {
@@ -94,6 +94,10 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
+
+type BootstrappedKMSAutokey struct {
+	*cloudkms.KeyHandle
+}
 
 func BootstrapKMSAutokeyKeyHandle(t *testing.T) BootstrappedKMSAutokey {
 	return BootstrapKMSAutokeyKeyHandleWithLocation(t, "global")
