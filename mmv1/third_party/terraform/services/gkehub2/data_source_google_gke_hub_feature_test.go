@@ -37,15 +37,13 @@ func TestAccDataSourceGoogleGkeHubFeature_basic(t *testing.T) {
 func testAccDataSourceGoogleGkeHubFeature_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gke_hub_feature" "example" {
-  location = "us-central1"
-  project  = "%{project}"
+  location = "global"
   name     = "servicemesh"
 }
 
 data "google_gke_hub_feature" "example" {
-  location = google_gke_hub_feature.feature.location
-  project  = google_gke_hub_feature.feature.project
-  name     = google_gke_hub_feature.feature.name
+  location = google_gke_hub_feature.example.location
+  name     = google_gke_hub_feature.example.name
 }
 `, context)
 }

@@ -11,7 +11,7 @@ import (
 func DataSourceGoogleGkeHubFeature() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceGKEHub2Feature().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "project")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
