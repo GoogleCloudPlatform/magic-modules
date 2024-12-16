@@ -2762,3 +2762,142 @@ resource "google_storage_bucket" "bucket" {
 }
 `, bucketName)
 }
+
+{{- if ne $.TargetVersionName "ga"}}
+func TestAccStorageBucket_IPFilter(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	var disabled storage.Bucket
+	var updated storage.Bucket
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_IPFilter(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_IPFilter_disable(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &disabled),
+					testAccCheckStorageBucketWasUpdated(&disabled, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_IPFilter_update(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &updated),
+					testAccCheckStorageBucketWasUpdated(&updated, &disabled),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func testAccStorageBucket_IPFilter(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "us-central1"
+	uniform_bucket_level_access = true
+  force_destroy = true
+  ip_filter  {
+    mode = "Enabled"
+		public_network_source {
+			allowed_ip_cidr_ranges = ["0.0.0.0/0"]
+		}
+		vpc_network_sources {
+			network = "projects/%s/global/networks/%s"
+			allowed_ip_cidr_ranges = ["0.0.0.0/0"]
+		}
+  }
+}
+`, bucketName, envvar.GetTestProjectFromEnv(), "default")
+}
+
+func testAccStorageBucket_IPFilter_disable(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "vpc_2" {
+  name = "storage-source-2"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet_21" {
+  name          = "storage-subnet21"
+  ip_cidr_range = "10.201.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.vpc_2.id
+}
+
+resource "google_compute_subnetwork" "subnet_22" {
+  name          = "storage-subnet22"
+  ip_cidr_range = "10.202.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.vpc_2.id
+}
+
+resource "google_storage_bucket" "bucket" {
+	name     = "%s"
+	location = "us-central1"
+	uniform_bucket_level_access = true
+	force_destroy = true
+  ip_filter  {
+    mode = "Disabled"
+			public_network_source {
+			allowed_ip_cidr_ranges = ["192.0.2.0/24", "2001:db8::/32"]
+		}
+		vpc_network_sources {
+			network = "projects/%s/global/networks/%s"
+			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+		}
+		vpc_network_sources {
+			network = "projects/%s/global/networks/%s"
+			allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
+		}
+  }
+}
+`, bucketName, envvar.GetTestProjectFromEnv(), "default", envvar.GetTestProjectFromEnv(), "storage-source-2")
+}
+
+func testAccStorageBucket_IPFilter_update(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+	name     = "%s"
+	location = "us-central1"
+	uniform_bucket_level_access = true
+	force_destroy = true
+  ip_filter  {
+    mode = "Disabled"
+  }
+}
+`, bucketName)
+}
+{{- end }}

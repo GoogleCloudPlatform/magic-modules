@@ -173,6 +173,8 @@ The following arguments are supported:
 
 * `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace). To use this configuration, `uniform_bucket_level_access` must be enabled on bucket.
 
+* `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -289,6 +291,20 @@ The following arguments are supported:
 
 * `enabled` - (Required) Enables hierarchical namespace for the bucket.
 
+<a name="nested_ip_filter"></a>The `ip_filter` block supports:
+
+* `mode` - The state of the IP filter configuration. Valid values are `Enabled` and `Disabled`. When set to `Enabled`, IP filtering rules are applied to a bucket and all incoming requests to the bucket are evaluated against these rules. When set to `Disabled`, IP filtering rules are not applied to a bucket. 
+* `public_network_source` - (Optional) The public network IP address ranges that can access the bucket and its data. Structure is [documented below](#nested_public_network_source).
+* `vpc_network_sources` - (Optional) The list of VPC networks that can access the bucket. Structure is [documented below](#nested_vpc_network_sources).
+
+<a name="nested_public_network_source"></a>The `public_network_source` block supports:
+
+* `allowed_ip_cidr_ranges` - The list of public IPv4 and IPv6 CIDR ranges that can access the bucket and its data.
+
+<a name="nested_vpc_network_sources"></a>The `vpc_network_sources` block supports:
+
+* `network` - Name of the network. Format: `projects/PROJECT_ID/global/networks/NETWORK_NAME`
+* `allowed_ip_cidr_ranges` - The list of public or private IPv4 and IPv6 CIDR ranges that can access the bucket.
 
 ## Attributes Reference
 
