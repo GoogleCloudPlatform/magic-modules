@@ -5,7 +5,6 @@ aliases:
   - /reference/resource-reference
   - /reference/iam-policy-reference
   - /develop/resource-reference
-  - /reference/resource-reference
 ---
 
 # MMv1 resource reference

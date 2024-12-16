@@ -4,7 +4,6 @@ weight: 20
 aliases:
   - /reference/field-reference
   - /develop/field-reference
-  - /reference/field-reference
 ---
 
 # MMv1 field reference
