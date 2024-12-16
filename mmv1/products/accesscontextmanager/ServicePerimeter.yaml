@@ -65,7 +65,6 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/access_context_manager_service_perimeter.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
@@ -783,10 +782,3 @@ properties:
       actually enforcing them. This testing is done through analyzing the differences
       between currently enforced and suggested restrictions. useExplicitDryRunSpec must
       bet set to True if any of the fields in the spec are set to non-default values.
-  - name: 'etag'
-    type: Fingerprint
-    description: |
-      An opaque identifier for the current version of the ServicePerimeter. This
-      identifier does not follow any specific format. If an etag is not provided, the
-      operation will be performed as if a valid etag is provided.
-    output: true
