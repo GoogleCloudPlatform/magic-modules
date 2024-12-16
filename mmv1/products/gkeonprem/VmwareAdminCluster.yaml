@@ -84,6 +84,7 @@ properties:
     name: "description"
     description: |
       A human readable description of this VMware admin cluster.
+    default_from_api: true
   - type: String
     name: "onPremVersion"
     description: |
@@ -92,10 +93,12 @@ properties:
     name: "imageType"
     description: |
       The OS image type for the VMware admin cluster.
+    default_from_api: true
   - type: String
     name: "bootstrapClusterMembership"
     description: |
       The bootstrap cluster this VMware admin cluster belongs to.
+    default_from_api: true
   - type: KeyValueAnnotations
     name: "annotations"
     description: |
@@ -279,6 +282,7 @@ properties:
     name: "addonNode"
     description: |
       The VMware admin cluster addon node configuration.
+    default_from_api: true
     properties:
       - type: NestedObject
         name: "autoResizeConfig"
