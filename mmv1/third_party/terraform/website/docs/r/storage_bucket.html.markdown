@@ -173,7 +173,7 @@ The following arguments are supported:
 
 * `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace). To use this configuration, `uniform_bucket_level_access` must be enabled on bucket.
 
-* `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
+* `ip_filter` -  (Optional, Beta) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
 
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
