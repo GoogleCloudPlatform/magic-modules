@@ -319,6 +319,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
         {{- if ne $.TargetVersionName "ga" }}
+        resourcemanager.NewGoogleProjectFWDataSource,
         firebase.NewGoogleFirebaseAndroidAppConfigDataSource,
         firebase.NewGoogleFirebaseAppleAppConfigDataSource,
         firebase.NewGoogleFirebaseWebAppConfigDataSource,
