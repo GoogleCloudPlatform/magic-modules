@@ -1,42 +1,42 @@
 resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}}" {
-  cluster = "{{index $.Vars "cluster_name"}}"
+  name = "{{index $.Vars "cluster_name"}}"
   cluster_endpoints {
     connections {
       psc_connection {
-        psc_connection_id = google_compute_forwarding_rule.forwarding_rule1_network1.pscConnectionId
-        address = ip11.address
+        psc_connection_id = google_compute_forwarding_rule.forwarding_rule1_network1.psc_connection_id
+        address = google_compute_address.ip11.address
         forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network1.id
-        network = google_compute_forwarding_rule.forwarding_rule1_network1.network
-        service_attachment = google_compute_forwarding_rule.forwarding_rule1_network1.target
+        network = google_compute_network.network1.id
+        service_attachment = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
       }
     }
     connections {
       psc_connection {
-        psc_connection_id = google_compute_forwarding_rule.forwarding_rule2_network1.pscConnectionId
-        address = ip12.address
+        psc_connection_id = google_compute_forwarding_rule.forwarding_rule2_network1.psc_connection_id
+        address = google_compute_address.ip12.address
         forwarding_rule = google_compute_forwarding_rule.forwarding_rule2_network1.id
-        network = google_compute_forwarding_rule.forwarding_rule2_network1.network
-        service_attachment = google_compute_forwarding_rule.forwarding_rule2_network1.target
+        network = google_compute_network.network1.id
+        service_attachment = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment
       }
     }
   }
 }
 resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
-  name                   = "forwardingRule11"
+  name                   = "forwardingrule11"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip11.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network1.id
-  target = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
+  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment) 
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
-  name                   = "forwardingRule12"
+  name                   = "forwardingrule12"
   region                 = "us-central1"
   ip_address             = google_compute_address.ip12.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network1.id
-  target = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment
+  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment) 
 }
 
 resource "google_compute_address" "ip11" {
@@ -73,4 +73,5 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   shard_count    = 3
   region = "us-central1"
   replica_count = 0
+  deletion_protection_enabled = false
 }

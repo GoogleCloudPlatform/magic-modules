@@ -23,7 +23,7 @@ docs:
 id_format: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
-create_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?clusterEndpoints{{clusterEndpoints}}&updateMask=cluster_endpoint'
+create_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints'
 create_verb: PATCH
 update_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?clusterEndpoints{{clusterEndpoints}}'
@@ -48,82 +48,87 @@ examples:
       cluster_name: 'cluster-user-conn'
       subnet_name: 'mysubnet'
       network_name: 'mynetwork'
-properties:
-  - name: 'cluster'
+parameters:
+  - name: 'name'
     type: String
     description: |
       The name of the redis cluster these endpoints should be added to.
     required: true
+    default_from_api: true
+properties:
   - name: 'clusterEndpoints'
     type: Array
     description: "A list of cluster endpoints"
     default_from_api: true
     item_type:
-      type: Array
+      type: NestedObject
       description: |
         ClusterEndpoint consists of PSC connections that are created 
         as a group in each VPC network for accessing the cluster. In each group,
         there shall be one connection for each service attachment in the cluster.
-      item_type:
-        type: NestedObject
-        name: 'connections'
-        properties:
-          - name: 'pscConnection'
+      properties:
+        - name: connections
+          type: Array
+          item_type:
             type: NestedObject
-            description: |
-              Detailed information of a PSC connection that is created by the customer
-              who owns the cluster.
+            name: 'connections'
             properties:
-              - name: 'pscConnectionId'
-                type: String
-                description:
-                  "The PSC connection id of the forwarding rule connected
-                  to the\nservice attachment."
-                required: true
-              - name: 'address'
-                type: String
-                description:
-                  "The IP allocated on the consumer network for the
-                  PSC forwarding rule. "
-                required: true
-              - name: 'forwardingRule'
-                type: String
-                description: "The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-                required: true
-              - name: 'projectId'
-                type: String
-                description:
-                  "The consumer project_id where the forwarding rule is
-                  created from. "
-                default_from_api: true
-              - name: 'network'
-                type: String
-                description:
-                  "The consumer network where the IP address resides, in
-                  the form of\nprojects/{project_id}/global/networks/{network_id}. "
-                required: true
-              - name: 'serviceAttachment'
-                type: String
-                description:
-                  "The service attachment which is the target of the PSC connection, in the form of
-                  projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-                required: true
-              - name: 'pscConnectionStatus'
-                type: Enum
-                description:
-                  "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
-                  \n Possible values:\n ACTIVE \n NOT_FOUND"
-                output: true
-                enum_values:
-                  - 'ACTIVE'
-                  - 'NOT_FOUND'
-              - name: 'connectionType'
-                type: Enum
-                description:
-                  "Output Only. Type of a PSC Connection.
-                  \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-                output: true
-                enum_values:
-                  - 'CONNECTION_TYPE_READER'
-                  - 'CONNECTION_TYPE_PRIMARY'
-                  - 'CONNECTION_TYPE_DISCOVERY'
+              - name: 'pscConnection'
+                type: NestedObject
+                description: |
+                  Detailed information of a PSC connection that is created by the customer
+                  who owns the cluster.
+                properties:
+                  - name: 'pscConnectionId'
+                    type: String
+                    description:
+                      "The PSC connection id of the forwarding rule connected
+                      to the\nservice attachment."
+                    required: true
+                  - name: 'address'
+                    type: String
+                    description:
+                      "The IP allocated on the consumer network for the
+                      PSC forwarding rule. "
+                    required: true
+                  - name: 'forwardingRule'
+                    type: String
+                    description: "The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+                    required: true
+                  - name: 'projectId'
+                    type: String
+                    description:
+                      "The consumer project_id where the forwarding rule is
+                      created from. "
+                    default_from_api: true
+                  - name: 'network'
+                    type: String
+                    description:
+                      "The consumer network where the IP address resides, in
+                      the form of\nprojects/{project_id}/global/networks/{network_id}. "
+                    required: true
+                  - name: 'serviceAttachment'
+                    type: String
+                    description:
+                      "The service attachment which is the target of the PSC connection, in the form of
+                      projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
+                    required: true
+                  - name: 'pscConnectionStatus'
+                    type: Enum
+                    description:
+                      "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
+                      \n Possible values:\n ACTIVE \n NOT_FOUND"
+                    output: true
+                    enum_values:
+                      - 'ACTIVE'
+                      - 'NOT_FOUND'
+                  - name: 'connectionType'
+                    type: Enum
+                    description:
+                      "Output Only. Type of a PSC Connection.
+                      \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
+                    output: true
+                    enum_values:
+                      - 'CONNECTION_TYPE_READER'
+                      - 'CONNECTION_TYPE_PRIMARY'
+                      - 'CONNECTION_TYPE_DISCOVERY'
