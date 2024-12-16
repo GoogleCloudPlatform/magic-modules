@@ -103,6 +103,7 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 var WorkbenchInstanceProvidedTags = []string{
 	"deeplearning-vm",
 	"notebook-instance",
+	"resource-url",
 }
 
 func WorkbenchInstanceTagsDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
