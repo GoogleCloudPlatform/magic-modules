@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Contribute on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/</link><description>Recent content in Contribute on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/contribute/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</guid><description>&lt;h1 id="create-a-pull-request-pr">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Code review on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/</link><description>Recent content in Code review on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/code-review/index.xml" rel="self" type="application/rss+xml"/><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/</guid><description>&lt;h1 id="create-a-pull-request-pr">
  Create a pull request (PR)
  &lt;a class="anchor" href="#create-a-pull-request-pr">#&lt;/a>
 &lt;/h1>
@@ -16,7 +16,7 @@
 &lt;li>Follow the instructions at &lt;a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">Creating a pull request&lt;/a> to create a pull request to merge your branch into &lt;code>GoogleCloudPlatform/magic-modules&lt;/code>.
 &lt;ul>
 &lt;li>Make sure the PR body includes the text &lt;code>Fixes GITHUB_ISSUE_LINK.&lt;/code> once per issue resolved by your PR. Replace &lt;code>GITHUB_ISSUE_LINK&lt;/code> with a link to a GitHub issue from the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">provider issue tracker&lt;/a>.&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">Write release notes&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/">Write release notes&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;/ol>
@@ -35,7 +35,7 @@
 &lt;li>If your assigned reviewer does not respond to changes on a pull request within two US business days, ping them on the pull request.&lt;/li>
 &lt;/ol>
 &lt;blockquote class="book-hint info">
- &lt;p>&lt;strong>TIP:&lt;/strong> Speeding up review:&lt;/p></description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</guid><description>&lt;h1 id="write-release-notes">
+ &lt;p>&lt;strong>TIP:&lt;/strong> Speeding up review:&lt;/p></description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</guid><description>&lt;h1 id="write-release-notes">
  Write release notes
  &lt;a class="anchor" href="#write-release-notes">#&lt;/a>
 &lt;/h1>
@@ -44,7 +44,7 @@
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-markdown" data-lang="markdown">&lt;span style="display:flex;">&lt;span>```release-note:TYPE
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>CONTENT
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>```
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>TYPE&lt;/code> with the correct release note type, and &lt;code>CONTENT&lt;/code> with a release note written according to the guidelines in the following sections.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Replace &lt;code>TYPE&lt;/code> with the correct release note type, and &lt;code>CONTENT&lt;/code> with a release note written according to the guidelines in the following sections.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
  Review a pull request
  &lt;a class="anchor" href="#review-a-pull-request">#&lt;/a>
 &lt;/h1>
@@ -123,5 +123,5 @@ Some acceptance tests may be skipped in VCR and manual testing is required.
 &lt;li>documentation is added manually for handwritten resources.&lt;/li>
 &lt;/ol>
 &lt;/li>
-&lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
+&lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
 &lt;/ol></description></item></channel></rss>

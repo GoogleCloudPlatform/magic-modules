@@ -39,7 +39,7 @@ git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git check
 &lt;li>Unit tests: test specific functions thoroughly. Unit tests do not interact with GCP APIs.&lt;/li>
 &lt;li>Acceptance tests (aka VCR tests, or create and update tests): test that resources interact as expected with the APIs. Acceptance tests interact with GCP APIs, but should only test the provider&amp;rsquo;s behavior in constructing the API requests and parsing the responses.&lt;/li>
 &lt;/ul>
-&lt;p>Acceptance tests are also called &amp;ldquo;VCR tests&amp;rdquo; because they use &lt;a href="https://github.com/dnaeon/go-vcr">&lt;code>go-vcr&lt;/code>&lt;/a> to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don&amp;rsquo;t actually need to be created, updated, or destroyed by the live API.&lt;/p></description></item><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/</guid><description>&lt;h1 id="create-a-pull-request-pr">
+&lt;p>Acceptance tests are also called &amp;ldquo;VCR tests&amp;rdquo; because they use &lt;a href="https://github.com/dnaeon/go-vcr">&lt;code>go-vcr&lt;/code>&lt;/a> to record and play back HTTP requests. This allows tests to run more quickly on PRs because the resources don&amp;rsquo;t actually need to be created, updated, or destroyed by the live API.&lt;/p></description></item><item><title>Create a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/</guid><description>&lt;h1 id="create-a-pull-request-pr">
  Create a pull request (PR)
  &lt;a class="anchor" href="#create-a-pull-request-pr">#&lt;/a>
 &lt;/h1>
@@ -57,7 +57,7 @@ git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git check
 &lt;li>Follow the instructions at &lt;a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">Creating a pull request&lt;/a> to create a pull request to merge your branch into &lt;code>GoogleCloudPlatform/magic-modules&lt;/code>.
 &lt;ul>
 &lt;li>Make sure the PR body includes the text &lt;code>Fixes GITHUB_ISSUE_LINK.&lt;/code> once per issue resolved by your PR. Replace &lt;code>GITHUB_ISSUE_LINK&lt;/code> with a link to a GitHub issue from the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">provider issue tracker&lt;/a>.&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">Write release notes&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/">Write release notes&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;/ol>
@@ -232,8 +232,8 @@ git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git check
 &lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/generate-providers/">Generate the providers&lt;/a> that include your change.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/test/run-tests/">Run provider tests locally&lt;/a> that are relevant to the change you made&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
-&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/create-pr/#code-review">code review&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/">Create a pull request (PR)&lt;/a>&lt;/li>
+&lt;li>Make changes in response to &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/create-pr/#code-review">code review&lt;/a>&lt;/li>
 &lt;/ol>
 &lt;h2 id="after-your-change-is-merged">
  After your change is merged
@@ -331,7 +331,7 @@ GOOGLE_BILLING_ACCOUNT
  &lt;label for="tabs-version-0">GA Provider&lt;/label>
  &lt;div class="book-tabs-content markdown-inner">&lt;ol>
 &lt;li>
-&lt;p>Run unit tests and linters&lt;/p></description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/</guid><description>&lt;h1 id="write-release-notes">
+&lt;p>Run unit tests and linters&lt;/p></description></item><item><title>Write release notes</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/</guid><description>&lt;h1 id="write-release-notes">
  Write release notes
  &lt;a class="anchor" href="#write-release-notes">#&lt;/a>
 &lt;/h1>
@@ -402,7 +402,7 @@ additional work to implement.&lt;/p></description></item><item><title>Labels and
  &lt;a class="anchor" href="#cleaning-up-old-files">#&lt;/a>
 &lt;/h4>
 &lt;p>Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
-to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/contribute/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
+to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
  Review a pull request
  &lt;a class="anchor" href="#review-a-pull-request">#&lt;/a>
 &lt;/h1>
@@ -481,7 +481,7 @@ Some acceptance tests may be skipped in VCR and manual testing is required.
 &lt;li>documentation is added manually for handwritten resources.&lt;/li>
 &lt;/ol>
 &lt;/li>
-&lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
+&lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
 &lt;/ol></description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support">
  Add IAM support
  &lt;a class="anchor" href="#add-iam-support">#&lt;/a>
