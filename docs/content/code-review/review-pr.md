@@ -1,6 +1,8 @@
 ---
 title: "Review a pull request"
 weight: 30
+aliases:
+  - /contribute/review-pr
 ---
 
 # Review a pull request
