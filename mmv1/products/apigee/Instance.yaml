@@ -40,14 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
@@ -69,6 +63,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_instance_cidr_range'
     vars:
       instance_name: 'my-instance-name'
@@ -83,6 +78,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_instance_ip_range'
     vars:
       instance_name: 'my-instance-name'
@@ -97,6 +93,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_instance_full'
     vars:
       instance_name: 'my-instance-name'
@@ -112,6 +109,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_instance_service_attachment_basic_test'
     primary_resource_id: 'apigee_instance'
     test_env_vars:
@@ -120,6 +118,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String

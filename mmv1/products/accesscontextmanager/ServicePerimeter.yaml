@@ -60,14 +60,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
@@ -257,7 +251,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
-                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
                 - name: 'identities'
                   type: Array
                   description: |
@@ -380,7 +374,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
-                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'
@@ -571,7 +565,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
-                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
                 - name: 'identities'
                   type: Array
                   description: |
@@ -689,7 +683,7 @@ properties:
                     - 'ANY_IDENTITY'
                     - 'ANY_USER_ACCOUNT'
                     - 'ANY_SERVICE_ACCOUNT'
-                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+                  diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
                 - name: 'sources'
                   type: Array
                   description: 'Sources that this EgressPolicy authorizes access from.'
