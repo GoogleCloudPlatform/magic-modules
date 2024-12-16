@@ -11,6 +11,6 @@ For example: Fixes https://github.com/hashicorp/terraform-provider-google/issues
 
 See [Write release notes](https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/) for guidance.
 
-```release-note:REPLACEME
-
+```release-note:enhancement
+   compute: added `network_profile` field to `google_compute_network` resource. Added support for MRDMA and IRDMA nic types.
 ```
