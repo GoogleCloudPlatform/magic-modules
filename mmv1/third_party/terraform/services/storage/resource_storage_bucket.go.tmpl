@@ -969,7 +969,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-{{- if ne $.TargetVersionName "ga"}}
+{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("ip_filter") {
 		if v, ok := d.GetOk("ip_filter"); ok {
 			sb.IpFilter = expandIpFilter(v.([]interface{}))
@@ -1888,7 +1888,7 @@ func lockRetentionPolicy(bucketsService *storage.BucketsService, bucketName stri
 	return nil
 }
 
-{{- if ne $.TargetVersionName "ga"}}
+{{- if ne $.TargetVersionName "ga" }}
 func flattenIpFilter(ipFilter *storage.BucketIpFilter) []map[string]interface{} {
 	ipFilterList := make([]map[string]interface{}, 0, 1)
 
@@ -2135,7 +2135,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		}
 	}
 
-{{- if ne $.TargetVersionName "ga"}}
+{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("ip_filter", flattenIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
