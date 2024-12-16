@@ -132,4 +132,3 @@ properties:
     description: |
       IP (L3) MTU value of the virtual edge cloud. Default value is `1500`. Possible values are: `1500`, `9000`.
     default_value: 1500
-
