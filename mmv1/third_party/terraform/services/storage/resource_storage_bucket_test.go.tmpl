@@ -2763,7 +2763,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-{{- if ne $.TargetVersionName "ga"}}
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccStorageBucket_IPFilter(t *testing.T) {
 	t.Parallel()
 
