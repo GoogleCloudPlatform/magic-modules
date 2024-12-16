@@ -60,7 +60,7 @@ iam_policy:
   # min_version: beta
 ```
 
-2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference: `iam_policy` ↗]({{<ref "/reference/resource-reference#iam_policy" >}}).
+2. Modify the template as needed to match the API resource's documented behavior. These are the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference: `iam_policy` ↗]({{<ref "/reference/resource#iam_policy" >}}).
 3. Delete all remaining comments in the IAM configuration (including attribute descriptions) that were copied from the above template.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
