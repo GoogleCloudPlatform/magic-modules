@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reference on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/reference/</link><description>Recent content in Reference on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/reference/index.xml" rel="self" type="application/rss+xml"/><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/resource-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/resource-reference/</guid><description>&lt;h1 id="mmv1-resource-reference">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reference on Magic Modules</title><link>https://googlecloudplatform.github.io/magic-modules/reference/</link><description>Recent content in Reference on Magic Modules</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://googlecloudplatform.github.io/magic-modules/reference/index.xml" rel="self" type="application/rss+xml"/><item><title>MMv1 resource reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/resource/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/resource/</guid><description>&lt;h1 id="mmv1-resource-reference">
  MMv1 resource reference
  &lt;a class="anchor" href="#mmv1-resource-reference">#&lt;/a>
 &lt;/h1>
@@ -28,7 +28,7 @@ available properties, see &lt;a href="https://github.com/GoogleCloudPlatform/mag
  &lt;code>references&lt;/code>
  &lt;a class="anchor" href="#references">#&lt;/a>
 &lt;/h3>
-&lt;p>Links to reference documentation for a resource. Contains two attributes:&lt;/p></description></item><item><title>MMv1 field reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/field-reference/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/field-reference/</guid><description>&lt;h1 id="mmv1-field-reference">
+&lt;p>Links to reference documentation for a resource. Contains two attributes:&lt;/p></description></item><item><title>MMv1 field reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/field/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/field/</guid><description>&lt;h1 id="mmv1-field-reference">
  MMv1 field reference
  &lt;a class="anchor" href="#mmv1-field-reference">#&lt;/a>
 &lt;/h1>
