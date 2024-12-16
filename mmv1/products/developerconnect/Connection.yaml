@@ -189,7 +189,6 @@ properties:
     Optional. This checksum is computed by the server based on the value of other
     fields, and may be sent on update and delete requests to ensure the
     client has an up-to-date value before proceeding.
-  output: true
 - name: uid
   type: String
   description: Output only. A system-assigned unique identifier for a the GitRepositoryLink.
@@ -301,13 +300,11 @@ properties:
     description: |-
       Output only. Message of what the user should do next to continue the installation.
       Empty string if the installation is already complete.
-    output: true
   - name: actionUri
     type: String
     description: |-
       Output only. Link to follow for next action. Empty string if the installation is already
       complete.
-    output: true
   - name: stage
     type: String
     description: |-
