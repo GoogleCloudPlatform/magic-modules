@@ -5,6 +5,7 @@ aliases:
   - /reference/resource-reference
   - /reference/iam-policy-reference
   - /develop/resource-reference
+  - /reference/resource-reference
 ---
 
 # MMv1 resource reference
@@ -335,12 +336,12 @@ the behavior of a Terraform resource such as `deletion_protection`.
 
 ### `parameters`
 
-Contains a list of [fields]({{< ref "/reference/field-reference" >}}). By convention,
+Contains a list of [fields]({{< ref "/reference/field" >}}). By convention,
 these should be the fields that are part URL parameters such as `location` and `name`.
 
 ### `properties`
 
-Contains a list of [fields]({{< ref "/reference/field-reference" >}}). By convention,
+Contains a list of [fields]({{< ref "/reference/field" >}}). By convention,
 these should be fields that aren't part of the URL parameters.
 
 Example:
