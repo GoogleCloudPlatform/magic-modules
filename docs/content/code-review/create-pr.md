@@ -1,6 +1,8 @@
 ---
 title: "Create a pull request"
 weight: 10
+aliases:
+  - /contribute/create-pr
 ---
 
 # Create a pull request (PR)
@@ -12,7 +14,7 @@ weight: 10
 	 - If you are adding a few fields and also fixing a bug, create one PR for adding the new fields and a separate PR for the bugs.
 1. Follow the instructions at [Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to create a pull request to merge your branch into `GoogleCloudPlatform/magic-modules`.
    - Make sure the PR body includes the text `Fixes GITHUB_ISSUE_LINK.` once per issue resolved by your PR. Replace `GITHUB_ISSUE_LINK` with a link to a GitHub issue from the [provider issue tracker](https://github.com/hashicorp/terraform-provider-google/issues).
-   - [Write release notes]({{< ref "/contribute/release-notes" >}})
+   - [Write release notes]({{< ref "/code-review/release-notes" >}})
 
 ## Code review
 
@@ -28,7 +30,7 @@ weight: 10
    - You can push them and test in parallel as well. New CI runs will preempt old ones where possible.
 1. Resolve failed [status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) quickly
    - Directly ask your reviewer for help if you don't know how to proceed. If there are failed checks they may only check in if there's no progress after a couple days.
-1. [Self-review your PR]({{< ref "/contribute/review-pr" >}}) or ask someone else familiar with Terraform to review
+1. [Self-review your PR]({{< ref "/code-review/review-pr" >}}) or ask someone else familiar with Terraform to review
 {{< /hint >}}
 
 

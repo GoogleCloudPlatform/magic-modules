@@ -1,6 +1,8 @@
 ---
 title: "Write release notes"
 weight: 20
+aliases:
+  - /contribute/release-notes
 ---
 
 # Write release notes
