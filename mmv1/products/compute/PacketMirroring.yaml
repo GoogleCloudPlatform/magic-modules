@@ -143,7 +143,8 @@ properties:
     required: true
     properties:
       - name: 'subnetworks'
-        type: Array
+        type: !ruby/object:Api::Type::Array
+        is_set: true
         description: |
           All instances in one of these subnetworks will be mirrored.
         at_least_one_of:
@@ -164,7 +165,8 @@ properties:
               resource: 'Subnetwork'
               imports: 'selfLink'
       - name: 'instances'
-        type: Array
+        type: !ruby/object:Api::Type::Array
+        is_set: true
         description: |
           All the listed instances will be mirrored.  Specify at most 50.
         at_least_one_of:
