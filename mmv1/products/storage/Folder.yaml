@@ -63,13 +63,13 @@ parameters:
   - name: 'name'
     description: |
       The name of the folder expressed as a path. Must include
-      trailing '/'. For example, `example_dir/example_dir2/`.
+      trailing '/'. For example, `example_dir/example_dir2/`, `example@#/`, `a-b/d-f/`.
     required: true
     # The API returns values with trailing slashes, even if not
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
     validation:
-      regex: '/$'
+      regex: '^[^/\s][^\s/]*(/[^\s/]+)*\/$'
 properties:
   - name: createTime
     type: String
