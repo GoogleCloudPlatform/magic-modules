@@ -23,7 +23,7 @@ import vcs_roots.ModularMagicianVCSRootBeta
 import vcs_roots.ModularMagicianVCSRootGa
 
 const val featureBranchEphemeralWriteOnly = "FEATURE-BRANCH-ephemeral-write-only"
-const val EphemeralWriteOnlyTfCoreVersion = "1.10.0"
+const val EphemeralWriteOnlyTfCoreVersion = "1.11.0-alpha20241211"
 
 fun featureBranchEphemeralWriteOnlySubProject(allConfig: AllContextParameters): Project {
 
@@ -140,7 +140,7 @@ fun featureBranchEphemeralWriteOnlySubProject(allConfig: AllContextParameters): 
     )
     val buildConfigsMMBeta = BuildConfigurationsForPackages(ServicesListWriteOnlyBetaMM, ProviderNameBeta, "EphemeralWriteOnlyBeta - MM", ModularMagicianVCSRootBeta, listOf(SharedResourceNameBeta), vcrConfig)
 
-    // Make all builds use a 1.10.0-ish version of TF core
+    // Make all builds use a 1.11.0-ish version of TF core
     val allBuildConfigs = buildConfigsGa + buildConfigsBeta + buildConfigsMMGa + buildConfigsMMBeta
     allBuildConfigs.forEach{ builds ->
         builds.overrideTerraformCoreVersion(EphemeralWriteOnlyTfCoreVersion)
