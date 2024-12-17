@@ -13,3 +13,9 @@ resource "google_storage_folder" "{{$.PrimaryResourceId}}" {
   name          = "parent-folder/"
   force_destroy = true
 }
+
+resource "google_storage_folder" "subfolder" {
+  bucket        = google_storage_bucket.bucket.name
+  name          = "${google_storage_folder.{{$.PrimaryResourceId}}.name}subfolder/"
+  force_destroy = true
+}
