@@ -15,8 +15,8 @@
 name: DeveloperConnect
 display_name: Developer Connect
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'
 versions:
-- base_url: https://developerconnect.googleapis.com/v1/
-  name: ga
+  - base_url: 'https://developerconnect.googleapis.com/v1/'
+    name: ga
 caibaseurl: ""
