@@ -5,7 +5,7 @@ var listError, deleteObjectError error
 for deleteObjectError == nil {
     res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Prefix(name).Do()
     if err != nil {
-        log.Printf("Error listing contents of bucket %s: %v", bucket, err)
+        log.Printf("Error listing contents of folder %s: %v", bucket, err)
         listError = err
         break
     }
