@@ -21,7 +21,7 @@ import vcs_roots.HashiCorpVCSRootBeta
 import vcs_roots.HashiCorpVCSRootGa
 import vcs_roots.ModularMagicianVCSRootBeta
 import vcs_roots.ModularMagicianVCSRootGa
-import getServicesList
+import components.projects.feature_branches.getServicesList
 
 const val featureBranchEphemeralWriteOnly = "FEATURE-BRANCH-ephemeral-write-only"
 const val EphemeralWriteOnlyTfCoreVersion = "1.11.0-alpha20241211"

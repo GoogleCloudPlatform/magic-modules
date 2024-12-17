@@ -2,11 +2,14 @@
  * Copyright (c) HashiCorp, Inc.
  * SPDX-License-Identifier: MPL-2.0
  */
+package components.projects.feature_branches
+ 
 import generated.ServicesListGa
 import generated.ServicesListBeta
 
 // This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
+// This function is used to get the services list for a given version. Typically used in feature branch builds for testing very specific services only.
 fun getServicesList(Services: Array<String>, version: String): Map<String,Map<String,String>> {
     if (Services.isEmpty()) {
         throw Exception("No services found for version $version")
@@ -24,32 +27,30 @@ fun getServicesList(Services: Array<String>, version: String): Map<String,Map<St
     }
 
     when (version) {
-        "GA" -> return servicesList
+        "GA" -> servicesList
         "Beta" -> {
-            servicesList = servicesList.mapValues { (_, value) ->
+            servicesList.mapValues { (_, value) ->
                 value + mapOf(
-                    "displayName" to "${value["displayName"]} - Beta",
-                    "path" to (value["path"]?.replace("./google/", "./google-beta/") ?: "")
+                        "displayName" to "${value["displayName"]} - Beta"
                 )
             }.toMutableMap()
         }
         "GA-MM" -> {
-            servicesList = servicesList.mapValues { (_, value) ->
+            servicesList.mapValues { (_, value) ->
                 value + mapOf(
-                    "displayName" to "${value["displayName"]} - MM"
+                        "displayName" to "${value["displayName"]} - MM"
                 )
             }.toMutableMap()
         }
         "Beta-MM" -> {
-            servicesList = servicesList.mapValues { (_, value) ->
+            servicesList.mapValues { (_, value) ->
                 value + mapOf(
-                    "displayName" to "${value["displayName"]} - Beta - MM",
-                    "path" to (value["path"]?.replace("./google-beta/", "./google-beta/services/") ?: "")
+                        "displayName" to "${value["displayName"]} - Beta - MM"
                 )
             }.toMutableMap()
         }
         else -> throw Exception("Invalid version $version")
-    }
-    
+    }.also { servicesList = it as MutableMap<String, Map<String, String>> }
+
     return servicesList
 }
