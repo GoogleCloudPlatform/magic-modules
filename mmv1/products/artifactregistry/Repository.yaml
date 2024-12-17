@@ -746,7 +746,6 @@ properties:
     type: NestedObject
     description: |-
       Configuration for vulnerability scanning of artifacts stored in this repository.
-    allow_empty_object: true
     default_from_api: true
     properties:
       - name: 'enablementConfig'
