@@ -34,8 +34,12 @@ func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *te
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    {{ if ne $.TargetVersionName `ga` -}}
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+    {{ else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckParallelstoreInstanceDestroyProducer(t),
+    {{ end }}
+    CheckDestroy:             testAccCheckParallelstoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_basic(context),
@@ -58,8 +62,6 @@ func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *te
 
 		},
     {{ if ne $.TargetVersionName `ga` -}}
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckParallelstoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context),
@@ -70,16 +72,6 @@ func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *te
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
 			},
-			                        {
-                                Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(context),
-                        },
-                        {
-                                ResourceName:            "google_parallelstore_instance.instance",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
-                        },
-
 		},
     {{ end }}
 	})
