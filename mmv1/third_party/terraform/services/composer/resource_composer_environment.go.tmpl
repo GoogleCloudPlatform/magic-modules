@@ -734,17 +734,20 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:         schema.TypeList,
 										Description: `Optional. The configuration setting for database retention.`,
 										Optional:     true,
+										Computed:     true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"retention_mode": {
 													Type:         schema.TypeString,
 													Optional:     true,
+													Computed:     true,
 													ValidateFunc: validation.StringInSlice([]string{"RETENTION_MODE_ENABLED", "RETENTION_MODE_DISABLED"}, false),
 													Description:  `Whether database retention is enabled or not. This field is supported for Cloud Composer environments in composer 3 and newer.`,
 												},
 												"retention_days": {
 													Type:         schema.TypeInt,
 													Optional:     true,
+													Computed:     true,
 													ValidateFunc: validation.IntBetween(30, 730),
 													Description:  `How many days data should be retained for. This field is supported for Cloud Composer environments in composer 3 and newer.`,
 												},
