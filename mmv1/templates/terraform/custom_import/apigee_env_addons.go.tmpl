@@ -1,16 +1,13 @@
 config := meta.(*transport_tpg.Config)
 
-// current import_formats can't import fields with forward slashes in their value
-if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+// current import_formats cannot import fields with forward slashes in their value
+if err := tpgresource.ParseImportId([]string{"(?P<env_id>.+)"}, d, config); err != nil {
 	return nil, err
 }
 
-parts := strings.Split(d.Get("name").(string), "/")
-
-if err := d.Set("org", parts[1]); err != nil {
-	return nil, fmt.Errorf("Error setting organization: %s", err)
+nameParts := strings.Split(d.Get("env_id").(string), "/")
+if len(nameParts) == 5 {
+	id := fmt.Sprintf("organizations/%s/environments/%s", nameParts[1], nameParts[3])
+	d.SetId(id)
 }
-d.SetId(parts[3])
-
 return []*schema.ResourceData{d}, nil
-
