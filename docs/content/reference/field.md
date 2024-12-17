@@ -1,8 +1,9 @@
 ---
 title: "MMv1 field reference"
-weight: 120
+weight: 20
 aliases:
   - /reference/field-reference
+  - /develop/field-reference
 ---
 
 # MMv1 field reference
@@ -280,7 +281,7 @@ This property has two mutually exclusive child properties:
   [`function: verify.ValidateRegexp(REGEX_STRING)`](https://github.com/hashicorp/terraform-provider-google-beta/blob/0ef51142a4dd1c1a4fc308c1eb09dce307ebe5f5/google-beta/verify/validation.go#L425).
 
 `validation` is not supported for Array fields (including sets); however, individual
-elements in the array can be validated using [`item_validation`]({{<ref "/develop/field-reference#item_validation" >}}).
+elements in the array can be validated using [`item_validation`]({{<ref "#item_validation" >}}).
 
 Example: Provider-specific function
 
@@ -331,7 +332,7 @@ stating the current allowed values in the String field's description. Do not
 include UNSPECIFIED values in this list.
 
 Enums will validate that the provided field is in the allowed list unless a
-custom [`validation`]({{<ref "/develop/field-reference#validation" >}}) is provided.
+custom [`validation`]({{<ref "#validation" >}}) is provided.
 
 Example:
 
@@ -380,7 +381,7 @@ item_type:
 
 ### `item_validation`
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
-used to validate individual items in the array. Behaves like [`validation`]({{<ref "/develop/field-reference#validation" >}}).
+used to validate individual items in the array. Behaves like [`validation`]({{<ref "#validation" >}}).
 
 For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
 If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum

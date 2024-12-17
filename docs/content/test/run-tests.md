@@ -298,4 +298,4 @@ Terraform will resume its normal behaviour of pulling published provider version
 
 ## What's next?
 
-[Create a pull request]({{< ref "/contribute/create-pr" >}})
+[Create a pull request]({{< ref "/code-review/create-pr" >}})

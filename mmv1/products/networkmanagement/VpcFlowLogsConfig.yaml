@@ -16,7 +16,6 @@ name: 'VpcFlowLogsConfig'
 description:
   VPC Flow Logs Config is a resource that lets you configure
   Flow Logs for VPC, Interconnect attachments or VPN Tunnels.
-min_version: beta
 id_format: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
@@ -41,7 +40,6 @@ custom_code:
 examples:
   - name: 'network_management_vpc_flow_logs_config_interconnect_full'
     primary_resource_id: 'interconnect-test'
-    min_version: 'beta'
     vars:
       network_name: 'full-interconnect-test-network'
       router_name: 'full-interconnect-test-router'
@@ -49,7 +47,6 @@ examples:
       interconnect_attachment_name: 'full-interconnect-test-id'
   - name: 'network_management_vpc_flow_logs_config_interconnect_basic'
     primary_resource_id: 'interconnect-test'
-    min_version: 'beta'
     vars:
       network_name: 'basic-interconnect-test-network'
       router_name: 'basic-interconnect-test-router'
@@ -57,7 +54,6 @@ examples:
       interconnect_attachment_name: 'basic-interconnect-test-id'
   - name: 'network_management_vpc_flow_logs_config_vpn_basic'
     primary_resource_id: 'vpn-test'
-    min_version: 'beta'
     vars:
       network_name: 'basic-test-network'
       vpn_tunnel_name: 'basic-test-tunnel'
@@ -70,7 +66,6 @@ examples:
       vpc_flow_logs_config_id: 'basic-test-id'
   - name: 'network_management_vpc_flow_logs_config_vpn_full'
     primary_resource_id: 'vpn-test'
-    min_version: 'beta'
     vars:
       network_name: 'full-test-network'
       vpn_tunnel_name: 'full-test-tunnel'

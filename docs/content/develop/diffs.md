@@ -176,7 +176,7 @@ See [SDKv2 Schema Behaviors - DiffSuppressFunc ↗](https://developer.hashicorp.
 
 ## API field that is never included in the response {#ignore_read}
 
-This is common for fields that store credentials or similar information. Such fields should also be marked as [`sensitive`]({{< ref "/develop/field-reference#sensitive" >}}).
+This is common for fields that store credentials or similar information. Such fields should also be marked as [`sensitive`]({{< ref "/reference/field#sensitive" >}}).
 
 In the flattener for the field, return the value of the field in the user's configuration.
 
