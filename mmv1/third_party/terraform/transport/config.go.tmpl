@@ -438,7 +438,7 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	cleanCtx := context.WithValue(ctx, oauth2.HTTPClient, cleanhttp.DefaultClient())
 	clientOptions := []option.ClientOption{option.WithTokenSource(tokenSource)}
 
-    // The client libraries allow setting the GOOGLE_CLOUD_QUOTA_PROJECT environment variable 
+	// The client libraries allow setting the GOOGLE_CLOUD_QUOTA_PROJECT environment variable 
 	// directly, which unintentionally takes precedence over provider settings. Ensure that 
 	// provider settings take precedence by applying to the client library's client directly
 	// b/360405077#comment8 - go/tpg-issue/17882
