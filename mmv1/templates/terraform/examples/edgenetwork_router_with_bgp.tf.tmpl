@@ -1,0 +1,82 @@
+
+resource "google_edgenetwork_router" "{{$.PrimaryResourceId}}" {
+  router_id   = "{{index $.Vars "edgenetwork_router_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
+  description = "Example router."
+  network     = google_edgenetwork_network.example_network.id
+  labels      = {
+    "environment" : "dev"
+  }
+  interface {
+        name       = "interface-ipv4"
+        ipv4_cidr  = "1.1.1.1/24"
+        subnetwork = google_edgenetwork_subnet.example_subnet.id
+        linked_interconnect_attachment = google_edgenetwork_interconnect_attachment.example_interconnect_attachment.id
+  }
+  interface {
+        name       = "interface-ipv6"
+        ipv6_cidr  = "4444:4444:4444:4444::1/64"
+        subnetwork = google_edgenetwork_subnet.example_subnet.id
+        linked_interconnect_attachment = google_edgenetwork_interconnect_attachment.example_interconnect_attachment.id
+  }
+  interface {
+        name                  = "interface-loopback"
+        loopback_ip_addresses = ["2.2.2.2", "2.2.2.3"]
+  }
+  bgp_peer {
+        name                = "peer-ipv4"
+        interface           = "interface-ipv4"
+        interface_ipv4_cidr = "1.1.1.1/24"
+        peer_ipv4_cidr      = "9.9.9.9/24"
+        peer_asn            = 123
+  }
+  bgp_peer {
+        name                = "peer-ipv6"
+        interface           = "interface-ipv6"
+        interface_ipv6_cidr = "4444:4444:4444:4444::1/64"
+        peer_ipv6_cidr      = "8888:8888:8888:8888::1/64"
+        peer_asn            = 789
+  }
+  bgp {
+    asn = 456
+    keepalive_interval_in_seconds = 40
+  }
+  route_advertisements = ["3.3.3.3/24", "4.4.4.4/24"]
+}
+
+resource "google_edgenetwork_interconnect_attachment" "example_interconnect_attachment" {
+  interconnect_attachment_id   = "{{index $.Vars "edgenetwork_interconnect_attachment_id"}}"
+  location     = "{{index $.TestEnvVars "location"}}"
+  zone         = "{{index $.TestEnvVars "zone"}}"
+  description  = "Example interconnect attachment."
+  network      = google_edgenetwork_network.example_network.id
+  interconnect = "11111111-2222-3333-4444-555555555555"
+  vlan_id      = 55
+  mtu          = 9000
+  labels       = {
+    "environment" : "dev"
+  }
+}
+
+resource "google_edgenetwork_subnet" "example_subnet" {
+  subnet_id   = "{{index $.Vars "edgenetwork_subnet_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
+  description = "Example subnet."
+  network     = google_edgenetwork_network.example_network.id
+  ipv4_cidr   = ["4.4.4.1/24"]
+  vlan_id     = 55
+  labels      = {
+    "environment" : "dev"
+  }
+}
+
+resource "google_edgenetwork_network" "example_network" {
+  network_id  = "{{index $.Vars "edgenetwork_network_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
+  description = "Example network."
+  mtu         = 9000
+}
+
