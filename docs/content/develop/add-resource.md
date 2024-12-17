@@ -146,7 +146,7 @@ For more information about types of resources and the generation process overall
 3. Modify the template as needed to match the API resource's documented behavior.
 4. Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.
 
-> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/reference/resource-reference" >}}).
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/reference/resource" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 > **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.
