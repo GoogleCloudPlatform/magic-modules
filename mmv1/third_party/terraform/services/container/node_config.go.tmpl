@@ -2029,8 +2029,9 @@ func flattenHostMaintenancePolicy(c *container.HostMaintenancePolicy) []map[stri
 // node pool updates in `resource_container_cluster`
 func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Config, nodePoolInfo *NodePoolInformation, prefix, name string, timeout time.Duration) error {
 
-	// Cluster write-lock will be acquired when createOpF is called, and read-lock will be acquired when waitOpF is
-	// called.
+	// Cluster write-lock will be acquired when createOpF is called to make operation creations sequential within
+	// the cluster, and read-lock will be acquired when waitOpF is called to allow concurrent operation.
+	// This is to resolve the bottleneck of large number of operations being created at the same time.
 	clusterLockKey := nodePoolInfo.clusterLockKey()
 	// Nodepool write-lock will be acquired when calling creaetOpF and waitOpF.
 	npLockKey := nodePoolInfo.nodePoolLockKey(name)
