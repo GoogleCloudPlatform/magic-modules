@@ -37,7 +37,6 @@ var ttvRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
-	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
@@ -56,7 +55,9 @@ var ttvRequiredEnvironmentVariables = [...]string{
 	"USER",
 }
 
-var ttvOptionalEnvironmentVariables = [...]string{}
+var ttvOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 type analytics struct {
 	ReplayingResult  vcr.Result

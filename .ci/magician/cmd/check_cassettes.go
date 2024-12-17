@@ -16,7 +16,6 @@ var ccRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
-	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
@@ -33,7 +32,9 @@ var ccRequiredEnvironmentVariables = [...]string{
 	"SA_KEY",
 }
 
-var ccOptionalEnvironmentVariables = [...]string{}
+var ccOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 var checkCassettesCmd = &cobra.Command{
 	Use:   "check-cassettes",

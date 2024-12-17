@@ -19,7 +19,6 @@ var vcuRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
-	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
@@ -39,7 +38,9 @@ var vcuRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN_CLASSIC",
 }
 
-var vcuOptionalEnvironmentVariables = [...]string{}
+var vcuOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 var (
 	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl
