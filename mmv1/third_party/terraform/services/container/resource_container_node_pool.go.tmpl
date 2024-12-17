@@ -1676,9 +1676,9 @@ func containerNodePoolAwaitRestingState(config *transport_tpg.Config, name, proj
 // there is an incompatible operation already running on the cluster or there are the number of allowed concurrent
 // operations running on the cluster. These errors can be safely retried until the incompatible operation completes,
 // and the newly requested operation can begin.
-// The cluster lock is held during createOpFunc to make opeation creations sequencial, and cluster read lock is held
-// during waitOpFunc to allow concurrency.
-func retryWhileIncompatibleOperation(timeout time.Duration, lockKey string, clusterLockKey string, createOpFunc func() (*container.Operation, error), waitOpFunc func(*container.Operation) error) error {
+// The npLockKey is held during createOpFunc to make operations sequential within the node pool, and
+// clusterLockKey is held during waitOpFunc to allow concurrency on a cluster.
+func retryWhileIncompatibleOperation(timeout time.Duration, npLockKey string, clusterLockKey string, createOpFunc func() (*container.Operation, error), waitOpFunc func(*container.Operation) error) error {
 	f := func() error {
 		transport_tpg.MutexStore.Lock(clusterLockKey)
 		op, err := createOpFunc()
