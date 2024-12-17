@@ -42,7 +42,19 @@ func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *te
     
     CheckDestroy:             testAccCheckParallelstoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
+			
+      {{ if ne $.TargetVersionName `ga` -}}
+      {
+				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context),
+			},
 			{
+				ResourceName:            "google_parallelstore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
+			},
+      {{ else }}
+      {
 				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExample_basic(context),
 			},
 			{
@@ -60,16 +72,6 @@ func TestAccParallelstoreInstance_parallelstoreInstanceBasicExample_update(t *te
                                 ImportStateVerify:       true,
                                 ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
                         },
-      {{ if ne $.TargetVersionName `ga` -}}
-      {
-				Config: testAccParallelstoreInstance_parallelstoreInstanceBasicExampleBeta_basic(context),
-			},
-			{
-				ResourceName:            "google_parallelstore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "instance_id", "labels", "terraform_labels"},
-			},
       {{ end }}
 		},
 	})
