@@ -1,45 +1,36 @@
-resource "google_secret_manager_secret" "gitlab-read-cred" {
-
+resource "google_secret_manager_secret" "gitlab-read-cred-secret" {
   secret_id = "gitlab-read-cred"
-
   replication {
     auto {}
   }
 }
 
-resource "google_secret_manager_secret" "gitlab-auth-cred" {
-
-  secret_id = "gitlab-auth-cred"
-
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret" "gitlab-webhook-secret" {
-
-  secret_id = "gitlab-webhook-secret"
-
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "gitlab-read-cred-version" {
-
-  secret = google_secret_manager_secret.gitlab-read-cred.id
+resource "google_secret_manager_secret_version" "gitlab-read-cred-secret-version" {
+  secret = google_secret_manager_secret.gitlab-read-cred-secret.id
   secret_data = file("my-gitlab-read-cred.txt")
 }
 
-resource "google_secret_manager_secret_version" "gitlab-auth-cred-version" {
+resource "google_secret_manager_secret" "gitlab-auth-cred-secret" {
+  secret_id = "gitlab-auth-cred"
+  replication {
+    auto {}
+  }
+}
 
-  secret = google_secret_manager_secret.gitlab-auth-cred.id
+resource "google_secret_manager_secret_version" "gitlab-auth-cred-secret-version" {
+  secret = google_secret_manager_secret.gitlab-auth-cred-secret.id
   secret_data = file("my-gitlab-auth-cred.txt")
 }
 
-resource "google_secret_manager_secret_version" "gitlab-webhook-secret-version" {
+resource "google_secret_manager_secret" "gitlab-webhook-secret-secret" {
+  secret_id = "gitlab-webhook-secret"
+  replication {
+    auto {}
+  }
+}
 
-  secret = google_secret_manager_secret.gitlab-webhook-secret.id
+resource "google_secret_manager_secret_version" "gitlab-webhook-secret-secret-version" {
+  secret = google_secret_manager_secret.gitlab-webhook-secret-secret.id
   secret_data = file("my-gitlab-webhook-secret.txt")
 
 data "google_iam_policy" "p4sa-secretAccessor" {
@@ -50,11 +41,18 @@ data "google_iam_policy" "p4sa-secretAccessor" {
   }
 }
 
-resource "google_secret_manager_secret_iam_policy" "policy" {
+resource "google_secret_manager_secret_iam_policy" "policy-rc" {
+  secret_id = google_secret_manager_secret.gitlab-read-cred-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
 
-  secret_id = google_secret_manager_secret.gitlab-read-cred.secret_id
-  secret_id = google_secret_manager_secret.gitlab-auth-cred.secret_id
-  secret_id = google_secret_manager_secret.gitlab-webhook-secret.secret_id
+resource "google_secret_manager_secret_iam_policy" "policy-ac" {
+  secret_id = google_secret_manager_secret.gitlab-auth-cred-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "policy-wh" {
+  secret_id = google_secret_manager_secret.gitlab-webhook-secret-secret.secret_id
   policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
 }
 
@@ -64,14 +62,20 @@ resource "google_developer_connect_connection" "my-connection" {
   connection_id = "my-connection"
 
   gitlab_config {
-    webhook_secret_secret_version = google_secret_manager_secret_version.gitlab-webhook-secret-version.id
+    webhook_secret_secret_version = google_secret_manager_secret_version.gitlab-webhook-secret-secret-version.id
   
     read_authorizer_credential {
-      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred-version.id
+      user_token_secret_version = google_secret_manager_secret_version.gitlab-read-cred-secret-version.id
     }
 
     authorizer_credential {
-      user_token_secret_version = google_secret_manager_secret_version.gitlab-auth-cred-version.id
+      user_token_secret_version = google_secret_manager_secret_version.gitlab-auth-cred-secret-version.id
     }    
   }
+ 
+  depends_on = [
+    google_secret_manager_secret_iam_policy.policy-rc,
+    google_secret_manager_secret_iam_policy.policy-ac,
+    google_secret_manager_secret_iam_policy.policy-wh
+  ]
 }

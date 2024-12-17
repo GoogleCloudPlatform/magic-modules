@@ -1,14 +1,27 @@
-resource "google_secret_manager_secret" "github-enterprise-token-secret" {
-  secret_id = "github-token-secret"
+resource "google_secret_manager_secret" "private-key-secret" {
+  secret_id = "ghe-pk-secret"
 
   replication {
     auto {}
   }
 }
 
-resource "google_secret_manager_secret_version" "github-enterprise-token-secret-version" {
-  secret = google_secret_manager_secret.github-token-secret.id
-  secret_data = file("my-github-enterprise-token.txt")
+resource "google_secret_manager_secret_version" "private-key-secret-version" {
+  secret = google_secret_manager_secret.private-key-secret.id
+  secret_data = file("private-key.pem")
+}
+
+resource "google_secret_manager_secret" "webhook-secret-secret" {
+  secret_id = "ghe-token-secret"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "webhook-secret-secret-version" {
+  secret = google_secret_manager_secret.webhook-secret-secret.id
+  secret_data = "<webhook-secret-data>"
 }
 
 data "google_iam_policy" "p4sa-secretAccessor" {
@@ -19,8 +32,13 @@ data "google_iam_policy" "p4sa-secretAccessor" {
   }
 }
 
-resource "google_secret_manager_secret_iam_policy" "policy" {
-  secret_id = google_secret_manager_secret.github-enterprise-token-secret.secret_id
+resource "google_secret_manager_secret_iam_policy" "policy-pk" {
+  secret_id = google_secret_manager_secret.private-key-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "policy-whs" {
+  secret_id = google_secret_manager_secret.webhook-secret-secret.secret_id
   policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
 }
 
@@ -29,18 +47,22 @@ resource "google_developer_connect_connection" "my-connection" {
   connection_id = "my-connection"
 
   github_enterprise_config {
-    host_uri = "https://devconnect-terraform.com" 
+    host_uri = "https://ghe.com"
+    private_key_secret_version = google_secret_manager_secret_version.private-key-secret-version.id
+    webhook_secret_secret_version = google_secret_manager_secret_version.webhook-secret-secret-version.id
+    app_id = 100
     app_installation_id = 123123
-    authorizer_credential {
-      oauth_token_secret_version = google_secret_manager_secret_version.github-token-secret-version.id
-    }
   }
+
+  depends_on = [
+    google_secret_manager_secret_iam_policy.policy-pk,
+    google_secret_manager_secret_iam_policy.policy-whs
+  ]
 }
 
 resource "google_developer_connect_git_repository_link" "my-repository" {
   location = "us-central1"
   git_repository_link_id = "my-repo"
   parent_connection = google_developer_connect_connection.my-connection.connection_id
-  remote_uri = "https://devconnect-terraform.com/myuser/myrepo.git"
+  clone_uri = "https://ghe.com/myuser/myrepo.git"
 }
-
