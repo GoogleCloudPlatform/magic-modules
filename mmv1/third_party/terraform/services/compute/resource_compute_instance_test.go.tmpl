@@ -665,12 +665,16 @@ func TestAccComputeInstance_diskEncryption(t *testing.T) {
 			RawKey: "dGhpcmQ2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
 			Sha256: "b3pvaS7BjDbCKeLPPTx7yXBuQtxyMobCHN1QJR43xeM=",
 		},
+		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
+			RsaEncryptedKey: "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
+			Sha256:          "rRMQGdop82ArhrmlouYFR0+TJJL96KPCxe2qjorh1KA=",
+		},
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_disks_encryption(bootEncryptionKey, diskNameToEncryptionKey, instanceName, acctest.RandString(t, 10)),
@@ -763,6 +767,88 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_instanceEncryption(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	kms := acctest.BootstrapKMSKey(t)
+
+	context_1 := map[string]interface{}{
+		"instance_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"encryption_key": kms.CryptoKey.Name,
+		"desired_status": "RUNNING",
+	}
+
+	context_2 := map[string]interface{}{
+		"instance_name":  context_1["instance_name"],
+		"encryption_key": context_1["encryption_key"],
+		"desired_status": "TERMINATED",
+	}
+
+	context_3 := map[string]interface{}{
+		"instance_name":  context_1["instance_name"],
+		"encryption_key": context_1["encryption_key"],
+		"desired_status": "RUNNING",
+	}
+
+	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
+		t.Fatal("Stopping the test because a role was added to the policy.")
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+			{
+				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	context_1 := map[string]interface{}{
+		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"guest_os_features": `["UEFI_COMPATIBLE", "VIRTIO_SCSI_MULTIQUEUE", "GVNIC", "IDPF"]`,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_guestOsFeatures(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.0", "UEFI_COMPATIBLE"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.1", "VIRTIO_SCSI_MULTIQUEUE"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.2", "GVNIC"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.3", "IDPF"),
+				),
+			},
 		},
 	})
 }
@@ -6385,6 +6471,17 @@ resource "google_compute_disk" "foobar3" {
   }
 }
 
+resource "google_compute_disk" "foobar5" {
+  name = "%s"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+
+  disk_encryption_key {
+	rsa_encrypted_key = "%s"
+  }
+}
+
 resource "google_compute_disk" "foobar4" {
   name = "%s"
   size = 10
@@ -6423,6 +6520,11 @@ resource "google_compute_instance" "foobar" {
     disk_encryption_key_raw = "%s"
   }
 
+  attached_disk {
+	source                  = google_compute_disk.foobar5.self_link
+	disk_encryption_key_rsa = "%s"
+  }
+
   network_interface {
     network = "default"
   }
@@ -6436,9 +6538,10 @@ resource "google_compute_instance" "foobar" {
 `, diskNames[0], diskNameToEncryptionKey[diskNames[0]].RawKey,
 		diskNames[1], diskNameToEncryptionKey[diskNames[1]].RawKey,
 		diskNames[2], diskNameToEncryptionKey[diskNames[2]].RawKey,
+		diskNames[3], diskNameToEncryptionKey[diskNames[3]].RsaEncryptedKey,
 		"tf-testd-"+suffix,
 		instance, bootEncryptionKey,
-		diskNameToEncryptionKey[diskNames[0]].RawKey, diskNameToEncryptionKey[diskNames[1]].RawKey, diskNameToEncryptionKey[diskNames[2]].RawKey)
+		diskNameToEncryptionKey[diskNames[0]].RawKey, diskNameToEncryptionKey[diskNames[1]].RawKey, diskNameToEncryptionKey[diskNames[2]].RawKey, diskNameToEncryptionKey[diskNames[3]].RsaEncryptedKey)
 }
 
 func testAccComputeInstance_disks_encryption_restart(bootEncryptionKey string, diskNameToEncryptionKey map[string]*compute.CustomerEncryptionKey, instance string) string {
@@ -11658,4 +11761,62 @@ resource "google_compute_instance" "foobar" {
 	}
 }
 `, context)
+}
+
+func testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+	instance_encryption_key {
+		kms_key_self_link       = "%{encryption_key}"
+		kms_key_service_account = data.google_compute_default_service_account.default.email
+	}
+	desired_status = "%{desired_status}"
+}
+
+data "google_compute_default_service_account" "default" {
+}
+`, context)
+}
+
+func testAccComputeInstance_guestOsFeatures(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "us-central1-a"
+
+	boot_disk {
+		guest_os_features = %{guest_os_features}
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = "default"
+	}
+}`, context)
 }
