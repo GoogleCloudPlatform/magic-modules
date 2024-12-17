@@ -69,7 +69,7 @@ parameters:
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
     validation:
-      regex: '^[^/\s][^\s/]*(/[^\s/]+)*\/$'
+      regex: '/$'
 properties:
   - name: createTime
     type: String
