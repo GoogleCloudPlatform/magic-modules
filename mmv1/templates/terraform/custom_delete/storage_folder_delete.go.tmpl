@@ -72,6 +72,14 @@ if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contain
     return fmt.Errorf("could not delete non-empty folder due to error when deleting contents: %v", deleteObjectError)
 }
 
+if err != nil {
+    log.Printf("[DEBUG] Error deleting folder or folder not empty %v\n\n", name)
+} else {
+    log.Printf("[DEBUG] Deleted empty folder %v\n\n", name)
+    return nil
+}
+
+// attempts to delete any sub folders and folder if still exists
 foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
 if err != nil {
     return err
