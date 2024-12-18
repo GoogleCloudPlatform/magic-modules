@@ -105,8 +105,6 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 }
 
 func TestAccDataprocVirtualCluster_basic(t *testing.T) {
-	// Currently failing
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	var cluster dataproc.Cluster
@@ -2243,6 +2241,9 @@ resource "google_dataproc_cluster" "with_labels" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+    software_config {
+      image_version = "2.0.35-debian10"
+    }
   }
 
   labels = {
@@ -2261,6 +2262,9 @@ resource "google_dataproc_cluster" "with_labels" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+    software_config {
+      image_version = "2.0.35-debian10"
+    }
   }
 
   labels = {
@@ -2278,6 +2282,9 @@ resource "google_dataproc_cluster" "with_labels" {
   cluster_config {
     gce_cluster_config {
       subnetwork = "%s"
+    }
+    software_config {
+      image_version = "2.0.35-debian10"
     }
   }
 }
