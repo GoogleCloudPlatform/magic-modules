@@ -90,7 +90,7 @@ func TestProjectIDDiffSuppress(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if ProjectIDDiffSuppress(tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if ProjectIDDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
