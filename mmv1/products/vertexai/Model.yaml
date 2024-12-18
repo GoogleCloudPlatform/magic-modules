@@ -28,7 +28,7 @@ id_format: '{{name}}'
 update_verb: 'PATCH'
 exclude_import: true
 async:
-  actions: ['create', 'delete', 'update']
+  actions: ['create', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -44,6 +44,7 @@ custom_diff:
   - 'vertexAiModelDiffSuppress'
 custom_code:
   constants: templates/terraform/constants/vertex_ai_model.go.tmpl
+  update_encoder: templates/terraform/update_encoder/vertex_ai_model.go.tmpl
   decoder: templates/terraform/decoders/vertex_ai_models.go.tmpl
   encoder: templates/terraform/encoders/vertex_ai_models.go.tmpl
   pre_create: templates/terraform/pre_create/vertex_ai_models.go.tmpl
@@ -305,6 +306,7 @@ properties:
       The timestamp of when the MetadataStore was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
   - type: String
     name: 'modelName'
+    default_from_api: true
     at_least_one_of:
       - modelName
       - sourceModel

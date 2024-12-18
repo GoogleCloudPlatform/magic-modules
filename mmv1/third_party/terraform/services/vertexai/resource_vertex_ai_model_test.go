@@ -15,8 +15,9 @@ func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 
 	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project_name": envvar.GetTestProjectFromEnv(),
-		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"model_id":      fmt.Sprintf("tf-test-test-model%s", randomString),
+		"random_suffix": randomString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -35,7 +36,7 @@ func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "model_id", context["model_id"].(string)),
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "description", "updated"),
-					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "display_name", "updated"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "model_name", "updated"),
 				),
 			},
 		},
@@ -69,9 +70,34 @@ func testAccVertexAIModel_modelIdNotProvided_create(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = google_vertex_ai_model.model_upload.name
 
   region       = "us-central1"
+}
+
+resource "google_vertex_ai_model" "model_upload" {
+  model_name = "tf_test_model_upload_source_%{random_suffix}"
+  description  = "basic upload model for source testing"
+  region       = "us-central1"
+
+    container_spec {
+      image_uri             = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest"
+    command     = ["/usr/bin/python3"]
+    args        = ["model_server.py"]
+    
+    env {
+      name  = "MODEL_NAME"
+      value = "example-model"
+    }
+    
+    health_route = "/health"
+    predict_route = "/predict"
+    ports {
+      container_port = 8080
+    }
+  }
+  artifact_uri = "gs://cloud-samples-data/ai-platform/mnist_tfrecord/pretrained"
+
 }
 `, context)
 }
@@ -81,8 +107,9 @@ func TestAccVertexAIModel_modelIdProvidedAtCreateTime(t *testing.T) {
 
 	randomString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"project_name": envvar.GetTestProjectFromEnv(),
-		"model_id":     fmt.Sprintf("tf-test-test-model%s", randomString),
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"model_id":      fmt.Sprintf("tf-test-test-model%s", randomString),
+		"random_suffix": randomString,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -105,9 +132,34 @@ func testAccVertexAIModel_modelIdProvided_create(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = google_vertex_ai_model.model_upload.name
 
   region       = "us-central1"
+}
+
+resource "google_vertex_ai_model" "model_upload" {
+  model_name = "tf_test_model_upload_source_%{random_suffix}"
+  description  = "basic upload model for source testing"
+  region       = "us-central1"
+
+  container_spec {
+      image_uri             = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest"
+    command     = ["/usr/bin/python3"]
+    args        = ["model_server.py"]
+    
+    env {
+      name  = "MODEL_NAME"
+      value = "example-model"
+    }
+    
+    health_route = "/health"
+    predict_route = "/predict"
+    ports {
+      container_port = 8080
+    }
+  }
+  artifact_uri = "gs://cloud-samples-data/ai-platform/mnist_tfrecord/pretrained"
+
 }
 `, context)
 }
@@ -117,12 +169,37 @@ func testAccVertexAIModel_modelIdProvided_update(context map[string]interface{})
 resource "google_vertex_ai_model" "model" {
   model_id = "%{model_id}"
   project = "%{project_name}"
-  source_model = "projects/%{project_name}/locations/us-central1/models/7222055265628061696"
+  source_model = google_vertex_ai_model.model_upload.name
 
   region       = "us-central1"
 
   description = "updated"
-  display_name = "updated"
+  model_name = "updated"
+}
+
+resource "google_vertex_ai_model" "model_upload" {
+  model_name = "tf_test_model_upload_source_%{random_suffix}"
+  description  = "basic upload model for source testing"
+  region       = "us-central1"
+
+  container_spec {
+      image_uri             = "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest"
+    command     = ["/usr/bin/python3"]
+    args        = ["model_server.py"]
+    
+    env {
+      name  = "MODEL_NAME"
+      value = "example-model"
+    }
+    
+    health_route = "/health"
+    predict_route = "/predict"
+    ports {
+      container_port = 8080
+    }
+  }
+  artifact_uri = "gs://cloud-samples-data/ai-platform/mnist_tfrecord/pretrained"
+
 }
 `, context)
 }
