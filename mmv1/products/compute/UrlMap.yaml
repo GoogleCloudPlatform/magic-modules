@@ -22,6 +22,7 @@ references:
     'Official Documentation': 'https://cloud.google.com/load-balancing/docs/url-map-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/urlMaps'
 docs:
+api_version: '2026-11-01'
 base_url: 'projects/{{project}}/global/urlMaps'
 has_self_link: true
 timeouts:
@@ -267,10 +268,8 @@ samples:
           health_check_name: 'health-check'
   - name: 'url_map_image_optimization_policy'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     steps:
       - name: 'url_map_image_optimization_policy'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           backend_service_name: 'example'
@@ -281,7 +280,6 @@ samples:
           path_rule_qpi: 'ENABLED'
           route_rule_qpi: 'DISABLED'
       - name: 'url_map_image_optimization_policy'
-        min_version: 'beta'
         resource_id_vars:
           url_map_name: 'urlmap'
           backend_service_name: 'example'
@@ -1394,7 +1392,6 @@ properties:
                           - 'DISABLED'
                   - name: 'imageOptimizationPolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the policy for optimizing images returned in the HTTP response.
                     properties:
@@ -2538,7 +2535,6 @@ properties:
                           - 'DISABLED'
                   - name: 'imageOptimizationPolicy'
                     type: NestedObject
-                    min_version: beta
                     description: |
                       Specifies the policy for optimizing images returned in the HTTP response.
                     properties:
@@ -3474,7 +3470,6 @@ properties:
                     - 'DISABLED'
             - name: 'imageOptimizationPolicy'
               type: NestedObject
-              min_version: beta
               description: |
                 Specifies the policy for optimizing images returned in the HTTP response.
               properties:
@@ -4750,7 +4745,6 @@ properties:
               - 'DISABLED'
       - name: 'imageOptimizationPolicy'
         type: NestedObject
-        min_version: beta
         description: |
           Specifies the policy for optimizing images returned in the HTTP response.
         at_least_one_of:
