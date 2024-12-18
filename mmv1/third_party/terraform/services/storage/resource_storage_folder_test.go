@@ -227,7 +227,7 @@ resource "google_storage_folder" "subfolder" {
   name          = "folder/subfolder/"
   force_destroy = false
 } 
-`, bucketName, hnsFlag)
+`, bucketName)
 }
 
 func testAccCheckStorageBucketUploadItem(t *testing.T, bucketName string) resource.TestCheckFunc {
