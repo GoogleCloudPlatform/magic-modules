@@ -12,10 +12,11 @@
 # limitations under the License.
 
 ---
-name: 'DeveloperConnect'
-display_name: 'Developer Connect'
-versions:
-  - name: 'beta'
-    base_url: 'https://developerconnect.googleapis.com/v1/'
+name: DeveloperConnect
+display_name: Developer Connect
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+versions:
+  - base_url: 'https://developerconnect.googleapis.com/v1/'
+    name: ga
+caibaseurl: ""
