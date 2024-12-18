@@ -177,6 +177,8 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				ConflictsWith: []string{"replication_spec"},
+				ExactlyOneOf: []string{"transfer_spec", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(transferSpecObjectConditionsKeys),
