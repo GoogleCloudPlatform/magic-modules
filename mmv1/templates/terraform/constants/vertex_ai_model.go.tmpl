@@ -1,4 +1,8 @@
 func vertexAiModelDiffSuppress(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// we require diffSuppress on COPY method and not UPLOAD
+	if _, ok := diff.GetOkExists("model_name"); ok {
+		return nil
+	}
 	// If the resource has no id then it hasn't been created yet
 	// Check to see if any fields are set in the config at create time that shouldn't be there
 	if diff.Id() == "" {

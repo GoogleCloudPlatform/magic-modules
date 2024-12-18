@@ -2,5 +2,14 @@ if modelName, ok := res["model"].(string); ok && modelName != "" {
 	res["name"] = modelName
 }
 
+if _, ok := d.GetOk("source_model"); ok {
+	res["sourceModel"] = d.Get("source_model").(string)
+}
+
+if _, ok := d.GetOk("model_id"); ok {
+	res["modelId"] = d.Get("model_id").(string)
+}
+
+res["modelName"] = res["displayName"]
 
 return res, nil
