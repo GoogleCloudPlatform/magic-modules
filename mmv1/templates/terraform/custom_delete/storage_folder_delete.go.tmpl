@@ -73,7 +73,7 @@ if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contain
 }
 
 if err != nil {
-    log.Printf("[ERROR] Error deleting folder or folder not empty %v\n\n", name)
+    log.Printf("[ERROR] Error deleting folder or folder is not empty %v\n\n", name)
 } else {
     log.Printf("[DEBUG] Deleted empty folder %v\n\n", name)
     return nil
@@ -103,7 +103,7 @@ if len(foldersList.Items) == 1 || d.Get("force_destroy").(bool) {
 
     log.Printf("[DEBUG] Finished deleting Folder %q: %#v", d.Id(), name)
 } else {
-    deleteErr := fmt.Errorf("Error trying to delete folder without force_destroy set to true")
+    deleteErr := fmt.Errorf("Sub folders exist within folder, use force_destroy to true to delete all subfolders")
     log.Printf("Error! %s : %s\n\n", name, deleteErr)
     return deleteErr
 }
