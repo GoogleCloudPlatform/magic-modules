@@ -58,6 +58,24 @@ examples:
     exclude_docs: true
   - name: 'developer_connect_git_repository_link_gitlab_enterprise_doc'
     exclude_test: true
+  - name: 'developer_connect_git_repository_link_bitbucket_cloud'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+      git_repository_link_name: 'my-repository'
+    exclude_docs: true
+  - name: 'developer_connect_git_repository_link_bitbucket_cloud_doc'
+    exclude_test: true
+  - name: 'developer_connect_git_repository_link_bbdc'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+      git_repository_link_name: 'my-repository'
+    exclude_docs: true
+  - name: 'developer_connect_git_repository_link_bitbucket_cloud_doc'
+    exclude_test: true
 autogen_async: true
 async:
   operation:

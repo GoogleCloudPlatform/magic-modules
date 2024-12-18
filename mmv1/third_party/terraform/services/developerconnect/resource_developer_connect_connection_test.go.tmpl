@@ -442,3 +442,234 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
+
+func TestAccDeveloperConnectConnection_developerConnectConnectionBitbucketCloudUpdate(t *testing.T) {
+        t.Parallel()
+
+        context := map[string]interface{}{
+                "random_suffix": acctest.RandString(t, 10),
+        }
+
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccDeveloperConnectConnection_BitbucketCloud(context),
+                        },
+                        {
+                                ResourceName:            "google_developer_connect_connection.my-connection",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+                        },
+                        {
+                                Config: testAccDeveloperConnectConnection_BitbucketCloud(context),
+                        },
+                        {
+                                ResourceName:            "google_developer_connect_connection.my-connection",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+                        },
+                },
+        })
+}
+
+
+func testAccDeveloperConnectConnection_BitbucketCloud(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  bitbucket_cloud_config {
+    workspace = "proctor-test-dc"
+
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-read-token/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token/versions/latest"
+    }
+  }
+}
+`, context)
+}
+
+
+func testAccDeveloperConnectConnection_BitbucketCloudUpdate(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+  annotations = {}
+  labels = {}
+
+  crypto_key_config {
+    key_reference = "projects/devconnect-terraform-creds/locations/us-central1/keyRings/tf-keyring/cryptoKeys/tf-crypto-key"
+  }
+
+  bitbucket_cloud_config {
+    workspace = "proctor-test-dc"
+
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-read-token-update/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token/versions/latest"
+    }
+  }
+}
+`, context)
+}
+
+
+func TestAccDeveloperConnectConnection_developerConnectConnectionBitbucketDataCenterUpdate(t *testing.T) {
+        t.Parallel()
+
+        context := map[string]interface{}{
+                "random_suffix": acctest.RandString(t, 10),
+        }
+
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccDeveloperConnectConnection_BitbucketDataCenter(context),
+                        },
+                        {
+                                ResourceName:            "google_developer_connect_connection.my-connection",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+                        },
+                        {
+                                Config: testAccDeveloperConnectConnection_BitbucketDataCenterUpdate(context),
+                        },
+                        {
+                                ResourceName:            "google_developer_connect_connection.my-connection",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+                        },
+                },
+        })
+}
+
+
+func testAccDeveloperConnectConnection_BitbucketDataCenter(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+
+  bitbucket_data_center_config {
+    host_uri = "https://bitbucket-us-central.gcb-test.com"
+
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-read-token/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-auth-token/versions/latest"
+    }
+  }
+}
+`, context)
+}
+
+
+func testAccDeveloperConnectConnection_BitbucketDataCenterUpdate(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+  annotations = {}
+  labels = {}
+
+  crypto_key_config {
+    key_reference = "projects/devconnect-terraform-creds/locations/us-central1/keyRings/tf-keyring/cryptoKeys/tf-crypto-key"
+  }
+
+  bitbucket_data_center_config {
+    host_uri = "https://bitbucket-us-central.gcb-test.com"
+
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-read-token-update/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-auth-token/versions/latest"
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDeveloperConnectConnection_BbdcPrivConnection(t *testing.T) {
+        t.Parallel()
+
+        context := map[string]interface{}{
+                "random_suffix": acctest.RandString(t, 10),
+        }               
+                                
+        acctest.VcrTest(t, resource.TestCase{            
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccDeveloperConnectConnection_BbdcPrivConnection(context),
+                        },
+                        {
+                                ResourceName:            "google_developer_connect_connection.my-connection",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+                        },
+                },
+        })
+} 
+    
+
+func testAccDeveloperConnectConnection_BbdcPrivConnection(context map[string]interface{}) string {
+        return acctest.Nprintf(` 
+resource "google_developer_connect_connection" "my-connection" {
+  location = "us-central1"
+  connection_id = "tf-test-tf-test-connection%{random_suffix}"
+  annotations = {}
+  labels = {}
+
+  bitbucket_data_center_config {
+    host_uri = "https://private-bitbucket.proctor-test.com"
+
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-priv-read-token/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-priv-auth-token/versions/latest"
+    }
+
+    ssl_ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIDjDCCAnSgAwIBAgIUBh5+3oeT1vmUSS5rSNaFfy6igSAwDQYJKoZIhvcNAQEL\nBQAwVzELMAkGA1UEBhMCVVMxGzAZBgNVBAoMEkdvb2dsZSBDbG91ZCBCdWlsZDEr\nMCkGA1UEAwwicHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTAeFw0y\nMzEyMTIyMzI5NTlaFw0yNDEyMTEyMzI5NTlaMFcxCzAJBgNVBAYTAlVTMRswGQYD\nVQQKDBJHb29nbGUgQ2xvdWQgQnVpbGQxKzApBgNVBAMMInByaXZhdGUtYml0YnVj\na2V0LnByb2N0b3ItdGVzdC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQCNfMx4ImGD4imZR64RbmRtpUNmypDokx2/S9kgobmyNvBWeSgRVhOGHGbU\nUgyvENcEg803K8unwF2jF6sdGrocRnIdPpr2tUoViOM2Ss6ds+TD8a2kqBA6+hmQ\nOMJiEIirpGT3Mw1pYTpuLisfIeeuuYssoS5k18kFLZ+Mk6MUSAHCgC8EowUZLGBZ\nagh9OhrjpMSXyidv+2d7FKTh/k3BWffVkDXehjvWjcr47hSvQwqW5m773ewCq0uD\nwxUgO6MAAAxLJz15cjhfvk4ishgSqcp49IZrx+xsNCLbHjPVyGkrL2OhgFaGsQS/\nq6GkXYfJ1sJYrf5Xm1EXbZlQZzJPAgMBAAGjUDBOMC0GA1UdEQQmMCSCInByaXZh\ndGUtYml0YnVja2V0LnByb2N0b3ItdGVzdC5jb20wHQYDVR0OBBYEFISmuuTpHKMB\n+m1h62gEqg1ovC86MA0GCSqGSIb3DQEBCwUAA4IBAQAwIwR6pIum9EZyLtC438Q1\nEgH3SKqbdyMFCkFSBvr4WfFU6ja1pn5ZxzJWt5TRFlI9GMy7BupQrxJGebOiFuUC\noNJpc4QDt9a0/GKh48DGF7uKo9XK33p0v1ahq3ewNT/CUnHewQNX7aXXP1/rL+br\nZPA20XWURUTviMik7DdhaXKQv76K9coI3H74heeBUp+OHKgUkqA3D1QIGNRGOKos\n4z6MyBWVpMUIeJQGtIQBd9CY1hBN231iG1+hdOlOMwgyNVK2GS738r+HbngFo9v4\nh2I1HMUHVcHiPQLqwZ2/OTmTmF1aWCUbhnAvoisu20rHVcGnVIOqMrHYFzdGr3ZQ\n-----END CERTIFICATE-----\n"
+
+    service_directory_config {
+      service = "projects/devconnect-terraform-creds/locations/us-central1/namespaces/my-namespace/services/terraform-bbdc"
+    }
+  }
+}
+`, context)
+}
