@@ -115,6 +115,8 @@ properties:
           https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressFromIdentitiesDiffSuppressFunc
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_from_identities_custom_flatten.go.tmpl
       - name: 'sources'
         type: Array
         description: |
