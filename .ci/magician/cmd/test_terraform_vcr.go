@@ -55,7 +55,9 @@ var ttvRequiredEnvironmentVariables = [...]string{
 	"USER",
 }
 
-var ttvOptionalEnvironmentVariables = [...]string{}
+var ttvOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 type analytics struct {
 	ReplayingResult  vcr.Result

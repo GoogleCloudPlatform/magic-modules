@@ -32,7 +32,9 @@ var ccRequiredEnvironmentVariables = [...]string{
 	"SA_KEY",
 }
 
-var ccOptionalEnvironmentVariables = [...]string{}
+var ccOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 var checkCassettesCmd = &cobra.Command{
 	Use:   "check-cassettes",

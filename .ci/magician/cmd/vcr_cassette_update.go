@@ -38,7 +38,9 @@ var vcuRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN_CLASSIC",
 }
 
-var vcuOptionalEnvironmentVariables = [...]string{}
+var vcuOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
 
 var (
 	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl

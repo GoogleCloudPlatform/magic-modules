@@ -72,6 +72,7 @@ type Examples struct {
 	//  - :SERVICE_ACCT
 	//  - :CUST_ID
 	//  - :IDENTITY_USER
+	//  - :CHRONICLE_ID
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -226,6 +227,7 @@ func (e *Examples) SetHCLText() {
 		"CUST_ID":             "A01b123xz",
 		"IDENTITY_USER":       "cloud_identity_user",
 		"PAP_DESCRIPTION":     "description",
+		"CHRONICLE_ID":        "00000000-0000-0000-0000-000000000000",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
