@@ -984,7 +984,7 @@ func TestFieldChanged(t *testing.T) {
 		tc := tc
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			changed := fieldChanged(tc.oldField, tc.newField)
+			_, _, changed := diffFields(tc.oldField, tc.newField, "")
 			if changed != tc.expectChanged {
 				if diff := cmp.Diff(tc.oldField, tc.newField); diff != "" {
 					t.Errorf("want %t; got %t.\nField diff (-old, +new):\n%s",
@@ -1074,9 +1074,15 @@ func TestComputeSchemaDiff(t *testing.T) {
 					Schema: map[string]*schema.Schema{
 						"field_one": {
 							Type: schema.TypeString,
+							ConflictsWith: []string{
+								"field_two",
+							},
 						},
 						"field_two": {
 							Type: schema.TypeList,
+							ConflictsWith: []string{
+								"field_one",
+							},
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"field_three": {
@@ -1110,9 +1116,15 @@ func TestComputeSchemaDiff(t *testing.T) {
 					Schema: map[string]*schema.Schema{
 						"field_one": {
 							Type: schema.TypeString,
+							ConflictsWith: []string{
+								"field_two",
+							},
 						},
 						"field_two": {
 							Type: schema.TypeList,
+							ConflictsWith: []string{
+								"field_one",
+							},
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"field_three": {
@@ -1134,9 +1146,15 @@ func TestComputeSchemaDiff(t *testing.T) {
 								Schema: map[string]*schema.Schema{
 									"field_three": {
 										Type: schema.TypeString,
+										ConflictsWith: []string{
+											"field_two.0.field_four",
+										},
 									},
 									"field_four": {
 										Type: schema.TypeInt,
+										ConflictsWith: []string{
+											"field_two.0.field_three",
+										},
 									},
 								},
 							},
@@ -1151,10 +1169,35 @@ func TestComputeSchemaDiff(t *testing.T) {
 						New: &schema.Resource{},
 					},
 					Fields: map[string]FieldDiff{
+						"field_two.field_three": FieldDiff{
+							Old: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							New: &schema.Schema{
+								Type: schema.TypeString,
+								ConflictsWith: []string{
+									"field_two.0.field_four",
+								},
+							},
+						},
 						"field_two.field_four": FieldDiff{
 							Old: nil,
 							New: &schema.Schema{
 								Type: schema.TypeInt,
+								ConflictsWith: []string{
+									"field_two.0.field_three",
+								},
+							},
+						},
+					},
+					FieldSets: ResourceFieldSetsDiff{
+						Old: ResourceFieldSets{},
+						New: ResourceFieldSets{
+							ConflictsWith: []FieldSet{
+								{
+									"field_two.field_three": {},
+									"field_two.field_four":  {},
+								},
 							},
 						},
 					},
