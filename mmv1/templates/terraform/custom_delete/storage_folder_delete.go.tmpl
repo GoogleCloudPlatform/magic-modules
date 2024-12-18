@@ -57,7 +57,7 @@ for deleteObjectError == nil {
 if listError != nil {
     return fmt.Errorf("could not delete non-empty folder due to error when listing contents: %v", listError)
 }
-log.Printf("[DEBUG] force_destroy value: %#v", d.Get("force_destroy").(bool))
+
 foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
 if err != nil {
     return err
