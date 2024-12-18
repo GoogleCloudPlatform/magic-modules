@@ -117,6 +117,9 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 	}
 	{{- end }}
 
+	{{- if $.Res.ApiVersion }}
+	acctest.AssertRequestApiVersion(t, "{{ $.Res.BaseUrl }}", "{{ $.Res.ApiVersion }}")
+	{{- end }}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 	{{- if $.Res.VersionedProvider $s.MinVersion }}
@@ -225,6 +228,9 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		{{- end }}
 		{{- if $.Res.ErrorAbortPredicates }}
 			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- range $i, $p := $.Res.ErrorAbortPredicates }}{{ if $i }},{{ end }}{{ if not (contains $p ".") }}{{ lower $.Res.ProductMetadata.Name }}.{{ end }}{{ $p }}{{ end -}} },
+		{{- end }}
+		{{- if $.Res.ApiVersion }}
+			ApiVersion: "{{ $.Res.ApiVersion }}",
 		{{- end }}
 		})
 		if err == nil {

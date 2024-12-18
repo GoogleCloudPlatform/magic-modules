@@ -1,5 +1,4 @@
 resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
-  provider        = google-beta
   name            = "{{index $.ResourceIdVars "url_map_name"}}"
   description     = "a description"
   default_service = google_compute_backend_service.example.id
@@ -63,7 +62,6 @@ resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_backend_service" "example" {
-  provider              = google-beta
   name                  = "{{index $.ResourceIdVars "backend_service_name"}}"
   port_name             = "http"
   protocol              = "HTTP"
@@ -75,8 +73,7 @@ resource "google_compute_backend_service" "example" {
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
-  name     = "{{index $.ResourceIdVars "health_check_name"}}"
+  name = "{{index $.ResourceIdVars "health_check_name"}}"
   http_health_check {
     port = 80
   }

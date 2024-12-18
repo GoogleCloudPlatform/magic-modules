@@ -401,6 +401,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
@@ -666,6 +669,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
         })
         if err != nil {
             return res, err
@@ -768,6 +774,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
 {{- end}}
     })
     if err != nil {
@@ -1070,6 +1079,9 @@ if len(updateMask) > 0 {
 {{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
+{{-             if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{-             end}}
     })
 
     if err != nil {
@@ -1180,6 +1192,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{		                if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
 {{-                     end}}
+{{-                     if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
+{{-                     end}}
         })
         if err != nil {
             return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
@@ -1281,6 +1296,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                 end}}
 {{-                 if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{-                 end}}
+{{-                 if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
 {{-                 end}}
 			Headers:   headers,
         })
@@ -1457,6 +1475,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
         {{- end }}
+        {{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+        {{- end}}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
