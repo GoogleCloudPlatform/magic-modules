@@ -75,7 +75,7 @@ func TestProjectIDDiffSuppress(t *testing.T) {
 		"different project identifiers": {
 			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
 			New:                "projects/1234/locations/abc/serviceAttachments/xyz",
-			ExpectDiffSuppress: yes,
+			ExpectDiffSuppress: true,
 		},
 		"same values": {
 			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",

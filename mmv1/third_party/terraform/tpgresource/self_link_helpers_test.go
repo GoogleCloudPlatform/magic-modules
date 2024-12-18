@@ -66,7 +66,7 @@ func TestCompareSelfLinkOrResourceName(t *testing.T) {
 	}
 }
 
-func CompareSelfLinkRelativePathsIgnoreProjectId(t *testing.T) {
+func TestCompareSelfLinkRelativePathsIgnoreProjectId(t *testing.T) {
 	cases := map[string]struct {
 		Old, New string
 		Expect   bool
