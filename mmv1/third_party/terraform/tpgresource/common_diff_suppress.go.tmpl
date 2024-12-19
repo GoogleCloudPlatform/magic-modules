@@ -96,8 +96,8 @@ func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
 	reN := regexp.MustCompile("projects/\\d+")
 	re := regexp.MustCompile("projects/[^/]+")
 	replacement := []byte("projects/equal")
-	a2 = string(reN.ReplaceAll([]byte(old), replacement))
-	b2 = string(re.ReplaceAll([]byte(new), replacement))
+	a2 = string(re.ReplaceAll([]byte(old), replacement))
+	b2 = string(reN.ReplaceAll([]byte(new), replacement))
 	return a2 == b2
 }
 
