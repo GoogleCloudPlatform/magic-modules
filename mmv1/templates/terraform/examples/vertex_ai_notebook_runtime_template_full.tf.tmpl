@@ -1,0 +1,50 @@
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.3.0.0/16"
+  region        = "europe-west4"
+  private_ip_google_access = true
+  network       = google_compute_network.network.id
+}
+
+resource "google_vertex_ai_notebook_runtime_template" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "template_name"}}"
+  display_name = "Sample template"
+  description = "Sample template description"
+
+  machine_spec {
+    machine_type = "e2-standard-4"
+  }
+
+  data_persistent_disk_spec {
+    disk_size_gb = 100
+    disk_type    = "pd-standard"
+  }
+
+  network_spec {
+    enable_internet_access = false
+    network = google_compute_network.network.id
+    subnetwork = google_compute_subnetwork.subnetwork.id
+  }
+
+  idle_shutdown_config {
+    idle_timeout = "10800s"
+    idle_shutdown_disabled = false
+  }
+
+  notebook_runtime_type = "USER_DEFINED"
+
+  shielded_vm_config {
+    enable_secure_boot = true
+  }
+
+  network_tags = ["colab-notebook"]
+
+  encryption_spec {
+    kms_key_name = "{{index $.Vars "kms_key_name"}}"
+  }
+}

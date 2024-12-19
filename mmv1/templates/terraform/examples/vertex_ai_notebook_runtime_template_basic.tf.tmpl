@@ -1,0 +1,4 @@
+resource "google_vertex_ai_notebook_runtime_template" "{{$.PrimaryResoruceId}}" {
+  name = "{{index $.Vars "template_name"}}"
+  display_name = "Sample template"
+}

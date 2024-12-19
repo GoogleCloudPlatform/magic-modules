@@ -1,0 +1,320 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: NotebookRuntimeTemplate
+# Resource description for the provider documentation.
+description: |
+  A template that specifies runtime configurations such as machine type, runtime version, network configurations, etc. Multiple runtimes can be created from a runtime template.
+references:
+  guides:
+    # Link to quickstart in the API's Guides section. For example:
+    # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
+    "QUICKSTART_TITLE": "https://cloud.google.com/vertex-ai/docs/colab/create-console-quickstart"
+  # Link to the REST API reference for the resource. For example,
+  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
+  api: "https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimeTemplates"
+base_url: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates"
+self_link: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates/{{name}}"
+create_url: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates?notebookRuntimeTemplateId={{name}}"
+update_verb: PATCH
+update_mask: true
+autogen_async: true
+async:
+  actions: ["create", "delete", "update"]
+  # type: "OpAsync"
+  operation:
+    base_url: "{{op_id}}"
+    timeouts:
+      insert_minutes: 40
+      update_minutes: 20
+      delete_minutes: 20
+  result:
+    resource_inside_response: true
+iam_policy:
+  parent_resource_attribute: "notebook_runtime_template"
+  method_name_separator: ":"
+  fetch_iam_policy_verb: POST
+  import_format:
+    - "projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}"
+    - "{{name}}"
+  example_config_body: "templates/terraform/iam/example_config_body/vertex_ai_notebook_runtime_template.tf.tmpl"
+examples:
+  - name: "vertex_ai_notebook_runtime_template_basic"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
+    vars:
+      template_name: "my-template"
+    primary_resource_id: "template"
+  - name: "vertex_ai_notebook_runtime_template_full"
+    primary_resource_id: "template"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
+    vars:
+      network_name: "my-network"
+      subnetwork_name: "my-subnetwork"
+      template_name: "my-template"
+      kms_key_name: "my-key"
+    test_vars_overrides:
+      "kms_key_name": 'acctest.BootstrapKMSKeyInLocation(t, "europe-west4").CryptoKey.Name'
+
+parameters:
+  - name: "region"
+    description: The region of the runtime template. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+
+properties:
+  - name: "name"
+    type: String
+    description: The resource name of the NotebookRuntimeTemplate.
+    url_param_only: true
+    immutable: true
+
+  - name: "displayName"
+    type: String
+    description: |
+      Required. The display name of the NotebookRuntimeTemplate. The name can be up to 128 characters long and can consist of any UTF-8 characters.
+    required: true
+    immutable: true
+
+  - name: "description"
+    type: String
+    description: |
+      The description of the NotebookRuntimeTemplate.
+    immutable: true
+
+  - name: "machineSpec"
+    type: NestedObject
+    description: |
+      Optional. Immutable. The specification of a single machine for the template.
+    immutable: true
+    properties:
+      - name: "machineType"
+        type: String
+        description: |
+          Immutable. The type of the machine.
+        immutable: true
+
+      - name: "acceleratorType"
+        type: String
+        description: |
+          Immutable. The type of accelerator(s) that may be attached to the machine as per acceleratorCount. 
+          See https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#acceleratortype
+        immutable: true
+
+      - name: "acceleratorCount"
+        type: Integer
+        description: |
+          The number of accelerators to attach to the machine.
+        default_value: 0
+        immutable: true
+
+      - name: "tpuTopology"
+        type: String
+        description: |
+          Immutable. The topology of the TPUs. Corresponds to the TPU topologies available from GKE. (Example: tpuTopology: "2x2x1").
+        immutable: true
+
+      - name: "reservationAffinity"
+        type: NestedObject
+        description: |
+          Optional. Immutable. Configuration controlling how this resource pool consumes reservation.
+        immutable: true
+        properties:
+          - name: "reservationAffinityType"
+            type: Enum
+            description: |
+              Required. Specifies the reservation affinity type.
+            required: true
+            enum_values:
+              - TYPE_UNSPECIFIED
+              - NO_RESERVATION
+              - ANY_RESERVATION
+              - SPECIFIC_RESERVATION
+
+          - name: "key"
+            type: String
+            description: |
+              Optional. Corresponds to the label key of a reservation resource. 
+              To target a SPECIFIC_RESERVATION by name, use compute.googleapis.com/reservation-name as the key and specify the name of your reservation as its value.
+            immutable: true
+
+          - name: "values"
+            type: Array
+            description: |
+              Optional. Corresponds to the label values of a reservation resource. This must be the full resource name of the reservation.
+            item_type:
+              type: String
+            immutable: true
+
+  - name: "dataPersistentDiskSpec"
+    type: NestedObject
+    description: |
+      Optional. The specification of [persistent disk][https://cloud.google.com/compute/docs/disks/persistent-disks] attached to the runtime as data disk storage.
+    immutable: true
+    properties:
+      - name: "diskType"
+        type: String
+        default_value: "pd-standard"
+        description: |
+          type of the disk (default is "pd-standard"). 
+          Valid values: "pd-ssd" (Persistent Disk Solid state Drive) 
+          "pd-standard" (Persistent Disk Hard Disk Drive) 
+          "pd-balanced" (Balanced Persistent Disk) 
+          "pd-extreme" (Extreme Persistent Disk)
+        immutable: true
+
+      - name: "diskSizeGb"
+        type: String
+        default_value: "100GB"
+        description: |
+          size in GB of the disk (default is 100GB).
+        immutable: true
+
+  - name: "networkSpec"
+    type: NestedObject
+    description: |
+      Optional. Network spec.
+    immutable: true
+    properties:
+      - name: "enableInternetAccess"
+        type: Boolean
+        default_value: false
+        description: |
+          Whether to enable public internet access. Default false.
+        immutable: true
+
+      - name: "network"
+        type: String
+        description: |
+          The full name of the Google Compute Engine network
+        immutable: true
+
+      - name: "subnetwork"
+        type: String
+        description: |
+          The name of the subnet that this instance is in. Format: projects/{project_id_or_number}/regions/{region}/subnetworks/{subnetwork_id}
+        immutable: true
+
+  - name: "labels"
+    type: KeyValueLabels
+    description: |
+      The labels with user-defined metadata to organize the NotebookRuntimeTemplates.
+      label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed.
+      See https://goo.gl/xmQnxf for more information and examples of labels.
+    immutable: true
+
+  - name: "idleShutdownConfig"
+    type: NestedObject
+    description: |
+      The idle shutdown configuration of NotebookRuntimeTemplate. This config will only be set when idle shutdown is enabled.
+    default_from_api: true
+    immutable: true
+    properties:
+      - name: "idleTimeout"
+        type: String
+        description: |
+          Required. Duration is accurate to the second. In Notebook, Idle Timeout is accurate to minute so the range of idleTimeout (second) is: 10 * 60 ~ 1440 * 60.
+          A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+        default_from_api: true
+        immutable: true
+
+      - name: "idleShutdownDisabled"
+        type: Boolean
+        description: |
+          Whether Idle Shutdown is disabled in this NotebookRuntimeTemplate.
+        default_from_api: true
+        immutable: true
+
+  - name: "eucConfig"
+    type: NestedObject
+    description: |
+      EUC configuration of the NotebookRuntimeTemplate.
+    immutable: true
+    properties:
+      - name: "eucDisabled"
+        type: Boolean
+        default_value: false
+        description: |
+          Input only. Whether EUC is disabled in this NotebookRuntimeTemplate. 
+          In proto3, the default value of a boolean is false. In this way, by default EUC will be enabled for NotebookRuntimeTemplate.
+        immutable: true
+
+      - name: "bypassActasCheck"
+        type: Boolean
+        description: |
+          Output only. Whether ActAs check is bypassed for service account attached to the VM. 
+          If false, we need ActAs check for the default Compute Engine service account. 
+          When a Runtime is created, a VM is allocated using Default Compute Engine service Account. 
+          Any user requesting to use this Runtime requires service Account user (ActAs) permission over this SA. 
+          If true, Runtime owner is using EUC and does not require the above permission as VM no longer use default Compute Engine SA, but a P4SA.
+        output: true
+
+  - name: "createTime"
+    type: String
+    description: |
+      Output only. timestamp when this NotebookRuntimeTemplate was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+
+  - name: "updateTime"
+    type: String
+    description: |
+      Output only. timestamp when this NotebookRuntimeTemplate was most recently updated.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
+    output: true
+
+  - name: "notebookRuntimeType"
+    type: Enum
+    description: |
+      Optional. Immutable. The type of the notebook runtime template.
+    immutable: true
+    default_value: :USER_DEFINED
+    enum_values:
+      - NOTEBOOK_RUNTIME_TYPE_UNSPECIFIED
+      - USER_DEFINED
+      - ONE_CLICK
+
+  - name: "shieldedVmConfig"
+    type: NestedObject
+    description: |
+      Optional. Immutable. Runtime Shielded VM spec.
+    immutable: true
+    properties:
+      - name: "enableSecureBoot"
+        type: Boolean
+        description: |
+          Defines whether the instance has Secure Boot enabled.
+          Secure Boot helps ensure that the system only runs authentic software by verifying the digital signature of all boot components, and halting the boot process if signature verification fails.
+
+  - name: "networkTags"
+    type: Array
+    description: |
+      Optional. The Compute Engine tags to add to runtime (see (Tagging instances)[https://cloud.google.com/vpc/docs/add-remove-network-tags]).
+    item_type:
+      type: String
+    immutable: true
+
+  - name: "encryptionSpec"
+    type: NestedObject
+    description: |
+      Customer-managed encryption key spec for the notebook runtime.
+    update_mask_fields:
+      - "encryptionSpec.kmsKeyName"
+    properties:
+      - name: "kmsKeyName"
+        type: String
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. 
+          The key needs to be in the same region as where the compute resource is created.
