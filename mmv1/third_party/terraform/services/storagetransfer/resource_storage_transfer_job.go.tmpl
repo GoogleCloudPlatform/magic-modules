@@ -118,9 +118,9 @@ func ResourceStorageTransferJob() *schema.Resource {
 			"event_stream": {
 				Type:          schema.TypeList,
 				Optional:      true,
+				Computed:      true,
 				MaxItems:      1,
-				ConflictsWith: []string{"schedule"},
-				DiffSuppressFunc: diffSuppressEventStream,
+				ConflictsWith: []string{"schedule", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -1424,12 +1424,6 @@ func flattenTransferJobNotificationConfig(notificationConfig *storagetransfer.No
 	}
 
 	return []map[string]interface{}{data}
-}
-
-func diffSuppressEventStream(k, old, new string, d *schema.ResourceData) bool {
-	// Check if it's a replication job.
-	_, is_replication := d.GetOk("replication_spec")
-	return is_replication
 }
 
 func expandReplicationSpecs(replicationSpecs []interface{}) *storagetransfer.ReplicationSpec {
