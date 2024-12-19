@@ -42,14 +42,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
@@ -100,13 +94,6 @@ properties:
           description: |
             Description of the ServicePerimeter and its use. Does not affect
             behavior.
-        - name: 'etag'
-          type: Fingerprint
-          description: |
-            An opaque identifier for the current version of the ServicePerimeter. This
-            identifier does not follow any specific format. If an etag is not provided, the
-            operation will be performed as if a valid etag is provided.
-          output: true
         - name: 'createTime'
           type: Time
           description: |

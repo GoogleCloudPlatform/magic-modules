@@ -191,6 +191,7 @@ steps:
       secretEnv:
         - "GITHUB_TOKEN_DOWNSTREAMS"
         - "GOOGLE_BILLING_ACCOUNT"
+        - "GOOGLE_CHRONICLE_INSTANCE_ID"
         - "GOOGLE_CUST_ID"
         - "GOOGLE_IDENTITY_USER"
         - "GOOGLE_MASTER_BILLING_ACCOUNT"
@@ -224,6 +225,8 @@ availableSecrets:
       env: GITHUB_TOKEN_DOWNSTREAMS
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-chronicle-instance-id/versions/latest
+      env: GOOGLE_CHRONICLE_INSTANCE_ID
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
