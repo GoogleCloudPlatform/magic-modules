@@ -485,7 +485,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
   - name: 'labelFingerprint'
     type: Fingerprint
