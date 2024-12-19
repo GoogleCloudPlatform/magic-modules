@@ -376,7 +376,7 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":      acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-alloydb-secondary-key1").CryptoKey.Name,
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-alloydb-secondary-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

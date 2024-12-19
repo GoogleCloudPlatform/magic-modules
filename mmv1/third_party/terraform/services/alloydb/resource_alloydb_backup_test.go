@@ -171,7 +171,7 @@ func TestAccAlloydbBackup_usingCMEK(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-backup-cmek-1"),
 		"random_suffix": acctest.RandString(t, 10),
-		"kms_key_name":      acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-key1").CryptoKey.Name,
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
