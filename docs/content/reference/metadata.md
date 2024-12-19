@@ -5,7 +5,7 @@ weight: 35
 
 # MMv1 metadata reference
 
-This page documents all properties for metadata.
+This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.
 
 ## Required
 
