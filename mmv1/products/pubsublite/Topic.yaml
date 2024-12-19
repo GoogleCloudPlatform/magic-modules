@@ -38,7 +38,6 @@ examples:
     vars:
       reservation_name: 'example-reservation'
       topic_name: 'example-topic'
-    #   update_encoder: templates/terraform/update_encoder/pubsub_topic.erb
 parameters:
   - name: 'region'
     type: String

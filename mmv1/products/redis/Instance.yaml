@@ -20,6 +20,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/redis/'
   api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/v1/projects.locations.instances'
 docs:
+  attributes: |
+    * `auth_string` - AUTH String set on the instance. This field will only be populated if auth_enabled is true.
 base_url: 'projects/{{project}}/locations/{{region}}/instances'
 create_url: 'projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}'
 update_verb: 'PATCH'

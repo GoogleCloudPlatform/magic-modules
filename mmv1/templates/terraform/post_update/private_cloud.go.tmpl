@@ -47,7 +47,7 @@ if len(clusterUpdateMask) > 0 {
     }
 
     err = VmwareengineOperationWaitTime(
-      config, res, project, "Updating Managment Cluster", userAgent,
+      config, res, project, "Updating Management Cluster", userAgent,
       d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {

@@ -75,7 +75,6 @@ examples:
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
-    exclude_test: true
   - name: 'alloydb_backup_full_test'
     primary_resource_id: 'default'
     vars:

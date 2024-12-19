@@ -27,4 +27,6 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResou
   labels = {
     "label-one" = "value-one"
   }
+
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }

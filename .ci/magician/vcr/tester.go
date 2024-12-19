@@ -78,6 +78,7 @@ var safeToLog = map[string]bool{
 	"GOCACHE":                                    true,
 	"GOOGLE_APPLICATION_CREDENTIALS":             false,
 	"GOOGLE_BILLING_ACCOUNT":                     false,
+	"GOOGLE_CHRONICLE_INSTANCE_ID":               true,
 	"GOOGLE_CREDENTIALS":                         false,
 	"GOOGLE_CUST_ID":                             true,
 	"GOOGLE_IDENTITY_USER":                       true,
@@ -245,17 +246,19 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-vet=off",
 	)
 	env := map[string]string{
-		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       opt.Mode.Upper(),
-		"ACCTEST_PARALLELISM":            strconv.Itoa(accTestParallelism),
-		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
-		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          strings.Join(opt.TestDirs, " "),
-		"TF_LOG":                         "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":           "INFO",
-		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                         "1",
-		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+		"VCR_PATH":                 cassettePath,
+		"VCR_MODE":                 opt.Mode.Upper(),
+		"ACCTEST_PARALLELISM":      strconv.Itoa(accTestParallelism),
+		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
+		"TF_LOG":                   "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":     "INFO",
+		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                   "1",
+		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+	}
+	if vt.saKeyPath != "" {
+		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
 	}
 	for ev, val := range vt.env {
 		env[ev] = val
@@ -390,17 +393,19 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-vet=off",
 	}
 	env := map[string]string{
-		"VCR_PATH":                       cassettePath,
-		"VCR_MODE":                       mode.Upper(),
-		"ACCTEST_PARALLELISM":            "1",
-		"GOOGLE_CREDENTIALS":             vt.env["SA_KEY"],
-		"GOOGLE_APPLICATION_CREDENTIALS": filepath.Join(vt.baseDir, vt.saKeyPath),
-		"GOOGLE_TEST_DIRECTORY":          testDir,
-		"TF_LOG":                         "DEBUG",
-		"TF_LOG_SDK_FRAMEWORK":           "INFO",
-		"TF_LOG_PATH_MASK":               filepath.Join(logPath, "%s.log"),
-		"TF_ACC":                         "1",
-		"TF_SCHEMA_PANIC_ON_ERROR":       "1",
+		"VCR_PATH":                 cassettePath,
+		"VCR_MODE":                 mode.Upper(),
+		"ACCTEST_PARALLELISM":      "1",
+		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
+		"GOOGLE_TEST_DIRECTORY":    testDir,
+		"TF_LOG":                   "DEBUG",
+		"TF_LOG_SDK_FRAMEWORK":     "INFO",
+		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
+		"TF_ACC":                   "1",
+		"TF_SCHEMA_PANIC_ON_ERROR": "1",
+	}
+	if vt.saKeyPath != "" {
+		env["GOOGLE_APPLICATION_CREDENTIALS"] = filepath.Join(vt.baseDir, vt.saKeyPath)
 	}
 	for ev, val := range vt.env {
 		env[ev] = val
@@ -534,6 +539,9 @@ func (vt *Tester) UploadCassettes(head string, version provider.Version) error {
 
 // Deletes the service account key.
 func (vt *Tester) Cleanup() error {
+	if vt.saKeyPath == "" {
+		return nil
+	}
 	if err := vt.rnr.RemoveAll(vt.saKeyPath); err != nil {
 		return err
 	}

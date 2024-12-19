@@ -86,6 +86,14 @@ func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resou
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
+func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/metadata.yaml.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
 func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/operation.go.tmpl"
 	templates := []string{
@@ -126,6 +134,7 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		CUST_ID:             "A01b123xz",
 		IDENTITY_USER:       "cloud_identity_user",
 		PAP_DESCRIPTION:     "description",
+		CHRONICLE_ID:        "00000000-0000-0000-0000-000000000000",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -204,6 +213,9 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	}
 
 	sourceByte := contents.Bytes()
+	if len(sourceByte) == 0 {
+		return
+	}
 
 	if goFormat {
 		formattedByte, err := format.Source(sourceByte)
@@ -286,4 +298,5 @@ type TestInput struct {
 	CUST_ID             string
 	IDENTITY_USER       string
 	PAP_DESCRIPTION     string
+	CHRONICLE_ID        string
 }
