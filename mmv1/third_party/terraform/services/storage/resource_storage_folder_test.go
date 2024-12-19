@@ -108,14 +108,14 @@ func TestAccStorageFolder_FailDeleteNonEmptyFolder(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageFolder_storageBucketAndFolders(bucketName, false, false),
+				Config: testAccStorageFolder_storageBucketAndFolders(bucketName, false),
 			},
 			{
 				Config:      testAccStorageFolder_removeParentFolder(bucketName),
 				ExpectError: regexp.MustCompile("use force_destroy to true to delete all subfolders"),
 			},
 			{
-				Config: testAccStorageFolder_storageBucketAndFolders(bucketName, true, true),
+				Config: testAccStorageFolder_storageBucketAndFolders(bucketName, true),
 			},
 		},
 	})
@@ -189,7 +189,7 @@ resource "google_storage_folder" "folder" {
 `, forceDestroy)
 }
 
-func testAccStorageFolder_storageBucketAndFolders(bucketName string, forceDestroy bool, subFolderForceDestroy bool) string {
+func testAccStorageFolder_storageBucketAndFolders(bucketName string, forceDestroy bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name                        = "%s"
@@ -207,9 +207,8 @@ resource "google_storage_folder" "folder" {
 resource "google_storage_folder" "subfolder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "${google_storage_folder.folder.name}subfolder/"
-  force_destroy = %t
 } 
-`, bucketName, forceDestroy, subFolderForceDestroy)
+`, bucketName, forceDestroy)
 }
 
 func testAccStorageFolder_removeParentFolder(bucketName string) string {
