@@ -1,3 +1,2 @@
-res["analytics_enabled"] = true
-res["analyticsEnabled"] = true
+res["analyticsEnabled"] = res["analyticsConfig"].(map[string]interface{})["enabled"]
 return res, nil
