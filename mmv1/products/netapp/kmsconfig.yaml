@@ -60,8 +60,9 @@ examples:
     primary_resource_id: 'kmsConfig'
     vars:
       kms_name: 'kms-test'
-      key_ring_value: 'key-ring'
-      crypto_name: 'crypto-name'
+      kms_key_name: 'crypto-name'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-netapp-kmsconfig-key1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
