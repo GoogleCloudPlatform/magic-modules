@@ -47,7 +47,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName),
+				Config: testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName, kmsKeyName),
 			},
 			{
 				ResourceName:            "google_compute_snapshot.foobar",
@@ -92,7 +92,7 @@ resource "google_compute_snapshot" "foobar" {
 `, diskName, snapshotName)
 }
 
-func testAccComputeSnapshot_encryptionCMEK(snapshotName string, diskName string) string {
+func testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName, kmsKeyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-12"
