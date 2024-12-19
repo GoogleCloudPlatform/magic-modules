@@ -11,7 +11,7 @@ on:
 jobs:
   reassign-reviewer:
     if: ${{ github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     env:

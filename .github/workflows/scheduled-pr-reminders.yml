@@ -9,7 +9,7 @@ on:
 jobs:
   send-pr-reminders:
     if: github.repository == 'GoogleCloudPlatform/magic-modules'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     env:
