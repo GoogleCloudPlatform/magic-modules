@@ -37,8 +37,8 @@ var (
 		// },
 		{
 			id:        "BBBmau",
-			startDate: newDate(2024, 11, 1, pdtLoc),
-			endDate:   newDate(2024, 11, 1, pdtLoc),
+			startDate: newDate(2024, 12, 23, pdtLoc),
+			endDate:   newDate(2025, 1, 6, pdtLoc),
 		},
 		{
 			id:        "hao-nan-li",
