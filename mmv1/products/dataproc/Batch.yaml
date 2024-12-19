@@ -71,7 +71,7 @@ examples:
       project_name: 'PROJECT_NAME'
     test_vars_overrides:
       'prevent_destroy': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name'
     ignore_read_extra:
       - 'runtime_config.0.properties'
   - name: 'dataproc_batch_sparksql'
