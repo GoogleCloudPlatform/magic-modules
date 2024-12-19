@@ -72,8 +72,8 @@ var (
 		},
 		{
 			id:        "rileykarson",
-			startDate: newDate(2024, 7, 18, pdtLoc),
-			endDate:   newDate(2024, 8, 10, pdtLoc),
+			startDate: newDate(2024, 12, 20, pdtLoc),
+			endDate:   newDate(2024, 1, 2, pdtLoc),
 		},
 		{
 			id:        "roaks3",
