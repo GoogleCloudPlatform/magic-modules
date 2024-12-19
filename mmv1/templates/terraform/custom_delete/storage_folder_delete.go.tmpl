@@ -80,7 +80,7 @@ if err == nil {
     return nil
 }
 
-// attempts to delete any sub folders and folder
+// attempts to delete any sub folders within the folder
 foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Prefix(name).Do()
 if err != nil {
     return err
