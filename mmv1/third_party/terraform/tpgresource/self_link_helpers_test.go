@@ -124,7 +124,7 @@ func TestCompareSelfLinkRelativePathsIgnoreProjectId(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		if CompareSelfLinkOrResourceName("", tc.Old, tc.New, nil) != tc.Expect {
+		if CompareSelfLinkRelativePathsIgnoreProjectId("", tc.Old, tc.New, nil) != tc.Expect {
 			t.Errorf("bad: %s, expected %t for old = %q and new = %q", tn, tc.Expect, tc.Old, tc.New)
 		}
 	}
