@@ -2653,7 +2653,10 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_basic3, databaseName),
-				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA")),
+				Check:  resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -2679,7 +2682,10 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, "GOOGLE_MANAGED_CAS_CA"),
-				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA")),
+				Check:  resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+				),
 			},
 			{
 				ResourceName:            resourceName,
