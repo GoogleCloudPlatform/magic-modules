@@ -26,7 +26,7 @@ self_link: '{{env_id}}/addonsConfig'
 create_url: '{{env_id}}/addonsConfig:setAddonEnablement'
 update_url: '{{env_id}}/addonsConfig:setAddonEnablement'
 update_verb: 'POST'
-exclude_delete: true 
+exclude_delete: true
 timeouts:
   insert_minutes: 5
   update_minutes: 5
