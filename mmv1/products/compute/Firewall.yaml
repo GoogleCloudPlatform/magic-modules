@@ -258,7 +258,6 @@ properties:
       apply. IPv4 or IPv6 ranges are supported. For INGRESS traffic, one of
       `source_ranges`, `source_tags` or `source_service_accounts` is required.
     is_set: true
-    diff_suppress_func: 'diffSuppressSourceRanges'
     item_type:
       type: String
   - name: 'sourceServiceAccounts'
