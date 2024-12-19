@@ -71,8 +71,7 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true
   - name: 'dataproc_metastore_service_cmek_example'
