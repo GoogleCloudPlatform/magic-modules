@@ -117,7 +117,7 @@ resource "google_compute_disk" "foobar" {
   zone = "us-central1-a"
 
   disk_encryption_key {
-	kms_key_self_link = "%{kms_key_name}"
+	kms_key_self_link = "%s"
 	kms_key_service_account = google_service_account.test.email
   }
 }
@@ -131,5 +131,5 @@ resource "google_compute_snapshot" "foobar" {
 	kms_key_service_account = google_service_account.test.email
   }
 }
-`, diskName, kmsKeyName, diskName, snapshotName, kmsKeyName)
+`, diskName, kmsKeyName, kmsKeyName, diskName, snapshotName, kmsKeyName)
 }
