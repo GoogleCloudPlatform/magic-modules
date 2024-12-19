@@ -10,10 +10,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -125,41 +124,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
-				Type: schema.TypeString,
-				// This field is not Computed because it needs to trigger a diff.
+				Type:     schema.TypeString,
 				Optional: true,
-				// Makes the diff message nicer:
-				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "different hash" (forces new resource)
-				// Instead of the more confusing:
-				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "" (forces new resource)
-				Default: "different hash",
-				// 1. Compute the md5 hash of the local file
-				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
-				// 3. Don't suppress the diff iff they don't match
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					localMd5Hash := ""
-					if source, ok := d.GetOkExists("source"); ok {
-						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
-					}
-
-					if content, ok := d.GetOkExists("content"); ok {
-						localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
-					}
-
-					// If `source` or `content` is dynamically set, both field will be empty.
-					// We should not suppress the diff to avoid the following error:
-					// 'Mismatch reason: extra attributes: detect_md5hash'
-					if localMd5Hash == "" {
-						return false
-					}
-
-					// `old` is the md5 hash we retrieved from the server in the ReadFunc
-					if old != localMd5Hash {
-						return false
-					}
-
-					return true
-				},
+				Computed: true,
 			},
 
 			"storage_class": {
