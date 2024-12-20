@@ -167,7 +167,7 @@ properties:
     type: NestedObject
     description: |
       This field is only used for PSC NEGs.
-
+    default_from_api: true
     properties:
       - name: 'producerPort'
         type: String
