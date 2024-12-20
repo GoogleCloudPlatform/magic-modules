@@ -18,7 +18,6 @@ description: Enable/Disable add-ons for an Apigee environment.
 references:
   guides:
     'Enable Analytics Add-On': 'https://cloud.google.com/apigee/docs/api-platform/reference/manage-analytics-add-on'
-    'Enable ApiSecurity Add-On': 'https://cloud.google.com/apigee/docs/api-platform/reference/manage-security-add-on'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.addonsConfig/setAddonEnablement'
 docs:
 base_url: '{{env_id}}'
@@ -47,6 +46,7 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+    skip_vcr: true
   - name: 'apigee_env_addons_enable_analytics'
     exclude_test: true
 parameters:
