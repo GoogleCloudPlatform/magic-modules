@@ -78,6 +78,8 @@ if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contain
 if err == nil {
     log.Printf("[DEBUG] Deleted empty folder %v\n\n", name)
     return nil
+} else {
+    log.Printf("[ERROR] Error deleting folder %v, %v\n\n", name, err)
 }
 
 // attempts to delete any sub folders within the folder
@@ -85,7 +87,7 @@ foldersList, err := config.NewStorageClient(userAgent).Folders.List(bucket).Pref
 if err != nil {
     return err
 }
-if len(foldersList.Items) == 1 || d.Get("force_destroy").(bool) {
+if d.Get("force_destroy").(bool) {
     log.Printf("[DEBUG] folder names to delete: %#v", name)
     items := foldersList.Items
     for i := len(items) - 1; i >= 0; i-- {
