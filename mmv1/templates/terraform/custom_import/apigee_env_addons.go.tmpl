@@ -5,9 +5,10 @@ if err := tpgresource.ParseImportId([]string{"(?P<env_id>.+)/addonsConfig"}, d, 
 	return nil, err
 }
 
-nameParts := strings.Split(d.Get("env_id").(string), "/")
-if len(nameParts) == 5 {
-	id := fmt.Sprintf("organizations/%s/environments/%s", nameParts[1], nameParts[3])
-	d.SetId(id)
+id := d.Get("env_id").(string)
+nameParts := strings.Split(id, "/")
+if len(nameParts) != 4 {
+	return nil, fmt.Errorf("env is expected to have shape organizations/{{"{{"}}org_id{{"}}"}}/environments/{{"{{"}}env{{"}}"}}, got %s instead", id)
 }
+d.SetId(id)
 return []*schema.ResourceData{d}, nil

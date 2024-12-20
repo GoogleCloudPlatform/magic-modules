@@ -21,7 +21,7 @@ references:
     'Enable ApiSecurity Add-On': 'https://cloud.google.com/apigee/docs/api-platform/reference/manage-security-add-on'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.addonsConfig/setAddonEnablement'
 docs:
-base_url: '{{env_id}}/addonsConfig'
+base_url: '{{env_id}}'
 self_link: '{{env_id}}/addonsConfig'
 create_url: '{{env_id}}/addonsConfig:setAddonEnablement'
 update_url: '{{env_id}}/addonsConfig:setAddonEnablement'
@@ -47,7 +47,8 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-    skip_vcr: true
+  - name: 'apigee_env_addons_enable_analytics'
+    exclude_test: true
 parameters:
   - name: 'envId'
     type: String
@@ -61,6 +62,3 @@ properties:
   - name: 'analyticsEnabled'
     type: Boolean
     description: Flag to enable/disable Analytics.
-  - name: 'apiSecurityEnabled'
-    type: Boolean
-    description: Flag to enable/disable ApiSecurity.
