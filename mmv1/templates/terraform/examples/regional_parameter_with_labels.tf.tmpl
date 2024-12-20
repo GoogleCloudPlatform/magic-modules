@@ -1,0 +1,12 @@
+resource "google_parameter_manager_regional_parameter" "{{$.PrimaryResourceId}}" {
+  parameter_id = "{{index $.Vars "parameter_id"}}"
+  location = "us-central1"
+
+  labels = {
+    key1 = "val1"
+    key2 = "val2"
+    key3 = "val3"
+    key4 = "val4"
+    key5 = "val5"
+  }
+}
