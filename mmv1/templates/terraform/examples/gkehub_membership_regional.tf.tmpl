@@ -1,0 +1,18 @@
+resource "google_container_cluster" "primary" {
+  name               = "{{index $.Vars "cluster_name"}}"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  deletion_protection = false
+  network       = "{{index $.Vars "network_name"}}"
+  subnetwork    = "{{index $.Vars "subnetwork_name"}}"
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "{{index $.Vars "name"}}"
+  location = "{{index $.TestEnvVars "location"}}"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
+    }
+  }
+}

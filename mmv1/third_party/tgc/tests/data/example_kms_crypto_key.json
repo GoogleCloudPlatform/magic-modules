@@ -9,6 +9,9 @@
       "discovery_name": "CryptoKey",
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "purpose": "ENCRYPT_DECRYPT"
       }
     }

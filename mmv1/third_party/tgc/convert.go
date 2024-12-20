@@ -172,7 +172,6 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 		}
 
 		for _, converted := range convertedItems {
-
 			key := converted.Type + converted.Name
 			var existingConverterAsset *resources.Asset
 			if existing, exists := c.assets[key]; exists {
@@ -190,14 +189,14 @@ func (c *Converter) addDelete(rc *tfjson.ResourceChange) error {
 				} else {
 					existingConverterAsset = &asset
 				}
-				if existingConverterAsset != nil {
-					converted = converter.MergeDelete(*existingConverterAsset, converted)
-					augmented, err := c.augmentAsset(rd, c.cfg, converted)
-					if err != nil {
-						return err
-					}
-					c.assets[key] = augmented
+			}
+			if existingConverterAsset != nil {
+				converted = converter.MergeDelete(*existingConverterAsset, converted)
+				augmented, err := c.augmentAsset(rd, c.cfg, converted)
+				if err != nil {
+					return err
 				}
+				c.assets[key] = augmented
 			}
 		}
 	}

@@ -19,7 +19,7 @@ Three different resources help you manage your IAM policy for a Spanner instance
 
 ~> **Note:** `google_spanner_instance_iam_binding` resources **can be** used in conjunction with `google_spanner_instance_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_spanner\_instance\_iam\_policy
+## google_spanner_instance_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -38,7 +38,7 @@ resource "google_spanner_instance_iam_policy" "instance" {
 }
 ```
 
-## google\_spanner\_instance\_iam\_binding
+## google_spanner_instance_iam_binding
 
 ```hcl
 resource "google_spanner_instance_iam_binding" "instance" {
@@ -51,7 +51,7 @@ resource "google_spanner_instance_iam_binding" "instance" {
 }
 ```
 
-## google\_spanner\_instance\_iam\_member
+## google_spanner_instance_iam_member
 
 ```hcl
 resource "google_spanner_instance_iam_member" "instance" {
@@ -73,6 +73,8 @@ The following arguments are supported:
   * **allAuthenticatedUsers**: A special identifier that represents anyone who is authenticated with a Google account or a service account.
   * **user:{emailid}**: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
   * **serviceAccount:{emailid}**: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
+  * **principal:{principal}**: Federated single identity. For example, principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/NAMESPACE/sa/SERVICEACCOUNT
+  * **principalSet:{principalSet}**: Federated identity group. For example, principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/namespace/NAMESPACE
   * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
 
@@ -95,7 +97,7 @@ exported:
 
 ## Import
 
--> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
+-> **Custom Roles** If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
 
 ### Importing IAM members

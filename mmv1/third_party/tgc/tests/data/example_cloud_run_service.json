@@ -15,6 +15,9 @@
           "annotations": {
             "generated-by": "magic-modules"
           },
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "name": "cloudrun-to-get-cai",
           "namespace": "{{.Provider.project}}"
         },

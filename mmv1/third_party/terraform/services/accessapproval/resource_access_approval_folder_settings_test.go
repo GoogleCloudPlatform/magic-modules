@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 // Since access approval settings are hierarchical, and only one can exist per folder/project/org,
@@ -67,6 +67,7 @@ func testAccAccessApprovalFolderSettings_full(context map[string]interface{}) st
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
+  deletion_protection = false
 }
 
 # Wait after folder creation to limit eventual consistency errors.
@@ -94,6 +95,7 @@ func testAccAccessApprovalFolderSettings_update(context map[string]interface{}) 
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
+  deletion_protection = false
 }
 
 # Wait after folder creation to limit eventual consistency errors.
@@ -121,6 +123,7 @@ func testAccAccessApprovalFolderSettings_activeKeyVersion(context map[string]int
 resource "google_folder" "my_folder" {
   display_name = "tf-test-my-folder%{random_suffix}"
   parent       = "organizations/%{org_id}"
+  deletion_protection = false
 }
 
 # Wait after folder creation to limit eventual consistency errors.

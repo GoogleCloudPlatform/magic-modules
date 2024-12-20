@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
+func testAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	org := envvar.GetTestOrgFromEnv(t)
@@ -32,7 +32,7 @@ func TestAccAccessContextManagerAccessPolicyIamBinding(t *testing.T) {
 	})
 }
 
-func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
+func testAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	org := envvar.GetTestOrgFromEnv(t)
@@ -45,7 +45,7 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccAccessContextManagerAccessPolicyIamMember(policy, account, role),
+				Config: testAccAccessContextManagerAccessPolicyIamMember_basic(policy, account, role),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_access_context_manager_access_policy_iam_member.member", "role", role),
@@ -57,7 +57,7 @@ func TestAccAccessContextManagerAccessPolicyIamMember(t *testing.T) {
 	})
 }
 
-func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
+func testAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	org := envvar.GetTestOrgFromEnv(t)
@@ -70,7 +70,7 @@ func TestAccAccessContextManagerAccessPolicyIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccAccessContextManagerAccessPolicyIamPolicy(policy, account, role),
+				Config: testAccAccessContextManagerAccessPolicyIamPolicy_basic(policy, account, role),
 			},
 		},
 	})
@@ -93,7 +93,7 @@ resource google_access_context_manager_access_policy_iam_binding binding {
 `, account, role)
 }
 
-func testAccAccessContextManagerAccessPolicyIamMember(policy, account, role string) string {
+func testAccAccessContextManagerAccessPolicyIamMember_basic(policy, account, role string) string {
 	return fmt.Sprintf(policy+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -109,7 +109,7 @@ resource google_access_context_manager_access_policy_iam_member member {
 `, account, role)
 }
 
-func testAccAccessContextManagerAccessPolicyIamPolicy(policy, account, role string) string {
+func testAccAccessContextManagerAccessPolicyIamPolicy_basic(policy, account, role string) string {
 	return fmt.Sprintf(policy+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -138,6 +138,7 @@ func createScopedPolicy(t *testing.T, org string) string {
 		project_id      = "acm-tf-test-%s"
 		name            = "acm-tf-test-%s"
 		org_id          = "%s"
+		deletion_policy = "DELETE"
 		}
 
 		resource "google_access_context_manager_access_policy" "access-policy" {

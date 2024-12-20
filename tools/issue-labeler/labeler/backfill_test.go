@@ -136,7 +136,7 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		"add missing service labels even if already linked": {
+		"don't add missing service labels if already linked": {
 			issues: []Issue{
 				{
 					Number:      1,
@@ -145,14 +145,8 @@ func TestComputeIssueUpdates(t *testing.T) {
 					PullRequest: map[string]any{},
 				},
 			},
-			regexpLabels: defaultRegexpLabels,
-			expectedIssueUpdates: []IssueUpdate{
-				{
-					Number:    1,
-					Labels:    []string{"forward/linked", "service/service1", "service/service2-subteam1"},
-					OldLabels: []string{"service/service2-subteam1", "forward/linked"},
-				},
-			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
 		},
 	}
 

@@ -1,7 +1,0 @@
-resource "google_compute_network_edge_security_service" "<%= ctx[:primary_resource_id] %>" {
-  provider     = google-beta  
-
-  name         = "<%= ctx[:vars]['resource_name'] %>"
-  region       = "us-east1"
-  description  = "My basic resource"
-}

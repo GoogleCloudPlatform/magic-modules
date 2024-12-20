@@ -4,7 +4,7 @@ description: |-
   Manages a project-level logging sink.
 ---
 
-# google\_logging\_project\_sink
+# google_logging_project_sink
 
 Manages a project-level logging sink. For more information see:
 
@@ -169,8 +169,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the logging sink. Logging automatically creates two sinks: `_Required` and `_Default`.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket . Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`

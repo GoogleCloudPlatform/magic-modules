@@ -1,11 +1,11 @@
 // Copyright 2021 Google LLC. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,14 +67,13 @@ func (t Type) String() string {
 		}
 		return "unknown number type"
 	case "object":
-		// assume if this is set, it's a string -> string map for now.
-		// https://swagger.io/docs/specification/data-models/dictionaries/
-		// describes the behaviour of AdditionalProperties for type: object
 		if t.typ.AdditionalProperties != nil {
 			if v := t.typ.AdditionalProperties.Type; v == "string" {
 				return SchemaTypeMap
 			} else {
-				return fmt.Sprintf("unknown AdditionalProperties: %q", v)
+				// Complex maps are handled as sets with an extra value for the
+				// name of the object
+				return SchemaTypeSet
 			}
 		}
 		return SchemaTypeList

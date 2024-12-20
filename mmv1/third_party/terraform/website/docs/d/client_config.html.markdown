@@ -4,7 +4,7 @@ description: |-
   Get information about the configuration of the Google Cloud provider.
 ---
 
-# google\_client\_config
+# google_client_config
 
 Use this data source to access the configuration of the Google Cloud provider.
 
@@ -57,3 +57,5 @@ In addition to the arguments listed above, the following attributes are exported
 * `zone` - The zone to operate under.
 
 * `access_token` - The OAuth2 access token used by the client to authenticate against the Google Cloud API.
+
+* `default_labels` - The default labels configured on the provider.

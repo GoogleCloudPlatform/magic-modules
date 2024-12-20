@@ -3,7 +3,7 @@ package apigee_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -59,6 +59,7 @@ resource "google_project" "project" {
   name            = "tf-test-my-project%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {
@@ -79,12 +80,10 @@ resource "google_service_account" "service_account" {
   display_name = "Service Account"
 }
 
-resource "google_project_iam_binding" "synchronizer-iam" {
+resource "google_project_iam_member" "synchronizer-iam" {
   project = google_project.project.project_id
   role    = "roles/apigee.synchronizerManager"
-  members = [
-    "serviceAccount:${google_service_account.service_account.email}",
-  ]
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_apigee_sync_authorization" "apigee_sync_authorization" {
@@ -92,7 +91,7 @@ resource "google_apigee_sync_authorization" "apigee_sync_authorization" {
   identities = [
     "serviceAccount:${google_service_account.service_account.email}",
   ]
-  depends_on = [google_project_iam_binding.synchronizer-iam]
+  depends_on = [google_project_iam_member.synchronizer-iam]
 }
 `, context)
 }
@@ -104,6 +103,7 @@ resource "google_project" "project" {
   name            = "tf-test-my-project%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {
@@ -163,6 +163,7 @@ resource "google_project" "project" {
   name            = "tf-test-my-project%{random_suffix}"
   org_id          = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "apigee" {

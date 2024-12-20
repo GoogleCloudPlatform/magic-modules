@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,36 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'DefaultSupportedIdpConfig'
-base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
-self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
-create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Configurations options for authenticating with a the standard set of Identity Toolkit-trusted IDPs.
 
   You must enable the
   [Google Identity Platform](https://console.cloud.google.com/marketplace/details/google-cloud-platform/customer-identity) in
   the marketplace prior to using this resource.
-import_format: ['projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}']
+docs:
+base_url: 'projects/{{project}}/defaultSupportedIdpConfigs'
+self_link: 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
+create_url: 'projects/{{project}}/defaultSupportedIdpConfigs?idpId={{idp_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/defaultSupportedIdpConfigs/{{idp_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'identity_platform_default_supported_idp_config_basic'
-    primary_resource_id:
-      'idp_config'
+  - name: 'identity_platform_default_supported_idp_config_basic'
+    primary_resource_id: 'idp_config'
       # Skip test due to operating on singleton and the handwritten update test handles this
       # If we could spin up a project and enable identity platform we could test this separately
-    skip_test: true
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The name of the DefaultSupportedIdpConfig resource
-  - !ruby/object:Api::Type::String
-    name: 'idpId'
+    output: true
+  - name: 'idpId'
+    type: String
     description: |
       ID of the IDP. Possible values include:
 
@@ -64,20 +70,20 @@ properties:
 
       * `yahoo.com`
 
-    immutable: true
     url_param_only: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'clientId'
+    immutable: true
+  - name: 'clientId'
+    type: String
     description: |
       OAuth client ID
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'clientSecret'
+  - name: 'clientSecret'
+    type: String
     description: |
       OAuth client secret
     required: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'enabled'
+  - name: 'enabled'
+    type: Boolean
     description: |
       If this IDP allows the user to sign in

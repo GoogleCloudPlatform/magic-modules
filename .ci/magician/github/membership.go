@@ -1,3 +1,18 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package github
 
 import (
@@ -6,38 +21,32 @@ import (
 	"math/rand"
 	"time"
 
-	"golang.org/x/exp/slices"
-)
-
-var (
-	// This is for the random-assignee rotation.
-	reviewerRotation = []string{
-		"slevenick",
-		"c2thorn",
-		"rileykarson",
-		"melinath",
-		"ScottSuarez",
-		"shuyama1",
-		"SarahFrench",
-		"roaks3",
-		"zli82016",
-		"trodge",
-		"hao-nan-li",
-		"NickElliot",
-	}
-
-	// This is for new team members who are onboarding
-	trustedContributors = []string{
-		"BBBmau",
-	}
-
-	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{
-		"hao-nan-li",
-	}
+	"golang.org/x/exp/maps"
 )
 
 type UserType int64
+
+type date struct {
+	year  int
+	month int
+	day   int
+	loc   *time.Location
+}
+
+type onVacationReviewer struct {
+	id        string
+	startDate date
+	endDate   date
+}
+
+func newDate(year, month, day int, loc *time.Location) date {
+	return date{
+		year:  year,
+		month: month,
+		day:   day,
+		loc:   loc,
+	}
+}
 
 const (
 	CommunityUserType UserType = iota
@@ -56,9 +65,9 @@ func (ut UserType) String() string {
 	}
 }
 
-func (gh *github) GetUserType(user string) UserType {
-	if isTeamMember(user, gh.token) {
-		fmt.Println("User is a team member")
+func (gh *Client) GetUserType(user string) UserType {
+	if IsCoreContributor(user) {
+		fmt.Println("User is a core contributor")
 		return CoreContributorUserType
 	}
 
@@ -76,24 +85,55 @@ func (gh *github) GetUserType(user string) UserType {
 }
 
 // Check if a user is team member to not request a random reviewer
-func isTeamMember(author, githubToken string) bool {
-	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
+func IsCoreContributor(user string) bool {
+	_, isTrustedContributor := trustedContributors[user]
+	return IsCoreReviewer(user) || isTrustedContributor
 }
 
-func IsTeamReviewer(reviewer string) bool {
-	return slices.Contains(reviewerRotation, reviewer)
+func IsCoreReviewer(user string) bool {
+	_, isCoreReviewer := reviewerRotation[user]
+	return isCoreReviewer
 }
 
 func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	res, _ := utils.RequestCall(url, "GET", githubToken, nil, nil)
+	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
 
-	return res != 404
+	return err == nil
 }
 
 func GetRandomReviewer() string {
-	availableReviewers := utils.Removes(reviewerRotation, onVacationReviewers)
-	rand.Seed(time.Now().UnixNano())
+	availableReviewers := AvailableReviewers()
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
+}
+
+// Return a random reviewer other than the old reviewer
+func GetNewRandomReviewer(oldReviewer string) string {
+	availableReviewers := AvailableReviewers()
+	availableReviewers = utils.Removes(availableReviewers, []string{oldReviewer})
+	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
+	return reviewer
+}
+
+func AvailableReviewers() []string {
+	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers)
+}
+
+func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer) []string {
+	onVacationList := onVacation(nowTime, vacationList)
+	return utils.Removes(allReviewers, onVacationList)
+}
+
+func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
+	var onVacationList []string
+	for _, reviewer := range vacationList {
+		start := time.Date(reviewer.startDate.year, time.Month(reviewer.startDate.month), reviewer.startDate.day, 0, 0, 0, 0, reviewer.startDate.loc)
+		end := time.Date(reviewer.endDate.year, time.Month(reviewer.endDate.month), reviewer.endDate.day, 0, 0, 0, 0, reviewer.endDate.loc).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
+		if nowTime.Before(start) || nowTime.After(end) {
+			continue
+		}
+		onVacationList = append(onVacationList, reviewer.id)
+	}
+	return onVacationList
 }

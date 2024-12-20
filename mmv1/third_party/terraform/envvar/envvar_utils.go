@@ -19,6 +19,18 @@ var CredsEnvVars = []string{
 	"GOOGLE_USE_DEFAULT_CREDENTIALS",
 }
 
+// CredsEnvVarsExcludingAdcs returns the contents of CredsEnvVars excluding GOOGLE_APPLICATION_CREDENTIALS
+func CredsEnvVarsExcludingAdcs() []string {
+	envs := CredsEnvVars
+	var filtered []string
+	for _, e := range envs {
+		if e != "GOOGLE_APPLICATION_CREDENTIALS" {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
+}
+
 var ProjectNumberEnvVars = []string{
 	"GOOGLE_PROJECT_NUMBER",
 }
@@ -27,10 +39,6 @@ var ProjectEnvVars = []string{
 	"GOOGLE_PROJECT",
 	"GCLOUD_PROJECT",
 	"CLOUDSDK_CORE_PROJECT",
-}
-
-var FirestoreProjectEnvVars = []string{
-	"GOOGLE_FIRESTORE_PROJECT",
 }
 
 var RegionEnvVars = []string{
@@ -96,6 +104,17 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
+// This value is the instance id of a pre-configured Chronicle instance, for the purpose of
+// integration tests. It is needed because the instance is 1-to-1 with a test project, and it
+// cannot be created within the test org.
+var ChronicleInstanceIdEnvVars = []string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
+
+var ImpersonateServiceAccountEnvVars = []string{
+	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -130,6 +149,10 @@ func GetTestZoneFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ZoneEnvVars)
 }
 
+func GetTestImpersonateServiceAccountFromEnv() string {
+	return transport_tpg.MultiEnvSearch(ImpersonateServiceAccountEnvVars)
+}
+
 func GetTestCustIdFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, CustIdEnvVars...)
 	return transport_tpg.MultiEnvSearch(CustIdEnvVars)
@@ -138,13 +161,6 @@ func GetTestCustIdFromEnv(t *testing.T) string {
 func GetTestIdentityUserFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return transport_tpg.MultiEnvSearch(IdentityUserEnvVars)
-}
-
-// Firestore can't be enabled at the same time as Datastore, so we need a new
-// project to manage it until we can enable Firestore programmatically.
-func GetTestFirestoreProjectFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, FirestoreProjectEnvVars...)
-	return transport_tpg.MultiEnvSearch(FirestoreProjectEnvVars)
 }
 
 // Returns the raw organization id like 1234567890, skipping the test if one is
@@ -192,6 +208,11 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
+}
+
+func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, ChronicleInstanceIdEnvVars...)
+	return transport_tpg.MultiEnvSearch(ChronicleInstanceIdEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

@@ -1,0 +1,15 @@
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  provider      = google-beta
+  name          = "{{index $.Vars "example_bucket"}}"
+  location      = "US"
+  uniform_bucket_level_access = true
+
+  lifecycle_rule {
+    condition {
+      age = 3
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}

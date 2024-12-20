@@ -2,7 +2,6 @@
   "name": "{{target}}",
   "location": "{{region}}",
   "project": "{{project}}",
-
   "description": "updated description",
   "annotations": {
     "my_second_annotation": "updated-example-annotation-2",
@@ -15,16 +14,22 @@
   "requireApproval": true,
   "gke": {
     "cluster": "projects/{{project}}/locations/{{region}}/clusters/different-example-cluster-name",
-    "internalIp": true
+    "internalIp": true,
+    "proxyUrl": "http://10.0.0.1"
   },
   "executionConfigs": [
     {
-      "usages": ["RENDER"],
+      "usages": [
+        "RENDER"
+      ],
       "serviceAccount": "other-owner@{{project}}.iam.gserviceaccount.com",
-      "artifactStorage": "gs://other-bucket/other-dir"
+      "artifactStorage": "gs://other-bucket/other-dir",
+      "verbose": true
     },
     {
-      "usages": ["DEPLOY"],
+      "usages": [
+        "DEPLOY"
+      ],
       "workerPool": "projects/{{project}}/locations/{{region}}/workerPools/my-deploy-pool",
       "serviceAccount": "deploy-pool-owner@{{project}}.iam.gserviceaccount.com",
       "artifactStorage": "gs://deploy-bucket/deploy-dir"

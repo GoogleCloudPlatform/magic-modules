@@ -1,0 +1,26 @@
+[
+    {
+        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/locations/global/buckets/_Default",
+        "asset_type": "logging.googleapis.com/LogBucket",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest?version=v2",
+            "discovery_name": "LogBucket",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bucketId": "_Default",
+                "id": "organizations/{{.OrgID}}/locations/global/buckets/_Default",
+                "indexConfigs": [
+                    {
+                        "fieldPath": "jsonPayload.request.status",
+                        "type": "INDEX_TYPE_STRING"
+                    }
+                ],
+                "location": "global",
+                "retentionDays": 30
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"  
+    }
+]

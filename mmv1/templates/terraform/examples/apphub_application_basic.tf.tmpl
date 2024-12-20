@@ -1,0 +1,7 @@
+resource "google_apphub_application" "{{$.PrimaryResourceId}}" {
+  location = "{{index $.Vars "location"}}"
+  application_id = "{{index $.Vars "application_id"}}"
+  scope {
+    type = "{{index $.Vars "scope_type"}}"
+  }
+}
