@@ -1,0 +1,77 @@
+!ruby/object:Api::Resource
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: 'DataCollector'
+base_url: '{{org}}/datacollectors'
+create_url: '{{org}}/datacollectors'
+delete_url: '{{org}}/datacollectors/{{name}}'
+self_link: '{{org}}/datacollectors/{{name}}'
+description: |
+  An `Organization` is the top-level container in Apigee.
+update_verb: :PATCH
+immutable: true
+description: |
+  A `DataCollector` in Apigee.
+references: !ruby/object:Api::Resource::ReferenceLinks
+  guides:
+    'Creating a Data Collector': 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.datacollectors'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.datacollectors/create'
+autogen_async: true
+import_format: ['{{org}}/datacollectors/{{name}}', '{{org}}/{{name}}']
+skip_sweeper: true
+examples:
+  - !ruby/object:Provider::Terraform::Examples
+    name: 'apigee_datacollector_basic_test'
+    primary_resource_id: 'apigee_datacollector'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'properties'
+    skip_vcr: true
+    skip_docs: true
+    # Resource creation race
+    skip_vcr: true
+timeouts: !ruby/object:Api::Timeouts
+  insert_minutes: 1
+  delete_minutes: 1
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  custom_import: templates/terraform/custom_import/apigee_datacollector.go.erb
+parameters:
+  - !ruby/object:Api::Type::String
+    name: 'envId'
+    description: |
+      The Apigee data collector group associated with the Apigee organization,
+      in the format `organizations/{{org_name}}/datacollectors`.
+    required: true
+    immutable: true
+    url_param_only: true
+  - !ruby/object:Api::Type::String
+    name: 'name'
+    description: |
+      The name of the newly created data collector.
+    immutable: true
+  - !ruby/object:Api::Type::String
+    name: 'org'
+    required: true
+    description: |
+      Name of the Apigee organization.
+    url_param_only: true
+    immutable: true
+properties:
+  - !ruby/object:Api::Type::Array
+    name: 'aliases'
+    item_type: Api::Type::String
+    description: |
+      Aliases in this keystore.
+    output: true
