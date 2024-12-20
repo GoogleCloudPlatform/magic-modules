@@ -1,0 +1,227 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Router'
+description: |
+  A Distributed Cloud Edge router, which encapsulates northbound layer-3 parameters for a zone.
+references:
+  guides:
+    'Create and manage routers': 'https://cloud.google.com/distributed-cloud/edge/latest/docs/routers#api'
+  api: 'https://cloud.google.com/distributed-cloud/edge/latest/docs/reference/network/rest/v1/projects.locations.zones.routers'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers'
+self_link: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers/{{router_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers?routerId={{router_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers/{{router_id}}'
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    path: 'name'
+    wait_ms: 1000
+  result:
+    path: 'response'
+    resource_inside_response: false
+  error:
+    path: 'error'
+    message: 'message'
+examples:
+  - name: 'edgenetwork_router_minimal'
+    primary_resource_id: 'example_router'
+    vars:
+      edgenetwork_router_id: 'example-router'
+      edgenetwork_network_id: 'example-network'
+    test_env_vars:
+      location: 'REGION'
+      zone: 'ZONE'
+    exclude_test: true
+  - name: 'edgenetwork_router_with_bgp'
+    primary_resource_id: 'example_router'
+    vars:
+      edgenetwork_router_id: 'example-router'
+      edgenetwork_interconnect_attachment_id: 'example-interconnect-attachment'
+      edgenetwork_network_id: 'example-network'
+      edgenetwork_subnet_id: 'example-subnet'
+    test_env_vars:
+      location: 'REGION'
+      zone: 'ZONE'
+    exclude_test: true
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The Google Cloud region to which the target Distributed Cloud Edge zone belongs.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'zone'
+    type: String
+    description: |
+      The name of the target Distributed Cloud Edge zone.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'router_id'
+    type: String
+    description: |
+      A unique ID that identifies this router.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The canonical name of this resource, with format
+      `projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers/{{router_id}}`
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels associated with this resource.
+    required: false
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+    required: false
+  - name: 'createTime'
+    type: String
+    description: |
+      The time when the resource was created.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time when the resource was last updated.
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine
+      fractional digits. Examples: `2014-10-02T15:01:23Z` and `2014-10-02T15:01:23.045123456Z`.
+    output: true
+  - name: 'network'
+    type: ResourceRef
+    description: |
+      The ID of the network to which this router belongs.
+      Must be of the form: `projects/{{project}}/locations/{{location}}/zones/{{zone}}/networks/{{network_id}}`
+    required: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Network'
+    imports: 'name'
+  - name: 'interface'
+    type: Array
+    description: |
+      Router interfaces, defining the zone-side layer-3 information for building the BGP session.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of this interface entry. Unique within the zone.
+        - name: 'ipv4Cidr'
+          type: String
+          description: |
+            IPv4 address and range of the interface.
+        - name: 'ipv6Cidr'
+          type: String
+          description: |
+            IPv6 address and range of the interface.
+        - name: 'linkedInterconnectAttachment'
+          type: ResourceRef
+          description: |
+            The ID of the linked interconnect attachment.
+            Must be of the form: `projects/{{project}}/locations/{{location}}/zones/{{zone}}/interconnectAttachments/{{interconnect_attachment_id}}`
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+          resource: 'InterconnectAttachment'
+          imports: 'name'
+        - name: 'subnetwork'
+          type: ResourceRef
+          description: |
+            The ID of the subnetwork that this interface belongs to.
+            Must be of the form: `projects/{{project}}/locations/{{location}}/zones/{{zone}}/subnets/{{subnet_id}}`
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+          resource: 'Subnet'
+          imports: 'name'
+        - name: 'loopbackIpAddresses'
+          type: Array
+          description: |
+            Creates loopback interfaces in the router when specified. The number of IP addresses must match the number of TOR devices.
+          item_type:
+            type: String
+  - name: 'bgpPeer'
+    type: Array
+    description: |
+      BGP Peers, defining the peer-side layer-3 information for building the BGP session.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of this BGP peer. Unique within the zone.
+        - name: 'interface'
+          type: String
+          description: |
+            Name of the interface entry that this peer is associated with.
+        - name: 'interfaceIpv4Cidr'
+          type: String
+          description: |
+            IPv4 range of the interface within Google.
+        - name: 'interfaceIpv6Cidr'
+          type: String
+          description: |
+            IPv6 range of the interface within Google.
+        - name: 'peerIpv4Cidr'
+          type: String
+          description: |
+            IPv4 range of the BGP interface outside Google.
+        - name: 'peerIpv6Cidr'
+          type: String
+          description: |
+            IPv6 range of the BGP interface outside Google.
+        - name: 'peerAsn'
+          type: Integer
+          description: |
+            Peer BGP autonomous system number (ASN). Each BGP interface may use a different value.
+  - name: 'bgp'
+    type: NestedObject
+    description: |
+      BGP information specific to this router.
+    properties:
+      - name: 'asn'
+        type: Integer
+        description: |
+          Locally assigned BGP ASN.
+      - name: 'keepaliveIntervalInSeconds'
+        type: Integer
+        description: |
+          The interval in seconds between BGP keepalive messages that are sent to the peer. Default value is `20`. Must be between `20` and `60`.
+        default_value: 20
+  - name: 'routeAdvertisements'
+    type: Array
+    description: |
+      A list of CIDRs in IP/Length format to advertise northbound as static routes from this router.
+    item_type:
+      type: String
