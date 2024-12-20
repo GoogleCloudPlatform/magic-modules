@@ -233,6 +233,7 @@ properties:
           authType of the Connection
         required: true
         values:
+          - AUTH_TYPE_UNSPECIFIED
           - USER_PASSWORD
           - OAUTH2_JWT_BEARER
           - OAUTH2_CLIENT_CREDENTIALS
