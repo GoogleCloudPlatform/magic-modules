@@ -191,3 +191,11 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MIN
         DIRECTORY_STRIPE_LEVEL_BALANCED
         DIRECTORY_STRIPE_LEVEL_MAX
+  - name: deploymentType
+    type: String
+    description: |
+      Parallelstore Instance deployment type.
+        Possible values:
+        DEPLOYMENT_TYPE_UNSPECIFIED
+        SCRATCH
+        PERSISTENT
