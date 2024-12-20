@@ -87,6 +87,9 @@ var (
 		"boot_disk.0.initialize_params.0.size",
 		"boot_disk.0.initialize_params.0.type",
 		"boot_disk.0.initialize_params.0.image",
+		"boot_disk.0.initialize_params.0.source_image_encryption_key",
+		"boot_disk.0.initialize_params.0.snapshot",
+		"boot_disk.0.initialize_params.0.source_snapshot_encryption_key",
 		"boot_disk.0.initialize_params.0.labels",
 		"boot_disk.0.initialize_params.0.resource_manager_tags",
 		"boot_disk.0.initialize_params.0.provisioned_iops",
@@ -343,7 +346,123 @@ func ResourceComputeInstance() *schema.Resource {
 										Computed:         true,
 										ForceNew:         true,
 										DiffSuppressFunc: DiskImageDiffSuppress,
+										ConflictsWith:    []string{"boot_disk.0.initialize_params.0.snapshot", "boot_disk.0.initialize_params.0.source_snapshot_encryption_key"},
 										Description:      `The image from which this disk was initialised.`,
+									},
+
+									"source_image_encryption_key": {
+										Type: schema.TypeList,
+										Optional: true,
+										AtLeastOneOf: initializeParamsKeys,
+										MaxItems: 1,
+										ConflictsWith: []string{"boot_disk.0.initialize_params.0.snapshot", "boot_disk.0.initialize_params.0.source_snapshot_encryption_key"},
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"raw_key": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
+													Sensitive:        true,
+													Description:      `The raw representation of the encryption key as a base64 encoded string.`,
+												},
+
+												"rsa_encrypted_key": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
+													Sensitive:        true,
+													Description:      `The RSA encrypted representation of the encryption key, as a base64 encoded string.`,
+												},
+
+												"kms_key_self_link": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													Computed:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key"},
+													DiffSuppressFunc: KmsKeyNameDiffSuppress,
+													Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
+												},
+
+												"kms_key_service_account": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													Description:      `The service account used to manage the KMS key for the disk.`,
+												},
+
+												"sha256": {
+													Type:             schema.TypeString,
+													Computed:         true,
+													Description:      `The SHA256 hash of the encryption key used to encrypt this disk.`,
+												},
+											},
+										},
+									},
+
+									"snapshot": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										AtLeastOneOf:     initializeParamsKeys,
+										Computed:         true,
+										ForceNew:         true,
+										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+										ConflictsWith:    []string{"boot_disk.0.initialize_params.0.image", "boot_disk.0.initialize_params.0.source_image_encryption_key"},
+										Description:      `The snapshot from which this disk was initialised.`,
+									},
+
+									"source_snapshot_encryption_key": {
+										Type: schema.TypeList,
+										Optional: true,
+										AtLeastOneOf: initializeParamsKeys,
+										MaxItems: 1,
+										ConflictsWith: []string{"boot_disk.0.initialize_params.0.image", "boot_disk.0.initialize_params.0.source_image_encryption_key"},
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"raw_key": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
+													Sensitive:        true,
+													Description:      `The raw representation of the encryption key as a base64 encoded string.`,
+												},
+
+												"rsa_encrypted_key": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
+													Sensitive:        true,
+													Description:      `The RSA encrypted representation of the encryption key, as a base64 encoded string.`,
+												},
+
+												"kms_key_self_link": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													Computed:         true,
+													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key"},
+													DiffSuppressFunc: KmsKeyNameDiffSuppress,
+													Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
+												},
+
+												"kms_key_service_account": {
+													Type:             schema.TypeString,
+													Optional:         true,
+													ForceNew:         true,
+													Description:      `The service account used to manage the KMS key for the disk.`,
+												},
+
+												"sha256": {
+													Type:             schema.TypeString,
+													Computed:         true,
+													Description:      `The SHA256 hash of the encryption key used to encrypt this disk.`,
+												},
+											},
+										},
 									},
 
 									"labels": {
@@ -3414,6 +3533,23 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			disk.InitializeParams.SourceImage = imageUrl
 		}
 
+		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.source_image_encryption_key"); ok {
+			disk.InitializeParams.SourceImageEncryptionKey = expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_image_encryption_key")
+		}
+
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.snapshot"); ok {
+			snapshotName := v.(string)
+			snapshotUrl, err := tpgresource.ParseSnapshotFieldValue(snapshotName, d, config)
+			if err != nil {
+				return nil, fmt.Errorf("Error resolving snapshot name '%s': %s", snapshotName, err)
+			}
+			disk.InitializeParams.SourceSnapshot = snapshotUrl.RelativeLink()
+		}
+
+		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.source_snapshot_encryption_key"); ok {
+			disk.InitializeParams.SourceSnapshotEncryptionKey = expandComputeInstanceSourceEncryptionKey(d, "boot_disk.0.initialize_params.0.source_snapshot_encryption_key")
+		}
+
 		if _, ok := d.GetOk("boot_disk.0.initialize_params.0.labels"); ok {
 			disk.InitializeParams.Labels = tpgresource.ExpandStringMap(d, "boot_disk.0.initialize_params.0.labels")
 		}
@@ -3484,6 +3620,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			// If the config specifies a family name that doesn't match the image name, then
 			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
 			"image":  diskDetails.SourceImage,
+			"source_image_encryption_key":        d.Get("boot_disk.0.initialize_params.0.source_image_encryption_key"),
+			"snapshot":                    diskDetails.SourceSnapshot,
+			"source_snapshot_encryption_key":     d.Get("boot_disk.0.initialize_params.0.source_snapshot_encryption_key"),
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
 			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),
