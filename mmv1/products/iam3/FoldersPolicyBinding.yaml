@@ -13,6 +13,7 @@
 
 ---
 name: 'FoldersPolicyBinding'
+api_resource_type_kind: PolicyBinding
 description: A policy binding to a folder
 references:
   guides:

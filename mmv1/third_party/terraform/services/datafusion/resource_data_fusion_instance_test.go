@@ -9,6 +9,7 @@ import (
 )
 
 func TestAccDataFusionInstance_update(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20574")
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -87,6 +88,7 @@ resource "google_data_fusion_instance" "foobar" {
 }
 
 func TestAccDataFusionInstanceEnterprise_update(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20574")
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -154,6 +156,7 @@ resource "google_data_fusion_instance" "foobar" {
 }
 
 func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20574")
 	t.Parallel()
 
 	context := map[string]interface{}{
