@@ -127,6 +127,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return old == "1" && new == "0"
+				},
 			},
 
 			"storage_class": {
