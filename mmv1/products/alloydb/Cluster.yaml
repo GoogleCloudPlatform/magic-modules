@@ -110,7 +110,7 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
-  - name: 'skip_await_version_upgrade'
+  - name: 'skip_await_major_version_upgrade'
     type: Boolean
     default_value: true
     description: |

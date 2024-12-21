@@ -87,7 +87,7 @@ func TestAccAlloydbCluster_upgrade(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
 			},
 			{
 				Config: testAccAlloydbCluster_afterUpgrade(context),
@@ -96,7 +96,7 @@ func TestAccAlloydbCluster_upgrade(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
 			},
 		},
 	})
@@ -105,6 +105,7 @@ func TestAccAlloydbCluster_upgrade(t *testing.T) {
 func testAccAlloydbCluster_beforeUpgrade(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
+  skip_await_major_version_upgrade = false
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
@@ -136,6 +137,7 @@ data "google_compute_network" "default" {
 func testAccAlloydbCluster_afterUpgrade(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
+  skip_await_major_version_upgrade = false
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
@@ -150,7 +152,7 @@ resource "google_alloydb_instance" "default" {
   instance_type = "PRIMARY"
 
   machine_config {
-    cpu_count = 4
+    cpu_count = 8
   }
 }
 
