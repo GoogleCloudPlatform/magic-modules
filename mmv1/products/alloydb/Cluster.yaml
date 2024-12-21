@@ -110,6 +110,13 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - name: 'skip_await_version_upgrade'
+    type: Boolean
+    default_value: true
+    description: |
+      Set to true to skip awaiting on the major version upgrade of the cluster.
+      Possible values: true, false
+      Default value: "true"
 parameters:
   - name: 'clusterId'
     type: String
