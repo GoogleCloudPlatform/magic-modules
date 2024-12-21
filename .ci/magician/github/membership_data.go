@@ -42,8 +42,8 @@ var (
 		},
 		{
 			id:        "hao-nan-li",
-			startDate: newDate(2024, 9, 24, pdtLoc),
-			endDate:   newDate(2024, 10, 4, pdtLoc),
+			startDate: newDate(2024, 12, 23, pdtLoc),
+			endDate:   newDate(2025, 1, 5, pdtLoc),
 		},
 		{
 			id:        "ScottSuarez",
@@ -57,8 +57,8 @@ var (
 		},
 		{
 			id:        "melinath",
-			startDate: newDate(2024, 9, 18, pdtLoc),
-			endDate:   newDate(2024, 9, 23, pdtLoc),
+			startDate: newDate(2024, 12, 19, pdtLoc),
+			endDate:   newDate(2025, 1, 7, pdtLoc),
 		},
 		{
 			id:        "slevenick",
@@ -87,8 +87,8 @@ var (
 		},
 		{
 			id:        "trodge",
-			startDate: newDate(2024, 10, 23, pdtLoc),
-			endDate:   newDate(2024, 10, 25, pdtLoc),
+			startDate: newDate(2024, 12, 5, pdtLoc),
+			endDate:   newDate(2024, 12, 8, pdtLoc),
 		},
 		{
 			id:        "roaks3",
@@ -119,6 +119,11 @@ var (
 			id:        "c2thorn",
 			startDate: newDate(2024, 11, 27, pdtLoc),
 			endDate:   newDate(2024, 12, 9, pdtLoc),
+		},
+		{
+			id:        "roaks3",
+			startDate: newDate(2024, 12, 6, pdtLoc),
+			endDate:   newDate(2024, 12, 8, pdtLoc),
 		},
 	}
 )

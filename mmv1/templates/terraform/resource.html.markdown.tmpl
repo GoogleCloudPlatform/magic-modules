@@ -148,6 +148,9 @@ In addition to the arguments listed above, the following computed attributes are
 * `self_link` - The URI of the created resource.
 {{ "" }}
 {{- end }}
+{{- if $.Docs.Attributes }}
+{{ $.Docs.Attributes }}
+{{- end }}
 {{ range $p := $.AllUserProperties }}
 	{{- if $p.Output }}
 {{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p }}

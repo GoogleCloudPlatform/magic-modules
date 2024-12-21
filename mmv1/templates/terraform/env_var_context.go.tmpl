@@ -26,6 +26,8 @@
 		"{{$varKey}}": envvar.GetTestIdentityUserFromEnv(t),
 		{{- else if eq $varVal "PAP_DESCRIPTION" }}
 		"{{$varKey}}": envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		{{- else if eq $varVal "CHRONICLE_ID" }}
+		"{{$varKey}}": envvar.GetTestChronicleInstanceIdFromEnv(t),
 		{{- else if eq $varVal "ZONE" }}
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
 		{{- end }}
