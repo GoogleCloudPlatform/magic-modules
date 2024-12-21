@@ -33,7 +33,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"gtid", "binaryLogPosition", "create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -43,7 +43,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"gtid", "binaryLogPosition", "create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "PAUSED", true),
@@ -53,7 +53,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"gtid", "binaryLogPosition", "create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -63,21 +63,21 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"gtid", "binaryLogPosition", "create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
-			},
-			{
-				// Disable prevent_destroy
-				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", false),
-			},
-				{
-				Config: testAccDatastreamStream_datastreamStreamBasicExample(context),
-				Check:  resource.TestCheckResourceAttr("google_datastream_stream.gtid", "state", "NOT_STARTED"),
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				ResourceName:            "google_datastream_stream.gtid",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"gtid", "binaryLogPosition", "create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+			},
+			{
+				// Disable prevent_destroy
+				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", false),
+			},
+			{
+				Config: testAccDatastreamStream_datastreamStreamBasicExample(context),
+				Check:  resource.TestCheckResourceAttr("google_datastream_stream.gtid", "state", "NOT_STARTED"),
 			},
 		},
 	})
@@ -215,8 +215,8 @@ resource "google_datastream_stream" "default" {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
 
         mysql_source_config {
-	  binary_log_position {}
-	}
+	        binary_log_position {}
+	    }
     }
     destination_config {
         destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
@@ -251,8 +251,8 @@ resource "google_datastream_stream" "gtid" {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
 
         mysql_source_config {
-	  gtid {}
-	}
+	        gtid {}
+	    }
     }
     destination_config {
         destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
