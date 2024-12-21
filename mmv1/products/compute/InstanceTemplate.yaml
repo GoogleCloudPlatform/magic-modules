@@ -1,0 +1,30 @@
+---
+name: 'InstanceTemplate'
+kind: 'compute#instanceTemplate'
+description: |
+  Resource that enables a convenient way to save a virtual machine (VM) instance's configuration
+  that includes all of its properties and allows you to create a new instance from it.
+base_url: 'projects/{{project}}/global/instanceTemplates'
+has_self_link: true
+exclude_resource: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the resource.
+    required: true
+    immutable: true
+iam_policy:
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/global/instanceTemplates/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/global/instanceTemplates/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'instance_template_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance-template%s", context["random_suffix"])'
+    vars:
+      instance_name: 'my-instance-template'
