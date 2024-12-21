@@ -130,6 +130,8 @@ The following arguments are supported:
 
     There is a limit of 6.5 GB per CPU unless you add [extended memory](https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type#extendedmemory). You must do this explicitly by adding the suffix `-ext`, e.g. `custom-2-15360-ext` for 2 vCPU and 15 GB of memory.
 
+    More advanced machine types like [Z3](https://cloud.google.com/compute/docs/storage-optimized-machines) have a fixed storage requirement that's added without it being set by the user.
+
 * `name` - (Required) A unique name for the resource, required by GCE.
     Changing this forces a new resource to be created.
 
