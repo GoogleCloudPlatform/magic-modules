@@ -29,6 +29,7 @@ update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?pri
 update_verb: 'POST'
 delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
 delete_verb: 'POST'
+legacy_long_form_project: true
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
   - '{{firewall_policy}}/{{priority}}'
