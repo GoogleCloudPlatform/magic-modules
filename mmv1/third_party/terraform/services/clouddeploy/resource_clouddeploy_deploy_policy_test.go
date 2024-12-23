@@ -67,7 +67,7 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
 `
 }
 
-func testAccClouddeployDeployPolicy_update(context map[string]interface{}) string {
+func testAccClouddeployDeployPolicy_update() string {
 	return `
 resource "google_clouddeploy_deploy_policy" "deploy-policy" {
     location = "us-central1"
