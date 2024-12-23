@@ -116,10 +116,9 @@ The following arguments are supported:
 
 * `description` - (Required) Unique description to identify the Transfer Job.
 
-* `transfer_spec` - (Optional) Transfer specification. Structure [documented below](#nested_transfer_spec). Only one of `transfer_spec`, or `replication_spec` can be specified.
+* `transfer_spec` - (Optional) Transfer specification. Structure [documented below](#nested_transfer_spec). One of `transfer_spec`, or `replication_spec` can be specified.
 
-* `replication_spec` - (Optional) Replication specification. Structure [documented below](#nested_replication_spec). User should not configure
-`transfer_spec`, `schedule`, `event_stream` with this argument.
+* `replication_spec` - (Optional) Replication specification. Structure [documented below](#nested_replication_spec). User should not configure `schedule`, `event_stream` with this argument. One of `transfer_spec`, or `replication_spec` must be specified.
 
 - - -
 
