@@ -14,7 +14,7 @@
 ---
 name: 'ParameterVersion'
 description: |
-  A Parameter Version resource.
+  A Parameter Version resource that stores the actual value of the parameter.
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
