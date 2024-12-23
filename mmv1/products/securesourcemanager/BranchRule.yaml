@@ -36,13 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'secure_source_manager_branch_rule_basic'

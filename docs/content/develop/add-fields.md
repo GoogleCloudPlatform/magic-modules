@@ -17,7 +17,7 @@ For more information about types of resources and the generation process overall
 ## Before you begin
 
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
-1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/resource" >}}).
+1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/add-resource" >}}).
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```
    cd ~/magic-modules
@@ -186,7 +186,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 
 2. Modify the field configuration according to the API documentation and behavior.
 
-> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/develop/field-reference.md" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
+> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Add the field to the handwritten resource's schema.
@@ -210,7 +210,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 ## What's next?
 
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
-+ [Add documentation]({{< ref "/develop/add-documentation" >}})
++ [Add documentation]({{< ref "/document/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
-+ [Add tests]({{< ref "/develop/test/test" >}})
-+ [Run tests]({{< ref "/develop/test/run-tests" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})

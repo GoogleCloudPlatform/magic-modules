@@ -33,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
@@ -123,10 +116,16 @@ properties:
     immutable: true
     validation:
       function: 'verify.ValidateGCEName'
+  - name: 'networkId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'numericId'
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
+    deprecation_message: '`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.'
     output: true
   - name: 'autoCreateSubnetworks'
     type: Boolean

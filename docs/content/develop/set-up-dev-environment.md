@@ -70,7 +70,7 @@ development environment.
 
 ## What's next
 
-+ [Learn how to add or modify a resource]({{< ref "/develop/resource" >}})
++ [Learn how to add a resource]({{< ref "/develop/add-resource" >}})
 + [Learn how to add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Learn how to add a datasource]({{< ref "/develop/add-handwritten-datasource" >}})
 + [Learn how to promote a resource to GA]({{< ref "/develop/promote-to-ga" >}})

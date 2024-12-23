@@ -51,6 +51,6 @@ library, or the raw HTTP client used in MMV1 through `SendRequest`.
 
 1. Open the data source documentation in [`magic-modules/third_party/terraform/website/docs/d/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/d) using an editor of your choice.
    - The name of the file is the name of the data source without a `google_` prefix. For example, for `google_compute_instance`, the file is called `compute_instance.html.markdown`
-2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/develop/handwritten-docs-style-guide" >}}).
+2. Modify the documentation as needed according to [Handwritten documentation style guide]({{< ref "/document/handwritten-docs-style-guide" >}}).
 4. [Generate the providers]({{< ref "/develop/generate-providers" >}})
 5. Copy and paste the generated documentation into the Hashicorp Registry's [Doc Preview Tool](https://registry.terraform.io/tools/doc-preview) to see how it is rendered.
