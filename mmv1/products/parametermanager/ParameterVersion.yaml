@@ -92,9 +92,9 @@ properties:
     type: Boolean
     description: |
       The current state of Parameter Version. This field is only applicable for updating Parameter Version.
-  - name: 'payload' 
+  - name: 'payload'
     type: NestedObject
-    description: | 
+    description: |
       The payload content of a ParameterVersion resource.
     flatten_object: true
     required: true
