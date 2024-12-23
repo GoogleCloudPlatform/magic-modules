@@ -1,0 +1,280 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DeployPolicy'
+description: |
+  A `DeployPolicy` inhibits manual or automation-driven actions within a Delivery 
+  Pipeline or Target. 
+references:
+  guides:
+    'Restrict deploy behavior using policies': 'https://cloud.google.com/deploy/docs/deploy-policy'
+  api: 'https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deployPolicies'
+base_url: 'projects/{{project}}/locations/{{location}}/deployPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/deployPolicies?deployPolicyId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}'
+    - '{{name}}'
+custom_code:
+examples:
+  - name: 'clouddeploy_deploy_policy_basic'
+    primary_resource_id: 'deploy-policy'
+    vars:
+      deploy_policy_name: 'my-deploy-policy'
+  - name: 'clouddeploy_deploy_policy_weekly_windows'
+    primary_resource_id: 'deploy-policy'
+    vars:
+      deploy_policy_name: 'my-deploy-policy'
+parameters:
+  - name: 'location'
+    type: String
+    description: "The location of the resource."
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Name of the `DeployPolicy`."
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'uid'
+    type: String
+    description: "Unique identifier of the `DeployPolicy`."
+    output: true
+  - name: 'description'
+    type: String
+    description: "Description of the `DeployPolicy`. Max length is 255 characters."
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      User annotations. These attributes can only be set and used by the user, and
+      not by Cloud Deploy. See https://google.aip.dev/128#annotations for more details 
+      such as format and size limitations.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels are attributes that can be set and used by both the user and by Cloud 
+      Deploy. Labels must meet the following constraints: 
+      * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. 
+      * All characters must use UTF-8 encoding, and international characters are allowed. 
+      * Keys must start with a lowercase letter or international character. 
+      * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 128 bytes."
+  - name: 'createTime'
+    type: String
+    description: "Time at which the `DeployPolicy` was created."
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: "Time at which the `DeployPolicy` was updated."
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      The weak etag of the `DeployPolicy` resource. This checksum is computed by
+      the server based on the value of other fields, and may be sent on update
+      and delete requests to ensure the client has an up-to-date value before
+      proceeding.
+    output: true
+  - name: 'suspended'
+    type: Boolean
+    description: |
+      When suspended, the policy will not prevent actions from occurring, even
+      if the action violates the policy.
+  - name: 'selectors'
+    type: Array
+    description: | 
+      Selected resources to which the policy will be applied. At least one
+      selector is required. If one selector matches the resource the policy
+      applies. For example, if there are two selectors and the action being
+      attempted matches one of them, the policy will apply to that action.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'deliveryPipeline'
+          type: NestedObject
+          description: Contains attributes about a delivery pipeline.
+          properties:
+            - name: 'id'
+              type: string
+              description: |
+                ID of the `DeliveryPipeline`. The value of this field could be one
+                of the following:
+                * The last segment of a pipeline name
+                * "*", all delivery pipelines in a location
+            - name: 'labels'
+              type: KeyValuePairs
+              description: DeliveryPipeline labels.
+        - name: 'target'
+          type: NestedObject
+          description: Contains attributes about a target.
+          properties:
+            - name: 'id'
+              type: string
+              description: |
+                ID of the `Target`. The value of this field could be one
+                of the following:
+                * The last segment of a target name
+                * "*", all targets in a location
+            - name: 'labels'
+              type: KeyValuePairs
+              description: Target labels.
+  - name: 'rules'
+    type: Array
+    description: Rules to apply. At least one rule must be present.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'rolloutRestriction'
+          type: NestedObject
+          description: Rollout restrictions
+          exactly_one_of:
+            - 'rollout_restriction'
+          properties:
+            - name: 'id'
+              type: string
+              required: true
+              description: |
+                Restriction rule ID. Required and must be unique within a
+                DeployPolicy. The format is `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.
+            - name: 'invokers'
+              type: Array
+              description: | 
+                What invoked the action. If left empty, all invoker types will
+                be restricted.
+              item_type:
+                type: Enum
+                description: What invoked the action.
+                enum_values:
+                  - 'INVOKER_UNSPECIFIED'
+                  - 'USER'
+                  - 'DEPLOY_AUTOMATION'
+            - name: 'actions'
+              type: Array
+              description: | 
+                Rollout actions to be restricted as part of the policy. If left
+                empty, all actions will be restricted.
+              item_type:
+                type: Enum
+                description: Rollout actions to be restricted as part of the policy.
+                enum_values:
+                  - 'ROLLOUT_ACTIONS_UNSPECIFIED'
+                  - 'ADVANCE'
+                  - 'APPROVE'
+                  - 'CANCEL'
+                  - 'CREATE'
+                  - 'IGNORE_JOB'
+                  - 'RETRY_JOB'
+                  - 'ROLLBACK'
+                  - 'TERMINATE_JOBRUN'
+            - name: 'timeWindows'
+              type: NestedObject
+              description: Time window within which actions are restricted.
+              properties:
+                - name: 'timeZone'
+                  type: string
+                  description: |
+                    The time zone in IANA format: https://www.iana.org/time-zones
+                    (e.g. America/New_York).
+                - name: 'weeklyWindows'
+                  type: Array
+                  description: |
+                    Recurring weekly windows within which actions are restricted.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'daysOfWeek'
+                        type: Array
+                        description: Days of week. If left empty, all days of the week will be included.
+                        item_type:
+                          type: Enum
+                          description: Days of week during which to restrict actions.
+                          enum_values:
+                            - 'DAY_OF_WEEK_UNSPECIFIED'
+                            - 'MONDAY'
+                            - 'TUESDAY'
+                            - 'WEDNESDAY'
+                            - 'THURSDAY'
+                            - 'FRIDAY'
+                            - 'SATURDAY'
+                            - 'SUNDAY'
+                      - name: 'startTime'
+                        type: string
+                        description: |
+                          Start time (inclusive). Use 00:00 for the beginning of 
+                          the day. If you specify start_time you must also specify
+                          end_time. If left empty, this will block for the entire
+                          day for the days specified in days_of_week.
+                      - name: 'endTime'
+                        type: string
+                        description: |
+                          End time (exclusive). Use 24:00 to indicate midnight.
+                          If you specify end_time you must also specify start_time.
+                          If left empty, this will block for the entire day for
+                          the days specified in days_of_week.
+                - name: 'oneTimeWindows'
+                  type: Array
+                  description: |
+                    One-time windows within which actions are restricted. For example,
+                    blocking actions over New Year's Eve from December 31st at
+                    5pm to January 1st at 9am.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'startDate'
+                        type: string
+                        description: |
+                          Start date. Dates are expressed as yyyy-mm-dd.
+                      - name: 'endDate'
+                        type: string
+                        description: |
+                          End date. Dates are expressed as yyyy-mm-dd.
+                      - name: 'startTime'
+                        type: string
+                        description: |
+                          Start time (inclusive). Use 00:00 for the beginning of 
+                          the day. If you specify start_time you must also specify
+                          end_time. If left empty, this will block for the entire
+                          day for the days specified in days_of_week.
+                      - name: 'endTime'
+                        type: string
+                        description: |
+                          End time (exclusive). Use 24:00 to indicate midnight.
+                          If you specify end_time you must also specify start_time.
+                          If left empty, this will block for the entire day for
+                          the days specified in days_of_week.
