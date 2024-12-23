@@ -15,7 +15,7 @@
 name: 'RegionalParameterVersion'
 api_resource_type_kind: ParameterVersion
 description: |
-  A Regional Parameter Version resource.
+  A Regional Parameter Version resource that stores the actual value of the regional parameter.
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
@@ -100,9 +100,9 @@ properties:
     type: Boolean
     description: |
       The current state of Regional Parameter Version. This field is only applicable for updating Regional Parameter Version.
-  - name: 'payload' 
+  - name: 'payload'
     type: NestedObject
-    description: | 
+    description: |
       The parameter payload of the RegionalParameterVersion.
     flatten_object: true
     required: true
