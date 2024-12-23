@@ -812,7 +812,12 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
+
+{{- if ne $.TargetVersionName "ga" -}}
 			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Projection("full").Do()
+{{- else }}
+			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
+{{- end }}
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -991,7 +996,11 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
+{{- if ne $.TargetVersionName "ga" -}}
 			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Projection("full").Do()
+{{- else }}
+			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
+{{- end }}
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutUpdate),
@@ -1038,7 +1047,11 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
 	// to make sure it exists before moving on
+{{ if ne $.TargetVersionName "ga" -}}
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
+{{ else }}
+	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
+{{ end }}
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
