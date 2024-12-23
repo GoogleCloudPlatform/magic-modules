@@ -14,8 +14,8 @@
 ---
 name: 'DeployPolicy'
 description: |
-  A `DeployPolicy` inhibits manual or automation-driven actions within a Delivery 
-  Pipeline or Target. 
+  A `DeployPolicy` inhibits manual or automation-driven actions within a Delivery
+  Pipeline or Target.
 references:
   guides:
     'Restrict deploy behavior using policies': 'https://cloud.google.com/deploy/docs/deploy-policy'
@@ -82,16 +82,16 @@ properties:
     type: KeyValueAnnotations
     description: |
       User annotations. These attributes can only be set and used by the user, and
-      not by Cloud Deploy. See https://google.aip.dev/128#annotations for more details 
+      not by Cloud Deploy. See https://google.aip.dev/128#annotations for more details
       such as format and size limitations.
   - name: 'labels'
     type: KeyValueLabels
     description: |
-      Labels are attributes that can be set and used by both the user and by Cloud 
-      Deploy. Labels must meet the following constraints: 
-      * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. 
-      * All characters must use UTF-8 encoding, and international characters are allowed. 
-      * Keys must start with a lowercase letter or international character. 
+      Labels are attributes that can be set and used by both the user and by Cloud
+      Deploy. Labels must meet the following constraints:
+      * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes.
+      * All characters must use UTF-8 encoding, and international characters are allowed.
+      * Keys must start with a lowercase letter or international character.
       * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 128 bytes."
   - name: 'createTime'
     type: String
@@ -116,7 +116,7 @@ properties:
       if the action violates the policy.
   - name: 'selectors'
     type: Array
-    description: | 
+    description: |
       Selected resources to which the policy will be applied. At least one
       selector is required. If one selector matches the resource the policy
       applies. For example, if there are two selectors and the action being
@@ -174,7 +174,7 @@ properties:
                 DeployPolicy. The format is `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`.
             - name: 'invokers'
               type: Array
-              description: | 
+              description: |
                 What invoked the action. If left empty, all invoker types will
                 be restricted.
               item_type:
@@ -186,7 +186,7 @@ properties:
                   - 'DEPLOY_AUTOMATION'
             - name: 'actions'
               type: Array
-              description: | 
+              description: |
                 Rollout actions to be restricted as part of the policy. If left
                 empty, all actions will be restricted.
               item_type:
@@ -236,7 +236,7 @@ properties:
                       - name: 'startTime'
                         type: string
                         description: |
-                          Start time (inclusive). Use 00:00 for the beginning of 
+                          Start time (inclusive). Use 00:00 for the beginning of
                           the day. If you specify start_time you must also specify
                           end_time. If left empty, this will block for the entire
                           day for the days specified in days_of_week.
@@ -267,7 +267,7 @@ properties:
                       - name: 'startTime'
                         type: string
                         description: |
-                          Start time (inclusive). Use 00:00 for the beginning of 
+                          Start time (inclusive). Use 00:00 for the beginning of
                           the day. If you specify start_time you must also specify
                           end_time. If left empty, this will block for the entire
                           day for the days specified in days_of_week.
