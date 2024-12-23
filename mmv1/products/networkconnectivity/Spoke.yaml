@@ -263,13 +263,11 @@ properties:
       - name: 'excludeExportRanges'
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
       - name: 'includeExportRanges'
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
   - name: linkedProducerVpcNetwork
@@ -301,13 +299,11 @@ properties:
       - name: includeExportRanges
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
       - name: excludeExportRanges
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
   - name: 'uniqueId'
