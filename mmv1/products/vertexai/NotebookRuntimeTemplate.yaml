@@ -29,16 +29,11 @@ self_link: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates/{
 create_url: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates?notebookRuntimeTemplateId={{name}}"
 update_verb: PATCH
 update_mask: true
-autogen_async: true
+# autogen_async: true
 async:
-  actions: ["create", "delete", "update"]
-  # type: "OpAsync"
+  actions: ["create", "delete"]
   operation:
     base_url: "{{op_id}}"
-    timeouts:
-      insert_minutes: 40
-      update_minutes: 20
-      delete_minutes: 20
   result:
     resource_inside_response: true
 iam_policy:
@@ -51,10 +46,12 @@ iam_policy:
   example_config_body: "templates/terraform/iam/example_config_body/vertex_ai_notebook_runtime_template.tf.tmpl"
 examples:
   - name: "vertex_ai_notebook_runtime_template_basic"
-    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
-    vars:
-      template_name: "my-template"
     primary_resource_id: "template"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-basic-template%s", context["random_suffix"])'
+    vars:
+      network_name: "my-network"
+      subnetwork_name: "my-subnetwork"
+      template_name: "my-basic-template"
   - name: "vertex_ai_notebook_runtime_template_full"
     primary_resource_id: "template"
     primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
@@ -71,7 +68,6 @@ parameters:
     description: The region of the runtime template. eg us-central1
     url_param_only: true
     immutable: true
-    default_from_api: true
 
 properties:
   - name: "name"
@@ -79,6 +75,7 @@ properties:
     description: The resource name of the NotebookRuntimeTemplate.
     url_param_only: true
     immutable: true
+    custom_flatten: "templates/terraform/custom_flatten/name_from_self_link.tmpl"
 
   - name: "displayName"
     type: String
@@ -96,14 +93,16 @@ properties:
   - name: "machineSpec"
     type: NestedObject
     description: |
-      Optional. Immutable. The specification of a single machine for the template.
+      Immutable. The specification of a single machine for the template.
     immutable: true
+    required: true # API documentation states this is optional, but request fails if machineType is not specified
     properties:
       - name: "machineType"
         type: String
         description: |
           Immutable. The type of the machine.
         immutable: true
+        required: true
 
       - name: "acceleratorType"
         type: String
@@ -116,8 +115,8 @@ properties:
         type: Integer
         description: |
           The number of accelerators to attach to the machine.
-        default_value: 0
         immutable: true
+        default_from_api: true
 
       - name: "tpuTopology"
         type: String
@@ -129,18 +128,17 @@ properties:
         type: NestedObject
         description: |
           Optional. Immutable. Configuration controlling how this resource pool consumes reservation.
-        immutable: true
         properties:
           - name: "reservationAffinityType"
             type: Enum
             description: |
               Required. Specifies the reservation affinity type.
-            required: true
             enum_values:
               - TYPE_UNSPECIFIED
               - NO_RESERVATION
               - ANY_RESERVATION
               - SPECIFIC_RESERVATION
+            immutable: true
 
           - name: "key"
             type: String
@@ -159,13 +157,13 @@ properties:
 
   - name: "dataPersistentDiskSpec"
     type: NestedObject
+    immutable: true
+    default_from_api: true
     description: |
       Optional. The specification of [persistent disk][https://cloud.google.com/compute/docs/disks/persistent-disks] attached to the runtime as data disk storage.
-    immutable: true
     properties:
       - name: "diskType"
         type: String
-        default_value: "pd-standard"
         description: |
           type of the disk (default is "pd-standard"). 
           Valid values: "pd-ssd" (Persistent Disk Solid state Drive) 
@@ -173,38 +171,47 @@ properties:
           "pd-balanced" (Balanced Persistent Disk) 
           "pd-extreme" (Extreme Persistent Disk)
         immutable: true
+        default_value: "pd-standard"
+        custom_flatten: "templates/terraform/custom_flatten/default_if_empty.tmpl"
 
       - name: "diskSizeGb"
-        type: String
-        default_value: "100GB"
+        type: Integer
         description: |
           size in GB of the disk (default is 100GB).
         immutable: true
+        default_value: 100
+        custom_flatten: "templates/terraform/custom_flatten/default_if_empty.tmpl"
 
   - name: "networkSpec"
     type: NestedObject
+    required:
+      true # API documentation states that this is optional, but the
+      # default for enableInternetAccess being false means that either
+      # network and subnetwork must be specified or enableInternetAccess
+      # must be manually changed to true
     description: |
-      Optional. Network spec.
-    immutable: true
+      Network spec.
     properties:
       - name: "enableInternetAccess"
         type: Boolean
-        default_value: false
         description: |
           Whether to enable public internet access. Default false.
         immutable: true
+        default_value: false
 
       - name: "network"
         type: String
         description: |
           The full name of the Google Compute Engine network
         immutable: true
+        default_from_api: true
 
       - name: "subnetwork"
         type: String
         description: |
           The name of the subnet that this instance is in. Format: projects/{project_id_or_number}/regions/{region}/subnetworks/{subnetwork_id}
         immutable: true
+        default_from_api: true
 
   - name: "labels"
     type: KeyValueLabels
@@ -216,31 +223,29 @@ properties:
 
   - name: "idleShutdownConfig"
     type: NestedObject
+    default_from_api: true
     description: |
       The idle shutdown configuration of NotebookRuntimeTemplate. This config will only be set when idle shutdown is enabled.
-    default_from_api: true
-    immutable: true
     properties:
       - name: "idleTimeout"
         type: String
         description: |
           Required. Duration is accurate to the second. In Notebook, Idle Timeout is accurate to minute so the range of idleTimeout (second) is: 10 * 60 ~ 1440 * 60.
           A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-        default_from_api: true
         immutable: true
+        default_value: "10800s"
 
       - name: "idleShutdownDisabled"
         type: Boolean
         description: |
           Whether Idle Shutdown is disabled in this NotebookRuntimeTemplate.
-        default_from_api: true
         immutable: true
+        default_value: false
 
   - name: "eucConfig"
     type: NestedObject
     description: |
       EUC configuration of the NotebookRuntimeTemplate.
-    immutable: true
     properties:
       - name: "eucDisabled"
         type: Boolean
@@ -279,7 +284,7 @@ properties:
     description: |
       Optional. Immutable. The type of the notebook runtime template.
     immutable: true
-    default_value: :USER_DEFINED
+    default_value: USER_DEFINED
     enum_values:
       - NOTEBOOK_RUNTIME_TYPE_UNSPECIFIED
       - USER_DEFINED

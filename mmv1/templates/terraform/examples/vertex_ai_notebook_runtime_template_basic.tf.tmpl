@@ -1,4 +1,12 @@
-resource "google_vertex_ai_notebook_runtime_template" "{{$.PrimaryResoruceId}}" {
-  name = "{{index $.Vars "template_name"}}"
+resource "google_vertex_ai_notebook_runtime_template" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "template_name"}}"
   display_name = "Sample template"
+  
+  machine_spec {
+    machine_type = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
 }
