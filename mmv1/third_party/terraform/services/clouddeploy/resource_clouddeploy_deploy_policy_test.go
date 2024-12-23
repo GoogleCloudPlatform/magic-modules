@@ -11,13 +11,17 @@ import (
 func TestAccClouddeployDeployPolicy_update(t *testing.T) {
 	t.Parallel()
 
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckClouddeployDeployPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccClouddeployDeployPolicy_basic(),
+				Config: testAccClouddeployDeployPolicy_basic(context),
 			},
 			{
 				ResourceName:            "google_clouddeploy_deploy_policy.deploy-policy",
@@ -26,7 +30,7 @@ func TestAccClouddeployDeployPolicy_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccClouddeployDeployPolicy_update(),
+				Config: testAccClouddeployDeployPolicy_update(context),
 			},
 			{
 				ResourceName:            "google_clouddeploy_custom_target_type.custom-target-type",
@@ -38,8 +42,8 @@ func TestAccClouddeployDeployPolicy_update(t *testing.T) {
 	})
 }
 
-func testAccClouddeployDeployPolicy_basic() string {
-	return `
+func testAccClouddeployDeployPolicy_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_clouddeploy_deploy_policy" "deploy-policy" {
     location = "us-central1"
     name = "tf-test-my-deploy-policy"
@@ -64,11 +68,11 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
       }
     }
 }
-`
+`, context)
 }
 
-func testAccClouddeployDeployPolicy_update() string {
-	return `
+func testAccClouddeployDeployPolicy_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_clouddeploy_deploy_policy" "deploy-policy" {
     location = "us-central1"
     name = "tf-test-my-deploy-policy"
@@ -105,5 +109,5 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
       }
     }
 }
-`
+`, context)
 }

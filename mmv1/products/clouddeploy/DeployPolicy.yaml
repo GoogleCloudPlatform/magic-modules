@@ -51,10 +51,12 @@ custom_code:
 examples:
   - name: 'clouddeploy_deploy_policy_basic'
     primary_resource_id: 'deploy-policy'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-deploy-policy%s", context["random_suffix"])'
     vars:
       deploy_policy_name: 'my-deploy-policy'
   - name: 'clouddeploy_deploy_policy_weekly_windows'
     primary_resource_id: 'deploy-policy'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-deploy-policy%s", context["random_suffix"])'
     vars:
       deploy_policy_name: 'my-deploy-policy'
 parameters:
