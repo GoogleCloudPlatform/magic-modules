@@ -16,11 +16,13 @@ name: ApiHubInstance
 description: An ApiHubInstance represents the instance resources of the API Hub. Currently, only one ApiHub instance is allowed for each project.
 base_url: projects/{{project}}/locations/{{location}}/apiHubInstances
 immutable: true
-self_link: projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
+self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/apiHubInstances?apiHubInstanceId={{api_hub_instance_id}}
-id_format: projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
+id_format: '{{name}}'
 import_format:
 - projects/{{project}}/locations/{{location}}/apiHubInstances/{{api_hub_instance_id}}
+custom_code:
+  custom_import: 'templates/terraform/custom_import/apihub_api_hub_instance_set_id.go.tmpl'
 examples:
 - name: apihub_api_hub_instance_basic
   primary_resource_id: apihub-instance
@@ -63,7 +65,6 @@ parameters:
     are `/a-z[0-9]-_/`.
   immutable: true
   url_param_only: true
-  required: true
 properties:
 - name: description
   type: String
@@ -108,6 +109,7 @@ properties:
   properties:
   - name: encryptionType
     type: String
+    default_from_api: true
     description: |-
       Optional. Encryption type for the region. If the encryption type is CMEK, the
       cmek_key_name must be provided. If no encryption type is provided,
