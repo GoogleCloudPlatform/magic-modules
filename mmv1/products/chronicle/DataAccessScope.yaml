@@ -215,15 +215,15 @@ properties:
                 Optional. The value of the ingestion label. Optional. An object
                 with no provided value and some key provided would match
                 against the given key and ANY value.
-  - name: displayName
-    type: String
-    description: |-
-      Output only. The display name of the label.
-      Data access label and log types's name
-      will match the display name of the resource.
-      The asset namespace will match the namespace itself.
-      The ingestion key value pair will match the key of the tuple.
-    output: true
+        - name: displayName
+          type: String
+          description: |-
+            Output only. The display name of the label.
+            Data access label and log types's name
+            will match the display name of the resource.
+            The asset namespace will match the namespace itself.
+            The ingestion key value pair will match the key of the tuple.
+          output: true
   - name: updateTime
     type: String
     description: Output only. The time at which the data access scope was last updated.
