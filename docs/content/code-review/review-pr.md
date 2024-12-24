@@ -9,6 +9,15 @@ aliases:
 
 This page provides guidelines for reviewing a Magic Modules pull request (PR).
 
+## Special cases
+
+The following types of PRs may require additional scrutiny and/or multiple reviewers.
+
+- DCL to MMv1 migrations
+- Adding multi-actor fields (fields whose values can be altered as a side effect of changes made to a different resource)
+
+## Review
+
 1. Read the PR description to understand the context and ensure the PR either
    * is linked to a GitHub issue or an internal bug
       * if not, check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether the feature has already been requested and add the issues in the description, if any.
