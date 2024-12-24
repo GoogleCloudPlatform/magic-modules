@@ -40,7 +40,7 @@ timeouts:
   delete_minutes: 20
 examples:
   - name: 'dataform_config'
-    primary_resource_id: 'dataform_config'
+    primary_resource_id: 'config'
     min_version: 'beta'
     vars:
       key_ring_name: 'example-key-ring'
