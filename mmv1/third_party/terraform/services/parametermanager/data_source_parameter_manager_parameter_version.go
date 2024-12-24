@@ -119,8 +119,8 @@ func dataSourceParameterManagerParameterVersionRead(d *schema.ResourceData, meta
 	}
 
 	// If the response contains the disabled value, return an error stating that the parameter version is currently disabled
-	_, ok = parameterVersion["disabled"]
-	if ok {
+	isDisabled, ok := parameterVersion["disabled"]
+	if ok && isDisabled.(bool) {
 		return fmt.Errorf("parameter version %s is in DISABLED state.", dParameterVersionId)
 	}
 

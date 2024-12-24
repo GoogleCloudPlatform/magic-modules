@@ -24,7 +24,7 @@ func TestAccDataSourceParameterManagerParameterVersion_basicWithResourceReferenc
 		CheckDestroy:             testAccCheckParameterManagerParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppParameterManagerParameterVersion_basicWithResourceReference(context),
+				Config: testAccParameterManagerParameterVersion_basicWithResourceReference(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version.parameter-version-basic", "google_parameter_manager_parameter_version.parameter-version-basic"),
 				),
@@ -34,7 +34,7 @@ func TestAccDataSourceParameterManagerParameterVersion_basicWithResourceReferenc
 
 }
 
-func testAccAppParameterManagerParameterVersion_basicWithResourceReference(context map[string]interface{}) string {
+func testAccParameterManagerParameterVersion_basicWithResourceReference(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-basic" {
   parameter_id = "tf_test_parameter%{random_suffix}"
@@ -53,7 +53,7 @@ data "google_parameter_manager_parameter_version" "parameter-version-basic" {
 `, context)
 }
 
-func TestAccDataSourceAppParameterManagerParameterVersion_basicWithParameterName(t *testing.T) {
+func TestAccDataSourceParameterManagerParameterVersion_basicWithParameterName(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -66,7 +66,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_basicWithParameterName
 		CheckDestroy:             testAccCheckParameterManagerParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppParameterManagerParameterVersion_basicWithParameterName(context),
+				Config: testAccParameterManagerParameterVersion_basicWithParameterName(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version.parameter-version-basic", "google_parameter_manager_parameter_version.parameter-version-basic"),
 				),
@@ -76,7 +76,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_basicWithParameterName
 
 }
 
-func testAccAppParameterManagerParameterVersion_basicWithParameterName(context map[string]interface{}) string {
+func testAccParameterManagerParameterVersion_basicWithParameterName(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-basic" {
   parameter_id = "tf_test_parameter%{random_suffix}"
@@ -95,7 +95,7 @@ data "google_parameter_manager_parameter_version" "parameter-version-basic" {
 `, context)
 }
 
-func TestAccDataSourceAppParameterManagerParameterVersion_withJsonData(t *testing.T) {
+func TestAccDataSourceParameterManagerParameterVersion_withJsonData(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -109,7 +109,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_withJsonData(t *testin
 		CheckDestroy:             testAccCheckParameterManagerParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppParameterManagerParameterVersion_withJsonData(context),
+				Config: testAccParameterManagerParameterVersion_withJsonData(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version.parameter-version-with-json-data", "google_parameter_manager_parameter_version.parameter-version-with-json-data"),
 				),
@@ -119,7 +119,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_withJsonData(t *testin
 
 }
 
-func testAccAppParameterManagerParameterVersion_withJsonData(context map[string]interface{}) string {
+func testAccParameterManagerParameterVersion_withJsonData(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-basic" {
   parameter_id = "tf_test_parameter%{random_suffix}"
@@ -139,7 +139,7 @@ data "google_parameter_manager_parameter_version" "parameter-version-with-json-d
 `, context)
 }
 
-func TestAccDataSourceAppParameterManagerParameterVersion_withYamlData(t *testing.T) {
+func TestAccDataSourceParameterManagerParameterVersion_withYamlData(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -153,7 +153,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_withYamlData(t *testin
 		CheckDestroy:             testAccCheckParameterManagerParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppParameterManagerParameterVersion_withYamlData(context),
+				Config: testAccParameterManagerParameterVersion_withYamlData(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version.parameter-version-with-yaml-data", "google_parameter_manager_parameter_version.parameter-version-with-yaml-data"),
 				),
@@ -163,7 +163,7 @@ func TestAccDataSourceAppParameterManagerParameterVersion_withYamlData(t *testin
 
 }
 
-func testAccAppParameterManagerParameterVersion_withYamlData(context map[string]interface{}) string {
+func testAccParameterManagerParameterVersion_withYamlData(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-basic" {
   parameter_id = "tf_test_parameter%{random_suffix}"
