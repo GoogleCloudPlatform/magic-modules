@@ -12,7 +12,7 @@ Use this data source to list the Parameter Manager Regional Parameters
 
 ```hcl
 data "google_parameter_manager_regional_parameters" "regional-parameters" {
-    location             = "us-central1"
+  location = "us-central1"
 }
 ```
 
