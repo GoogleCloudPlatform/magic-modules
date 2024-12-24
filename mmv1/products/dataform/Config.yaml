@@ -31,6 +31,9 @@ self_link: 'projects/{{project}}/locations/{{region}}/config'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{region}}/config'
+skip_delete: true
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
 timeouts:
   insert_minutes: 20
   update_minutes: 20
