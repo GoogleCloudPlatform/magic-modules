@@ -1,0 +1,19 @@
+resource "google_apigee_organization" "apigee_org" {
+  analytics_region   = "us-central1"
+  project_id         = google_project.project.project_id
+  authorized_network = google_compute_network.apigee_network.id
+  billing_type       = "PAYG"
+}
+
+resource "google_apigee_environment" "{{$.PrimaryResourceId}}" {
+  org_id       = google_apigee_organization.apigee_org.id
+  name         = "tf-test%{random_suffix}"
+  type         = "COMPREHENSIVE"
+  description  = "Apigee Environment"
+  display_name = "environment-1"
+}
+
+resource "google_apigee_environment_addons_config" "{{$.PrimaryResourceId}}" {
+  env_id            = google_apigee_environment.{{$.PrimaryResourceId}}.id
+  analytics_enabled = true
+}
