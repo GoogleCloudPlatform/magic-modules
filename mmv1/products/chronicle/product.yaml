@@ -15,8 +15,8 @@
 name: Chronicle
 display_name: Chronicle
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+ - https://www.googleapis.com/auth/cloud-platform
 versions:
-- base_url: https://{{location}}-chronicle.googleapis.com/v1beta/
-  name: beta
+ - base_url: https://{{location}}-chronicle.googleapis.com/v1beta/
+   name: beta
 caibaseurl: ""
