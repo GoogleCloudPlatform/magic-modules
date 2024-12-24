@@ -72,6 +72,7 @@ type Examples struct {
 	//  - :SERVICE_ACCT
 	//  - :CUST_ID
 	//  - :IDENTITY_USER
+	//  - :CHRONICLE_ID
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -149,6 +150,10 @@ type Examples struct {
 	// Or a config with two fine grained resources that have a race condition during create
 	SkipVcr bool `yaml:"skip_vcr,omitempty"`
 
+	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
+	// unskipping the test. If this is not empty, the test will be skipped.
+	SkipTest string `yaml:"skip_test,omitempty"`
+
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
@@ -222,6 +227,7 @@ func (e *Examples) SetHCLText() {
 		"CUST_ID":             "A01b123xz",
 		"IDENTITY_USER":       "cloud_identity_user",
 		"PAP_DESCRIPTION":     "description",
+		"CHRONICLE_ID":        "00000000-0000-0000-0000-000000000000",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML

@@ -610,6 +610,34 @@ func TestAccComputeRegionInstanceTemplate_instanceResourcePolicies(t *testing.T)
 	})
 }
 
+func TestAccComputeRegionInstanceTemplate_instanceResourcePoliciesSpread(t *testing.T) {
+	t.Parallel()
+
+	var template compute.InstanceTemplate
+	var policyName = "tf-test-policy-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories:    acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_instanceResourcePolicySpread(acctest.RandString(t, 10), policyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &template),
+					testAccCheckComputeRegionInstanceTemplateHasInstanceResourcePolicies(&template, policyName),
+					testAccCheckComputeRegionInstanceTemplateHasAvailabilityDomain(&template, 3),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeRegionInstanceTemplate_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
@@ -772,6 +800,110 @@ func TestAccComputeRegionInstanceTemplate_AdvancedMachineFeatures(t *testing.T) 
 		},
 	})
 }
+
+func TestAccComputeRegionInstanceTemplate_performanceMonitoringUnit(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	context_1 := map[string]interface{}{
+		"instance_name":               fmt.Sprintf("tf-test-instance-template-%s", acctest.RandString(t, 10)),
+		"performance_monitoring_unit": "STANDARD",
+	}
+	context_2 := map[string]interface{}{
+		"instance_name":               context_1["instance_name"].(string),
+		"performance_monitoring_unit": "ENHANCED",
+	}
+	context_3 := map[string]interface{}{
+		"instance_name":               context_1["instance_name"].(string),
+		"performance_monitoring_unit": "ARCHITECTURAL",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "STANDARD"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ENHANCED"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context_3),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ARCHITECTURAL"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceTemplate_enableUefiNetworking(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	context_1 := map[string]interface{}{
+		"instance_name":               fmt.Sprintf("tf-test-instance-template-%s", acctest.RandString(t, 10)),
+		"enable_uefi_networking": "false",
+	}
+	context_2 := map[string]interface{}{
+		"instance_name":               context_1["instance_name"].(string),
+		"enable_uefi_networking": "true",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_enableUefiNetworking(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.enable_uefi_networking", "false"),
+				),
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_enableUefiNetworking(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "advanced_machine_features.0.enable_uefi_networking", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_enableDisplay(t *testing.T) {
@@ -1752,6 +1884,15 @@ func testAccCheckComputeRegionInstanceTemplateHasInstanceResourcePolicies(instan
 		return nil
 	}
 
+}
+
+func testAccCheckComputeRegionInstanceTemplateHasAvailabilityDomain(instanceTemplate *compute.InstanceTemplate, availabilityDomain int64) resource.TestCheckFunc {
+	return func (s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.AvailabilityDomain != availabilityDomain {
+			return fmt.Errorf("Expected availability_domain  %d, got %d", availabilityDomain, instanceTemplate.Properties.Scheduling.AvailabilityDomain)
+		}
+		return nil
+	}
 }
 
 func testAccCheckComputeRegionInstanceTemplateHasReservationAffinity(instanceTemplate *compute.InstanceTemplate, consumeReservationType string, specificReservationNames ...string) resource.TestCheckFunc {
@@ -2879,6 +3020,49 @@ resource "google_compute_region_instance_template" "foobar" {
 `, policyName, suffix)
 }
 
+func testAccComputeRegionInstanceTemplate_instanceResourcePolicySpread(suffix string, policyName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_resource_policy" "foo" {
+  name = "%s"
+  region = "us-central1"
+  group_placement_policy {
+	availability_domain_count = 5
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "e2-standard-4"
+  region      = "us-central1"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+	availability_domain = 3
+  }
+
+  resource_policies = [google_compute_resource_policy.foo.self_link]
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, policyName, suffix)
+}
+
 func testAccComputeRegionInstanceTemplate_reservationAffinityInstanceTemplate_nonSpecificReservation(templateName, consumeReservationType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3103,7 +3287,7 @@ func testAccComputeRegionInstanceTemplateConfidentialInstanceConfigEnableTdx(suf
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image3" {
   family  = "ubuntu-2204-lts"
-  project = "tdx-guest-images"
+  project = "ubuntu-os-cloud"
 }
 
 resource "google_compute_region_instance_template" "foobar5" {
@@ -3142,8 +3326,8 @@ data "google_compute_image" "my_image" {
 
 resource "google_compute_region_instance_template" "foobar" {
   name         = "tf-test-instance-template-%s"
-  region      = "us-central1"
-  machine_type = "n2-standard-2" // Nested Virt isn't supported on E2 and N2Ds https://cloud.google.com/compute/docs/instances/nested-virtualization/overview#restrictions and https://cloud.google.com/compute/docs/instances/disabling-smt#limitations
+  region       = "us-central1"
+  machine_type = "c2-standard-2"
 
   disk {
     source_image = data.google_compute_image.my_image.self_link
@@ -3156,9 +3340,10 @@ resource "google_compute_region_instance_template" "foobar" {
   }
 
   advanced_machine_features {
-	threads_per_core = 1
 	enable_nested_virtualization = true
-	visible_core_count = 1
+	threads_per_core             = 1
+	turbo_mode                   = "ALL_CORE_MAX"
+	visible_core_count           = 1
   }
 
   scheduling {
@@ -3168,6 +3353,61 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, suffix)
 }
+
+func testAccComputeRegionInstanceTemplate_performanceMonitoringUnit(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2004-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+	name         = "%{instance_name}"
+	region       = "us-central1"
+	machine_type = "c4-standard-96"
+
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	advanced_machine_features {
+		performance_monitoring_unit = "%{performance_monitoring_unit}"
+	}
+}
+`, context)
+}
+
+func testAccComputeRegionInstanceTemplate_enableUefiNetworking(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2004-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+	name         = "%{instance_name}"
+	region       = "us-central1"
+	machine_type = "n2-standard-2"
+
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	advanced_machine_features {
+		enable_uefi_networking = "%{enable_uefi_networking}"
+	}
+}
+`, context)
+}
+
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_enableDisplay(suffix string) string {
@@ -3859,12 +4099,12 @@ resource "google_compute_region_instance_template" "foobar" {
     boot         = true
 
     resource_manager_tags = {
-      "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+      (google_tags_tag_key.key.id) = google_tags_tag_value.value.id
     }
   }
 
   resource_manager_tags = {
-    "tagKeys/${google_tags_tag_key.key.name}" = "tagValues/${google_tags_tag_value.value.name}"
+    (google_tags_tag_key.key.id) = google_tags_tag_value.value.id
   }
 
   network_interface {

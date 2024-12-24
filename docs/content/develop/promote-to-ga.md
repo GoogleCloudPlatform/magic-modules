@@ -1,6 +1,6 @@
 ---
 title: "Promote to GA"
-weight: 50
+weight: 80
 ---
 
 # Promote from beta to GA
@@ -9,11 +9,11 @@ This document describes how to promote an existing resource or field that uses M
 
 Handwritten code (including `custom_code`) commonly uses "version guards" in the form of `{{- if ne $.TargetVersionName "ga" }}...{{- end }}` to wrap code that is beta-specific, which need to be removed during promotion.
 
-For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/get-started/how-magic-modules-works.md" >}}).
+For more information about types of resources and the generation process overall, see [How Magic Modules works]({{< ref "/" >}}).
 
 ## Before you begin
 
-1. Complete the [Generate the providers]({{< ref "/get-started/generate-providers" >}}) quickstart to set up your environment and your Google Cloud project.
+1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 2. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
    ```
    cd ~/magic-modules
@@ -72,4 +72,4 @@ For handwritten resources, modify the documentation as appropriate for your chan
 
 ## What's next?
 
-- [Test your changes]({{< ref "/develop/test/run-tests.md" >}})
+- [Test your changes]({{< ref "/test/run-tests" >}})

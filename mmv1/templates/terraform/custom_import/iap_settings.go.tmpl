@@ -1,0 +1,17 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"^(?P<name>.+)/iapSettings$",
+    	"^(?P<name>.+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}name{{"}}"}}/iapSettings")
+if err != nil {
+	return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil
+
