@@ -31,6 +31,7 @@ resource "google_dataform_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   
   region = "us-central1"
+  name = "config"
   default_kms_key_name = google_kms_crypto_key.example_key.id
 
   depends_on = [
