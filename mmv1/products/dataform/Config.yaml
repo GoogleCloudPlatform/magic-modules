@@ -33,7 +33,7 @@ import_format:
   - 'projects/{{project}}/locations/{{region}}/config'
 skip_delete: true
 custom_code:
-  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.erb
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
 timeouts:
   insert_minutes: 20
   update_minutes: 20
