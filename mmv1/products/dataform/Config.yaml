@@ -41,7 +41,6 @@ examples:
     primary_resource_id: 'dataform_config'
     min_version: 'beta'
     vars:
-      config_name: "dataform-config-name"
       key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
 parameters:
