@@ -38,7 +38,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-custom_code:
 examples:
   - name: 'dataform_config'
     primary_resource_id: 'dataform_config'
