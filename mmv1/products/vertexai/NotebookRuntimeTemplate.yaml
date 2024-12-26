@@ -29,7 +29,6 @@ self_link: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates/{
 create_url: "projects/{{project}}/locations/{{region}}/notebookRuntimeTemplates?notebookRuntimeTemplateId={{name}}"
 update_verb: PATCH
 update_mask: true
-# autogen_async: true
 async:
   actions: ["create", "delete"]
   operation:
@@ -107,7 +106,7 @@ properties:
       - name: "acceleratorType"
         type: String
         description: |
-          Immutable. The type of accelerator(s) that may be attached to the machine as per acceleratorCount. 
+          Immutable. The type of accelerator(s) that may be attached to the machine as per acceleratorCount.
           See https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec#acceleratortype
         immutable: true
 
@@ -143,7 +142,7 @@ properties:
           - name: "key"
             type: String
             description: |
-              Optional. Corresponds to the label key of a reservation resource. 
+              Optional. Corresponds to the label key of a reservation resource.
               To target a SPECIFIC_RESERVATION by name, use compute.googleapis.com/reservation-name as the key and specify the name of your reservation as its value.
             immutable: true
 
@@ -165,10 +164,10 @@ properties:
       - name: "diskType"
         type: String
         description: |
-          type of the disk (default is "pd-standard"). 
-          Valid values: "pd-ssd" (Persistent Disk Solid state Drive) 
-          "pd-standard" (Persistent Disk Hard Disk Drive) 
-          "pd-balanced" (Balanced Persistent Disk) 
+          type of the disk (default is "pd-standard").
+          Valid values: "pd-ssd" (Persistent Disk Solid state Drive)
+          "pd-standard" (Persistent Disk Hard Disk Drive)
+          "pd-balanced" (Balanced Persistent Disk)
           "pd-extreme" (Extreme Persistent Disk)
         immutable: true
         default_value: "pd-standard"
@@ -251,17 +250,17 @@ properties:
         type: Boolean
         default_value: false
         description: |
-          Input only. Whether EUC is disabled in this NotebookRuntimeTemplate. 
+          Input only. Whether EUC is disabled in this NotebookRuntimeTemplate.
           In proto3, the default value of a boolean is false. In this way, by default EUC will be enabled for NotebookRuntimeTemplate.
         immutable: true
 
       - name: "bypassActasCheck"
         type: Boolean
         description: |
-          Output only. Whether ActAs check is bypassed for service account attached to the VM. 
-          If false, we need ActAs check for the default Compute Engine service account. 
-          When a Runtime is created, a VM is allocated using Default Compute Engine service Account. 
-          Any user requesting to use this Runtime requires service Account user (ActAs) permission over this SA. 
+          Output only. Whether ActAs check is bypassed for service account attached to the VM.
+          If false, we need ActAs check for the default Compute Engine service account.
+          When a Runtime is created, a VM is allocated using Default Compute Engine service Account.
+          Any user requesting to use this Runtime requires service Account user (ActAs) permission over this SA.
           If true, Runtime owner is using EUC and does not require the above permission as VM no longer use default Compute Engine SA, but a P4SA.
         output: true
 
@@ -320,6 +319,6 @@ properties:
       - name: "kmsKeyName"
         type: String
         description: |
-          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource. 
-          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key. 
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key.
           The key needs to be in the same region as where the compute resource is created.
