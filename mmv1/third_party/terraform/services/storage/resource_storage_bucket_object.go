@@ -568,6 +568,7 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	if hasObjectContentChanges(d) {
 		d.SetNewComputed("crc32c")
 		d.SetNewComputed("generation")
+		d.SetNewComputed("md5hash")
 	}
 
 	if d.HasChange("md5hash") {
