@@ -669,7 +669,6 @@ resource "google_storage_bucket_object" "object" {
   name   = "%s"
   bucket = google_storage_bucket.bucket.name
   source = "%s"
-  detect_md5hash = ""
 }
 `, bucketName, objectName, sourceFilename)
 }

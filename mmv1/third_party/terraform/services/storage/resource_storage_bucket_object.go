@@ -111,6 +111,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"md5hash": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Optional:    true,
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
 
@@ -120,16 +121,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				ForceNew:     true,
 				ExactlyOneOf: []string{"content"},
 				Description:  `A path to the data you want to upload. Must be defined if content is not.`,
-			},
-
-			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
-			"detect_md5hash": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return old == "1" && new == "0"
-				},
 			},
 
 			"storage_class": {
@@ -353,7 +344,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("detect_md5hash") {
+	if d.HasChange("content") || d.HasChange("md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
@@ -428,9 +419,6 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
-	}
-	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
-		return fmt.Errorf("Error setting detect_md5hash: %s", err)
 	}
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
@@ -577,33 +565,26 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	localMd5Hash := ""
-	if source, ok := d.GetOkExists("source"); ok {
-		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
-	}
-	if content, ok := d.GetOkExists("content"); ok {
-		localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
-	}
-	if localMd5Hash == "" {
-		return nil
+	if hasObjectContentChanges(d) {
+		d.SetNewComputed("crc32c")
+		d.SetNewComputed("generation")
 	}
 
-	oldMd5Hash, ok := d.GetOkExists("md5hash")
-	if ok && oldMd5Hash == localMd5Hash {
-		return nil
-	}
-
-	err := d.SetNewComputed("md5hash")
-	if err != nil {
-		return fmt.Errorf("Error re-setting md5hash: %s", err)
-	}
-	err = d.SetNewComputed("crc32c")
-	if err != nil {
-		return fmt.Errorf("Error re-setting crc32c: %s", err)
-	}
-	err = d.SetNewComputed("generation")
-	if err != nil {
-		return fmt.Errorf("Error re-setting generation: %s", err)
+	if d.HasChange("md5hash") {
+		d.SetNewComputed("crc32c")
 	}
 	return nil
+}
+
+func hasObjectContentChanges(d *schema.ResourceDiff) bool {
+	for _, key := range []string{
+		"source",
+		"content",
+		"md5hash",
+	} {
+		if d.HasChange(key) {
+			return true
+		}
+	}
+	return false
 }
