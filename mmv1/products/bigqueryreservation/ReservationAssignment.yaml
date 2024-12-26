@@ -13,6 +13,7 @@
 
 ---
 name: 'ReservationAssignment'
+api_resource_type_kind: Assignment
 description: |
   The BigqueryReservation Assignment resource.
 references:
