@@ -1,0 +1,19 @@
+func hasChange(d *schema.ResourceDiff) error {
+	for _, key := range []string{
+		"delete_object",
+		"put_object_hold",
+		"put_kms_key",
+		"manifest",
+		"prefix_list",
+		"put_metadata",
+	} {
+		if d.HasChange(key) && !d.HasChange("job_id") {
+			return fmt.Errorf("Error, any change in parameters, should update job_id")
+		}
+	}
+	return nil
+}
+
+func verifyJobIdChange(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return hasChange(diff)
+}
