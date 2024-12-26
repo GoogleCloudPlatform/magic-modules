@@ -93,6 +93,13 @@ examples:
       hub_name: "hub-basic"
       spoke_name: "vpc-spoke"
       producer_spoke_name: "producer-spoke"
+  - name: 'network_connectivity_spoke_center_group'
+    primary_resource_id: 'primary'
+    vars:
+      hub_name: "hub-basic"
+      spoke_name: "vpc-spoke"
+      auto_accept_project_1_name: "foo"
+      auto_accept_project_2_name: "bar"
 parameters:
   - name: 'location'
     type: String
@@ -256,13 +263,11 @@ properties:
       - name: 'excludeExportRanges'
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
       - name: 'includeExportRanges'
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
   - name: linkedProducerVpcNetwork
@@ -294,13 +299,11 @@ properties:
       - name: includeExportRanges
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
       - name: excludeExportRanges
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
   - name: 'uniqueId'

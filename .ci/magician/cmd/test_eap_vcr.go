@@ -36,6 +36,7 @@ var tevRequiredEnvironmentVariables = [...]string{
 }
 
 var tevOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
