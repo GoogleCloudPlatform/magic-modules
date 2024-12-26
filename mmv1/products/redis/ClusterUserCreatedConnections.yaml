@@ -26,7 +26,7 @@ self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints'
 create_verb: PATCH
 update_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?clusterEndpoints{{clusterEndpoints}}'
+update_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints'
 update_mask: true
 exclude_delete: true
 timeouts:
@@ -46,8 +46,18 @@ examples:
     primary_resource_id: 'cluster-user-conn'
     vars:
       cluster_name: 'cluster-user-conn'
-      subnet_name: 'mysubnet'
-      network_name: 'mynetwork'
+      network1_name: 'net1'
+      subnet_network1_name: 'subnet-net1'
+      ip1_network1_name: 'ip1-net1'
+      ip2_network1_name: 'ip2-net1'
+      forwarding_rule1_network1_name: 'fwd1-net1'
+      forwarding_rule2_network1_name: 'fwd2-net1'      
+      network2_name: 'network2'
+      subnet_network2_name: 'subnet-net2'
+      ip1_network2_name: 'ip1-net2'
+      ip2_network2_name: 'ip2-net2'
+      forwarding_rule1_network2_name: 'fwd1-net2'
+      forwarding_rule2_network2_name: 'fwd2-net2'  
 parameters:
   - name: 'name'
     type: String
