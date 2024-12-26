@@ -51,13 +51,13 @@ examples:
       ip1_network1_name: 'ip1-net1'
       ip2_network1_name: 'ip2-net1'
       forwarding_rule1_network1_name: 'fwd1-net1'
-      forwarding_rule2_network1_name: 'fwd2-net1'      
+      forwarding_rule2_network1_name: 'fwd2-net1'   
       network2_name: 'network2'
       subnet_network2_name: 'subnet-net2'
       ip1_network2_name: 'ip1-net2'
       ip2_network2_name: 'ip2-net2'
       forwarding_rule1_network2_name: 'fwd1-net2'
-      forwarding_rule2_network2_name: 'fwd2-net2'  
+      forwarding_rule2_network2_name: 'fwd2-net2'
 parameters:
   - name: 'name'
     type: String
@@ -73,7 +73,7 @@ properties:
     item_type:
       type: NestedObject
       description: |
-        ClusterEndpoint consists of PSC connections that are created 
+        ClusterEndpoint consists of PSC connections that are created
         as a group in each VPC network for accessing the cluster. In each group,
         there shall be one connection for each service attachment in the cluster.
       properties:

@@ -710,11 +710,10 @@ properties:
   - name: 'clusterEndpoints'
     type: Array
     description: "A list of cluster endpoints"
-    default_from_api: true
     item_type:
       type: NestedObject
       description: |
-        ClusterEndpoint consists of PSC connections that are created 
+        ClusterEndpoint consists of PSC connections that are created
         as a group in each VPC network for accessing the cluster. In each group,
         there shall be one connection for each service attachment in the cluster.
       properties:
@@ -785,6 +784,7 @@ properties:
                       - 'CONNECTION_TYPE_DISCOVERY'
               - name: 'pscConnection'
                 type: NestedObject
+                output: true
                 description: |
                   Detailed information of a PSC connection that is created by the customer
                   who owns the cluster.
