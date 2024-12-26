@@ -698,10 +698,12 @@ properties:
       properties:
         - name: 'serviceAttachment'
           type: String
+          output: true
           description: |
               Service attachment URI which your self-created PscConnection should use as
         - name: 'connectionType'
           type: Enum
+          output: true
           enum_values:
             - 'CONNECTION_TYPE_READER'
             - 'CONNECTION_TYPE_PRIMARY'
@@ -723,65 +725,6 @@ properties:
             type: NestedObject
             name: 'connections'
             properties:
-              - name: 'pscAutoConnection'
-                type: NestedObject
-                description: |
-                  Detailed information of a PSC connection that is created through
-                  service connectivity automation.
-                properties:
-                  - name: 'pscConnectionId'
-                    type: String
-                    description:
-                      "Output only. The PSC connection id of the forwarding rule connected
-                      to the\nservice attachment. "
-                    output: true
-                  - name: 'address'
-                    type: String
-                    description:
-                      "Output only. The IP allocated on the consumer network for the
-                      PSC forwarding rule. "
-                    output: true
-                  - name: 'forwardingRule'
-                    type: String
-                    description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
-                    output: true
-                  - name: 'projectId'
-                    type: String
-                    description:
-                      "The consumer project_id where the forwarding rule is
-                      created from. "
-                    required: true
-                  - name: 'network'
-                    type: String
-                    description:
-                      "The consumer network where the IP address resides, in
-                      the form of\nprojects/{project_id}/global/networks/{network_id}. "
-                    required: true
-                  - name: 'serviceAttachment'
-                    type: String
-                    description:
-                      "Output only. The service attachment which is the target of the PSC connection, in the form of
-                      projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
-                    output: true
-                  - name: 'pscConnectionStatus'
-                    type: Enum
-                    description:
-                      "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
-                      \n Possible values:\n ACTIVE \n NOT_FOUND"
-                    output: true
-                    enum_values:
-                      - 'ACTIVE'
-                      - 'NOT_FOUND'
-                  - name: 'connectionType'
-                    type: Enum
-                    description:
-                      "Output Only. Type of a PSC Connection.
-                      \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
-                    output: true
-                    enum_values:
-                      - 'CONNECTION_TYPE_READER'
-                      - 'CONNECTION_TYPE_PRIMARY'
-                      - 'CONNECTION_TYPE_DISCOVERY'
               - name: 'pscConnection'
                 type: NestedObject
                 output: true

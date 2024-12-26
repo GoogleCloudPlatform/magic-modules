@@ -7,6 +7,7 @@ resource "google_redis_cluster_user_created_connections" "{{$.PrimaryResourceId}
         address = google_compute_address.ip1_network1.address
         forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network1.id
         network = google_compute_network.network1.id
+        project_id = ${data.google_project.project.project_id}
         service_attachment = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
       }
     }
@@ -48,7 +49,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
   ip_address             = google_compute_address.ip1_network1.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network1.id
-  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment) 
+  target                 = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
@@ -57,7 +58,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
   ip_address             = google_compute_address.ip2_network1.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network1.id
-  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment) 
+  target                 = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment
 }
 
 resource "google_compute_address" "ip1_network1" {
@@ -94,7 +95,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
   ip_address             = google_compute_address.ip1_network2.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network2.id
-  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment) 
+  target                 = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[0].service_attachment
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
@@ -103,7 +104,7 @@ resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
   ip_address             = google_compute_address.ip2_network2.id
   load_balancing_scheme  = ""
   network                = google_compute_network.network2.id
-  target = format("%s/%s","https://www.googleapis.com/compute/v1",google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment) 
+  target                 = google_redis_cluster.{{$.PrimaryResourceId}}.psc_service_attachments[1].service_attachment
 }
 
 resource "google_compute_address" "ip1_network2" {
@@ -141,4 +142,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
   replica_count = 0
   deletion_protection_enabled = false
+}
+
+data "google_project" "project" {
 }
