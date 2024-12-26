@@ -1,7 +1,9 @@
 package diff
 
 import (
+	"maps"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
@@ -22,11 +24,23 @@ type ResourceFieldSetsDiff struct {
 	New ResourceFieldSets
 }
 
+type ResourceFieldSetsDiffWithKeys struct {
+	Old ResourceFieldSetsWithKeys
+	New ResourceFieldSetsWithKeys
+}
+
 type ResourceFieldSets struct {
 	ConflictsWith []FieldSet
 	ExactlyOneOf  []FieldSet
 	AtLeastOneOf  []FieldSet
 	RequiredWith  []FieldSet
+}
+
+type ResourceFieldSetsWithKeys struct {
+	ConflictsWith map[string]FieldSet
+	ExactlyOneOf  map[string]FieldSet
+	AtLeastOneOf  map[string]FieldSet
+	RequiredWith  map[string]FieldSet
 }
 
 type FieldSet map[string]struct{}
@@ -61,14 +75,16 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 		}
 
 		resourceDiff.Fields = make(map[string]FieldDiff)
+		fieldSetsDiffWithKeys := ResourceFieldSetsDiffWithKeys{}
 		for key := range union(flattenedOldSchema, flattenedNewSchema) {
 			oldField := flattenedOldSchema[key]
 			newField := flattenedNewSchema[key]
 			if fieldDiff, fieldSetsDiff, changed := diffFields(oldField, newField, key); changed {
 				resourceDiff.Fields[key] = fieldDiff
-				resourceDiff.FieldSets = mergeFieldSetsDiff(fieldSetsDiff, resourceDiff.FieldSets)
+				fieldSetsDiffWithKeys = mergeFieldSetsDiff(fieldSetsDiffWithKeys, fieldSetsDiff)
 			}
 		}
+		resourceDiff.FieldSets = removeFieldSetsDiffKeys(fieldSetsDiffWithKeys)
 		if len(resourceDiff.Fields) > 0 || !cmp.Equal(resourceDiff.ResourceConfig.Old, resourceDiff.ResourceConfig.New) {
 			schemaDiff[resource] = resourceDiff
 		}
@@ -270,35 +286,48 @@ func funcChanged(oldFunc, newFunc interface{}) bool {
 	return false
 }
 
-func mergeFieldSetsDiff(a, b ResourceFieldSetsDiff) ResourceFieldSetsDiff {
-	a.Old = mergeResourceFieldSets(a.Old, b.Old)
-	a.New = mergeResourceFieldSets(a.New, b.New)
-	return a
+func mergeFieldSetsDiff(allFields ResourceFieldSetsDiffWithKeys, currentField ResourceFieldSetsDiff) ResourceFieldSetsDiffWithKeys {
+	allFields.Old = mergeResourceFieldSets(allFields.Old, currentField.Old)
+	allFields.New = mergeResourceFieldSets(allFields.New, currentField.New)
+	return allFields
 }
 
-func mergeResourceFieldSets(a, b ResourceFieldSets) ResourceFieldSets {
-	a.ConflictsWith = mergeFieldSets(a.ConflictsWith, b.ConflictsWith)
-	a.ExactlyOneOf = mergeFieldSets(a.ExactlyOneOf, b.ExactlyOneOf)
-	a.AtLeastOneOf = mergeFieldSets(a.AtLeastOneOf, b.AtLeastOneOf)
-	a.RequiredWith = mergeFieldSets(a.RequiredWith, b.RequiredWith)
-	return a
+func mergeResourceFieldSets(allFields ResourceFieldSetsWithKeys, currentField ResourceFieldSets) ResourceFieldSetsWithKeys {
+	allFields.ConflictsWith = mergeFieldSets(allFields.ConflictsWith, currentField.ConflictsWith)
+	allFields.ExactlyOneOf = mergeFieldSets(allFields.ExactlyOneOf, currentField.ExactlyOneOf)
+	allFields.AtLeastOneOf = mergeFieldSets(allFields.AtLeastOneOf, currentField.AtLeastOneOf)
+	allFields.RequiredWith = mergeFieldSets(allFields.RequiredWith, currentField.RequiredWith)
+	return allFields
 }
 
-func mergeFieldSets(a, b []FieldSet) []FieldSet {
-	keys := make(map[string]struct{})
-	for _, set := range a {
-		slice := setToSortedSlice(set)
-		key := strings.Join(slice, ",")
-		keys[key] = struct{}{}
+func mergeFieldSets(allFields map[string]FieldSet, currentField []FieldSet) map[string]FieldSet {
+	for _, fieldSet := range currentField {
+		allFields[setKey(fieldSet)] = fieldSet
 	}
-	for _, set := range b {
-		slice := setToSortedSlice(set)
-		key := strings.Join(slice, ",")
-		if _, ok := keys[key]; ok {
-			continue
-		}
-		keys[key] = struct{}{}
-		a = append(a, set)
+	return allFields
+}
+
+func setKey(set FieldSet) string {
+	slice := setToSortedSlice(set)
+	return strings.Join(slice, ",")
+}
+
+func removeFieldSetsDiffKeys(fieldSets ResourceFieldSetsDiffWithKeys) ResourceFieldSetsDiff {
+	return ResourceFieldSetsDiff{
+		Old: removeFieldSetsKey(fieldSets.Old),
+		New: removeFieldSetsKey(fieldSets.New),
 	}
-	return a
+}
+
+func removeFieldSetsKey(fieldSets ResourceFieldSetsWithKeys) ResourceFieldSets {
+	return ResourceFieldSets{
+		ConflictsWith: removeFieldSetKey(fieldSets.ConflictsWith),
+		ExactlyOneOf:  removeFieldSetKey(fieldSets.ExactlyOneOf),
+		AtLeastOneOf:  removeFieldSetKey(fieldSets.AtLeastOneOf),
+		RequiredWith:  removeFieldSetKey(fieldSets.RequiredWith),
+	}
+}
+
+func removeFieldSetKey(fieldSets map[string]FieldSet) []FieldSet {
+	return slices.Collect(maps.Values(fieldSets))
 }
