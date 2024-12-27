@@ -58,7 +58,7 @@ examples:
       ip2_network2_name: 'ip2-net2'
       forwarding_rule1_network2_name: 'fwd1-net2'
       forwarding_rule2_network2_name: 'fwd2-net2'
-  - name: 'redis_cluster_user_and auto_created_connections'
+  - name: 'redis_cluster_user_and_auto_created_connections'
     primary_resource_id: 'cluster-user-auto-conn'
     vars:
       cluster_name: 'cluster-user-auto-conn'
