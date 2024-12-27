@@ -31,8 +31,7 @@ func CompareSelfLinkRelativePathsIgnoreProjectId(unused1, old, new string, unuse
 	if oldStripped == newStripped {
 		return true
 	}
-
-	return ProjectIDDiffSuppress("", oldStripped, newStripped, r)
+	return ProjectIDDiffSuppress(unused1, oldStripped, newStripped, unused2)
 }
 
 // Compare only the relative path of two self links.
