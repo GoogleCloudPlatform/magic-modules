@@ -131,5 +131,5 @@ resource "google_compute_snapshot" "foobar" {
 	kms_key_service_account = google_service_account.test.email
   }
 }
-`, diskName, kmsKeyName, kmsKeyName, diskName, snapshotName, kmsKeyName)
+`, diskName, kmsKeyName, diskName, kmsKeyName, snapshotName, kmsKeyName)
 }
