@@ -64,6 +64,7 @@ examples:
       cluster_name: 'cluster-user-auto-conn'
       network1_name: 'net1'
       subnet_network1_name: 'subnet-net1'
+      policy_name: 'scpolicy'
       network2_name: 'network2'
       subnet_network2_name: 'subnet-net2'
       ip1_network2_name: 'ip1-net2'
