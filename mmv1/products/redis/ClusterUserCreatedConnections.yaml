@@ -51,7 +51,7 @@ examples:
       ip1_network1_name: 'ip1-net1'
       ip2_network1_name: 'ip2-net1'
       forwarding_rule1_network1_name: 'fwd1-net1'
-      forwarding_rule2_network1_name: 'fwd2-net1' 
+      forwarding_rule2_network1_name: 'fwd2-net1'
       network2_name: 'network2'
       subnet_network2_name: 'subnet-net2'
       ip1_network2_name: 'ip1-net2'
