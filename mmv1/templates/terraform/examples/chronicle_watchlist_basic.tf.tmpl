@@ -1,0 +1,20 @@
+provider "google-beta" {
+ user_project_override = true
+}
+
+resource "google_chronicle_watchlist" "{{$.PrimaryResourceId}}" {
+ provider = "google-beta"
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ watchlist_id = "{{index $.Vars "name"}}"
+ description = "{{index $.Vars "description"}}"
+ display_name = "{{index $.Vars "name"}}"
+ entity_population_mechanism {
+  manual {
+
+  }
+ }
+ watchlist_user_preferences {
+  pinned = true
+ }
+}
