@@ -134,6 +134,7 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		CUST_ID:             "A01b123xz",
 		IDENTITY_USER:       "cloud_identity_user",
 		PAP_DESCRIPTION:     "description",
+		CHRONICLE_ID:        "00000000-0000-0000-0000-000000000000",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -297,4 +298,5 @@ type TestInput struct {
 	CUST_ID             string
 	IDENTITY_USER       string
 	PAP_DESCRIPTION     string
+	CHRONICLE_ID        string
 }
