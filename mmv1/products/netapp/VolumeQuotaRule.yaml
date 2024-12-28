@@ -1,0 +1,105 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'VolumeQuotaRule'
+api_resource_type_kind: QuotaRule
+description: |
+ <TO BE FILLED>
+references:
+  guides:
+    'Documentation': <TBD>
+  api: <TBD>
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules'
+self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules?QuotaRuleId={{name}}'
+update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+# Skipping the sweeper since we need to sweep multiple regions
+exclude_sweeper: true
+examples:
+  - name: 'netapp_volume_quotaRule_basic'
+    primary_resource_id: 'test_quotaRule'
+    vars:
+      volume_name: 'test-volume'
+      pool_name: 'test-pool'
+      network_name: 'test-network'
+      quotaRule_name: 'testvolumequotaRule'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      Loction of the quotaRule. QuotaRules are child resources of volumes and live in the same location.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'volume_name'
+    type: String
+    description: |
+      Name of the volume to create the quotaRule in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'name'
+    type: String
+    description:
+      The resource name of the quotaRule.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'target'
+    type: String
+    description: |
+      The quota rule applies to the specified user or group, identified by a Unix UID/GID, Windows SID, or null for default.
+  - name: 'state'
+    type: String
+    description: |
+      The state of the quota rule. Possible Values : [STATE_UNSPECIFIED, CREATING, UPDATING, READY, DELETING, ERROR]
+    output: true
+  - name: 'stateDetails'
+    type: String
+    description: |
+      State details of the quota rule
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      Create time of the quota rule. A timestamp in RFC3339 UTC "Zulu" format. Examples: "2023-06-22T09:13:01.617Z".
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Description for the quota rule.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Labels as key value pairs of the quota rule. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
