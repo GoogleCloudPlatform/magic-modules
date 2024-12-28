@@ -71,7 +71,7 @@ resource "google_netapp_volume_quota_rule" "test_quotaRule" {
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
   description = "This is a test description"
-  type = 'DEFAULT_USER_QUOTA'
+  type = "DEFAULT_USER_QUOTA"
   disk_limit_mib = 50
   target = "user1"
   labels = {
@@ -111,7 +111,7 @@ resource "google_netapp_volume_quota_rule" "test_quotaRule" {
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
   description = "This is a updated description"
-  type = 'DEFAULT_USER_QUOTA'
+  type = "DEFAULT_USER_QUOTA"
   disk_limit_mib = 50
   target = "user1"
   labels = {

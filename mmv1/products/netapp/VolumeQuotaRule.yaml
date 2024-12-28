@@ -23,7 +23,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules'
 self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules?QuotaRuleId={{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules?quotaRuleId={{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
