@@ -80,6 +80,22 @@ properties:
     type: String
     description: |
       The quota rule applies to the specified user or group, identified by a Unix UID/GID, Windows SID, or null for default.
+  - name: 'type'
+    type: Enum
+    description: |
+      Types of Quota Rule.
+    required: true
+    enum_values:
+      - 'INDIVIDUAL_USER_QUOTA'
+      - 'INDIVIDUAL_GROUP_QUOTA'
+      - 'DEFAULT_USER_QUOTA'
+      - 'DEFAULT_GROUP_QUOTA'
+    required: true
+  - name: 'diskLimitMib'
+    type: String
+    description:
+      The maximum allowed disk space in MiB.
+    required: true
   - name: 'state'
     type: String
     description: |

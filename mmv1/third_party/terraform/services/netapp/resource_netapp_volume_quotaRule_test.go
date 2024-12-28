@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(t *testing.T) {
+func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -25,7 +25,7 @@ func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(t *testing.T
 		CheckDestroy:             testAccCheckNetappVolumeQuotaRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(context),
+				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_quota_rule.test_quotaRule",
@@ -34,7 +34,7 @@ func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(t *testing.T
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
 			},
 			{
-				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample_update(context),
+				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_quota_rule.test_quotaRule",
@@ -46,7 +46,7 @@ func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(t *testing.T
 	})
 }
 
-func testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample(context map[string]interface{}) string {
+func testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-test-pool%{random_suffix}"
@@ -71,6 +71,9 @@ resource "google_netapp_volume_quota_rule" "test_quotaRule" {
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
   description = "This is a test description"
+  type = 'DEFAULT_USER_QUOTA'
+  disk_limit_mib = 50
+  target = "user1"
   labels = {
 	key= "test"
 	value= "quota_rule"
@@ -83,7 +86,7 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-func testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample_update(context map[string]interface{}) string {
+func testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-test-pool%{random_suffix}"
@@ -108,6 +111,9 @@ resource "google_netapp_volume_quota_rule" "test_quotaRule" {
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
   description = "This is a updated description"
+  type = 'DEFAULT_USER_QUOTA'
+  disk_limit_mib = 50
+  target = "user1"
   labels = {
 	key= "test"
 	value= "quota_rule_update"
