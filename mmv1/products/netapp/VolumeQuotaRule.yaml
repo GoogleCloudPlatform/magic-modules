@@ -90,7 +90,6 @@ properties:
       - 'INDIVIDUAL_GROUP_QUOTA'
       - 'DEFAULT_USER_QUOTA'
       - 'DEFAULT_GROUP_QUOTA'
-    required: true
   - name: 'diskLimitMib'
     type: String
     description:
