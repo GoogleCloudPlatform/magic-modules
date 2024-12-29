@@ -41,13 +41,13 @@ examples:
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
     immutable: true
     url_param_only: true
     required: true
   - name: instance
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
     immutable: true
     url_param_only: true
     required: true
@@ -76,11 +76,14 @@ properties:
   - name: udmQuery
     type: String
     description: A UDM query over event data.
+    required: true
   - name: name
     type: String
-    description: Required. The unique resource name of the data access label.
-    required: true
-    default_from_api: true
+    description: |-
+      The unique resource name of the data access label. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/dataAccessLabels/{data_access_label_id}
+    output: true
   - name: displayName
     type: String
     description: Output only. The short name displayed for the label as it appears on event data.

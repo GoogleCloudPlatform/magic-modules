@@ -1,12 +1,8 @@
-provider "google-beta" {
- user_project_override = true
-}
-
 resource "google_chronicle_data_access_label" "{{$.PrimaryResourceId}}" {
- provider = "google-beta"
- location = "us" 
- instance = "{{index $.TestEnvVars "chronicle_id"}}"
- data_access_label_id = "{{index $.Vars "name"}}"
- udm_query = "principal.hostname=\"google.com\""
- description = "{{index $.Vars "description"}}"
+  provider = "google-beta"
+  location = "us" 
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_label_id = "{{index $.Vars "name"}}"
+  udm_query = "principal.hostname=\"google.com\""
+  description = "{{index $.Vars "description"}}"
 }

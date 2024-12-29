@@ -49,34 +49,26 @@ func TestAccChronicleDataAccessLabel_chronicleDataaccesslabelBasicExample_update
 
 func testAccChronicleDataAccessLabel_chronicleDataaccesslabelBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
- user_project_override = true
-}
-
 resource "google_chronicle_data_access_label" "example" {
- provider = "google-beta"
- location = "us" 
- instance = "%{chronicle_id}"
- data_access_label_id = "tf-test-label-name%{random_suffix}"
- udm_query = "principal.hostname=\"google.com\""
- description = "tf-test-label-description%{random_suffix}"
+  provider = "google-beta"
+  location = "us" 
+  instance = "%{chronicle_id}"
+  data_access_label_id = "tf-test-label-name%{random_suffix}"
+  udm_query = "principal.hostname=\"google.com\""
+  description = "tf-test-label-description%{random_suffix}"
 }
 `, context)
 }
 
 func testAccChronicleDataAccessLabel_chronicleDataaccesslabelBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
- user_project_override = true
-}
-
 resource "google_chronicle_data_access_label" "example" {
- provider = "google-beta"
- location = "us" 
- instance = "%{chronicle_id}"
- data_access_label_id = "tf-test-label-name%{random_suffix}"
- udm_query = "principal.hostname=\"google-updated.com\""
- description = "tf-test-label-updated-description%{random_suffix}"
+  provider = "google-beta"
+  location = "us" 
+  instance = "%{chronicle_id}"
+  data_access_label_id = "tf-test-label-name%{random_suffix}"
+  udm_query = "principal.hostname=\"google-updated.com\""
+  description = "tf-test-label-updated-description%{random_suffix}"
 }
 `, context)
 }
