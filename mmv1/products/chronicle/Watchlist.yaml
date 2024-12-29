@@ -65,7 +65,7 @@ properties:
   - name: name
     type: String
     description: |-
-      Identifier. Resource name of the watchlist.
+      Identifier. Resource name of the watchlist. This unique identifier is generated using values provided for the URL parameters.
       Format:
       projects/{project}/locations/{location}/instances/{instance}/watchlists/{watchlist}
     output: true
