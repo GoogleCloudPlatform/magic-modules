@@ -144,7 +144,7 @@ var ServicesListGa = mapOf(
     "chronicle" to mapOf(
         "name" to "chronicle",
         "displayName" to "Chronicle",
-        "path" to "./google-beta/services/chronicle"
+        "path" to "./google/services/chronicle"
     ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",

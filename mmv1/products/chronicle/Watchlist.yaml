@@ -41,13 +41,13 @@ examples:
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
     immutable: true
     url_param_only: true
     required: true
   - name: instance
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
     immutable: true
     url_param_only: true
     required: true
@@ -68,7 +68,7 @@ properties:
       Identifier. Resource name of the watchlist.
       Format:
       projects/{project}/locations/{location}/instances/{instance}/watchlists/{watchlist}
-    default_from_api: true
+    output: true
   - name: multiplyingFactor
     type: Double
     description: |-
@@ -101,6 +101,7 @@ properties:
       - name: manual
         type: NestedObject
         description: Entities are added manually.
+        default_from_api: true
         allow_empty_object: true
         send_empty_value: true
         properties:
@@ -121,6 +122,7 @@ properties:
   - name: watchlistUserPreferences
     type: NestedObject
     description: A collection of user preferences for watchlist UI configuration.
+    default_from_api: true
     properties:
       - name: pinned
         type: Boolean
