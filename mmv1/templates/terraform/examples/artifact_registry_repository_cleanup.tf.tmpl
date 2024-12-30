@@ -10,7 +10,7 @@ resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
     condition {
       tag_state    = "TAGGED"
       tag_prefixes = ["alpha", "v0"]
-      older_than   = "2592000s"
+      older_than   = "30d"
     }
   }
   cleanup_policies {

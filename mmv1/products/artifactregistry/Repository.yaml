@@ -416,11 +416,13 @@ properties:
               type: String
               description: |-
                 Match versions older than a duration.
+              custom_flatten: 'templates/terraform/custom_flatten/duration_string_to_seconds.go.tmpl'
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
             - name: 'newerThan'
               type: String
               description: |-
                 Match versions newer than a duration.
+              custom_flatten: 'templates/terraform/custom_flatten/duration_string_to_seconds.go.tmpl'
               diff_suppress_func: 'tpgresource.DurationDiffSuppress'
         - name: 'mostRecentVersions'
           type: NestedObject
