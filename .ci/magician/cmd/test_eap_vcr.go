@@ -36,6 +36,7 @@ var tevRequiredEnvironmentVariables = [...]string{
 }
 
 var tevOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
@@ -104,9 +105,9 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		return fmt.Errorf("error changing to gen path: %w", err)
 	}
 
-	changedFiles, err := rnr.Run("git", []string{"diff", "--name-only"}, nil)
+	changedFiles, err := rnr.ReadFile("diff.log")
 	if err != nil {
-		return fmt.Errorf("error diffing gen path: %w", err)
+		return fmt.Errorf("error reading diff log: %w", err)
 	}
 
 	services, runFullVCR := modifiedPackages(strings.Split(changedFiles, "\n"), provider.Private)

@@ -262,6 +262,7 @@ func TestAccComputeNetwork_numericId(t *testing.T) {
 			{
 				Config: testAccComputeNetwork_basic(networkName),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("google_compute_network.bar", "network_id",regexp.MustCompile("^\\d{16,48}$")),
 					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("^\\d{16,48}$")),
 					resource.TestCheckResourceAttr("google_compute_network.bar", "id", networkId),
 				),
@@ -335,7 +336,7 @@ func TestAccComputeNetwork_default_bgp_always_compare_med(t *testing.T) {
 
    var network compute.Network
    suffixName := acctest.RandString(t, 10)
-   networkName := fmt.Sprintf("tf-test-bgp-always-comapre-med-default-routes-%s", suffixName)
+   networkName := fmt.Sprintf("tf-test-bgp-always-compare-med-default-routes-%s", suffixName)
 
    expectedBgpAlwaysCompareMed := false
 
@@ -768,7 +769,7 @@ resource "google_compute_network" "acc_network_bgp_best_path_selection_mode" {
 `, networkName, bgpBestPathSelection)
 }
 
-func testAccComputeNetwork_bgp_always_compare_med(networkName string, bgpAlwaysComapreMed bool) string {
+func testAccComputeNetwork_bgp_always_compare_med(networkName string, bgpAlwaysCompareMed bool) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_bgp_always_compare_med" {
  provider     = google-beta
@@ -777,7 +778,7 @@ resource "google_compute_network" "acc_network_bgp_always_compare_med" {
  bgp_best_path_selection_mode = "STANDARD"
  bgp_always_compare_med = %t
 }
-`, networkName, bgpAlwaysComapreMed)
+`, networkName, bgpAlwaysCompareMed)
 }
 
 func testAccComputeNetwork_bgp_inter_region_cost(networkName, bgpInterRegionCost string) string {

@@ -94,13 +94,6 @@ properties:
           description: |
             Description of the ServicePerimeter and its use. Does not affect
             behavior.
-        - name: 'etag'
-          type: Fingerprint
-          description: |
-            An opaque identifier for the current version of the ServicePerimeter. This
-            identifier does not follow any specific format. If an etag is not provided, the
-            operation will be performed as if a valid etag is provided.
-          output: true
         - name: 'createTime'
           type: Time
           description: |
