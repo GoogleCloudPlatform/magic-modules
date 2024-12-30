@@ -1,0 +1,19 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+    "^(?P<bucket>[^/]+)/folders/(?P<name>.+)$",
+    "^(?P<bucket>[^/]+)/(?P<name>.+)$",
+}, d, config); err != nil {
+    return nil, err
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}bucket{{"}}"}}/{{"{{"}}name{{"}}"}}")
+if err != nil {
+    return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+if err := d.Set("force_destroy", false); err != nil {
+    return nil, fmt.Errorf("Error setting force_destroy: %s", err)
+}
+
+return []*schema.ResourceData{d}, nil

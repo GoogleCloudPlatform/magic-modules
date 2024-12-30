@@ -39,13 +39,24 @@ async:
     resource_inside_response: true
 custom_code:
 examples:
-  - name: 'developer_connect_connection_basic'
+  - name: 'developer_connect_connection_new'
     primary_resource_id: 'my-connection'
-    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection-new%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
-      connection_name: 'tf-test-connection'
-  - name: 'developer_connect_connection_github_doc'
+      connection_name: 'tf-test-connection-new'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'developer_connect_connection_existing_credentials'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection-cred%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      connection_name: 'tf-test-connection-cred'
+      secret_name: "projects/your-project/secrets/your-secret-id/versions/latest"
+    test_vars_overrides:
+      secret_name: '"projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"'
+  - name: 'developer_connect_connection_existing_installation'
     min_version: 'beta'
     exclude_test: true
 parameters:
@@ -93,6 +104,7 @@ properties:
           Represents an OAuth token of the account that authorized the Connection,and
           associated metadata.
         min_version: 'beta'
+        default_from_api: true
         properties:
           - name: 'oauthTokenSecretVersion'
             type: String
@@ -113,6 +125,7 @@ properties:
         description: |
           Optional. GitHub App installation id.
         min_version: 'beta'
+        default_from_api: true
       - name: 'installationUri'
         type: String
         description: |
