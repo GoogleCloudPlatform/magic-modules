@@ -19,4 +19,5 @@ resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
       uri         = "https://us-central1-docker.pkg.dev/${data.google_project.project.project_id}/{{index $.Vars "upstream_repository_id"}}"
     }
   }
+  depends_on = [google_artifact_registry_repository.upstream_repo]
 }
