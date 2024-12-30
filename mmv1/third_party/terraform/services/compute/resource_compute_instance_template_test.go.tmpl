@@ -4860,7 +4860,7 @@ resource "google_compute_snapshot" "snapshot" {
   zone        = "us-central1-a"
 
   snapshot_encryption_key {
-	  rsa_encrypted_key = "%{rsa_key}"
+	  rsa_encrypted_key = "%{rsa_encrypted_key}"
   }
 
   source_disk_encryption_key {
@@ -4875,7 +4875,7 @@ resource "google_compute_instance_template" "template" {
   disk {
 	source_snapshot = google_compute_snapshot.snapshot.self_link
 	source_snapshot_encryption_key {
-		rsa_encrypted_key = "%{rsa_key}"
+		rsa_encrypted_key = "%{rsa_encrypted_key}"
 	}
 	auto_delete = true
 	boot        = true
