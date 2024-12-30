@@ -1,4 +1,5 @@
 package parametermanagerregional_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -147,3 +148,5 @@ resource "google_parameter_manager_regional_parameter" "regional-parameter-with-
 }
 `, context)
 }
+
+{{ end }}
