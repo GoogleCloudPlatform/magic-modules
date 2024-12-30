@@ -15,8 +15,6 @@
 name: 'ParameterManager'
 display_name: 'Parameter Manager'
 versions:
-  - name: 'ga'
-    base_url: 'https://parametermanager.googleapis.com/v1/'
   - name: 'beta'
     base_url: 'https://parametermanager.googleapis.com/v1/'
 scopes:

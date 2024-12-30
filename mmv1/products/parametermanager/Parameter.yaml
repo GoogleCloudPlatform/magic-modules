@@ -15,6 +15,7 @@
 name: 'Parameter'
 description: |
   A Parameter resource is a logical parameter.
+min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
@@ -33,14 +34,17 @@ timeouts:
 examples:
   - name: 'parameter_config_basic'
     primary_resource_id: 'parameter-basic'
+    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
   - name: 'parameter_with_format'
     primary_resource_id: 'parameter-with-format'
+    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
   - name: 'parameter_with_labels'
     primary_resource_id: 'parameter-with-labels'
+    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
 parameters:
@@ -48,6 +52,7 @@ parameters:
     type: String
     description: |
       This must be unique within the project.
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -57,21 +62,25 @@ properties:
     description: |
       The resource name of the Parameter. Format:
       `projects/{{project}}/locations/global/parameters/{{parameter_id}}`
+    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       The time at which the Parameter was created.
+    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       The time at which the Parameter was updated.
+    min_version: 'beta'
     output: true
   - name: 'policyMember'
     type: NestedObject
     description: |
       Policy member strings of a Google Cloud resource.
+    min_version: 'beta'
     output: true
     properties:
       - name: 'iamPolicyUidPrincipal'
@@ -81,6 +90,7 @@ properties:
           If a resource is deleted and recreated with the same name, the binding will not be applicable to the
           new resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/global/parameters/{{uid}}`
+        min_version: 'beta'
         output: true
       - name: 'iamPolicyNamePrincipal'
         type: String
@@ -89,6 +99,7 @@ properties:
           resource is deleted and recreated with the same name, the binding will be applicable to the
           new resource. Format:
           `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/global/parameters/{{parameter_id}}`
+        min_version: 'beta'
         output: true
   - name: 'labels'
     type: KeyValueLabels
@@ -105,10 +116,12 @@ properties:
 
       An object containing a list of "key": value pairs. Example:
       { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    min_version: 'beta'
   - name: 'format'
     type: Enum
     description: |
       The format type of the parameter resource. Default value is UNFORMATTED.
+    min_version: 'beta'
     default_from_api: true
     immutable: true
     enum_values:
