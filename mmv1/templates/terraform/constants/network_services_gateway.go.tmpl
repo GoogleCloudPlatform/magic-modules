@@ -133,7 +133,7 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 
 	err = tpgcompute.ComputeOperationWaitTime(
 		config, res, billingProject, "Deleting autogen router", userAgent,
-		d.Timeout(schema.TimeoutCreate))
+		d.Timeout(schema.TimeoutDelete))
 
 	return nil
 }
