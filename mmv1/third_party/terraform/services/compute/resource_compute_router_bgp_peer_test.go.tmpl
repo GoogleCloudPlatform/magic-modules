@@ -1,7 +1,7 @@
 package compute_test
+
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -24,10 +24,9 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerKeepRouter(routerName),
@@ -53,10 +52,9 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerAdvertiseModeUpdate(routerName),
@@ -64,10 +62,9 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -88,10 +85,9 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerEnable(routerName, false),
@@ -99,10 +95,9 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerEnable(routerName, true),
@@ -110,10 +105,9 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -134,10 +128,9 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerBfd(routerName, "DISABLED"),
@@ -145,10 +138,9 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerBasic(routerName),
@@ -156,10 +148,9 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -180,10 +171,9 @@ func TestAccComputeRouterPeer_routerApplianceInstance(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:            "google_compute_router_peer.foobar",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      "google_compute_router_peer.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -208,19 +198,18 @@ func TestAccComputeRouterPeer_Ipv6Basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
 func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
+  routerName := fmt.Sprintf("tf-test-router-%s", acctest.RandString(t, 10))
 	resourceName := "google_compute_router_peer.foobar"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -236,10 +225,9 @@ func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeRouterPeerUpdateIpv4Address(routerName),
@@ -247,15 +235,14 @@ func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
 					testAccCheckComputeRouterPeerExists(
 						t, resourceName),
 					resource.TestCheckResourceAttr(resourceName, "enable_ipv4", "true"),
-					resource.TestCheckResourceAttr(resourceName, "ipv4_nexthop_address", "169.254.1.2"),
-					resource.TestCheckResourceAttr(resourceName, "peer_ipv4_nexthop_address", "169.254.1.1"),
+          resource.TestCheckResourceAttr(resourceName, "ipv4_nexthop_address", "169.254.1.2"),
+          resource.TestCheckResourceAttr(resourceName, "peer_ipv4_nexthop_address", "169.254.1.1"),
 				),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -275,9 +262,6 @@ func TestAccComputeRouterPeer_UpdateRouterCustomLearnedRoutePriority(t *testing.
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "custom_learned_route_priority", "100"), // Check for one element in the list
 				),
-			}, {
-				Config:      testAccComputeRouterPeerCustomLearnedRoutePriority(routerName, 0, false),
-				ExpectError: regexp.MustCompile(`Error: Invalid custom_learned_route_priority value: When zero_custom_learned_route_priority is set to 'false', the custom_learned_route_priority field cannot be 0. Please provide a non-zero value.`), // Expect the specific error message
 			}, {
 				Config: testAccComputeRouterPeerCustomLearnedRoutePriority(routerName, 0, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -1041,7 +1025,7 @@ func testAccComputeRouterPeerWithMd5AuthKeyUpdate(routerName string) string {
 		routerName, routerName)
 }
 
-func testAccComputeRouterPeerCustomLearnedRoutePriority(routerName string, customLearnedRoutePriority int, zeroCustomLearnedRoutePriroity bool) string {
+func testAccComputeRouterPeerCustomLearnedRoutePriority(routerName string, customLearnedRoutePriority int, forcedCustomLearnedRoutePriroity bool) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "network" {
   name                    = "%s-net"
@@ -1071,9 +1055,9 @@ resource "google_compute_router_peer" "peer" {
   interface                 = "interface-1"
   peer_asn                  = 65513
   custom_learned_route_priority = %d
-  zero_custom_learned_route_priority = %t
+  forced_zero_custom_learned_route_priority = %t
 }
-  `, routerName, routerName, routerName, routerName, customLearnedRoutePriority, zeroCustomLearnedRoutePriroity)
+  `, routerName, routerName, routerName, routerName, customLearnedRoutePriority, forcedCustomLearnedRoutePriroity)
 
 }
 
