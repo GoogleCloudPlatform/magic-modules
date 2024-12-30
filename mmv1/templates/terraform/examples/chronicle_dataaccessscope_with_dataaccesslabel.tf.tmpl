@@ -1,7 +1,3 @@
-provider "google-beta" {
-  user_project_override = true
-}
-
 resource "google_chronicle_data_access_label" "custom_data_access_label" {
   provider = "google-beta"
   location = "us"
@@ -17,9 +13,6 @@ resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
   data_access_scope_id = "{{index $.Vars "name"}}"
   description = "{{index $.Vars "description"}}"
   allowed_data_access_labels {
-      log_type = "GCP_CLOUDAUDIT"
-  }
-  allowed_data_access_labels {
-      data_access_label = resource.google_chronicle_data_access_label.custom_data_access_label.data_access_label_id
+    data_access_label = resource.google_chronicle_data_access_label.custom_data_access_label.data_access_label_id
   }
 }

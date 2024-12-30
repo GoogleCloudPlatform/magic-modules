@@ -1,7 +1,3 @@
-provider "google-beta" {
-  user_project_override = true
-}
-
 resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
   provider = "google-beta"
   location = "us"
@@ -9,9 +5,9 @@ resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
   data_access_scope_id = "{{index $.Vars "name"}}"
   description = "{{index $.Vars "description"}}"
   allowed_data_access_labels {
-      log_type = "GCP_CLOUDAUDIT"
+    log_type = "GCP_CLOUDAUDIT"
   }
   allowed_data_access_labels {
-      log_type = "GITHUB"
+    log_type = "GITHUB"
   }
 }

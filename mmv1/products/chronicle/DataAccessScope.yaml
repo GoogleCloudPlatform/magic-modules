@@ -76,13 +76,13 @@ examples:
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
     immutable: true
     url_param_only: true
     required: true
   - name: instance
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
     immutable: true
     url_param_only: true
     required: true
@@ -174,14 +174,14 @@ properties:
   - name: name
     type: String
     description: |-
-      Required. The unique full name of the data access scope.
-      The name should comply with https://google.aip.dev/122 standards.
-    required: true
-    default_from_api: true
+      The unique full name of the data access scope. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{data_access_scope_id}
+    output: true
   - name: allowedDataAccessLabels
     type: Array
     description: |-
-      Required. The allowed labels for the scope. There has to be at
+      The allowed labels for the scope. There has to be at
       least one label allowed for the scope to be valid.
       The logical operator for evaluation of the allowed labels is OR.
       Either allow_all or allowed_data_access_labels needs to be provided.
