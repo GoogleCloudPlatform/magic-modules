@@ -1,4 +1,5 @@
 package parametermanager_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -78,3 +79,5 @@ resource "google_parameter_manager_parameter_version" "parameter-version-update"
 }
 `, context)
 }
+
+{{ end }}
