@@ -21,13 +21,10 @@ references:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'
   api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations'
 
-id_format: 'projects/{{project}}/locations/{{region}}/config'
 base_url: 'projects/{{project}}/locations/{{region}}/config'
-create_url: 'projects/{{project}}/locations/{{region}}/config'
-create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{region}}/config'
-update_verb: 'PATCH'
 self_link: 'projects/{{project}}/locations/{{region}}/config'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{region}}/config'
@@ -54,13 +51,6 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: 'name'
-    type: String
-    min_version: beta
-    description: The config's name.
-    immutable: true
-    required: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'defaultKmsKeyName'
     type: String
     min_version: beta
