@@ -16,6 +16,7 @@ name: 'RegionalParameterVersion'
 api_resource_type_kind: ParameterVersion
 description: |
   A Regional Parameter Version resource that stores the actual value of the regional parameter.
+min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
@@ -34,11 +35,13 @@ timeouts:
 examples:
   - name: 'regional_parameter_version_basic'
     primary_resource_id: 'regional-parameter-version-basic'
+    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
   - name: 'regional_parameter_version_with_json_format'
     primary_resource_id: 'regional-parameter-version-with-json-format'
+    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
@@ -47,6 +50,7 @@ examples:
       'data': '"./test-fixtures/parameter_data_json_format.json"'
   - name: 'regional_parameter_version_with_yaml_format'
     primary_resource_id: 'regional-parameter-version-with-yaml-format'
+    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
@@ -61,6 +65,7 @@ parameters:
     type: ResourceRef
     description: |
       Parameter Manager Regional Parameter resource.
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -70,6 +75,7 @@ parameters:
     type: String
     description: |
       Version ID of the Regional Parameter Version Resource. This must be unique within the Regional Parameter.
+    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -77,6 +83,7 @@ parameters:
     type: String
     description: |
       Location of Parameter Manager Regional parameter resource.
+    min_version: 'beta'
     url_param_only: true
     output: true
 properties:
@@ -85,25 +92,30 @@ properties:
     description: |
       The resource name of the Regional Parameter Version. Format:
       `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
+    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       The time at which the Regional Parameter Version was created.
+    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       The time at which the Regional Parameter Version was updated.
+    min_version: 'beta'
     output: true
   - name: 'disabled'
     type: Boolean
     description: |
       The current state of Regional Parameter Version. This field is only applicable for updating Regional Parameter Version.
+    min_version: 'beta'
   - name: 'payload'
     type: NestedObject
     description: |
       The parameter payload of the RegionalParameterVersion.
+    min_version: 'beta'
     flatten_object: true
     required: true
     immutable: true
@@ -113,6 +125,7 @@ properties:
         type: String
         description: |
           The Regional Parameter data.
+        min_version: 'beta'
         api_name: data
         required: true
         immutable: true
