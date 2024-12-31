@@ -19,7 +19,7 @@ base_url: 'projects/{{project}}/locations/{{location}}/jobs'
 self_link: 'projects/{{project}}/locations/{{location}}/jobs/{{job_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/jobs?jobId={{job_id}}'
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/jobs/{{jobId}}'
+  - 'projects/{{project}}/locations/{{location}}/jobs/{{job_id}}'
 timeouts:
   insert_minutes: 120
   update_minutes: 120
@@ -67,7 +67,9 @@ parameters:
     type: String
     description: 'The ID of the job.'
     url_param_only: true
-    immutable: true  
+    immutable: true
+    validation:
+      regex: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$'
 properties:
   - name: 'location'
     type: String
@@ -83,15 +85,25 @@ properties:
       - 'prefix_list'
       - 'manifest'
     properties:
-      - name: 'bucketName'
-        type: string
-        required: true
-        immutable: true
-        description: 'bucket on which operations performed'
-      - name: 'objectPrefix'
-        type: string
-        immutable: true
-        description: 'object prefix allows to specify a prefix as the scope for batch operations'
+    - name: 'prefixes'
+      type: Array
+      min_size: 1
+      max_size: 1
+      description: contains object_prefix and bucket
+      immutable: true
+      item_type:
+        type: NestedObject
+        properties:
+        - name: 'bucket'
+          type: string
+          required: true
+          immutable: true
+          description: 'bucket on which operations performed'
+        - name: 'objectPrefix'
+          type: string
+          immutable: true
+          required: false
+          description: 'object prefix allows to specify a prefix as the scope for batch operations'
   - name: 'manifest'
     type: NestedObject
     immutable: true

@@ -6,9 +6,10 @@ func hasChange(d *schema.ResourceDiff) error {
 		"manifest",
 		"prefix_list",
 		"put_metadata",
+		"location",
 	} {
 		if d.HasChange(key) && !d.HasChange("job_id") {
-			return fmt.Errorf("Error, any change in parameters, should update job_id")
+			return fmt.Errorf("Error, job_id should be updated, if any change in parameters)
 		}
 	}
 	return nil
