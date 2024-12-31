@@ -1,4 +1,5 @@
 package parametermanagerregional
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -22,7 +23,7 @@ func DataSourceParameterManagerRegionalRegionalParameter() *schema.Resource {
 }
 
 func dataSourceParameterManagerRegionalRegionalParameterRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}")
+	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/parameters/{{"{{"}}parameter_id{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -41,3 +42,5 @@ func dataSourceParameterManagerRegionalRegionalParameterRead(d *schema.ResourceD
 	}
 	return nil
 }
+
+{{ end }}
