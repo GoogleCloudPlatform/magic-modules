@@ -253,7 +253,7 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:      true,
 							ConflictsWith: []string{"boot_disk.0.kms_key_self_link", "boot_disk.0.disk_encryption_key_rsa"},
 							Sensitive:     true,
-							Description:   `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
+							Description:   `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link, disk_encryption_key_raw and disk_encryption_key_rsa may be set.`,
 						},
 
 						"disk_encryption_key_rsa": {
@@ -263,7 +263,7 @@ func ResourceComputeInstance() *schema.Resource {
 							ForceNew:      true,
 							ConflictsWith: []string{"boot_disk.0.kms_key_self_link", "boot_disk.0.disk_encryption_key_raw"},
 							Sensitive:     true,
-							Description:   `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link and disk_encryption_key_rsa may be set.`,
+							Description:   `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link, disk_encryption_key_raw and disk_encryption_key_rsa may be set.`,
 						},
 
 						"disk_encryption_key_sha256": {
@@ -295,7 +295,7 @@ func ResourceComputeInstance() *schema.Resource {
 							ConflictsWith:    []string{"boot_disk.0.disk_encryption_key_raw", "boot_disk.0.disk_encryption_key_rsa"},
 							DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 							Computed:         true,
-							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
+							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link, disk_encryption_key_raw and disk_encryption_key_rsa may be set.`,
 						},
 
 						"guest_os_features": {
@@ -356,6 +356,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										MaxItems: 1,
 										ConflictsWith: []string{"boot_disk.0.initialize_params.0.snapshot", "boot_disk.0.initialize_params.0.source_snapshot_encryption_key"},
+										Description: `The encryption key used to decrypt the source image.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"raw_key": {
@@ -364,7 +365,7 @@ func ResourceComputeInstance() *schema.Resource {
 													ForceNew:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
 													Sensitive:        true,
-													Description:      `The raw representation of the encryption key as a base64 encoded string.`,
+													Description:      `Specifies a 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to either encrypt or decrypt this resource. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"rsa_encrypted_key": {
@@ -373,7 +374,7 @@ func ResourceComputeInstance() *schema.Resource {
 													ForceNew:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
 													Sensitive:        true,
-													Description:      `The RSA encrypted representation of the encryption key, as a base64 encoded string.`,
+													Description:      `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"kms_key_self_link": {
@@ -383,14 +384,14 @@ func ResourceComputeInstance() *schema.Resource {
 													Computed:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key"},
 													DiffSuppressFunc: KmsKeyNameDiffSuppress,
-													Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
+													Description:      `The self link of the encryption key that is stored in Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"kms_key_service_account": {
 													Type:             schema.TypeString,
 													Optional:         true,
 													ForceNew:         true,
-													Description:      `The service account used to manage the KMS key for the disk.`,
+													Description:      `The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.`,
 												},
 
 												"sha256": {
@@ -419,6 +420,7 @@ func ResourceComputeInstance() *schema.Resource {
 										AtLeastOneOf: initializeParamsKeys,
 										MaxItems: 1,
 										ConflictsWith: []string{"boot_disk.0.initialize_params.0.image", "boot_disk.0.initialize_params.0.source_image_encryption_key"},
+										Description: `The encryption key used to decrypt the source snapshot.`,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"raw_key": {
@@ -427,7 +429,7 @@ func ResourceComputeInstance() *schema.Resource {
 													ForceNew:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
 													Sensitive:        true,
-													Description:      `The raw representation of the encryption key as a base64 encoded string.`,
+													Description:      `Specifies a 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to either encrypt or decrypt this resource. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"rsa_encrypted_key": {
@@ -436,7 +438,7 @@ func ResourceComputeInstance() *schema.Resource {
 													ForceNew:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.kms_key_self_link"},
 													Sensitive:        true,
-													Description:      `The RSA encrypted representation of the encryption key, as a base64 encoded string.`,
+													Description:      `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"kms_key_self_link": {
@@ -446,14 +448,14 @@ func ResourceComputeInstance() *schema.Resource {
 													Computed:         true,
 													ConflictsWith:    []string{"boot_disk.0.initialize_params.0.source_image_encryption_key.0.raw_key","boot_disk.0.initialize_params.0.source_image_encryption_key.0.rsa_encrypted_key"},
 													DiffSuppressFunc: KmsKeyNameDiffSuppress,
-													Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
+													Description:      `The self link of the encryption key that is stored in Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
 												"kms_key_service_account": {
 													Type:             schema.TypeString,
 													Optional:         true,
 													ForceNew:         true,
-													Description:      `The service account used to manage the KMS key for the disk.`,
+													Description:      `The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.`,
 												},
 
 												"sha256": {
@@ -849,14 +851,14 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Sensitive:   true,
-							Description: `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
+							Description: `A 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to encrypt this disk. Only one of kms_key_self_link, disk_encryption_key_rsa and disk_encryption_key_raw may be set.`,
 						},
 
 						"disk_encryption_key_rsa": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Sensitive:   true,
-							Description: `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link and disk_encryption_key_rsa may be set.`,
+							Description: `Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit customer-supplied encryption key to either encrypt or decrypt this resource. Only one of kms_key_self_link, disk_encryption_key_rsa and disk_encryption_key_raw may be set.`,
 						},
 
 						"kms_key_self_link": {
@@ -864,7 +866,7 @@ func ResourceComputeInstance() *schema.Resource {
 							Optional:         true,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 							Computed:         true,
-							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
+							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link, disk_encryption_key_rsa and disk_encryption_key_raw may be set.`,
 						},
 
 						"disk_encryption_service_account": {
@@ -1546,7 +1548,7 @@ be from 0 to 999,999,999 inclusive.`,
 				MaxItems:    1,
 				Optional:    true,
 				ForceNew:    true,
-				Description: `The customer's encryption key.`,
+				Description: `Encryption key used to provide data encryption on the given instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"kms_key_self_link": {
@@ -1562,7 +1564,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							Description: `The service account used to manage the encryption key in Google Cloud KMS.`,
+							Description: `The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.`,
 						},
 
 						"sha256": {
