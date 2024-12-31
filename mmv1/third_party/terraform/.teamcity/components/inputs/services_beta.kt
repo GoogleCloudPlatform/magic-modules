@@ -736,11 +736,6 @@ var ServicesListBeta = mapOf(
         "displayName" to "Storagetransfer",
         "path" to "./google-beta/services/storagetransfer"
     ),
-    "storagebatchoperations" to mapOf(
-        "name" to "storagebatchoperations",
-        "displayName" to "Storagebatchoperations",
-        "path" to "./google/services/storagebatchoperations"
-    ),
     "tags" to mapOf(
         "name" to "tags",
         "displayName" to "Tags",
