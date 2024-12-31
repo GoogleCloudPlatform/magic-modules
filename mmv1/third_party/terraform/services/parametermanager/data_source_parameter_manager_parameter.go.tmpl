@@ -1,4 +1,5 @@
 package parametermanager
+{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -21,7 +22,7 @@ func DataSourceParameterManagerParameter() *schema.Resource {
 }
 
 func dataSourceParameterManagerParameterRead(d *schema.ResourceData, meta interface{}) error {
-	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/locations/global/parameters/{{parameter_id}}")
+	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{"{{"}}project{{"}}"}}/locations/global/parameters/{{"{{"}}parameter_id{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -40,3 +41,5 @@ func dataSourceParameterManagerParameterRead(d *schema.ResourceData, meta interf
 	}
 	return nil
 }
+
+{{ end }}
