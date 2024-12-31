@@ -54,7 +54,7 @@ parameters:
   - name: watchlistId
     type: String
     description: |-
-      Optional. The ID to use for the watchlist,
+      The ID to use for the watchlist,
       which will become the final component of the watchlist's resource name.
       This value should be 4-63 characters, and valid characters
       are /a-z-/.
