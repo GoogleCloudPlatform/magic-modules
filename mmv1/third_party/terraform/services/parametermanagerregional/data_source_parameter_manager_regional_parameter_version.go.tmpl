@@ -1,4 +1,5 @@
 package parametermanagerregional
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/base64"
@@ -117,7 +118,7 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRead(d *schema.Re
 		return fmt.Errorf("wrong type for regional parameter version id field (%T), expected string", d.Get("parameter_version_id"))
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ParameterManagerRegionalBasePath}}projects/{{project}}/locations/{{location}}/parameters/{{parameter}}/versions/{{parameter_version_id}}")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ParameterManagerRegionalBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/parameters/{{"{{"}}parameter{{"}}"}}/versions/{{"{{"}}parameter_version_id{{"}}"}}")
 	if err != nil {
 		return err
 	}
@@ -174,3 +175,5 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRead(d *schema.Re
 	d.SetId(nameValue.(string))
 	return nil
 }
+
+{{ end }}
