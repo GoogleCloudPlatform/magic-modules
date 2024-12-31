@@ -1,4 +1,5 @@
 package parametermanager
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -45,7 +46,7 @@ func dataSourceParameterManagerParametersRead(d *schema.ResourceData, meta inter
 		return err
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{ParameterManagerBasePath}}projects/{{project}}/locations/global/parameters")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ParameterManagerBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/global/parameters")
 	if err != nil {
 		return err
 	}
@@ -118,7 +119,7 @@ func dataSourceParameterManagerParametersRead(d *schema.ResourceData, meta inter
 	}
 
 	// Store the ID now
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/global/parameters")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/global/parameters")
 	if err != nil {
 		return fmt.Errorf("error constructing id: %s", err)
 	}
@@ -163,3 +164,5 @@ func getDataFromName(v interface{}, part int) string {
 	split := strings.Split(name, "/")
 	return split[part]
 }
+
+{{ end }}
