@@ -184,7 +184,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_oracle_database_cloud_vm_cluster":          oracledatabase.DataSourceOracleDatabaseCloudVmCluster(),
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
 	{{- if ne $.TargetVersionName "ga" }}
-	"google_parameter_manager_parameter_version_render":    parametermanager.DataSourceParameterManagerParameterVersionRender(),
+	"google_parameter_manager_parameter_version_render":parametermanager.DataSourceParameterManagerParameterVersionRender(),
 	{{- end }}
 	"google_privateca_certificate_authority":           privateca.DataSourcePrivatecaCertificateAuthority(),
 	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
