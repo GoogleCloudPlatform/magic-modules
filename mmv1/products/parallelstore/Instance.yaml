@@ -193,7 +193,6 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MAX
   - name: deploymentType
     type: String
-    min_version: 'beta'
     description: |
       Parallelstore Instance deployment type.
         Possible values:
