@@ -100,12 +100,10 @@ properties:
     type: KeyValueLabels
     description: |
       Labels associated with this resource.
-    required: false
   - name: 'description'
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-    required: false
   - name: 'createTime'
     type: String
     description: |

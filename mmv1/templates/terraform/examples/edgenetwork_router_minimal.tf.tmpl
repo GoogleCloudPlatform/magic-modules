@@ -3,14 +3,7 @@ resource "google_edgenetwork_router" "{{$.PrimaryResourceId}}" {
   router_id   = "{{index $.Vars "edgenetwork_router_id"}}"
   location    = "{{index $.TestEnvVars "location"}}"
   zone        = "{{index $.TestEnvVars "zone"}}"
-  description = "Example router."
   network     = google_edgenetwork_network.example_network.id
-  labels      = {
-    "environment" : "dev"
-  }
-  bgp {
-    asn = 456
-  }
 }
 
 resource "google_edgenetwork_network" "example_network" {
