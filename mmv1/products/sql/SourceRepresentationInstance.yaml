@@ -13,6 +13,7 @@
 
 ---
 name: 'SourceRepresentationInstance'
+api_resource_type_kind: Instance
 kind: 'sql#instance'
 description: |
   A source representation instance is a Cloud SQL instance that represents
@@ -32,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/operations/{{op_id}}'
-    kind: 'sql#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'

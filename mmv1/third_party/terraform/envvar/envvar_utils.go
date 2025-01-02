@@ -104,6 +104,17 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
+// This value is the instance id of a pre-configured Chronicle instance, for the purpose of
+// integration tests. It is needed because the instance is 1-to-1 with a test project, and it
+// cannot be created within the test org.
+var ChronicleInstanceIdEnvVars = []string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
+
+var ImpersonateServiceAccountEnvVars = []string{
+	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+}
+
 // AccTestPreCheck ensures at least one of the project env variables is set.
 func GetTestProjectNumberFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectNumberEnvVars)
@@ -136,6 +147,10 @@ func GetTestRegionFromEnv() string {
 
 func GetTestZoneFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ZoneEnvVars)
+}
+
+func GetTestImpersonateServiceAccountFromEnv() string {
+	return transport_tpg.MultiEnvSearch(ImpersonateServiceAccountEnvVars)
 }
 
 func GetTestCustIdFromEnv(t *testing.T) string {
@@ -193,6 +208,11 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
+}
+
+func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, ChronicleInstanceIdEnvVars...)
+	return transport_tpg.MultiEnvSearch(ChronicleInstanceIdEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

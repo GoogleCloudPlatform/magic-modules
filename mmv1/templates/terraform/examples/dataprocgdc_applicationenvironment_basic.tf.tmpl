@@ -1,0 +1,7 @@
+resource "google_dataproc_gdc_application_environment" "{{$.PrimaryResourceId}}" {
+  application_environment_id = "{{index $.Vars "application_environment_id"}}"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  project         = "{{index $.Vars "project"}}"
+  location        = "us-west2"
+  namespace = "default"
+}

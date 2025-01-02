@@ -46,7 +46,8 @@
                     "oauthScopes": [
                         "https://www.googleapis.com/auth/cloud-platform"
                     ],
-                    "preemptible": true
+                    "preemptible": true,
+                    "serviceAccount": "service-account-cc@{{.Provider.project}}.iam.gserviceaccount.com"
                 },
                 "location": "us-central1",
                 "management": {

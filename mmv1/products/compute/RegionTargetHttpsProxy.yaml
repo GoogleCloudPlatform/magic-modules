@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionTargetHttpsProxy'
+api_resource_type_kind: TargetHttpsProxy
 description: |
   Represents a RegionTargetHttpsProxy resource, which is used by one or more
   forwarding rules to route incoming HTTPS requests to a URL map.
@@ -33,15 +34,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/compute_region_target_https_proxy.go.tmpl'
   # update_encoder is usually the same as encoder by default. This resource is an uncommon case where the whole resource

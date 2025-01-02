@@ -13,6 +13,7 @@
 
 ---
 name: 'Instance'
+api_resource_type_kind: ExtensionInstance
 description: An Instance is an installation of an Extension into a user's project.
 min_version: 'beta'
 references:
@@ -39,14 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'firebase_extentions_instance_resize_image'

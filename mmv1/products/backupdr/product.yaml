@@ -15,6 +15,8 @@
 name: 'BackupDR'
 display_name: 'Backup and DR Service'
 versions:
+  - name: 'ga'
+    base_url: 'https://backupdr.googleapis.com/v1/'
   - name: 'beta'
     base_url: 'https://backupdr.googleapis.com/v1/'
 scopes:
@@ -23,11 +25,5 @@ async:
   type: "OpAsync"
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'

@@ -13,6 +13,7 @@
 
 ---
 name: 'RouterRoutePolicy'
+api_resource_type_kind: Router
 description: A route policy created in a router
 min_version: 'beta'
 references:
@@ -40,15 +41,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
 examples:

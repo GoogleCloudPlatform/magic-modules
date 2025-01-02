@@ -21,7 +21,7 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
   pool = "{{index $.Vars "pool_name"}}"
   certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}"
   location = "{{index $.Vars "pool_location"}}"
-  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
   key_spec {
     cloud_kms_key_version = "{{index $.Vars "kms_key_name"}}/cryptoKeyVersions/1"
   }
@@ -37,7 +37,6 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
       ca_options {
         # is_ca *MUST* be true for certificate authorities
         is_ca = true
-        max_issuer_path_length = 10
       }
       key_usage {
         base_key_usage {
@@ -46,7 +45,6 @@ resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
           crl_sign = true
         }
         extended_key_usage {
-          server_auth = false
         }
       }
       name_constraints {

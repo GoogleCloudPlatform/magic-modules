@@ -13,6 +13,7 @@
 
 ---
 name: 'BackendBucketSignedUrlKey'
+api_resource_type_kind: BackendBucket
 kind: 'compute#BackendBucketSignedUrlKey'
 description: |
   A key for signing Cloud CDN signed URLs for BackendBuckets.
@@ -38,15 +39,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - name
 nested_query:

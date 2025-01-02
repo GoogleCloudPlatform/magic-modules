@@ -13,6 +13,7 @@
 
 ---
 name: 'NetworkEndpoints'
+api_resource_type_kind: NetworkEndpointGroup
 kind: 'compute#networkEndpoints'
 description: |
   A set of network endpoints belonging to a network endpoint group (NEG). A
@@ -53,15 +54,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - networkEndpointGroup
 custom_code:

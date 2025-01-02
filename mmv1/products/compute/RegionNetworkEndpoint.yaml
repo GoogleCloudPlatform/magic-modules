@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionNetworkEndpoint'
+api_resource_type_kind: NetworkEndpointGroup
 kind: 'compute#networkEndpoint'
 description: |
   A Region network endpoint represents a IP address/FQDN and port combination that is
@@ -43,15 +44,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - ipAddress
   - fqdn
@@ -127,6 +121,12 @@ properties:
       IPv4 address external endpoint.
 
       This can only be specified when network_endpoint_type of the NEG is INTERNET_IP_PORT.
+  - name: 'networkEndpointId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'fqdn'
     type: String
     description: |
