@@ -53,7 +53,7 @@ resource "google_chronicle_data_access_label" "custom_data_access_label" {
   provider = "google-beta"
   location = "us"
   instance = "%{chronicle_id}"
-  data_access_label_id = "tf-test-label-name%{random_suffix}"
+  data_access_label_id = "tf-test-label-id%{random_suffix}"
   udm_query = "principal.hostname=\"google.com\""
 }
 
@@ -61,7 +61,7 @@ resource "google_chronicle_data_access_scope" "example" {
   provider = "google-beta"
   location = "us"
   instance = "%{chronicle_id}"
-  data_access_scope_id = "tf-test-scope-with-denied-labels%{random_suffix}"
+  data_access_scope_id = "tf-test-scope-id%{random_suffix}"
   description = "tf-test-scope-description%{random_suffix}"
   allow_all = false
   allowed_data_access_labels {
@@ -92,7 +92,7 @@ resource "google_chronicle_data_access_label" "custom_data_access_label" {
   provider = "google-beta"
   location = "us"
   instance = "%{chronicle_id}"
-  data_access_label_id = "tf-test-label-name%{random_suffix}"
+  data_access_label_id = "tf-test-label-id%{random_suffix}"
   udm_query = "principal.hostname=\"google-updated.com\""
 }
 
@@ -100,7 +100,7 @@ resource "google_chronicle_data_access_scope" "example" {
   provider = "google-beta"
   location = "us"
   instance = "%{chronicle_id}"
-  data_access_scope_id = "tf-test-scope-with-denied-labels%{random_suffix}"
+  data_access_scope_id = "tf-test-scope-id%{random_suffix}"
   description = "tf-test-scope-description-updated%{random_suffix}"
   allow_all = true
   denied_data_access_labels {

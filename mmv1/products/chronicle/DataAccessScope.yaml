@@ -33,7 +33,7 @@ examples:
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: scope-with-logtype
+      data_access_scope_id: scope-id
       description: scope-description
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
@@ -41,16 +41,16 @@ examples:
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: scope-with-dataaccesslabel
+      data_access_scope_id: scope-id
       description: scope-description
-      data_access_label_id: label-name
+      data_access_label_id: label-id
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
   - name: 'chronicle_dataaccessscope_with_asset_namespace'
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: scope-with-asset-namespace
+      data_access_scope_id: scope-id
       description: scope-description
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
@@ -58,7 +58,7 @@ examples:
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: scope-with-ingestion-label
+      data_access_scope_id: scope-id
       description: scope-description
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
@@ -66,9 +66,9 @@ examples:
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: scope-with-denied-labels
+      data_access_scope_id: scope-id
       description: scope-description
-      data_access_label_id: label-name
+      data_access_label_id: label-id
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
 
@@ -96,6 +96,73 @@ parameters:
     url_param_only: true
     required: true
 properties:
+  - name: name
+    type: String
+    description: |-
+      The unique full name of the data access scope. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{data_access_scope_id}
+    output: true
+  - name: allowedDataAccessLabels
+    type: Array
+    description: |-
+      The allowed labels for the scope. There has to be at
+      least one label allowed for the scope to be valid.
+      The logical operator for evaluation of the allowed labels is OR.
+      Either allow_all or allowed_data_access_labels needs to be provided.
+      E.g.: A customer with scope with allowed labels A and B will be able
+      to see data with labeled with A or B or (A and B).
+    at_least_one_of:
+      - 'allowed_data_access_labels'
+      - 'allow_all'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: dataAccessLabel
+          type: String
+          description: The name of the data access label.
+        - name: logType
+          type: String
+          description: The name of the log type.
+        - name: assetNamespace
+          type: String
+          description: |-
+            The asset namespace configured in the forwarder
+            of the customer's events.
+        - name: ingestionLabel
+          type: NestedObject
+          description: Representation of an ingestion label type.
+          properties:
+            - name: ingestionLabelKey
+              type: String
+              description: Required. The key of the ingestion label. Always required.
+              required: true
+            - name: ingestionLabelValue
+              type: String
+              description: |-
+                Optional. The value of the ingestion label. Optional. An object
+                with no provided value and some key provided would match
+                against the given key and ANY value.
+        - name: displayName
+          type: String
+          description: |-
+            Output only. The display name of the label.
+            Data access label and log types's name
+            will match the display name of the resource.
+            The asset namespace will match the namespace itself.
+            The ingestion key value pair will match the key of the tuple.
+          output: true
+  - name: allowAll
+    type: Boolean
+    description: |-
+      Optional. Whether or not the scope allows all labels, allow_all and
+      allowed_data_access_labels are mutually exclusive and one of them must be
+      present. denied_data_access_labels can still be used along with allow_all.
+      When combined with denied_data_access_labels, access will be granted to all
+      data that doesn't have labels mentioned in denied_data_access_labels. E.g.:
+      A customer with scope with denied labels A and B and allow_all will be able
+      to see all data except data labeled with A and data labeled with B and data
+      with labels A and B.
   - name: deniedDataAccessLabels
     type: Array
     description: |-
@@ -160,70 +227,6 @@ properties:
   - name: description
     type: String
     description: Optional. A description of the data access scope for a human reader.
-  - name: allowAll
-    type: Boolean
-    description: |-
-      Optional. Whether or not the scope allows all labels, allow_all and
-      allowed_data_access_labels are mutually exclusive and one of them must be
-      present. denied_data_access_labels can still be used along with allow_all.
-      When combined with denied_data_access_labels, access will be granted to all
-      data that doesn't have labels mentioned in denied_data_access_labels. E.g.:
-      A customer with scope with denied labels A and B and allow_all will be able
-      to see all data except data labeled with A and data labeled with B and data
-      with labels A and B.
-  - name: name
-    type: String
-    description: |-
-      The unique full name of the data access scope. This unique identifier is generated using values provided for the URL parameters.
-      Format:
-      projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{data_access_scope_id}
-    output: true
-  - name: allowedDataAccessLabels
-    type: Array
-    description: |-
-      The allowed labels for the scope. There has to be at
-      least one label allowed for the scope to be valid.
-      The logical operator for evaluation of the allowed labels is OR.
-      Either allow_all or allowed_data_access_labels needs to be provided.
-      E.g.: A customer with scope with allowed labels A and B will be able
-      to see data with labeled with A or B or (A and B).
-    item_type:
-      type: NestedObject
-      properties:
-        - name: dataAccessLabel
-          type: String
-          description: The name of the data access label.
-        - name: logType
-          type: String
-          description: The name of the log type.
-        - name: assetNamespace
-          type: String
-          description: |-
-            The asset namespace configured in the forwarder
-            of the customer's events.
-        - name: ingestionLabel
-          type: NestedObject
-          description: Representation of an ingestion label type.
-          properties:
-            - name: ingestionLabelKey
-              type: String
-              description: Required. The key of the ingestion label. Always required.
-              required: true
-            - name: ingestionLabelValue
-              type: String
-              description: |-
-                Optional. The value of the ingestion label. Optional. An object
-                with no provided value and some key provided would match
-                against the given key and ANY value.
-        - name: displayName
-          type: String
-          description: |-
-            Output only. The display name of the label.
-            Data access label and log types's name
-            will match the display name of the resource.
-            The asset namespace will match the namespace itself.
-            The ingestion key value pair will match the key of the tuple.
-          output: true
   - name: updateTime
     type: String
     description: Output only. The time at which the data access scope was last updated.
