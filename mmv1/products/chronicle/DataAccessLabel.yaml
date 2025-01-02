@@ -33,7 +33,7 @@ examples:
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
-      name: label-name
+      data_access_label_id: label-id
       description: label-description
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
@@ -86,7 +86,7 @@ properties:
     output: true
   - name: displayName
     type: String
-    description: Output only. The short name displayed for the label as it appears on event data.
+    description: Output only. The short name displayed for the label as it appears on event data. This is same as data access label id.
     output: true
   - name: createTime
     type: String
