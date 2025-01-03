@@ -1377,9 +1377,7 @@ resource "google_dns_record_set" "ihc_failover" {
       backup_geo {
         location = "us-central1"
         health_checked_targets {
-          internal_load_balancers {
-            external_endpoints = ["8.8.4.4"]
-          }
+          external_endpoints = ["8.8.4.4"]
         }
       }
 
