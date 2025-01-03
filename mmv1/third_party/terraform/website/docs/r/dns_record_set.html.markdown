@@ -279,7 +279,6 @@ resource "google_dns_managed_zone" "zone" {
 }
 
 resource "google_compute_health_check" "health_check" {
-  provider            = "google-beta"
   name                = "health-check"
   check_interval_sec  = 30
   source_regions      = ["us-central1", "us-east1", "asia-south1"]
