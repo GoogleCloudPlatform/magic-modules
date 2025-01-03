@@ -33,7 +33,7 @@ var (
 	recordReplayTmplText string
 )
 
-var ttvEnvironmentVariables = [...]string{
+var ttvRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -53,6 +53,10 @@ var ttvEnvironmentVariables = [...]string{
 	"PATH",
 	"SA_KEY",
 	"USER",
+}
+
+var ttvOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
 }
 
 type analytics struct {
@@ -103,15 +107,23 @@ It expects the following arguments:
 	5. Build step number
 	
 The following environment variables are required:
-` + listTTVEnvironmentVariables(),
+` + listTTVRequiredEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		env := make(map[string]string, len(ttvEnvironmentVariables))
-		for _, ev := range ttvEnvironmentVariables {
+		env := make(map[string]string)
+		for _, ev := range ttvRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
+		}
+		for _, ev := range ttvOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
+			}
 		}
 
 		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
@@ -147,9 +159,9 @@ The following environment variables are required:
 	},
 }
 
-func listTTVEnvironmentVariables() string {
+func listTTVRequiredEnvironmentVariables() string {
 	var result string
-	for i, ev := range ttvEnvironmentVariables {
+	for i, ev := range ttvRequiredEnvironmentVariables {
 		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
 	}
 	return result

@@ -52,15 +52,8 @@ async:
   type: 'OpAsync'
   operation:
     full_url: 'selfLink'
-    kind: 'deploymentmanager#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   # Custom diff to force new if 'preview' is true
   constants: 'templates/terraform/constants/deployment_manager_deployment.go.tmpl'

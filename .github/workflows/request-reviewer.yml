@@ -15,8 +15,8 @@ on:
 
 jobs:
   request-review:
-    if: (github.event.action == 'created' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.draft == false)
-    runs-on: ubuntu-latest
+    if: (github.event.action == 'created' && github.event.issue.state == 'open' && github.event.issue.draft == false && github.event.comment.user.login == github.event.issue.user.login) || (github.event.action != 'created' && github.event.pull_request.state == 'open' && github.event.pull_request.draft == false )
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     env:

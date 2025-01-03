@@ -37,15 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_forwarding_rule.go.tmpl'
@@ -492,7 +485,7 @@ properties:
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
     update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId'
     custom_expand: 'templates/terraform/custom_expand/self_link_from_name.tmpl'
   - name: 'labelFingerprint'
     type: Fingerprint

@@ -164,7 +164,7 @@ properties:
           - name: 'useTimeoutBasedEndpointing'
             type: Boolean
             description: |
-              Use timeout based endpointing, interpreting endpointer sensitivy as seconds of timeout value.
+              Use timeout based endpointing, interpreting endpointer sensitivity as seconds of timeout value.
           - name: 'models'
             type: KeyValuePairs
             description: |

@@ -28,6 +28,8 @@ docs:
 base_url: 'projects/{{project}}/datasets'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}'
 has_self_link: true
+create_url: 'projects/{{project}}/datasets?accessPolicyVersion=3'
+update_url: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
 delete_url: 'projects/{{project}}/datasets/{{dataset_id}}?deleteContents={{delete_contents_on_destroy}}'
 import_format:
   - 'projects/{{project}}/datasets/{{dataset_id}}'
@@ -37,6 +39,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'bigquery_dataset_basic'
@@ -82,11 +85,6 @@ examples:
     vars:
       dataset_id: 'example_dataset'
       account_name: 'bqowner'
-    exclude_docs: true
-  - name: 'bigquery_dataset_external_reference_aws_test'
-    primary_resource_id: 'dataset'
-    vars:
-      dataset_id: 'example_dataset'
     exclude_docs: true
   - name: 'bigquery_dataset_external_reference_aws'
     primary_resource_id: 'dataset'
@@ -242,6 +240,32 @@ properties:
                 A-Z), numbers (0-9), or underscores (_). The maximum length
                 is 256 characters.
               required: true
+        - name: 'condition'
+          type: NestedObject
+          description: |
+            Condition for the binding. If CEL expression in this field is true, this
+            access binding will be considered.
+          properties:
+            - name: expression
+              type: String
+              required: true
+              description: |
+                Textual representation of an expression in Common Expression Language syntax.
+            - name: title
+              type: String
+              description: |
+                Title for the expression, i.e. a short string describing its purpose.
+                This can be used e.g. in UIs which allow to enter the expression.
+            - name: description
+              type: String
+              description: |
+                Description of the expression. This is a longer text which describes the expression,
+                e.g. when hovered over it in a UI.
+            - name: location
+              type: String
+              description: |
+                String indicating the location of the expression for error reporting, e.g. a file
+                name and a position in the file.
   - name: 'creationTime'
     type: Integer
     description: |

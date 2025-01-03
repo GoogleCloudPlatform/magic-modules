@@ -69,7 +69,7 @@ func mergeProperties(ga, beta []Property) []Property {
 		betaProps[p.title] = p
 	}
 	inOrder := make([]string, 0)
-	for k, _ := range betaProps {
+	for k := range betaProps {
 		inOrder = append(inOrder, k)
 	}
 	sort.Strings(inOrder)

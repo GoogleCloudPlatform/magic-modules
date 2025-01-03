@@ -79,7 +79,7 @@ properties:
   - name: "channelId"
     type: String
     description: |
-      Channel identifier identifies the owner maintaing this grouping.
+      Channel identifier identifies the owner maintaining this grouping.
   - name: "displayName"
     type: String
     description: |

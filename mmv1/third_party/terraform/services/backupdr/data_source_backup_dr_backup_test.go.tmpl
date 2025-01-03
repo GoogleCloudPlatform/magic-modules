@@ -1,5 +1,4 @@
 package backupdr_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -51,5 +50,3 @@ data "google_backup_dr_backup" "foo" {
 
 `, context)
 }
-
-{{- end }}

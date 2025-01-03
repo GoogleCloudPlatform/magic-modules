@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/datastream_stream.go.tmpl'
   encoder: 'templates/terraform/encoders/datastream_stream.go.tmpl'
@@ -138,6 +132,22 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     # Requires SQLServer Configuration
+    exclude_test: true
+  - name: 'datastream_stream_mysql_gtid'
+    primary_resource_id: 'default'
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      mysql_name: 'mysql'
+      mysql_root_password: 'root-password'
+      stream_id: 'stream'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    # Requires MySQL Configuration
     exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
@@ -426,6 +436,24 @@ properties:
             send_empty_value: true
             validation:
               function: 'validation.IntAtLeast(0)'
+          - name: 'binaryLogPosition'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.mysql_source_config.gtid
+            description: |
+              CDC reader reads from binary logs replication cdc method.
+            properties: []
+          - name: 'gtid'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.mysql_source_config.binaryLogPosition
+            description: |
+              CDC reader reads from gtid based replication.
+            properties: []
       - name: 'oracleSourceConfig'
         type: NestedObject
         description: |

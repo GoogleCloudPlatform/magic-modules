@@ -139,6 +139,8 @@
                 },
                 "sourceConfig": {
                     "mysqlSourceConfig": {
+                        "binaryLogPosition":          null,
+                        "gtid":                       null,
                         "maxConcurrentBackfillTasks": 0,
                         "maxConcurrentCdcTasks": 0
                     },

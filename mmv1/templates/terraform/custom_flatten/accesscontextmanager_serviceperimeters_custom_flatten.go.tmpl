@@ -18,7 +18,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 			"perimeter_type":            flattenAccessContextManagerServicePerimetersServicePerimetersPerimeterType(original["perimeterType"], d, config),
 			"status":                    flattenAccessContextManagerServicePerimetersServicePerimetersStatus(original["status"], d, config),
 			"spec":                      flattenAccessContextManagerServicePerimetersServicePerimetersSpec(original["spec"], d, config),
-			"etag":                      flattenAccessContextManagerServicePerimetersServicePerimetersEtag(original["etag"], d, config),
 			"use_explicit_dry_run_spec": flattenAccessContextManagerServicePerimetersServicePerimetersUseExplicitDryRunSpec(original["useExplicitDryRunSpec"], d, config),
 		})
 	}
@@ -36,10 +35,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 }
 
 func flattenAccessContextManagerServicePerimetersServicePerimetersName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenAccessContextManagerServicePerimetersServicePerimetersEtag(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 

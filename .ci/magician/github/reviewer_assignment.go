@@ -68,7 +68,7 @@ func FormatReviewerComment(newPrimaryReviewer string) string {
 	return sb.String()
 }
 
-var reviewerCommentRegex = regexp.MustCompile("@(?P<reviewer>[^,]*), a repository maintainer, has been assigned to review your changes.")
+var reviewerCommentRegex = regexp.MustCompile("@(?P<reviewer>[^,]*), a repository maintainer, has been assigned")
 
 // FindReviewerComment returns the comment which mentions the current primary reviewer and the reviewer's login,
 // or an empty comment and empty string if no such comment is found.

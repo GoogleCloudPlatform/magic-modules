@@ -12,13 +12,13 @@ func TestAccSecurityCenterProjectBigQueryExportConfig_basic(t *testing.T) {
 	t.Parallel()
 
 	randomSuffix := acctest.RandString(t, 10)
-	dataset_id := "tf_test_" + randomSuffix
+	datasetID := "tf_test_" + randomSuffix
 	orgID := envvar.GetTestOrgFromEnv(t)
 
 	context := map[string]interface{}{
 		"org_id":              orgID,
 		"random_suffix":       randomSuffix,
-		"dataset_id":          dataset_id,
+		"dataset_id":          datasetID,
 		"big_query_export_id": "tf-test-export-" + randomSuffix,
 		"project":             envvar.GetTestProjectFromEnv(),
 	}
@@ -63,6 +63,7 @@ resource "google_bigquery_dataset" "default" {
   location                    = "US"
   default_table_expiration_ms = 3600000
   default_partition_expiration_ms = null
+  delete_contents_on_destroy  = true
 
   labels = {
     env = "default"
@@ -75,7 +76,7 @@ resource "google_bigquery_dataset" "default" {
 
 resource "time_sleep" "wait_x_minutes" {
 	depends_on = [google_bigquery_dataset.default]
-	create_duration = "3m"
+	create_duration = "6m"
 	# need to wait for destruction due to 
 	# 'still in use' error from api 
 	destroy_duration = "1m"
@@ -91,6 +92,11 @@ resource "google_scc_project_scc_big_query_export" "default" {
   depends_on = [time_sleep.wait_x_minutes]
 }
 
+resource "time_sleep" "wait_for_cleanup" {
+	create_duration = "6m"
+	depends_on = [google_scc_project_scc_big_query_export.default]
+}
+
 `, context)
 }
 
@@ -104,6 +110,7 @@ resource "google_bigquery_dataset" "default" {
   location                    = "US"
   default_table_expiration_ms = 3600000
   default_partition_expiration_ms = null
+  delete_contents_on_destroy  = true
 
   labels = {
     env = "default"
@@ -114,12 +121,27 @@ resource "google_bigquery_dataset" "default" {
   }
 }
 
+resource "time_sleep" "wait_x_minutes" {
+	depends_on = [google_bigquery_dataset.default]
+	create_duration = "6m"
+	# need to wait for destruction due to
+	# 'still in use' error from api
+	destroy_duration = "1m"
+}
+
 resource "google_scc_project_scc_big_query_export" "default" {
   big_query_export_id    = "%{big_query_export_id}"
   project      = "%{project}"
   dataset      = google_bigquery_dataset.default.id
   description  = "SCC Findings Big Query Export Update"
   filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+
+  depends_on = [time_sleep.wait_x_minutes]
+}
+
+resource "time_sleep" "wait_for_cleanup" {
+	create_duration = "6m"
+	depends_on = [google_scc_project_scc_big_query_export.default]
 }
 
 `, context)

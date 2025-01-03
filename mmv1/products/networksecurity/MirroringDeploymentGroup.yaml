@@ -1,0 +1,119 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MirroringDeploymentGroup'
+description: A Deployment Group represents the collector deployments across different zones within an organization.
+min_version: 'beta'
+references:
+  guides:
+    'Mirroring deployment group overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployment-groups-overview'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1beta1/projects.locations.mirroringDeploymentGroups'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups'
+self_link: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups?mirroringDeploymentGroupId={{mirroring_deployment_group_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+examples:
+  - name: 'network_security_mirroring_deployment_group_basic'
+    config_path: 'templates/terraform/examples/network_security_mirroring_deployment_group_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      subnetwork_name: 'example-subnet'
+      deployment_group_id: 'example-dg'
+parameters:
+  - name: 'location'
+    type: String
+    description: 'Resource ID segment making up resource `name`. It identifies the resource
+    within its parent collection as described in https://google.aip.dev/122. See documentation
+    for resource type `networksecurity.googleapis.com/MirroringDeploymentGroup`. '
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'mirroringDeploymentGroupId'
+    type: String
+    description: "Required. Id of the requesting object\nIf auto-generating Id server-side,
+    remove this field and\nmirroring_deployment_group_id from the method_signature
+    of Create RPC "
+    min_version: 'beta'
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: 'Immutable. Identifier. Then name of the MirroringDeploymentGroup. '
+    min_version: 'beta'
+    immutable: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: 'Output only. [Output only] Create time stamp '
+    min_version: 'beta'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Output only. [Output only] Update time stamp '
+    min_version: 'beta'
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Optional. Labels as key value pairs '
+    min_version: 'beta'
+  - name: 'network'
+    type: String
+    description: "Required. Immutable. The network that is being used for the deployment.
+    Format is:\nprojects/{project}/global/networks/{network}. "
+    min_version: 'beta'
+    required: true
+    immutable: true
+  - name: 'connectedEndpointGroups'
+    type: Array
+    description: 'Output only. The list of Mirroring Endpoint Groups that are connected
+      to this resource. '
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: 'Output only. A connected mirroring endpoint group. '
+          min_version: 'beta'
+          output: true
+  - name: 'state'
+    type: String
+    description: "Output only. Current state of the deployment group. \n Possible values:\n
+    STATE_UNSPECIFIED\nACTIVE\nCREATING\nDELETING"
+    min_version: 'beta'
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: "Output only. Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
+    min_version: 'beta'
+    output: true

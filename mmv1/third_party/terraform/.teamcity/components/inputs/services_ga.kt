@@ -141,6 +141,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
     ),
+    "chronicle" to mapOf(
+        "name" to "chronicle",
+        "displayName" to "Chronicle",
+        "path" to "./google/services/chronicle"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",
@@ -410,6 +415,11 @@ var ServicesListGa = mapOf(
         "name" to "firestore",
         "displayName" to "Firestore",
         "path" to "./google/services/firestore"
+    ),
+    "gemini" to mapOf(
+        "name" to "gemini",
+        "displayName" to "Gemini",
+        "path" to "./google/services/gemini"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",

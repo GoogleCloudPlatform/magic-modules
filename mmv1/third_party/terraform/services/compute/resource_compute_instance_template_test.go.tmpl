@@ -738,6 +738,34 @@ func TestAccComputeInstanceTemplate_instanceResourcePolicies(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceTemplate_instanceResourcePoliciesSpread(t *testing.T) {
+	t.Parallel()
+
+	var template compute.InstanceTemplate
+	var policyName = "tf-test-policy-" + acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+				{
+				Config: testAccComputeInstanceTemplate_instanceResourcePolicySpread(acctest.RandString(t, 10), policyName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &template),
+					testAccCheckComputeInstanceTemplateHasInstanceResourcePolicies(&template, policyName),
+					testAccCheckComputeInstanceTemplateHasAvailabilityDomain(&template, 3),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceTemplate_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
@@ -952,6 +980,47 @@ func TestAccComputeInstanceTemplate_performanceMonitoringUnit(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ARCHITECTURAL"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_enableUefiNetworking(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	context_1 := map[string]interface{}{
+		"instance_name":               fmt.Sprintf("tf-test-instance-template-%s", acctest.RandString(t, 10)),
+		"enable_uefi_networking": "false",
+	}
+	context_2 := map[string]interface{}{
+		"instance_name":               context_1["instance_name"].(string),
+		"enable_uefi_networking": "true",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_enableUefiNetworking(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "advanced_machine_features.0.enable_uefi_networking", "false"),
+				),
+			},
+			{
+				Config: testAccComputeInstanceTemplate_enableUefiNetworking(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "advanced_machine_features.0.enable_uefi_networking", "true"),
 				),
 			},
 			{
@@ -2192,6 +2261,15 @@ func testAccCheckComputeInstanceTemplateHasInstanceResourcePolicies(instanceTemp
 		return nil
 	}
 
+}
+
+func testAccCheckComputeInstanceTemplateHasAvailabilityDomain(instanceTemplate *compute.InstanceTemplate, availabilityDomain int64) resource.TestCheckFunc {
+	return func (s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.AvailabilityDomain != availabilityDomain {
+			return fmt.Errorf("Expected availability_domain  %d, got %d", availabilityDomain, instanceTemplate.Properties.Scheduling.AvailabilityDomain)
+		}
+		return nil
+	}
 }
 
 func testAccCheckComputeInstanceTemplateHasReservationAffinity(instanceTemplate *compute.InstanceTemplate, consumeReservationType string, specificReservationNames ...string) resource.TestCheckFunc {
@@ -3564,6 +3642,49 @@ resource "google_compute_instance_template" "foobar" {
 `, policyName, suffix)
 }
 
+func testAccComputeInstanceTemplate_instanceResourcePolicySpread(suffix string, policyName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_resource_policy" "foo" {
+  name = "%s"
+  region = "us-central1"
+  group_placement_policy {
+	availability_domain_count = 5
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%s"
+  machine_type = "e2-standard-4"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+	availability_domain = 3
+  }
+
+  resource_policies = [google_compute_resource_policy.foo.self_link]
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, policyName, suffix)
+}
+
+
 func testAccComputeInstanceTemplate_reservationAffinityInstanceTemplate_nonSpecificReservation(templateName, consumeReservationType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -3867,6 +3988,32 @@ resource "google_compute_instance_template" "foobar" {
 
 	advanced_machine_features {
 		performance_monitoring_unit = "%{performance_monitoring_unit}"
+	}
+}
+`, context)
+}
+
+func testAccComputeInstanceTemplate_enableUefiNetworking(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2004-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "n2-standard-2"
+
+	disk {
+		source_image = data.google_compute_image.my_image.self_link
+	}
+
+	network_interface {
+		network = "default"
+	}
+
+	advanced_machine_features {
+		enable_uefi_networking = "%{enable_uefi_networking}"
 	}
 }
 `, context)

@@ -17,5 +17,7 @@ display_name: 'Cloud IAM'
 versions:
   - name: 'beta'
     base_url: 'https://iam.googleapis.com/v3beta/'
+  - name: 'ga'
+    base_url: 'https://iam.googleapis.com/v3/'
 scopes:
   - 'https://www.googleapis.com/auth/iam'

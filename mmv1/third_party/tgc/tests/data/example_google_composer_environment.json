@@ -7,7 +7,7 @@
                 {
                     "role": "roles/composer.worker",
                     "members": [
-                        ""
+                        "serviceAccount:composer-new-account@{{.Provider.project}}.iam.gserviceaccount.com"
                     ]
                 }
             ]

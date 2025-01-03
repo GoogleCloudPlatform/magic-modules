@@ -24,7 +24,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccUniverseDomain_bucket(universeDomain, bucketName),
 			},
 		},

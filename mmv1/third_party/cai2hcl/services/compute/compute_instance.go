@@ -219,6 +219,9 @@ func convertScheduling(sched *compute.Scheduling) []map[string]interface{} {
 	if len(sched.ProvisioningModel) > 0 {
 		data["provisioning_model"] = sched.ProvisioningModel
 	}
+	if sched.AvailabilityDomain > 0 {
+		data["availability_domain"] = sched.AvailabilityDomain
+	}
 	return []map[string]interface{}{data}
 }
 

@@ -87,6 +87,10 @@ service/certificatemanager:
   - google_compute_managed_ssl_certificate
   - google_compute_region_ssl_certificate
   - google_compute_ssl_certificate
+service/chronicle:
+  team: chronicle-terraform
+  resources:
+  - google_chronicle_.*
 service/cloud-dns:
   resources:
   - google_dns_.*
@@ -211,6 +215,7 @@ service/compute-managed:
   - google_compute_per_instance_config.*
   - google_compute_region_per_instance_config.*
   - google_compute_resize_request.*
+  - google_compute_region_resize_request.*
 service/compute-nat:
   resources:
   - google_compute_router_nat.*
@@ -313,6 +318,9 @@ service/dataproc:
   - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
+service/dataprocgdc:
+  resources:
+  - google_dataproc_gdc_.*
 service/datastream:
   resources:
   - google_datastream_.*
@@ -373,6 +381,9 @@ service/firestore-dataplane:
   - google_firestore_field
   - google_firestore_index
   - google_firestore_ttl
+service/gemini:
+  resources:
+  - google_gemini_.*
 service/gkebackup:
   resources:
   - google_gke_backup_.*
@@ -397,6 +408,8 @@ service/iam-core:
   - google_iam_deny_policy
   - google_iam_policy
   - google_iam_role
+  - google_iam_.*_policy_binding
+  - google_iam_principal_access_boundary_policy
   - google_iam_testable_permissions
 service/iam-serviceaccount:
   resources:
@@ -506,6 +519,10 @@ service/networksecurity-swp:
   - google_network_security_gateway_security_policy_rule
   - google_network_security_url_lists
   - google_network_security_tls_inspection_policy
+service/networksecurityintegrations:
+  resources:
+  - google_network_security_mirroring.*
+  - google_network_security_intercept.*
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*

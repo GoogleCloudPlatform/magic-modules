@@ -1111,7 +1111,7 @@ properties:
         properties:
           - name: 'keyId'
             type: String
-            description: The value of the KeyId in lowercase hexidecimal.
+            description: The value of the KeyId in lowercase hexadecimal.
             immutable: true
       - name: 'publicKey'
         type: NestedObject

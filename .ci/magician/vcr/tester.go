@@ -78,6 +78,7 @@ var safeToLog = map[string]bool{
 	"GOCACHE":                                    true,
 	"GOOGLE_APPLICATION_CREDENTIALS":             false,
 	"GOOGLE_BILLING_ACCOUNT":                     false,
+	"GOOGLE_CHRONICLE_INSTANCE_ID":               true,
 	"GOOGLE_CREDENTIALS":                         false,
 	"GOOGLE_CUST_ID":                             true,
 	"GOOGLE_IDENTITY_USER":                       true,
