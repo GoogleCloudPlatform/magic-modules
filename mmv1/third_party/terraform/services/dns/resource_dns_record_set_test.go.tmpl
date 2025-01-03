@@ -364,7 +364,7 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.ihc_failover",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -373,7 +373,7 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.ihc_wrr",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -382,7 +382,7 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.ihc_geo",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -1358,7 +1358,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility  = "public"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "ihc_failover" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
@@ -1418,7 +1418,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility  = "public"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "ihc_wrr" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
@@ -1467,7 +1467,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility  = "public"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "ihc_geo" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
