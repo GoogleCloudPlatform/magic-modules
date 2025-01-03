@@ -75,9 +75,15 @@ parameters:
   - name: 'name'
     type: String
     description: |
-      The name of the redis cluster these endpoints should be added to.
+      The name of the Redis cluster these endpoints should be added to.
     required: true
     url_param_only: true
+  - name: 'region'
+    type: String
+    description: |
+      The name of the region of the Redis cluster these endpoints should be added to.
+    url_param_only: true
+    required: true
 properties:
   - name: 'clusterEndpoints'
     type: Array
