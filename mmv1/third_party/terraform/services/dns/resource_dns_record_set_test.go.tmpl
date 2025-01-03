@@ -354,36 +354,38 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 	t.Parallel()
 
 	httpHealthCheckName := fmt.Sprintf("tf-test-http-health-check-%s", acctest.RandString(t, 10))
-	zoneName := fmt.Sprintf("dnszone-test-%s", acctest.RandString(t, 10))
+	failoverZoneName := fmt.Sprintf("failover-dnszone-test-%s", acctest.RandString(t, 10))
+    wrrZoneName := fmt.Sprintf("wrr-dnszone-test-%s", acctest.RandString(t, 10))
+    geoZoneName := fmt.Sprintf("geo-dnszone-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, zoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, failoverZoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_failover",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), failoverZoneName, failoverZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
             {
-				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, zoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, wrrZoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_wrr",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), wrrZoneName, wrrZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
             {
-				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, zoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, geoZoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_geo",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), geoZoneName, geoZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
