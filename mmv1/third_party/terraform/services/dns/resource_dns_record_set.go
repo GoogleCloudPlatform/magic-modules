@@ -260,12 +260,11 @@ var geoPolicySchema *schema.Resource = &schema.Resource{
 			},
 		},
 		"health_checked_targets": {
-			Type:         schema.TypeList,
-			Optional:     true,
-			Description:  "For A and AAAA types only. The list of targets to be health checked. These can be specified along with `rrdatas` within this item.",
-			MaxItems:     1,
-			Elem:         healthCheckedTargetSchema,
-			ExactlyOneOf: []string{"routing_policy.0.wrr", "routing_policy.0.geo", "routing_policy.0.primary_backup"},
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "For A and AAAA types only. The list of targets to be health checked. These can be specified along with `rrdatas` within this item.",
+			MaxItems:    1,
+			Elem:        healthCheckedTargetSchema,
 		},
 	},
 }
