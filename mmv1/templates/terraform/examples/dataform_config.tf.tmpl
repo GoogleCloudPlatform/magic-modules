@@ -1,9 +1,10 @@
 resource "google_project" "project" {
   provider = google-beta
 
-  project_id = "projectid"
-  name       = "projectname"
-  org_id     = "123456789"
+  name            = "{{index $.Vars "project_name"}}"
+  project_id      = "{{index $.Vars "project_name"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 

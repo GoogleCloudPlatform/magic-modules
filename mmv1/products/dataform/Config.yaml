@@ -40,8 +40,12 @@ examples:
     primary_resource_id: 'config'
     min_version: 'beta'
     vars:
+      project_name: 'project-1'
       key_ring_name: 'example-key-ring'
       crypto_key_name: 'example-crypto-key-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'region'
     type: String
