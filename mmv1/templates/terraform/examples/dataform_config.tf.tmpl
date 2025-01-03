@@ -8,6 +8,14 @@ resource "google_project" "project" {
   deletion_policy = "DELETE"
 }
 
+# Enable dataform API
+resource "google_project_service" "dataform" {
+   provider = google-beta
+
+  project = google_project.project.project_id
+  service = "dataform.googleapis.com"
+}
+
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
   
