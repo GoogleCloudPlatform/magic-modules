@@ -915,6 +915,9 @@ func flattenDnsRecordSetRoutingPolicy(policy *dns.RRSetRoutingPolicy) []interfac
 	if policy.PrimaryBackup != nil {
 		p["primary_backup"] = flattenDnsRecordSetRoutingPolicyPrimaryBackup(policy.PrimaryBackup)
 	}
+	if policy.HealthCheck != "" {
+		p["health_check"] = policy.HealthCheck
+	}
 	return append(ps, p)
 }
 
@@ -949,6 +952,7 @@ func flattenDnsRecordSetHealthCheckedTargets(targets *dns.RRSetRoutingPolicyHeal
 
 	data := map[string]interface{}{
 		"internal_load_balancers": flattenDnsRecordSetInternalLoadBalancers(targets.InternalLoadBalancers),
+		"external_endpoints":      flattenDnsRecordSetExternalEndpoints(targets.ExternalEndpoints),
 	}
 
 	return []map[string]interface{}{data}
@@ -969,6 +973,10 @@ func flattenDnsRecordSetInternalLoadBalancers(ilbs []*dns.RRSetRoutingPolicyLoad
 		ilbsSchema = append(ilbsSchema, data)
 	}
 	return ilbsSchema
+}
+
+func flattenDnsRecordSetExternalEndpoints(externalEndpoints []string) []string {
+	return externalEndpoints
 }
 
 func flattenDnsRecordSetRoutingPolicyPrimaryBackup(primaryBackup *dns.RRSetRoutingPolicyPrimaryBackupPolicy) []map[string]interface{} {
