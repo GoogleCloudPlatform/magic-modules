@@ -1370,21 +1370,6 @@ func testAccDataLossPreventionDiscoveryConfig_dlpDiscoveryConfigStartAwsS3(conte
 	return acctest.Nprintf(`
 data "google_project" "project" {
 }
-resource "google_organization_iam_member" "service_agent" {
-	org_id = "%{organization}"
-	role    = "roles/servicemanagement.admin"
-	member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
-}
-resource "google_organization_iam_member" "org_admin" {
-	org_id = "%{organization}"
-	role    = "roles/resourcemanager.organizationAdmin"
-	member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
-}
-resource "google_organization_iam_member" "dlp_role" {
-    org_id = "%{organization}"
-	role    = "roles/dlp.orgdriver"
-	member = "serviceAccount:service-${data.google_project.project.number}@dlp-api.iam.gserviceaccount.com"
-}
 resource "google_data_loss_prevention_inspect_template" "basic" {
     parent = "projects/%{project}"
     description = "Description"
