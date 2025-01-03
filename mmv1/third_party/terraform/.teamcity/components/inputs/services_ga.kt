@@ -586,6 +586,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
     ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google/services/parametermanager"
+    ),
     "privateca" to mapOf(
         "name" to "privateca",
         "displayName" to "Privateca",
