@@ -49,7 +49,7 @@ examples:
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
-    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids 
+    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
     exclude_import_test: true
 
 parameters:
