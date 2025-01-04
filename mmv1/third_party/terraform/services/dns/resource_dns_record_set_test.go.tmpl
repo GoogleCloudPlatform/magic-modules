@@ -1344,13 +1344,19 @@ func testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(healthCheckName, zon
 	return fmt.Sprintf(`
 
 resource "google_compute_health_check" "health_check" {
-    name                = "%s"
-    description         = "Resource created for Terraform acceptance testing"
-    check_interval_sec  = 30
-    source_regions      = ["us-central1", "us-east1", "asia-south1"]
-    http_health_check {
-        port          = "80"
-    }
+  name                = "%s"
+  description         = "Resource created for Terraform acceptance testing"
+  check_interval_sec  = 30
+  source_regions      = ["us-central1", "us-east1", "asia-south1"]
+  http_health_check {
+    port              = "80"
+  }
+}
+
+resource "time_sleep" "wait_2_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "2m"
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
@@ -1361,6 +1367,8 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_failover" {
+  depends_on = [time_sleep.wait_2_minutes]
+
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
@@ -1411,6 +1419,12 @@ resource "google_compute_health_check" "health_check" {
     }
 }
 
+resource "time_sleep" "wait_2_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "2m"
+}
+
 resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
   dns_name    = "%s.hashicorptest-com."
@@ -1419,6 +1433,8 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_wrr" {
+  depends_on = [time_sleep.wait_2_minutes]
+
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
@@ -1460,6 +1476,12 @@ resource "google_compute_health_check" "health_check" {
     }
 }
 
+resource "time_sleep" "wait_2_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "2m"
+}
+
 resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
   dns_name    = "%s.hashicorptest-com."
@@ -1468,6 +1490,8 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_geo" {
+  depends_on = [time_sleep.wait_2_minutes]
+
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
   type         = "A"
