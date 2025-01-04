@@ -1,0 +1,44 @@
+resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
+    location = "us-central1"
+    name = "{{index $.Vars "deploy_policy_name"}}"
+    description = "My deploy policy"
+    annotations = {
+      my_first_annotation = "example-annotation-1"
+      my_second_annotation = "example-annotation-2"
+    }
+    labels = {
+      my_first_label = "example-label-1"
+      my_second_label = "example-label-2"
+    }
+    selectors {
+      delivery_pipeline {
+        id = "mypipeline"
+      }
+    }
+    rules {
+      rollout_restriction {
+        id = "weekendfreeze"
+        invokers = ["USER"]
+        actions = ["CREATE", "APPROVE"]
+        time_windows {
+          time_zone = "America/New_York"
+          weekly_windows {
+            days_of_week = ["SATURDAY", "SUNDAY"]
+            start_time = "00:00"
+            end_time = "24:00"
+          }
+        }
+      }
+    }
+    rules {
+      rollout_restriction {
+        id = "norolloutsMondays"
+        time_windows {
+          time_zone = "America/New_York"
+          weekly_windows {
+            days_of_week = ["MONDAY"]
+          }
+        }
+      }
+    }
+}
