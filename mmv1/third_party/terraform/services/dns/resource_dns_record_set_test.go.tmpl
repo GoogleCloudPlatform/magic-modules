@@ -350,6 +350,52 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 	})
 }
 
+func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
+	t.Parallel()
+
+	httpHealthCheckName := fmt.Sprintf("tf-test-http-health-check-%s", acctest.RandString(t, 10))
+	failoverZoneName := fmt.Sprintf("failover-dnszone-test-%s", acctest.RandString(t, 10))
+    wrrZoneName := fmt.Sprintf("wrr-dnszone-test-%s", acctest.RandString(t, 10))
+    geoZoneName := fmt.Sprintf("geo-dnszone-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+        ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, failoverZoneName, 300),
+			},
+			{
+				ResourceName:  "google_dns_record_set.ihc_failover",
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), failoverZoneName, failoverZoneName),
+				ImportState:   true,
+				ImportStateVerify: true,
+			},
+            {
+				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, wrrZoneName, 300),
+			},
+			{
+				ResourceName:  "google_dns_record_set.ihc_wrr",
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), wrrZoneName, wrrZoneName),
+				ImportState:   true,
+				ImportStateVerify: true,
+			},
+            {
+				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, geoZoneName, 300),
+			},
+			{
+				ResourceName:  "google_dns_record_set.ihc_geo",
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), geoZoneName, geoZoneName),
+				ImportState:   true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccDNSRecordSet_changeRouting(t *testing.T) {
 	t.Parallel()
 
@@ -1295,6 +1341,186 @@ resource "google_dns_record_set" "foobar" {
   }
 }
 `, networkName, backendSubnetName, proxySubnetName, healthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName, zoneName, zoneName, zoneName, ttl)
+}
+
+func testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(healthCheckName, zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_health_check" "health_check" {
+  name                = "%s"
+  description         = "Resource created for Terraform acceptance testing"
+  check_interval_sec  = 30
+  source_regions      = ["us-central1", "us-east1", "asia-south1"]
+  http_health_check {
+    port              = "80"
+  }
+}
+
+resource "time_sleep" "wait_4_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "4m"
+}
+
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest-com."
+  description = "Test Description"
+  visibility  = "public"
+}
+
+resource "google_dns_record_set" "ihc_failover" {
+  depends_on = [time_sleep.wait_4_minutes]
+
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest-com."
+  type         = "A"
+  ttl          = %d
+
+  routing_policy {
+    health_check = google_compute_health_check.health_check.self_link
+    primary_backup {
+      trickle_ratio                  = 0.1
+      enable_geo_fencing_for_backups = true
+
+      primary {
+        external_endpoints = ["8.8.8.8"]
+      }
+
+      backup_geo {
+        location = "us-central1"
+        health_checked_targets {
+          external_endpoints = ["8.8.4.4"]
+        }
+      }
+
+      backup_geo {
+        location = "us-west1"
+        rrdatas  = ["1.2.3.4"]
+      }
+
+      backup_geo {
+        location = "asia-east1"
+        rrdatas  = ["5.6.7.8"]
+      }
+    }
+  }
+}
+`, healthCheckName, zoneName, zoneName, zoneName, ttl)
+}
+
+func testAccDnsRecordSet_routingPolicyInternetWRR(healthCheckName, zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_health_check" "health_check" {
+    name                = "%s"
+    description         = "Resource created for Terraform acceptance testing"
+    check_interval_sec  = 30
+    source_regions      = ["us-central1", "us-east1", "asia-south1"]
+    http_health_check {
+        port          = "80"
+    }
+}
+
+resource "time_sleep" "wait_4_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "4m"
+}
+
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest-com."
+  description = "Test Description"
+  visibility  = "public"
+}
+
+resource "google_dns_record_set" "ihc_wrr" {
+  depends_on = [time_sleep.wait_4_minutes]
+
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest-com."
+  type         = "A"
+  ttl          = %d
+
+  routing_policy {
+    health_check = google_compute_health_check.health_check.self_link
+
+    wrr {
+      weight = 1.0
+
+      health_checked_targets {
+        external_endpoints = ["8.8.8.8"]
+      }
+    }
+
+    wrr {
+      weight = 0.5
+
+      health_checked_targets {
+        external_endpoints = ["8.8.4.4"]
+      }
+    }
+  }
+}
+`, healthCheckName, zoneName, zoneName, zoneName, ttl)
+}
+
+func testAccDnsRecordSet_routingPolicyInternetGEO(healthCheckName, zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_health_check" "health_check" {
+    name                = "%s"
+    description         = "Resource created for Terraform acceptance testing"
+    check_interval_sec  = 30
+    source_regions      = ["us-central1", "us-east1", "asia-south1"]
+    http_health_check {
+        port          = "80"
+    }
+}
+
+resource "time_sleep" "wait_4_minutes" {
+  depends_on = [google_compute_health_check.health_check]
+  # need to wait for destruction due to 'still in use' error from api
+  destroy_duration = "4m"
+}
+
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest-com."
+  description = "Test Description"
+  visibility  = "public"
+}
+
+resource "google_dns_record_set" "ihc_geo" {
+  depends_on = [time_sleep.wait_4_minutes]
+
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest-com."
+  type         = "A"
+  ttl          = %d
+
+  routing_policy {
+    health_check = google_compute_health_check.health_check.self_link
+
+    geo {
+      location = "us-east1"
+
+      health_checked_targets {
+        external_endpoints = ["8.8.8.8"]
+      }
+    }
+
+    geo {
+      location = "us-west1"
+
+      health_checked_targets {
+        external_endpoints = ["8.8.4.4"]
+      }
+    }
+  }
+}
+`, healthCheckName, zoneName, zoneName, zoneName, ttl)
 }
 
 func testAccDnsRecordSet_interpolated(zoneName string) string {
