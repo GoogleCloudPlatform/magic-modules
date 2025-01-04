@@ -1356,10 +1356,10 @@ resource "google_compute_health_check" "health_check" {
   }
 }
 
-resource "time_sleep" "wait_2_minutes" {
+resource "time_sleep" "wait_4_minutes" {
   depends_on = [google_compute_health_check.health_check]
   # need to wait for destruction due to 'still in use' error from api
-  destroy_duration = "2m"
+  destroy_duration = "4m"
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
@@ -1370,7 +1370,7 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_failover" {
-  depends_on = [time_sleep.wait_2_minutes]
+  depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
@@ -1422,10 +1422,10 @@ resource "google_compute_health_check" "health_check" {
     }
 }
 
-resource "time_sleep" "wait_2_minutes" {
+resource "time_sleep" "wait_4_minutes" {
   depends_on = [google_compute_health_check.health_check]
   # need to wait for destruction due to 'still in use' error from api
-  destroy_duration = "2m"
+  destroy_duration = "4m"
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
@@ -1436,7 +1436,7 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_wrr" {
-  depends_on = [time_sleep.wait_2_minutes]
+  depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
@@ -1479,10 +1479,10 @@ resource "google_compute_health_check" "health_check" {
     }
 }
 
-resource "time_sleep" "wait_2_minutes" {
+resource "time_sleep" "wait_4_minutes" {
   depends_on = [google_compute_health_check.health_check]
   # need to wait for destruction due to 'still in use' error from api
-  destroy_duration = "2m"
+  destroy_duration = "4m"
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
@@ -1493,7 +1493,7 @@ resource "google_dns_managed_zone" "parent-zone" {
 }
 
 resource "google_dns_record_set" "ihc_geo" {
-  depends_on = [time_sleep.wait_2_minutes]
+  depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest-com."
