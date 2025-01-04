@@ -920,17 +920,14 @@ is set to true. Defaults to ZONAL.`,
 			},
 			"replication_cluster": {
 				Type:     schema.TypeList,
-				Computed: true,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"failover_dr_replica_name": {
 							Type:        schema.TypeString,
-							Computed:    true,
 							Optional:    true,
-							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. For non-existent case, %q will be used instead.`, emptyFailoverDrReplicaName),
-							AtLeastOneOf: []string{"replication_cluster.0.failover_dr_replica_name"},
+							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica.`),
 						},
 						"dr_replica": {
 							Type:        schema.TypeBool,
@@ -1063,13 +1060,6 @@ is set to true. Defaults to ZONAL.`,
 		UseJSONNumber: true,
 	}
 }
-
-const (
-	// Instance name can't contain uppder case letters nor underscore, so this non-exitent
-	// marker is safe to use. See
-	// https://cloud.google.com/sql/docs/mysql/instance-settings#settings-2ndgen
-	emptyFailoverDrReplicaName = "NON_EXISTENT"
-)
 
 // Makes private_network ForceNew if it is changing from set to nil. The API returns an error
 // if this change is attempted in-place.
@@ -2077,7 +2067,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
-	if failoverDrReplicaName != emptyFailoverDrReplicaName {
+	if failoverDrReplicaName != "" {
 		instance.ReplicationCluster = &sqladmin.ReplicationCluster{
 			FailoverDrReplicaName: failoverDrReplicaName,
 		}
@@ -2412,7 +2402,6 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 
 func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
 	data := make(map[string]interface{})
-	data["failover_dr_replica_name"] = emptyFailoverDrReplicaName
 	if replicationCluster.FailoverDrReplicaName != "" {
 		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
 	}

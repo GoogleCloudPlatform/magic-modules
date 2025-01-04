@@ -2599,15 +2599,37 @@ func TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
-			// Let's make sure that setting and unsetting failover replica works.
+			// Let's make sure that setting and unsetting failover replica works. These
+			// operations on primary implicitly updates replica, so we verify the impact
+			// to the replica also.
 			{
-				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				// Replica's replication_cluster is not set, so we expect non-empty
+				// plan on replica.
+				Config:             googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				RefreshState:       true,
+				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: googleSqlDatabaseInstance_mysqlUnsetFailoverReplica(project, primaryName, replicaName),
 			},
 			{
-				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterUnsetFailover("google_sql_database_instance.original-replica")),
+			},
+			{
+				// Replica's replication_cluster is not set, so we expect non-empty
+				// plan on replica.
+				Config:             googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				RefreshState:       true,
+				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -2620,7 +2642,7 @@ func TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess(t *testing.T) {
 			},
 			{
 				RefreshState: true,
-				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
+				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName), checkInstanceAfterSetFailover("google_sql_database_instance.original-primary")),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-primary",
@@ -2675,15 +2697,37 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
-			// Let's make sure that setting and unsetting failover replica works.
+			// Let's make sure that setting and unsetting failover replica works. These
+			// operations on primary implicitly updates replica, so we verify the impact
+			// to the replica also.
 			{
-				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				// Replica's replication_cluster is not set, so we expect non-empty
+				// plan on replica.
+				Config:             googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				RefreshState:       true,
+				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: googleSqlDatabaseInstance_postgresUnsetFailoverReplica(project, primaryName, replicaName),
 			},
 			{
-				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterUnsetFailover("google_sql_database_instance.original-replica")),
+			},
+			{
+				// Replica's replication_cluster is not set, so we expect non-empty
+				// plan on replica.
+				Config:             googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				RefreshState:       true,
+				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				ExpectNonEmptyPlan: true,
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -2696,7 +2740,7 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 			},
 			{
 				RefreshState: true,
-				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName)),
+				Check:        resource.ComposeTestCheckFunc(resource.TestCheckTypeSetElemAttr("google_sql_database_instance.original-replica", "replica_names.*", primaryName), checkSwitchoverOriginalReplicaConfigurations("google_sql_database_instance.original-replica"), checkSwitchoverOriginalPrimaryConfigurations("google_sql_database_instance.original-primary", replicaName), checkInstanceAfterSetFailover("google_sql_database_instance.original-primary")),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.original-primary",
@@ -3682,6 +3726,51 @@ resource "google_sql_database_instance" "original-replica" {
 `, project, primaryName, project, replicaName, project, replicaName, primaryName)
 }
 
+func checkInstanceAfterSetFailover(resourceName string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		replicaResource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find original replica in state")
+		}
+		replicaResourceAttributes := replicaResource.Primary.Attributes
+
+		drReplicaAttr := "replication_cluster.0.dr_replica"
+		drReplica, ok := replicaResourceAttributes[drReplicaAttr]
+		if !ok {
+			return fmt.Errorf("%q is not present for the original replica", drReplicaAttr)
+		}
+
+		if drReplica != "true" {
+			return fmt.Errorf("%q: %v, want: true", drReplicaAttr, drReplica)
+		}
+
+		return nil
+	}
+}
+
+func checkInstanceAfterUnsetFailover(resourceName string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		replicaResource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find original replica in state")
+		}
+		replicaResourceAttributes := replicaResource.Primary.Attributes
+
+		drReplicaAttr := "replication_cluster.0.dr_replica"
+		drReplica, ok := replicaResourceAttributes[drReplicaAttr]
+		if !ok {
+			// It's OK that dr_replica is not present.
+			return nil
+		}
+
+		if drReplica != "false" {
+			return fmt.Errorf("%q: %v, want: false", drReplicaAttr, drReplica)
+		}
+
+		return nil
+	}
+}
+
 func googleSqlDatabaseInstance_mysqlUnsetFailoverReplica(project, primaryName, replicaName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
@@ -3691,10 +3780,6 @@ resource "google_sql_database_instance" "original-primary" {
   database_version    = "MYSQL_8_0"
   instance_type       = "CLOUD_SQL_INSTANCE"
   deletion_protection = false
-
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
 
   settings {
     tier              = "db-perf-optimized-N-2"
@@ -3783,9 +3868,7 @@ resource "google_sql_database_instance" "original-primary" {
   master_instance_name = "%s"
   deletion_protection  = false
 
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
+  replication_cluster {}
 
   settings {
     tier              = "db-perf-optimized-N-2"
@@ -3861,10 +3944,6 @@ resource "google_sql_database_instance" "original-replica" {
   instance_type        = "CLOUD_SQL_INSTANCE"
   replica_names        = []
   deletion_protection  = false
-
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
 
   settings {
     tier              = "db-perf-optimized-N-2"
@@ -3966,10 +4045,6 @@ resource "google_sql_database_instance" "original-primary" {
   instance_type       = "CLOUD_SQL_INSTANCE"
   deletion_protection = false
 
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
-
   settings {
     tier              = "db-perf-optimized-N-2"
     edition           = "ENTERPRISE_PLUS"
@@ -4057,9 +4132,7 @@ resource "google_sql_database_instance" "original-primary" {
   master_instance_name = "%s"
   deletion_protection  = false
 
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
+  replication_cluster {}
 
   settings {
     tier              = "db-perf-optimized-N-2"
@@ -4135,10 +4208,6 @@ resource "google_sql_database_instance" "original-replica" {
   instance_type        = "CLOUD_SQL_INSTANCE"
   replica_names        = []
   deletion_protection  = false
-
-  replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
-  }
 
   settings {
     tier              = "db-perf-optimized-N-2"

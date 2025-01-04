@@ -557,7 +557,7 @@ block during resource creation/update will trigger the restore action after the 
 
 The optional `replication_cluster` block supports:
 
-* `failover_dr_replica_name`: (Optional, Computed) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. For non-existent case, "NON_EXISETENT" will be used instead.
+* `failover_dr_replica_name`: (Optional, Computed) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica.
 
 * `dr_replica`: Read-only field that indicates whether the replica is a DR replica.
 
@@ -651,7 +651,7 @@ SQL Server: Create a `cascadable` replica in a different region from the primary
 3. (SQL Server) Set `replica_configuration` and set `cascadable_replica` to `true`
 4. Remove original replica from `replica_names`
    * **NOTE**: Do **not** delete the replica_names field, even if it has no replicas remaining. Set replica_names = [ ] to indicate it having no replicas.
-5. (MySQL/PostgreSQL) Set `replication_cluster.failover_dr_replica_name` as `"NON_EXISTENT"`.
+5. (MySQL/PostgreSQL) Remove `replication_cluster`.
 6. (MySQL/PostgreSQL) Adjust `backup_configuration`. See [Switchover Guide](../guides/sql_instance_switchover.html.markdown) for details.
 #### Plan and verify that:
 - `terraform plan` outputs **"0 to add, 0 to destroy"**
