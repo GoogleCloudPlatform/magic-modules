@@ -1267,14 +1267,30 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:    1,
 							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
 							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type:        schema.TypeBool,
-										Required:    true,
-										Description: `Whether or not the managed collection is enabled.`,
-									},
-								},
-							},
+									        	Schema: map[string]*schema.Schema{
+						            		"enabled": {
+						                		Type:        schema.TypeBool,
+						                		Required:    true,
+						                		Description: `Whether or not the managed collection is enabled.`,
+						            		},
+						            		"auto_monitoring_config": {
+						                		Type:        schema.TypeSet,
+						                		Optional:    true,
+						                		MaxItems:    1,
+						                		Description: `Configuration for GKE Workload Auto-Monitoring.`,
+						                		Elem: &schema.Resource{
+						                    			Schema: map[string]*schema.Schema{
+						                       				"scope": {
+						                            				Type:         schema.TypeString,
+						                            				Required:     true,
+						                            				Description:  `The scope of auto-monitoring.`,
+						                            				ValidateFunc: validation.StringInSlice([]string{"ALL", "NONE"}, false),
+						                        			},
+						                    			},
+						                		},
+						           		},
+						        	},
+						    	},
 						},
 						"advanced_datapath_observability_config": {
 							Type:        schema.TypeList,
@@ -5894,6 +5910,14 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
+		if autoMonitoring, ok := managed_prometheus["auto_monitoring_config"]; ok && len(autoMonitoring.([]interface{})) > 0 {
+			autoMonitoringConfig := autoMonitoring.([]interface{})[0].(map[string]interface{})
+			if scope, ok := autoMonitoringConfig["scope"].(string); ok {
+				mc.ManagedPrometheusConfig.AutoMonitoringConfig = &container.AutoMonitoringConfig {
+					Scope: scope,
+				}
+			}
+		}
 	}
 
 	if v, ok := config["advanced_datapath_observability_config"]; ok && len(v.([]interface{})) > 0 {
@@ -6871,11 +6895,23 @@ func flattenAdvancedDatapathObservabilityConfig(c *container.AdvancedDatapathObs
 }
 
 func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[string]interface{} {
-	return []map[string]interface{}{
-		{
-			"enabled": c != nil && c.Enabled,
-		},
-	}
+        if c == nil {
+                return nil
+        }
+
+        result := make(map[string]interface{})
+
+        result["enabled"] = c.Enabled
+
+        if c.AutoMonitoringConfig != nil {
+                autoMonitoringMap := make(map[string]interface{})
+                if c.AutoMonitoringConfig.Scope != "" {
+                        autoMonitoringMap["scope"] = c.AutoMonitoringConfig.Scope
+                }
+                result["auto_monitoring_config"] = autoMonitoringMap
+        }
+
+        return []map[string]interface{}{result}
 }
 
 func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]interface{} {
