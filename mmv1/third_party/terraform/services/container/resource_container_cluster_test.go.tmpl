@@ -10783,6 +10783,9 @@ resource "google_container_cluster" "primary" {
   monitoring_config {
     managed_prometheus {
       enabled = true
+      auto_monitoring_config {
+        scope = "ALL"
+      }
     }
   }
   deletion_protection = false
