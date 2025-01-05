@@ -10740,9 +10740,6 @@ resource "google_container_cluster" "primary" {
     enable_components = ["SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "SCHEDULER"]
     managed_prometheus {
       enabled = true
-      auto_monitoring_config {
-        scope = "ALL" 
-      }
     }
   }
   deletion_protection = false
@@ -10762,9 +10759,6 @@ resource "google_container_cluster" "primary" {
     enable_components = []
     managed_prometheus {
       enabled = true
-      auto_monitoring_config {
-        scope = "ALL"
-      }
     }
   }
   deletion_protection = false
@@ -10783,8 +10777,47 @@ resource "google_container_cluster" "primary" {
   monitoring_config {
     managed_prometheus {
       enabled = true
+    }
+  }
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withMonitoringConfigScopeAll(name, networkName, subnetworkName string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+    managed_prometheus {
+      enabled = true
       auto_monitoring_config {
         scope = "ALL"
+      }
+    }
+  }
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withMonitoringConfigScopeNone(name, networkName, subnetworkName string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+    managed_prometheus {
+      enabled = true
+      auto_monitoring_config {
+        scope = "NONE"
       }
     }
   }
