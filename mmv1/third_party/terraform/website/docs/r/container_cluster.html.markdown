@@ -663,6 +663,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
+* `auto_monitoring_config` - (Optional) Configuration for Auto-Monitoring which includes a `Scope` field (string). Supported values include: `ALL` and `NONE`.
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
