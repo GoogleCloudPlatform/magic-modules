@@ -106,15 +106,10 @@ func testAccAlloydbCluster_beforeUpgrade(context map[string]interface{}) string 
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   skip_await_major_version_upgrade = false
-  provider = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
     network = data.google_compute_network.default.id
-  }
-
-  labels = {
-	test = "tf-test-alloydb-cluster%{random_suffix}"
   }
   database_version = "POSTGRES_14"
 }
@@ -139,7 +134,6 @@ func testAccAlloydbCluster_afterUpgrade(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   skip_await_major_version_upgrade = false
-  provider = google-beta
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
   network_config {
