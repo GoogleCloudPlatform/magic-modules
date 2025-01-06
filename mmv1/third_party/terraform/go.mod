@@ -30,10 +30,10 @@ require (
 	github.com/stretchr/testify v1.9.0
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.24.0
-	google.golang.org/api v0.212.0
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241206012308-a4fef0638583
+	google.golang.org/api v0.214.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.2
 )
