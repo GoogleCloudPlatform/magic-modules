@@ -112,7 +112,6 @@ func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeNetwork_bgpBestPathSelectionModeAndUpdate(t *testing.T) {
    t.Parallel()
 
@@ -122,7 +121,7 @@ func TestAccComputeNetwork_bgpBestPathSelectionModeAndUpdate(t *testing.T) {
 
    acctest.VcrTest(t, resource.TestCase{
        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-       ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
        CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
        Steps: []resource.TestStep{
            {
@@ -157,7 +156,7 @@ func TestAccComputeNetwork_bgpAlwaysCompareMedAndUpdate(t *testing.T) {
 
    acctest.VcrTest(t, resource.TestCase{
        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-       ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
        CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
        Steps: []resource.TestStep{
            {
@@ -193,7 +192,7 @@ func TestAccComputeNetwork_bgpInterRegionCostAndUpdate(t *testing.T) {
 
    acctest.VcrTest(t, resource.TestCase{
        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-       ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
        CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
        Steps: []resource.TestStep{
            {
@@ -219,6 +218,7 @@ func TestAccComputeNetwork_bgpInterRegionCostAndUpdate(t *testing.T) {
    })
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeNetwork_networkProfile(t *testing.T) {
    t.Parallel()
 
@@ -303,7 +303,6 @@ func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeNetwork_default_bgp_best_path_selection_mode(t *testing.T) {
 	t.Parallel()
 
@@ -315,11 +314,11 @@ func TestAccComputeNetwork_default_bgp_best_path_selection_mode(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBetaNetwork_basic(networkName),
+				Config: testAccComputeNetwork_basic(networkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						t, "google_compute_network.bar", &network),
@@ -342,7 +341,7 @@ func TestAccComputeNetwork_default_bgp_always_compare_med(t *testing.T) {
 
    acctest.VcrTest(t, resource.TestCase{
        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-       ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
        CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
        Steps: []resource.TestStep{
            {
@@ -357,7 +356,6 @@ func TestAccComputeNetwork_default_bgp_always_compare_med(t *testing.T) {
        },
    })
 }
-{{- end }}
 
 func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
 	t.Parallel()
@@ -564,7 +562,6 @@ func testAccCheckComputeNetworkHasRoutingMode(t *testing.T, n string, network *c
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeNetworkHasBgpBestPathSelectionMode(t *testing.T, n string, network *compute.Network, bgpBestPathSelectionMode string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -652,6 +649,7 @@ func testAccCheckComputeNetworkHasBgpInterRegionCost(t *testing.T, n string, net
    }
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeNetworkHasNetworkProfile(t *testing.T, n string, network *compute.Network, networkProfile string) resource.TestCheckFunc {
    return func(s *terraform.State) error {
        config := acctest.GoogleProviderConfig(t)
@@ -747,21 +745,10 @@ resource "google_compute_network" "acc_network_routing_mode" {
 `, networkName, routingMode)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-func testAccComputeBetaNetwork_basic(networkName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "bar" {
-  provider 				  = google-beta
-  name                    = "%s"
-  auto_create_subnetworks = true
-}
-`, networkName)
-}
 
 func testAccComputeNetwork_best_bgp_path_selection_mode(networkName, bgpBestPathSelection string) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_bgp_best_path_selection_mode" {
- provider     = google-beta
  name         = "%s"
  routing_mode = "GLOBAL"
  bgp_best_path_selection_mode = "%s"
@@ -772,7 +759,6 @@ resource "google_compute_network" "acc_network_bgp_best_path_selection_mode" {
 func testAccComputeNetwork_bgp_always_compare_med(networkName string, bgpAlwaysCompareMed bool) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_bgp_always_compare_med" {
- provider     = google-beta
  name         = "%s"
  routing_mode = "GLOBAL"
  bgp_best_path_selection_mode = "STANDARD"
@@ -784,7 +770,6 @@ resource "google_compute_network" "acc_network_bgp_always_compare_med" {
 func testAccComputeNetwork_bgp_inter_region_cost(networkName, bgpInterRegionCost string) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_bgp_inter_region_cost" {
- provider     = google-beta
  name         = "%s"
  routing_mode = "GLOBAL"
  bgp_best_path_selection_mode = "STANDARD"
@@ -793,6 +778,7 @@ resource "google_compute_network" "acc_network_bgp_inter_region_cost" {
 `, networkName, bgpInterRegionCost)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeNetwork_network_profile(networkName, networkProfile string) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_network_profile" {
