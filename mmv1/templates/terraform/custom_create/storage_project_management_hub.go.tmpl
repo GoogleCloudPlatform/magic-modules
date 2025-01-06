@@ -5,13 +5,13 @@
 	}
 
 	obj := make(map[string]interface{})
-	editionConfigProp, err := expandStorageManagementHubEditionConfig(d.Get("edition_config"), d, config)
+	editionConfigProp, err := expandStorageProjectManagementHubEditionConfig(d.Get("edition_config"), d, config)
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("edition_config"); !tpgresource.IsEmptyValue(reflect.ValueOf(editionConfigProp)) && (ok || !reflect.DeepEqual(v, editionConfigProp)) {
 		obj["editionConfig"] = editionConfigProp
 	}
-	filterProp, err := expandStorageManagementHubFilter(d.Get("filter"), d, config)
+	filterProp, err := expandStorageProjectManagementHubFilter(d.Get("filter"), d, config)
 	if err != nil {
 		return err
 	} else if v, ok := d.GetOkExists("filter"); !tpgresource.IsEmptyValue(reflect.ValueOf(filterProp)) && (ok || !reflect.DeepEqual(v, filterProp)) {
@@ -23,7 +23,7 @@
 		return err
 	}
 
-	log.Printf("[DEBUG] Creating new ManagementHub: %#v", obj)
+	log.Printf("[DEBUG] Patching ManagementHub: %#v", obj)
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
@@ -32,14 +32,10 @@
 	}
 
 	headers := make(http.Header)
-  updateMask := []string{}
+  updateMask := []string{"filter"}
 
 	if d.HasChange("edition_config") {
 		updateMask = append(updateMask, "editionConfig")
-	}
-
-	if d.HasChange("filter") {
-		updateMask = append(updateMask, "filter")
 	}
 	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
@@ -61,7 +57,7 @@
 		Headers:   headers,
 	})
 	if err != nil {
-		return fmt.Errorf("Error creating ManagementHub: %s", err)
+		return fmt.Errorf("Error patching ManagementHub: %s", err)
 	}
 
 	// Store the ID now
@@ -71,6 +67,6 @@
 	}
 	d.SetId(id)
 
-	log.Printf("[DEBUG] Finished creating ManagementHub %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished patching ManagementHub %q: %#v", d.Id(), res)
 
-	return resourceStorageManagementHubRead(d, meta)
+	return resourceStorageProjectManagementHubRead(d, meta)

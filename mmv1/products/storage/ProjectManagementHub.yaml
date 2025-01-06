@@ -17,15 +17,21 @@ name: 'ProjectManagementHub'
 kind: 'storage#managementhub'
 # Resource description for the provider documentation.
 description: |
-  RESOURCE_DESCRIPTION
-references:
-  guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
-    'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
-  api: 'API_REFERENCE_URL'
+  The Project Management Hub resource represents GCS Management Hub operating on
+  individual GCP project. Management Hub is a singleton resource and individual
+  instance exists on each GCP project.
+
+  Management Hub is for Storage Admins to manage GCP storage assets at scale for
+  performance, cost, security & compliance.
+
+docs:
+  warning: |
+    Management Hub is a singleton resource which cannot be created or
+    deleted. A single instance of Management Hub exist for each GCP Project.
+    Terraform does not create or destroy this resource. Terraform resource
+    creation for this resource is simply an update operation on existing
+    resource with specified properties. Terraform deletion won't have any effect
+    on this resource rather it will only remove it from the state file.
 # Marks the resource as beta-only. Ensure a beta version block is present in
 # provider.yaml.
 # min_version: beta
@@ -44,6 +50,7 @@ custom_code:
   pre_delete: templates/terraform/constants/storage_management_hub.go.tmpl
   pre_read: templates/terraform/constants/storage_management_hub.go.tmpl
   pre_update: templates/terraform/constants/storage_management_hub.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_project_management_hub.go.tmpl
 # Overrides the URL for the resource's standard Update method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/134
 # Terraform field names enclosed in double curly braces are replaced with
@@ -75,21 +82,32 @@ properties:
     immutable: true
     url_param_only: true
     description: |
-      NAME_DESCRIPTION
+      Identifier of the GCP project. For GCP project, this field can be project
+      name or project number.
   - name: 'editionConfig'
     type: String
     required: false
     default_from_api: true
+    description: |
+      Edition configuration of the Management Hub resource. Valid values are
+      INHERIT, DISABLED and STANDARD.
   - name: 'updateTime'
     type: String
     output: true
+    description: |
+      The time at which the Management Hub resource is last updated.
   - name: 'filter'
     type: NestedObject
-    description:
+    description: |
+      Filter over location and bucket using include or exclude semantics.
+      Resources that match the include or exclude filter are exclusively
+      included or excluded from the Management Hub plan.
     properties:
       - name: excludedCloudStorageBuckets
         type: NestedObject
         required: false
+        description: |
+          Buckets to exclude from the Management Hub plan.
         conflicts:
           - 'filter.0.included_cloud_storage_buckets'
         at_least_one_of:
@@ -106,11 +124,21 @@ properties:
               properties:
                 - name: bucketId
                   type: String
+                  description: |
+                    Id of the bucket.
+                    Only one of the bucket_id and bucket_id_regex should be
+                    specified.
                 - name: bucketIdRegex
                   type: String
+                  description: |
+                    ID regex of the bucket.
+                    Only one of the bucket_id and bucket_id_regex should be
+                    specified.
       - name: includedCloudStorageBuckets
         type: NestedObject
         required: false
+        description: |
+          Buckets to include in the Management Hub plan.
         conflicts:
           - 'filter.0.excluded_cloud_storage_buckets'
         at_least_one_of:
@@ -128,12 +156,22 @@ properties:
                 - name: bucketId
                   type: String
                   required: false
+                  description: |
+                    Id of the bucket.
+                    Only one of the bucket_id and bucket_id_regex should be
+                    specified.
                 - name: bucketIdRegex
                   type: String
                   required: false
+                  description: |
+                    ID regex of the bucket.
+                    Only one of the bucket_id and bucket_id_regex should be
+                    specified.
       - name: excludedCloudStorageLocations
         type: NestedObject
         required: false
+        description: |
+          Locations to exclude from the Management Hub plan.
         conflicts:
           - 'filter.0.included_cloud_storage_locations'
         at_least_one_of:
@@ -145,11 +183,15 @@ properties:
           - name: locations
             type: Array
             required: true
+            description: |
+              List of locations.
             item_type:
               type: String
       - name: includedCloudStorageLocations
         type: NestedObject
         required: false
+        description: |
+          Locations to include in the Management Hub plan.
         conflicts:
           - 'filter.0.excluded_cloud_storage_locations'
         at_least_one_of:
@@ -161,5 +203,23 @@ properties:
           - name: locations
             type: Array
             required: true
+            description: |
+              List of locations.
             item_type:
               type: String
+  - name: 'effectiveManagementHubEdition'
+    output: true
+    description: |
+      The Management Hub edition that is effective for the resource.
+    type: NestedObject
+    properties:
+      - name: managementHub
+        type: String
+        output: true
+        description: |
+          The Management Hub resource that is applied for the target resource.
+      - name: managementHubEdition
+        type: String
+        output: true
+        description: |
+          The `ManagementHub` edition that is applicable for the resource.
