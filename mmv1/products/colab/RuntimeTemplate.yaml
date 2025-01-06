@@ -1,0 +1,169 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'RuntimeTemplate'
+description: |
+  'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM, 
+  as well as common settings such as the network and whether public internet access is enabled. When you create 
+  a runtime, its VM is created according to the specifications of a runtime template.'
+  
+references:
+  guides:
+    'Create a runtime template': 'https://cloud.google.com/colab/docs/create-runtime-template'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimeTemplates'
+base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
+immutable: true
+create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?resourceId={{name}}'
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+examples:
+  - name: 'colab_runtime_template_basic'
+    primary_resource_id: 'runtime-template'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_template_name: 'colab-runtime-template'
+  - name: 'colab_runtime_template_full'
+    primary_resource_id: 'runtime-template'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_template_name: 'colab-runtime-template'
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location for the resource: https://cloud.google.com/colab/docs/locations      
+properties:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      'The resource name of the Runtime Template'
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Runtime Template.
+    required: true
+  - name: RuntimeTemplateConfig
+    type: NestedObject
+    description: |
+     "Configuration of the runtime template"
+    properties:
+      - name: description
+        type: String
+        description: 'The description of the Runtime Template.'
+      - name: machineConfig
+        type: NestedObject
+        description: "The machine configuration of the runtime."
+        properties:
+          - name: 'machineType'
+            type: string
+            description: |
+                    The Compute Engine machine type selected for the runtime.
+            default_from_api: true
+          - name: 'acceleratorType'
+            type: enum
+            description: |
+                    The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+            enum_values:
+              - 'NVIDIA_TESLA_V100'
+              - 'NVIDIA_TESLA_T4'
+              - 'NVIDIA_TESLA_A100'
+              - 'NVIDIA_A100_80GB'
+              - 'NVIDIA_L4'
+          - name: 'acceleratorCount'
+            type: int
+            description: |
+                    The number of accelerators used by the runtime.
+      - name: dataDiskConfig
+        type: NestedObject
+        description: |
+          "The configuration for the data disk of the runtime."
+        properties:
+          - name: 'diskType'
+            type: enum
+            description: |
+                    The type of the persistent disk. 
+            enum_values:
+              - 'PD_STANDARD'
+              - 'PD_SSD'
+              - 'PD_BALANCED'
+              - 'PD_EXTREME'
+          - name: 'diskSizeGb'
+            type: int
+            description: |
+                    The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+            default_from_api: true
+      - name: NetworkConfig
+        type: NestedObject
+        description: |
+          "The network configuration for the runtime."
+        properties:
+          - name: 'enableInternetAccess'
+            type: bool
+            description: |
+                    Enable public internet access for the runtime. Enabled by default.
+            default_from_api: true
+          - name: 'network'
+            type: String
+            description: |
+                    The name of the VPC that this runtime is in.
+            default_from_api: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          - name: 'subnetwork'
+            type: String
+            description: |
+                    The name of the VPC that this runtime is in.
+            default_from_api: true
+            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: 'labels'
+        type: string
+        description: |
+          'Labels to identify and group the runtime template.'
+      - name: 'idleShutdownTimeout'
+        type: string
+        description: |
+          'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
+      - name: 'enableEuc'
+        type: bool
+        description: |
+          'Enable end user credential access for the runtime. Enabled by default.'
+      - name: 'enableSecureBoot'
+        type: bool
+        description: |
+          'Enables secure boot for the runtime. Disabled by default.'
+      - name: 'networkTags'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          'Applies the given Compute Engine tags to the runtime.'
+      - name: 'kmsKey'
+        type: String
+        description: |
+          'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
+  - name: 'runtimeTemplateId'
+    type: String
+    description:
+      The id of the runtime template. If not specified, a random id will be generated.

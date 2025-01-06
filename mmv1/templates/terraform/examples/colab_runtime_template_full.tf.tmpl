@@ -1,0 +1,5 @@
+resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  displayName = "Runtime template full"
+  location = "us-central1"
+}
