@@ -94,7 +94,34 @@ is not declared using the corresponding property.&lt;/p>
  &lt;a class="anchor" href="#cleaning-up-old-files">#&lt;/a>
 &lt;/h4>
 &lt;p>Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
-to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration">
+to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference">
+ MMv1 metadata reference
+ &lt;a class="anchor" href="#mmv1-metadata-reference">#&lt;/a>
+&lt;/h1>
+&lt;p>This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p>
+&lt;h2 id="required">
+ Required
+ &lt;a class="anchor" href="#required">#&lt;/a>
+&lt;/h2>
+&lt;h3 id="resource">
+ &lt;code>resource&lt;/code>
+ &lt;a class="anchor" href="#resource">#&lt;/a>
+&lt;/h3>
+&lt;p>The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p>
+&lt;h3 id="generation_type">
+ &lt;code>generation_type&lt;/code>
+ &lt;a class="anchor" href="#generation_type">#&lt;/a>
+&lt;/h3>
+&lt;p>The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p>
+&lt;h2 id="optional">
+ Optional
+ &lt;a class="anchor" href="#optional">#&lt;/a>
+&lt;/h2>
+&lt;h3 id="api_service_name">
+ &lt;code>api_service_name&lt;/code>
+ &lt;a class="anchor" href="#api_service_name">#&lt;/a>
+&lt;/h3>
+&lt;p>The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p></description></item><item><title>Ruby to Go Migration</title><link>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/ruby-go-changes/</guid><description>&lt;h1 id="what-has-changed-in-the-mmv1-go-migration">
  What has changed in the MMv1 Go migration
  &lt;a class="anchor" href="#what-has-changed-in-the-mmv1-go-migration">#&lt;/a>
 &lt;/h1>

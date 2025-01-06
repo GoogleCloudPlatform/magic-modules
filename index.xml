@@ -482,7 +482,34 @@ Some acceptance tests may be skipped in VCR and manual testing is required.
 &lt;/ol>
 &lt;/li>
 &lt;li>Check if release notes capture all changes in the PR, and are correctly formatted following the guidance in &lt;a href="https://googlecloudplatform.github.io/magic-modules/code-review/release-notes/">write release notes&lt;/a> before merging the PR.&lt;/li>
-&lt;/ol></description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support">
+&lt;/ol></description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference">
+ MMv1 metadata reference
+ &lt;a class="anchor" href="#mmv1-metadata-reference">#&lt;/a>
+&lt;/h1>
+&lt;p>This page documents all properties for metadata. Metadata does not impact the provider itself, but is used by Google internally for coverage metrics.&lt;/p>
+&lt;h2 id="required">
+ Required
+ &lt;a class="anchor" href="#required">#&lt;/a>
+&lt;/h2>
+&lt;h3 id="resource">
+ &lt;code>resource&lt;/code>
+ &lt;a class="anchor" href="#resource">#&lt;/a>
+&lt;/h3>
+&lt;p>The name of the Terraform resource e.g., &amp;ldquo;google_cloudfunctions2_function&amp;rdquo;.&lt;/p>
+&lt;h3 id="generation_type">
+ &lt;code>generation_type&lt;/code>
+ &lt;a class="anchor" href="#generation_type">#&lt;/a>
+&lt;/h3>
+&lt;p>The generation method used to create the Terraform resource e.g., &amp;ldquo;mmv1&amp;rdquo;, &amp;ldquo;dcl&amp;rdquo;, &amp;ldquo;handwritten&amp;rdquo;.&lt;/p>
+&lt;h2 id="optional">
+ Optional
+ &lt;a class="anchor" href="#optional">#&lt;/a>
+&lt;/h2>
+&lt;h3 id="api_service_name">
+ &lt;code>api_service_name&lt;/code>
+ &lt;a class="anchor" href="#api_service_name">#&lt;/a>
+&lt;/h3>
+&lt;p>The base name of the API used for this resource e.g., &amp;ldquo;cloudfunctions.googleapis.com&amp;rdquo;.&lt;/p></description></item><item><title>Add IAM support</title><link>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/add-iam-support/</guid><description>&lt;h1 id="add-iam-support">
  Add IAM support
  &lt;a class="anchor" href="#add-iam-support">#&lt;/a>
 &lt;/h1>
