@@ -3966,6 +3966,30 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigScopeAll(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "monitoring_config.0.managed_prometheus.0.auto_monitoring_config.0.scope", "ALL"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigScopeNone(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "monitoring_config.0.managed_prometheus.0.auto_monitoring_config.0.scope", "NONE"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
 			// Back to basic settings to test setting Prometheus on its own
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
