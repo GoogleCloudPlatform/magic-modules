@@ -57,7 +57,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 				ResourceName:            "google_compute_router_peer.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority","is_custom_learned_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerAdvertiseModeUpdate(routerName),
@@ -68,7 +68,7 @@ func TestAccComputeRouterPeer_advertiseMode(t *testing.T) {
 				ResourceName:            "google_compute_router_peer.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
+				ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority","is_custom_learned_priority_set"},
 			},
 		},
 	})
@@ -311,6 +311,7 @@ func TestAccComputeRouterPeer_UpdateIpv6Address(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
 			},
 			{
 				Config: testAccComputeRouterPeerUpdateIpv6Address(routerName, true),
@@ -324,6 +325,7 @@ func TestAccComputeRouterPeer_UpdateIpv6Address(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
 			},
 		},
 	})
@@ -351,6 +353,7 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
 			},
 			{
 				Config: testAccComputeRouterPeerIpv6(routerName, true),
@@ -364,6 +367,7 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
 			},
 			{
 				Config: testAccComputeRouterPeerIpv6(routerName, false),
@@ -377,6 +381,7 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+        ImportStateVerifyIgnore: []string{"zero_custom_learned_route_priority"},
 			},
 		},
 	})
