@@ -63,7 +63,6 @@ parameters:
     type: ResourceRef
     description: |
       Parameter Manager Parameter resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -73,7 +72,6 @@ parameters:
     type: String
     description: |
       Version ID of the Parameter Version Resource. This must be unique within the Parameter.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -83,30 +81,25 @@ properties:
     description: |
       The resource name of the Parameter Version. Format:
       `projects/{{project}}/locations/global/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       The time at which the Parameter Version was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       The time at which the Parameter Version was updated.
-    min_version: 'beta'
     output: true
   - name: 'disabled'
     type: Boolean
     description: |
       The current state of Parameter Version. This field is only applicable for updating Parameter Version.
-    min_version: 'beta'
   - name: 'payload'
     type: NestedObject
     description: |
       The payload content of a ParameterVersion resource.
-    min_version: 'beta'
     flatten_object: true
     required: true
     immutable: true
@@ -116,7 +109,6 @@ properties:
         type: String
         description: |
           The Parameter data.
-        min_version: 'beta'
         api_name: data
         required: true
         immutable: true
