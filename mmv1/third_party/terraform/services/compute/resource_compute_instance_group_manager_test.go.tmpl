@@ -394,7 +394,6 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -428,7 +427,6 @@ func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
     },
   })
 }
-{{- end }}
 
 func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 	t.Parallel()
@@ -1743,7 +1741,6 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 `, network, template, target, igm)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1835,7 +1832,6 @@ resource "google_compute_instance_group_manager" "sr-igm" {
 }
 `, network, template, igm)
 }
-{{- end }}
 
 func testAccInstanceGroupManager_waitForStatus(template, target, igm, perInstanceConfig string) string {
 	return fmt.Sprintf(`
