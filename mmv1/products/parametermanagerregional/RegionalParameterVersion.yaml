@@ -65,7 +65,6 @@ parameters:
     type: ResourceRef
     description: |
       Parameter Manager Regional Parameter resource.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -75,7 +74,6 @@ parameters:
     type: String
     description: |
       Version ID of the Regional Parameter Version Resource. This must be unique within the Regional Parameter.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -83,7 +81,6 @@ parameters:
     type: String
     description: |
       Location of Parameter Manager Regional parameter resource.
-    min_version: 'beta'
     url_param_only: true
     output: true
 properties:
@@ -92,30 +89,25 @@ properties:
     description: |
       The resource name of the Regional Parameter Version. Format:
       `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |
       The time at which the Regional Parameter Version was created.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |
       The time at which the Regional Parameter Version was updated.
-    min_version: 'beta'
     output: true
   - name: 'disabled'
     type: Boolean
     description: |
       The current state of Regional Parameter Version. This field is only applicable for updating Regional Parameter Version.
-    min_version: 'beta'
   - name: 'payload'
     type: NestedObject
     description: |
       The parameter payload of the RegionalParameterVersion.
-    min_version: 'beta'
     flatten_object: true
     required: true
     immutable: true
@@ -125,7 +117,6 @@ properties:
         type: String
         description: |
           The Regional Parameter data.
-        min_version: 'beta'
         api_name: data
         required: true
         immutable: true
