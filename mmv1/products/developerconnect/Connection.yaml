@@ -327,7 +327,7 @@ properties:
           Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook
           events, formatted as `projects/*/secrets/*/versions/*`. This is used to
           validate and create webhooks.
-        immutable: true 
+        immutable: true
         required: true
       - name: readAuthorizerCredential
         type: NestedObject
