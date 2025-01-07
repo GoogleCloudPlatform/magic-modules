@@ -44,6 +44,9 @@ iam_policy:
   # Overrides the HTTP method for setIamPolicy. Default: 'POST'
   # set_iam_policy_verb: 'POST'
 
+  # Overrides the default IamPolicyVersion (version: 1)
+  iam_policy_version: '1'
+
   # Must match the parent resource's `import_format` (or `self_link` if
   # `import_format` is unset), but with the `parent_resource_attribute`
   # value substituted for the final field.
