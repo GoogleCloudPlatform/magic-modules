@@ -79,7 +79,7 @@ type ClusterParams struct {
 	userEndpointCount         int
 }
 
-func createRedisUserCreatedConnection(params *ClusterParams) string {
+func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
 	return fmt.Sprintf(`
 		resource "google_redis_cluster_user_created_connections" "default" {
 		name = "%s"
@@ -92,7 +92,7 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 					forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network1.id
 					network = google_compute_network.network1.id
 					project_id = data.google_project.project.project_id
-					service_attachment = google_redis_cluster.default.psc_service_attachments[0].service_attachment
+					service_attachment = google_redis_cluster.test.psc_service_attachments[0].service_attachment
 				}
 			}
 			connections {
@@ -101,7 +101,7 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 					address = google_compute_address.ip2_network1.address
 					forwarding_rule = google_compute_forwarding_rule.forwarding_rule2_network1.id
 					network = google_compute_network.network1.id
-					service_attachment = google_redis_cluster.default.psc_service_attachments[1].service_attachment
+					service_attachment = google_redis_cluster.test.psc_service_attachments[1].service_attachment
 				}
 			}
 		}
@@ -112,7 +112,7 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 					address = google_compute_address.ip1_network2.address
 					forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network2.id
 					network = google_compute_network.network2.id
-					service_attachment = google_redis_cluster.default.psc_service_attachments[0].service_attachment
+					service_attachment = google_redis_cluster.test.psc_service_attachments[0].service_attachment
 				}
 			}
 			connections {
@@ -121,32 +121,32 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 					address = google_compute_address.ip2_network2.address
 					forwarding_rule = google_compute_forwarding_rule.forwarding_rule2_network2.id
 					network = google_compute_network.network2.id
-					service_attachment = google_redis_cluster.default.psc_service_attachments[1].service_attachment
+					service_attachment = google_redis_cluster.test.psc_service_attachments[1].service_attachment
 				}
 			}
 		}
 		}
 
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
-		name                   = "fwd-rule1-net1"
+		name                   = "%s"
 		region                 = "us-central1"
 		ip_address             = google_compute_address.ip1_network1.id
 		load_balancing_scheme  = ""
 		network                = google_compute_network.network1.id
-		target                 = google_redis_cluster.default.psc_service_attachments[0].service_attachment
+		target                 = google_redis_cluster.test.psc_service_attachments[0].service_attachment
 		}
 
 		resource "google_compute_forwarding_rule" "forwarding_rule2_network1" {
-		name                   = "fwd-rule2-net1"
+		name                   = "%s"
 		region                 = "us-central1"
 		ip_address             = google_compute_address.ip2_network1.id
 		load_balancing_scheme  = ""
 		network                = google_compute_network.network1.id
-		target                 = google_redis_cluster.default.psc_service_attachments[1].service_attachment
+		target                 = google_redis_cluster.test.psc_service_attachments[1].service_attachment
 		}
 
 		resource "google_compute_address" "ip1_network1" {
-		name         = "ip1-net1"
+		name         = "%s"
 		region       = "us-central1"
 		subnetwork   = google_compute_subnetwork.subnet_network1.id
 		address_type = "INTERNAL"
@@ -154,7 +154,7 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 		}
 
 		resource "google_compute_address" "ip2_network1" {
-		name         = "ip2-net1"
+		name         = "%s"
 		region       = "us-central1"
 		subnetwork   = google_compute_subnetwork.subnet_network1.id
 		address_type = "INTERNAL"
@@ -162,37 +162,37 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 		}
 
 		resource "google_compute_subnetwork" "subnet_network1" {
-		name          = "subnet1"
+		name          = "%s"
 		ip_cidr_range = "10.0.0.248/29"
 		region        = "us-central1"
 		network       = google_compute_network.network1.id
 		}
 
 		resource "google_compute_network" "network1" {
-		name                    = "net1"
+		name                    = "%s"
 		auto_create_subnetworks = false
 		}
 
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
-		name                   = "fwd-rule1-net2"
+		name                   = "%s"
 		region                 = "us-central1"
 		ip_address             = google_compute_address.ip1_network2.id
 		load_balancing_scheme  = ""
 		network                = google_compute_network.network2.id
-		target                 = google_redis_cluster.default.psc_service_attachments[0].service_attachment
+		target                 = google_redis_cluster.test.psc_service_attachments[0].service_attachment
 		}
 
 		resource "google_compute_forwarding_rule" "forwarding_rule2_network2" {
-		name                   = "fwd-rule2-net2"
+		name                   = "%s"
 		region                 = "us-central1"
 		ip_address             = google_compute_address.ip2_network2.id
 		load_balancing_scheme  = ""
 		network                = google_compute_network.network2.id
-		target                 = google_redis_cluster.default.psc_service_attachments[1].service_attachment
+		target                 = google_redis_cluster.test.psc_service_attachments[1].service_attachment
 		}
 
 		resource "google_compute_address" "ip1_network2" {
-		name         = "ip1-net2"
+		name         = "%s"
 		region       = "us-central1"
 		subnetwork   = google_compute_subnetwork.subnet_network2.id
 		address_type = "INTERNAL"
@@ -200,7 +200,7 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 		}
 
 		resource "google_compute_address" "ip2_network2" {
-		name         = "ip2-net2"
+		name         = "%s"
 		region       = "us-central1"
 		subnetwork   = google_compute_subnetwork.subnet_network2.id
 		address_type = "INTERNAL"
@@ -208,18 +208,34 @@ func createRedisUserCreatedConnection(params *ClusterParams) string {
 		}
 
 		resource "google_compute_subnetwork" "subnet_network2" {
-		name          = "subnet2"
+		name          = "%s"
 		ip_cidr_range = "10.0.0.248/29"
 		region        = "us-central1"
 		network       = google_compute_network.network2.id
 		}
 
 		resource "google_compute_network" "network2" {
-		name                    = "net2"
+		name                    = "%s"
 		auto_create_subnetworks = false
 		}
+
+		data "google_project" "project" {
+		}
 		`,
-		params.name)
+		params.name,
+		params.name+"-11", // fwd-rule1-net1
+		params.name+"-12", // fwd-rule2-net1
+		params.name+"-11", // ip1-net1
+		params.name+"-12", // ip2-net1
+		params.name+"-1",  // subnet-net1
+		params.name+"-1",  // net1
+		params.name+"-21", // fwd-rule1-net2
+		params.name+"-22", // fwd-rule2-net2
+		params.name+"-21", // ip1-net2
+		params.name+"-22", // ip2-net2
+		params.name+"-2",  // subnet-net2
+		params.name+"-2",  // net2
+	)
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
@@ -230,7 +246,7 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 	}
 	endpointBlock := ``
 	if params.userEndpointCount > 0 {
-
+		endpointBlock = createRedisClusterUserCreatedConnection(params)
 	}
 
 	return fmt.Sprintf(`
