@@ -242,8 +242,8 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
   if err != nil {
     return nil, err
   }
-  {{- if $.CustomCode.NestedQueryPostRead }}
-    {{ $.CustomTemplate $.CustomCode.NestedQueryPostRead false -}}
+  {{- if $.CustomCode.PostRead }}
+    {{ $.CustomTemplate $.CustomCode.PostRead false -}}
   {{- end }}
 
 {{- if $.CustomCode.PostRead }}

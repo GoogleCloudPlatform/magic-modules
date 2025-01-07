@@ -133,7 +133,7 @@ type CustomCode struct {
 	// the Read() method to succeed.
 	PostImport string `yaml:"post_import"`
 
-	NestedQueryPostRead string `yaml:"nested_query_post_read"`
+	PostRead string `yaml:"post_read"`
 
 	// This code is run in the generated test file to check that the
 	// resource was successfully deleted. Use this if the API responds
