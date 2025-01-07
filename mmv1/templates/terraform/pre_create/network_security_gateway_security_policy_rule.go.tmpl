@@ -1,0 +1,3 @@
+// When creating more than one rule sometimes the creation conflicts
+// Use random sleep duration to mitigate this issue
+time.Sleep(time.Duration(rand.Intn(10)) * time.Second)

@@ -73,6 +73,16 @@ func TestAccNetworkSecurityGatewaySecurityPolicyRule_multiple(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName:      "google_network_security_gateway_security_policy_rule.rule3",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_network_security_gateway_security_policy_rule.rule4",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -150,6 +160,31 @@ resource "google_network_security_gateway_security_policy_rule" "rule2" {
   description             = "Second rule"
   priority                = 2
   session_matcher         = "host() == 'example.com'"
+  application_matcher     = "request.method == 'GET'"
+  tls_inspection_enabled  = false
+  basic_profile           = "DENY"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "rule3" {
+  name                    = "tf-test-gateway-sp-rule3-%{random_suffix}"
+  location                = "us-central1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  description             = "Third rule"
+  priority                = 3
+  session_matcher         = "host() == 'update.com'"
+  application_matcher     = "request.method == 'POST'"
+  basic_profile           = "ALLOW"
+}
+
+resource "google_network_security_gateway_security_policy_rule" "rule4" {
+  name                    = "tf-test-gateway-sp-rule4-%{random_suffix}"
+  location                = "us-central1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  description             = "Fourth rule"
+  priority                = 4
+  session_matcher         = "host() == 'update.com'"
   application_matcher     = "request.method == 'GET'"
   tls_inspection_enabled  = false
   basic_profile           = "DENY"
