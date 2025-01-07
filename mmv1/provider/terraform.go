@@ -499,7 +499,7 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 
 func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	if !expectedOutputFolder(outputFolder) {
-		log.Printf("Unexpected output folder (%s) detected"+
+		log.Printf("Unexpected output folder (%s) detected "+
 			"when deciding to add HashiCorp copyright headers.\n"+
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
