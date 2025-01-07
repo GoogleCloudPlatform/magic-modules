@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v61/github"
 	"golang.org/x/oauth2"
 )
 

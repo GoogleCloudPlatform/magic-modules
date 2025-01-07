@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v61/github"
 )
 
 type Label struct {
@@ -75,7 +75,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
-		if issue.PullRequestLinks == nil || issue.PullRequestLinks.GetURL() == "" {
+		if !issue.IsPullRequest() {
 			continue
 		}
 

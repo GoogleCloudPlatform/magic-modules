@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v61/github"
 )
 
 // TestIssue represents a simplified issue structure for testing
@@ -20,10 +20,11 @@ type TestIssue struct {
 
 // Convert TestIssue to github.Issue
 func (i TestIssue) toGithubIssue() *github.Issue {
-	var labels []github.Label
+	var labels []*github.Label
 	for _, l := range i.Labels {
 		name := l
-		labels = append(labels, github.Label{Name: &name})
+		label := github.Label{Name: &name}
+		labels = append(labels, &label)
 	}
 
 	number := i.Number
