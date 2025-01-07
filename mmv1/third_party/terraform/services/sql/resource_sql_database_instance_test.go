@@ -2609,9 +2609,9 @@ func TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess(t *testing.T) {
 				// ExpectNonEmptyPlan: true,
 			},
 			{
-				RefreshState:       true,
-				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
-				ExpectNonEmptyPlan: true,
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: googleSqlDatabaseInstance_mysqlUnsetFailoverReplica(project, primaryName, replicaName),
@@ -2623,13 +2623,13 @@ func TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess(t *testing.T) {
 			{
 				// Replica's replication_cluster is not set, so we expect non-empty
 				// plan on replica.
-				Config:             googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
-				ExpectNonEmptyPlan: true,
+				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
-				RefreshState:       true,
-				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
-				ExpectNonEmptyPlan: true,
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -2703,13 +2703,13 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 			{
 				// Replica's replication_cluster is not set, so we expect non-empty
 				// plan on replica.
-				Config:             googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
-				ExpectNonEmptyPlan: true,
+				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
-				RefreshState:       true,
-				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
-				ExpectNonEmptyPlan: true,
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: googleSqlDatabaseInstance_postgresUnsetFailoverReplica(project, primaryName, replicaName),
@@ -2721,13 +2721,13 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 			{
 				// Replica's replication_cluster is not set, so we expect non-empty
 				// plan on replica.
-				Config:             googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
-				ExpectNonEmptyPlan: true,
+				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
-				RefreshState:       true,
-				Check:              resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
-				ExpectNonEmptyPlan: true,
+				RefreshState: true,
+				Check:        resource.ComposeTestCheckFunc(checkInstanceAfterSetFailover("google_sql_database_instance.original-replica")),
+				// ExpectNonEmptyPlan: true,
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.

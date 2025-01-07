@@ -921,6 +921,7 @@ is set to true. Defaults to ZONAL.`,
 			"replication_cluster": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
