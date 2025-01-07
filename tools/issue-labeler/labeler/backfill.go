@@ -75,7 +75,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
-		if issue.PullRequestLinks == nil || issue.PullRequestLinks.GetURL() == "" {
+		if !issue.IsPullRequest() {
 			continue
 		}
 
