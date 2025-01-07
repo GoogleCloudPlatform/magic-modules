@@ -95,36 +95,6 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 	return labels
 }
 
-// ComputeLabelChanges determines which labels need to be created or updated
-func ComputeLabelChanges(existingLabels []*github.Label, desiredLabels []string, desiredColor string) []LabelChange {
-	labelMap := make(map[string]*github.Label)
-	for _, label := range existingLabels {
-		labelMap[label.GetName()] = label
-	}
-
-	changes := make([]LabelChange, 0, len(desiredLabels))
-	desiredColor = strings.ToUpper(desiredColor)
-
-	for _, labelName := range desiredLabels {
-		change := LabelChange{
-			Name:  labelName,
-			Color: desiredColor,
-		}
-
-		if existingLabel, exists := labelMap[labelName]; exists {
-			change.IsNew = false
-			change.NeedsUpdate = strings.ToUpper(existingLabel.GetColor()) != desiredColor
-		} else {
-			change.IsNew = true
-			change.NeedsUpdate = false
-		}
-
-		changes = append(changes, change)
-	}
-
-	return changes
-}
-
 // EnsureLabelsWithColor applies the computed changes using the GitHub API
 func EnsureLabelsWithColor(repository string, labelNames []string, color string) error {
 	client := newGitHubClient()
@@ -161,4 +131,34 @@ func EnsureLabelsWithColor(repository string, labelNames []string, color string)
 	}
 
 	return nil
+}
+
+// ComputeLabelChanges determines which labels need to be created or updated
+func ComputeLabelChanges(existingLabels []*github.Label, desiredLabels []string, desiredColor string) []LabelChange {
+	labelMap := make(map[string]*github.Label)
+	for _, label := range existingLabels {
+		labelMap[label.GetName()] = label
+	}
+
+	changes := make([]LabelChange, 0, len(desiredLabels))
+	desiredColor = strings.ToUpper(desiredColor)
+
+	for _, labelName := range desiredLabels {
+		change := LabelChange{
+			Name:  labelName,
+			Color: desiredColor,
+		}
+
+		if existingLabel, exists := labelMap[labelName]; exists {
+			change.IsNew = false
+			change.NeedsUpdate = strings.ToUpper(existingLabel.GetColor()) != desiredColor
+		} else {
+			change.IsNew = true
+			change.NeedsUpdate = false
+		}
+
+		changes = append(changes, change)
+	}
+
+	return changes
 }
