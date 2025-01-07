@@ -9,4 +9,5 @@ resource "google_compute_subnetwork" "subnetwork-ipv6-only" {
 resource "google_compute_network" "custom-test" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
+  enable_ula_internal_ipv6 = true
 }

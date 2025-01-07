@@ -131,7 +131,7 @@ examples:
       subnetwork_name: 'subnet-ipv6-only'
       network_name: 'network-ipv6-only'
   - name: 'subnetwork_ipv6_only_external'
-    primary_resource_id: 'subnetwork-ipv6-only-external'
+    primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
     vars:
       subnetwork_name: 'subnet-ipv6-only'
