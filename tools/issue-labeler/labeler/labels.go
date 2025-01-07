@@ -33,6 +33,13 @@ type RegexpLabel struct {
 	Label  string
 }
 
+type LabelChange struct {
+	Name        string
+	Color       string
+	IsNew       bool
+	NeedsUpdate bool
+}
+
 func BuildRegexLabels(teamsYaml []byte) ([]RegexpLabel, error) {
 	enrolledTeams := make(map[string]LabelData)
 	regexpLabels := []RegexpLabel{}
@@ -88,10 +95,40 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 	return labels
 }
 
-// EnsureLabelsWithColor ensures service labels exist with the correct color
+// ComputeLabelChanges determines which labels need to be created or updated
+func ComputeLabelChanges(existingLabels []*github.Label, desiredLabels []string, desiredColor string) []LabelChange {
+	labelMap := make(map[string]*github.Label)
+	for _, label := range existingLabels {
+		labelMap[label.GetName()] = label
+	}
+
+	changes := make([]LabelChange, 0, len(desiredLabels))
+	desiredColor = strings.ToUpper(desiredColor)
+
+	for _, labelName := range desiredLabels {
+		change := LabelChange{
+			Name:  labelName,
+			Color: desiredColor,
+		}
+
+		if existingLabel, exists := labelMap[labelName]; exists {
+			change.IsNew = false
+			change.NeedsUpdate = strings.ToUpper(existingLabel.GetColor()) != desiredColor
+		} else {
+			change.IsNew = true
+			change.NeedsUpdate = false
+		}
+
+		changes = append(changes, change)
+	}
+
+	return changes
+}
+
+// EnsureLabelsWithColor applies the computed changes using the GitHub API
 func EnsureLabelsWithColor(repository string, labelNames []string, color string) error {
-	glog.Infof("Modifying labels for %s", repository)
 	client := newGitHubClient()
+	ctx := context.Background()
 	owner, repo, err := splitRepository(repository)
 	if err != nil {
 		return fmt.Errorf("invalid repository format: %w", err)
@@ -103,39 +140,23 @@ func EnsureLabelsWithColor(repository string, labelNames []string, color string)
 		return fmt.Errorf("failed to list existing labels: %w", err)
 	}
 
-	// Create a map for quick lookup
-	labelMap := make(map[string]*github.Label)
-	for _, label := range existingLabels {
-		labelMap[label.GetName()] = label
-	}
-
-	ctx := context.Background()
-	desiredColor := strings.ToUpper(color)
-
-	// Process each desired label
-	for _, labelName := range labelNames {
-		if existingLabel, exists := labelMap[labelName]; exists {
-			// Update if color doesn't match
-			if strings.ToUpper(existingLabel.GetColor()) != desiredColor {
-				existingLabel.Color = &desiredColor
-				_, _, err = client.Issues.EditLabel(ctx, owner, repo, labelName, existingLabel)
-				if err != nil {
-					return fmt.Errorf("failed to update label %s color: %w", labelName, err)
-				}
-				glog.Infof("Updated label %q color from %q to %q", labelName, existingLabel.GetColor(), color)
-			} else {
-				glog.Infof("Label %q already exists with correct color", labelName)
-			}
-		} else {
-			// Create new label
-			_, _, err = client.Issues.CreateLabel(ctx, owner, repo, &github.Label{
-				Name:  &labelName,
-				Color: &color,
+	changes := ComputeLabelChanges(existingLabels, labelNames, color)
+	for _, change := range changes {
+		if change.IsNew {
+			_, _, err := client.Issues.CreateLabel(ctx, owner, repo, &github.Label{
+				Name:  &change.Name,
+				Color: &change.Color,
 			})
 			if err != nil {
-				return fmt.Errorf("failed to create label %s: %w", labelName, err)
+				return fmt.Errorf("failed to create label %s: %w", change.Name, err)
 			}
-			glog.Infof("Created new label %q with color %q", labelName, color)
+		} else if change.NeedsUpdate {
+			_, _, err := client.Issues.EditLabel(ctx, owner, repo, change.Name, &github.Label{
+				Color: &change.Color,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to update label %s color: %w", change.Name, err)
+			}
 		}
 	}
 
