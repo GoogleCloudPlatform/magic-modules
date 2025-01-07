@@ -70,6 +70,8 @@ custom_code:
   encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
   post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -105,3 +107,8 @@ properties:
     ignore_read: true
     immutable: true
     output: true
+  - name: 'etag'
+    type: String
+    default_value: ''
+    description: |
+      Etag is used to prevent overwriting the list of perimeter resources on PATCH calls.
