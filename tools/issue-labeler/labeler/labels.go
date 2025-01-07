@@ -84,19 +84,3 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 
 	return labels
 }
-
-// EnsureLabelsWithColor ensures a service label exists with the correct color
-func EnsureLabelsWithColor(repository string, labelNames []string, color string) error {
-	glog.Infof("Modifying labels for %s", repository)
-	client := newGitHubClient()
-	owner, repo, err := splitRepository(repository)
-	if err != nil {
-		return fmt.Errorf("invalid repository format: %w", err)
-	}
-
-	for _, labelName := range labelNames {
-		ensureLabelWithColor(client, owner, repo, labelName, color)
-	}
-
-	return nil
-}
