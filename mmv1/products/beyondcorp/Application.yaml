@@ -21,13 +21,13 @@ create_url: projects/{{project}}/locations/global/securityGateways/{{security_ga
 update_verb: PATCH
 id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
 import_format:
-- projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
+  - projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
 examples:
-- name: beyondcorp_security_gateway_application_basic
-  primary_resource_id: example
-  vars:
-    security_gateway_name: default
-    application_name: google
+  - name: beyondcorp_security_gateway_application_basic
+    primary_resource_id: example
+    vars:
+      security_gateway_name: default
+      application_name: google
 autogen_async: true
 async:
   operation:
@@ -37,9 +37,9 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
@@ -47,65 +47,65 @@ async:
   include_project: false
 autogen_status: QXBwbGljYXRpb24=
 parameters:
-- name: securityGatewaysId
-  type: String
-  description: Part of `parent`. See documentation of `projectsId`.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: applicationId
-  type: String
-  description: |-
-    Optional. User-settable Application resource ID.
-    * Must start with a letter.
-    * Must contain between 4-63 characters from `/a-z-/`.
-    * Must end with a number or letter.
-  immutable: true
-  url_param_only: true
-  required: true
+  - name: securityGatewaysId
+    type: String
+    description: Part of `parent`. See documentation of `projectsId`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: applicationId
+    type: String
+    description: |-
+      Optional. User-settable Application resource ID.
+      * Must start with a letter.
+      * Must contain between 4-63 characters from `/a-z-/`.
+      * Must end with a number or letter.
+    immutable: true
+    url_param_only: true
+    required: true
 properties:
-- name: createTime
-  type: String
-  description: Output only. Timestamp when the resource was created.
-  output: true
-- name: displayName
-  type: String
-  description: |-
-    Optional. An arbitrary user-provided name for the Application resource.
-    Cannot exceed 64 characters.
-- name: endpointMatchers
-  type: Array
-  description: |-
-    Required. Endpoint matchers associated with an application.
-    A combination of hostname and ports as endpoint matcher is used to match
-    the application.
-    Match conditions for OR logic.
-    An array of match conditions to allow for multiple matching criteria.
-    The rule is considered a match if one the conditions are met.
-    The conditions can be one of the following combination
-    (Hostname), (Hostname & Ports)
+  - name: createTime
+    type: String
+    description: Output only. Timestamp when the resource was created.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      Optional. An arbitrary user-provided name for the Application resource.
+      Cannot exceed 64 characters.
+  - name: endpointMatchers
+    type: Array
+    description: |-
+      Required. Endpoint matchers associated with an application.
+      A combination of hostname and ports as endpoint matcher is used to match
+      the application.
+      Match conditions for OR logic.
+      An array of match conditions to allow for multiple matching criteria.
+      The rule is considered a match if one the conditions are met.
+      The conditions can be one of the following combination
+      (Hostname), (Hostname & Ports)
 
-    EXAMPLES:
-    Hostname - ("*.abc.com"), ("xyz.abc.com")
-    Hostname and Ports - ("abc.com" and "22"), ("abc.com" and "22,33") etc
-  required: true
-  item_type:
-    type: NestedObject
-    properties:
-    - name: hostname
-      type: String
-      description: Required. Hostname of the application.
-      required: true
-    - name: ports
-      type: Array
-      description: Optional. Ports of the application.
-      item_type:
-        type: Integer
-- name: name
-  type: String
-  description: Identifier. Name of the resource.
-  output: true
-- name: updateTime
-  type: String
-  description: Output only. Timestamp when the resource was last modified.
-  output: true
+      EXAMPLES:
+      Hostname - ("*.abc.com"), ("xyz.abc.com")
+      Hostname and Ports - ("abc.com" and "22"), ("abc.com" and "22,33") etc
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: hostname
+          type: String
+          description: Required. Hostname of the application.
+          required: true
+        - name: ports
+          type: Array
+          description: Optional. Ports of the application.
+          item_type:
+            type: Integer
+  - name: name
+    type: String
+    description: Identifier. Name of the resource.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Timestamp when the resource was last modified.
+    output: true
