@@ -25,7 +25,7 @@ func TestAccApigeeOrganization_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeOrganization_full(default_context),
@@ -87,13 +87,6 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
 }
 
-resource "google_project_service" "kms" {
-  provider = google
-
-  project = google_project.project.project_id
-  service = "cloudkms.googleapis.com"
-}
-
 resource "google_compute_network" "apigee_network" {
   provider = google
 
@@ -108,7 +101,7 @@ resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 21
   network       = google_compute_network.apigee_network.id
   project       = google_project.project.project_id
 }
@@ -122,62 +115,18 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   depends_on              = [google_project_service.servicenetworking]
 }
 
-resource "google_kms_key_ring" "apigee_keyring" {
+resource "google_apigee_organization" "apigee_org" {
   provider = google
 
-  name       = "apigee-keyring"
-  location   = "us-central1"
-  project    = google_project.project.project_id
-  depends_on = [google_project_service.kms]
-}
-
-resource "google_kms_crypto_key" "apigee_key" {
-  provider = google
-
-  name            = "apigee-key"
-  key_ring        = google_kms_key_ring.apigee_keyring.id
-}
-
-resource "google_project_service_identity" "apigee_sa" {
-  provider = google
-
-  project = google_project.project.project_id
-  service = google_project_service.apigee.service
-}
-
-resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
-  provider = google
-
-  crypto_key_id = google_kms_crypto_key.apigee_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = google_project_service_identity.apigee_sa.member
-}
-
-resource "google_apigee_organization" "org" {
-  provider = google
-
-  display_name                         = "apigee-org"
-  description                          = "Terraform-managed Apigee Org"
-  analytics_region                     = "us-central1"
-  project_id                           = google_project.project.project_id
-  authorized_network                   = google_compute_network.apigee_network.id
-  billing_type                         = "EVALUATION"
-  runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id
-  properties {
-    property {
-      name = "features.hybrid.enabled"
-      value = "true"
-    }
-    property {
-      name = "features.mart.connect.enabled"
-      value = "true"
-    }
-  }
-
+  display_name       = "apigee-org"
+  analytics_region   = "us-central1"
+  description        = "Terraform-managed Apigee Org"
+  project_id         = google_project.project.project_id
+  authorized_network = google_compute_network.apigee_network.id
+  billing_type       = "EVALUATION"
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
-    google_kms_crypto_key_iam_member.apigee_sa_keyuser,
+    google_project_service.apigee,
   ]
 }
 `, context)
@@ -216,13 +165,6 @@ resource "google_project_service" "servicenetworking" {
   service = "servicenetworking.googleapis.com"
 }
 
-resource "google_project_service" "kms" {
-  provider = google
-
-  project = google_project.project.project_id
-  service = "cloudkms.googleapis.com"
-}
-
 resource "google_compute_network" "apigee_network" {
   provider = google
 
@@ -237,7 +179,7 @@ resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 16
+  prefix_length = 21
   network       = google_compute_network.apigee_network.id
   project       = google_project.project.project_id
 }
@@ -251,62 +193,18 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   depends_on              = [google_project_service.servicenetworking]
 }
 
-resource "google_kms_key_ring" "apigee_keyring" {
+resource "google_apigee_organization" "apigee_org" {
   provider = google
 
-  name       = "apigee-keyring"
-  location   = "us-central1"
-  project    = google_project.project.project_id
-  depends_on = [google_project_service.kms]
-}
-
-resource "google_kms_crypto_key" "apigee_key" {
-  provider = google
-
-  name            = "apigee-key"
-  key_ring        = google_kms_key_ring.apigee_keyring.id
-}
-
-resource "google_project_service_identity" "apigee_sa" {
-  provider = google
-
-  project = google_project.project.project_id
-  service = google_project_service.apigee.service
-}
-
-resource "google_kms_crypto_key_iam_member" "apigee_sa_keyuser" {
-  provider = google
-
-  crypto_key_id = google_kms_crypto_key.apigee_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = google_project_service_identity.apigee_sa.member
-}
-
-resource "google_apigee_organization" "org" {
-  provider = google
-
-  display_name                         = "apigee-org"
-  description                          = "%{org_description}"
-  analytics_region                     = "us-central1"
-  project_id                           = google_project.project.project_id
-  authorized_network                   = google_compute_network.apigee_network.id
-  billing_type                         = "EVALUATION"
-  runtime_database_encryption_key_name = google_kms_crypto_key.apigee_key.id
-  properties {
-    property {
-      name = "features.hybrid.enabled"
-      value = "true"
-    }
-    property {
-      name = "features.mart.connect.enabled"
-      value = "true"
-    }
-  }
-
+  display_name       = "apigee-org"
+  analytics_region   = "us-central1"
+  description        = "%{org_description}"
+  project_id         = google_project.project.project_id
+  authorized_network = google_compute_network.apigee_network.id
+  billing_type       = "EVALUATION"
   depends_on = [
     google_service_networking_connection.apigee_vpc_connection,
-    google_kms_crypto_key_iam_member.apigee_sa_keyuser,
+    google_project_service.apigee,
   ]
 }
 `, context)
