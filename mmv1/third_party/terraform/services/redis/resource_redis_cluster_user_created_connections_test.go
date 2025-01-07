@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-// Validate that replica count is updated for the cluster
+// Validate that cluster endpoints are updated for the cluster
 func TestAccRedisCluster_updateClusterEndpoints(t *testing.T) {
 	t.Parallel()
 
@@ -17,7 +17,7 @@ func TestAccRedisCluster_updateClusterEndpoints(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -237,7 +237,6 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 		%s
 		%s
 		resource "google_network_connectivity_service_connection_policy" "default" {
-			provider = google-beta
 			name = "%s"
 			location = "us-central1"
 			service_class = "gcp-memorystore-redis"
@@ -249,7 +248,6 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 		}
 
 		resource "google_compute_subnetwork" "producer_subnet" {
-			provider      = google-beta
 			name          = "%s"
 			ip_cidr_range = "10.0.0.16/28"
 			region        = "us-central1"
@@ -257,7 +255,6 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 		}
 
 		resource "google_compute_network" "producer_net" {
-			provider                = google-beta
 			name                    = "%s"
 			auto_create_subnetworks = false
 		}
@@ -341,7 +338,6 @@ func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster 
 
 	return fmt.Sprintf(`
 		resource "google_redis_cluster" "%s" {
-		provider = google-beta
 		name           = "%s"
 		replica_count = %d
 		shard_count = %d
