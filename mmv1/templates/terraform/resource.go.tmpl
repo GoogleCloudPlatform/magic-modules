@@ -567,6 +567,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
     })
+{{- if $.CustomCode.PostRead }}
+    {{ $.CustomTemplate $.CustomCode.PostRead false -}}
+{{- end }}
     if err != nil {
 {{- if $.ReadErrorTransform -}}
         return transport_tpg.HandleNotFoundError({{ $.ReadErrorTransform }}(err), d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
