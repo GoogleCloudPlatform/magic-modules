@@ -1,13 +1,16 @@
 package labeler
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"sort"
+	"strings"
 
 	_ "embed"
 
 	"github.com/golang/glog"
+	"github.com/google/go-github/v61/github"
 	"gopkg.in/yaml.v2"
 )
 
@@ -85,7 +88,7 @@ func ComputeLabels(resources []string, regexpLabels []RegexpLabel) []string {
 	return labels
 }
 
-// EnsureLabelsWithColor ensures a service label exists with the correct color
+// EnsureLabelsWithColor ensures service labels exist with the correct color
 func EnsureLabelsWithColor(repository string, labelNames []string, color string) error {
 	glog.Infof("Modifying labels for %s", repository)
 	client := newGitHubClient()
@@ -94,8 +97,46 @@ func EnsureLabelsWithColor(repository string, labelNames []string, color string)
 		return fmt.Errorf("invalid repository format: %w", err)
 	}
 
+	// Get all existing labels first
+	existingLabels, err := listLabels(repository)
+	if err != nil {
+		return fmt.Errorf("failed to list existing labels: %w", err)
+	}
+
+	// Create a map for quick lookup
+	labelMap := make(map[string]*github.Label)
+	for _, label := range existingLabels {
+		labelMap[label.GetName()] = label
+	}
+
+	ctx := context.Background()
+	desiredColor := strings.ToUpper(color)
+
+	// Process each desired label
 	for _, labelName := range labelNames {
-		ensureLabelWithColor(client, owner, repo, labelName, color)
+		if existingLabel, exists := labelMap[labelName]; exists {
+			// Update if color doesn't match
+			if strings.ToUpper(existingLabel.GetColor()) != desiredColor {
+				existingLabel.Color = &desiredColor
+				_, _, err = client.Issues.EditLabel(ctx, owner, repo, labelName, existingLabel)
+				if err != nil {
+					return fmt.Errorf("failed to update label %s color: %w", labelName, err)
+				}
+				glog.Infof("Updated label %q color from %q to %q", labelName, existingLabel.GetColor(), color)
+			} else {
+				glog.Infof("Label %q already exists with correct color", labelName)
+			}
+		} else {
+			// Create new label
+			_, _, err = client.Issues.CreateLabel(ctx, owner, repo, &github.Label{
+				Name:  &labelName,
+				Color: &color,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create label %s: %w", labelName, err)
+			}
+			glog.Infof("Created new label %q with color %q", labelName, color)
+		}
 	}
 
 	return nil

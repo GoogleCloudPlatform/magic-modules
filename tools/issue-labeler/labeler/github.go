@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/google/go-github/v61/github"
 	"golang.org/x/oauth2"
 )
@@ -33,46 +32,31 @@ func splitRepository(repository string) (string, string, error) {
 	return owner, repo, nil
 }
 
-func ensureLabelWithColor(client *github.Client, owner, repo, labelName, color string) error {
-	existingLabel, err := getLabel(client, owner, repo, labelName)
-	desiredColor := strings.ToUpper(color)
-	ctx := context.Background()
-
+// ListLabels returns all labels for a repository
+func listLabels(repository string) ([]*github.Label, error) {
+	client := newGitHubClient()
+	owner, repo, err := splitRepository(repository)
 	if err != nil {
-		return fmt.Errorf("failed to check for existing label %s: %w", labelName, err)
-	} else if existingLabel != nil && strings.ToUpper(existingLabel.GetColor()) != desiredColor {
-		existingLabel.Color = &desiredColor
-		_, _, err = client.Issues.EditLabel(ctx, owner, repo, labelName, existingLabel)
-		if err != nil {
-			return fmt.Errorf("failed to update label %s color: %w", labelName, err)
-		}
-		glog.Infof("Updated label %q color from %q to %q", labelName, existingLabel.GetColor(), color)
-	} else if existingLabel == nil {
-		_, _, err = client.Issues.CreateLabel(ctx, owner, repo, &github.Label{
-			Name:  &labelName,
-			Color: &color,
-		})
-		if err != nil {
-			return fmt.Errorf("failed to create label %s: %w", labelName, err)
-		}
-		glog.Infof("Created new label %q with color %q", labelName, color)
-
-	} else {
-		glog.Infof("Label %q already exists with correct color", labelName)
+		return nil, fmt.Errorf("invalid repository format: %w", err)
 	}
 
-	return nil
-}
-
-// getLabel attempts to get an existing label
-func getLabel(client *github.Client, owner, repo, labelName string) (*github.Label, error) {
 	ctx := context.Background()
-	label, resp, err := client.Issues.GetLabel(ctx, owner, repo, labelName)
-	if err != nil {
-		if resp != nil && resp.StatusCode == 404 {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("failed to get label: %w", err)
+	opts := &github.ListOptions{
+		PerPage: 100,
 	}
-	return label, nil
+
+	var allLabels []*github.Label
+	for {
+		labels, resp, err := client.Issues.ListLabels(ctx, owner, repo, opts)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list labels: %w", err)
+		}
+		allLabels = append(allLabels, labels...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	return allLabels, nil
 }
