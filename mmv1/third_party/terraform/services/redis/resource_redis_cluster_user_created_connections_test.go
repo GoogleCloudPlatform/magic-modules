@@ -79,7 +79,51 @@ type ClusterParams struct {
 	userEndpointCount         int
 }
 
-func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
+func createRedisClusterEndpoints(params *ClusterParams) string {
+	if params.userEndpointCount == 2 {
+		return createRedisClusterEndpointsWithTwoUserCreatedConnections(params)
+	} else if params.userEndpointCount == 1 {
+		return createRedisClusterEndpointsWithOneUserCreatedConnections(params)
+	}
+	return ``
+}
+
+func createRedisClusterEndpointsWithOneUserCreatedConnections(params *ClusterParams) string {
+	return fmt.Sprintf(`
+		resource "google_redis_cluster_user_created_connections" "default" {
+		name = "%s"
+		region = "us-central1"
+		cluster_endpoints {
+			connections {
+				psc_connection {
+					psc_connection_id = google_compute_forwarding_rule.forwarding_rule1_network1.psc_connection_id
+					address = google_compute_address.ip1_network1.address
+					forwarding_rule = google_compute_forwarding_rule.forwarding_rule1_network1.id
+					network = google_compute_network.network1.id
+					project_id = data.google_project.project.project_id
+					service_attachment = google_redis_cluster.test.psc_service_attachments[0].service_attachment
+				}
+			}
+			connections {
+				psc_connection {
+					psc_connection_id = google_compute_forwarding_rule.forwarding_rule2_network1.psc_connection_id
+					address = google_compute_address.ip2_network1.address
+					forwarding_rule = google_compute_forwarding_rule.forwarding_rule2_network1.id
+					network = google_compute_network.network1.id
+					service_attachment = google_redis_cluster.test.psc_service_attachments[1].service_attachment
+				}
+			}
+		}
+		}
+		%s
+		`,
+		params.name,
+		createRedisClusterUserCreatedConnection1(params),
+	)
+
+}
+
+func createRedisClusterEndpointsWithTwoUserCreatedConnections(params *ClusterParams) string {
 	return fmt.Sprintf(`
 		resource "google_redis_cluster_user_created_connections" "default" {
 		name = "%s"
@@ -126,7 +170,17 @@ func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
 			}
 		}
 		}
+		%s
+		%s
+		`,
+		params.name,
+		createRedisClusterUserCreatedConnection1(params),
+		createRedisClusterUserCreatedConnection2(params),
+	)
+}
 
+func createRedisClusterUserCreatedConnection1(params *ClusterParams) string {
+	return fmt.Sprintf(`
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network1" {
 		name                   = "%s"
 		region                 = "us-central1"
@@ -172,7 +226,21 @@ func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
 		name                    = "%s"
 		auto_create_subnetworks = false
 		}
+		
+		data "google_project" "project" {
+		}
+		`,
+		params.name+"-11", // fwd-rule1-net1
+		params.name+"-12", // fwd-rule2-net1
+		params.name+"-11", // ip1-net1
+		params.name+"-12", // ip2-net1
+		params.name+"-1",  // subnet-net1
+		params.name+"-1",  // net1
+	)
+}
 
+func createRedisClusterUserCreatedConnection2(params *ClusterParams) string {
+	return fmt.Sprintf(`
 		resource "google_compute_forwarding_rule" "forwarding_rule1_network2" {
 		name                   = "%s"
 		region                 = "us-central1"
@@ -222,13 +290,6 @@ func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
 		data "google_project" "project" {
 		}
 		`,
-		params.name,
-		params.name+"-11", // fwd-rule1-net1
-		params.name+"-12", // fwd-rule2-net1
-		params.name+"-11", // ip1-net1
-		params.name+"-12", // ip2-net1
-		params.name+"-1",  // subnet-net1
-		params.name+"-1",  // net1
 		params.name+"-21", // fwd-rule1-net2
 		params.name+"-22", // fwd-rule2-net2
 		params.name+"-21", // ip1-net2
@@ -236,6 +297,7 @@ func createRedisClusterUserCreatedConnection(params *ClusterParams) string {
 		params.name+"-2",  // subnet-net2
 		params.name+"-2",  // net2
 	)
+
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
