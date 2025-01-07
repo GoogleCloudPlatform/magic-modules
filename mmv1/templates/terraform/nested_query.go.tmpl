@@ -242,7 +242,8 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
   if err != nil {
     return nil, err
   }
-{{- if $.CustomCode.PostRead }}
+
+  {{- if $.CustomCode.PostRead }}
   {{ $.CustomTemplate $.CustomCode.PostRead false -}}
 {{- end }}
   var v interface{}
