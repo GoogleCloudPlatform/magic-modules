@@ -44,6 +44,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  post_delete: 'templates/terraform/post_delete/sleep.go.tmpl'
 examples:
   - name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'
