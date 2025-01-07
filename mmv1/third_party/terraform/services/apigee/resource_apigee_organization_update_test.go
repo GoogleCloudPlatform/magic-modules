@@ -158,7 +158,7 @@ resource "google_apigee_organization" "org" {
   provider = google
 
   display_name                         = "apigee-org"
-  description                          = "%{org_description}"
+  description                          = "Terraform-managed Apigee Org"
   analytics_region                     = "us-central1"
   project_id                           = google_project.project.project_id
   authorized_network                   = google_compute_network.apigee_network.id
@@ -287,7 +287,7 @@ resource "google_apigee_organization" "org" {
   provider = google
 
   display_name                         = "apigee-org"
-  description                          = "Terraform-managed Apigee Org"
+  description                          = "%{org_description}"
   analytics_region                     = "us-central1"
   project_id                           = google_project.project.project_id
   authorized_network                   = google_compute_network.apigee_network.id
