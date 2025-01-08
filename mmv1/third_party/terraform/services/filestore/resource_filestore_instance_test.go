@@ -438,7 +438,7 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 func testAccFileInstanceTags(name string, tags map[string]string) string {
 	r := fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
-  name = "tf-instance-%s"
+  name = "tf-test-instance-%s"
   zone = "us-central1-b"
   tier = "BASIC_HDD"
   file_shares {
