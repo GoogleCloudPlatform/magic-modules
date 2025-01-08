@@ -61,7 +61,6 @@ properties:
   - name: 'name'
     type: String
     url_param_only: true
-    required: true
     description: 'The resource name of the Runtime Template'
   - name: 'displayName'
     type: String
@@ -77,7 +76,6 @@ properties:
      'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
-        required: true
         type: string
         description: |
                 The Compute Engine machine type selected for the runtime.
@@ -114,7 +112,6 @@ properties:
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
   - name: networkSpec
     type: NestedObject
-    required: true
     description: 'The network configuration for the runtime.'
     properties:
       - name: 'enableInternetAccess'
