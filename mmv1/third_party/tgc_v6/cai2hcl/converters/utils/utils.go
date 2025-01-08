@@ -23,7 +23,7 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
-// Remove the Terraform attribution label "goog-terraform-provisioned" from lables
+// Remove the Terraform attribution label "goog-terraform-provisioned" from labels
 func RemoveTerraformAttributionLabel(raw interface{}) map[string]interface{} {
 	if raw == nil {
 		return nil
