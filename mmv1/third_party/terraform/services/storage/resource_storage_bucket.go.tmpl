@@ -781,7 +781,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 {{- if ne $.TargetVersionName "ga" }}
 	if v, ok := d.GetOk("ip_filter"); ok {
-		sb.IpFilter = expandIpFilter(v.([]interface{}))
+		sb.IpFilter = expandBucketIpFilter(v.([]interface{}))
 	}
 {{- end }}
 
@@ -972,7 +972,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 {{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("ip_filter") {
 		if v, ok := d.GetOk("ip_filter"); ok {
-			sb.IpFilter = expandIpFilter(v.([]interface{}))
+			sb.IpFilter = expandBucketIpFilter(v.([]interface{}))
 		}
 	}
 {{- end }}
@@ -1893,7 +1893,7 @@ func lockRetentionPolicy(bucketsService *storage.BucketsService, bucketName stri
 }
 
 {{- if ne $.TargetVersionName "ga" }}
-func flattenIpFilter(ipFilter *storage.BucketIpFilter) []map[string]interface{} {
+func flattenBucketIpFilter(ipFilter *storage.BucketIpFilter) []map[string]interface{} {
 	ipFilterList := make([]map[string]interface{}, 0, 1)
 
 	if ipFilter == nil {
@@ -1904,17 +1904,17 @@ func flattenIpFilter(ipFilter *storage.BucketIpFilter) []map[string]interface{} 
 		"mode": ipFilter.Mode,
 	}
 
-	if publicSrc := flattenIpFilterPublicNetworkSource(ipFilter.PublicNetworkSource); publicSrc != nil {
+	if publicSrc := flattenBucketIpFilterPublicNetworkSource(ipFilter.PublicNetworkSource); publicSrc != nil {
 		filterItem["public_network_source"] = publicSrc
 	}
-	if vpcSrc := flattenIpFilterVpcNetworkSources(ipFilter.VpcNetworkSources); vpcSrc != nil {
+	if vpcSrc := flattenBucketIpFilterVpcNetworkSources(ipFilter.VpcNetworkSources); vpcSrc != nil {
 		filterItem["vpc_network_sources"] = vpcSrc
 	}
 
 	return append(ipFilterList, filterItem)
 }
 
-func flattenIpFilterPublicNetworkSource(publicNetworkSource *storage.BucketIpFilterPublicNetworkSource) []map[string]interface{} {
+func flattenBucketIpFilterPublicNetworkSource(publicNetworkSource *storage.BucketIpFilterPublicNetworkSource) []map[string]interface{} {
 	if publicNetworkSource == nil || len(publicNetworkSource.AllowedIpCidrRanges) == 0 {
 		return nil
 	}
@@ -1926,7 +1926,7 @@ func flattenIpFilterPublicNetworkSource(publicNetworkSource *storage.BucketIpFil
 	}
 }
 
-func flattenIpFilterVpcNetworkSources(vpnNetworkSource []*storage.BucketIpFilterVpcNetworkSources) []map[string]interface{} {
+func flattenBucketIpFilterVpcNetworkSources(vpnNetworkSource []*storage.BucketIpFilterVpcNetworkSources) []map[string]interface{} {
 	if len(vpnNetworkSource) == 0 {
 		return nil
 	}
@@ -1943,7 +1943,7 @@ func flattenIpFilterVpcNetworkSources(vpnNetworkSource []*storage.BucketIpFilter
 	return srcs
 }
 
-func expandIpFilter(v interface{}) (*storage.BucketIpFilter) {
+func expandBucketIpFilter(v interface{}) (*storage.BucketIpFilter) {
 	ipfs := v.([]interface{})
 	if len(ipfs) == 0 || ipfs[0] == nil {
 		return nil
@@ -1951,13 +1951,13 @@ func expandIpFilter(v interface{}) (*storage.BucketIpFilter) {
 	ipf := ipfs[0].(map[string]interface{})
 	return &storage.BucketIpFilter{
 		Mode:                ipf["mode"].(string),
-		PublicNetworkSource: expandIpFilterPublicNetworkSource(ipf["public_network_source"]),
-		VpcNetworkSources:   expandIpFilterVpcNetworkSources(ipf["vpc_network_sources"]),
+		PublicNetworkSource: expandBucketIpFilterPublicNetworkSource(ipf["public_network_source"]),
+		VpcNetworkSources:   expandBucketIpFilterVpcNetworkSources(ipf["vpc_network_sources"]),
 		ForceSendFields:     []string{"PublicNetworkSource", "VpcNetworkSources"},
 	}
 }
 
-func expandIpFilterPublicNetworkSource(v interface{}) (*storage.BucketIpFilterPublicNetworkSource) {
+func expandBucketIpFilterPublicNetworkSource(v interface{}) (*storage.BucketIpFilterPublicNetworkSource) {
 	e := &storage.BucketIpFilterPublicNetworkSource{
 			ForceSendFields: []string{"AllowedIpCidrRanges"},
 		}
@@ -1976,7 +1976,7 @@ func expandIpFilterPublicNetworkSource(v interface{}) (*storage.BucketIpFilterPu
 	return e
 }
 
-func expandIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFilterVpcNetworkSources) {
+func expandBucketIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFilterVpcNetworkSources) {
 	vnss := v.([]interface{})
 	if len(vnss) == 0 || vnss[0] == nil {
 		return nil
@@ -2140,7 +2140,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	}
 
 {{- if ne $.TargetVersionName "ga" }}
-	if err := d.Set("ip_filter", flattenIpFilter(res.IpFilter)); err != nil {
+	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
 {{- end }}
