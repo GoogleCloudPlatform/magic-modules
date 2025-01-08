@@ -50,21 +50,19 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
     required: true
-    immutable: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
 properties:
   - name: 'name'
     type: String
-    immutable: true
     url_param_only: true
-    description: |
-      'The resource name of the Runtime Template'
+    required: true
+    description: 'The resource name of the Runtime Template'
   - name: 'displayName'
     type: String
     description:
@@ -75,16 +73,14 @@ properties:
     description: 'The description of the Runtime Template.'
   - name: machineSpec
     type: NestedObject
-    default_from_api: true
     description: |
-     "The machine configuration of the runtime."
+     'The machine configuration of the runtime.'
     properties:
       - name: 'machineType'
         required: true
         type: string
         description: |
                 The Compute Engine machine type selected for the runtime.
-        default_from_api: true
       - name: 'acceleratorType'
         type: enum
         description: |
@@ -98,12 +94,11 @@ properties:
       - name: 'acceleratorCount'
         type: Integer
         default_from_api: true
-        description: |
-                The number of accelerators used by the runtime.
+        description: 'The number of accelerators used by the runtime.'
   - name: dataPersistentDiskSpec
     type: NestedObject
     default_from_api: true
-    description: "The configuration for the data disk of the runtime."
+    description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
         type: enum
@@ -119,23 +114,20 @@ properties:
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
   - name: networkSpec
     type: NestedObject
-    default_from_api: true
-    description: |
-      "The network configuration for the runtime."
+    required: true
+    description: 'The network configuration for the runtime.'
     properties:
       - name: 'enableInternetAccess'
         type: Boolean
         description: Enable public internet access for the runtime. Enabled by default.
-        default_from_api: true
       - name: 'network'
         type: String
-        description: The name of the VPC that this runtime is in.
+        description: 'The name of the VPC that this runtime is in.'
         default_from_api: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'subnetwork'
         type: String
-        description: |
-                The name of the VPC that this runtime is in.
+        description: 'The name of the VPC that this runtime is in.'
         default_from_api: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
@@ -144,21 +136,21 @@ properties:
   - name: idleShutdownConfig
     type: NestedObject
     default_from_api: true
-    description: "Notebook Idle Shutdown configuration for the runtime."
+    description: 'Notebook Idle Shutdown configuration for the runtime.'
     properties:
       - name: 'idleTimeout'
         type: String
         description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
   - name: eucConfig
     type: NestedObject
-    description: "EUC configuration of the NotebookRuntimeTemplate."
+    description: 'EUC configuration of the NotebookRuntimeTemplate.'
     properties:
       - name: 'eucDisabled'
         type: Boolean
         description: 'Enable end user credential access for the runtime.'
   - name: shieldedVmConfig
     type: NestedObject
-    description: "Runtime Shielded VM spec."
+    description: 'Runtime Shielded VM spec.'
     properties:
       - name: 'enableSecureBoot'
         type: Boolean
@@ -170,7 +162,7 @@ properties:
     description: 'Applies the given Compute Engine tags to the runtime.'
   - name: encryptionSpec
     type: NestedObject
-    description: "Customer-managed encryption key spec for the notebook runtime."
+    description: 'Customer-managed encryption key spec for the notebook runtime.'
     properties:
       - name: 'kmsKeyName'
         type: String
