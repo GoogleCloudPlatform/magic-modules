@@ -626,6 +626,25 @@ func ResourceStorageBucket() *schema.Resource {
 						},
 					},
 				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if k == "ip_filter.#" {
+						o, _ := d.GetChange("ip_filter")
+						l := o.([]interface{})
+						if len(l) == 0 {
+							return false
+						}
+
+						if contents, ok := l[0].(map[string]interface{}); !ok {
+							return false
+						} else if mode, ok := contents["mode"].(string); ok && mode == "Disabled" {
+							return true
+						}
+						return false
+					} else if k == "ip_filter.0.mode" {
+						return old == "Disabled" && new == ""
+					}
+					return false
+				},
 			},
 {{- end }}
 		},
@@ -1992,8 +2011,7 @@ func expandBucketIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFi
 	}
 
 	return vpcnwsrcs
-}
-{{- end }}
+}{{- end }}
 
 // d.HasChange("lifecycle_rule") always returns true, giving false positives. This function detects changes
 // to the list size or the actions/conditions of rules directly.

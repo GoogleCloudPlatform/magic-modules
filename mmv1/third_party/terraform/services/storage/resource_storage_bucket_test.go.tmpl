@@ -2769,7 +2769,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 
 	var bucket storage.Bucket
 	var disabled storage.Bucket
-	var updated storage.Bucket
+	var noIPfilter storage.Bucket
 	bucketName := acctest.TestBucketName(t)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -2805,11 +2805,11 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_IPFilter_update(bucketName),
+				Config: testAccStorageBucket_withoutIPFilter(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &updated),
-					testAccCheckStorageBucketWasUpdated(&updated, &disabled),
+						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
+					testAccCheckStorageBucketWasUpdated(&noIPfilter, &disabled),
 				),
 			},
 			{
@@ -2869,9 +2869,9 @@ resource "google_storage_bucket" "bucket" {
 	location = "us-central1"
 	uniform_bucket_level_access = true
 	force_destroy = true
-  ip_filter  {
-    mode = "Disabled"
-			public_network_source {
+	ip_filter  {
+		mode = "Disabled"
+		public_network_source {
 			allowed_ip_cidr_ranges = ["192.0.2.0/24", "2001:db8::/32"]
 		}
 		vpc_network_sources {
@@ -2882,21 +2882,18 @@ resource "google_storage_bucket" "bucket" {
 			network = "projects/%s/global/networks/%s"
 			allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
 		}
-  }
+	}
 }
 `, bucketName, envvar.GetTestProjectFromEnv(), "default", envvar.GetTestProjectFromEnv(), "storage-source-2")
 }
 
-func testAccStorageBucket_IPFilter_update(bucketName string) string {
+func testAccStorageBucket_withoutIPFilter(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
 	name     = "%s"
 	location = "us-central1"
 	uniform_bucket_level_access = true
 	force_destroy = true
-  ip_filter  {
-    mode = "Disabled"
-  }
 }
 `, bucketName)
 }
