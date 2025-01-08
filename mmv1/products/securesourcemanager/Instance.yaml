@@ -36,18 +36,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/securesourcemanager.instanceManager'
@@ -74,11 +68,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      keyring_name: 'my-keyring'
-      key_name: 'my-key'
+      kms_key_name: 'my-key'
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
       'prevent_destroy': 'false'
   - name: 'secure_source_manager_instance_private'

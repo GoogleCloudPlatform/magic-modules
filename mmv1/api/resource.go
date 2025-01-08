@@ -331,6 +331,10 @@ type Resource struct {
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 
+	// The API "resource type kind" used for this resource e.g., "Function".
+	// If this is not set, then :name is used instead, which is strongly
+	// preferred wherever possible. Its main purpose is for supporting
+	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
 	ImportPath string `yaml:"-"`

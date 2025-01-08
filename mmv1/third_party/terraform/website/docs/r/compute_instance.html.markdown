@@ -305,7 +305,7 @@ is desired, you will need to modify your state file manually using
 
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
-* `resource_policies` - (Optional) A list of self_links of resource policies to attach to the instance's boot disk. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
+* `resource_policies` - (Optional) A list of self_links of resource policies to attach to the instance's boot disk. Modifying this list will cause the instance to recreate, so any external values are not set until the user specifies this field. Currently a max of 1 resource policy is supported.
 
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
@@ -493,6 +493,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
+* `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
+
 * `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
 
 
@@ -576,6 +578,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `visible_core_count` - (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
+
+* `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 

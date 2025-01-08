@@ -36,6 +36,10 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `description` - Description of this network.
 
+* `network_id` - The numeric unique identifier for the resource.
+
+* `numeric_id` - (Deprecated) The numeric unique identifier for the resource. `numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.
+
 * `gateway_ipv4` - The IP address of the gateway.
 
 * `internal_ipv6_range` - The ula internal ipv6 range assigned to this network.
