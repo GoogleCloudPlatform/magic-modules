@@ -31,7 +31,7 @@ func TestAccApigeeOrganization_update(t *testing.T) {
 				Config: testAccApigeeOrganization_full(default_context),
 			},
 			{
-				ResourceName:            "google_apigee_organization.org",
+				ResourceName:            "google_apigee_organization.apigee_org",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project_id", "properties", "retention"},
@@ -40,12 +40,12 @@ func TestAccApigeeOrganization_update(t *testing.T) {
 				Config: testAccApigeeOrganization_update(update_context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_apigee_organization.org", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_apigee_organization.apigee_org", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_apigee_organization.org",
+				ResourceName:            "google_apigee_organization.apigee_org",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"project_id", "properties", "retention"},
