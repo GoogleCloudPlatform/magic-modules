@@ -15,10 +15,10 @@
 
 name: 'RuntimeTemplate'
 description: |
-  'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM, 
-  as well as common settings such as the network and whether public internet access is enabled. When you create 
-  a runtime, its VM is created according to the specifications of a runtime template.'
-  
+  'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM,
+   as well as common settings such as the network and whether public internet access is enabled. When you create
+   a runtime, its VM is created according to the specifications of a runtime template.'
+
 references:
   guides:
     'Create a runtime template': 'https://cloud.google.com/colab/docs/create-runtime-template'
@@ -57,8 +57,7 @@ parameters:
     required: true
     immutable: true
     url_param_only: true
-    description: |
-      The location for the resource: https://cloud.google.com/colab/docs/locations      
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
 properties:
   - name: 'name'
     type: String
@@ -108,8 +107,7 @@ properties:
     properties:
       - name: 'diskType'
         type: enum
-        description: |
-                The type of the persistent disk. 
+        description: 'The type of the persistent disk.'
         enum_values:
           - 'pd-standard'
           - 'pd-ssd'
