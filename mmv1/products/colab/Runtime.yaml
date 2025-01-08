@@ -1,0 +1,147 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'Runtime'
+description: |
+  'A runtime is a Google-provisioned virtual machine (VM) that can run the code in your notebook (IPYNB file).'
+
+references:
+  guides:
+    'Create a runtime': 'https://cloud.google.com/colab/docs/create-runtime'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimes'
+base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes?notebook_runtime_template_id={{name}}'
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+examples:
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+properties:
+  - name: 'name'
+    type: String
+    url_param_only: true
+    required: true
+    description: 'The resource name of the Runtime Template'
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Runtime Template.
+    required: true
+  - name: description
+    type: String
+    description: 'The description of the Runtime Template.'
+  - name: machineSpec
+    type: NestedObject
+    description: |
+     'The machine configuration of the runtime.'
+    properties:
+      - name: 'machineType'
+        required: true
+        type: string
+        description: |
+                The Compute Engine machine type selected for the runtime.
+      - name: 'acceleratorType'
+        type: enum
+        description: |
+                The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+        enum_values:
+          - 'NVIDIA_TESLA_V100'
+          - 'NVIDIA_TESLA_T4'
+          - 'NVIDIA_TESLA_A100'
+          - 'NVIDIA_A100_80GB'
+          - 'NVIDIA_L4'
+      - name: 'acceleratorCount'
+        type: Integer
+        default_from_api: true
+        description: 'The number of accelerators used by the runtime.'
+  - name: dataPersistentDiskSpec
+    type: NestedObject
+    default_from_api: true
+    description: 'The configuration for the data disk of the runtime.'
+    properties:
+      - name: 'diskType'
+        type: enum
+        description: 'The type of the persistent disk.'
+        enum_values:
+          - 'pd-standard'
+          - 'pd-ssd'
+          - 'pd-balanced'
+          - 'pd-extreme'
+      - name: 'diskSizeGb'
+        type: int
+        description: |
+                The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+  - name: networkSpec
+    type: NestedObject
+    required: true
+    description: 'The network configuration for the runtime.'
+    properties:
+      - name: 'enableInternetAccess'
+        type: Boolean
+        description: Enable public internet access for the runtime. Enabled by default.
+      - name: 'network'
+        type: String
+        description: 'The name of the VPC that this runtime is in.'
+        default_from_api: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: 'subnetwork'
+        type: String
+        description: 'The name of the VPC that this runtime is in.'
+        default_from_api: true
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'labels'
+    type: KeyValueLabels
+    description: 'Labels to identify and group the runtime template.'
+  - name: idleShutdownConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'Notebook Idle Shutdown configuration for the runtime.'
+    properties:
+      - name: 'idleTimeout'
+        type: String
+        description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
+  - name: eucConfig
+    type: NestedObject
+    description: 'EUC configuration of the NotebookRuntimeTemplate.'
+    properties:
+      - name: 'eucDisabled'
+        type: Boolean
+        description: 'Enable end user credential access for the runtime.'
+  - name: shieldedVmConfig
+    type: NestedObject
+    description: 'Runtime Shielded VM spec.'
+    properties:
+      - name: 'enableSecureBoot'
+        type: Boolean
+        description: 'Enables secure boot for the runtime.'
+  - name: 'networkTags'
+    type: Array
+    item_type:
+      type: String
+    description: 'Applies the given Compute Engine tags to the runtime.'
+  - name: encryptionSpec
+    type: NestedObject
+    description: 'Customer-managed encryption key spec for the notebook runtime.'
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: 'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
