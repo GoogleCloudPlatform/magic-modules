@@ -291,7 +291,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     })
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+        {{ $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
@@ -324,7 +324,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+    {{ $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 {{- end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -380,7 +380,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+    {{ $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 {{ end}}
 {{-          if not $.TaintResourceOnFailedCreate -}}
         // The resource didn't actually create
@@ -406,7 +406,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{-        else }}
 {{- if $.CustomCode.PostCreateFailure -}}
-        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+    {{ $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 {{- end}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
 {{- end}}
@@ -1198,11 +1198,6 @@ func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta int
 {{- end }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     {{ $.CustomTemplate $.CustomCode.Decoder false -}}
-}
-{{- end }}
-{{- if $.CustomCode.PostCreateFailure }}
-func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}) {
-    {{- $.CustomTemplate $.CustomCode.PostCreateFailure false -}}
 }
 {{- end }}
 {{- if and $.SchemaVersion $.StateUpgraders }}
