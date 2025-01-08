@@ -10,10 +10,6 @@ resource "google_compute_subnetwork" "my_subnetwork" {
   ip_cidr_range = "10.0.1.0/24"
 }
 
-resource "google_compute_address" "static" {
-  name = "{{index $.Vars "network_name"}}"
-}
-
 resource "google_colab_runtime_template" "default" {
   name        = "{{index $.Vars "runtime_template_name"}}"
   display_name = "Runtime template full"
