@@ -24,8 +24,14 @@ resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
           time_zone = "America/New_York"
           weekly_windows {
             days_of_week = ["SATURDAY", "SUNDAY"]
-            start_time = "00:00"
-            end_time = "24:00"
+            start_time = {
+              hours = 0
+              minutes = 0
+            }
+            end_time = {
+              hours = 24
+              minutes = 0
+            }
           }
         }
       }

@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -236,19 +236,67 @@ properties:
                             - 'SATURDAY'
                             - 'SUNDAY'
                       - name: 'startTime'
-                        type: string
+                        type: NestedObject
                         description: |
                           Start time (inclusive). Use 00:00 for the beginning of
                           the day. If you specify start_time you must also specify
                           end_time. If left empty, this will block for the entire
                           day for the days specified in days_of_week.
+                        properties:
+                          - name: 'hours'
+                            type: Integer
+                            description: |
+                              Hours of day in 24 hour format.
+                          - name: 'minutes'
+                            type: Integer
+                            description: |
+                              Minutes of hour of day. Must be from 0 to 59.
+                            validation:
+                              function: 'validation.IntBetween(0,59)'
+                          - name: 'seconds'
+                            type: Integer
+                            description: |
+                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              An API may allow the value 60 if it allows leap-seconds.
+                            validation:
+                              function: 'validation.IntBetween(0,60)'
+                          - name: 'nanos'
+                            type: Integer
+                            description: |
+                              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                            validation:
+                              function: 'validation.IntBetween(0,999999999)'
                       - name: 'endTime'
-                        type: string
+                        type: NestedObject
                         description: |
                           End time (exclusive). Use 24:00 to indicate midnight.
                           If you specify end_time you must also specify start_time.
                           If left empty, this will block for the entire day for
                           the days specified in days_of_week.
+                        properties:
+                          - name: 'hours'
+                            type: Integer
+                            description: |
+                              Hours of day in 24 hour format.
+                          - name: 'minutes'
+                            type: Integer
+                            description: |
+                              Minutes of hour of day. Must be from 0 to 59.
+                            validation:
+                              function: 'validation.IntBetween(0,59)'
+                          - name: 'seconds'
+                            type: Integer
+                            description: |
+                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              An API may allow the value 60 if it allows leap-seconds.
+                            validation:
+                              function: 'validation.IntBetween(0,60)'
+                          - name: 'nanos'
+                            type: Integer
+                            description: |
+                              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                            validation:
+                              function: 'validation.IntBetween(0,999999999)'
                 - name: 'oneTimeWindows'
                   type: Array
                   description: |
@@ -259,24 +307,96 @@ properties:
                     type: NestedObject
                     properties:
                       - name: 'startDate'
-                        type: string
+                        type: NestedObject
                         description: |
-                          Start date. Dates are expressed as yyyy-mm-dd.
+                          Start date. 
+                        properties:
+                          - name: 'year'
+                            type: Integer
+                            description: Year of the date. Must be from 1 to 9999.
+                          - name: 'month'
+                            type: Integer
+                            description: Month of a year. Must be from 1 to 12.
+                          - name: 'day'
+                            type: Integer
+                            description: |
+                              Day of a month. Must be from 1 to 31
+                              and valid for the year and month.
                       - name: 'endDate'
-                        type: string
+                        type: NestedObject
                         description: |
                           End date. Dates are expressed as yyyy-mm-dd.
+                        properties:
+                          - name: 'year'
+                            type: Integer
+                            description: Year of the date. Must be from 1 to 9999.
+                          - name: 'month'
+                            type: Integer
+                            description: Month of a year. Must be from 1 to 12.
+                          - name: 'day'
+                            type: Integer
+                            description: |
+                              Day of a month. Must be from 1 to 31
+                              and valid for the year and month.
                       - name: 'startTime'
-                        type: string
+                        type: NestedObject
                         description: |
                           Start time (inclusive). Use 00:00 for the beginning of
                           the day. If you specify start_time you must also specify
                           end_time. If left empty, this will block for the entire
                           day for the days specified in days_of_week.
+                        properties:
+                          - name: 'hours'
+                            type: Integer
+                            description: |
+                              Hours of day in 24 hour format.
+                          - name: 'minutes'
+                            type: Integer
+                            description: |
+                              Minutes of hour of day. Must be from 0 to 59.
+                            validation:
+                              function: 'validation.IntBetween(0,59)'
+                          - name: 'seconds'
+                            type: Integer
+                            description: |
+                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              An API may allow the value 60 if it allows leap-seconds.
+                            validation:
+                              function: 'validation.IntBetween(0,60)'
+                          - name: 'nanos'
+                            type: Integer
+                            description: |
+                              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                            validation:
+                              function: 'validation.IntBetween(0,999999999)'
                       - name: 'endTime'
-                        type: string
+                        type: NestedObject
                         description: |
                           End time (exclusive). Use 24:00 to indicate midnight.
                           If you specify end_time you must also specify start_time.
                           If left empty, this will block for the entire day for
                           the days specified in days_of_week.
+                        properties:
+                          - name: 'hours'
+                            type: Integer
+                            description: |
+                              Hours of day in 24 hour format.
+                          - name: 'minutes'
+                            type: Integer
+                            description: |
+                              Minutes of hour of day. Must be from 0 to 59.
+                            validation:
+                              function: 'validation.IntBetween(0,59)'
+                          - name: 'seconds'
+                            type: Integer
+                            description: |
+                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              An API may allow the value 60 if it allows leap-seconds.
+                            validation:
+                              function: 'validation.IntBetween(0,60)'
+                          - name: 'nanos'
+                            type: Integer
+                            description: |
+                              Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                            validation:
+                              function: 'validation.IntBetween(0,999999999)'

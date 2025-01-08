@@ -59,10 +59,24 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
         time_windows {
           time_zone = "America/New_York"
           one_time_windows {
-            start_date = "2024-12-24"
-            start_time = "00:00"
-            end_date = "2024-12-27"
-            end_time = "09:00"
+            start_date = {
+							year  = 2024
+							month = 12
+							day   = 24
+						}
+            start_time = {
+              hours = 0
+              minutes = 0
+            }
+            end_date = {
+							year  = 2024
+							month = 12
+							day   = 27
+						}
+            end_time = {
+              hours = 9
+              minutes = 0
+            }
           }
         }
       }
@@ -91,8 +105,14 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
           time_zone = "America/New_York"
           weekly_windows {
             days_of_week = ["SATURDAY", "SUNDAY"]
-            start_time = "00:00"
-            end_time = "24:00"
+            start_time = {
+              hours = 0
+              minutes = 0
+            }
+            end_time = {
+              hours = 24
+              minutes = 0
+            }
           }
         }
       }
