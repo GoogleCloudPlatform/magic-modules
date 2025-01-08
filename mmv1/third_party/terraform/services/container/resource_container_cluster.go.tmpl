@@ -1267,7 +1267,7 @@ func ResourceContainerCluster() *schema.Resource {
 							MaxItems:    1,
 							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
 							Elem: &schema.Resource{
-									        	Schema: map[string]*schema.Schema{
+								Schema: map[string]*schema.Schema{
 						            		"enabled": {
 						                		Type:        schema.TypeBool,
 						                		Required:    true,
