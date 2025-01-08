@@ -812,12 +812,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-
-{{- if ne $.TargetVersionName "ga" -}}
-			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Projection("full").Do()
-{{- else }}
 			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
-{{- end }}
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutCreate),
@@ -996,11 +991,7 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	// to make sure it exists before moving on
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
-{{- if ne $.TargetVersionName "ga" -}}
-			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Projection("full").Do()
-{{- else }}
 			_, retryErr := config.NewStorageClient(userAgent).Buckets.Get(res.Name).Do()
-{{- end }}
 			return retryErr
 		},
 		Timeout: d.Timeout(schema.TimeoutUpdate),
