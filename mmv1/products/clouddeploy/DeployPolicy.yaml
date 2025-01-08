@@ -256,7 +256,7 @@ properties:
                           - name: 'seconds'
                             type: Integer
                             description: |
-                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              Seconds of minutes of the time. Must normally be from 0 to 59.
                               An API may allow the value 60 if it allows leap-seconds.
                             validation:
                               function: 'validation.IntBetween(0,60)'
@@ -287,7 +287,7 @@ properties:
                           - name: 'seconds'
                             type: Integer
                             description: |
-                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              Seconds of minutes of the time. Must normally be from 0 to 59.
                               An API may allow the value 60 if it allows leap-seconds.
                             validation:
                               function: 'validation.IntBetween(0,60)'
@@ -309,7 +309,7 @@ properties:
                       - name: 'startDate'
                         type: NestedObject
                         description: |
-                          Start date. 
+                          Start date.
                         properties:
                           - name: 'year'
                             type: Integer
@@ -359,7 +359,7 @@ properties:
                           - name: 'seconds'
                             type: Integer
                             description: |
-                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              Seconds of minutes of the time. Must normally be from 0 to 59.
                               An API may allow the value 60 if it allows leap-seconds.
                             validation:
                               function: 'validation.IntBetween(0,60)'
@@ -390,7 +390,7 @@ properties:
                           - name: 'seconds'
                             type: Integer
                             description: |
-                              Seconds of minutes of the time. Must normally be from 0 to 59. 
+                              Seconds of minutes of the time. Must normally be from 0 to 59.
                               An API may allow the value 60 if it allows leap-seconds.
                             validation:
                               function: 'validation.IntBetween(0,60)'
