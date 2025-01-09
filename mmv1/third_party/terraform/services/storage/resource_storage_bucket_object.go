@@ -116,6 +116,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
 
+			"source_md5hash": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
+			},
+
 			"source": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -362,7 +368,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("md5hash") {
+	if d.HasChange("content") || d.HasChange("source_md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
@@ -437,6 +443,9 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
+	}
+	if err := d.Set("source_md5hash", d.Get("source_md5hash")); err != nil {
+		return fmt.Errorf("Error setting source_md5hash: %s", err)
 	}
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
@@ -589,8 +598,9 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 		d.SetNewComputed("md5hash")
 	}
 
-	if d.HasChange("md5hash") {
+	if d.HasChange("source_md5hash") {
 		d.SetNewComputed("crc32c")
+		d.SetNewComputed("md5hash")
 	}
 	return nil
 }
@@ -599,7 +609,7 @@ func hasObjectContentChanges(d *schema.ResourceDiff) bool {
 	for _, key := range []string{
 		"source",
 		"content",
-		"md5hash",
+		"source_md5hash",
 	} {
 		if d.HasChange(key) {
 			return true
