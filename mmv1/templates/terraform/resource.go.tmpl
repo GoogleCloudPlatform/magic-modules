@@ -574,6 +574,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
         return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("{{ $.ResourceName }} %q", d.Id()))
 {{- end}}
     }
+{{- if $.CustomCode.PostRead }}
+    {{ $.CustomTemplate $.CustomCode.PostRead false -}}
+{{- end }}
 
 {{if $.NestedQuery -}}
     res, err = flattenNested{{ $.ResourceName -}}(d, meta, res)
