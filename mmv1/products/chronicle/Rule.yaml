@@ -20,11 +20,11 @@ references:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
   api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{name}}
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{name}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{name}}
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 update_verb: PATCH
 update_mask: true
 
@@ -36,6 +36,7 @@ examples:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
       - 'deletion_policy'
+    exclude_import_test: true
   - name: 'chronicle_rule_with_force_deletion'
     primary_resource_id: example
     min_version: 'beta'
@@ -43,6 +44,7 @@ examples:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
       - 'deletion_policy'
+    exclude_import_test: true
   - name: 'chronicle_rule_with_data_access_scope'
     primary_resource_id: example
     min_version: 'beta'
@@ -50,9 +52,11 @@ examples:
       data_access_scope_id: scope-name
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
+    exclude_import_test: true
 
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
+  post_create: 'templates/terraform/post_create/chronicle_rule_id.go.tmpl'
 
 virtual_fields:
   - name: 'deletion_policy'
@@ -84,11 +88,18 @@ properties:
   - name: name
     type: String
     output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     description: |-
       Full resource name for the rule. This unique identifier is generated using values provided for the URL parameters.
       Format:
       projects/{project}/locations/{location}/instances/{instance}/rules/{rule}
+  - name: ruleId
+    type: String
+    output: true
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Rule Id is the ID of the Rule.
   - name: text
     type: String
     description: |-

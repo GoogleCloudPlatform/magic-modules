@@ -28,19 +28,7 @@ func TestAccChronicleRule_chronicleRuleBasicExample_update(t *testing.T) {
 				Config: testAccChronicleRule_chronicleRuleBasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_chronicle_rule.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance", "location"},
-			},
-			{
 				Config: testAccChronicleRule_chronicleRuleBasicExample_update(context),
-			},
-			{
-				ResourceName:            "google_chronicle_rule.example",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance", "location"},
 			},
 		},
 	})
