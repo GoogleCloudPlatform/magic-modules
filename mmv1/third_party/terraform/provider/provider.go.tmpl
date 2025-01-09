@@ -37,14 +37,37 @@ func Provider() *schema.Provider {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ValidateFunc:  ValidateCredentials,
-				ConflictsWith: []string{"access_token"},
+				ConflictsWith: []string{"access_token", "external_credentials"},
 			},
 
 			"access_token": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ValidateFunc:  ValidateEmptyStrings,
-				ConflictsWith: []string{"credentials"},
+				ConflictsWith: []string{"credentials", "external_credentials"},
+			},
+
+			"external_credentials": {
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				ConflictsWith: []string{"credentials", "access_token"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"audience": {
+							Type:     schema.TypeString,
+							Required: true, // TODO: validate audience is non-empty string
+						},
+						"service_account_email": {
+							Type:     schema.TypeString, // TODO: validate service_account_email is non-empty string that is a valid email address
+							Required: true,
+						},
+						"identity_token_file": {
+							Type:     schema.TypeString, // TODO: validate identity_token is non-empty string that is a valid JWT
+							Required: true,
+						},
+					},
+				},
 			},
 
 			"impersonate_service_account": {
@@ -265,6 +288,15 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 
 	if v, ok := d.GetOk("credentials"); ok {
 		config.Credentials = v.(string)
+	}
+
+
+	if v, ok := d.GetOk("external_credentials"); ok {
+		externalCredentials, err := transport_tpg.ExpandExternalCredentials(v)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		config.ExternalCredentials = externalCredentials
 	}
 
 	// only check environment variables if neither value was set in config- this
