@@ -57,11 +57,11 @@ parameters:
     required: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
-properties:
   - name: 'name'
     type: String
     url_param_only: true
     description: 'The resource name of the Runtime Template'
+properties:
   - name: 'displayName'
     type: String
     description:
