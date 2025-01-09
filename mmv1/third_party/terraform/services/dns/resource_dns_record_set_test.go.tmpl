@@ -354,9 +354,7 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 	t.Parallel()
 
 	httpHealthCheckName := fmt.Sprintf("tf-test-http-health-check-%s", acctest.RandString(t, 10))
-	failoverZoneName := fmt.Sprintf("failover-dnszone-test-%s", acctest.RandString(t, 10))
-    wrrZoneName := fmt.Sprintf("wrr-dnszone-test-%s", acctest.RandString(t, 10))
-    geoZoneName := fmt.Sprintf("geo-dnszone-test-%s", acctest.RandString(t, 10))
+	zoneName := fmt.Sprintf("dnszone-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -366,29 +364,29 @@ func TestAccDNSRecordSet_routingPolicyInternetHealthCheck(t *testing.T) {
 		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, failoverZoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(httpHealthCheckName, zoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_failover",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), failoverZoneName, failoverZoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, failoverZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
             {
-				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, wrrZoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetWRR(httpHealthCheckName, zoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_wrr",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), wrrZoneName, wrrZoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, wrrZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
             {
-				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, geoZoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicyInternetGEO(httpHealthCheckName, zoneName, 300),
 			},
 			{
 				ResourceName:  "google_dns_record_set.ihc_geo",
-				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), geoZoneName, geoZoneName),
+				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest-com./A", envvar.GetTestProjectFromEnv(), zoneName, geoZoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
 			},
@@ -1347,7 +1345,7 @@ func testAccDnsRecordSet_routingPolicyInternetPrimaryBackup(healthCheckName, zon
 	return fmt.Sprintf(`
 
 resource "google_compute_health_check" "health_check" {
-  name                = "%s"
+  name                = "failover-%s"
   description         = "Resource created for Terraform acceptance testing"
   check_interval_sec  = 30
   source_regions      = ["us-central1", "us-east1", "asia-south1"]
@@ -1363,8 +1361,8 @@ resource "time_sleep" "wait_4_minutes" {
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
-  name        = "%s"
-  dns_name    = "%s.hashicorptest-com."
+  name        = "failover-%s"
+  dns_name    = "failover-%s.hashicorptest-com."
   description = "Test Description"
   visibility  = "public"
 }
@@ -1373,7 +1371,7 @@ resource "google_dns_record_set" "ihc_failover" {
   depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
-  name         = "test-record.%s.hashicorptest-com."
+  name         = "test-record.failover-%s.hashicorptest-com."
   type         = "A"
   ttl          = %d
 
@@ -1413,7 +1411,7 @@ func testAccDnsRecordSet_routingPolicyInternetWRR(healthCheckName, zoneName stri
 	return fmt.Sprintf(`
 
 resource "google_compute_health_check" "health_check" {
-    name                = "%s"
+    name                = "wrr-%s"
     description         = "Resource created for Terraform acceptance testing"
     check_interval_sec  = 30
     source_regions      = ["us-central1", "us-east1", "asia-south1"]
@@ -1429,8 +1427,8 @@ resource "time_sleep" "wait_4_minutes" {
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
-  name        = "%s"
-  dns_name    = "%s.hashicorptest-com."
+  name        = "wrr-%s"
+  dns_name    = "wrr-%s.hashicorptest-com."
   description = "Test Description"
   visibility  = "public"
 }
@@ -1439,7 +1437,7 @@ resource "google_dns_record_set" "ihc_wrr" {
   depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
-  name         = "test-record.%s.hashicorptest-com."
+  name         = "test-record.wrr-%s.hashicorptest-com."
   type         = "A"
   ttl          = %d
 
@@ -1470,7 +1468,7 @@ func testAccDnsRecordSet_routingPolicyInternetGEO(healthCheckName, zoneName stri
 	return fmt.Sprintf(`
 
 resource "google_compute_health_check" "health_check" {
-    name                = "%s"
+    name                = "geo-%s"
     description         = "Resource created for Terraform acceptance testing"
     check_interval_sec  = 30
     source_regions      = ["us-central1", "us-east1", "asia-south1"]
@@ -1486,8 +1484,8 @@ resource "time_sleep" "wait_4_minutes" {
 }
 
 resource "google_dns_managed_zone" "parent-zone" {
-  name        = "%s"
-  dns_name    = "%s.hashicorptest-com."
+  name        = "geo-%s"
+  dns_name    = "geo-%s.hashicorptest-com."
   description = "Test Description"
   visibility  = "public"
 }
@@ -1496,7 +1494,7 @@ resource "google_dns_record_set" "ihc_geo" {
   depends_on = [time_sleep.wait_4_minutes]
 
   managed_zone = google_dns_managed_zone.parent-zone.name
-  name         = "test-record.%s.hashicorptest-com."
+  name         = "test-record.geo-%s.hashicorptest-com."
   type         = "A"
   ttl          = %d
 
