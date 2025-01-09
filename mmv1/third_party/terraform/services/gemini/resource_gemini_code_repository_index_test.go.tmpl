@@ -70,7 +70,7 @@ func TestAccGeminiCodeRepositoryIndex_delete(t *testing.T) {
 				ResourceName:            "google_gemini_code_repository_index.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"code_repository_index_id", "labels", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"code_repository_index_id", "labels", "location", "terraform_labels", "force_destroy"},
 			},
 			{
 				Config: testAccGeminiCodeRepositoryIndex_withChildren_delete(context),
@@ -88,6 +88,7 @@ resource "google_gemini_code_repository_index" "example" {
   labels = {"ccfe_debug_note": "terraform_e2e_should_be_deleted"}
   location = "us-central1"
   code_repository_index_id = "%{cri_id}"
+  force_destroy = true
 }
 
 resource "google_gemini_repository_group" "example" {
@@ -100,6 +101,9 @@ resource "google_gemini_repository_group" "example" {
     branch_pattern = "main"
   }
   labels = {"label1": "value1"}
+  depends_on = [
+    google_gemini_code_repository_index.example
+  ]
 }
 
 resource "google_developer_connect_git_repository_link" "conn" {
@@ -129,6 +133,7 @@ resource "google_developer_connect_connection" "github_conn" {
 `, context)
 }
 
+// Removed depends_on to not break plan test
 func testAccGeminiCodeRepositoryIndex_withChildren_delete(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_gemini_repository_group" "example" {

@@ -56,6 +56,12 @@ custom_code:
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      If set to true, any RepositoryGroups for this CodeRepositoryIndex will also be deleted.
+    type: Boolean
+    default_value: false
 parameters:
   - name: location
     type: String
