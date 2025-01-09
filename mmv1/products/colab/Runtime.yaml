@@ -62,25 +62,27 @@ parameters:
     url_param_only: true
     description: 'The resource name of the Runtime Template'
 properties:
-  - name: 'runtimeUser'
+  - name: 'notebookRuntimeTemplate'
     type: String
     required: true
-    description: 'The user email of the NotebookRuntime.'
-  - name: 'displayName'
-    type: String
-    description:
-      Required. The display name of the Runtime.
-    required: true
-  - name: description
-    type: String
-    description: 'The description of the Runtime Template.'
-  - name: 'labels'
-    type: KeyValueLabels
-    description: 'Labels to identify and group the runtime template.'
-  - name: notebookRuntimeTemplateRef 
+    description: 'The resource name of the NotebookRuntimeTemplate based on which a NotebookRuntime will be created.'
+  - name: notebookRuntime
     type: NestedObject
     description: |
-     'The pointer to NotebookRuntimeTemplate this NotebookRuntime is created from'
+     'Runtime specific information used for NotebookRuntime creation.'
     properties:
-      - name: 'notebookRuntimeTemplate'
+      - name: 'runtimeUser'
+        type: String
         required: true
+        description: 'The user email of the NotebookRuntime.'
+      - name: 'displayName'
+        type: String
+        description:
+          Required. The display name of the Runtime.
+        required: true
+      - name: description
+        type: String
+        description: 'The description of the Runtime Template.'
+      - name: 'labels'
+        type: KeyValuePairs
+        description: 'Labels to identify and group the runtime template.'

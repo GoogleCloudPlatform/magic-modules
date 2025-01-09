@@ -22,12 +22,11 @@ resource "google_colab_runtime_template" "my_template" {
 
 resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "runtime_name"}}"
-  display_name = "Runtime template basic"
-  location = "us-central1"
-
-  runtime_user = "example@example.com"
-
-  notebook_runtime_template_ref {
-    notebook_runtime_template = google_colab_runtime_template.my_template.id
+  notebook_runtime_template = google_colab_runtime_template.my_template.id
+  location = "us-central1" 
+  
+  notebook_runtime {
+    display_name = "Runtime basic"
+    runtime_user = "bcreddy@google.com"
   }
 }
