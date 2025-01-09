@@ -1,0 +1,10 @@
+certifi==2024.12.14
+charset-normalizer==3.4.0
+deepdiff==8.1.1
+idna==3.10
+jsonref==1.1.0
+orderly-set==5.2.3
+pyjson==1.4.1
+PyYAML==6.0.2
+requests==2.32.3
+urllib3==2.2.3
