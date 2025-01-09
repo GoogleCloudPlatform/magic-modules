@@ -3966,6 +3966,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			{{- if ne $.TargetVersionName "ga" }}
 			{
 				Config: testAccContainerCluster_withMonitoringConfigScopeAll(clusterName, networkName, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
@@ -3990,6 +3991,7 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			{{- end }}
 			// Back to basic settings to test setting Prometheus on its own
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
@@ -10810,6 +10812,7 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}								
 func testAccContainerCluster_withMonitoringConfigScopeAll(name, networkName, subnetworkName string) string {
        return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -10851,6 +10854,7 @@ resource "google_container_cluster" "primary" {
 }
 `, name, networkName, subnetworkName)
 }
+{{- end }}
 
 func testAccContainerCluster_withMonitoringConfigAdvancedDatapathObservabilityConfigEnabled(name string) string {
        return fmt.Sprintf(`
