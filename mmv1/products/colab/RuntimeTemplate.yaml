@@ -58,12 +58,12 @@ parameters:
     required: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
-properties:
   - name: 'name'
     type: String
     default_from_api: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     description: 'The resource name of the Runtime Template'
+properties:
   - name: 'displayName'
     type: String
     description:
