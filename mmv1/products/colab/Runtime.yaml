@@ -35,6 +35,9 @@ examples:
     region_override: 'us-central1'
     vars:
       runtime_name: 'colab-runtime'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
   - name: 'colab_runtime_full'
     primary_resource_id: 'runtime'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
