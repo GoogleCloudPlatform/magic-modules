@@ -133,6 +133,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// Instead of the more confusing:
 				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "" (forces new resource)
 				Default: "different hash",
+				// 1. Compute the md5 hash of the local file
+				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
+				// 3. Don't suppress the diff iff they don't match
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return false
+				},
 			},
 
 			"storage_class": {
