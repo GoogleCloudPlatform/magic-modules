@@ -1273,6 +1273,7 @@ func ResourceContainerCluster() *schema.Resource {
 						                		Required:    true,
 						                		Description: `Whether or not the managed collection is enabled.`,
 						            		},
+									{{- if ne $.TargetVersionName "ga" }}
 						            		"auto_monitoring_config": {
 						                		Type:        schema.TypeSet,
 						                		Optional:    true,
@@ -1289,6 +1290,7 @@ func ResourceContainerCluster() *schema.Resource {
 						                    			},
 						                		},
 						           		},
+									{{- end }}
 						        	},
 						    	},
 						},
