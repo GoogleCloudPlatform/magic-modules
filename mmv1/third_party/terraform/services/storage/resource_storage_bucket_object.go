@@ -133,33 +133,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// Instead of the more confusing:
 				// detect_md5hash:       "1XcnP/iFw/hNrbhXi7QTmQ==" => "" (forces new resource)
 				Default: "different hash",
-				// 1. Compute the md5 hash of the local file
-				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
-				// 3. Don't suppress the diff iff they don't match
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					localMd5Hash := ""
-					if source, ok := d.GetOkExists("source"); ok {
-						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
-					}
-
-					if content, ok := d.GetOkExists("content"); ok {
-						localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
-					}
-
-					// If `source` or `content` is dynamically set, both field will be empty.
-					// We should not suppress the diff to avoid the following error:
-					// 'Mismatch reason: extra attributes: detect_md5hash'
-					if localMd5Hash == "" {
-						return false
-					}
-
-					// `old` is the md5 hash we retrieved from the server in the ReadFunc
-					if old != localMd5Hash {
-						return false
-					}
-
-					return true
-				},
 			},
 
 			"storage_class": {
