@@ -74,6 +74,7 @@ properties:
     description: 'The description of the Runtime Template.'
   - name: machineSpec
     type: NestedObject
+    default_from_api: true
     description: |
      'The machine configuration of the runtime.'
     properties:
@@ -93,7 +94,6 @@ properties:
           - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
-        default_from_api: true
         description: 'The number of accelerators used by the runtime.'
   - name: dataPersistentDiskSpec
     type: NestedObject
@@ -114,6 +114,7 @@ properties:
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
   - name: networkSpec
     type: NestedObject
+    default_from_api: true
     description: 'The network configuration for the runtime.'
     properties:
       - name: 'enableInternetAccess'
@@ -122,12 +123,10 @@ properties:
       - name: 'network'
         type: String
         description: 'The name of the VPC that this runtime is in.'
-        default_from_api: true
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'subnetwork'
         type: String
-        description: 'The name of the VPC that this runtime is in.'
-        default_from_api: true
+        description: 'The name of the subnetwork that this runtime is in.'
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
     type: KeyValueLabels
@@ -146,7 +145,7 @@ properties:
     properties:
       - name: 'eucDisabled'
         type: Boolean
-        description: 'Enable end user credential access for the runtime.'
+        description: 'Disable end user credential access for the runtime.'
   - name: shieldedVmConfig
     type: NestedObject
     description: 'Runtime Shielded VM spec.'
