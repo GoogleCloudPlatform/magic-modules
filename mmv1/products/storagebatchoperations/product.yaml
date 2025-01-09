@@ -15,7 +15,7 @@
 name: 'StorageBatchOperations'
 display_name: 'Cloud Storage Batch Operations'
 versions:
-  - name: 'alpha'
+  - name: 'ga'
     base_url: 'https://storagebatchoperations.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
