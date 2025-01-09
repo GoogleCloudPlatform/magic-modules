@@ -66,6 +66,7 @@ properties:
     type: String
     required: true
     description: 'The resource name of the NotebookRuntimeTemplate based on which a NotebookRuntime will be created.'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: notebookRuntime
     type: NestedObject
     description: |
