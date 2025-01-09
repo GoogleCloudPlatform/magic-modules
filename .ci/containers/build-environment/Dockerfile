@@ -1,5 +1,5 @@
 # Stage 1: Building Go dependencies
-FROM golang:1.21-bullseye AS builder
+FROM golang:1.23-bullseye AS builder
 
 # Set working directory
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN go mod download
 FROM ruby:3.1-bullseye
 
 # golang
-COPY --from=golang:1.21-bullseye /usr/local/go /usr/local/go
+COPY --from=golang:1.23-bullseye /usr/local/go /usr/local/go
 ENV GOPATH /go
 ENV PATH /usr/local/go/bin:$PATH
 ENV PATH $GOPATH/bin:$PATH
@@ -23,7 +23,7 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 1777 "$GOPATH"
 WORKDIR $GOPATH
 
 # terraform binary used by tfv/tgc
-COPY --from=hashicorp/terraform:1.8.3 /bin/terraform /bin/terraform
+COPY --from=hashicorp/terraform:1.10.0 /bin/terraform /bin/terraform
 
 SHELL ["/bin/bash", "-c"]
 

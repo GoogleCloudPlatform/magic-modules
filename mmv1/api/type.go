@@ -320,7 +320,7 @@ func (t *Type) SetDefault(r *Resource) {
 		}
 
 		if t.Description == "" {
-			t.Description = "A nested object resource"
+			t.Description = "A nested object resource."
 		}
 
 		for _, p := range t.Properties {
@@ -397,6 +397,15 @@ func (t Type) Lineage() string {
 	}
 
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
+}
+
+// Returns the lineage in snake case
+func (t Type) LineageAsSnakeCase() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", t.ParentMetadata.LineageAsSnakeCase(), google.Underscore(t.Name))
 }
 
 // Prints the access path of the field in the configration eg: metadata.0.labels

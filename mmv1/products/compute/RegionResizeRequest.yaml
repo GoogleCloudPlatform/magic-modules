@@ -1,0 +1,370 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionResizeRequest'
+api_resource_type_kind: InstanceGroupManagerResizeRequest
+min_version: beta
+description: |
+  Represents a Regional Managed Instance Group Resize Request
+
+  Resize Requests are the Managed Instance Group implementation of Dynamic Workload Scheduler Flex Start.
+
+  With Dynamic Workload Scheduler in Flex Start mode, you submit a GPU capacity request for your AI/ML jobs by indicating how many you need, a duration, and your preferred region. Dynamic Workload Scheduler intelligently persists the request; once the capacity becomes available, it automatically provisions your VMs enabling your workloads to run continuously for the entire duration of the capacity allocation.
+references:
+  guides:
+    'About resize requests in a MIG': 'https://cloud.google.com/compute/docs/instance-groups/about-resize-requests-mig'
+  # Link to the REST API reference for the resource.
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagerResizeRequests'
+docs:
+### List Method ###
+base_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests'
+### Get Method
+self_link: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{instance_group_manager}}/resizeRequests/{{name}}'
+immutable: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+# Sets parameters for handling operations returned by the API.
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/compute_rmig_resize_request_delete.go.tmpl'
+# Examples for testing
+examples:
+  - name: 'compute_rmig_resize_request'
+    min_version: beta
+    primary_resource_id: 'a3_resize_request'
+    vars:
+      resize_request_name: 'a3-dws'
+# Resize request parameters injected via URL
+parameters:
+  - name: 'region'
+    type: ResourceRef
+    description: |
+      The reference of the compute region scoping this request.
+    url_param_only: true
+    required: true
+    resource: 'Region'
+    imports: 'name'
+  - name: 'instanceGroupManager'
+    type: ResourceRef
+    description: |
+      The reference of the regional instance group manager this ResizeRequest is a part of.
+    url_param_only: true
+    required: true
+    resource: 'InstanceGroupManager'
+    imports: 'name'
+# Non-URL parameters including input and output parameters
+properties:
+  - name: 'creationTimestamp'
+    type: Time
+    description: |
+      The creation timestamp for this resize request in RFC3339 text format.
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      Current state of the request.
+    output: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of this resize request. The name must be 1-63 characters long, and comply with RFC1035.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resize-request.
+  - name: 'resizeBy'
+    type: Integer
+    description: |
+      The number of instances to be created by this resize request. The group's target size will be increased by this number.
+    required: true
+  - name: 'requestedRunDuration'
+    type: NestedObject
+    description: |
+      Requested run duration for instances that will be created by this request. At the end of the run duration instances will be deleted.
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Span of time at a resolution of a second. Must be from 600 to 604800 inclusive. Note: minimum and maximum allowed range for requestedRunDuration is 10 minutes (600 seconds) and 7 days(604800 seconds) correspondingly.
+        required: true
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+  - name: 'status'
+    type: NestedObject
+    description: |
+      Status of the request.
+    output: true
+    properties:
+      # Status.error
+      - name: 'error'
+        type: NestedObject
+        description: |
+          Fatal errors encountered during the queueing or provisioning phases of the ResizeRequest that caused the transition to the FAILED state. Contrary to the lastAttempt errors, this field is final and errors are never removed from here, as the ResizeRequest is not going to retry.
+        output: true
+        properties:
+          - name: 'errors'
+            type: Array
+            description: |
+              The array of errors encountered while processing this operation.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'code'
+                  type: String
+                  description: |
+                    The error type identifier for this error.
+                  output: true
+                - name: 'location'
+                  type: String
+                  description: |
+                    Indicates the field in the request that caused the error. This property is optional.
+                  output: true
+                - name: 'message'
+                  type: String
+                  description: |
+                    An optional, human-readable error message.
+                  output: true
+                - name: 'errorDetails'
+                  type: Array
+                  description: |
+                    An array of messages that contain the error details. There is a set of defined message types to use for providing details.The syntax depends on the error code. For example, QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                  output: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: 'errorInfo'
+                        type: NestedObject
+                        output: true
+                        properties:
+                          - name: 'reason'
+                            type: String
+                            description: |
+                              The reason of the error. This is a constant value that identifies the proximate cause of the error. Error reasons are unique within a particular domain of errors.
+                            output: true
+                          - name: 'domain'
+                            type: String
+                            description: |
+                              The logical grouping to which the "reason" belongs. The error domain is typically the registered service name of the tool or product that generates the error. Example: "pubsub.googleapis.com".
+                            output: true
+                          - name: 'metadatas'
+                            type: KeyValuePairs
+                            description: |
+                              Additional structured details about this error.
+                            output: true
+                      - name: 'quotaInfo'
+                        type: NestedObject
+                        output: true
+                        properties:
+                          - name: 'metricName'
+                            type: String
+                            description: |
+                              The Compute Engine quota metric name.
+                            output: true
+                          - name: 'limitName'
+                            type: String
+                            description: |
+                              The name of the quota limit.
+                            output: true
+                          - name: 'dimensions'
+                            type: KeyValuePairs
+                            description: |
+                              The map holding related quota dimensions
+                            output: true
+                          - name: 'limit'
+                            type: Integer
+                            description: |
+                              Current effective quota limit. The limit's unit depends on the quota type or metric.
+                            output: true
+                          - name: 'futureLimit'
+                            type: Integer
+                            description: |
+                              Future quota limit being rolled out. The limit's unit depends on the quota type or metric.
+                            output: true
+                          - name: 'rolloutStatus'
+                            type: String
+                            description: |
+                              Rollout status of the future quota limit.
+                            output: true
+                      - name: 'help'
+                        type: NestedObject
+                        output: true
+                        properties:
+                          - name: 'links'
+                            type: NestedObject
+                            output: true
+                            properties:
+                              - name: 'description'
+                                type: String
+                                description: |
+                                  Describes what the link offers.
+                                output: true
+                              - name: 'url'
+                                type: String
+                                description: |
+                                  The URL of the link.
+                                output: true
+                      - name: 'localizedMessage'
+                        type: NestedObject
+                        output: true
+                        properties:
+                          - name: 'locale'
+                            type: String
+                            description: |
+                              The locale used following the specification defined at https://www.rfc-editor.org/rfc/bcp/bcp47.txt. Examples are: "en-US", "fr-CH", "es-MX"
+                            output: true
+                          - name: 'message'
+                            type: String
+                            description: |
+                              The localized error message in the above locale.
+                            output: true
+      # Status.lastAttempt
+      - name: 'lastAttempt'
+        type: NestedObject
+        description: |
+          Information about the last attempt to fulfill the request. The value is temporary since the ResizeRequest can retry, as long as it's still active and the last attempt value can either be cleared or replaced with a different error. Since ResizeRequest retries infrequently, the value may be stale and no longer show an active problem. The value is cleared when ResizeRequest transitions to the final state (becomes inactive). If the final state is FAILED the error describing it will be storred in the "error" field only.
+        output: true
+        properties:
+          - name: 'error'
+            type: NestedObject
+            description: |
+              Fatal errors encountered during the queueing or provisioning phases of the ResizeRequest that caused the transition to the FAILED state. Contrary to the lastAttempt errors, this field is final and errors are never removed from here, as the ResizeRequest is not going to retry.
+            output: true
+            properties:
+              - name: 'errors'
+                type: Array
+                description: |
+                  The array of errors encountered while processing this operation.
+                output: true
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'code'
+                      type: String
+                      description: |
+                        The error type identifier for this error.
+                      output: true
+                    - name: 'location'
+                      type: String
+                      description: |
+                        Indicates the field in the request that caused the error. This property is optional.
+                      output: true
+                    - name: 'message'
+                      type: String
+                      description: |
+                        An optional, human-readable error message.
+                      output: true
+                    - name: 'errorDetails'
+                      type: Array
+                      description: |
+                        An array of messages that contain the error details. There is a set of defined message types to use for providing details.The syntax depends on the error code. For example, QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                      output: true
+                      item_type:
+                        type: NestedObject
+                        properties:
+                          - name: 'errorInfo'
+                            type: NestedObject
+                            output: true
+                            properties:
+                              - name: 'reason'
+                                type: String
+                                description: |
+                                  The reason of the error. This is a constant value that identifies the proximate cause of the error. Error reasons are unique within a particular domain of errors.
+                                output: true
+                              - name: 'domain'
+                                type: String
+                                description: |
+                                  The logical grouping to which the "reason" belongs. The error domain is typically the registered service name of the tool or product that generates the error. Example: "pubsub.googleapis.com".
+                                output: true
+                              - name: 'metadatas'
+                                type: KeyValuePairs
+                                description: |
+                                  Additional structured details about this error.
+                                output: true
+                          - name: 'quotaInfo'
+                            type: NestedObject
+                            output: true
+                            properties:
+                              - name: 'metricName'
+                                type: String
+                                description: |
+                                  The Compute Engine quota metric name.
+                                output: true
+                              - name: 'limitName'
+                                type: String
+                                description: |
+                                  The name of the quota limit.
+                                output: true
+                              - name: 'dimensions'
+                                type: KeyValuePairs
+                                description: |
+                                  The map holding related quota dimensions
+                                output: true
+                              - name: 'limit'
+                                type: Integer
+                                description: |
+                                  Current effective quota limit. The limit's unit depends on the quota type or metric.
+                                output: true
+                              - name: 'futureLimit'
+                                type: Integer
+                                description: |
+                                  Future quota limit being rolled out. The limit's unit depends on the quota type or metric.
+                                output: true
+                              - name: 'rolloutStatus'
+                                type: String
+                                description: |
+                                  Rollout status of the future quota limit.
+                                output: true
+                          - name: 'help'
+                            type: NestedObject
+                            output: true
+                            properties:
+                              - name: 'links'
+                                type: NestedObject
+                                output: true
+                                properties:
+                                  - name: 'description'
+                                    type: String
+                                    description: |
+                                      Describes what the link offers.
+                                    output: true
+                                  - name: 'url'
+                                    type: String
+                                    description: |
+                                      The URL of the link.
+                                    output: true
+                          - name: 'localizedMessage'
+                            type: NestedObject
+                            output: true
+                            properties:
+                              - name: 'locale'
+                                type: String
+                                description: |
+                                  The locale used following the specification defined at https://www.rfc-editor.org/rfc/bcp/bcp47.txt. Examples are: "en-US", "fr-CH", "es-MX"
+                                output: true
+                              - name: 'message'
+                                type: String
+                                description: |
+                                  The localized error message in the above locale.
+                                output: true
