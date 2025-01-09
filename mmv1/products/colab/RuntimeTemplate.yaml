@@ -46,8 +46,6 @@ examples:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'
       key_name: 'my-crypto-key'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
