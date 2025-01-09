@@ -112,7 +112,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"md5hash": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Optional:    true,
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
 
