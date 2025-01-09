@@ -30,6 +30,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	googleoauth "golang.org/x/oauth2/google"
+	googleoauthexternalaccount "golang.org/x/oauth2/google/externalaccount"
 	appengine "google.golang.org/api/appengine/v1"
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/bigtableadmin/v2"
@@ -182,6 +183,7 @@ type Config struct {
 	DCLConfig
 	AccessToken                               string
 	Credentials                               string
+	ExternalCredentials                       *googleoauthexternalaccount.Config
 	ImpersonateServiceAccount                 string
 	ImpersonateServiceAccountDelegates        []string
 	Project                                   string
@@ -520,6 +522,25 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 	return nil
 }
 
+func ExpandExternalCredentials(v interface{}) (*googleoauthexternalaccount.Config, error) {
+	ls := v.([]interface{})
+	if len(ls) == 0 || ls[0] == nil {
+		return nil, fmt.Errorf("external_credentials must be a list with at least one element")
+	}
+	cfgV := ls[0].(map[string]interface{})
+	externalCredentialsConfig := &googleoauthexternalaccount.Config{
+		SubjectTokenType: "urn:ietf:params:oauth:token-type:jwt",
+		TokenURL:         "https://sts.googleapis.com/v1/token",
+		Scopes:           []string{"https://www.googleapis.com/auth/cloud-platform"},
+		Audience:         cfgV["audience"].(string),
+		ServiceAccountImpersonationURL: fmt.Sprintf("https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:generateAccessToken", cfgV["service_account_email"].(string)),
+		CredentialSource: &googleoauthexternalaccount.CredentialSource{
+			File: cfgV["identity_token_file"].(string),
+		},
+	}
+	return externalCredentialsConfig, nil
+}
+
 func ExpandProviderBatchingConfig(v interface{}) (*BatchingConfig, error) {
 	config := &BatchingConfig{
 		SendAfter:      time.Second * DefaultBatchSendIntervalSec,
@@ -607,6 +628,16 @@ func (c *Config) logGoogleIdentities() error {
 // Get a TokenSource based on the Google Credentials configured.
 // If initialCredentialsOnly is true, don't follow the impersonation settings and return the initial set of creds.
 func (c *Config) getTokenSource(clientScopes []string, initialCredentialsOnly bool) (oauth2.TokenSource, error) {
+
+	if c.ExternalCredentials != nil {
+		log.Printf("[INFO] Using external credentials")
+		creds, err := googleoauthexternalaccount.NewTokenSource(c.Context, *c.ExternalCredentials)
+		if err != nil {
+			return nil, fmt.Errorf("error creating token source from external credentials: %s", err)
+		}
+		return creds, nil
+	}
+
 	creds, err := c.GetCredentials(clientScopes, initialCredentialsOnly)
 	if err != nil {
 		return nil, fmt.Errorf("%s", err)
