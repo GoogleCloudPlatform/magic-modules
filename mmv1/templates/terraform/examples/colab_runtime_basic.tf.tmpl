@@ -1,0 +1,38 @@
+resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  display_name = "Runtime template basic"
+  location = "us-central1"
+
+  machine_spec {
+    machine_type     = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
+}
+
+resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  display_name = "Runtime template basic"
+  location = "us-central1"
+
+  runtime_user = ""
+
+  notebook_runtime_template_ref {
+    enable_internet_access = true
+  }
+}
+
+
+
+
+
+
+  - name: notebookRuntimeTemplateRef 
+    type: NestedObject
+    description: |
+     'The pointer to NotebookRuntimeTemplate this NotebookRuntime is created from'
+    properties:
+      - name: 'notebookRuntimeTemplate'
+        required: true

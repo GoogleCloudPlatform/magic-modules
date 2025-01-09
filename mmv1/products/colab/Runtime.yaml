@@ -29,17 +29,36 @@ async:
   operation:
     base_url: '{{op_id}}'
 examples:
+  - name: 'colab_runtime_basic'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+  - name: 'colab_runtime_full'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+      network_name: 'colab-test-default'
+      key_name: 'my-crypto-key'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
     required: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
-properties:
   - name: 'name'
     type: String
     url_param_only: true
     description: 'The resource name of the Runtime Template'
+properties:
   - name: 'runtimeUser'
     type: String
     required: true
