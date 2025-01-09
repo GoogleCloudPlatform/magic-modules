@@ -73,6 +73,7 @@ type Examples struct {
 	//  - :CUST_ID
 	//  - :IDENTITY_USER
 	//  - :CHRONICLE_ID
+	//  - :VMWAREENGINE_PROJECT
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -215,19 +216,20 @@ func (e *Examples) SetHCLText() {
 	originalTestEnvVars := e.TestEnvVars
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
-		"PROJECT_NAME":        "my-project-name",
-		"CREDENTIALS":         "my/credentials/filename.json",
-		"REGION":              "us-west1",
-		"ORG_ID":              "123456789",
-		"ORG_DOMAIN":          "example.com",
-		"ORG_TARGET":          "123456789",
-		"BILLING_ACCT":        "000000-0000000-0000000-000000",
-		"MASTER_BILLING_ACCT": "000000-0000000-0000000-000000",
-		"SERVICE_ACCT":        "my@service-account.com",
-		"CUST_ID":             "A01b123xz",
-		"IDENTITY_USER":       "cloud_identity_user",
-		"PAP_DESCRIPTION":     "description",
-		"CHRONICLE_ID":        "00000000-0000-0000-0000-000000000000",
+		"PROJECT_NAME":         "my-project-name",
+		"CREDENTIALS":          "my/credentials/filename.json",
+		"REGION":               "us-west1",
+		"ORG_ID":               "123456789",
+		"ORG_DOMAIN":           "example.com",
+		"ORG_TARGET":           "123456789",
+		"BILLING_ACCT":         "000000-0000000-0000000-000000",
+		"MASTER_BILLING_ACCT":  "000000-0000000-0000000-000000",
+		"SERVICE_ACCT":         "my@service-account.com",
+		"CUST_ID":              "A01b123xz",
+		"IDENTITY_USER":        "cloud_identity_user",
+		"PAP_DESCRIPTION":      "description",
+		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
+		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML

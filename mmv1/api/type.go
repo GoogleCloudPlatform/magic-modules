@@ -399,6 +399,15 @@ func (t Type) Lineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
+// Returns the lineage in snake case
+func (t Type) LineageAsSnakeCase() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", t.ParentMetadata.LineageAsSnakeCase(), google.Underscore(t.Name))
+}
+
 // Prints the access path of the field in the configration eg: metadata.0.labels
 // The only intended purpose is to get the value of the labes field by calling d.Get().
 func (t Type) TerraformLineage() string {
