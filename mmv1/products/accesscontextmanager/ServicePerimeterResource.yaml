@@ -109,6 +109,6 @@ properties:
     output: true
   - name: 'etag'
     type: String
-    default_value: ''
+    output: true
     description: |
-      Etag is used to prevent overwriting the list of perimeter resources on PATCH calls.
+      The perimeter etag is internally used to prevent overwriting the list of perimeter resources on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of resources. The resource to add or remove is merged into that list and then this etag is sent with the PATCH call along with the updated resource list.
