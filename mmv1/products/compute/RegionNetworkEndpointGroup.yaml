@@ -40,15 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
 examples:
@@ -174,7 +167,7 @@ properties:
     type: NestedObject
     description: |
       This field is only used for PSC NEGs.
-
+    default_from_api: true
     properties:
       - name: 'producerPort'
         type: String

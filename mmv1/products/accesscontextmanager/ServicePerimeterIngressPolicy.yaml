@@ -58,14 +58,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - ingressFrom
   - ingressTo
@@ -110,7 +104,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
-        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
@@ -121,6 +115,8 @@ properties:
           https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressFromIdentitiesDiffSuppressFunc
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_from_identities_custom_flatten.go.tmpl
       - name: 'sources'
         type: Array
         description: |
@@ -169,7 +165,7 @@ properties:
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'operations'
