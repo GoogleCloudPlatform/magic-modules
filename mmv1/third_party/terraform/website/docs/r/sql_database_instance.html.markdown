@@ -555,9 +555,9 @@ block during resource creation/update will trigger the restore action after the 
 
 * `project` - (Optional) The full project ID of the source instance.`
 
-The optional `replication_cluster` block supports:
+The optional, computed `replication_cluster` block represents a primary instance and disaster recovery replica pair. Applicable to MySQL and PostgreSQL. This field can be set only after both the primary and replica are created. This block supports:
 
-* `failover_dr_replica_name`: (Optional, Computed) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. For non-existent case, "NON_EXISETENT" will be used instead.
+* `failover_dr_replica_name`: (Optional) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format. For non-existent case, "NON_EXISETENT" will be used instead.
 
 * `dr_replica`: Read-only field that indicates whether the replica is a DR replica.
 

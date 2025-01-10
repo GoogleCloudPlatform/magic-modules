@@ -927,9 +927,8 @@ is set to true. Defaults to ZONAL.`,
 					Schema: map[string]*schema.Schema{
 						"failover_dr_replica_name": {
 							Type:        schema.TypeString,
-							Computed:    true,
 							Optional:    true,
-							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. For non-existent case, %q will be used instead.`, emptyFailoverDrReplicaName),
+							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format. For non-existent case, %q will be used instead.`, emptyFailoverDrReplicaName),
 							AtLeastOneOf: []string{"replication_cluster.0.failover_dr_replica_name"},
 						},
 						"dr_replica": {
@@ -939,6 +938,7 @@ is set to true. Defaults to ZONAL.`,
 						},
 					},
 				},
+				Description: "A primary instance and disaster recovery replica pair. Applicable to MySQL and PostgreSQL. This field can be set only after both the primary and replica are created.",
 			},
 			"server_ca_cert": {
 				Type:      schema.TypeList,
@@ -1740,10 +1740,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("replica_names", instance.ReplicaNames); err != nil {
 		return fmt.Errorf("Error setting replica_names: %w", err)
 	}
-	if instance.ReplicationCluster != nil {
-		if err := d.Set("replication_cluster", flattenReplicationCluster(instance.ReplicationCluster, d)); err != nil {
-			return fmt.Errorf("Error setting replication_cluster: %w", err)
-		}
+
+	// We always set replication_cluster because it is computed+optional.
+	if err := d.Set("replication_cluster", flattenReplicationCluster(instance.ReplicationCluster, d)); err != nil {
+		return fmt.Errorf("Error setting replication_cluster: %w", err)
 	}
 	ipAddresses := flattenIpAddresses(instance.IpAddresses)
 	if err := d.Set("ip_address", ipAddresses); err != nil {
@@ -2410,13 +2410,19 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 	return flags
 }
 
+// flattenReplicationCluster converts cloud SQL backend ReplicationCluster (proto) to
+// terraform replication_cluster. We explicitly allow the case when ReplicationCluster
+// is nil since replication_cluster is computed+optional.
 func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
 	data := make(map[string]interface{})
 	data["failover_dr_replica_name"] = emptyFailoverDrReplicaName
-	if replicationCluster.FailoverDrReplicaName != "" {
+	if replicationCluster != nil && replicationCluster.FailoverDrReplicaName != "" {
 		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
 	}
-	data["dr_replica"] = replicationCluster.DrReplica
+	data["dr_replica"] = false
+	if replicationCluster != nil {
+		data["dr_replica"] = replicationCluster.DrReplica
+	}
 	return []map[string]interface{}{data}
 }
 
