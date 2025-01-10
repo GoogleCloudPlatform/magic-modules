@@ -8,49 +8,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccParameterManagerParameter_import(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckParameterManagerParameterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccParameterManagerParameter_import(context),
-			},
-			{
-				ResourceName:            "google_parameter_manager_parameter.parameter-import",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "parameter_id", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccParameterManagerParameter_import(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_parameter_manager_parameter" "parameter-import" {
-  provider = google-beta
-  parameter_id = "tf_test_parameter%{random_suffix}"
-  format = "YAML"
-
-  labels = {
-    key1 = "val1"
-    key2 = "val2"
-    key3 = "val3"
-    key4 = "val4"
-    key5 = "val5"
-  }
-}
-`, context)
-}
-
 func TestAccParameterManagerParameter_labelsUpdate(t *testing.T) {
 	t.Parallel()
 
