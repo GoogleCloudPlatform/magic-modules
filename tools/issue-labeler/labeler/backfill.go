@@ -27,7 +27,7 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 		return nil, fmt.Errorf("invalid repository format: %w", err)
 	}
 
-	sinceTime, err := time.Parse(time.RFC3339, since)
+	sinceTime, err := time.Parse("2006-01-02", since) // input format YYYY-MM-DD
 	if err != nil {
 		return nil, fmt.Errorf("invalid since time format: %w", err)
 	}
