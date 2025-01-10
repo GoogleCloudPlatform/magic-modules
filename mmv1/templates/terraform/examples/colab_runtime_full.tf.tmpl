@@ -75,5 +75,10 @@ resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
       k = "val"
     }
   }
+
+  depends_on = [
+    google_project_iam_member.colab_enterprise_admin,
+    google_colab_runtime_template.my_template
+  ]
 }
 

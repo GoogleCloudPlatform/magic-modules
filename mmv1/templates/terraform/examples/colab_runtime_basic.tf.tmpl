@@ -27,4 +27,9 @@ resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
     display_name = "Runtime basic"
     runtime_user = "example@example.com"
   }
+
+  depends_on = [
+    google_project_iam_member.colab_enterprise_admin,
+    google_colab_runtime_template.my_template,
+  ]
 }
