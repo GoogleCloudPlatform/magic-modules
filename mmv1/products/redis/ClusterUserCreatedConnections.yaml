@@ -28,7 +28,8 @@ create_verb: PATCH
 update_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}?updateMask=cluster_endpoints'
 update_mask: true
-exclude_delete: true
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/redis_cluster_user_created_connections.go.tmpl'
 timeouts:
   insert_minutes: 60
   update_minutes: 120
