@@ -38,6 +38,8 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/accesspolicy.tmpl'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
@@ -62,12 +64,11 @@ parameters:
     required: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+properties:
   - name: 'name'
     type: String
     default_from_api: true
-    url_param_only: true
     description: 'The resource name of the Runtime Template'
-properties:
   - name: 'displayName'
     type: String
     description:
