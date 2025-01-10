@@ -59,7 +59,8 @@ error_retry_predicates:
 virtual_fields:
   - name: 'force_destroy'
     description:
-      If set to true, any RepositoryGroups for this CodeRepositoryIndex will also be deleted.
+      If set to true, will allow deletion of the CodeRepositoryIndex even if there are existing
+      RepositoryGroups for the resource. These RepositoryGroups will also be deleted.
     type: Boolean
     default_value: false
 parameters:
