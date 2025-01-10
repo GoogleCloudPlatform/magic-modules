@@ -314,8 +314,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
-{{if ($.GetAsync.IsA "OpAsync") -}}
-{{if and $.GetAsync.Result.ResourceInsideResponse $.GetIdentity -}}
+{{  if ($.GetAsync.IsA "OpAsync") -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse $.GetIdentity -}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
@@ -330,7 +330,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         // The resource didn't actually create
         d.SetId("")
 
-{{ end -}}
+{{           end -}}
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
@@ -390,8 +390,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 
 {{        end  -}}
-{{      end -}}
-{{    end -}}
+{{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
+{{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
 {{if $.CustomCode.PostCreate -}} 
     {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
 {{- end}}
