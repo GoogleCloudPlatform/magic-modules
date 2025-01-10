@@ -362,13 +362,13 @@ properties:
   - name: 'mode'
     type: Enum
     description:
-      "Optional. Standalone or cluster.
-      \n Possible values:\n CLUSTER\nSTANDALONE"
+      "Optional. cluster or cluster-disabled.
+      \n Possible values:\n CLUSTER\nCLUSTER_DISABLED"
     default_from_api: true
     immutable: true
     enum_values:
       - 'CLUSTER'
-      - 'STANDALONE'
+      - 'CLUSTER_DISABLED'
   - name: 'pscAutoConnections'
     type: Array
     description:
