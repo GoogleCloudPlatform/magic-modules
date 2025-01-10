@@ -137,7 +137,7 @@ properties:
   - name: 'description'
     type: String
     description: |
-      An arbitrary description for the Conection.
+      An arbitrary description for the Connection.
   - name: 'labels'
     type: KeyValueLabels
     description: |
@@ -236,6 +236,7 @@ properties:
           authType of the Connection
         required: true
         enum_values:
+          - 'AUTH_TYPE_UNSPECIFIED'
           - 'USER_PASSWORD'
           - 'OAUTH2_JWT_BEARER'
           - 'OAUTH2_CLIENT_CREDENTIALS'

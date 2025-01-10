@@ -44,6 +44,12 @@ examples:
       network_name: 'net'
       hub_name: 'hub1'
       spoke_name: 'spoke1'
+  - name: 'network_connectivity_spoke_linked_vpc_network_group'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: 'net-spoke'
+      hub_name: 'hub1-spoke'
+      spoke_name: 'group-spoke1'
   - name: 'network_connectivity_spoke_router_appliance_basic'
     primary_resource_id: 'primary'
     vars:
@@ -87,6 +93,13 @@ examples:
       hub_name: "hub-basic"
       spoke_name: "vpc-spoke"
       producer_spoke_name: "producer-spoke"
+  - name: 'network_connectivity_spoke_center_group'
+    primary_resource_id: 'primary'
+    vars:
+      hub_name: "hub-basic"
+      spoke_name: "vpc-spoke"
+      auto_accept_project_1_name: "foo"
+      auto_accept_project_2_name: "bar"
 parameters:
   - name: 'location'
     type: String
@@ -122,15 +135,21 @@ properties:
     immutable: true
     resource: 'hub'
     imports: 'name'
+  - name: 'group'
+    type: String
+    description: The name of the group that this spoke is associated with.
+    immutable: true
+    default_from_api: true
   - name: 'linkedVpnTunnels'
     type: NestedObject
     description: The URIs of linked VPN tunnel resources
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedVpnTunnels.includeImportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -154,12 +173,13 @@ properties:
   - name: 'linkedInterconnectAttachments'
     type: NestedObject
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
-    immutable: true
     conflicts:
       - linked_vpn_tunnels
       - linked_router_appliance_instances
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedInterconnectAttachments.includeImportRanges'
     properties:
       - name: 'uris'
         type: Array
@@ -183,12 +203,14 @@ properties:
   - name: 'linkedRouterApplianceInstances'
     type: NestedObject
     description: The URIs of linked Router appliance resources
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_vpn_tunnels
       - linked_vpc_network
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedRouterApplianceInstances.instances'
+      - 'linkedRouterApplianceInstances.includeImportRanges'
     properties:
       - name: 'instances'
         type: Array
@@ -203,11 +225,13 @@ properties:
               type: String
               description: The URI of the virtual machine resource
               immutable: true
+              required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'ipAddress'
               type: String
               description: The IP address on the VM to use for peering.
               immutable: true
+              required: true
       - name: 'siteToSiteDataTransfer'
         type: Boolean
         description: A value that controls whether site-to-site data transfer is enabled for these resources. Note that data transfer is available only in supported locations.
@@ -239,13 +263,11 @@ properties:
       - name: 'excludeExportRanges'
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
       - name: 'includeExportRanges'
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
   - name: linkedProducerVpcNetwork
@@ -277,13 +299,11 @@ properties:
       - name: includeExportRanges
         type: Array
         description: IP ranges allowed to be included from peering.
-        immutable: true
         item_type:
           type: String
       - name: excludeExportRanges
         type: Array
         description: IP ranges encompassing the subnets to be excluded from peering.
-        immutable: true
         item_type:
           type: String
   - name: 'uniqueId'

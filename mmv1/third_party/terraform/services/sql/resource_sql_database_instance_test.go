@@ -1584,8 +1584,9 @@ func TestAccSqlDatabaseInstance_encryptionKey_replicaInDifferentRegion(t *testin
 
 	context := map[string]interface{}{
 		"project_id":    envvar.GetTestProjectFromEnv(),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
 		"instance_name": "tf-test-sql-" + acctest.RandString(t, 10),
+		"kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-sql-database-instance-key1").CryptoKey.Name,
+		"kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-sql-database-instance-key2").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1755,9 +1756,9 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName),
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName, false),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "false"),
 				),
 			},
 			{
@@ -1765,6 +1766,12 @@ func TestAccSQLDatabaseInstance_sqlMysqlDataCacheConfig(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName, true),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
+				),
 			},
 		},
 	})
@@ -1782,7 +1789,7 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS", true),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
 				),
@@ -1794,7 +1801,19 @@ func TestAccSQLDatabaseInstance_sqlPostgresDataCacheConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE"),
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterprisePlusInstanceName, enterprisePlusTier, "ENTERPRISE_PLUS", false),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "false"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(enterpriseInstanceName, enterpriseTier, "ENTERPRISE", true),
 				ExpectError: regexp.MustCompile(
 					fmt.Sprintf("Error, failed to create instance %s: googleapi: Error 400: Invalid request: Only ENTERPRISE PLUS edition supports data cache", enterpriseInstanceName)),
 			},
@@ -1824,7 +1843,7 @@ func TestAccSqlDatabaseInstance_Mysql_Edition_Upgrade(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(editionUpgrade),
+				Config: testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(editionUpgrade, true),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.edition", "ENTERPRISE_PLUS"),
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "settings.0.data_cache_config.0.data_cache_enabled", "true"),
@@ -2245,7 +2264,7 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_26", "NEVER", true),
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_37", "NEVER", true),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2254,7 +2273,16 @@ func TestAccSqlDatabaseInstance_activationPolicy(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
 			},
 			{
-				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_26", "ALWAYS", false),
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_0_37", "ALWAYS", false),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "root_password"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_activationPolicy(instanceName, "MYSQL_8_4", "ALWAYS", false),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
@@ -2635,7 +2663,10 @@ func TestAccSqlDatabaseInstance_useInternalCaByDefault(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testGoogleSqlDatabaseInstance_basic3, databaseName),
-				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA")),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_INTERNAL_CA"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -2661,7 +2692,10 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleSqlDatabaseInstance_setCasServerCa(databaseName, "GOOGLE_MANAGED_CAS_CA"),
-				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA")),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -2899,7 +2933,7 @@ resource "google_sql_database_instance" "instance" {
 }`, databaseName, tier)
 }
 
-func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string) string {
+func testGoogleSqlDatabaseInstance_sqlMysqlDataCacheConfig(instanceName string, datacache bool) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
@@ -2911,13 +2945,13 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-perf-optimized-N-2"
     edition = "ENTERPRISE_PLUS"
     data_cache_config {
-        data_cache_enabled = true
+        data_cache_enabled = "%t"
     }
   }
-}`, instanceName)
+}`, instanceName, datacache)
 }
 
-func testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(instanceName, tier, edition string) string {
+func testGoogleSqlDatabaseInstance_sqlPostgresDataCacheConfig(instanceName, tier, edition string, datacache bool) string {
 	return fmt.Sprintf(`
 
 resource "google_sql_database_instance" "instance" {
@@ -2929,10 +2963,10 @@ resource "google_sql_database_instance" "instance" {
     tier = "%s"
     edition = "%s"
     data_cache_config {
-        data_cache_enabled = true
+        data_cache_enabled = "%t"
     }
   }
-}`, instanceName, tier, edition)
+}`, instanceName, tier, edition, datacache)
 }
 
 func testGoogleSqlDatabaseInstance_SqlServerTimezone(instance, rootPassword, timezone string) string {
@@ -4420,19 +4454,8 @@ data "google_project" "project" {
   project_id = "%{project_id}"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name1}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
@@ -4443,7 +4466,7 @@ resource "google_sql_database_instance" "master" {
   database_version    = "MYSQL_5_7"
   region              = "us-central1"
   deletion_protection = false
-  encryption_key_name = google_kms_crypto_key.key.id
+  encryption_key_name = "%{kms_key_name1}"
 
   settings {
     tier = "db-n1-standard-1"
@@ -4458,20 +4481,8 @@ resource "google_sql_database_instance" "master" {
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
-resource "google_kms_key_ring" "keyring-rep" {
-
-  name     = "%{key_name}-rep"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "key-rep" {
-
-  name     = "%{key_name}-rep"
-  key_ring = google_kms_key_ring.keyring-rep.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key_rep" {
-  crypto_key_id = google_kms_crypto_key.key-rep.id
+  crypto_key_id = "%{kms_key_name2}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
@@ -4482,7 +4493,7 @@ resource "google_sql_database_instance" "replica" {
   database_version     = "MYSQL_5_7"
   region               = "us-east1"
   master_instance_name = google_sql_database_instance.master.name
-  encryption_key_name = google_kms_crypto_key.key-rep.id
+  encryption_key_name = "%{kms_key_name2}"
   deletion_protection  = false
 
   settings {
