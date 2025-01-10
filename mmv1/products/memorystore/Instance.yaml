@@ -363,7 +363,7 @@ properties:
     type: Enum
     description:
       "Optional. cluster or cluster-disabled.
-      \n Possible values:\n CLUSTER\nCLUSTER_DISABLED"
+      \n Possible values:\n CLUSTER\n CLUSTER_DISABLED"
     default_from_api: true
     immutable: true
     enum_values:
