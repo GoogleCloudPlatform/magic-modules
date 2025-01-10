@@ -233,7 +233,8 @@ resource "google_sql_database_instance" "original-replica" {
   * **NOTE**: Do **not** delete the `replica_names` field, even if it has no replicas remaining. Set `replica_names = [ ]` to indicate it having no replicas.
 * Remove original replica from `replication_cluster.failover_dr_replica_name`. `"NON_EXISTENT"` is the placeholder for non-existent DR replica.
 * Disable backup for original primary (because it became a replica).
-* Run `terraform plan` and verify that everything is done in-place (or data will be lost).
+* Run `terraform plan` and verify that your configuration matches infrastructure. You should see a message like the following:
+  * **`No changes. Your infrastructure matches the configuration.`**
 
 ```diff
 resource "google_sql_database_instance" "original-primary" {
@@ -283,13 +284,6 @@ resource "google_sql_database_instance" "original-replica" {
   }
 }
 ```
-
-#### Plan and verify that:
-- `terraform plan` outputs **"0 to add, 0 to destroy"**
-- `terraform plan` does not say **"must be replaced"** for any resource
-- Every resource **"will be updated in-place"**
-- Only the 2 instances involved in switchover have planned changes
-- (Recommended) Use `deletion_protection` on instances as a safety measure
 
 ## PostgreSQL
 
@@ -439,7 +433,8 @@ resource "google_sql_database_instance" "original-replica" {
   * **NOTE**: Do **not** delete the `replica_names` field, even if it has no replicas remaining. Set `replica_names = [ ]` to indicate it having no replicas.
 * Remove original replica from `replication_cluster.failover_dr_replica_name`. `"NON_EXISTENT"` is the placeholder for non-existent DR replica.
 * Disable backup and PITR for original primary (because it became a replica).
-* Run `terraform plan` and verify that everything is done in-place (or data will be lost).
+* Run `terraform plan` and verify that your configuration matches infrastructure. You should see a message like the following:
+  * **`No changes. Your infrastructure matches the configuration.`**
 
 ```diff
 resource "google_sql_database_instance" "original-primary" {
@@ -490,10 +485,3 @@ resource "google_sql_database_instance" "original-replica" {
   }
 }
 ```
-
-#### Plan and verify that:
-- `terraform plan` outputs **"0 to add, 0 to destroy"**
-- `terraform plan` does not say **"must be replaced"** for any resource
-- Every resource **"will be updated in-place"**
-- Only the 2 instances involved in switchover have planned changes
-- (Recommended) Use `deletion_protection` on instances as a safety measure
