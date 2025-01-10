@@ -557,7 +557,7 @@ block during resource creation/update will trigger the restore action after the 
 
 The optional, computed `replication_cluster` block represents a primary instance and disaster recovery replica pair. Applicable to MySQL and PostgreSQL. This field can be set only after both the primary and replica are created. This block supports:
 
-* `failover_dr_replica_name`: (Optional) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format. For non-existent case, "NON_EXISETENT" will be used instead.
+* `failover_dr_replica_name`: (Optional) If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format.
 
 * `dr_replica`: Read-only field that indicates whether the replica is a DR replica.
 
@@ -651,7 +651,7 @@ SQL Server: Create a `cascadable` replica in a different region from the primary
 3. (SQL Server) Set `replica_configuration` and set `cascadable_replica` to `true`
 4. Remove original replica from `replica_names`
    * **NOTE**: Do **not** delete the replica_names field, even if it has no replicas remaining. Set replica_names = [ ] to indicate it having no replicas.
-5. (MySQL/PostgreSQL) Set `replication_cluster.failover_dr_replica_name` as `"NON_EXISTENT"`.
+5. (MySQL/PostgreSQL) Set `replication_cluster.failover_dr_replica_name` as the empty string.
 6. (MySQL/PostgreSQL) Adjust `backup_configuration`. See [Switchover Guide](../guides/sql_instance_switchover.html.markdown) for details.
 #### Plan and verify that:
 - `terraform plan` outputs **"0 to add, 0 to destroy"**

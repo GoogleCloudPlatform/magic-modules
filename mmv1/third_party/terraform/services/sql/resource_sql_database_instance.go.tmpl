@@ -928,8 +928,7 @@ is set to true. Defaults to ZONAL.`,
 						"failover_dr_replica_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format. For non-existent case, %q will be used instead.`, emptyFailoverDrReplicaName),
-							AtLeastOneOf: []string{"replication_cluster.0.failover_dr_replica_name"},
+							Description: fmt.Sprintf(`If the instance is a primary instance, then this field identifies the disaster recovery (DR) replica. The standard format of this field is "your-project:your-instance". You can also set this field to "your-instance", but cloud SQL backend will convert it to the aforementioned standard format.`),
 						},
 						"dr_replica": {
 							Type:        schema.TypeBool,
@@ -1063,13 +1062,6 @@ is set to true. Defaults to ZONAL.`,
 		UseJSONNumber: true,
 	}
 }
-
-const (
-	// Instance name can't contain uppder case letters nor underscore, so this non-exitent
-	// marker is safe to use. See
-	// https://cloud.google.com/sql/docs/mysql/instance-settings#settings-2ndgen
-	emptyFailoverDrReplicaName = "NON_EXISTENT"
-)
 
 // Makes private_network ForceNew if it is changing from set to nil. The API returns an error
 // if this change is attempted in-place.
@@ -2077,7 +2069,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
-	if failoverDrReplicaName != emptyFailoverDrReplicaName {
+	if failoverDrReplicaName != "" {
 		instance.ReplicationCluster = &sqladmin.ReplicationCluster{
 			FailoverDrReplicaName: failoverDrReplicaName,
 		}
@@ -2415,7 +2407,7 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 // is nil since replication_cluster is computed+optional.
 func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
 	data := make(map[string]interface{})
-	data["failover_dr_replica_name"] = emptyFailoverDrReplicaName
+	data["failover_dr_replica_name"] = ""
 	if replicationCluster != nil && replicationCluster.FailoverDrReplicaName != "" {
 		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
 	}

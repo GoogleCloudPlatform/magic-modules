@@ -143,7 +143,7 @@ resource "google_sql_database_instance" "original-primary" {
   
 +  replication_cluster {
 +    # Note that the format of the name is "project:instance".
-+    # If you want to unset DR replica, mark this field as "NON_EXISTENT".
++    # If you want to unset DR replica, put empty string in this field.
 +    failover_dr_replica_name = "your-project:your-original-replica"
 +  }
   
@@ -231,7 +231,7 @@ resource "google_sql_database_instance" "original-replica" {
 * Set `master_instance_name` to the new primary (original replica).
 * (If `replica_names` is present) Remove original replica from `replica_names`.
   * **NOTE**: Do **not** delete the `replica_names` field, even if it has no replicas remaining. Set `replica_names = [ ]` to indicate it having no replicas.
-* Remove original replica from `replication_cluster.failover_dr_replica_name`. `"NON_EXISTENT"` is the placeholder for non-existent DR replica.
+* Remove original replica from `replication_cluster.failover_dr_replica_name` by setting this field to the empty string.
 * Disable backup for original primary (because it became a replica).
 * Run `terraform plan` and verify that your configuration matches infrastructure. You should see a message like the following:
   * **`No changes. Your infrastructure matches the configuration.`**
@@ -248,7 +248,7 @@ resource "google_sql_database_instance" "original-primary" {
   
   replication_cluster {
 -    failover_dr_replica_name = "your-project:your-original-replica"
-+    failover_dr_replica_name = "NON_EXISTENT"
++    failover_dr_replica_name = ""
   }
   
   settings {
@@ -343,7 +343,7 @@ resource "google_sql_database_instance" "original-primary" {
   
 +  replication_cluster {
 +    # Note that the format of the name is "project:instance".
-+    # If you want to unset DR replica, mark this field as "NON_EXISTENT".
++    # If you want to unset DR replica, put empty string in this field.
 +    failover_dr_replica_name = "your-project:your-original-replica"
 +  }
   
@@ -431,7 +431,7 @@ resource "google_sql_database_instance" "original-replica" {
 * Set `master_instance_name` to the new primary (original replica).
 * (If `replica_names` is present) Remove original replica from `replica_names`.
   * **NOTE**: Do **not** delete the `replica_names` field, even if it has no replicas remaining. Set `replica_names = [ ]` to indicate it having no replicas.
-* Remove original replica from `replication_cluster.failover_dr_replica_name`. `"NON_EXISTENT"` is the placeholder for non-existent DR replica.
+* Remove original replica from `replication_cluster.failover_dr_replica_name` by setting this field to the empty string.
 * Disable backup and PITR for original primary (because it became a replica).
 * Run `terraform plan` and verify that your configuration matches infrastructure. You should see a message like the following:
   * **`No changes. Your infrastructure matches the configuration.`**
@@ -448,7 +448,7 @@ resource "google_sql_database_instance" "original-primary" {
   
   replication_cluster {
 -    failover_dr_replica_name = "your-project:your-original-replica"
-+    failover_dr_replica_name = "NON_EXISTENT"
++    failover_dr_replica_name = ""
   }
   
   settings {
