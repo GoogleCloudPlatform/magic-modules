@@ -3693,7 +3693,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
@@ -3784,7 +3784,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection  = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
@@ -3863,7 +3863,7 @@ resource "google_sql_database_instance" "original-replica" {
   deletion_protection  = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
@@ -3967,7 +3967,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
@@ -4058,7 +4058,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection  = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
@@ -4137,7 +4137,7 @@ resource "google_sql_database_instance" "original-replica" {
   deletion_protection  = false
 
   replication_cluster {
-    failover_dr_replica_name = "NON_EXISTENT"
+    failover_dr_replica_name = ""
   }
 
   settings {
