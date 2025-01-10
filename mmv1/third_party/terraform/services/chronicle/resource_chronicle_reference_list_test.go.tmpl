@@ -52,9 +52,9 @@ resource "google_chronicle_reference_list" "example" {
  location = "us"
  instance = "%{chronicle_id}"
  reference_list_id = "tf_test_reference_list_id%{random_suffix}"
- description = "tf-test-referencelist-description%{random_suffix}"
+ description = "referencelist-description"
  entries {
-  value = "tf-test-referencelist-entry-value%{random_suffix}"
+  value = "referencelist-entry-value"
  }
  syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING"
 }
@@ -68,9 +68,9 @@ resource "google_chronicle_reference_list" "example" {
  location = "us"
  instance = "%{chronicle_id}"
  reference_list_id = "tf_test_reference_list_id%{random_suffix}"
- description = "tf-test-referencelist-description-updated%{random_suffix}"
+ description = "referencelist-description-updated"
  entries {
-  value = "tf-test-referencelist-entry-value-updated%{random_suffix}"
+  value = "referencelist-entry-value-updated"
  }
  syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_REGEX"
 }

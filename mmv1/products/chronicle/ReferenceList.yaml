@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,8 +35,6 @@ examples:
     min_version: 'beta'
     vars:
       reference_list_id: reference_list_id
-      description: referencelist-description
-      reference_list_entry_value: "referencelist-entry-value"
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
 
@@ -133,7 +131,6 @@ properties:
     description: |2-
 
       Possible values:
-      REFERENCE_LIST_SYNTAX_TYPE_UNSPECIFIED
       REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING
       REFERENCE_LIST_SYNTAX_TYPE_REGEX
       REFERENCE_LIST_SYNTAX_TYPE_CIDR
