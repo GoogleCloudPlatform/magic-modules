@@ -31,21 +31,25 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
+iam_policy:
+  parent_resource_attribute: 'runtime_template'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
+    - '{{runtime_template}}'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
-    region_override: 'us-central1'
     vars:
       runtime_template_name: 'colab-runtime-template'
   - name: 'colab_runtime_template_no_name'
     primary_resource_id: 'runtime-template'
-    region_override: 'us-central1'
     exclude_import_test: true
   - name: 'colab_runtime_template_full'
     primary_resource_id: 'runtime-template'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
-    region_override: 'us-central1'
     vars:
       runtime_template_name: 'colab-runtime-template'
       network_name: 'colab-test-default'
@@ -60,8 +64,8 @@ parameters:
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
   - name: 'name'
     type: String
-    url_param_only: true
     default_from_api: true
+    url_param_only: true
     description: 'The resource name of the Runtime Template'
 properties:
   - name: 'displayName'
@@ -80,6 +84,7 @@ properties:
     properties:
       - name: 'machineType'
         type: string
+        default_from_api: true
         description: |
                 The Compute Engine machine type selected for the runtime.
       - name: 'acceleratorType'
@@ -94,15 +99,17 @@ properties:
           - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
+        default_from_api: true
         description: 'The number of accelerators used by the runtime.'
   - name: dataPersistentDiskSpec
-    type: NestedObject
     default_from_api: true
+    type: NestedObject
     description: 'The configuration for the data disk of the runtime.'
     properties:
       - name: 'diskType'
         type: enum
         description: 'The type of the persistent disk.'
+        default_from_api: true
         enum_values:
           - 'pd-standard'
           - 'pd-ssd'
@@ -110,6 +117,7 @@ properties:
           - 'pd-extreme'
       - name: 'diskSizeGb'
         type: int
+        default_from_api: true
         description: |
                 The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
   - name: networkSpec
@@ -119,8 +127,9 @@ properties:
     properties:
       - name: 'enableInternetAccess'
         type: Boolean
-        description: Enable public internet access for the runtime. Enabled by default.
+        description: Enable public internet access for the runtime.
       - name: 'network'
+        default_from_api: true
         type: String
         description: 'The name of the VPC that this runtime is in.'
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
@@ -137,6 +146,7 @@ properties:
     description: 'Notebook Idle Shutdown configuration for the runtime.'
     properties:
       - name: 'idleTimeout'
+        default_from_api: true
         type: String
         description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
   - name: eucConfig
