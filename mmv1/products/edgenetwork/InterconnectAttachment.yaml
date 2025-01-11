@@ -54,17 +54,6 @@ examples:
     test_env_vars:
       location: 'REGION'
       zone: 'ZONE'
-
-    Settings
-
-Owner avatar
-magic-modules
-Public
-forked from GoogleCloudPlatform/magic-modules
-
-f1urps/magic-modules
-t
-Add file
     exclude_test: true
 parameters:
   - name: 'location'
