@@ -42,8 +42,8 @@ var (
 		},
 		{
 			id:        "hao-nan-li",
-			startDate: newDate(2024, 9, 24, pdtLoc),
-			endDate:   newDate(2024, 10, 4, pdtLoc),
+			startDate: newDate(2024, 12, 23, pdtLoc),
+			endDate:   newDate(2025, 1, 5, pdtLoc),
 		},
 		{
 			id:        "ScottSuarez",
@@ -122,8 +122,8 @@ var (
 		},
 		{
 			id:        "roaks3",
-			startDate: newDate(2024, 12, 6, pdtLoc),
-			endDate:   newDate(2024, 12, 8, pdtLoc),
+			startDate: newDate(2024, 12, 27, pdtLoc),
+			endDate:   newDate(2025, 1, 5, pdtLoc),
 		},
 	}
 )

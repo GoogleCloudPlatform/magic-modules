@@ -36,12 +36,14 @@ var tevRequiredEnvironmentVariables = [...]string{
 }
 
 var tevOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
 	"GOOGLE_CUST_ID",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 	"GOOGLE_ORG_2",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_SERVICE_ACCOUNT",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 var testEAPVCRCmd = &cobra.Command{

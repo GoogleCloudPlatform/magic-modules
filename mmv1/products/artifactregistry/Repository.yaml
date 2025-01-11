@@ -207,6 +207,12 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_vulnerability_scanning'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository with vulnerability scanning config'
 parameters:
   - name: 'repository_id'
     type: String
@@ -736,3 +742,30 @@ properties:
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.
+  - name: 'vulnerabilityScanningConfig'
+    type: NestedObject
+    description: |-
+      Configuration for vulnerability scanning of artifacts stored in this repository.
+    default_from_api: true
+    properties:
+      - name: 'enablementConfig'
+        type: Enum
+        description: |-
+          This configures whether vulnerability scanning is automatically performed for artifacts pushed to this repository.
+        enum_values:
+          - 'INHERITED'
+          - 'DISABLED'
+      - name: 'enablementState'
+        type: Enum
+        description: |-
+          This field returns whether scanning is active for this repository.
+        output: true
+        enum_values:
+          - 'SCANNING_UNSUPPORTED'
+          - 'SCANNING_DISABLED'
+          - 'SCANNING_ACTIVE'
+      - name: 'enablementStateReason'
+        type: String
+        description: |-
+          This provides an explanation for the state of scanning on this repository.
+        output: true
