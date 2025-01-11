@@ -77,7 +77,6 @@ func durationDiffSuppress(k, oldr, newr string, d *schema.ResourceData) bool {
 	if !ok {
 		return false
 	}
-	fmt.Printf("%v: old:%v, new:%v, DIFFME\n", k, old, new)
 	if old == new {
 		return true
 	}
@@ -89,7 +88,6 @@ func durationDiffSuppress(k, oldr, newr string, d *schema.ResourceData) bool {
 	if !ok {
 		return false
 	}
-	fmt.Printf("%v: oldS:%v, newS:%v, DIFFME\n", k, oldSeconds, newSeconds)
 	return oldSeconds == newSeconds
 }
 
