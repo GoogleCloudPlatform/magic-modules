@@ -25,6 +25,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers/{
 create_url: 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers?routerId={{router_id}}'
 update_verb: 'PATCH'
 update_mask: true
+immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/zones/{{zone}}/routers/{{router_id}}'
   - '{{name}}'
