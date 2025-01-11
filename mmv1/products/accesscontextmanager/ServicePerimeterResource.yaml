@@ -43,7 +43,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter_name}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter_name}}/{{resource}}'
 timeouts:
@@ -67,6 +67,7 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
   post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
@@ -97,3 +98,10 @@ properties:
       Format: projects/{project_number}
     required: true
     immutable: true
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    immutable: true
+    output: true
