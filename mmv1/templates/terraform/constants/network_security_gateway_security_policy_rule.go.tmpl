@@ -1,0 +1,11 @@
+// Flip integer number order
+func reverse_int(n int) int {
+	new_int := 0
+	for n > 0 {
+		remainder := n % 10
+		new_int *= 10
+		new_int += remainder
+		n /= 10
+	}
+	return new_int * 100
+}

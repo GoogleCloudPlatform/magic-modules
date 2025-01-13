@@ -1,3 +1,5 @@
 // When creating more than one rule sometimes the creation conflicts
-// Use random sleep duration to mitigate this issue
-time.Sleep(time.Duration(rand.Intn(100)) * time.Second)
+// Workaround: Get actual time Nanosecond, reverse the number and use as Microseconds
+// https://github.com/hashicorp/terraform-provider-google/issues/20892
+microNow := reverse_int(time.Now().Nanosecond())
+time.Sleep(time.Duration(microNow) * time.Microsecond)
