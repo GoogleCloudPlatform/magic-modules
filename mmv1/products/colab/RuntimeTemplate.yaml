@@ -31,13 +31,6 @@ autogen_async: true
 async:
   operation:
     base_url: '{{op_id}}'
-iam_policy:
-  parent_resource_attribute: 'runtime_template'
-  method_name_separator: ':'
-  fetch_iam_policy_verb: 'POST'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
-    - '{{runtime_template}}'
 custom_code:
   post_create: 'templates/terraform/post_create/colab_runtime_template.tmpl'
 examples:
