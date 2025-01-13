@@ -15,7 +15,7 @@
 name: Apihub
 display_name: API hub
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-- base_url: https://apihub.googleapis.com/v1/
-  name: ga
+  - base_url: https://apihub.googleapis.com/v1/
+    name: ga
