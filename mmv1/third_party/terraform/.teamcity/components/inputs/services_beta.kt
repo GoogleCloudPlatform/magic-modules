@@ -141,6 +141,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google-beta/services/certificatemanager"
     ),
+    "chronicle" to mapOf(
+        "name" to "chronicle",
+        "displayName" to "Chronicle",
+        "path" to "./google-beta/services/chronicle"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",
@@ -585,6 +590,16 @@ var ServicesListBeta = mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
+    ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google-beta/services/parametermanager"
+    ),
+    "parametermanagerregional" to mapOf(
+        "name" to "parametermanagerregional",
+        "displayName" to "Parametermanagerregional",
+        "path" to "./google-beta/services/parametermanagerregional"
     ),
     "privateca" to mapOf(
         "name" to "privateca",

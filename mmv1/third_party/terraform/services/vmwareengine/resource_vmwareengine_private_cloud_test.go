@@ -40,7 +40,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -52,7 +51,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -62,7 +61,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -72,7 +70,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -82,7 +80,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -92,7 +89,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -112,7 +109,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -122,7 +118,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -152,7 +148,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 }
 
 func testVmwareenginePrivateCloudCreateConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudConfig(context, "sample description", "TIME_LIMITED", 1, 0) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}) string {
@@ -160,7 +156,7 @@ func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}
 }
 
 func testVmwareenginePrivateCloudUpdateAutoscaleConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudDelayedDeleteConfig(context map[string]interface{}) string {
@@ -209,20 +205,6 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       node_type_id = "standard-72"
       node_count = "%{node_count}"
       custom_core_count = 32
-    }
-		autoscaling_settings {
-      autoscaling_policies {
-        autoscale_policy_id = "autoscaling-policy"
-        node_type_id = "standard-72"
-        scale_out_size = 1
-        storage_thresholds {
-          scale_out = 60
-          scale_in  = 20
-        }
-      }
-      min_cluster_node_count = 3
-      max_cluster_node_count = 8
-      cool_down_period = "1800s"
     }
   }
 }

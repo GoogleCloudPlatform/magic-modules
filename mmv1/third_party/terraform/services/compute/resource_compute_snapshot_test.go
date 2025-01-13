@@ -39,6 +39,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 
 	snapshotName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	kmsKeyName := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-compute-snapshot-key1").CryptoKey.Name
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -46,7 +47,7 @@ func TestAccComputeSnapshot_encryptionCMEK(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName),
+				Config: testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName, kmsKeyName),
 			},
 			{
 				ResourceName:            "google_compute_snapshot.foobar",
@@ -91,7 +92,7 @@ resource "google_compute_snapshot" "foobar" {
 `, diskName, snapshotName)
 }
 
-func testAccComputeSnapshot_encryptionCMEK(snapshotName string, diskName string) string {
+func testAccComputeSnapshot_encryptionCMEK(snapshotName, diskName, kmsKeyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-12"
@@ -99,23 +100,12 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_service_account" "test" {
-	account_id   = "%s"
-	display_name = "KMS Ops Account"
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "%s"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "example-key" {
-  name            = "%s"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "100000s"
+  account_id   = "%s"
+  display_name = "KMS Ops Account"
 }
 
 resource "google_kms_crypto_key_iam_member" "example-key" {
-  crypto_key_id = google_kms_crypto_key.example-key.id
+  crypto_key_id = "%s"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.test.email}"
 }
@@ -127,9 +117,10 @@ resource "google_compute_disk" "foobar" {
   zone = "us-central1-a"
 
   disk_encryption_key {
-	kms_key_self_link = google_kms_crypto_key_iam_member.example-key.crypto_key_id
-	kms_key_service_account = google_service_account.test.email
+    kms_key_self_link = "%s"
+    kms_key_service_account = google_service_account.test.email
   }
+  depends_on = [google_kms_crypto_key_iam_member.example-key]
 }
 
 resource "google_compute_snapshot" "foobar" {
@@ -137,9 +128,9 @@ resource "google_compute_snapshot" "foobar" {
   source_disk = google_compute_disk.foobar.name
   zone        = "us-central1-a"
   snapshot_encryption_key {
-	kms_key_self_link = google_kms_crypto_key_iam_member.example-key.crypto_key_id
-	kms_key_service_account = google_service_account.test.email
+    kms_key_self_link = "%s"
+    kms_key_service_account = google_service_account.test.email
   }
 }
-`, diskName, diskName, diskName, diskName, snapshotName)
+`, diskName, kmsKeyName, diskName, kmsKeyName, snapshotName, kmsKeyName)
 }
