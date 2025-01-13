@@ -149,6 +149,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_kms_key_rings":                             kms.DataSourceGoogleKmsKeyRings(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_kms_key_handle":                            kms.DataSourceGoogleKmsKeyHandle(),
+	"google_kms_autokey_config":                        kms.DataSourceGoogleKmsAutokeyConfig(),
 	{{- end }}
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
@@ -185,6 +186,9 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_parameter_manager_parameters":              parametermanager.DataSourceParameterManagerParameters(),
+	{{- end }}
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_parameter_manager_regional_parameter":      parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameter(),
 	{{- end }}
 	"google_privateca_certificate_authority":           privateca.DataSourcePrivatecaCertificateAuthority(),
 	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
