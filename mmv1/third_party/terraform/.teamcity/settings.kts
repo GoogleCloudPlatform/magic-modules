@@ -45,6 +45,14 @@ val masterBillingAccountVcr  = DslContext.getParameter("masterBillingAccountVcr"
 val org2Ga   = DslContext.getParameter("org2Ga", "")
 val org2Beta = DslContext.getParameter("org2Beta", "")
 val org2Vcr  = DslContext.getParameter("org2Vcr", "")
+// GOOGLE_CHRONICLE_INSTANCE_ID
+val chronicleInstanceIdGa   = DslContext.getParameter("chronicleInstanceIdGa", "")
+val chronicleInstanceIdBeta = DslContext.getParameter("chronicleInstanceIdBeta", "")
+val chronicleInstanceIdVcr  = DslContext.getParameter("chronicleInstanceIdVcr", "")
+// GOOGLE_VMWAREENGINE_PROJECT
+val vmwareengineProjectGa   = DslContext.getParameter("vmwareengineProjectGa", "")
+val vmwareengineProjectBeta = DslContext.getParameter("vmwareengineProjectBeta", "")
+val vmwareengineProjectVcr  = DslContext.getParameter("vmwareengineProjectVcr", "")
 
 // Values that are the same across GA, Beta, and VCR testing environments
 val billingAccount  = DslContext.getParameter("billingAccount", "")   // GOOGLE_BILLING_ACCOUNT
@@ -84,6 +92,12 @@ var allContextParams = AllContextParameters(
     org2Ga,
     org2Beta,
     org2Vcr,
+    chronicleInstanceIdGa,
+    chronicleInstanceIdBeta,
+    chronicleInstanceIdVcr,
+    vmwareengineProjectGa,
+    vmwareengineProjectBeta,
+    vmwareengineProjectVcr,
     billingAccount,
     billingAccount2,
     custId,
