@@ -1,5 +1,4 @@
-// When creating more than one rule sometimes the creation conflicts
-// Workaround: Get actual time Nanosecond, reverse the number and use as Microseconds
+// When creating more than one rule sometimes the creation conflicts.
 // https://github.com/hashicorp/terraform-provider-google/issues/20892
-microNow := reverse_int(time.Now().Nanosecond())
-time.Sleep(time.Duration(microNow) * time.Microsecond)
+// Workaround: Get sleep wait time based on actual Nanosecond.
+time.Sleep(sleep_wait_time(time.Now().Nanosecond()))

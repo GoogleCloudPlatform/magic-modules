@@ -1,3 +1,13 @@
+// Get the wait time for creation sleep
+// Use the time.Now().Nanosecond()
+// It reverts the nanoseconds and multiply by a random number
+// Return the duration to use
+func sleep_wait_time(nanosec int) time.Duration {
+	reverse_nano := reverse_int(nanosec)
+	multiplier := random_int(50, 150)
+	return (time.Duration(reverse_nano*multiplier) * time.Microsecond)
+}
+
 // Flip integer number order
 func reverse_int(n int) int {
 	new_int := 0
@@ -7,5 +17,10 @@ func reverse_int(n int) int {
 		new_int += remainder
 		n /= 10
 	}
-	return new_int * 100
+	return new_int
+}
+
+// Return a random int over a range
+func random_int(min, max int) int {
+	return (rand.Intn(max-min) + min)
 }
