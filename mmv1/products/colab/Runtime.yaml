@@ -26,6 +26,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
 autogen_async: true
 async:
+  actions: ['create', 'update', 'delete', 'assign']
   operation:
     base_url: '{{op_id}}'
 examples:
