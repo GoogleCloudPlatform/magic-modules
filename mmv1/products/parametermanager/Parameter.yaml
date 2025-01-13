@@ -12,50 +12,42 @@
 # limitations under the License.
 
 ---
-name: 'RegionalParameter'
-api_resource_type_kind: Parameter
+name: 'Parameter'
 description: |
-  A Regional Parameter is a logical regional parameter.
+  A Parameter resource is a logical parameter.
 min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/parameters'
-self_link: 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/parameters?parameter_id={{parameter_id}}'
+base_url: 'projects/{{project}}/locations/global/parameters'
+self_link: 'projects/{{project}}/locations/global/parameters/{{parameter_id}}'
+create_url: 'projects/{{project}}/locations/global/parameters?parameter_id={{parameter_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
+  - 'projects/{{project}}/locations/global/parameters/{{parameter_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
 examples:
-  - name: 'regional_parameter_basic'
-    primary_resource_id: 'regional-parameter-basic'
+  - name: 'parameter_config_basic'
+    primary_resource_id: 'parameter-basic'
     min_version: 'beta'
     vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_format'
-    primary_resource_id: 'regional-parameter-with-format'
+      parameter_id: 'parameter'
+  - name: 'parameter_with_format'
+    primary_resource_id: 'parameter-with-format'
     min_version: 'beta'
     vars:
-      parameter_id: 'regional_parameter'
-  - name: 'regional_parameter_with_labels'
-    primary_resource_id: 'regional-parameter-with-labels'
+      parameter_id: 'parameter'
+  - name: 'parameter_with_labels'
+    primary_resource_id: 'parameter-with-labels'
     min_version: 'beta'
     vars:
-      parameter_id: 'regional_parameter'
+      parameter_id: 'parameter'
 parameters:
-  - name: 'location'
-    type: String
-    description: |
-      The location of the regional parameter. eg us-central1
-    url_param_only: true
-    required: true
-    immutable: true
   - name: 'parameterId'
     type: String
     description: |
@@ -67,44 +59,45 @@ properties:
   - name: 'name'
     type: String
     description: |
-      The resource name of the regional Parameter. Format:
-      `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}`
+      The resource name of the Parameter. Format:
+      `projects/{{project}}/locations/global/parameters/{{parameter_id}}`
     output: true
   - name: 'createTime'
     type: String
     description: |
-      The time at which the regional Parameter was created.
+      The time at which the Parameter was created.
     output: true
   - name: 'updateTime'
     type: String
     description: |
-      The time at which the regional Parameter was updated.
+      The time at which the Parameter was updated.
     output: true
   - name: 'policyMember'
     type: NestedObject
     description: |
-      An object containing a unique resource identity tied to the regional parameter.
+      Policy member strings of a Google Cloud resource.
     output: true
     properties:
       - name: 'iamPolicyUidPrincipal'
         type: String
         description: |
-          IAM policy binding member referring to a Google Cloud resource by system-assigned unique identifier. If
-          a resource is deleted and recreated with the same name, the binding will not be applicable to the new
-          resource. Format:
-          `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/{{location}}/parameters/{{uid}}`
+          IAM policy binding member referring to a Google Cloud resource by system-assigned unique identifier.
+          If a resource is deleted and recreated with the same name, the binding will not be applicable to the
+          new resource. Format:
+          `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/global/parameters/{{uid}}`
         output: true
       - name: 'iamPolicyNamePrincipal'
         type: String
         description: |
-          IAM policy binding member referring to a Google Cloud resource by user-assigned name. If a resource is
-          deleted and recreated with the same name, the binding will be applicable to the new resource. Format:
-          `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/{{location}}/parameters/{{parameter_id}}`
+          IAM policy binding member referring to a Google Cloud resource by user-assigned name. If a
+          resource is deleted and recreated with the same name, the binding will be applicable to the
+          new resource. Format:
+          `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/global/parameters/{{parameter_id}}`
         output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |
-      The labels assigned to this regional Parameter.
+      The labels assigned to this Parameter.
 
       Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
       and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
@@ -119,7 +112,7 @@ properties:
   - name: 'format'
     type: Enum
     description: |
-      The format type of the regional parameter.
+      The format type of the parameter resource.
     default_value: 'UNFORMATTED'
     immutable: true
     enum_values:
