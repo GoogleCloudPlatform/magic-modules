@@ -1174,7 +1174,6 @@ resource "google_compute_health_check" "health_check" {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionBackendService_withSecurityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1223,4 +1222,3 @@ resource "google_compute_region_security_policy" "policy" {
 }
 `, serviceName, polLink, polName)
 }
-{{- end }}

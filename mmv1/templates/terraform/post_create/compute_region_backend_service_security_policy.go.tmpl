@@ -1,4 +1,3 @@
-{{- if ne $.TargetVersionName "ga" }}
 // security_policy isn't set by Create
 if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, securityPolicyProp)) {
   err = resourceComputeRegionBackendServiceRead(d, meta)
@@ -36,4 +35,3 @@ if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.
     return err
   }
 }
-{{- end }}
