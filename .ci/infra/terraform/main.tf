@@ -316,6 +316,7 @@ module "project-services" {
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
     "parallelstore.googleapis.com",
+    "parametermanager.googleapis.com",
     "privateca.googleapis.com",
     "privilegedaccessmanager.googleapis.com",
     "pubsub.googleapis.com",
