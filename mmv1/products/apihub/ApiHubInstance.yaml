@@ -13,7 +13,10 @@
 
 ---
 name: ApiHubInstance
-description: An ApiHubInstance represents the instance resources of the API Hub. Currently, only one ApiHub instance is allowed for each project.
+description: |-
+  An ApiHubInstance represents the instance resources of the API Hub.
+  Currently, only one ApiHub instance is allowed for each project.
+  Currently, updation/deletion of ApiHub instance is not allowed.
 base_url: projects/{{project}}/locations/{{location}}/apiHubInstances
 immutable: true
 self_link: '{{name}}'
@@ -28,10 +31,12 @@ examples:
   primary_resource_id: apihub-instance-without-search
   vars:
     instance_id: test-instance-basic
+  exclude_test: true
 - name: apihub_api_hub_instance_full
   primary_resource_id: apihub-instance-search
   vars:
     instance_id: test-instance-full
+  exclude_test: true
 autogen_async: true
 exclude_delete: true
 async:
