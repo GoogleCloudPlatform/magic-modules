@@ -19,6 +19,7 @@ permissions: read-all
 
 jobs:
   analysis:
+    if: github.repository == 'GoogleCloudPlatform/magic-modules'
     name: Scorecard analysis
     runs-on: ubuntu-22.04
     permissions:

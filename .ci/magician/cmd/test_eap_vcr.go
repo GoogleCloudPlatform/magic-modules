@@ -43,6 +43,7 @@ var tevOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_ORG_2",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_SERVICE_ACCOUNT",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 var testEAPVCRCmd = &cobra.Command{
