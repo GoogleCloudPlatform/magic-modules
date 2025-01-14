@@ -187,3 +187,25 @@ properties:
     description: |
       Optional. URI of the forward proxy to be applied to the runtime instances in this environment. Must be in the format of {scheme}://{hostname}:{port}. Note that the scheme must be one of "http" or "https", and the port must be supplied.
     required: false
+  - name: 'properties'
+    type: NestedObject
+    description: |
+      Key-value pairs that may be used for customizing the environment.
+    immutable: false
+    required: false
+    properties:
+      - name: 'property'
+        type: Array
+        description: |
+          List of all properties in the object.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                The property key.
+            - name: 'value'
+              type: String
+              description: |
+                The property value.
