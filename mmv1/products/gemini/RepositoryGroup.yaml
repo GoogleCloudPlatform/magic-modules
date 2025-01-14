@@ -14,7 +14,6 @@
 ---
 name: RepositoryGroup
 description: The resource for managing Repository Group for Gemini Code Assist.
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups?repositoryGroupId={{repository_group_id}}
@@ -26,7 +25,6 @@ import_format:
 mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}'
 examples:
   - name: "gemini_repository_group_basic"
-    min_version: 'beta'
     primary_resource_id: "example"
     primary_resource_name: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-gen-example", "us-central1", "", map[string]string{}), fmt.Sprintf("tf-test-gen-repository-group-%s", context["random_suffix"])'
     vars:
@@ -62,7 +60,6 @@ async:
     resource_inside_response: true
   include_project: false
 iam_policy:
-  min_version: 'beta'
   parent_resource_attribute: 'repository_group_id'
   method_name_separator: ':'
   fetch_iam_policy_verb: 'GET'
