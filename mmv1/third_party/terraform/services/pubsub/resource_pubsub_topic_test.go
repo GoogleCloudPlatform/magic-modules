@@ -371,20 +371,20 @@ resource "google_pubsub_topic" "foo" {
 func testAccPubsubTopic_updateWithAzureEventHubsSettings(topic string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
-name = "%s"
+  name = "%s"
 
-# Outside of automated terraform-provider-google CI tests, these values must be of actual Azure resources for the test to pass.
-ingestion_data_source_settings {
-azure_event_hubs {
-	resource_group = "azure-ingestion-resource-group"
-	namespace = "azure-ingestion-namespace"
-	event_hub = "azure-ingestion-event-hub"
-	client_id = "aZZZZZZZ-YYYY-HHHH-GGGG-abcdef569123"
-	tenant_id = "0XXXXXXX-YYYY-HHHH-GGGG-123456789123"
-	subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456789123"
-	gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
-}
-}
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	azure_event_hubs {
+		resource_group = "azure-ingestion-resource-group"
+		namespace = "azure-ingestion-namespace"
+		event_hub = "azure-ingestion-event-hub"
+		client_id = "aZZZZZZZ-YYYY-HHHH-GGGG-abcdef569123"
+		tenant_id = "0XXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
 }
 `, topic)
 }
@@ -392,20 +392,20 @@ azure_event_hubs {
 func testAccPubsubTopic_updateWithUpdatedAzureEventHubsSettings(topic string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
-name = "%s"
+  name = "%s"
 
-# Outside of automated terraform-provider-google CI tests, these values must be of actual Azure resources for the test to pass.
-ingestion_data_source_settings {
-azure_event_hubs {
-	resource_group = "azure-ingestion-resource-group"
-	namespace = "updated-azure-ingestion-namespace"
-	event_hub = "updated-azure-ingestion-event-hub"
-	client_id = "0XXXXXXX-YYYY-HHHH-GGGG-abcdef569123"
-	tenant_id = "aZZZZZZZ-YYYY-HHHH-GGGG-123456789123"
-	subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456789123"
-	gcp_service_account = "updated-fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
-}
-}
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	azure_event_hubs {
+		resource_group = "azure-ingestion-resource-group"
+		namespace = "azure-ingestion-namespace"
+		event_hub = "azure-ingestion-event-hub"
+		client_id = "aZZZZZZZ-YYYY-HHHH-GGGG-abcdef569123"
+		tenant_id = "0XXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
 }
 `, topic)
 }
