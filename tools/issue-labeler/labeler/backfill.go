@@ -50,16 +50,7 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 		if err != nil {
 			return nil, fmt.Errorf("listing issues: %w", err)
 		}
-
-		// Convert github.Issue to our Issue type
-		for _, issue := range issues {
-			labels := make([]Label, len(issue.Labels))
-			for i, l := range issue.Labels {
-				labels[i] = Label{Name: *l.Name}
-			}
-
-			allIssues = append(allIssues, issue)
-		}
+		allIssues = append(allIssues, issues...)
 
 		if resp.NextPage == 0 {
 			break
@@ -75,7 +66,8 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
-		if !issue.IsPullRequest() {
+		// Skip pull requests
+		if issue.IsPullRequest() {
 			continue
 		}
 
