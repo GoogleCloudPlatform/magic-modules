@@ -35,6 +35,7 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
       notebook_execution_job_id: 'colab-notebook-execution'
+      bucket_id: 'colab-notebook-execution'
     test_env_vars:
       project_id: 'PROJECT_NAME'
   - name: 'colab_notebook_execution_full'
@@ -95,7 +96,7 @@ properties:
       - name: 'generation'
         type: String
         description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
-  - name: 'DirectNotebookSource'
+  - name: 'directNotebookSource'
     type: NestedObject
     description: 'The content of the input notebook in ipynb format.'
     exactly_one_of:
@@ -182,15 +183,10 @@ properties:
             type: String
             description: 'The name of the subnetwork that this runtime is in.'
             diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-  - name: executionSink
-    type: NestedObject
+  - name: 'gcsOutputUri'
     required: true
-    description: |
-     'The location to store the notebook execution result.'
-    properties:
-      - name: 'gcsOutputUri'
-        type: String
-        description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+    type: String
+    description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
   - name: 'executionUser'
     type: String
     exactly_one_of:
