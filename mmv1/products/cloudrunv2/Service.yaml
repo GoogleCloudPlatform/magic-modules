@@ -1166,22 +1166,9 @@ properties:
         description: |-
           Name of the Cloud Build Custom Worker Pool that should be used to build the Cloud Run function. The format of this field is `projects/{project}/locations/{region}/workerPools/{workerPool}` where {project} and {region} are the project id and region respectively where the worker pool is defined and {workerPool} is the short name of the worker pool.
       - name: 'environmentVariables'
-        type: Array
+        type: KeyValuePairs
         description: |-
           User-provided build-time environment variables for the function.
-        is_set: true
-        item_type:
-          type: NestedObject
-          properties:
-            - name: 'name'
-              type: String
-              description: |-
-                Name of the environment variable. Must match the regex [A-Z][A-Z0-9_]*
-              required: true
-            - name: 'value'
-              type: String
-              description: |-
-                Literal value of the environment variable. Variable references are not supported in Cloud Run.
       - name: 'serviceAccount'
         type: String
         description: |-

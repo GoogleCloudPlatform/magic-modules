@@ -16,13 +16,9 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
     base_image = "us-central1-docker.pkg.dev/serverless-runtimes/google-22-full/runtimes/nodejs22"
     enable_automatic_updates = true
     worker_pool = "worker-pool"
-    environment_variables {
-      name = "FOO_KEY"
-      value = "FOO_VALUE"
-    }
-    environment_variables {
-      name = "BAR_KEY"
-      value = "BAR_VALUE"
+    environment_variables = {
+      FOO_KEY = "FOO_VALUE"
+      BAR_KEY = "BAR_VALUE"
     }
     service_account = google_service_account.cloudbuild_service_account.id
   }
