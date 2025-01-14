@@ -83,12 +83,7 @@ properties:
     type: String
     description: |-
       Output only. Code Repository Index instance State.
-      Possible values:
-      STATE_UNSPECIFIED
-      CREATING
-      ACTIVE
-      DELETING
-      SUSPENDED
+      Possible values are: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`, `SUSPENDED`.
     output: true
   - name: labels
     type: KeyValueLabels
@@ -97,7 +92,7 @@ properties:
     type: String
     description: |-
       Optional. Immutable. Customer-managed encryption key name, in the format
-      projects/*/locations/*/keyRings/*/cryptoKeys/*.
+      `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
     immutable: true
   - name: name
     type: String
