@@ -4,7 +4,7 @@ description: |-
   Manages a project-level logging sink.
 ---
 
-# google\_logging\_project\_sink
+# google_logging_project_sink
 
 Manages a project-level logging sink. For more information see:
 
@@ -18,13 +18,16 @@ Manages a project-level logging sink. For more information see:
 
 ~> **Note** You must [enable the Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
-## Example Usage
+~> **Note:** The `_Default` and `_Required` logging sinks are automatically created for a given project and cannot be deleted. Creating a resource of this type will acquire and update the resource that already exists at the desired location. These sinks cannot be removed so deleting this resource will remove the sink config from your terraform state but will leave the logging sink unchanged. The sinks that are currently automatically created are "_Default" and "_Required".
+
+
+## Example Usage - Basic Sink
 
 ```hcl
 resource "google_logging_project_sink" "my-sink" {
   name = "my-pubsub-instance-sink"
 
-  # Can export to pubsub, cloud storage, or bigquery
+  # Can export to pubsub, cloud storage, bigquery, log bucket, or another project
   destination = "pubsub.googleapis.com/projects/my-project/topics/instance-activity"
 
   # Log all WARN or higher severity messages relating to instances
@@ -34,6 +37,8 @@ resource "google_logging_project_sink" "my-sink" {
   unique_writer_identity = true
 }
 ```
+
+## Example Usage - Cloud Storage Bucket Destination
 
 A more complete example follows: this creates a compute instance, as well as a log sink that logs all activity to a
 cloud storage bucket. Because we are using `unique_writer_identity`, we must grant it access to the bucket.
@@ -62,8 +67,8 @@ resource "google_compute_instance" "my-logged-instance" {
   }
 }
 
-# A bucket to store logs in
-resource "google_storage_bucket" "log-bucket" {
+# A gcs bucket to store logs in
+resource "google_storage_bucket" "gcs-bucket" {
   name     = "my-unique-logging-bucket"
   location = "US"
 }
@@ -72,14 +77,14 @@ resource "google_storage_bucket" "log-bucket" {
 resource "google_logging_project_sink" "instance-sink" {
   name        = "my-instance-sink"
   description = "some explanation on what this is"
-  destination = "storage.googleapis.com/${google_storage_bucket.log-bucket.name}"
+  destination = "storage.googleapis.com/${google_storage_bucket.gcs-bucket.name}"
   filter      = "resource.type = gce_instance AND resource.labels.instance_id = \"${google_compute_instance.my-logged-instance.instance_id}\""
 
   unique_writer_identity = true
 }
 
 # Because our sink uses a unique_writer, we must grant that writer access to the bucket.
-resource "google_project_iam_binding" "log-writer" {
+resource "google_project_iam_binding" "gcs-bucket-writer" {
   project = "your-project-id"
   role = "roles/storage.objectCreator"
 
@@ -88,6 +93,50 @@ resource "google_project_iam_binding" "log-writer" {
   ]
 }
 ```
+
+## Example Usage - User-managed Service Account 
+
+The following example creates a sink that are configured with user-managed service accounts, by specifying
+the `custom_writer_identity` field.
+
+Note that you can only create a sink that uses a user-managed service account when the sink destination
+is a log bucket.
+
+```hcl
+resource "google_service_account" "custom-sa" {
+  project      = "other-project-id"
+  account_id   = "gce-log-bucket-sink"
+  display_name = "gce-log-bucket-sink"
+}
+
+# Create a sink that uses user-managed service account
+resource "google_logging_project_sink" "my-sink" {
+  name = "other-project-log-bucket-sink"
+
+  # Can export to log bucket in another project
+  destination = "logging.googleapis.com/projects/other-project-id/locations/global/buckets/gce-logs"
+
+  # Log all WARN or higher severity messages relating to instances
+  filter = "resource.type = gce_instance AND severity >= WARNING"
+
+  unique_writer_identity = true
+  
+  # Use a user-managed service account
+  custom_writer_identity = google_service_account.custom-sa.email
+}
+
+# grant writer access to the user-managed service account
+resource "google_project_iam_member" "custom-sa-logbucket-binding" {
+  project = "destination-project-id"
+  role   = "roles/logging.bucketWriter"
+  member = "serviceAccount:${google_service_account.custom-sa.email}"
+}
+```
+
+The above example will create a log sink that route logs to destination GCP project using
+an user-managed service account. 
+
+## Example Usage - Sink Exclusions
 
 The following example uses `exclusions` to filter logs that will not be exported. In this example logs are exported to a [log bucket](https://cloud.google.com/logging/docs/buckets) and there are 2 exclusions configured
 
@@ -118,15 +167,15 @@ resource "google_logging_project_sink" "log-bucket" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the logging sink.
+* `name` - (Required) The name of the logging sink. Logging automatically creates two sinks: `_Required` and `_Default`.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket . Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`
     - `pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]`
-    - `logging.googleapis.com/projects/[PROJECT_ID]]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]`
 
     The writer associated with the sink must have access to write to the above resource.
 
@@ -141,10 +190,14 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project to create the sink in. If omitted, the project associated with the provider is
     used.
 
-* `unique_writer_identity` - (Optional) Whether or not to create a unique identity associated with this sink. If `false`
-    (the default), then the `writer_identity` used is `serviceAccount:cloud-logs@system.gserviceaccount.com`. If `true`,
+* `unique_writer_identity` - (Optional) Whether or not to create a unique identity associated with this sink. If `false`, then the `writer_identity` used is `serviceAccount:cloud-logs@system.gserviceaccount.com`. If `true` (the default),
     then a unique service account is created and used for this sink. If you wish to publish logs across projects or utilize
     `bigquery_options`, you must set `unique_writer_identity` to true.
+
+* `custom_writer_identity` - (Optional) A user managed service account that will be used to write
+    the log entries. The format must be `serviceAccount:some@email`. This field can only be specified if you are
+    routing logs to a destination outside this sink's project. If not specified, a Logging service account 
+    will automatically be generated.
 
 * `bigquery_options` - (Optional) Options that affect sinks exporting data to BigQuery. Structure [documented below](#nested_bigquery_options).
 
@@ -179,6 +232,19 @@ exported:
 
 Project-level logging sinks can be imported using their URI, e.g.
 
+* `projects/{{project_id}}/sinks/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import project-level logging sinks using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project_id}}/sinks/{{name}}"
+  to = google_logging_project_sink.default
+}
 ```
-$ terraform import google_logging_project_sink.my_sink projects/my-project/sinks/my-sink
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), project-level logging sinks can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_logging_project_sink.default projects/{{project_id}}/sinks/{{name}}
 ```

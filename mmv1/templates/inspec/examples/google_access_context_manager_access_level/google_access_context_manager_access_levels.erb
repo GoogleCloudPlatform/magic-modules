@@ -1,8 +1,0 @@
-<% gcp_organization_id = "#{external_attribute(pwd, 'gcp_organization_id', doc_generation)}" -%>
-<% service_perimeter = grab_attributes(pwd)['service_perimeter'] -%>
-
-policy_name = google_access_context_manager_access_policies(org_id: <%= gcp_organization_id %>).names.first
-
-describe google_access_context_manager_access_levels(parent: policy_name) do
-  its('names') { should include "ip_subnet" }
-end

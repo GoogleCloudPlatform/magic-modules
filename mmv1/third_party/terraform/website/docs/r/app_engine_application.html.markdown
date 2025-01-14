@@ -46,8 +46,10 @@ The following arguments are supported:
 
 * `database_type` - (Optional) The type of the Cloud Firestore or Cloud Datastore database associated with this application.
    Can be `CLOUD_FIRESTORE` or `CLOUD_DATASTORE_COMPATIBILITY` for new
-   instances.  To support old instances, the value `CLOUD_DATASTORE` is accepted
-   by the provider, but will be rejected by the API.
+   instances.  To support old instances, the value `CLOUD_DATASTORE` is accepted by the provider, but will be rejected by the API.
+   To create a Cloud Firestore database without creating an App Engine application, use the
+   [`google_firestore_database`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/firestore_database)
+   resource instead.
 
 * `serving_status` - (Optional) The serving status of the app.
 
@@ -103,6 +105,19 @@ This resource provides the following
 
 Applications can be imported using the ID of the project the application belongs to, e.g.
 
+* `{{project-id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import an Application using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project-id}}"
+  to = google_app_engine_application.default
+}
 ```
-$ terraform import google_app_engine_application.app your-project-id
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Applications can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_app_engine_application.default {{project-id}}
 ```

@@ -44,6 +44,7 @@ var vFilter = flag.String("version", "", "optional version name. If specified, t
 var mode = flag.String("mode", "", "mode for the generator. If unset, creates the provider. Options: 'serialization'")
 
 var terraformResourceDirectory = "google-beta"
+var terraformProviderModule = "github.com/hashicorp/terraform-provider-google-beta"
 
 func main() {
 	resources, products, err := loadAndModelResources()
@@ -75,8 +76,10 @@ func main() {
 	}
 	if *version == GA_VERSION {
 		terraformResourceDirectory = "google"
+		terraformProviderModule = "github.com/hashicorp/terraform-provider-google/google"
 	} else if *version == ALPHA_VERSION {
 		terraformResourceDirectory = "google-private"
+		terraformProviderModule = "internal/terraform-next"
 	}
 
 	generatedResources := make([]*Resource, 0, len(resourcesForVersion))
@@ -120,7 +123,11 @@ func main() {
 		return
 	}
 
-	copyHandwrittenFiles(*cPath, *oPath)
+	// Copy DCL helper files into the folder tpgdclresource to make it easier to remove these files later.
+	dirPath := path.Join(*oPath, terraformResourceDirectory, "tpgdclresource")
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		glog.Error(fmt.Errorf("error creating Terraform tpgdclresource directory %v: %v", dirPath, err))
+	}
 }
 
 func skipResource(r *Resource) bool {
@@ -357,6 +364,14 @@ func loadOverrides(packagePath Filepath, fileName string) Overrides {
 	return overrides
 }
 
+func getParentDir(res *Resource) string {
+	servicePath := path.Join(*oPath, terraformResourceDirectory, "services", string(res.Package()))
+	if err := os.MkdirAll(servicePath, os.ModePerm); err != nil {
+		glog.Error(fmt.Errorf("error creating Terraform the service directory %v: %v", servicePath, err))
+	}
+	return servicePath
+}
+
 func generateResourceFile(res *Resource) {
 	// Generate resource file
 	tmplInput := ResourceInput{
@@ -388,7 +403,8 @@ func generateResourceFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err = ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -428,8 +444,9 @@ func generateSweeperFile(res *Resource) {
 	if oPath == nil || *oPath == "" {
 		fmt.Printf("%v", string(formatted))
 	} else {
-		outname := fmt.Sprintf("resource_%s_%s_sweeper_test.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		outname := fmt.Sprintf("resource_%s_%s_sweeper.go", res.ProductName(), res.Name())
+		parentDir := getParentDir(res)
+		err := ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -471,7 +488,8 @@ func generateResourceTestFile(res *Resource) {
 		fmt.Printf("%v", string(formatted))
 	} else {
 		outname := fmt.Sprintf("resource_%s_%s_generated_test.go", res.ProductName(), res.Name())
-		err := ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644)
+		parentDir := getParentDir(res)
+		err = ioutil.WriteFile(path.Join(parentDir, outname), formatted, 0644)
 		if err != nil {
 			glog.Exit(err)
 		}
@@ -498,7 +516,7 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider_dcl_resources.go"), formatted, 0644); err != nil {
+	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
 		glog.Exit(err)
 	}
 }
@@ -530,7 +548,13 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 		fmt.Print(string(formatted))
 	} else {
 		outname := fileName + ".go"
-		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, outname), formatted, 0644); err != nil {
+
+		DCLFolderPath := path.Join(*oPath, terraformResourceDirectory, "transport")
+		if err := os.MkdirAll(DCLFolderPath, os.ModePerm); err != nil {
+			glog.Error(fmt.Errorf("error creating Terraform DCL directory %v: %v", DCLFolderPath, err))
+		}
+
+		if err = ioutil.WriteFile(path.Join(DCLFolderPath, outname), formatted, 0644); err != nil {
 			glog.Exit(err)
 		}
 	}

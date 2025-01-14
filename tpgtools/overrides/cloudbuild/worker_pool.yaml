@@ -1,6 +1,10 @@
 - type: DIFF_SUPPRESS_FUNC
   field: network_config.peered_network
   details:
-    diffsuppressfunc: compareResourceNames
+    diffsuppressfunc: tpgresource.CompareResourceNames
 - type: EXCLUDE
   field: etag
+- type: CUSTOMIZE_DIFF
+  details:
+    functions: 
+    - tpgresource.DefaultProviderProject

@@ -73,6 +73,10 @@ resource "google_container_azure_node_pool" "primary" {
       owner = "mmv2"
     }
 
+    labels = {
+      key_one = "label_one"
+    }
+
     vm_size = "Standard_DS2_v2"
   }
 
@@ -88,6 +92,10 @@ resource "google_container_azure_node_pool" "primary" {
 
   annotations = {
     annotation-one = "value-one"
+  }
+
+  management {
+    auto_repair = true
   }
 
   project = "{{project}}"

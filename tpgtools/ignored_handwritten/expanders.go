@@ -1,12 +1,15 @@
 package google
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
 
-func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, config *Config) *string {
+func expandComputeRouteNextHopInstance(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
-	val, err := parseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
+	val, err := tpgresource.ParseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, config, true)
 	if err != nil {
 		return nil
 	}
@@ -17,7 +20,7 @@ func expandComputeRouteNextHopInstance(v interface{}, d TerraformResourceData, c
 	return &nextInstance.SelfLink
 }
 
-func expandComputeVpnTunnelRegion(v interface{}, d TerraformResourceData, config *Config) *string {
+func expandComputeVpnTunnelRegion(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) *string {
 	if v == "" {
 		return nil
 	}
@@ -25,7 +28,7 @@ func expandComputeVpnTunnelRegion(v interface{}, d TerraformResourceData, config
 		return &reg
 	}
 
-	f, err := parseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
+	f, err := tpgresource.ParseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
 	if err != nil {
 		return nil
 	}

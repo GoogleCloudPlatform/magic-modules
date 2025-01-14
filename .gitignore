@@ -38,9 +38,6 @@ ehthumbs.db
 Thumbs.db
 
 final_api.yaml
-# Ansible PR Script
-mmv1/tools/ansible-pr/templates/*
-!mmv1/tools/ansible-pr/templates/.keep
 
 # Used by OiCS tutorial
 mmv1/build/*
@@ -55,3 +52,10 @@ mmv1/build/*
 tpgtools/temp.serial
 
 tpgtools/serialization.go
+
+# ignore magician binary
+.ci/magician/magician
+
+# ignore leftover testlogs and cassettes
+.ci/magician/testlogs
+.ci/magician/cassettes

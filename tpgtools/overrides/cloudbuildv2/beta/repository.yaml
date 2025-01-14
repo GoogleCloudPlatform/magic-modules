@@ -1,5 +1,0 @@
-- type: CUSTOM_NAME
-  # Rename to parent_connection as connection is a reserved word in terraform.
-  field: connection
-  details:
-    name: parent_connection

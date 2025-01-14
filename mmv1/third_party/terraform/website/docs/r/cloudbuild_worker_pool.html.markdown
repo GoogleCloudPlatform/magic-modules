@@ -4,7 +4,7 @@ description: |-
   Configuration for custom WorkerPool to run builds
 ---
 
-# google\_cloudbuild\_worker\_pool
+# google_cloudbuild_worker_pool
 
 Definition of custom Cloud Build WorkerPools for running jobs with custom configuration and custom networking.
 
@@ -61,6 +61,7 @@ resource "google_cloudbuild_worker_pool" "pool" {
   }
   network_config {
     peered_network = google_compute_network.network.id
+    peered_network_ip_range = "/29"
   }
   depends_on = [google_service_networking_connection.worker_pool_conn]
 }
@@ -100,16 +101,20 @@ The following arguments are supported:
 * `peered_network` -
   (Required)
   Immutable. The network definition that the workers are peered to. If this section is left empty, the workers will be peered to `WorkerPool.project_id` on the service producer network. Must be in the format `projects/{project}/global/networks/{network}`, where `{project}` is a project number, such as `12345`, and `{network}` is the name of a VPC network in the project. See (https://cloud.google.com/cloud-build/docs/custom-workers/set-up-custom-worker-pool-environment#understanding_the_network_configuration_options)
+
+* `peered_network_ip_range` -
+  (Optional)
+  Immutable. Subnet IP range within the peered network. This is specified in CIDR notation with a slash and the subnet prefix size. You can optionally specify an IP address before the subnet prefix value. e.g. `192.168.0.0/29` would specify an IP range starting at 192.168.0.0 with a prefix size of 29 bits. `/16` would specify a prefix size of 16 bits, with an automatically determined IP within the peered VPC. If unspecified, a value of `/24` will be used.
     
 <a name="nested_worker_config"></a>The `worker_config` block supports:
     
 * `disk_size_gb` -
   (Optional)
-  Size of the disk attached to the worker, in GB. See (https://cloud.google.com/cloud-build/docs/custom-workers/worker-pool-config-file). Specify a value of up to 1000. If `0` is specified, Cloud Build will use a standard disk size.
+  Size of the disk attached to the worker, in GB. See [diskSizeGb](https://cloud.google.com/build/docs/private-pools/private-pool-config-file-schema#disksizegb). Specify a value of up to 1000. If `0` is specified, Cloud Build will use a standard disk size.
     
 * `machine_type` -
   (Optional)
-  Machine type of a worker, such as `n1-standard-1`. See (https://cloud.google.com/cloud-build/docs/custom-workers/worker-pool-config-file). If left blank, Cloud Build will use `n1-standard-1`.
+  Machine type of a worker, such as `n1-standard-1`. See [machineType](https://cloud.google.com/build/docs/private-pools/private-pool-config-file-schema#machinetype). If left blank, Cloud Build will use `n1-standard-1`.
     
 * `no_external_ip` -
   (Optional)
@@ -145,6 +150,21 @@ This resource provides the following
 ## Import
 
 WorkerPool can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{location}}/workerPools/{{name}}`
+* `{{project}}/{{location}}/{{name}}`
+* `{{location}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkerPool using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/workerPools/{{name}}"
+  to = google_cloudbuild_worker_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), WorkerPool can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_cloudbuild_worker_pool.default projects/{{project}}/locations/{{location}}/workerPools/{{name}}

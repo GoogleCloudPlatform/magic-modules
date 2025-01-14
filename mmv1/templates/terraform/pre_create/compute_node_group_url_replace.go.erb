@@ -1,8 +1,0 @@
-var sizeParam string
-if v, ok := d.GetOkExists("size"); ok {
-	sizeParam = fmt.Sprintf("%v", v)
-} else if v, ok := d.GetOkExists("initial_size"); ok {
-	sizeParam = fmt.Sprintf("%v", v)
-}
-
-url = regexp.MustCompile("PRE_CREATE_REPLACE_ME").ReplaceAllLiteralString(url, sizeParam)

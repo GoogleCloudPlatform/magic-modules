@@ -1,0 +1,71 @@
+[
+  {
+    "name": "//cloudresourcemanager.googleapis.com/folders/{{.FolderID}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+    "v2_org_policies": [
+      {
+        "name": "folders/{{.FolderID}}/policies/samplePolicy",
+        "spec": {
+          "update_time": "2021-04-14T15:16:17Z",
+          "rules": [
+            {
+              "deny_all": true
+            }
+          ],
+          "inherit_from_parent": true
+        }
+      }
+    ],
+    "ancestry_path": "{{.Ancestry}}"
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Organization",
+    "v2_org_policies": [
+      {
+        "name": "organizations/{{.OrgID}}/policies/gcp.detailedAuditLoggingMode",
+        "spec": {
+          "update_time": "2021-04-14T15:16:17Z",
+          "reset": true
+        }
+      }
+    ],
+    "ancestry_path": "organization/{{.OrgID}}"
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "v2_org_policies": [
+      {
+        "name": "projects/{{.Provider.project}}/policies/gcp.resourceLocations",
+        "spec": {
+          "update_time": "2021-04-14T15:16:17Z",
+          "rules": [
+            {
+              "values": {
+                "allowed_values": [
+                  "projects/allowed-project1",
+                  "projects/allowed-project2"
+                ],
+                "denied_values": [
+                  "projects/denied-project"
+                ]
+              },
+              "condition": {
+                "expression": "resource.matchLabels('labelKeys/123', 'labelValues/345')",
+                "title": "sample-condition",
+                "description": "A sample condition for the policy",
+                "location": "sample-location.log"
+              }
+            },
+            {
+              "allow_all": true
+            }
+          ],
+          "inherit_from_parent": true
+        }
+      }
+    ],
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+  }
+]

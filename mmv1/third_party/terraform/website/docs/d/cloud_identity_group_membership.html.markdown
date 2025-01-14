@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud Identity"
 description: |-
-  Get list of the Cloud Identity Group Memberships within a Group.
+  Get a list of the Cloud Identity Group Memberships within a Group.
 ---
 
 # google_cloud_identity_group_memberships
@@ -9,6 +9,13 @@ description: |-
 Use this data source to get list of the Cloud Identity Group Memberships within a given Group.
 
 https://cloud.google.com/identity/docs/concepts/overview#memberships
+
+To get more information about GroupMembership, see:
+
+* [API documentation](https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships)
+* How-to Guides
+    * [Official Documentation](https://cloud.google.com/identity/docs/how-to/memberships-google-groups)
+
 
 ## Example Usage
 
@@ -20,7 +27,7 @@ data "google_cloud_identity_group_memberships" "members" {
 
 ## Argument Reference
 
-* `group` - The parent Group resource under which to lookup the Membership names. Must be of the form groups/{group_id}.
+* `group` -  (Required) The parent Group resource under which to lookup the Membership names. Must be of the form groups/{group_id}.
 
 ## Attributes Reference
 
@@ -32,6 +39,8 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `name` -
   The resource name of the Membership, of the form groups/{group_id}/memberships/{membership_id}.
+
+* `type` - The type of the membership.
 
 * `roles` - The MembershipRoles that apply to the Membership. Structure is [documented below](#nested_roles).
 

@@ -4,7 +4,7 @@ description: |-
   Manages a network peering within GCE.
 ---
 
-# google\_compute\_network\_peering
+# google_compute_network_peering
 
 Manages a network peering within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/vpc/vpc-peering)
@@ -65,6 +65,9 @@ Whether subnet routes with public IP range are exported. The default value is tr
 * `import_subnet_routes_with_public_ip` - (Optional)
 Whether subnet routes with public IP range are imported. The default value is false. The IPv4 special-use ranges (https://en.wikipedia.org/wiki/IPv4#Special_addresses) are always imported from peers and are not controlled by this field.
 
+* `stack_type` - (Optional)
+Which IP version(s) of traffic and routes are allowed to be imported or exported between peer networks. The default value is IPV4_ONLY. Possible values: ["IPV4_ONLY", "IPV4_IPV6"].
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -89,6 +92,19 @@ This resource provides the following
 
 VPC network peerings can be imported using the name and project of the primary network the peering exists in and the name of the network peering
 
+* `{{project_id}}/{{network_id}}/{{peering_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import VPC network peerings using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{network_id}}/{{peering_id}}"
+  to = google_compute_network_peering.default
+}
 ```
-$ terraform import google_compute_network_peering.peering_network project-name/network-name/peering-name
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), VPC network peerings can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_compute_network_peering.default {{project_id}}/{{network_id}}/{{peering_id}}
 ```

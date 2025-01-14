@@ -61,7 +61,7 @@ type CustomImportFunctionDetails struct {
 	// Function is the name of the function to call. Arguments are decided by
 	// the generated code based on the resource's identity, with the format
 	// (d, config, {{identity}}). For example:
-	// (d *schema.ResourceData, config *Config, project, location, name string)
+	// (d *schema.ResourceData, config *transport_tpg.Config, project, location, name string)
 	// This function is expected to return an error.
 	Function string
 }
@@ -224,4 +224,14 @@ type ProductDocsSectionDetails struct {
 type CustomTimeoutDetails struct {
 	// The overriding Timeouts in Terraform
 	TimeoutMinutes int
+}
+
+type StateUpgradeDetails struct {
+	// The current schema version
+	SchemaVersion int
+}
+
+type ComplexMapKeyDetails struct {
+	// The name of the key as exposed by Terraform
+	KeyName string
 }

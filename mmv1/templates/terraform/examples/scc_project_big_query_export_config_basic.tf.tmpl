@@ -1,0 +1,25 @@
+resource "google_bigquery_dataset" "default" {
+  dataset_id                  = "{{index $.Vars "dataset_id"}}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "US"
+  default_table_expiration_ms = 3600000
+  default_partition_expiration_ms = null
+
+  labels = {
+    env = "default"
+  }
+
+  lifecycle {
+    ignore_changes = [default_partition_expiration_ms]
+  }
+}
+
+resource "google_scc_project_scc_big_query_export" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "name"}}"
+  big_query_export_id    = "{{index $.Vars "big_query_export_id"}}"
+  project      = "{{index $.TestEnvVars "project"}}"
+  dataset      = google_bigquery_dataset.default.id
+  description  = "Cloud Security Command Center Findings Big Query Export Config"
+  filter       = "state=\"ACTIVE\" AND NOT mute=\"MUTED\""
+}

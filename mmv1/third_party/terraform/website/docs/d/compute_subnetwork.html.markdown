@@ -4,7 +4,7 @@ description: |-
   Get a subnetwork within GCE.
 ---
 
-# google\_compute\_subnetwork
+# google_compute_subnetwork
 
 Get a subnetwork within GCE from its name and region.
 
@@ -40,10 +40,14 @@ In addition to the arguments listed above, the following attributes are exported
 * `network` - The network name or resource link to the parent
     network of this subnetwork.
 
+* `subnetwork_id` - The numeric ID of the resource.
+
 * `description` - Description of this subnetwork.
 
 * `ip_cidr_range` - The IP address range that machines in this
     network are assigned to, represented as a CIDR block.
+
+* `internal_ipv6_prefix` - The internal IPv6 address range that is assigned to this subnetwork.
 
 * `gateway_address` - The IP address of the gateway.
 

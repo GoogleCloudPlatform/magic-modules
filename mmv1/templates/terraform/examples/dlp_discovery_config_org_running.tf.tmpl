@@ -1,0 +1,32 @@
+resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}" {
+	parent = "organizations/{{index $.TestEnvVars "organization"}}/locations/us"
+    location = "us"
+
+    targets {
+        big_query_target {
+            filter {
+                other_tables {}
+            }
+        }
+    }
+    org_config {
+        project_id = "{{index $.TestEnvVars "project"}}"
+        location {
+            organization_id = "{{index $.TestEnvVars "organization"}}"
+        }
+    }
+    inspect_templates = ["projects/%{project}/inspectTemplates/${google_data_loss_prevention_inspect_template.basic.name}"] 
+    status = "RUNNING"
+}
+
+resource "google_data_loss_prevention_inspect_template" "basic" {
+	parent = "projects/{{index $.TestEnvVars "project"}}"
+	description = "My description"
+	display_name = "display_name"
+
+	inspect_config {
+		info_types {
+			name = "EMAIL_ADDRESS"
+		}
+    }
+}

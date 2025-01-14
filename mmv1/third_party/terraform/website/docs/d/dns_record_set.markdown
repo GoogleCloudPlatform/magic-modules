@@ -4,7 +4,7 @@ description: |-
   Get a DNS record set within Google Cloud DNS
 ---
 
-# google\_dns\_record\_set
+# google_dns_record_set
 
 Get a DNS record set within Google Cloud DNS
 For more information see
@@ -33,6 +33,8 @@ The following arguments are supported:
 * `managed_zone` - (Required) The Name of the zone.
 
 * `name` - (Required) The DNS name for the resource.
+
+* `type` - (Required) The RRSet type. [See this table for supported types](https://cloud.google.com/dns/docs/records#record_type).
 
 * `project` - (Optional) The ID of the project for the Google Cloud.
 

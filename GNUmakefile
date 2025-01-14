@@ -9,9 +9,7 @@ ifeq ($(ENGINE),tpgtools)
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
 else ifneq ($(PRODUCT),)
-  mmv1_compile=-p products/$(PRODUCT)
-else
-  mmv1_compile=-a
+  mmv1_compile=--product $(PRODUCT)
 endif
 
 # tpgtools setup
@@ -26,12 +24,12 @@ else
 endif
 
 ifneq ($(RESOURCE),)
-  mmv1_compile += -t $(RESOURCE)
+  mmv1_compile += --resource $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-  mmv1_compile += -r $(OVERRIDES)
+  mmv1_compile += --overrides $(OVERRIDES)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
@@ -61,19 +59,50 @@ terraform build provider:
 	make tpgtools
 
 mmv1:
+	# Chaining these with "&&" is critical so this will exit non-0 if the first
+	# command fails, since we're not forcing bash and errexit / pipefail here.
 	cd mmv1;\
-		bundle; \
-		bundle exec compiler -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
+		if [ "$(VERSION)" = "ga" ]; then \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
+			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+		else \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
+		fi
 
 tpgtools:
 	make serialize
 	cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-validator:
+clean-provider:
+	cd $(OUTPUT_PATH);\
+		go mod download;\
+		find . -type f -not -wholename "./.git*" -not -wholename "./.changelog*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name "CHANGELOG_v*.md" -not -name "GNUmakefile" -not -name "docscheck.sh" -not -name "LICENSE" -not -name "CODEOWNERS" -not -name "README.md" -not -wholename "./examples*" -not -name ".go-version" -not -name ".hashibot.hcl" -print0 | xargs -0 git rm > /dev/null
+
+clean-tgc:
+	cd $(OUTPUT_PATH);\
+		rm -rf ./tfplan2cai/testdata/templates/;\
+		rm -rf ./tfplan2cai/testdata/generatedconvert/;\
+		rm -rf ./tfplan2cai/converters/google/provider;\
+		rm -rf ./tfplan2cai/converters/google/resources;\
+		rm -rf ./cai2hcl/*;\
+		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./v6/pkg/cai2hcl/*;\
+		rm -rf ./v6/pkg/tfplan2cai/*;\
+
+tgc:
 	cd mmv1;\
-		bundle; \
-		bundle exec compiler -e terraform -f validator -o $(OUTPUT_PATH) $(mmv1_compile);
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_v6 --output $(OUTPUT_PATH)/v6/pkg $(mmv1_compile);\
+
+tf-oics:
+	cd mmv1;\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
+
+test:
+	cd mmv1; \
+		go test ./...
 
 serialize:
 	cd tpgtools;\
@@ -90,7 +119,7 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
 validate_environment:
@@ -102,5 +131,4 @@ validate_environment:
 doctor:
 	./scripts/doctor
 
-.PHONY: mmv1 tpgtools
-
+.PHONY: mmv1 tpgtools test

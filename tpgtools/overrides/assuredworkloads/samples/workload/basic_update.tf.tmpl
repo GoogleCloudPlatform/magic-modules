@@ -8,9 +8,15 @@ resource "google_assured_workloads_workload" "primary" {
   provisioned_resources_parent = google_folder.folder1.name
   organization = "{{org_id}}"
   location = "us-central1"
+  resource_settings {
+    resource_type = "CONSUMER_FOLDER"
+    display_name = "folder-display-name"
+  }
+  violation_notifications_enabled = true
 }
 
 resource "google_folder" "folder1" {
   display_name = "{{name}}"
   parent       = "organizations/{{org_id}}"
+  deletion_protection = false
 }

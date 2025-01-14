@@ -1,0 +1,36 @@
+[
+  {
+    "name": "//cloudbilling.googleapis.com/projects/example-project/billingInfo",
+    "asset_type": "cloudbilling.googleapis.com/ProjectBillingInfo",
+    "ancestry_path": "organizations/123/folders/456/project/example-project",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/cloudbilling/v1/rest",
+      "discovery_name": "ProjectBillingInfo",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/example-project",
+      "data": {
+        "billingAccountName": "billingAccounts/example-account",
+        "name": "projects/example-project/billingInfo",
+        "projectId": "example-project"
+      }
+    }
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/example-project",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "ancestry_path": "organizations/123/folders/456/project/example-project",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Project",
+      "parent": "//cloudresourcemanager.googleapis.com/folders/456",
+      "data": {
+        "name": "My Project",
+        "labels": {
+          "project-label-key-a": "project-label-val-a"
+        },
+        "projectId": "example-project"
+      }
+    }
+  }
+]

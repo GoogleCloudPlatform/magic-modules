@@ -1,0 +1,42 @@
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "{{index $.Vars "secret_resource_id"}}" {
+  secret_id = "{{index $.Vars "secret_id"}}"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "{{index $.Vars "secret_resource_id"}}_version" {
+  secret = google_secret_manager_secret.{{index $.Vars "secret_resource_id"}}.id
+  secret_data = "{{index $.Vars "secret_data"}}"
+}
+
+resource "google_secret_manager_secret_iam_member" "secret-access" {
+  secret_id = google_secret_manager_secret.{{index $.Vars "secret_resource_id"}}.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+}
+
+resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  repository_id = "{{index $.Vars "repository_id"}}"
+  description   = "{{index $.Vars "desc"}}"
+  format        = "MAVEN"
+  mode          = "REMOTE_REPOSITORY"
+  remote_repository_config {
+    description = "custom maven remote with credentials"
+    disable_upstream_validation = true
+    maven_repository {
+      custom_repository {
+        uri = "https://my.maven.registry"
+      }
+    }
+    upstream_credentials {
+      username_password_credentials {
+        username = "{{index $.Vars "username"}}"
+        password_secret_version = google_secret_manager_secret_version.{{index $.Vars "secret_resource_id"}}_version.name
+      }
+    }
+  }
+}

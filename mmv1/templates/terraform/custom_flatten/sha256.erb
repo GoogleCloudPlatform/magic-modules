@@ -1,3 +1,0 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return hex.EncodeToString(sha256.New().Sum([]byte(v.(string))))
-}

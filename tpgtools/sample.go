@@ -46,6 +46,9 @@ type Sample struct {
 	// in the testcase. (if the test doesn't have a ga version of the test)
 	HasGAEquivalent bool
 
+	// LongForm is whether this sample is a copy with long form fields expanded to include `/`
+	LongForm bool
+
 	// SamplesPath is the path to the directory where the original sample data is stored
 	SamplesPath Filepath
 
@@ -101,11 +104,12 @@ type DocHideCondition struct {
 }
 
 type TestHideCondition struct {
-        // Location is the location attribute to match, if matched, append Name to list of Testhide
-        Location string `yaml:"location"`
-        // Name specifies sample file name to add to Testhide if location matches.
-        Name string `yaml:"file_name"`
+	// Location is the location attribute to match, if matched, append Name to list of Testhide
+	Location string `yaml:"location"`
+	// Name specifies sample file name to add to Testhide if location matches.
+	Name string `yaml:"file_name"`
 }
+
 // Dependency contains data that describes a single resource in a sample
 type Dependency struct {
 	// FileName is the name of the file as it appears in testcases.yaml
@@ -157,14 +161,14 @@ func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, erro
 
 	// Otherwise, just return an error.
 	var productOverrideKeys []Filepath
-	for k, _ := range productOverrides {
+	for k := range productOverrides {
 		productOverrideKeys = append(productOverrideKeys, k)
 	}
 	return DCLPackageName(""), fmt.Errorf("can't find %q in the overrides map, which contains %v", product, productOverrideKeys)
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
+func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent, makeLongForm bool, b []byte) (*Dependency, error) {
 	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
 	// we have to account for that.
 	var resourceName miscellaneousNameSnakeCase
@@ -193,7 +197,7 @@ func BuildDependency(fileName string, product SnakeCaseProductName, localname, v
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, makeLongForm, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -222,7 +226,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
-	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, s.LongForm, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -381,52 +385,52 @@ var translationMap = map[string]translationIndex{
 	"org_id": {
 		docsValue:    "123456789",
 		contextKey:   "org_id",
-		contextValue: "getTestOrgFromEnv(t)",
+		contextValue: "envvar.GetTestOrgFromEnv(t)",
 	},
 	"org_name": {
 		docsValue:    "example.com",
 		contextKey:   "org_domain",
-		contextValue: "getTestOrgDomainFromEnv(t)",
+		contextValue: "envvar.GetTestOrgDomainFromEnv(t)",
 	},
 	"region": {
 		docsValue:    "us-west1",
 		contextKey:   "region",
-		contextValue: "getTestRegionFromEnv()",
+		contextValue: "envvar.GetTestRegionFromEnv()",
 	},
 	"zone": {
 		docsValue:    "us-west1-a",
 		contextKey:   "zone",
-		contextValue: "getTestZoneFromEnv()",
+		contextValue: "envvar.GetTestZoneFromEnv()",
 	},
 	"org_target": {
 		docsValue:    "123456789",
 		contextKey:   "org_target",
-		contextValue: "getTestOrgTargetFromEnv(t)",
+		contextValue: "envvar.GetTestOrgTargetFromEnv(t)",
 	},
 	"billing_account": {
 		docsValue:    "000000-0000000-0000000-000000",
 		contextKey:   "billing_acct",
-		contextValue: "getTestBillingAccountFromEnv(t)",
+		contextValue: "envvar.GetTestBillingAccountFromEnv(t)",
 	},
 	"test_service_account": {
-		docsValue:    "emailAddress:my@service-account.com",
+		docsValue:    "my@service-account.com",
 		contextKey:   "service_acct",
-		contextValue: "getTestServiceAccountFromEnv(t)",
+		contextValue: "envvar.GetTestServiceAccountFromEnv(t)",
 	},
 	"project": {
 		docsValue:    "my-project-name",
 		contextKey:   "project_name",
-		contextValue: "getTestProjectFromEnv()",
+		contextValue: "envvar.GetTestProjectFromEnv()",
 	},
 	"project_number": {
 		docsValue:    "my-project-number",
 		contextKey:   "project_number",
-		contextValue: "getTestProjectNumberFromEnv()",
+		contextValue: "envvar.GetTestProjectNumberFromEnv()",
 	},
 	"customer_id": {
 		docsValue:    "A01b123xz",
 		contextKey:   "cust_id",
-		contextValue: "getTestCustIdFromEnv(t)",
+		contextValue: "envvar.GetTestCustIdFromEnv(t)",
 	},
 	// Begin a long list of multicloud-only values which are not going to see reuse.
 	// We can hardcode fake values because we are

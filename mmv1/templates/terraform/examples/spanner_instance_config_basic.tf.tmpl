@@ -1,0 +1,13 @@
+resource "google_spanner_instance_config" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "instance_config_name"}}"
+  display_name  = "Test Spanner Instance Config"
+  base_config    = "nam11"
+  replicas     {
+      location = "us-west1"
+      type = "READ_ONLY"
+      default_leader_location = false
+ }
+ labels = {
+    "foo" = "bar"
+  }
+}

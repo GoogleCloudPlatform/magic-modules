@@ -1,0 +1,67 @@
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "{{index $.Vars "address"}}"
+  parent      = "projects/{{index $.TestEnvVars "project_name"}}"
+  description = "Sample regional networksecurity_address_group"
+  location    = "{{index $.TestEnvVars "region"}}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
+resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
+  name        = "{{index $.Vars "fw_policy"}}"
+  description = "Sample regional network firewall policy"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+  region      = "{{index $.TestEnvVars "region"}}"
+}
+
+resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  action                  = "allow"
+  description             = "This is a simple rule description"
+  direction               = "INGRESS"
+  disabled                = false
+  enable_logging          = true
+  firewall_policy         = google_compute_region_network_firewall_policy.basic_regional_network_firewall_policy.name
+  priority                = 1000
+  region                  = "{{index $.TestEnvVars "region"}}"
+  rule_name               = "test-rule"
+  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
+
+  match {
+    src_ip_ranges = ["10.100.0.1/32"]
+    src_fqdns = ["example.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
+
+    layer4_configs {
+      ip_protocol = "all"
+    }
+
+    src_secure_tags {
+      name = google_tags_tag_value.basic_value.id
+    }
+
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
+  }
+}
+
+resource "google_compute_network" "basic_network" {
+  name = "{{index $.Vars "network"}}"
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+
+  purpose_data = {
+    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "tagvalue"
+}

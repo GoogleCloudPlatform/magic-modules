@@ -1,0 +1,20 @@
+[
+    {
+        "name": "//firebase.googleapis.com/v1beta1/projects/{{.Provider.project}}",
+        "asset_type": "firebase.googleapis.com/FirebaseProject",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1beta1",
+            "discovery_document_uri": "https://firebase.googleapis.com/$discovery/rest?version=v1beta1",
+            "discovery_name": "FirebaseProject",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "id": "projects/{{.Provider.project}}",
+                "projectId": "{{.Provider.project}}"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

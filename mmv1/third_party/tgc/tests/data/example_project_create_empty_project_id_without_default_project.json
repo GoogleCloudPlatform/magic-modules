@@ -1,0 +1,49 @@
+[
+  {
+    "name": "//cloudbilling.googleapis.com/projects/placeholder-project/billingInfo",
+    "asset_type": "cloudbilling.googleapis.com/ProjectBillingInfo",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/cloudbilling/v1/rest",
+      "discovery_name": "ProjectBillingInfo",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/unknown",
+      "data": {
+        "billingAccountName": "billingAccounts/{{.Project.BillingAccountName}}",
+        "name": "projects/placeholder-project/billingInfo"
+      }
+    },
+    "ancestry_path": "organization/unknown"
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/placeholder-project",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Project",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/unknown",
+      "data": {
+        "labels": {
+          "project-label-key-a": "project-label-val-a"
+        },
+        "name": "My Project"
+      }
+    },
+    "ancestry_path": "organization/unknown"
+  },
+  {
+    "name": "//cloudresourcemanager.googleapis.com/folders/placeholder-folder",
+    "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+      "discovery_name": "Folder",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+      "data": {
+        "display_name": "Department 1",
+        "parent": "organizations/{{.OrgID}}"
+      }
+    },
+    "ancestry_path": "organization/{{.OrgID}}"
+  }
+]

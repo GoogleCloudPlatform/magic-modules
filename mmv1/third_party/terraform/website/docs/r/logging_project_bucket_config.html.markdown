@@ -4,7 +4,7 @@ description: |-
   Manages a project-level logging bucket config.
 ---
 
-# google\_logging\_project\_bucket\_config
+# google_logging_project_bucket_config
 
 Manages a project-level logging bucket config. For more information see
 [the official logging documentation](https://cloud.google.com/logging/docs/) and
@@ -22,7 +22,7 @@ resource "google_project" "default" {
 }
 
 resource "google_logging_project_bucket_config" "basic" {
-	project    = google_project.default.id
+	project    = google_project.default.project_id
 	location  = "global"
 	retention_days = 30
 	bucket_id = "_Default"
@@ -37,6 +37,18 @@ resource "google_logging_project_bucket_config" "basic" {
 	location  = "global"
 	retention_days = 30
 	bucket_id = "custom-bucket"
+}
+```
+
+Create logging bucket with Log Analytics enabled
+
+```hcl
+resource "google_logging_project_bucket_config" "analytics-enabled-bucket" {
+	project          = "project_id"
+	location         = "global"
+	retention_days   = 30
+	enable_analytics = true
+	bucket_id        = "custom-bucket"
 }
 ```
 
@@ -55,7 +67,7 @@ resource "google_kms_key_ring" "keyring" {
 resource "google_kms_crypto_key" "key" {
 	name            = "crypto-key-example"
 	key_ring        = google_kms_key_ring.keyring.id
-	rotation_period = "100000s"
+	rotation_period = "7776000s"
 }
 
 resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
@@ -81,6 +93,22 @@ resource "google_logging_project_bucket_config" "example-project-bucket-cmek-set
 }
 ```
 
+Create logging bucket with index configs
+
+```hcl
+resource "google_logging_project_bucket_config" "example-project-bucket-index-configs" {
+  project          = "project_id"
+  location         = "global"
+  retention_days   = 30
+  bucket_id        = "custom-bucket"
+
+  index_configs {
+    field_path = "jsonPayload.request.status"
+    type       = "INDEX_TYPE_STRING"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -93,10 +121,15 @@ The following arguments are supported:
 
 * `description` - (Optional) Describes this bucket.
 
+* `locked` - (Optional) Whether the bucket is locked. The retention period on a locked bucket cannot be changed. Locked buckets may only be deleted if they are empty.
+
 * `retention_days` - (Optional) Logs will be retained by default for this amount of time, after which they will automatically be deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default time of 30 days will be used.
+
+* `enable_analytics` - (Optional) Whether or not Log Analytics is enabled. Logs for buckets with Log Analytics enabled can be queried in the **Log Analytics** page using SQL queries. Cannot be disabled once enabled.
 
 * `cmek_settings` - (Optional) The CMEK settings of the log bucket. If present, new log entries written to this log bucket are encrypted using the CMEK key provided in this configuration. If a log bucket has CMEK settings, the CMEK settings cannot be disabled later by updating the log bucket. Changing the KMS key is allowed. Structure is [documented below](#nested_cmek_settings).
 
+* `index_configs` - (Optional) A list of indexed fields and related configuration data. Structure is [documented below](#nested_index_configs).
 
 <a name="nested_cmek_settings"></a>The `cmek_settings` block supports:
 
@@ -120,6 +153,13 @@ This is a read-only field used to convey the specific configured CryptoKeyVersio
 Before enabling CMEK for a logging bucket, you must first assign the cloudkms.cryptoKeyEncrypterDecrypter role to the service account associated with the project for which CMEK will apply. Use [v2.getCmekSettings](https://cloud.google.com/logging/docs/reference/v2/rest/v2/TopLevel/getCmekSettings#google.logging.v2.ConfigServiceV2.GetCmekSettings) to obtain the service account ID.
 See [Enabling CMEK for Logging Buckets](https://cloud.google.com/logging/docs/routing/managed-encryption-storage) for more information.
 
+<a name="nested_index_configs"></a>The `index_configs` block supports:
+
+* `field_path` - The LogEntry field path to index.
+Note that some paths are automatically indexed, and other paths are not eligible for indexing. See [indexing documentation](https://cloud.google.com/logging/docs/analyze/custom-index) for details.
+
+* `type` - The type of data in this index. Allowed types include `INDEX_TYPE_UNSPECIFIED`, `INDEX_TYPE_STRING` and `INDEX_TYPE_INTEGER`.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -134,6 +174,19 @@ exported:
 ## Import
 
 This resource can be imported using the following format:
+
+* `projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import this resource using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}"
+  to = google_logging_project_bucket_config.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), this resource can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_logging_project_bucket_config.default projects/{{project}}/locations/{{location}}/buckets/{{bucket_id}}

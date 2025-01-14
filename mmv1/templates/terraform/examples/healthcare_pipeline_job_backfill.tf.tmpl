@@ -1,0 +1,13 @@
+resource "google_healthcare_pipeline_job" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "backfill_pipeline_name"}}"
+  location = "us-central1"
+  dataset = google_healthcare_dataset.dataset.id
+  backfill_pipeline_job {
+    mapping_pipeline_job = "${google_healthcare_dataset.dataset.id}/pipelinejobs/{{index $.Vars "mapping_pipeline_name"}}"
+  }      
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name     = "{{index $.Vars "dataset_name"}}"
+  location = "us-central1"
+}

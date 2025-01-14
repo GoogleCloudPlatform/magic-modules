@@ -1,3 +1,13 @@
+resource "google_network_security_address_group" "basic_regional_networksecurity_address_group" {
+  name        = "{{policy}}"
+  parent      = "projects/{{project}}"
+  description = "Sample regional networksecurity_address_group"
+  location    = "{{region}}"
+  items       = ["208.80.154.224/32"]
+  type        = "IPV4"
+  capacity    = 100
+}
+
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
   name        = "{{policy}}"
   description = "Sample regional network firewall policy"
@@ -19,14 +29,19 @@ resource "google_compute_region_network_firewall_policy_rule" "primary" {
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
+    src_fqdns = ["example.com"]
+    src_region_codes = ["US"]
+    src_threat_intelligences = ["iplist-known-malicious-ips"]
 
     layer4_configs {
       ip_protocol = "all"
     }
 
     src_secure_tags {
-      name = "tagValues/${google_tags_tag_value.basic_value.name}"
+      name = google_tags_tag_value.basic_value.id
     }
+    
+    src_address_groups = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
   }
 }
 
@@ -47,6 +62,6 @@ resource "google_tags_tag_key" "basic_key" {
 
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
-  parent      = "tagKeys/${google_tags_tag_key.basic_key.name}"
+  parent      = google_tags_tag_key.basic_key.id
   short_name  = "{{tagvalue}}"
 }

@@ -4,7 +4,7 @@ description: |-
   A Google Stackdriver dashboard.
 ---
 
-# google\_monitoring\_dashboard
+# google_monitoring_dashboard
 
 A Google Stackdriver dashboard. Dashboards define the content and layout of pages in the Stackdriver web application.
 
@@ -114,6 +114,12 @@ The following arguments are supported:
   The JSON representation of a dashboard, following the format at https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards.
   The representation of an existing dashboard can be found by using the [API Explorer](https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards/get)
 
+  ~> **Warning:** Because this is represented as a JSON string, Terraform doesn't have underlying information to know
+    which fields in the string have defaults. To prevent permanent diffs from default values, Terraform will attempt to
+    suppress diffs where the value is returned in the JSON string but doesn't exist in the configuration. Consequently,
+    legitmate remove-only diffs will also be suppressed. For Terraform to detect the diff, key removals must also be
+    accompanied by a non-removal change (trivial or not).
+
 - - -
 
 
@@ -139,6 +145,20 @@ This resource provides the following
 ## Import
 
 Dashboard can be imported using any of these accepted formats:
+
+* `projects/{{project}}/dashboards/{{dashboard_id}}`
+* `{{dashboard_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Dashboard using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/dashboards/{{dashboard_id}}"
+  to = google_monitoring_dashboard.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Dashboard can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_monitoring_dashboard.default projects/{{project}}/dashboards/{{dashboard_id}}

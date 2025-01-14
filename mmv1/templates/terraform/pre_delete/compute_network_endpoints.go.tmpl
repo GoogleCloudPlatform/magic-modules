@@ -1,0 +1,41 @@
+var endpointsToDelete []interface{}
+
+endpoints := d.Get("network_endpoints").(*schema.Set).List()
+
+for _, e := range(endpoints) {
+    endpoint := e.(map[string]interface{})
+    toDelete := make(map[string]interface{})
+    instanceProp, err := expandNestedComputeNetworkEndpointInstance(endpoint["instance"], d, config)
+    if err != nil {
+        return err
+    }
+    if instanceProp != "" {
+        toDelete["instance"] = instanceProp
+    }
+
+    portProp, err := expandNestedComputeNetworkEndpointPort(endpoint["port"], d, config)
+    if err != nil {
+        return err
+    }
+    if portProp != 0 {
+        toDelete["port"] = portProp
+    }
+
+    ipAddressProp, err := expandNestedComputeNetworkEndpointIpAddress(endpoint["ip_address"], d, config)
+    if err != nil {
+        return err
+    }
+    toDelete["ipAddress"] = ipAddressProp
+    endpointsToDelete = append(endpointsToDelete, toDelete)
+}
+
+chunkSize := 500 // API only accepts 500 endpoints at a time
+lastPage, err := networkEndpointsPaginatedMutate(d, endpointsToDelete, config, userAgent, url, project, billingProject, chunkSize, true)
+if err != nil {
+    // networkEndpointsPaginatedMutate already adds error description
+    return err
+}
+
+obj = map[string]interface{}{
+	"networkEndpoints": lastPage,
+}
