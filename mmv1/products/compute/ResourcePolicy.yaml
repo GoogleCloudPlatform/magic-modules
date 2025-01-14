@@ -78,6 +78,11 @@ examples:
     primary_resource_id: 'cgroup'
     vars:
       name: 'gce-policy'
+  - name: 'resource_policy_workload_policy'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -368,3 +373,14 @@ properties:
           Enable disk consistency on the resource policy.
         required: true
         immutable: true
+  - name: 'workloadPolicy'
+    type: NestedObject
+    description: |
+      Represents the workload policy.
+    min_version: 'beta'
+    properties:
+      - name: 'type'
+        type: Enum
+        enum_values:
+          - 'HIGH_AVAILABILITY'
+          - 'HIGH_THROUGHPUT'
