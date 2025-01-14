@@ -146,7 +146,7 @@ For more information about types of resources and the generation process overall
 3. Modify the template as needed to match the API resource's documented behavior.
 4. Delete all remaining comments in the resource configuration (including attribute descriptions) that were copied from the above template.
 
-> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/develop/resource-reference" >}}).
+> **Note:** The template includes the most commonly-used fields. For a comprehensive reference, see [MMv1 resource reference ↗]({{<ref "/reference/resource" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 > **Warning:** Handwritten resources are more difficult to develop and maintain. New handwritten resources will only be accepted if implementing the resource in MMv1 would require entirely overriding two or more CRUD methods.
@@ -158,6 +158,7 @@ For more information about types of resources and the generation process overall
    - Documentation: [`magic-modules/mmv1/third_party/terraform/website/docs/r`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/website/docs/r)
    - Tests: Copy to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
    - Sweepers: Put to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and add `_sweeper` suffix to the filename
+   - Metadata: Copy `*_meta.yaml` to the appropriate service folder inside [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services), and remove `_generated` from the filename
 4. Modify the Go code as needed.
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
@@ -178,7 +179,7 @@ For more information about types of resources and the generation process overall
 
 + [Add a field to an existing resource]({{< ref "/develop/add-fields" >}})
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
-+ [Add documentation]({{< ref "/develop/add-documentation" >}})
++ [Add documentation]({{< ref "/document/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Add tests]({{< ref "/test/test" >}})
 + [Run tests]({{< ref "/test/run-tests" >}})

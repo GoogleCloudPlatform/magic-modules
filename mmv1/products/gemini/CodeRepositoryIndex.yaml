@@ -42,9 +42,7 @@ async:
       insert_minutes: 90
       update_minutes: 90
       delete_minutes: 90
-    path: name
     base_url: "{{op_id}}"
-    wait_ms: 1000
   actions:
     - create
     - delete
@@ -52,14 +50,19 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
-    path: response
-  error:
-    path: error
-    message: message
   include_project: false
+custom_code:
+  pre_delete: templates/terraform/pre_delete/code_repository_index_force_delete.go.tmpl
 error_retry_predicates:
   - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
   - 'transport_tpg.IsRepositoryGroupQueueError'
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      If set to true, will allow deletion of the CodeRepositoryIndex even if there are existing
+      RepositoryGroups for the resource. These RepositoryGroups will also be deleted.
+    type: Boolean
+    default_value: false
 parameters:
   - name: location
     type: String

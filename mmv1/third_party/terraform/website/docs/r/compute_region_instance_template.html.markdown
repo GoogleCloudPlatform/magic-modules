@@ -529,7 +529,7 @@ The following arguments are supported:
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET. In the beta provider the additional values of MRDMA and IRDMA are supported.
 
-* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
+* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
 Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
@@ -604,6 +604,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
+
+* `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
 
 * `host_error_timeout_seconds` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
 
