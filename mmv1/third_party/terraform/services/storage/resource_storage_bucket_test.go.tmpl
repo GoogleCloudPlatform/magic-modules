@@ -2824,6 +2824,18 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 
 func testAccStorageBucket_IPFilter(bucketName string) string {
 	return fmt.Sprintf(`
+resource "google_compute_network" "vpc_gcs_ipfilter1" {
+  name = "tf-test-storage-ipfilter1"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "ipfilter_1" {
+  name          = "tf-test-storage-ipfilter1"
+  ip_cidr_range = "10.201.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.vpc_gcs_ipfilter1.id
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "us-central1"
@@ -2832,36 +2844,41 @@ resource "google_storage_bucket" "bucket" {
   ip_filter  {
     mode = "Enabled"
 		public_network_source {
-			allowed_ip_cidr_ranges = ["0.0.0.0/0"]
+			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
 		}
 		vpc_network_sources {
-			network = "projects/%s/global/networks/%s"
-			allowed_ip_cidr_ranges = ["0.0.0.0/0"]
+			network = google_compute_network.vpc_gcs_ipfilter1.id
+			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
 		}
   }
 }
-`, bucketName, envvar.GetTestProjectFromEnv(), "default")
+`, bucketName)
 }
 
 func testAccStorageBucket_IPFilter_disable(bucketName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "vpc_2" {
-  name = "storage-source-2"
+resource "google_compute_network" "vpc_gcs_ipfilter1" {
+  name = "tf-test-storage-ipfilter1"
 	auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "subnet_21" {
-  name          = "storage-subnet21"
+resource "google_compute_subnetwork" "ipfilter_1" {
+  name          = "tf-test-storage-ipfilter1"
   ip_cidr_range = "10.201.0.0/16"
   region        = "us-central1"
-  network       = google_compute_network.vpc_2.id
+  network       = google_compute_network.vpc_gcs_ipfilter1.id
 }
 
-resource "google_compute_subnetwork" "subnet_22" {
-  name          = "storage-subnet22"
+resource "google_compute_network" "vpc_gcs_ipfilter2" {
+  name = "tf-test-storage-ipfilter2"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "ipfilter_2" {
+  name          = "tf-test-storage-ipfilter2"
   ip_cidr_range = "10.202.0.0/16"
   region        = "us-central1"
-  network       = google_compute_network.vpc_2.id
+  network       = google_compute_network.vpc_gcs_ipfilter2.id
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -2869,22 +2886,22 @@ resource "google_storage_bucket" "bucket" {
 	location = "us-central1"
 	uniform_bucket_level_access = true
 	force_destroy = true
-	ip_filter  {
+	ip_filter {
 		mode = "Disabled"
 		public_network_source {
 			allowed_ip_cidr_ranges = ["192.0.2.0/24", "2001:db8::/32"]
 		}
 		vpc_network_sources {
-			network = "projects/%s/global/networks/%s"
+			network = google_compute_network.vpc_gcs_ipfilter1.id
 			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
 		}
 		vpc_network_sources {
-			network = "projects/%s/global/networks/%s"
+			network = google_compute_network.vpc_gcs_ipfilter2.id
 			allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
 		}
 	}
 }
-`, bucketName, envvar.GetTestProjectFromEnv(), "default", envvar.GetTestProjectFromEnv(), "storage-source-2")
+`, bucketName)
 }
 
 func testAccStorageBucket_withoutIPFilter(bucketName string) string {

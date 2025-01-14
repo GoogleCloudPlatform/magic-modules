@@ -619,7 +619,6 @@ func ResourceStorageBucket() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: "Name of the network. Format: projects/{PROJECT_ID}/global/networks/{NETWORK_NAME}",
-										ValidateFunc: validation.StringMatch(regexp.MustCompile("projects/.+/global/networks/.+"), ""),
 									},
 								},
 							},
