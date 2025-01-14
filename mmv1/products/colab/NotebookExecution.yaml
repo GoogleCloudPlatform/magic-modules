@@ -31,15 +31,15 @@ async:
     base_url: '{{op_id}}'
 examples:
   - name: 'colab_notebook_execution_basic'
-    primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    primary_resource_id: 'notebook-execution'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
-      runtime_template_name: 'colab-runtime-template'
+      notebook_execution_job_id: 'colab-notebook-execution'
   - name: 'colab_notebook_execution_full'
-    primary_resource_id: 'runtime-template'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    primary_resource_id: 'notebook-execution'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
-      runtime_template_name: 'colab-runtime-template'
+      notebook_execution_job_id: 'colab-notebook-execution'
       network_name: 'colab-test-default'
       key_name: 'my-crypto-key'
     test_vars_overrides:
