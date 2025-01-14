@@ -103,5 +103,4 @@ properties:
     description: |
       The name of the Access Policy this resource belongs to.
     ignore_read: true
-    immutable: true
     output: true
