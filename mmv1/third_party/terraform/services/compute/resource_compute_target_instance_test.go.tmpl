@@ -1,5 +1,4 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -109,7 +108,6 @@ resource "google_compute_instance" "target-vm" {
 }
 
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  provider    = google-beta
   region      = "southamerica-east1"
   name        = "tf-test-up-pol-policyddos%{random_suffix}"
   description = "ddos protection security policy to set target instance"
@@ -127,7 +125,6 @@ resource "google_compute_network_edge_security_service" "edge_sec_service" {
 }
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy1" {
-  provider    = google-beta
   name        = "tf-test-up-pol-region-secpolicy1%{random_suffix}"
   region      = "southamerica-east1"
   description = "basic security policy one for target instance"
@@ -136,7 +133,6 @@ resource "google_compute_region_security_policy" "regionsecuritypolicy1" {
 }
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy2" {
-  provider    = google-beta
   name        = "tf-test-up-pol-region-secpolicy2%{random_suffix}"
   region      = "southamerica-east1"
   description = "basic security policy two for target instance"
@@ -154,4 +150,3 @@ resource "google_compute_target_instance" "default" {
 }
 `, context)
 }
-{{- end }}

@@ -1,5 +1,4 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -941,5 +940,3 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 	}
 	`, context)
 }
-
-{{- end }}

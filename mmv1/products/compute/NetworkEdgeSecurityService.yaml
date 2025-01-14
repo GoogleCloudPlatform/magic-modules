@@ -16,7 +16,6 @@ name: 'NetworkEdgeSecurityService'
 kind: 'compute#networkEdgeSecurityService'
 description: |
   Google Cloud Armor network edge security service resource.
-min_version: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/advanced-network-ddos'
@@ -55,7 +54,6 @@ parameters:
     type: ResourceRef
     description: |
       The region of the gateway security policy.
-    min_version: 'beta'
     url_param_only: true
     required: false
     immutable: true
@@ -66,49 +64,41 @@ properties:
     type: String
     description: |
       Name of the resource. Provided by the client when the resource is created.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'description'
     type: String
     description: |
       Free-text description of the resource.
-    min_version: 'beta'
   - name: 'serviceId'
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
-    min_version: 'beta'
     output: true
   - name: 'creationTimestamp'
     type: String
     description: |
       Creation timestamp in RFC3339 text format.
-    min_version: 'beta'
     output: true
   - name: 'selfLink'
     type: String
     description: |
       Server-defined URL for the resource.
-    min_version: 'beta'
     output: true
   - name: 'selfLinkWithServiceId'
     type: String
     description: |
       Server-defined URL for this resource with the resource id.
     api_name: selfLinkWithId
-    min_version: 'beta'
     output: true
   - name: 'fingerprint'
     type: Fingerprint
     description: |
       Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking. This field will be ignored when inserting a NetworkEdgeSecurityService.
       An up-to-date fingerprint must be provided in order to update the NetworkEdgeSecurityService, otherwise the request will fail with error 412 conditionNotMet.
-    min_version: 'beta'
     output: true
   - name: 'securityPolicy'
     type: String
     description: |
       The resource URL for the network edge security service associated with this network edge security service.
-    min_version: 'beta'
