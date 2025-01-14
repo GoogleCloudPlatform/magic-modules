@@ -73,10 +73,10 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 	}
 
 	if newPrimaryReviewer == "" {
-		return "", errors.New("no primary reviewer found")
+		return errors.New("no primary reviewer found")
 	}
 	if newPrimaryReviewer == currentReviewer {
-		return newPrimaryReviewer, fmt.Errorf("primary reviewer is already %s", newPrimaryReviewer)
+		return fmt.Errorf("primary reviewer is already %s", newPrimaryReviewer)
 	}
 
 	fmt.Println("New primary reviewer is ", newPrimaryReviewer)
@@ -89,7 +89,7 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 		}
 	} else {
 		fmt.Println("Reassigning to random reviewer")
-		err := gh.UpdateComment(prNumber, github.FormatReviewerComment(newPrimaryReviewer), reviewerCommentID)
+		err := gh.UpdateComment(prNumber, github.FormatReviewerComment(newPrimaryReviewer), reviewerComment.ID)
 		if err != nil {
 			return err
 		}
