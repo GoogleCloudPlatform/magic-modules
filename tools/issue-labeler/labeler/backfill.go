@@ -96,7 +96,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
 
-		affectedResources := ExtractAffectedResources(*issue.Body)
+		affectedResources := ExtractAffectedResources(issue.GetBody())
 		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
 			desired[needed] = struct{}{}
 		}
@@ -110,8 +110,10 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 			}
 			sort.Strings(issueUpdate.Labels)
 
-			issueUpdate.Number = *issue.Number
-			issueUpdates = append(issueUpdates, issueUpdate)
+			issueUpdate.Number = issue.GetNumber()
+			if issueUpdate.Number > 0 {
+				issueUpdates = append(issueUpdates, issueUpdate)
+			}
 		}
 	}
 
