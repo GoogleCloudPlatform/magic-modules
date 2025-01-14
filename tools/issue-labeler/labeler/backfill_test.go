@@ -36,17 +36,55 @@ func TestComputeIssueUpdates(t *testing.T) {
 		},
 	}
 
-	cases := map[string]struct {
+	cases := []struct {
+		name, description    string
 		issues               []*github.Issue
 		regexpLabels         []RegexpLabel
 		expectedIssueUpdates []IssueUpdate
 	}{
-		"no issues -> no updates": {
+		{
+			name:                 "no issues",
+			description:          "no issues means no updates",
 			issues:               []*github.Issue{},
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"exempt labels -> no updates": {
+		{
+			name:        "nil body",
+			description: "gracefully handle a nil issue body",
+			issues: []*github.Issue{
+				{
+					Number: github.Int(1),
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name:        "nil number",
+			description: "gracefully handle a nil issue number",
+			issues: []*github.Issue{
+				{
+					Body: testIssueBodyWithResources([]string{"google_service1_resource1"}),
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name: "no listed resources",
+			issues: []*github.Issue{
+				{
+					Number: github.Int(1),
+					Body:   github.String("Body with unusual structure"),
+				},
+			},
+			regexpLabels:         defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{},
+		},
+		{
+			name:        "service/terraform",
+			description: "issues with service/terraform shouldn't get new labels",
 			issues: []*github.Issue{
 				{
 					Number: github.Int(1),
@@ -62,7 +100,9 @@ func TestComputeIssueUpdates(t *testing.T) {
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"add resource & review labels": {
+		{
+			name:        "add resource & review labels",
+			description: "issues with affected resources should normally get new labels added",
 			issues: []*github.Issue{
 				{
 					Number: github.Int(1),
@@ -85,7 +125,9 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		"don't update issues if all service labels are already present": {
+		{
+			name:        "labels already correct",
+			description: "don't update issues if all expected service labels are already present",
 			issues: []*github.Issue{
 				{
 					Number: github.Int(1),
@@ -101,7 +143,9 @@ func TestComputeIssueUpdates(t *testing.T) {
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
-		"add missing service labels": {
+		{
+			name:        "missing labels",
+			description: "add missing service labels",
 			issues: []*github.Issue{
 				{
 					Number: github.Int(1),
@@ -128,7 +172,9 @@ func TestComputeIssueUpdates(t *testing.T) {
 				},
 			},
 		},
-		"don't add missing service labels if already linked": {
+		{
+			name:        "forward/linked",
+			description: "don't add missing service labels if already linked",
 			issues: []*github.Issue{
 				{
 					Number: github.Int(1),
@@ -141,14 +187,14 @@ func TestComputeIssueUpdates(t *testing.T) {
 		},
 	}
 
-	for tn, tc := range cases {
+	for _, tc := range cases {
 		tc := tc
-		t.Run(tn, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
 			issueUpdates := ComputeIssueUpdates(tc.issues, tc.regexpLabels)
 			if !issueUpdatesEqual(issueUpdates, tc.expectedIssueUpdates) {
-				t.Errorf("Expected %v, got %v", tc.expectedIssueUpdates, issueUpdates)
+				t.Errorf("ComputeIssueUpdates(%s) expected %v, got %v", tc.name, tc.expectedIssueUpdates, issueUpdates)
 			}
 		})
 	}
