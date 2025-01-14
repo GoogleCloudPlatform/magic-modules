@@ -31,11 +31,11 @@ func TestAccNetworkServicesGateway_update(t *testing.T) {
 			},
 			{
 				Config: testAccNetworkServicesGateway_update(gatewayName),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
-           PreApply: []plancheck.PlanCheck{
-              plancheck.ExpectResourceAction("google_network_services_gateway.foobar", plancheck.ResourceActionUpdate),
-           },
-        },
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_services_gateway.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_services_gateway.foobar",
