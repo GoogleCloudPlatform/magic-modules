@@ -25,10 +25,10 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs/{{notebook_execution_job_id}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookExecutionJobs?notebook_execution_job_id={{notebook_execution_job_id}}'
-autogen_async: true
 async:
+  type: 'OpAsync'
   operation:
-    base_url: '{{op_id}}'
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
