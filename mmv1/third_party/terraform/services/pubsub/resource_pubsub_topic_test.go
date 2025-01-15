@@ -230,6 +230,7 @@ resource "google_pubsub_topic" "foo" {
     allowed_persistence_regions = [
       "%s",
     ]
+    enforce_in_transit = false
   }
 }
 `, topic, key, value, region)
