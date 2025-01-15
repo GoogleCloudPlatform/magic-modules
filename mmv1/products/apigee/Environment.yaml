@@ -191,8 +191,6 @@ properties:
     type: NestedObject
     description: |
       Key-value pairs that may be used for customizing the environment.
-    immutable: false
-    required: false
     properties:
       - name: 'property'
         type: Array
