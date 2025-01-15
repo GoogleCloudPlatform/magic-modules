@@ -46,9 +46,6 @@ examples:
       notebook_execution_job_id: 'colab-notebook-execution'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
-      key_name: 'my-crypto-key'
-    test_vars_overrides:
-      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
