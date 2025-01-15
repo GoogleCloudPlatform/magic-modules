@@ -134,7 +134,67 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1"},
 		},
 		{
-			name: "multiple vacations are honored",
+			name: "included before vacations",
+			rotation: map[string]ReviewerConfig{
+				"id1": {vacations: []Vacation{}},
+				"id2": {
+					vacations: []Vacation{
+						{
+							startDate: newDate(2024, 3, 29),
+							endDate:   newDate(2024, 4, 2),
+						},
+						{
+							startDate: newDate(2024, 5, 2),
+							endDate:   newDate(2024, 5, 5),
+						},
+					},
+				},
+			},
+			timeNow: time.Date(2024, 3, 1, 0, 0, 0, 0, usPacific),
+			want:    []string{"id1", "id2"},
+		},
+		{
+			name: "excluded during first vacation",
+			rotation: map[string]ReviewerConfig{
+				"id1": {vacations: []Vacation{}},
+				"id2": {
+					vacations: []Vacation{
+						{
+							startDate: newDate(2024, 3, 29),
+							endDate:   newDate(2024, 4, 2),
+						},
+						{
+							startDate: newDate(2024, 5, 2),
+							endDate:   newDate(2024, 5, 5),
+						},
+					},
+				},
+			},
+			timeNow: time.Date(2024, 4, 1, 0, 0, 0, 0, usPacific),
+			want:    []string{"id1"},
+		},
+		{
+			name: "included between vacations",
+			rotation: map[string]ReviewerConfig{
+				"id1": {vacations: []Vacation{}},
+				"id2": {
+					vacations: []Vacation{
+						{
+							startDate: newDate(2024, 3, 29),
+							endDate:   newDate(2024, 4, 2),
+						},
+						{
+							startDate: newDate(2024, 5, 2),
+							endDate:   newDate(2024, 5, 5),
+						},
+					},
+				},
+			},
+			timeNow: time.Date(2024, 4, 4, 0, 0, 0, 0, usPacific),
+			want:    []string{"id1", "id2"},
+		},
+		{
+			name: "excluded during second vacation",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -152,6 +212,26 @@ func TestAvailable(t *testing.T) {
 			},
 			timeNow: time.Date(2024, 5, 3, 0, 0, 0, 0, usPacific),
 			want:    []string{"id1"},
+		},
+		{
+			name: "included after vacations",
+			rotation: map[string]ReviewerConfig{
+				"id1": {vacations: []Vacation{}},
+				"id2": {
+					vacations: []Vacation{
+						{
+							startDate: newDate(2024, 3, 29),
+							endDate:   newDate(2024, 4, 2),
+						},
+						{
+							startDate: newDate(2024, 5, 2),
+							endDate:   newDate(2024, 5, 5),
+						},
+					},
+				},
+			},
+			timeNow: time.Date(2024, 6, 1, 0, 0, 0, 0, usPacific),
+			want:    []string{"id1", "id2"},
 		},
 		{
 			name: "explicitly excluded reviewers",

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	utils "magician/utility"
 	"math/rand"
+	"slices"
 	"time"
 
 	"golang.org/x/exp/maps"
@@ -93,7 +94,9 @@ func AvailableReviewers(excludedReviewers []string) []string {
 
 func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
 	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
-	return utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
+	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
+	slices.Sort(ret)
+	return ret
 }
 
 func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) []string {
