@@ -45,20 +45,20 @@ custom_code:
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
 examples:
   - name: 'firewall_policy_rule'
-    primary_resource_id: 'policy_rule'
+    primary_resource_id: 'primary'
     vars:
-      fw_policy_name: 'policy'
-      address_name: 'address'
-      folder_name: 'folder'
+      address_group: 'address-group'
+      folder: 'folder'
+      fw_policy: 'fw-policy'
     test_env_vars:
       org_id: 'ORG_ID'
-      service_account: 'SERVICE_ACCT'
+      service_acct: 'SERVICE_ACCT'
   - name: 'firewall_policy_rule_network_scope'
-    primary_resource_id: 'firewall-policy-rule'
+    primary_resource_id: 'primary'
     vars:
-      folder_name: 'tf-folder'
-      fw_policy_name: 'tf-policy'
-      network_name: 'tf-network'
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      network: 'network'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

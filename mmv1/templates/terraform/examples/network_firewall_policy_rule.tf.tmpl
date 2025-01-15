@@ -1,5 +1,5 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
-  name        = "{{index $.Vars "address"}}"
+  name        = "{{index $.Vars "address_group"}}"
   parent      = "projects/{{index $.TestEnvVars "project_name"}}"
   description = "Sample global networksecurity_address_group"
   location    = "global"
@@ -43,7 +43,7 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
 }
 
 resource "google_compute_network" "basic_network" {
-  name = "{{index $.Vars "network_name"}}"
+  name = "{{index $.Vars "network"}}"
 }
 
 resource "google_tags_tag_key" "basic_key" {
@@ -60,5 +60,5 @@ resource "google_tags_tag_key" "basic_key" {
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
   parent      = google_tags_tag_key.basic_key.id
-  short_name  = "tagvalue"
+  short_name  = "{{index $.Vars "tag_value"}}"
 }

@@ -26,5 +26,5 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
 }
 
 resource "google_compute_network" "network" {
-  name = "{{index $.Vars "network_name"}}"
+  name = "{{index $.Vars "network"}}"
 }

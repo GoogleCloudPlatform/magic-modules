@@ -47,21 +47,22 @@ async:
     resource_inside_response: false
 examples:
   - name: 'network_firewall_policy_rule'
-    primary_resource_id: 'network-firewall-policy-rule'
+    primary_resource_id: 'primary'
     vars:
-      address: 'tf-address'
-      fw_policy: 'tf-policy'
-      network_name: 'tf-network'
-      tag_key: 'tf-tagkey'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       service_acct: 'SERVICE_ACCT'
   - name: 'network_firewall_policy_rule_network_scope'
-    primary_resource_id: 'network-firewall-policy-rule'
+    primary_resource_id: 'primary'
     vars:
-      fw_policy: 'tf-policy'
-      network_name: 'tf-network'
+      fw_policy: 'fw-policy'
+      network: 'network'
     test_env_vars:
       project_name: 'PROJECT_NAME'
 parameters:

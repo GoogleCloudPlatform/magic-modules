@@ -1,12 +1,12 @@
 resource "google_folder" "folder" {
-  display_name        = "{{index $.Vars "folder_name"}}"
+  display_name        = "{{index $.Vars "folder"}}"
   parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
   deletion_protection = false
 }
 
 resource "google_compute_firewall_policy" "default" {
   parent      = google_folder.folder.id
-  short_name  = "{{index $.Vars "fw_policy_name"}}"
+  short_name  = "{{index $.Vars "fw_policy"}}"
   description = "Firewall policy"
 }
 
@@ -36,6 +36,6 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_network" "network" {
-  name                    = "{{index $.Vars "network_name"}}"
+  name                    = "{{index $.Vars "network"}}"
   auto_create_subnetworks = false
 }

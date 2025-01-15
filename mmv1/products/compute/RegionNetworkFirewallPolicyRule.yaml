@@ -52,10 +52,11 @@ examples:
   - name: 'region_network_firewall_policy_rule'
     primary_resource_id: 'primary'
     vars:
-      address: 'address'
-      fw_policy: 'policy'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
       network: 'network'
-      tag_key: 'tagkey'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
@@ -64,7 +65,7 @@ examples:
   - name: 'region_network_firewall_policy_rule_network_scope'
     primary_resource_id: 'primary'
     vars:
-      fw_policy: 'policy'
+      fw_policy: 'fw-policy'
       network: 'network'
     test_env_vars:
       org_id: 'ORG_ID'

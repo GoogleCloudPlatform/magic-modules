@@ -40,13 +40,13 @@ custom_code:
   post_update: 'templates/terraform/post_update/resource_compute_firewall_policy_with_rules.go.tmpl'
 examples:
   - name: 'compute_firewall_policy_with_rules_full'
-    primary_resource_id: 'firewall-policy-with-rules'
+    primary_resource_id: 'primary'
     vars:
-      address_group_name: 'tf-address-group'
-      network_name: 'tf-network'
-      policy_name: 'tf-fw-org-policy-with-rules'
-      security_profile_group_name: 'tf-security-profile-group'
-      security_profile_name: 'tf-security-profile'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      security_profile: 'sp'
+      security_profile_group: 'spg'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

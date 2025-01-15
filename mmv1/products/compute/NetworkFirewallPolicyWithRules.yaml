@@ -41,15 +41,15 @@ custom_code:
 legacy_long_form_project: true
 examples:
   - name: 'compute_network_firewall_policy_with_rules_full'
-    primary_resource_id: 'network-firewall-policy-with-rules'
+    primary_resource_id: 'primary'
     vars:
-      address_group_name: 'tf-address-group'
-      network_name: 'tf-network'
-      policy_name: 'tf-fw-policy-with-rules'
-      tag_key_name: 'tf-tag-key'
-      tag_value_name: 'tf-tag-value'
-      security_profile_group_name: 'tf-security-profile-group'
-      security_profile_name: 'tf-security-profile'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+      security_profile_group: 'spg'
+      security_profile: 'sp'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:

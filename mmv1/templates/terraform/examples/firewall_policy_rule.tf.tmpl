@@ -1,5 +1,5 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
-  name        = "{{index $.Vars "address"}}"
+  name        = "{{index $.Vars "address_group"}}"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   description = "Sample global networksecurity_address_group"
   location    = "global"
@@ -28,7 +28,7 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
   action                  = "allow"
   direction               = "EGRESS"
   disabled                = false
-  target_service_accounts = ["{{index $.TestEnvVars "service_account"}}"]
+  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
     dest_ip_ranges            = ["11.100.0.1/32"]
