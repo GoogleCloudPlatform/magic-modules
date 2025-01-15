@@ -82,11 +82,13 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		execDay := time.Now()
 		customDay := args[0]
 		if customDay != "" {
-			execDay, err := time.Parse("2006-01-02", customDay) // input format YYYY-MM-DD
+			var err error
+			execDay, err = time.Parse("2006-01-02", customDay) // input format YYYY-MM-DD
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
 		}
+		fmt.Println(execDay.Format("2006-01-02"))
 
 		return execCollectNightlyTestStatus(execDay, gh, tc, gcs)
 	},
