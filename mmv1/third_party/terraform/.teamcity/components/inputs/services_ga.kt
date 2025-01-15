@@ -216,6 +216,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Cloudtasks",
         "path" to "./google/services/cloudtasks"
     ),
+    "colab" to mapOf(
+        "name" to "colab",
+        "displayName" to "Colab",
+        "path" to "./google/services/colab"
+    ),
     "composer" to mapOf(
         "name" to "composer",
         "displayName" to "Composer",
@@ -585,6 +590,11 @@ var ServicesListGa = mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
+    ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google/services/parametermanager"
     ),
     "parametermanagerregional" to mapOf(
         "name" to "parametermanagerregional",
