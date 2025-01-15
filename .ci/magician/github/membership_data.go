@@ -38,7 +38,7 @@ func (v Vacation) GetEndDate(timezone *time.Location) time.Time {
 
 type ReviewerConfig struct {
 	// timezone controls the timezone for vacation start / end dates. Default: US/Pacific.
-	timezone  *time.Location
+	timezone *time.Location
 
 	// vacations allows specifying times when new reviews should not be requested of the reviewer.
 	// Existing PRs will still have reviews re-requested.
@@ -57,7 +57,7 @@ var (
 	usPacific, _ = time.LoadLocation("US/Pacific")
 	usCentral, _ = time.LoadLocation("US/Central")
 	usEastern, _ = time.LoadLocation("US/Eastern")
-	london, _ = time.LoadLocation("Europe/London")
+	london, _    = time.LoadLocation("Europe/London")
 
 	// This is for the random-assignee rotation.
 	reviewerRotation = map[string]ReviewerConfig{

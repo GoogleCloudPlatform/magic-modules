@@ -66,7 +66,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1"},
 		},
 		{
-			name:     "reviewers on vacation end date are excluded",
+			name: "reviewers on vacation end date are excluded",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -83,7 +83,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1"},
 		},
 		{
-			name:     "reviewers are included after vacation ends",
+			name: "reviewers are included after vacation ends",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -100,7 +100,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1", "id2"},
 		},
 		{
-			name:     "reviewers are included before vacation starts",
+			name: "reviewers are included before vacation starts",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -117,7 +117,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1", "id2"},
 		},
 		{
-			name:     "reviewers are excluded if vacation has not ended in the specified time zone",
+			name: "reviewers are excluded if vacation has not ended in the specified time zone",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -134,7 +134,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1"},
 		},
 		{
-			name:     "multiple vacations are honored",
+			name: "multiple vacations are honored",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
@@ -154,7 +154,7 @@ func TestAvailable(t *testing.T) {
 			want:    []string{"id1"},
 		},
 		{
-			name:              "explicitly excluded reviewers",
+			name: "explicitly excluded reviewers",
 			rotation: map[string]ReviewerConfig{
 				"id1": {vacations: []Vacation{}},
 				"id2": {vacations: []Vacation{}},
