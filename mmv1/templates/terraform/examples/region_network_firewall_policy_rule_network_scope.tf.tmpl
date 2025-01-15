@@ -25,42 +25,17 @@ resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResour
   priority                = 1000
   region                  = "{{index $.TestEnvVars "region"}}"
   rule_name               = "test-rule"
-  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
-    src_address_groups       = [google_network_security_address_group.basic_regional_networksecurity_address_group.id]
-    src_ip_ranges            = ["10.100.0.1/32"]
-    src_fqdns                = ["example.com"]
-    src_region_codes         = ["US"]
-    src_threat_intelligences = ["iplist-known-malicious-ips"]
+    src_ip_ranges = ["10.100.0.1/32"]
+    src_network_scope = "INTRA_VPC"
 
     layer4_configs {
       ip_protocol = "all"
     }
-
-    src_secure_tags {
-      name = google_tags_tag_value.basic_value.id
-    }
   }
 }
 
-resource "google_compute_network" "basic_network" {
+resource "google_compute_network" "network" {
   name = "{{index $.Vars "network"}}"
-}
-
-resource "google_tags_tag_key" "basic_key" {
-  description = "For keyname resources."
-  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
-  purpose     = "GCE_FIREWALL"
-  short_name  = "{{index $.Vars "tag_key"}}"
-
-  purpose_data = {
-    network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
-  }
-}
-
-resource "google_tags_tag_value" "basic_value" {
-  description = "For valuename resources."
-  parent      = google_tags_tag_key.basic_key.id
-  short_name  = "tagvalue"
 }

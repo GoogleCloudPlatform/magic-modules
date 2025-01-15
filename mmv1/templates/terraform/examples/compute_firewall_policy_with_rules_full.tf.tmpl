@@ -62,6 +62,39 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
     tls_inspect = true
   }
+  rule {
+    description    = "network scope rule 1"
+    rule_name      = "network scope 1"
+    priority       = 4000
+    enable_logging = false
+    action         = "allow"
+    direction      = "INGRESS"
+    match {
+      src_ip_ranges     = ["11.100.0.1/32"]
+      src_network_scope = "VPC_NETWORKS"
+      src_networks = [google_compute_network.network.id]
+      layer4_configs {
+        ip_protocol = "tcp"
+        ports = [8080]
+      }
+    }
+  }
+  rule {
+    description    = "network scope rule 2"
+    rule_name      = "network scope 2"
+    priority       = 5000
+    enable_logging = false
+    action         = "allow"
+    direction      = "EGRESS"
+    match {
+      dest_ip_ranges = ["0.0.0.0/0"]
+      dest_network_scope = "INTERNET"
+      layer4_configs {
+        ip_protocol = "tcp"
+        ports = [8080]
+      }
+    }
+  }
 }
 
 resource "google_network_security_address_group" "address_group_1" {
@@ -89,4 +122,9 @@ resource "google_network_security_security_profile" "security_profile_1" {
   type        = "THREAT_PREVENTION"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   location    = "global"
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
 }

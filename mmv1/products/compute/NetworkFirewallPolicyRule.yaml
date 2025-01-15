@@ -47,16 +47,23 @@ async:
     resource_inside_response: false
 examples:
   - name: 'network_firewall_policy_rule'
-    primary_resource_id: 'primary'
+    primary_resource_id: 'network-firewall-policy-rule'
     vars:
-      tag_key: 'tagkey'
-      network: 'network'
-      fw_policy: 'policy'
-      address: 'address'
+      address: 'tf-address'
+      fw_policy: 'tf-policy'
+      network_name: 'tf-network'
+      tag_key: 'tf-tagkey'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
+      service_acct: 'SERVICE_ACCT'
+  - name: 'network_firewall_policy_rule_network_scope'
+    primary_resource_id: 'network-firewall-policy-rule'
+    vars:
+      fw_policy: 'tf-policy'
+      network_name: 'tf-network'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      service_acct: 'SERVICE_ACCT'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -114,6 +121,33 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
+      - name: 'srcNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic source.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+      - name: 'srcNetworks'
+        type: Array
+        description: |
+          Networks of the traffic source. It can be either a full or partial url.
+        min_version: beta
+        item_type:
+          type: String
+      - name: 'destNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic destination.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

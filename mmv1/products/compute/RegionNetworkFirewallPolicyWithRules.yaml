@@ -43,8 +43,9 @@ examples:
   - name: 'compute_region_network_firewall_policy_with_rules_full'
     primary_resource_id: 'region-network-firewall-policy-with-rules'
     vars:
-      policy_name: 'tf-region-fw-policy-with-rules'
       address_group_name: 'tf-address-group'
+      network_name: 'tf-network'
+      policy_name: 'tf-region-fw-policy-with-rules'
       tag_key_name: 'tf-tag-key'
       tag_value_name: 'tf-tag-value'
     test_env_vars:
@@ -169,6 +170,33 @@ properties:
               min_version: 'beta'
               item_type:
                 type: String
+            - name: 'srcNetworkScope'
+              type: Enum
+              description: |
+                Network scope of the traffic source.
+              min_version: beta
+              enum_values:
+                - 'INTERNET'
+                - 'INTRA_VPC'
+                - 'NON_INTERNET'
+                - 'VPC_NETWORKS'
+            - name: 'srcNetworks'
+              type: Array
+              description: |
+                Networks of the traffic source. It can be either a full or partial url.
+              min_version: beta
+              item_type:
+                type: String
+            - name: 'destNetworkScope'
+              type: Enum
+              description: |
+                Network scope of the traffic destination.
+              min_version: beta
+              enum_values:
+                - 'INTERNET'
+                - 'INTRA_VPC'
+                - 'NON_INTERNET'
+                - 'VPC_NETWORKS'
             - name: 'srcRegionCodes'
               type: Array
               description: |
