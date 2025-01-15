@@ -46,6 +46,8 @@ examples:
       notebook_execution_job_id: 'colab-notebook-execution'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
