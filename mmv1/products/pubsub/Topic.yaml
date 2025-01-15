@@ -87,6 +87,10 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_azure_event_hubs'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 parameters:
 properties:
   - name: 'name'
@@ -173,6 +177,7 @@ properties:
         conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
+          - 'azure_event_hubs'
         properties:
           - name: 'streamArn'
             type: String
@@ -207,6 +212,7 @@ properties:
         conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
+          - 'azure_event_hubs'
         properties:
           - name: 'bucket'
             type: String
@@ -298,3 +304,42 @@ properties:
               - 'INFO'
               - 'WARNING'
               - 'ERROR'
+      - name: 'azureEventHubs'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Azure Event Hubs.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+        properties:
+          - name: 'resourceGroup'
+            type: String
+            description: |
+              The name of the resource group within an Azure subscription.
+          - name: 'namespace'
+            type: String
+            description: |
+              The Azure event hub namespace to ingest data from.
+          - name: 'eventHub'
+            type: String
+            description: |
+              The Azure event hub to ingest data from.
+          - name: 'clientId'
+            type: String
+            description: |
+              The Azure event hub client ID to use for ingestion.
+          - name: 'tenantId'
+            type: String
+            description: |
+              The Azure event hub tenant ID to use for ingestion.
+          - name: 'subscriptionId'
+            type: String
+            description: |
+              The Azure event hub subscription ID to use for ingestion.
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Azure (via a `AssumeRoleWithWebIdentity` call for the provided
+              role).

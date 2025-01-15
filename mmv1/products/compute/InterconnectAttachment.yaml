@@ -130,6 +130,7 @@ properties:
       - 'BPS_10G'
       - 'BPS_20G'
       - 'BPS_50G'
+      - 'BPS_100G'
   - name: 'edgeAvailabilityDomain'
     type: String
     description: |
