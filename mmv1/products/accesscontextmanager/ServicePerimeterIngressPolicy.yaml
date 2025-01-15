@@ -44,7 +44,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
 exclude_import: true
@@ -58,14 +58,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - ingressFrom
   - ingressTo
@@ -78,6 +72,7 @@ nested_query:
 custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -110,7 +105,7 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
-        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
@@ -121,6 +116,8 @@ properties:
           https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressFromIdentitiesDiffSuppressFunc
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_from_identities_custom_flatten.go.tmpl
       - name: 'sources'
         type: Array
         description: |
@@ -169,7 +166,7 @@ properties:
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
         custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
-        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSupressFunc
+        diff_suppress_func: AccessContextManagerServicePerimeterIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
       - name: 'operations'
@@ -207,3 +204,9 @@ properties:
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true

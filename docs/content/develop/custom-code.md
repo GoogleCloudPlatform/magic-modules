@@ -1,6 +1,6 @@
 ---
 title: "Add custom resource code"
-weight: 15
+weight: 70
 ---
 
 # Add custom resource code
@@ -32,12 +32,12 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as [diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
-  [validation functions]({{<ref "/develop/field-reference#validation" >}}),
+- Functions, such as [diff suppress functions]({{<ref "/reference/field#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/reference/field#validation" >}}),
   CustomizeDiff functions, and so on.
 - Methods
 
-Any custom functions added should have thorough [unit tests]({{< ref "/develop/test/test#add-unit-tests" >}}).
+Any custom functions added should have thorough [unit tests]({{< ref "/test/test#add-unit-tests" >}}).
 
 ## Modify the API request or response
 
@@ -264,9 +264,9 @@ docs:
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```
 
-See [Add documentation (Handwritten)]({{< ref "/develop/resource#add-documentation" >}}) for more information about what to include in the field documentation.
+See [Add documentation (Handwritten)]({{< ref "/document/add-documentation" >}}) for more information about what to include in the field documentation.
 
 ## What's next?
 
-- [Add tests]({{< ref "/develop/test/test.md" >}})
-- [Run tests]({{< ref "/develop/test/run-tests.md" >}})
++ [Add tests]({{< ref "/test/test" >}})
++ [Run tests]({{< ref "/test/run-tests" >}})
