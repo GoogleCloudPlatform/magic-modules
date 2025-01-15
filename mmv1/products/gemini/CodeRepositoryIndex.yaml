@@ -14,6 +14,10 @@
 ---
 name: CodeRepositoryIndex
 description: The resource for managing Code Repository Index for Gemini Code Assist.
+references:
+  guides:
+    'Gemini Code Assist overview': 'https://cloud.google.com/gemini/docs/codeassist/overview'
+  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes'
 base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
 self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
 create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
