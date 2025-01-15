@@ -45,7 +45,7 @@ examples:
     vars:
       address_group_name: 'tf-address-group'
       network_name: 'tf-network'
-      policy_name: 'tf-fw-policy-with-rules'      
+      policy_name: 'tf-fw-policy-with-rules'
       tag_key_name: 'tf-tag-key'
       tag_value_name: 'tf-tag-value'
       security_profile_group_name: 'tf-security-profile-group'
