@@ -2771,6 +2771,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 	var disabled storage.Bucket
 	var noIPfilter storage.Bucket
 	bucketName := acctest.TestBucketName(t)
+	nwSuffix := acctest.RandString(t, 8)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2778,7 +2779,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_IPFilter(bucketName),
+				Config: testAccStorageBucket_IPFilter(bucketName, nwSuffix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
@@ -2791,7 +2792,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_IPFilter_disable(bucketName),
+				Config: testAccStorageBucket_IPFilter_disable(bucketName, nwSuffix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &disabled),
@@ -2822,15 +2823,15 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 	})
 }
 
-func testAccStorageBucket_IPFilter(bucketName string) string {
+func testAccStorageBucket_IPFilter(bucketName string, nwSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc_gcs_ipfilter1" {
-  name = "tf-test-storage-ipfilter1"
+  name = "tf-test-storage-ipfilter1-%s"
 	auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_1" {
-  name          = "tf-test-storage-ipfilter1"
+  name          = "tf-test-storage-ipfilter1-%s"
   ip_cidr_range = "10.201.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc_gcs_ipfilter1.id
@@ -2852,30 +2853,30 @@ resource "google_storage_bucket" "bucket" {
 		}
   }
 }
-`, bucketName)
+`, nwSuffix, nwSuffix, bucketName)
 }
 
-func testAccStorageBucket_IPFilter_disable(bucketName string) string {
+func testAccStorageBucket_IPFilter_disable(bucketName string, nwSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc_gcs_ipfilter1" {
-  name = "tf-test-storage-ipfilter1"
+  name = "tf-test-storage-ipfilter1-%s"
 	auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_1" {
-  name          = "tf-test-storage-ipfilter1"
+  name          = "tf-test-storage-ipfilter1-%s"
   ip_cidr_range = "10.201.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc_gcs_ipfilter1.id
 }
 
 resource "google_compute_network" "vpc_gcs_ipfilter2" {
-  name = "tf-test-storage-ipfilter2"
+  name = "tf-test-storage-ipfilter2-%s"
 	auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_2" {
-  name          = "tf-test-storage-ipfilter2"
+  name          = "tf-test-storage-ipfilter2-%s"
   ip_cidr_range = "10.202.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc_gcs_ipfilter2.id
@@ -2901,7 +2902,7 @@ resource "google_storage_bucket" "bucket" {
 		}
 	}
 }
-`, bucketName)
+`, nwSuffix, nwSuffix, nwSuffix, nwSuffix, bucketName)
 }
 
 func testAccStorageBucket_withoutIPFilter(bucketName string) string {
