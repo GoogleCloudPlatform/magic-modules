@@ -3676,7 +3676,7 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Small sleep first, to avoid condition where cluster is ready but underlying GCE
 					// resources apparently aren't.
-					acctest.SleepInSecondsForTest(15),
+					acctest.SleepInSecondsForTest(30),
 					resource.TestCheckResourceAttrSet("google_container_cluster.with_autopilot", "node_pool_auto_config.0.resource_manager_tags.%"),
 				),
 			},
