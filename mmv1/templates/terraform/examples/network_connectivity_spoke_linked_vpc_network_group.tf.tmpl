@@ -34,7 +34,7 @@ resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
       "198.51.100.0/23",
       "10.0.0.0/8",
       "ALL_PRIVATE_IPV4_RANGES",
-      "ALL_PUPLIC_IPV4_RANGES",
+      "ALL_PUPI_IPV4_RANGES",
       "ALL_IPV6_RANGES"
     ]
     uri = google_compute_network.network.self_link
