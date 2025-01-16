@@ -30,10 +30,12 @@ import (
 // in any environment that is not strictly a test environment. Resources will be
 // destroyed.
 
-var flagSweep = flag.String("sweep", "", "List of Regions to run available Sweepers")
-var flagSweepAllowFailures = flag.Bool("sweep-allow-failures", true, "Enable to allow Sweeper Tests to continue after failures")
-var flagSweepRun = flag.String("sweep-run", "", "Comma separated list of Sweeper Tests to run")
-var sweeperFuncs map[string]*Sweeper
+var (
+	flagSweep              *string
+	flagSweepAllowFailures *bool
+	flagSweepRun           *string
+	sweeperFuncs           map[string]*Sweeper
+)
 
 // SweeperFunc is a signature for a function that acts as a sweeper. It
 // accepts a string for the region that the sweeper is to be ran in. This
@@ -56,6 +58,35 @@ type Sweeper struct {
 
 func init() {
 	sweeperFuncs = make(map[string]*Sweeper)
+}
+
+// registerFlags checks for and gets existing flag definitions before trying to redefine them.
+// This is needed because this package and terraform-plugin-testing both define the same sweep flags.
+// By checking first, we ensure we reuse any existing flags rather than causing a panic from flag redefinition.
+// This allows this module to be used alongside terraform-plugin-testing without conflicts.
+func registerFlags() {
+	// Check for existing flags in global CommandLine
+	if f := flag.Lookup("sweep"); f != nil {
+		// Use the Value.Get() interface to get the values
+		if getter, ok := f.Value.(flag.Getter); ok {
+			*flagSweep = getter.Get().(string)
+		}
+		if f := flag.Lookup("sweep-allow-failures"); f != nil {
+			if getter, ok := f.Value.(flag.Getter); ok {
+				*flagSweepAllowFailures = getter.Get().(bool)
+			}
+		}
+		if f := flag.Lookup("sweep-run"); f != nil {
+			if getter, ok := f.Value.(flag.Getter); ok {
+				*flagSweepRun = getter.Get().(string)
+			}
+		}
+	} else {
+		// Define our flags if they don't exist
+		flagSweep = flag.String("sweep", "", "List of Regions to run available Sweepers")
+		flagSweepAllowFailures = flag.Bool("sweep-allow-failures", true, "Enable to allow Sweeper Tests to continue after failures")
+		flagSweepRun = flag.String("sweep-run", "", "Comma separated list of Sweeper Tests to run")
+	}
 }
 
 // AddTestSweepers function adds a given name and Sweeper configuration
@@ -102,7 +133,6 @@ func ExecuteSweepers(t *testing.T) {
 		}
 	} else {
 		t.Skip("skipping sweeper run. No region supplied")
-		os.Exit(0)
 	}
 }
 
