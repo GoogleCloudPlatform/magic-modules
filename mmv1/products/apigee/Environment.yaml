@@ -79,6 +79,16 @@ examples:
       # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+  - name: 'apigee_environment_basic_properties_test'
+    primary_resource_id: 'apigee_environment'
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    # Resource creation race
+    skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
