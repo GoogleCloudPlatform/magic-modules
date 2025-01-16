@@ -117,7 +117,6 @@ properties:
       - name: 'content'
         type: String
         description: 'The base64-encoded contents of the input notebook file.'
-        diff_suppress_func: 'ColabNotebookExecutionContentDiffSuppress'
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
