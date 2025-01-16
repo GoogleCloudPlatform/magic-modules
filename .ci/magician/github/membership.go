@@ -102,27 +102,20 @@ func isOrgMember(author, org, githubToken string) bool {
 	return err == nil
 }
 
-func GetRandomReviewer() string {
-	availableReviewers := AvailableReviewers()
+// GetRandomReviewer returns a random available reviewer (optionally excluding some people from the reviewer pool)
+func GetRandomReviewer(excludedReviewers []string) string {
+	availableReviewers := AvailableReviewers(excludedReviewers)
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
 }
 
-// Return a random reviewer other than the old reviewer
-func GetNewRandomReviewer(oldReviewer string) string {
-	availableReviewers := AvailableReviewers()
-	availableReviewers = utils.Removes(availableReviewers, []string{oldReviewer})
-	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
-	return reviewer
+func AvailableReviewers(excludedReviewers []string) []string {
+	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers, excludedReviewers)
 }
 
-func AvailableReviewers() []string {
-	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers)
-}
-
-func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer) []string {
-	onVacationList := onVacation(nowTime, vacationList)
-	return utils.Removes(allReviewers, onVacationList)
+func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer, excludedReviewers []string) []string {
+	excludedReviewers = append(excludedReviewers, onVacation(nowTime, vacationList)...)
+	return utils.Removes(allReviewers, excludedReviewers)
 }
 
 func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
