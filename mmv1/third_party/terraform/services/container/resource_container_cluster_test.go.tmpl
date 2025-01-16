@@ -62,6 +62,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	pid := envvar.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectNumberFromEnv()
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
@@ -69,7 +70,8 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) {
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) ||
+		acctest.BootstrapPSARole(t, project, "@cloudservices", "roles/resourcemanager.tagUser") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
@@ -3636,13 +3638,15 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	pid := envvar.GetTestProjectFromEnv()
+	project := envvar.GetTestProjectNumberFromEnv()
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 	clusterNetName := fmt.Sprintf("tf-test-container-net-%s", randomSuffix)
 	clusterSubnetName := fmt.Sprintf("tf-test-container-subnet-%s", randomSuffix)
 
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) {
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) ||
+		acctest.BootstrapPSARole(t, project, "@cloudservices", "roles/resourcemanager.tagUser") {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
@@ -3672,7 +3676,7 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Small sleep first, to avoid condition where cluster is ready but underlying GCE
 					// resources apparently aren't.
-					acctest.SleepInSecondsForTest(30),
+					acctest.SleepInSecondsForTest(15),
 					resource.TestCheckResourceAttrSet("google_container_cluster.with_autopilot", "node_pool_auto_config.0.resource_manager_tags.%"),
 				),
 			},
@@ -11776,20 +11780,6 @@ data "google_project" "project" {
   project_id = "%[1]s"
 }
 
-resource "google_project_iam_member" "tag_user" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tag_user,
-  ]
-}
-
 resource "google_tags_tag_key" "key1" {
   parent      = data.google_project.project.id
   short_name  = "foobarbaz-%[2]s"
@@ -11844,8 +11834,6 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
   network             = "%[4]s"
   subnetwork          = "%[5]s"
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName, tagResourceNumber)
 }
@@ -11854,20 +11842,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTags(projectID, cluster
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tag_user" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tag_user,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -11964,8 +11938,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
@@ -11974,20 +11946,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTagsUpdate1(projectID, 
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tag_user" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tag_user,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -12085,8 +12043,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
@@ -12095,20 +12051,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTagsUpdate2(projectID, 
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tag_user" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tag_user,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -12199,8 +12141,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
