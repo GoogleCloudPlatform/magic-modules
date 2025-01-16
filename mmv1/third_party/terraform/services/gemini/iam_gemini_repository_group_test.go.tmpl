@@ -203,7 +203,6 @@ resource "google_gemini_repository_group" "example" {
 func testAccGeminiRepositoryGroupIamPolicy_emptyBinding(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_iam_policy" "foo" {
-  provider = google
 }
 
 resource "google_gemini_repository_group_iam_policy" "foo" {
