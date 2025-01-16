@@ -1,9 +1,6 @@
----
 name: 'ResourcePolicyAttachment'
 api_resource_type_kind: Instance
-description: |
-  Attaches existing resource policies to a compute instance. This enables separate management of instance policies.
-docs:
+description: 'Attaches resource policies to compute instances'
 id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
 base_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
@@ -11,10 +8,11 @@ create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResou
 delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
 delete_verb: 'POST'
 immutable: true
+
 timeouts:
   insert_minutes: 20
-  update_minutes: 20
   delete_minutes: 20
+
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -22,43 +20,35 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+
 identity:
   - name
+
 nested_query:
   keys:
     - resourcePolicies
   is_list_of_ids: true
   modify_by_patch: false
+
 custom_code:
   encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
-examples:
-  - name: 'resource_policy_attachment_basic'
-    primary_resource_id: 'attachment'
-    vars:
-      instance_name: 'my-instance'
-      policy_name: 'my-resource-policy'
+
 parameters:
   - name: 'instance'
     type: ResourceRef
-    description: |
-      The name of the instance to which the resource policies are being attached.
-    url_param_only: true
     required: true
     resource: 'Instance'
     imports: 'name'
   - name: 'zone'
     type: ResourceRef
-    description: 'A reference to the zone where the instance resides.'
-    url_param_only: true
     required: true
     resource: 'Zone'
     imports: 'name'
+
 properties:
   - name: 'name'
     type: String
-    description: |
-      The name of the resource policy to attach. Do not specify the full self link.
     required: true
     immutable: true
