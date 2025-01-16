@@ -41,6 +41,8 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
     primary_resource_id: 'notebook-execution'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
@@ -109,6 +111,7 @@ properties:
   - name: 'directNotebookSource'
     type: NestedObject
     description: 'The content of the input notebook in ipynb format.'
+    ignore_read: true
     exactly_one_of:
       - dataform_repository_source
       - gcs_notebook_source
