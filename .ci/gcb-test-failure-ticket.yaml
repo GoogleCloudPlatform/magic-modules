@@ -1,13 +1,12 @@
 ---
 steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
-      id: collect-test-status
+      id: gcb-test-failure-ticket
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN", "TEAMCITY_TOKEN"]
-      env:
-        - CUSTOM_DATE=$_CUSTOM_DATE
       args:
         - 'collect-nightly-test-status'
+        - $_CUSTOM_DATE
 
 timeout: 3600s
 options:
@@ -18,5 +17,5 @@ availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
       env: GITHUB_TOKEN
-    - versionName: projects/673497134629/secrets/teamcity-token/versions/latest
+    - versionName: projects/673497134629/secrets/ci-test-teamcity/versions/latest
       env: TEAMCITY_TOKEN
