@@ -163,7 +163,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
     {{- end }}{{/* if $.IsA "Map" */}}
     {{ if $.NestedProperties }}
       {{- range $prop := $.NestedProperties }}
-        {{- if not (and (hasPrefix $prop.Type "KeyValue") (not $prop.WriteOnly)) }}
+        {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite (not $prop.WriteOnly)) }}
           {{- template "expandPropertyMethod" $prop -}}
         {{- end }}
       {{- end }}
