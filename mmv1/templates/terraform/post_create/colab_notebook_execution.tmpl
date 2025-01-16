@@ -6,7 +6,8 @@ operation_name, _ := res["name"].(string)
 parts := strings.Split(operation_name, "/")
 long_name := strings.Join(parts[:len(parts)-2], "/")
 short_id := tpgresource.GetResourceNameFromSelfLink(long_name)
-log.Printf("[DEBUG] Setting resource name to %s", short_id)
-if err := d.Set("notebook_execution_job_id", id); err != nil {
+
+log.Printf("[DEBUG] Setting resource id to %s", short_id)
+if err := d.Set("notebook_execution_job_id", short_id); err != nil {
 	return fmt.Errorf("Error setting id: %s", err)
 }

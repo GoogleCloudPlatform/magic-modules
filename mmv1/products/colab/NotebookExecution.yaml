@@ -41,6 +41,8 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - 'direct_notebook_source.0.content'
   - name: 'colab_notebook_execution_full'
     primary_resource_id: 'notebook-execution'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
@@ -60,6 +62,8 @@ parameters:
     type: String
     url_param_only: true
     description: 'User specified ID for the Notebook Execution Job'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    default_from_api: true
 properties:
   - name: 'displayName'
     type: String
@@ -106,6 +110,7 @@ properties:
       - name: 'content'
         type: String
         description: 'The base64-encoded contents of the input notebook file.'
+        default_from_api: true
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'

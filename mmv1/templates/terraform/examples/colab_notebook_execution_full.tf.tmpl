@@ -10,17 +10,23 @@ resource "google_compute_subnetwork" "my_subnetwork" {
   ip_cidr_range = "10.0.1.0/24"
 }
 
-resource "google_project_iam_member" "colab_enterprise_admin" {
-  project = "{{index $.TestEnvVars "project_id"}}"
-  role    = "roles/aiplatform.colabEnterpriseAdmin"
-  member  = "user:example@example.com"
-}
-
 resource "google_storage_bucket" "output_bucket" {
   name          = "{{index $.Vars "bucket"}}"
   location      = "US"
   force_destroy = true
   uniform_bucket_level_access = true
+}
+
+resource "google_service_account" "service_account" {
+  account_id   = "sa-aiplatform-vm"
+  disabled     = false
+  display_name = "Service Account for AI Platform VM"
+}
+
+resource "google_project_iam_member" "member" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  role    = "roles/storage.objectAdmin" # Grant access to the bucket
+  member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 resource "google_storage_bucket_object" "notebook" {
@@ -74,7 +80,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
   }
   
-  execution_user = "example@example.com"
+  execution_user = "bcreddy@google.com"
 
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
   labels = {
@@ -105,7 +111,6 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     google_compute_subnetwork.my_subnetwork,
     google_storage_bucket_object.notebook,
     google_storage_bucket.output_bucket,
-    google_project_iam_member.colab_enterprise_admin,
   ]
   
 }
