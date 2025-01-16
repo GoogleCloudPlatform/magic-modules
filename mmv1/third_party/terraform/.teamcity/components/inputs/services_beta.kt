@@ -566,11 +566,6 @@ var ServicesListBeta = mapOf(
         "displayName" to "Networkservices",
         "path" to "./google-beta/services/networkservices"
     ),
-    "serviceextensions" to mapOf(
-        "name" to "serviceextensions",
-        "displayName" to "Serviceextensions",
-        "path" to "./google-beta/services/serviceextensions"
-    ),
     "notebooks" to mapOf(
         "name" to "notebooks",
         "displayName" to "Notebooks",
