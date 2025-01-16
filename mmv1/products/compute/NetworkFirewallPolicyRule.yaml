@@ -58,7 +58,13 @@ examples:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       service_acct: 'SERVICE_ACCT'
-  - name: 'network_firewall_policy_rule_network_scope'
+  - name: 'network_firewall_policy_rule_network_scope_egress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+  - name: 'network_firewall_policy_rule_network_scope_ingress'
     primary_resource_id: 'primary'
     vars:
       fw_policy: 'fw-policy'

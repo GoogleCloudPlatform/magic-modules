@@ -3,10 +3,10 @@ data "google_project" "project" {
 }
 
 resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
   short_name  = "{{index $.Vars "fw_policy"}}"
   description = "Terraform test"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
-  provider    = google-beta
 
   rule {
     description      = "tcp rule"
@@ -50,6 +50,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+
   rule {
     description             = "security profile group rule"
     rule_name               = "tcp rule"
@@ -82,7 +83,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
       src_network_scope = "VPC_NETWORKS"
       src_networks      = [google_compute_network.network.id]
 
-      layer4_configs {
+      layer4_config {
         ip_protocol = "tcp"
         ports       = [8080]
       }
@@ -100,7 +101,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
       dest_ip_ranges     = ["0.0.0.0/0"]
       dest_network_scope = "INTERNET"
 
-      layer4_configs {
+      layer4_config {
         ip_protocol = "tcp"
         ports       = [8080]
       }
@@ -136,6 +137,7 @@ resource "google_network_security_security_profile" "security_profile_1" {
 }
 
 resource "google_compute_network" "network" {
+  provider                = google-beta
   name                    = "{{index $.Vars "network"}}"
   auto_create_subnetworks = false
 }

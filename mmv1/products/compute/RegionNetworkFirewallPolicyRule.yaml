@@ -62,7 +62,15 @@ examples:
       project_name: 'PROJECT_NAME'
       region: 'REGION'
       service_acct: 'SERVICE_ACCT'
-  - name: 'region_network_firewall_policy_rule_network_scope'
+  - name: 'region_network_firewall_policy_rule_network_scope_egress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
+  - name: 'region_network_firewall_policy_rule_network_scope_ingress'
     primary_resource_id: 'primary'
     vars:
       fw_policy: 'fw-policy'

@@ -59,6 +59,8 @@ examples:
       folder: 'folder'
       fw_policy: 'fw-policy'
       network: 'network'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

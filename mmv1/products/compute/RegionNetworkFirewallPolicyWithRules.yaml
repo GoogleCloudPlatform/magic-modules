@@ -43,7 +43,7 @@ examples:
   - name: 'compute_region_network_firewall_policy_with_rules_full'
     primary_resource_id: 'primary'
     vars:
-      address: 'address'
+      address_group: 'address-group'
       network: 'network'
       fw_policy: 'fw-policy'
       tag_key: 'tag-key'
