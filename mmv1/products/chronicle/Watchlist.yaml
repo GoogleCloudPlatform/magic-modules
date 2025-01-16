@@ -27,9 +27,20 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 update_verb: PATCH
 update_mask: true
-
+custom_code:
+  encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
+  post_create: 'templates/terraform/post_create/chronicle_watchlist_id.go.tmpl'
 examples:
   - name: 'chronicle_watchlist_basic'
+    primary_resource_id: 'example'
+    min_version: 'beta'
+    vars:
+      name: watchlist_name
+      watchlist_id: watchlist-id
+      description: watchlist-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_watchlist_without_id'
     primary_resource_id: 'example'
     min_version: 'beta'
     vars:
@@ -37,6 +48,9 @@ examples:
       description: watchlist-description
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
+    # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
+    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
+    exclude_import_test: true
 
 parameters:
   - name: location
@@ -58,9 +72,10 @@ parameters:
       which will become the final component of the watchlist's resource name.
       This value should be 4-63 characters, and valid characters
       are /a-z-/.
+    required: false
     immutable: true
-    url_param_only: true
-    required: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
 properties:
   - name: name
     type: String

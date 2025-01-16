@@ -79,6 +79,16 @@ examples:
       # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+  - name: 'apigee_environment_basic_properties_test'
+    primary_resource_id: 'apigee_environment'
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    # Resource creation race
+    skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_environment_patch_update_test'
     primary_resource_id: 'apigee_environment'
     primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
@@ -187,3 +197,23 @@ properties:
     description: |
       Optional. URI of the forward proxy to be applied to the runtime instances in this environment. Must be in the format of {scheme}://{hostname}:{port}. Note that the scheme must be one of "http" or "https", and the port must be supplied.
     required: false
+  - name: 'properties'
+    type: NestedObject
+    description: |
+      Key-value pairs that may be used for customizing the environment.
+    properties:
+      - name: 'property'
+        type: Array
+        description: |
+          List of all properties in the object.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                The property key.
+            - name: 'value'
+              type: String
+              description: |
+                The property value.
