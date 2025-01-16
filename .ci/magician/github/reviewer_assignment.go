@@ -49,7 +49,7 @@ func ChooseCoreReviewers(requestedReviewers, previousReviewers []User) (reviewer
 	}
 
 	if !hasPrimaryReviewer {
-		newPrimaryReviewer = GetRandomReviewer()
+		newPrimaryReviewer = GetRandomReviewer(nil)
 		reviewersToRequest = append(reviewersToRequest, newPrimaryReviewer)
 	}
 

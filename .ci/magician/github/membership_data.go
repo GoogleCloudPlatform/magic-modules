@@ -125,5 +125,10 @@ var (
 			startDate: newDate(2024, 12, 27, pdtLoc),
 			endDate:   newDate(2025, 1, 5, pdtLoc),
 		},
+		{
+			id:        "zli82016",
+			startDate: newDate(2025, 1, 15, pdtLoc),
+			endDate:   newDate(2025, 2, 9, pdtLoc),
+		},
 	}
 )
