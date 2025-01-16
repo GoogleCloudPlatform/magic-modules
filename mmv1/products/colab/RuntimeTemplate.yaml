@@ -27,10 +27,10 @@ base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
 self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
 immutable: true
 create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
-autogen_async: true
 async:
+  type: 'OpAsync'
   operation:
-    base_url: '{{op_id}}'
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
   post_create: 'templates/terraform/post_create/colab_runtime_template.tmpl'
 examples:
