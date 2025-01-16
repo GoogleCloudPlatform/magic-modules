@@ -18,5 +18,5 @@ availableSecrets:
     # needed for ticket creator
     # - versionName: projects/673497134629/secrets/github-classic--repo-workflow/versions/latest
     #   env: GITHUB_TOKEN
-    - versionName: projects/673497134629/secrets/ci-test-teamcity/versions/latest
+    - versionName: projects/673497134629/secrets/teamcity-token/versions/latest
       env: TEAMCITY_TOKEN
