@@ -45,6 +45,11 @@ resource "google_network_connectivity_spoke" "primary"  {
     "198.51.100.0/24",
     "10.10.0.0/16"
     ]
+    include_export_ranges = [
+      "ALL_PRIVATE_IPV4_RANGES",
+      "ALL_PUPLIC_IPV4_RANGES",
+      "ALL_IPV6_RANGES"
+    ]
   }
   depends_on  = [google_network_connectivity_spoke.linked_vpc_spoke]
 }

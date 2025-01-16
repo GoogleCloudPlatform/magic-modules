@@ -32,4 +32,8 @@ resource "google_network_connectivity_spoke" "primary"  {
   linked_vpc_network {
     uri = google_compute_network.network.self_link
   }
+  include_export_ranges = [
+      "ALL_IPV4_RANGES",
+      "ALL_IPV6_RANGES"
+    ]
 }
