@@ -132,9 +132,13 @@ func main() {
 	}
 
 	startTime := time.Now()
+	providerName := "default (terraform)"
+	if *forceProvider != "" {
+		providerName = *forceProvider
+	}
 	log.Printf("Generating MM output to '%s'", *outputPath)
-	log.Printf("Using %s version", *version)
-	log.Printf("Using %s provider", *forceProvider)
+	log.Printf("Building %s version", *version)
+	log.Printf("Building %s provider", providerName)
 
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
