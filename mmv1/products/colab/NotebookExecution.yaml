@@ -30,7 +30,7 @@ async:
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
-  post_create: 'templates/terraform/post_create/colab_notebook_execution.tmpl'
+  post_create: 'templates/terraform/post_create/colab_notebook_execution.go.tmpl'
 examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
@@ -41,9 +41,16 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
-      - 'direct_notebook_source.0.content'
   - name: 'colab_notebook_execution_full'
+    primary_resource_id: 'notebook-execution'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
+    vars:
+      notebook_execution_job_id: 'colab-notebook-execution'
+      bucket: 'my_bucket'
+      network_name: 'colab-test-default'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'colab_notebook_execution_dataform'
     primary_resource_id: 'notebook-execution'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
@@ -110,7 +117,7 @@ properties:
       - name: 'content'
         type: String
         description: 'The base64-encoded contents of the input notebook file.'
-        default_from_api: true
+        diff_suppress_func: 'ColabNotebookExecutionContentDiffSuppress'
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'

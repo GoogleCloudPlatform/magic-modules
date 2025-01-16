@@ -1,0 +1,85 @@
+resource "google_colab_runtime_template" "my_runtime_template" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  display_name = "Runtime template"
+  location = "us-central1"
+
+  machine_spec {
+    machine_type     = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
+}
+
+resource "google_storage_bucket" "output_bucket" {
+  name          = "{{index $.Vars "bucket"}}"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+
+resource "google_dataform_repository" "dataform_repo" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  name     = "hello-world-repo"
+}
+
+resource "google_dataform_workspace" "dataform_workspace" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  location         = google_dataform_repository.dataform_repo.location
+  repository       = google_dataform_repository.dataform_repo.name
+  workspace_id     = "hello-world-workspace"
+}
+
+resource "google_dataform_file" "hello_world_file" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  location         = google_dataform_repository.dataform_repo.location
+  repository       = google_dataform_repository.dataform_repo.name
+  workspace        = google_dataform_workspace.dataform_workspace.workspace_id
+  path             = "hello_world.py"
+  content          = <<EOT
+# Hello World Python script in Dataform
+print("Hello World!")
+EOT
+}
+
+resource "google_dataform_commit" "commit_changes" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  location         = google_dataform_repository.dataform_repo.location
+  repository       = google_dataform_repository.dataform_repo.name
+  workspace        = google_dataform_workspace.dataform_workspace.workspace_id
+  commit_message   = "Initial commit: Hello World"
+}
+
+output "commit_sha" {
+  value = google_dataform_commit.commit_changes.commit_sha
+  description = "The SHA of the committed changes."
+}
+
+output "dataform_repository_resource_name" {
+  value = google_dataform_repository.dataform_repo.name
+  description = "The name of the Dataform repository resource."
+}
+
+resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
+  display_name = "Notebook execution basic"
+  location = "us-central1"
+
+  dataform_repository_source {
+  commit_sha = module.dataform.commit_sha
+  dataform_repository_resource_name = module.dataform.dataform_repository_resource_name
+  }
+ 
+  notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
+  
+  gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
+  
+  service_account = "{{index $.TestEnvVars "service_account"}}"
+
+  depends_on = [
+    google_colab_runtime_template.my_runtime_template,
+    google_storage_bucket.output_bucket,
+  ]
+  
+}
