@@ -322,7 +322,6 @@ properties:
   - name: 'reasons'
     type: NestedObject
     description: "Reason why the spoke is inactive."
-    required: false
     output: true
     properties:
       - name: "code"
