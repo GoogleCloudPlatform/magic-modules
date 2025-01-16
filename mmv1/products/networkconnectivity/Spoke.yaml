@@ -319,3 +319,25 @@ properties:
       - 'CREATING'
       - 'ACTIVE'
       - 'DELETING'
+  - name: 'reasons'
+    type: NestedObject
+    description: "Reason why the spoke is inactive."
+    required: false
+    output: true
+    properties: 
+      - name: "code"
+        type: "String"
+        description: "The code associated with this reason."
+        enum_values:
+          - 'CODE_UNSPECEFIED'
+          - 'PENDING_REVIEW'
+          - 'REJECTED'
+          - 'PAUSED'
+          - 'FAILED'
+      - name: "message"
+        type: String
+        description: "Human-readable details about this reason."
+      - name: "userDetails"
+        type: String
+        description: "Additional information provided by the user in the RejectSpoke call."
+
