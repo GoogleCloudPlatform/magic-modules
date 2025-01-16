@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"testing"
 	"time"
@@ -90,7 +91,10 @@ func SkipIfVcr(t *testing.T) {
 
 func SleepInSecondsForTest(t int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		time.Sleep(time.Duration(t) * time.Second)
+		// Assume we never want to sleep when we're in replaying mode.
+		if os.Getenv("VCR_MODE") != "REPLAYING" {
+			time.Sleep(time.Duration(t) * time.Second)
+		}
 		return nil
 	}
 }
