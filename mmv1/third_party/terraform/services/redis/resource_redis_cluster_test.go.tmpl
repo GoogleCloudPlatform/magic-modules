@@ -445,20 +445,7 @@ func createRedisClusterEndpoints(params *ClusterParams) string {
 	} else if params.userEndpointCount == 1 {
 		return createRedisClusterEndpointsWithOneUserCreatedConnections(params)
 	}
-	return createRedisClusterEndpointsWithNoUserCreatedConnections(params)
-}
-
-func createRedisClusterEndpointsWithNoUserCreatedConnections(params *ClusterParams) string {
-	return fmt.Sprintf(`
-		resource "google_redis_cluster_user_created_connections" "default" {
-		provider      = google-beta
-		name = "%s"
-		region = "us-central1"
-		%s
-		`,
-		params.name,
-	)
-
+	return ``
 }
 
 func createRedisClusterEndpointsWithOneUserCreatedConnections(params *ClusterParams) string {
@@ -704,7 +691,7 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 			provider = google-beta
 			name = "%s"
 			location = "us-central1"
-			service_class = "gcp-memorystore-redis"
+			service_class = "gcp-memorystore-redis-autopush"
 			description   = "my basic service connection policy"
 			network = google_compute_network.producer_net.id
 			psc_config {

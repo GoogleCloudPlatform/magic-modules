@@ -16,9 +16,9 @@ name: 'Redis'
 display_name: 'Memorystore (Redis)'
 versions:
   - name: 'ga'
-    base_url: 'https://redis.googleapis.com/v1/'
+    base_url: 'https://test-redis.sandbox.googleapis.com/v1/'
   - name: 'beta'
-    base_url: 'https://redis.googleapis.com/v1beta1/'
+    base_url: 'https://test-redis.sandbox.googleapis.com/v1beta1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
 async:

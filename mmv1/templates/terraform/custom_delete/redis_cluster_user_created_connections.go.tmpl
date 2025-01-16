@@ -32,6 +32,8 @@
 		billingProject = bp
 	}
 
+	obj["async_cluster_endpoints_deletion_enabled"] = true
+	
 	// if updateMask is empty we are not updating anything so skip the post
 	if len(updateMask) > 0 {
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
