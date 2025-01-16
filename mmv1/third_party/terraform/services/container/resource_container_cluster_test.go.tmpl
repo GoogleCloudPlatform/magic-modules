@@ -69,9 +69,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagAdmin") ||
-		acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagHoldAdmin") ||
-		acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagUser") {
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
@@ -3644,9 +3642,7 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 	clusterNetName := fmt.Sprintf("tf-test-container-net-%s", randomSuffix)
 	clusterSubnetName := fmt.Sprintf("tf-test-container-subnet-%s", randomSuffix)
 
-	if acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagAdmin") ||
-		acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagHoldAdmin") ||
-		acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagUser") {
+	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) {
 		t.Fatal("Stopping the test because a role was added to the policy.")
 	}
 
