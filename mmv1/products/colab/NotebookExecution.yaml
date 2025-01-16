@@ -29,6 +29,8 @@ async:
   type: 'OpAsync'
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/colab_notebook_execution.tmpl'
 examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
@@ -59,10 +61,6 @@ parameters:
     url_param_only: true
     description: 'User specified ID for the Notebook Execution Job'
 properties:
-  - name: 'name'
-    type: String
-    output: true
-    description: 'The resource name of this Notebook Execution Job'
   - name: 'displayName'
     type: String
     description:
