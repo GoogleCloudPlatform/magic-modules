@@ -23,6 +23,25 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
+// Remove the Terraform attribution label "goog-terraform-provisioned" from labels
+func RemoveTerraformAttributionLabel(raw interface{}) interface{} {
+	if raw == nil {
+		return nil
+	}
+
+	if labels, ok := raw.(map[string]string); ok {
+		delete(labels, "goog-terraform-provisioned")
+		return labels
+	}
+
+	if labels, ok := raw.(map[string]interface{}); ok {
+		delete(labels, "goog-terraform-provisioned")
+		return labels
+	}
+
+	return nil
+}
+
 // DecodeJSON decodes the map object into the target struct.
 func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)
