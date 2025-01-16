@@ -324,7 +324,7 @@ properties:
     description: "Reason why the spoke is inactive."
     required: false
     output: true
-    properties: 
+    properties:
       - name: "code"
         type: "String"
         description: "The code associated with this reason."
@@ -340,4 +340,3 @@ properties:
       - name: "userDetails"
         type: String
         description: "Additional information provided by the user in the RejectSpoke call."
-
