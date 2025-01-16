@@ -28,7 +28,7 @@ func TestAccDataSourceParameterManagerParameterVersionRender_basicWithResourceRe
 				Config: testAccParameterManagerParameterVersionRender_basicWithResourceReference(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version_render.parameter-version-basic", "google_parameter_manager_parameter_version.parameter-version-basic"),
-					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-basic", "tempsecret: parameter-version-data"),
+					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-basic", "\"tempsecret\": \"parameter-version-data\"\n"),
 				),
 			},
 		},
@@ -68,7 +68,9 @@ resource "google_parameter_manager_parameter_version" "parameter-version-basic" 
   provider = google-beta
   parameter = google_parameter_manager_parameter.parameter-basic.id
   parameter_version_id = "tf_test_parameter_version%{random_suffix}"
-  parameter_data = "tempsecret: __REF__(\"//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name}\")"
+  parameter_data = yamlencode({
+	"tempsecret": "__REF__(//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name})"
+  })
 }
 
 data "google_parameter_manager_parameter_version_render" "parameter-version-basic" {
@@ -95,7 +97,7 @@ func TestAccDataSourceParameterManagerParameterVersionRender_withJsonData(t *tes
 				Config: testAccParameterManagerParameterVersionRender_withJsonData(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version_render.parameter-version-with-json-data", "google_parameter_manager_parameter_version.parameter-version-with-json-data"),
-					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-with-json-data", "{\"tempsecret\": \"parameter-version-data\"}"),
+					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-with-json-data", "{\"tempsecret\":\"parameter-version-data\"}"),
 				),
 			},
 		},
@@ -135,7 +137,9 @@ resource "google_parameter_manager_parameter_version" "parameter-version-with-js
   provider = google-beta
   parameter = google_parameter_manager_parameter.parameter-basic.id
   parameter_version_id = "tf_test_parameter_version%{random_suffix}"
-  parameter_data = "{\"tempsecret\": \"__REF__(//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name})\"}"
+  parameter_data = jsonencode({
+	"tempsecret": "__REF__(//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name})"
+  })
 }
 
 data "google_parameter_manager_parameter_version_render" "parameter-version-with-json-data" {
@@ -162,7 +166,7 @@ func TestAccDataSourceParameterManagerParameterVersionRender_withYamlData(t *tes
 				Config: testAccParameterManagerParameterVersionRender_withYamlData(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckParameterManagerParameterDataDataSourceMatchesResource("data.google_parameter_manager_parameter_version_render.parameter-version-with-yaml-data", "google_parameter_manager_parameter_version.parameter-version-with-yaml-data"),
-					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-with-yaml-data", "tempsecret: parameter-version-data"),
+					testAccCheckParameterManagerRenderedParameterDataMatchesDataSourceRenderedData("data.google_parameter_manager_parameter_version_render.parameter-version-with-yaml-data", "\"tempsecret\": \"parameter-version-data\"\n"),
 				),
 			},
 		},
@@ -202,7 +206,9 @@ resource "google_parameter_manager_parameter_version" "parameter-version-with-ya
   provider = google-beta
   parameter = google_parameter_manager_parameter.parameter-basic.id
   parameter_version_id = "tf_test_parameter_version%{random_suffix}"
-  parameter_data = "tempsecret: __REF__(\"//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name}\")"
+  parameter_data = yamlencode({
+	"tempsecret": "__REF__(//secretmanager.googleapis.com/${google_secret_manager_secret_version.secret-version-basic.name})"
+  })
 }
 
 data "google_parameter_manager_parameter_version_render" "parameter-version-with-yaml-data" {
