@@ -18,7 +18,6 @@ package cmd
 import (
 	"fmt"
 	"magician/cloudstorage"
-	"magician/github"
 	"magician/provider"
 	"magician/teamcity"
 	utils "magician/utility"
@@ -35,7 +34,6 @@ const (
 )
 
 var cntsRequiredEnvironmentVariables = [...]string{
-	"GITHUB_TOKEN",
 	"TEAMCITY_TOKEN",
 }
 
@@ -75,7 +73,6 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 			env[ev] = val
 		}
 
-		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		tc := teamcity.NewClient(env["TEAMCITY_TOKEN"])
 		gcs := cloudstorage.NewClient()
 
@@ -88,9 +85,8 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
 		}
-		fmt.Println(execDay.Format("2006-01-02"))
 
-		return execCollectNightlyTestStatus(execDay, gh, tc, gcs)
+		return execCollectNightlyTestStatus(execDay, tc, gcs)
 	},
 }
 
@@ -102,7 +98,7 @@ func listCNTSRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execCollectNightlyTestStatus(now time.Time, gh GithubClient, tc TeamcityClient, gcs CloudstorageClient) error {
+func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs CloudstorageClient) error {
 	lastday := now.AddDate(0, 0, -1)
 	formattedStartCut := lastday.Format(time.RFC3339)
 	formattedFinishCut := now.Format(time.RFC3339)
