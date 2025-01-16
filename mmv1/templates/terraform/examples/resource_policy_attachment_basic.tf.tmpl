@@ -1,0 +1,49 @@
+resource "google_compute_resource_policy_attachment" "{{$.PrimaryResourceId}}" {
+  name = google_compute_resource_policy.policy.name
+  instance = google_compute_instance.instance.name
+  zone = "us-central1-a"
+}
+
+resource "google_compute_instance" "instance" {
+  name         = "{{index $.Vars "instance_name"}}"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+
+  allow_stopping_for_update = true
+
+  # Note: resource_policies field is intentionally not set here
+  # as it would create a circular dependency with the attachment resource
+}
+
+resource "google_compute_resource_policy" "policy" {
+  name = "{{index $.Vars "policy_name"}}"
+  region = "us-central1"
+  
+  instance_schedule_policy {
+    schedule {
+      vm_start_schedule {
+        schedule = "0 8 * * *"
+      }
+      vm_stop_schedule {
+        schedule = "0 18 * * *"
+      }
+    }
+    time_zone = "US/Central"
+  }
+}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
