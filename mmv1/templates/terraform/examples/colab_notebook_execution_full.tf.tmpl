@@ -78,6 +78,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   execution_timeout = "86400s"
   gcs_notebook_source {
   uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
+  generation = google_storage_bucket_object.notebook.generation
   }
   
   execution_user = "bcreddy@google.com"
