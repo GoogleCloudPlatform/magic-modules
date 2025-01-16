@@ -216,7 +216,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Sleep for 10s, letting the billing account settle before other resources
+	// Sleep to let the billing account settle before other resources
 	// try to use this project.
 	time.Sleep(15 * time.Second)
 
