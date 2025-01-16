@@ -49,11 +49,12 @@ func TestAvailable(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		rotation   []string
-		onVacation []onVacationReviewer
-		timeNow    time.Time
-		want       []string
+		name              string
+		rotation          []string
+		onVacation        []onVacationReviewer
+		timeNow           time.Time
+		excludedReviewers []string
+		want              []string
 	}{
 		{
 			name:     "reviewers on vacation start date are excluded",
@@ -121,10 +122,16 @@ func TestAvailable(t *testing.T) {
 			timeNow: time.Date(2024, 4, 3, 0, 0, 0, 0, newYork),
 			want:    []string{"id1"},
 		},
+		{
+			name:              "explicitly excluded reviewers",
+			rotation:          []string{"id1", "id2"},
+			excludedReviewers: []string{"id2"},
+			want:              []string{"id1"},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := available(test.timeNow, test.rotation, test.onVacation)
+			got := available(test.timeNow, test.rotation, test.onVacation, test.excludedReviewers)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("available(%v, %v, %v) got diff: %s", test.timeNow, test.rotation, test.onVacation, diff)
 			}
