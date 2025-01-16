@@ -1,60 +1,8 @@
-package apigee_test
-
-import (
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-)
-
-func TestAccApigeeEnvironment_apigeeEnvironmentUpdateTest(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		CheckDestroy: testAccCheckApigeeEnvironmentDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccApigeeEnvironment_apigeeEnvironmentBasicTestExample(context),
-			},
-			{
-				ResourceName:            "google_apigee_environment.apigee_environment",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"org_id"},
-			},
-			{
-				Config: testAccApigeeEnvironment_apigeeEnvironmentUpdateTest(context),
-			},
-			{
-				ResourceName:            "google_apigee_environment.apigee_environment",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"org_id"},
-			},
-		},
-	})
-}
-
-func testAccApigeeEnvironment_apigeeEnvironmentUpdateTest(context map[string]interface{}) string {
-	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -113,17 +61,15 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_environment" "apigee_environment" {
+resource "google_apigee_environment" "{{$.PrimaryResourceId}}" {
   org_id   = google_apigee_organization.apigee_org.id
   name         = "tf-test%{random_suffix}"
-  description  = "Updated Apigee Environment Description"
-  display_name = "environment-1-updated"
+  description  = "Apigee Environment"
+  display_name = "environment-1"
   properties {
-	property {
-		name  = "property-1-key"
+  	property {
+  		name  = "property-1-key"
         value = "property-1-value"
-	}
+  	}
   }
-}
-`, context)
 }
