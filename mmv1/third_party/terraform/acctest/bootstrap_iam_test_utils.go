@@ -3,6 +3,7 @@ package acctest
 import (
 	"fmt"
 	"log"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -14,6 +15,9 @@ import (
 // policy grants the given service agents the given roles.
 // prefix is usually "service-" and indicates the service agent should have the
 // given prefix before the project number.
+// If an address with an `@` (x@y) is passed, the address will be used
+// verbatim, but still prefixed with `serviceAccount:prefix` and suffixed with
+// `gserviceaccount.com`
 // This is important to bootstrap because using iam policy resources means that
 // deleting them removes permissions for concurrent tests.
 // Return whether the bindings changed.
@@ -38,7 +42,13 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 
 	members := make([]string, len(agentNames))
 	for i, agentName := range agentNames {
-		members[i] = fmt.Sprintf("serviceAccount:%s%d@%s.iam.gserviceaccount.com", prefix, project.ProjectNumber, agentName)
+
+		// Allow partially bypassing the builtin logic of making up the email if an @ is included
+		if strings.Contains(agentName, "@") {
+			members[i] = fmt.Sprintf("serviceAccount:%s%s.gserviceaccount.com", prefix, agentName)
+		} else {
+			members[i] = fmt.Sprintf("serviceAccount:%s%d@%s.iam.gserviceaccount.com", prefix, project.ProjectNumber, agentName)
+		}
 	}
 
 	// Create the bindings we need to add to the policy.
