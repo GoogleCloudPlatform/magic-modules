@@ -69,23 +69,29 @@ func registerFlags() {
 	if f := flag.Lookup("sweep"); f != nil {
 		// Use the Value.Get() interface to get the values
 		if getter, ok := f.Value.(flag.Getter); ok {
-			*flagSweep = getter.Get().(string)
+			vs := getter.Get().(string)
+			flagSweep = &vs
 		}
 		if f := flag.Lookup("sweep-allow-failures"); f != nil {
 			if getter, ok := f.Value.(flag.Getter); ok {
-				*flagSweepAllowFailures = getter.Get().(bool)
+				vb := getter.Get().(bool)
+				flagSweepAllowFailures = &vb
 			}
 		}
 		if f := flag.Lookup("sweep-run"); f != nil {
 			if getter, ok := f.Value.(flag.Getter); ok {
-				*flagSweepRun = getter.Get().(string)
+				vs := getter.Get().(string)
+				flagSweepRun = &vs
 			}
 		}
 	} else {
 		// Define our flags if they don't exist
-		flagSweep = flag.String("sweep", "", "List of Regions to run available Sweepers")
-		flagSweepAllowFailures = flag.Bool("sweep-allow-failures", true, "Enable to allow Sweeper Tests to continue after failures")
-		flagSweepRun = flag.String("sweep-run", "", "Comma separated list of Sweeper Tests to run")
+		fsDefault := ""
+		fsafDefault := true
+		fsrDefault := ""
+		flagSweep = &fsDefault
+		flagSweepAllowFailures = &fsafDefault
+		flagSweepRun = &fsrDefault
 	}
 }
 
@@ -120,6 +126,7 @@ func addTestSweepers(name string, s *Sweeper) {
 // Refer to the Env prefixed constants for environment variables that further
 // control testing functionality.
 func ExecuteSweepers(t *testing.T) {
+	registerFlags()
 	flag.Parse()
 	if *flagSweep != "" {
 		// parse flagSweep contents for regions to run

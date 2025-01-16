@@ -21,6 +21,11 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/firebaserules"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
+
+ // TODO: remove dependency on hashicorp flags
+ // need to blank import hashicorp sweeper code to maintain the flags declared in their package
+	_ "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
