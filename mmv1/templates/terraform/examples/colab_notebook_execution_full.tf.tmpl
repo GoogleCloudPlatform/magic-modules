@@ -81,7 +81,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   generation = google_storage_bucket_object.notebook.generation
   }
   
-  execution_user = "bcreddy@google.com"
+  service_account = "{{index $.TestEnvVars "service_account"}}"
 
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
   labels = {

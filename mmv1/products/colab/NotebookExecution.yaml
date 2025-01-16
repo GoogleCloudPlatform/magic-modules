@@ -34,7 +34,6 @@ custom_code:
 examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
       notebook_execution_job_id: 'colab-notebook-execution'
       bucket: 'my_bucket'
@@ -45,7 +44,6 @@ examples:
       - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
     primary_resource_id: 'notebook-execution'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
       notebook_execution_job_id: 'colab-notebook-execution'
       bucket: 'my_bucket'
@@ -120,6 +118,7 @@ properties:
       - name: 'content'
         type: String
         description: 'The base64-encoded contents of the input notebook file.'
+        custom_flatten: 'templates/terraform/custom_flatten/colab_notebook_execution_direct_content.go.tmpl'
   - name: executionTimeout
     type: String
     description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
