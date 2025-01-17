@@ -28,7 +28,6 @@ import (
 	"github.com/golang/glog"
 )
 
-// 
 type IamMember struct {
 	Member, Role string
 }
@@ -57,8 +56,8 @@ type Examples struct {
 	// BootstrapIam will automatically bootstrap the given member/role pairs.
 	// This should be used in cases where specific IAM permissions must be
 	// present on the default test project, to avoid race conditions between
-	// tests. Permissions for resources created in a test should instead
-	// be provisioned using standard terraform resources.
+	// tests. Permissions attached to resources created in a test should instead
+	// be provisioned with standard terraform resources.
 	BootstrapIam []IamMember `yaml:"bootstrap_iam,omitempty"`
 
 	// Vars is a Hash from template variable names to output variable names.
@@ -74,18 +73,18 @@ type Examples struct {
 	//
 	// test_env_vars is a Hash from template variable names to one of the
 	// following symbols:
-	//  - :PROJECT_NAME
-	//  - :CREDENTIALS
-	//  - :REGION
-	//  - :ORG_ID
-	//  - :ORG_TARGET
-	//  - :BILLING_ACCT
-	//  - :MASTER_BILLING_ACCT
-	//  - :SERVICE_ACCT
-	//  - :CUST_ID
-	//  - :IDENTITY_USER
-	//  - :CHRONICLE_ID
-	//  - :VMWAREENGINE_PROJECT
+	//  - PROJECT_NAME
+	//  - CREDENTIALS
+	//  - REGION
+	//  - ORG_ID
+	//  - ORG_TARGET
+	//  - BILLING_ACCT
+	//  - MASTER_BILLING_ACCT
+	//  - SERVICE_ACCT
+	//  - CUST_ID
+	//  - IDENTITY_USER
+	//  - CHRONICLE_ID
+	//  - VMWAREENGINE_PROJECT
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 

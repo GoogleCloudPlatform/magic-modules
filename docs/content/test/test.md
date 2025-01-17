@@ -273,7 +273,7 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
-## Skip tests in VCR replaying mode
+## Skip tests in VCR replaying mode {#skip-vcr}
 
 Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP requests and responses) to reduce the time it takes to present results to contributors. However, not all resources or tests are possible to run in replaying mode. Incompatible tests should be skipped during VCR replaying mode. They will still run in our nightly test suite.
 
