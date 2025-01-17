@@ -3,6 +3,8 @@ package acctest
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -43,7 +45,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	for _, member := range members {
 		newBindings = append(newBindings, &cloudresourcemanager.Binding{
 			Role:    member.role,
-			Members: []string{strings.Replace(member.member, "{project_number}", project.ProjectNumber)},
+			Members: []string{strings.ReplaceAll(member.member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))},
 		})
 	}
 
@@ -80,7 +82,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 // Return whether the bindings changed.
 func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []string) bool {
 	var members []IamMember
-	for i, agentName := range agentNames {
+	for _, agentName := range agentNames {
 		member := fmt.Sprintf("serviceAccount:%s{project_number}@%s.iam.gserviceaccount.com", prefix, agentName)
 		for _, role := range roles {
 			members = append(members, IamMember{
