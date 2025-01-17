@@ -46,6 +46,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Apigee",
         "path" to "./google/services/apigee"
     ),
+    "apihub" to mapOf(
+        "name" to "apihub",
+        "displayName" to "Apihub",
+        "path" to "./google/services/apihub"
+    ),
     "apikeys" to mapOf(
         "name" to "apikeys",
         "displayName" to "Apikeys",
@@ -215,6 +220,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
         "path" to "./google/services/cloudtasks"
+    ),
+    "colab" to mapOf(
+        "name" to "colab",
+        "displayName" to "Colab",
+        "path" to "./google/services/colab"
     ),
     "composer" to mapOf(
         "name" to "composer",
