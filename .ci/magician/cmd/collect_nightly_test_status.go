@@ -49,16 +49,16 @@ type TestInfo struct {
 var collectNightlyTestStatusCmd = &cobra.Command{
 	Use:   "collect-nightly-test-status",
 	Short: "Collects and stores nightly test status",
-	Long: `This command collects nightly test status, stores data in json files and upload the files to GCS.
+	Long: `This command collects nightly test status, stores the data in JSON files and upload the files to GCS.
 
 
 	The command expects the following argument(s):
-	1. Custom test date in YYYY-MM-DD format
+	1. Custom test date in YYYY-MM-DD format. default: ""(current time when the job is executed)
 
 	It then performs the following operations:
-	1. Collect nightly test status of the execution day or a given day if Test date is provided
-	2. Stores data in json files
-	3. Upload the files to GCS
+	1. Collects nightly test status of the execution day or the specified test date (if provided)
+	2. Stores the collected data in JSON files
+	3. Uploads the JSON files to GCS
 
 	The following environment variables are required:
 ` + listCNTSRequiredEnvironmentVariables(),
@@ -78,6 +78,7 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 
 		date := time.Now()
 		customDate := args[0]
+		//
 		if customDate != "" {
 			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
 			// Set the time to 6pm PT
@@ -142,7 +143,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 
 		for _, testResult := range serviceTestResults.TestResults {
 			var errorMessage string
-			// compute test debug log gcs link
+			// Get test debug log gcs link
 			logLink := fmt.Sprintf("https://storage.cloud.google.com/teamcity-logs/nightly/%s/%s/%s/debug-%s-%s-%s-%s.txt", pVersion.TeamCityNightlyProjectName(), date, build.Number, pVersion.ProviderName(), build.Number, strconv.Itoa(build.Id), testResult.Name)
 			// Get concise error message
 			if testResult.Status == "FAILURE" {
@@ -158,6 +159,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 		}
 	}
 
+	// Write test status data to a JSON file
 	fmt.Println("Write test status")
 	testStatusFileName := fmt.Sprintf("%s-%s.json", date, pVersion.String())
 	err = utils.WriteToJson(testInfoList, testStatusFileName)
@@ -165,6 +167,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 		return err
 	}
 
+	// Upload test status data file to gcs bucket
 	objectName := pVersion.String() + "/" + testStatusFileName
 	err = gcs.WriteToGCSBucket(NIGHTLY_DATA_BUCKET, objectName, testStatusFileName)
 	if err != nil {
@@ -174,6 +177,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	return nil
 }
 
+// convertServiceName extracts service package name from teamcity build type id
+// input: TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS_GOOGLE_PACKAGE_SECRETMANAGER
+// output: secretmanager
 func convertServiceName(servicePath string) (string, error) {
 	idx := strings.LastIndex(servicePath, "_")
 
@@ -183,6 +189,7 @@ func convertServiceName(servicePath string) (string, error) {
 	return "", fmt.Errorf("wrong service path format for %s", servicePath)
 }
 
+// convertErrorMessage returns concise error message
 func convertErrorMessage(rawErrorMessage string) string {
 
 	startMarker := "------- Stdout: -------"
