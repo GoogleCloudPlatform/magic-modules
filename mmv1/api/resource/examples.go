@@ -28,6 +28,11 @@ import (
 	"github.com/golang/glog"
 )
 
+// 
+type IamMember struct {
+	Member, Role string
+}
+
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
@@ -48,6 +53,13 @@ type Examples struct {
 	// If set, this will override the default resource type implied from the
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
+
+	// BootstrapIam will automatically bootstrap the given member/role pairs.
+	// This should be used in cases where specific IAM permissions must be
+	// present on the default test project, to avoid race conditions between
+	// tests. Permissions for resources created in a test should instead
+	// be provisioned using standard terraform resources.
+	BootstrapIam []IamMember `yaml:"bootstrap_iam,omitempty"`
 
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
