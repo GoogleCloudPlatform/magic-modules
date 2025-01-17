@@ -14,14 +14,14 @@
 ---
 name: SecurityGateway
 description: Deployment of Security Gateway.
-base_url: projects/{{project}}/locations/global/securityGateways
+base_url: projects/{{project}}/locations/{{location}}/securityGateways
 update_mask: true
-self_link: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}
-create_url: projects/{{project}}/locations/global/securityGateways?securityGatewayId={{security_gateway_id}}
+self_link: projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
+create_url: projects/{{project}}/locations/{{location}}/securityGateways?securityGatewayId={{security_gateway_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}
+id_format: projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
 import_format:
-  - projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}
+  - projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
 examples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
@@ -46,6 +46,15 @@ async:
   include_project: false
 autogen_status: U2VjdXJpdHlHYXRld2F5
 parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'
+    required: false
   - name: securityGatewayId
     type: String
     description: |-
