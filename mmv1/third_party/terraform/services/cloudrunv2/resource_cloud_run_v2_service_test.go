@@ -37,11 +37,11 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFunctionExample_update(t *testing
 			},
 			{
 				Config: testAccCloudRunV2Service_cloudrunv2ServiceFunctionExample_update(context),
-                                ConfigPlanChecks: resource.ConfigPlanChecks{
-               				PreApply: []plancheck.PlanCheck{
-                  				plancheck.ExpectResourceAction("google_cloud_run_v2_service.default", plancheck.ResourceActionUpdate),
-               					},
-            			},
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloud_run_v2_service.default", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -49,7 +49,6 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceFunctionExample_update(t *testing
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "deletion_protection", "labels", "location", "name", "terraform_labels"},
 			},
-
 		},
 	})
 }
@@ -183,4 +182,3 @@ resource "google_project_iam_member" "logs_writer" {
 }
 `, context)
 }
-
