@@ -76,17 +76,18 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		tc := teamcity.NewClient(env["TEAMCITY_TOKEN"])
 		gcs := cloudstorage.NewClient()
 
-		execDay := time.Now()
-		customDay := args[0]
-		if customDay != "" {
-			var err error
-			execDay, err = time.Parse("2006-01-02", customDay) // input format YYYY-MM-DD
+		date := time.Now()
+		customDate := args[0]
+		if customDate != "" {
+			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
+			// Set the time to 6pm PT
+			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 18, 0, 0, 0, parsedDate.Location())
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
 		}
 
-		return execCollectNightlyTestStatus(execDay, tc, gcs)
+		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
 }
 
