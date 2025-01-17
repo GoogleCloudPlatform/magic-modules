@@ -22,27 +22,27 @@ const testComposerNetworkPrefix = "tf-test-composer-net"
 const testComposerBucketPrefix = "tf-test-composer-bucket"
 const testComposerNetworkAttachmentPrefix = "tf-test-composer-nta"
 
-func bootstrapComposerServiceAgents() {
-	acctest.BootstrapIamMembers([]acctest.IamMember{
+func bootstrapComposerServiceAgents(t *testing.T) {
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
-			member: "serviceAccount:service-{project_number}@cloudcomposer-accounts.iam.gserviceaccount.com",
-			role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Member: "serviceAccount:service-{project_number}@cloudcomposer-accounts.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
-			member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
-			role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
-			member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
-			role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
-			member: "serviceAccount:service-{project_number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
-			role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Member: "serviceAccount:service-{project_number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 		{
-			member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-			role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 }
@@ -260,7 +260,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-composer1-key1")
 	pid := envvar.GetTestProjectFromEnv()
-	bootstrapComposerServiceAgents()
+	bootstrapComposerServiceAgents(t)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
@@ -297,7 +297,7 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-composer2-key1")
 	pid := envvar.GetTestProjectFromEnv()
-	bootstrapComposerServiceAgents()
+	bootstrapComposerServiceAgents(t)
 	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, acctest.RandInt(t))
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"

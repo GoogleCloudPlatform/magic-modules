@@ -14,7 +14,7 @@ import (
 )
 
 type IamMember struct {
-	member, role string
+	Member, Role string
 }
 
 // BootstrapIamMembers ensures that a given set of member/role pairs exist in the default
@@ -44,8 +44,8 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	var newBindings []*cloudresourcemanager.Binding
 	for _, member := range members {
 		newBindings = append(newBindings, &cloudresourcemanager.Binding{
-			Role:    member.role,
-			Members: []string{strings.ReplaceAll(member.member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))},
+			Role:    member.Role,
+			Members: []string{strings.ReplaceAll(member.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))},
 		})
 	}
 
@@ -86,8 +86,8 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 		member := fmt.Sprintf("serviceAccount:%s{project_number}@%s.iam.gserviceaccount.com", prefix, agentName)
 		for _, role := range roles {
 			members = append(members, IamMember{
-				member: member,
-				role:   role,
+				Member: member,
+				Role:   role,
 			})
 		}
 	}
