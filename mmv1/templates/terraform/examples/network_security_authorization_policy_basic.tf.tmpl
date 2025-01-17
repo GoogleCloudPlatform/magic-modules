@@ -1,0 +1,15 @@
+resource "google_network_security_authorization_policy" "{{$.PrimaryResourceId}}" {
+  provider               = google-beta
+  name                   = "{{index $.Vars "resource_name"}}"
+  labels                 = {
+    foo = "bar"
+  }
+  description            = "my description"
+  action                 = "ALLOW"
+  rules {
+    sources {
+      principals = ["namespace/*"]
+      ip_blocks = ["1.2.3.0/24"]
+    }
+  }
+}

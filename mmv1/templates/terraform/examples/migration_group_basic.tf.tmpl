@@ -1,0 +1,9 @@
+resource "google_migration_center_group" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  group_id     = "{{index $.Vars "group_name"}}"
+  description  = "Terraform integration test description"
+  display_name = "Terraform integration test display"
+  labels       = {
+    key = "value"
+  }
+}

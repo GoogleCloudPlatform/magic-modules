@@ -1,0 +1,20 @@
+resource "google_folder" "folder" {
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  display_name = "{{index $.Vars "folder_display_name"}}"
+}
+
+resource "google_pubsub_topic" "scc_v2_folder_notification_config" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_scc_v2_folder_notification_config" "{{$.PrimaryResourceId}}" {
+  config_id    = "{{index $.Vars "config_id"}}"
+  folder       = google_folder.folder.folder_id
+  location     = "global"
+  description  = "My custom Cloud Security Command Center Finding Notification Configuration"
+  pubsub_topic =  google_pubsub_topic.scc_v2_folder_notification_config.id
+
+  streaming_config {
+    filter = "category = \"OPEN_FIREWALL\" AND state = \"ACTIVE\""
+  }
+}

@@ -1,0 +1,12 @@
+- type: CUSTOM_SCHEMA_VALUES
+  field: enable_sovereign_controls
+  details:
+    required: false
+    optional: true
+    computed: true
+- type: CUSTOM_SCHEMA_VALUES
+  field: violation_notifications_enabled
+  details:
+    required: false
+    optional: true
+    computed: true

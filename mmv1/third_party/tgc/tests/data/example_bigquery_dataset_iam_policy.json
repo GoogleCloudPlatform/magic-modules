@@ -1,0 +1,36 @@
+[
+  {
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test_dataset",
+    "asset_type": "bigquery.googleapis.com/Dataset",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "discovery_name": "Dataset",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "datasetReference": {
+          "datasetId": "test_dataset"
+        },
+        "defaultTableExpirationMs": 3600000,
+        "labels": {
+          "env": "dev",
+          "goog-terraform-provisioned": "true"
+        },
+        "location": "EU",
+        "friendlyName": ""
+      }
+    },
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "serviceAccount:998476993360@cloudservices.gserviceaccount.com",
+            "allAuthenticatedUsers"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "//dns.googleapis.com/projects/{{.Provider.project}}/managedZones/publiczone",
+    "asset_type": "dns.googleapis.com/ManagedZone",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v1beta2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/dns/v1beta2/rest",
+      "discovery_name": "ManagedZone",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "description": "Managed by Terraform",
+        "dnsName": "publiczone.gsecurity.net.",
+        "dnssecConfig": {
+          "defaultKeySpecs": [
+            {
+              "algorithm": "rsasha1",
+              "keyLength": 1024,
+              "keyType": "zoneSigning",
+              "kind": "dns#dnsKeySpec"
+            }
+          ],
+          "kind": "dns#managedZoneDnsSecConfig",
+          "nonExistence": "nsec3",
+          "state": "on"
+        },
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "name": "publiczone",
+        "privateVisibilityConfig": {
+          "networks": []
+        },
+        "visibility": "public"
+      }
+    }
+  }
+]

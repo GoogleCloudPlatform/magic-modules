@@ -1,0 +1,38 @@
+[
+  {
+    "name": "//cloudresourcemanager.googleapis.com/projects/example-project",
+    "asset_type": "cloudresourcemanager.googleapis.com/Project",
+    "ancestry_path": "organizations/123/folders/456/project/example-project",
+    "iam_policy": {
+      "bindings": [
+        {
+          "role": "roles/editor",
+          "members": [
+            "user:example-a@google.com",
+            "user:example-b@google.com"
+          ]
+        },
+        {
+          "role": "roles/storage.admin",
+          "members": [
+            "user:example-a@google.com",
+            "user:example-b@google.com"
+          ]
+        },
+        {
+          "role": "roles/owner",
+          "members": [
+            "user:example-a@google.com"
+          ]
+        },
+        {
+          "role": "roles/viewer",
+          "members": [
+            "user:example-a@google.com",
+            "user:example-b@google.com"
+          ]
+        }
+      ]
+    }
+  }
+]

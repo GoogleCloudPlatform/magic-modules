@@ -1,0 +1,11 @@
+variables:
+  - name: "project-id"
+    type: "project"
+  - name: "region"
+    type: "region"
+  - name: "keyring"
+    type: "resource_name"
+  - name: "key"
+    type: "resource_name"
+  - name: "channel"
+    type: "resource_name"

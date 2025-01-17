@@ -1,0 +1,33 @@
+[
+    {
+        "name": "//storage.googleapis.com/new-bucket-test-tf",
+        "asset_type": "storage.googleapis.com/Bucket",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
+            "discovery_name": "Bucket",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "iamConfiguration": {
+                    "publicAccessPrevention": "enforced",
+                    "uniformBucketLevelAccess": {
+                        "enabled": false
+                    }
+                },
+                "lifecycle": {
+                    "rule": []
+                },
+                "location": "EU",
+                "name": "new-bucket-test-tf",
+                "project": "{{.Provider.project}}",
+                "storageClass": "STANDARD",
+                "website": {
+                    "mainPageSuffix": "index.html",
+                    "notFoundPage": "404.html"
+                }
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

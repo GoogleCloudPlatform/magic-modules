@@ -1,0 +1,5 @@
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+    // Allows for database to be abandoned without deletion to avoid deletion failing
+    // for Postgres databases in some circumstances due to existing SQL users
+    return nil
+}

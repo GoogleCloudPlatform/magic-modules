@@ -1,0 +1,58 @@
+
+resource "google_compute_network" "network" {
+  name                    = "{{network}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{subnet}}"
+  ip_cidr_range = "10.0.0.0/28"
+  region        = "{{region}}"
+  network       = google_compute_network.network.self_link
+}
+
+resource "google_compute_instance" "instance" {
+  name         = "{{instance}}"
+  machine_type = "e2-medium"
+  can_ip_forward = true
+  zone         = "{{zone}}"
+
+  boot_disk {
+    initialize_params {
+      image = "projects/debian-cloud/global/images/debian-10-buster-v20210817"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnetwork.name
+    network_ip = "10.0.0.2"
+    access_config {
+        network_tier = "PREMIUM"
+    }
+  }
+}
+
+resource "google_network_connectivity_hub" "basic_hub" {
+  name        = "{{hub}}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+}
+
+resource "google_network_connectivity_spoke" "primary" {
+  name = "{{name}}"
+  location = "{{region}}"
+  description = "An UPDATED sample spoke with a linked routher appliance instance"
+  labels = {
+    label-two = "value-two"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_router_appliance_instances {
+    instances {
+        virtual_machine = google_compute_instance.instance.self_link
+        ip_address = "10.0.0.2"
+    }
+    site_to_site_data_transfer = true
+  }
+}

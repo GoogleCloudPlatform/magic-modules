@@ -1,0 +1,46 @@
+resource "google_sql_database_instance" "postgresqldb" {
+  name             = "{{index $.Vars "sqldb"}}"
+  database_version = "POSTGRES_12"
+  settings {
+    tier = "db-custom-2-13312"
+  }
+  deletion_protection = false
+}
+
+resource "google_sql_ssl_cert" "sql_client_cert" {
+  common_name = "{{index $.Vars "sqldb_cert"}}"
+  instance    = google_sql_database_instance.postgresqldb.name
+
+  depends_on = [google_sql_database_instance.postgresqldb]
+}
+
+resource "google_sql_user" "sqldb_user" {
+  name     = "{{index $.Vars "sqldb_user"}}"
+  instance = google_sql_database_instance.postgresqldb.name
+  password = "{{index $.Vars "sqldb_pass"}}"
+
+
+  depends_on = [google_sql_ssl_cert.sql_client_cert]
+}
+
+resource "google_database_migration_service_connection_profile" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  connection_profile_id = "{{index $.Vars "profile"}}"
+  display_name = "{{index $.Vars "profile"}}_display"
+  labels = { 
+    foo = "bar" 
+  }
+  postgresql {
+    host = google_sql_database_instance.postgresqldb.ip_address.0.ip_address
+    port = 5432
+    username = google_sql_user.sqldb_user.name
+    password = google_sql_user.sqldb_user.password
+    ssl {
+      client_key = google_sql_ssl_cert.sql_client_cert.private_key
+      client_certificate = google_sql_ssl_cert.sql_client_cert.cert
+      ca_certificate = google_sql_ssl_cert.sql_client_cert.server_ca_cert
+    }
+    cloud_sql_id = "{{index $.Vars "sqldb"}}"
+  }
+  depends_on = [google_sql_user.sqldb_user]
+}

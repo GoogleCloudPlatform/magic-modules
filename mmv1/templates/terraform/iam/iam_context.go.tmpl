@@ -1,0 +1,25 @@
+{{- define "IamContext" }}
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"role":          "{{ $.IamPolicy.AllowedIamRole }}",
+{{- if $.IamPolicy.AdminIamRole }}
+		"admin_role":    "{{ $.IamPolicy.AdminIamRole }}",
+{{- end }}
+{{- if $.IamPolicy.TestProjectName }}
+		"project_id" :   fmt.Sprintf("{{ $.IamPolicy.TestProjectName }}%s", acctest.RandString(t, 10)),
+{{- end }}
+{{- template "EnvVarContext" dict "TestEnvVars" $.FirstTestExample.TestEnvVars "HasNewLine" true}}
+{{- if $.FirstTestExample.TestVarsOverrides }}
+{{-    range $varName, $override := $.FirstTestExample.TestVarsOverrides }}
+		"{{ $varName }}": {{ $override }},
+{{-   end }}
+{{- end }}
+{{- if $.IamPolicy.IamConditionsRequestType }}
+		"condition_title": "expires_after_2019_12_31",
+		"condition_expr": `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
+		"condition_desc":  "Expiring at midnight of 2019-12-31",
+		"condition_title_no_desc": "expires_after_2019_12_31-no-description",
+		"condition_expr_no_desc": `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
+{{- end }}
+	}
+{{- end }}

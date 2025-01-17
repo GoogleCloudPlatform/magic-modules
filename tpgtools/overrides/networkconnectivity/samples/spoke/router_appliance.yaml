@@ -1,0 +1,21 @@
+updates:
+  - resource: router_appliance_update.tf.tmpl
+variables:
+  - name: "project"
+    type: "project"
+  - name: "region"
+    type: "region"
+  - name: "zone"
+    type: "zone"
+  - name: "name"
+    type: "resource_name"
+  - name: "hub"
+    type: "resource_name"
+  - name: "network"
+    type: "resource_name"
+  - name: "subnet"
+    type: "resource_name"
+  - name: "instance"
+    type: "resource_name"
+  - name: "instance2"
+    type: "resource_name"
