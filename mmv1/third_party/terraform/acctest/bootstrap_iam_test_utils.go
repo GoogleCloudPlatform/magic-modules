@@ -85,7 +85,7 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 		for _, role := range roles {
 			members = append(members, IamMember{
 				member: member,
-				role: role,
+				role:   role,
 			})
 		}
 	}
