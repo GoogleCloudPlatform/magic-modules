@@ -20,16 +20,16 @@ type Vacation struct {
 	startDate, endDate date
 }
 
-// GetStartDate returns a time corresponding to the beginning of the start date in the given timezone.
-func (v Vacation) GetStartDate(timezone *time.Location) time.Time {
+// GetStart returns a time corresponding to the beginning of the start date in the given timezone.
+func (v Vacation) GetStart(timezone *time.Location) time.Time {
 	if timezone == nil {
 		timezone = usPacific
 	}
 	return time.Date(v.startDate.year, time.Month(v.startDate.month), v.startDate.day, 0, 0, 0, 0, timezone)
 }
 
-// GetEndDate returns a time corresponding to the end of the end date in the given timezone
-func (v Vacation) GetEndDate(timezone *time.Location) time.Time {
+// GetEnd returns a time corresponding to the end of the end date in the given timezone
+func (v Vacation) GetEnd(timezone *time.Location) time.Time {
 	if timezone == nil {
 		timezone = usPacific
 	}

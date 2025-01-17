@@ -103,7 +103,7 @@ func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) [
 	var onVacationList []string
 	for reviewer, config := range reviewerRotation {
 		for _, v := range config.vacations {
-			if nowTime.Before(v.GetStartDate(config.timezone)) || nowTime.After(v.GetEndDate(config.timezone)) {
+			if nowTime.Before(v.GetStart(config.timezone)) || nowTime.After(v.GetEnd(config.timezone)) {
 				continue
 			}
 			onVacationList = append(onVacationList, reviewer)
