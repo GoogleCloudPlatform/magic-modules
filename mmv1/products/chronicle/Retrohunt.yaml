@@ -61,26 +61,21 @@ parameters:
   - name: location
     type: String
     description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
-    immutable: true
     url_param_only: true
     required: true
   - name: instance
     type: String
     description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
-    immutable: true
     url_param_only: true
     required: true
   - name: rule
     type: String
     description: The Rule ID of the rule.
-    immutable: true
     url_param_only: true
     required: true
   - name: retrohunt
     type: String
     description: The retrohunt ID of the Retrohunt. A retrohunt is an execution of a Rule over a time range in the past.
-    required: false
-    immutable: true
     default_from_api: true
 properties:
   - name: progressPercentage
