@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleKmsKeyHandles() *schema.Resource {
@@ -26,14 +26,13 @@ func DataSourceGoogleKmsKeyHandles() *schema.Resource {
 				Required:    true,
 				Description: `The canonical id for the location. For example: "us-east1".`,
 			},
-			"filter": {
+			"resource_type_selector": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: `
-					The filter argument is used to add a filter query parameter that limits which key handles are retrieved by the data source: ?filter={{filter}}.
+					The resource_type_selector argument is used to add a filter query parameter that limits which key handles are retrieved by the data source: ?filter=resource_type_selector="{{resource_type_selector}}".
 					Example values:
-					
-					* resourceTypeSelector="{SERVICE}.googleapis.com/{TYPE}".
+					* resource_type_selector="{SERVICE}.googleapis.com/{TYPE}".
 					[See the documentation about using filters](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyHandles/list)
 				`,
 			},
@@ -69,36 +68,33 @@ func dataSourceGoogleKmsKeyHandlesRead(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	params := make(map[string]string)
-	if filter, ok := d.GetOk("filter"); ok {
-		fmt.Printf("[DEBUG] Search for key handles using filter ?filter=%s", filter)
-		params["filter"] = strings.Replace(filter.(string), "\"", "\\\"", -1)
-		fmt.Printf("[DEBUG] Search for key handles using filter ?filter=%s", params["filter"])
-
-		if err != nil {
-			return err
-		}
+	resourceTypeSelector := ""
+	if fl, ok := d.GetOk("resource_type_selector"); ok {
+		resourceTypeSelector = strings.Replace(fl.(string), "\"", "%22", -1)
 	}
 
 	billingProject := project
-	// err == nil indicates that the billing_project value was found
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
-	url, err := tpgresource.ReplaceVars(d, config, "https://cloudkms.googleapis.com/v1/projects/{{project}}/locations/{{location}}/keyHandles")
+
+	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}projects/{{project}}/locations/{{location}}/keyHandles")
 	if err != nil {
 		return err
 	}
-	url = fmt.Sprintf("%s?filter=%s", url, params["filter"])
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	params := make(map[string]string)
 	var keyHandles []interface{}
 	for {
-
+		newUrl, err := addQueryParams(url, resourceTypeSelector, params)
+		if err != nil {
+			return err
+		}
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:               config,
 			Method:               "GET",
 			Project:              billingProject,
-			RawURL:               url,
+			RawURL:               newUrl,
 			UserAgent:            userAgent,
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 		})
@@ -126,7 +122,26 @@ func dataSourceGoogleKmsKeyHandlesRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("key_handles", keyHandles); err != nil {
 		return fmt.Errorf("error setting key handles: %s", err)
 	}
+	d.SetId(fmt.Sprintf("projects/%s/locations/%s/keyHandles?filter=resource_type_selector=%s", project, d.Get("location"), resourceTypeSelector))
 	return nil
+}
+
+// transport_tpg.AddQueryParams() encodes the filter=resource_type_selector="value" into
+// filter=resource_type_selector%3D%22value%22
+// The encoding of '=' into %3D is currently causing issue with ListKeyHandle api.
+// To to handle this case currently, as part of this function,
+// we are manually adding filter as a query param to the url
+func addQueryParams(url string, resourceTypeSelector string, params map[string]string) (string, error) {
+	quoteEncoding := "%22"
+	if len(params) == 0 {
+		return fmt.Sprintf("%s?filter=resource_type_selector=%s%s%s", url, quoteEncoding, resourceTypeSelector, quoteEncoding), nil
+	} else {
+		url, err := transport_tpg.AddQueryParams(url, params)
+		if err != nil {
+			return "", nil
+		}
+		return fmt.Sprintf("%s&filter=resource_type_selector=%s%s%s", url, quoteEncoding, resourceTypeSelector, quoteEncoding), nil
+	}
 }
 
 // flattenKMSKeyHandlesList flattens a list of key handles
@@ -136,13 +151,10 @@ func flattenKMSKeyHandlesList(config *transport_tpg.Config, keyHandlesList inter
 		keyHandle := k.(map[string]interface{})
 
 		data := map[string]interface{}{}
-		// The google_kms_key_handles resource and dataset set
-		// id as the value of name (projects/{{project}}/locations/{{location}}/keyHandles/{{name}})
-		// and set name is set as just {{name}}.
-		fmt.Printf("Info keyhandle %s", keyHandle)
-		data["name"] = data["name"]
+		data["name"] = keyHandle["name"]
 		data["kms_key"] = keyHandle["kmsKey"]
 		data["resource_type_selector"] = keyHandle["resourceTypeSelector"]
+
 		keyHandles = append(keyHandles, data)
 	}
 
