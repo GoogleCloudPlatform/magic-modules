@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -15,16 +14,14 @@ func TestAccEventarcTrigger_channel(t *testing.T) {
 	t.Parallel()
 
 	region := envvar.GetTestRegionFromEnv()
-	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-trigger-key1")
-	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-trigger-key2")
+	key := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-trigger-key")
 
 	context := map[string]interface{}{
 		"region":          region,
 		"project_name":    envvar.GetTestProjectFromEnv(),
+		"project_number":  envvar.GetTestProjectNumberFromEnv(),
 		"service_account": envvar.GetTestServiceAccountFromEnv(t),
-		"key_ring":        tpgresource.GetResourceNameFromSelfLink(key1.KeyRing.Name),
-		"key1":            tpgresource.GetResourceNameFromSelfLink(key1.CryptoKey.Name),
-		"key2":            tpgresource.GetResourceNameFromSelfLink(key2.CryptoKey.Name),
+		"key_name":        key.CryptoKey.Name,
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -59,6 +56,7 @@ func TestAccEventarcTrigger_HttpDest(t *testing.T) {
 	context := map[string]interface{}{
 		"region":             region,
 		"project_name":       envvar.GetTestProjectFromEnv(),
+		"project_number":     envvar.GetTestProjectNumberFromEnv(),
 		"service_account":    envvar.GetTestServiceAccountFromEnv(t),
 		"network_attachment": fullFormNetworkAttachmentName,
 		"random_suffix":      acctest.RandString(t, 10),
@@ -82,34 +80,18 @@ func TestAccEventarcTrigger_HttpDest(t *testing.T) {
 
 func testAccEventarcTrigger_createTriggerWithChannelName(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "test_project" {
-	project_id  = "%{project_name}"
-}
-
-data "google_kms_key_ring" "test_key_ring" {
-	name     = "%{key_ring}"
-	location = "us-central1"
-}
-
-data "google_kms_crypto_key" "key1" {
-	name     = "%{key1}"
-	key_ring = data.google_kms_key_ring.test_key_ring.id
-}
-
-
-resource "google_kms_crypto_key_iam_member" "key1_member" {
-	crypto_key_id = data.google_kms_crypto_key.key1.id
+resource "google_kms_crypto_key_iam_member" "key_member" {
+	crypto_key_id = "%{key_name}"
 	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-${data.google_project.test_project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_channel" "test_channel" {
 	location = "%{region}"
 	name     = "tf-test-channel%{random_suffix}"
-	crypto_key_name =  data.google_kms_crypto_key.key1.id
-	third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/%{region}/providers/datadog"
-	depends_on = [google_kms_crypto_key_iam_member.key1_member]
+	crypto_key_name = "%{key_name}"
+	third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+	depends_on = [google_kms_crypto_key_iam_member.key_member]
 }
 
 resource "google_cloud_run_service" "default" {
@@ -154,7 +136,7 @@ resource "google_eventarc_trigger" "primary" {
 	}
 	service_account = "%{service_account}"
 
-    channel = "projects/${data.google_project.test_project.project_id}/locations/%{region}/channels/${google_eventarc_channel.test_channel.name}"
+	channel = "projects/%{project_name}/locations/%{region}/channels/${google_eventarc_channel.test_channel.name}"
 
     depends_on = [google_cloud_run_service.default,google_eventarc_channel.test_channel]
 }
@@ -163,10 +145,6 @@ resource "google_eventarc_trigger" "primary" {
 
 func testAccEventarcTrigger_createTriggerWithHttpDest(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "test_project" {
-	project_id  = "%{project_name}"
-}
-
 resource "google_eventarc_trigger" "primary" {
 	name = "tf-test-trigger%{random_suffix}"
 	location = "%{region}"
@@ -459,5 +437,82 @@ resource "google_cloud_run_service" "default2" {
 	}
 }
 
+`, context)
+}
+
+func TestAccEventarcTrigger_workflow(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":    envvar.GetTestProjectFromEnv(),
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
+		"region":          envvar.GetTestRegionFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEventarcTrigger_workflow(context),
+			},
+			{
+				ResourceName:            "google_eventarc_trigger.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccEventarcTrigger_workflow(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_eventarc_trigger" "primary" {
+	name = "tf-test-name%{random_suffix}"
+	location = "%{region}"
+	matching_criteria {
+		attribute = "type"
+		value = "google.cloud.pubsub.topic.v1.messagePublished"
+	}
+	destination {
+		workflow = google_workflows_workflow.example.id
+	}
+	service_account = "%{service_account}"
+}
+
+resource "google_workflows_workflow" "example" {
+  name = "tf-test-eventarc-workflow%{random_suffix}"
+  deletion_protection = false
+  region = "%{region}"
+  source_contents = <<-EOF
+  # This is a sample workflow, feel free to replace it with your source code
+  #
+  # This workflow does the following:
+  # - reads current time and date information from an external API and stores
+  #   the response in CurrentDateTime variable
+  # - retrieves a list of Wikipedia articles related to the day of the week
+  #   from CurrentDateTime
+  # - returns the list of articles as an output of the workflow
+  # FYI, In terraform you need to escape the $$ or it will cause errors.
+
+  - getCurrentTime:
+      call: http.get
+      args:
+          url: $${sys.get_env("url")}
+      result: CurrentDateTime
+  - readWikipedia:
+      call: http.get
+      args:
+          url: https://en.wikipedia.org/w/api.php
+          query:
+              action: opensearch
+              search: $${CurrentDateTime.body.dayOfTheWeek}
+      result: WikiResult
+  - returnOutput:
+      return: $${WikiResult.body[1]}
+EOF
+}
 `, context)
 }

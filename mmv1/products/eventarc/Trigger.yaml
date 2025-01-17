@@ -15,13 +15,9 @@
 name: Trigger
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/{{location}}/triggers
-# self_link: projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}
 self_link: projects/{{project}}/locations/{{location}}/triggers/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/triggers?triggerId={{name}}
 update_verb: PATCH
-#id_format: '{{name}}'
-#import_format:
-#- projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}
 update_mask: true
 references:
   guides:
@@ -53,14 +49,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-properties:
   - name: name
     type: String
     description: Required. The resource name of the trigger. Must be unique within the location on the project.
     required: true
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl' 
+properties:
   - name: uid
     type: String
     description: Output only. Server assigned unique identifier for the trigger. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
