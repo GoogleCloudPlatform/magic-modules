@@ -28,7 +28,7 @@ func DataSourceGoogleKmsKeyHandles() *schema.Resource {
 			},
 			"resource_type_selector": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				Description: `
 					The resource_type_selector argument is used to add a filter query parameter that limits which key handles are retrieved by the data source: ?filter=resource_type_selector="{{resource_type_selector}}".
 					Example values:
