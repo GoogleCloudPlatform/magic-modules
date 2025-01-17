@@ -1,0 +1,5 @@
+- type: SERIALIZATION_ONLY
+- type: CUSTOM_TERRAFORM_PRODUCT_NAME
+  details:
+    # Produces the correct resource name: `google_folder`
+    product: ""

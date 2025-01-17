@@ -1,0 +1,56 @@
+parent := d.Get("parent").(string)
+var opRes map[string]interface{}
+err = ComputeOrgOperationWaitTimeWithResponse(
+  config, res, &opRes, parent, "Creating FirewallPolicy", userAgent,
+  d.Timeout(schema.TimeoutCreate))
+
+if err != nil {
+  // The resource didn't actually create
+  d.SetId("")
+  return fmt.Errorf("Error waiting to create FirewallPolicy: %s", err)
+}
+
+policyId, ok := opRes["targetId"]
+if !ok {
+  return fmt.Errorf("Create response didn't contain targetId. Create may not have succeeded.")
+}
+if err := d.Set("policy_id", policyId.(string)); err != nil {
+  return fmt.Errorf("Error setting policy_id: %s", err)
+}
+
+// Store the ID now.
+id, err = tpgresource.ReplaceVars(d, config, "locations/global/firewallPolicies/{{"{{"}}policy_id{{"}}"}}")
+if err != nil {
+  return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+url, err = tpgresource.ReplaceVarsForId(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}locations/global/firewallPolicies/{{"{{"}}policy_id{{"}}"}}")
+if err != nil {
+  return err
+}
+
+headers = make(http.Header)
+res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+  Config:    config,
+  Method:    "GET",
+  Project:   billingProject,
+  RawURL:    url,
+  UserAgent: userAgent,
+  Headers:   headers,
+})
+if err != nil {
+ return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeFirewallPolicyWithRules %q", d.Id()))
+}
+
+if err := d.Set("fingerprint", flattenComputeFirewallPolicyWithRulesFingerprint(res["fingerprint"], d, config)); err != nil {
+  return fmt.Errorf("Error reading FirewallPolicyWithRules: %s", err)
+}
+
+res, err = resourceComputeFirewallPolicyWithRulesDecoder(d, meta, res)
+if err != nil {
+  return err
+}
+
+log.Printf("[DEBUG] Updating FirewallPolicyWithRules %q", d.Id())
+return resourceComputeFirewallPolicyWithRulesUpdate(d, meta)

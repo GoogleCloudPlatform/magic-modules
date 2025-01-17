@@ -1,0 +1,22 @@
+[
+    {
+        "name": "//artifactregistry.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/repositories/my-repository",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "artifactregistry.googleapis.com/Repository",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/artifactregistry/v1/rest",
+            "discovery_name": "Repository",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "description": "example docker repository",
+                "format": "DOCKER",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
+                "mode": "STANDARD_REPOSITORY"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"]
+    }
+]

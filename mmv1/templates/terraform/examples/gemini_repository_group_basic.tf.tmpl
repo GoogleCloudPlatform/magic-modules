@@ -1,0 +1,10 @@
+resource "google_gemini_repository_group" "example" {
+  location = "us-central1"
+  code_repository_index = "example-cri"
+  repository_group_id = "{{index $.Vars "repository_group_id"}}"
+  repositories {
+    resource = "{{index $.Vars "repository_resource"}}"
+    branch_pattern = "main"
+  }
+  labels = {"label1": "value1"}
+}

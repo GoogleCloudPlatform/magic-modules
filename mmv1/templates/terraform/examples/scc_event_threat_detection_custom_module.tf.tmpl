@@ -1,0 +1,18 @@
+resource "google_scc_event_threat_detection_custom_module" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  display_name = "{{index $.Vars "display_name"}}"
+  enablement_state = "ENABLED"
+  type = "{{index $.Vars "type"}}"
+  description = "My Event Threat Detection Custom Module"
+  config = jsonencode({
+    "metadata": {
+      "severity": "LOW",
+      "description": "Flagged by Forcepoint as malicious",
+      "recommendation": "Contact the owner of the relevant project."
+    },
+    "ips": [
+      "192.0.2.1",
+      "192.0.2.0/24"
+    ]
+  })
+}

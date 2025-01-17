@@ -1,0 +1,23 @@
+data "google_project" "project" {}
+
+resource "google_artifact_registry_repository" "upstream_repo" {
+  location      = "us-central1"
+  repository_id = "{{index $.Vars "upstream_repository_id"}}"
+  description   = "{{index $.Vars "upstream_repository_desc"}}"
+  format        = "DOCKER"
+}
+
+resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  repository_id = "{{index $.Vars "repository_id"}}"
+  description   = "{{index $.Vars "desc"}}"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+  remote_repository_config {
+    description = "pull-through cache of another Artifact Registry repository by URL"
+    common_repository {
+      uri         = "https://us-central1-docker.pkg.dev/${data.google_project.project.project_id}/{{index $.Vars "upstream_repository_id"}}"
+    }
+  }
+  depends_on = [google_artifact_registry_repository.upstream_repo]
+}

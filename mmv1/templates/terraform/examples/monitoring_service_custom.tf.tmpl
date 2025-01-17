@@ -1,0 +1,13 @@
+resource "google_monitoring_custom_service" "{{$.PrimaryResourceId}}" {
+  service_id = "{{index $.Vars "service_id"}}"
+  display_name = "My Custom Service {{index $.Vars "service_id"}}"
+
+  telemetry {
+  	resource_name = "{{index $.Vars "resource_name"}}"
+  }
+
+  user_labels = {
+    my_key       = "my_value"
+    my_other_key = "my_other_value"
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/disks/my-disk",
+    "asset_type": "compute.googleapis.com/Disk",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "beta",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+      "discovery_name": "Disk",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "labels": {
+          "disk-label-key-a": "disk-label-val-a",
+          "goog-terraform-provisioned": "true"
+        },
+        "name": "my-disk",
+        "sourceImage": "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
+        "type": "projects/{{.Provider.project}}/zones/us-central1-a/diskTypes/pd-ssd",
+        "zone": "projects/{{.Provider.project}}/global/zones/us-central1-a"
+      }
+    }
+  }
+]

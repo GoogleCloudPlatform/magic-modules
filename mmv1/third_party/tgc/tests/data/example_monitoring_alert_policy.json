@@ -1,0 +1,39 @@
+[
+  {
+    "name": "//monitoring.googleapis.com/placeholder-foobar",
+    "asset_type": "monitoring.googleapis.com/AlertPolicy",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v3",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/monitoring/v3/rest",
+      "discovery_name": "AlertPolicy",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "combiner": "OR",
+        "conditions": [
+          {
+            "conditionThreshold": {
+              "aggregations": [
+                {
+                  "alignmentPeriod": "60s",
+                  "perSeriesAligner": "ALIGN_RATE"
+                }
+              ],
+              "comparison": "COMPARISON_GT",
+              "duration": "60s",
+              "filter": "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+            },
+            "displayName": "test condition"
+          }
+        ],
+        "displayName": "My Alert Policy",
+        "enabled": true,
+        "notificationChannels": [
+          "projects/{{.Provider.project}}/notificationChannels/channel-1",
+          "projects/{{.Provider.project}}/notificationChannels/channel-2",
+          "projects/{{.Provider.project}}/notificationChannels/channel-3"
+        ]
+      }
+    }
+  }
+]

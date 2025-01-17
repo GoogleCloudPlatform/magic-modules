@@ -1,0 +1,50 @@
+[
+    {
+        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/metrics/my-test%2Fmetric",
+        "asset_type": "logging.googleapis.com/Metric",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/logging/v2/rest",
+            "discovery_name": "Metric",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bucketOptions": {
+                    "linearBuckets": {
+                        "numFiniteBuckets": 3,
+                        "offset": 1,
+                        "width": 1
+                    }
+                },
+                "filter": "resource.type=gae_app AND severity\u003e=ERROR",
+                "labelExtractors": {
+                    "mass": "EXTRACT(jsonPayload.request)",
+                    "sku": "EXTRACT(jsonPayload.id)"
+                },
+                "metricDescriptor": {
+                    "displayName": "My metric",
+                    "labels": [
+                        {
+                            "description": "Identifying number for item",
+                            "key": "sku",
+                            "valueType": "INT64"
+                        },
+                        {
+                            "description": "amount of matter",
+                            "key": "mass",
+                            "valueType": "STRING"
+                        }
+                    ],
+                    "metricKind": "DELTA",
+                    "unit": "1",
+                    "valueType": "DISTRIBUTION"
+                },
+                "name": "my-test/metric",
+                "valueExtractor": "EXTRACT(jsonPayload.request)"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

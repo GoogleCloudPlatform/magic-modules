@@ -1,0 +1,105 @@
+name: build
+description: Generates given downstream Magic Modules Repository from `repo` input
+inputs:
+  repo:
+    description: "provider repo"
+    required: true
+  token:
+    description: "github token"
+    required: true
+
+runs:
+    using: "composite"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
+        with:
+          ruby-version: '3.1'
+
+      - name: Cache Bundler gems
+        uses: actions/cache@v3
+        with:
+          path: mmv1/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install Ruby dependencies
+        shell: bash
+        run: |
+          bundle config path mmv1/vendor/bundle
+          bundle install
+        working-directory: mmv1
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.20'
+
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go install golang.org/x/tools/cmd/goimports@latest
+        shell: bash
+      - name: Build ${{ inputs.repo  }}
+        shell: bash
+        env:
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          GITHUB_TOKEN: ${{ inputs.token }}
+        run: |
+          set -e
+          set -x
+          # Set GOPATH to a directory the runner user has access to
+          export GOPATH=~/go
+
+          function clone_repo() {
+            export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
+            echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
+            GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+            mkdir -p "$(dirname $OUTPUT_PATH)"
+            git clone $GITHUB_PATH $OUTPUT_PATH --branch $BASE_BRANCH
+          }
+
+          GH_REPO="${{ inputs.repo  }}"
+          if [ "$GH_REPO" == "docs-examples" ] && [ "$BASE_BRANCH" == "main" ]; then
+              BASE_BRANCH="master"
+          fi
+
+          GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
+
+          if [[ "$GH_REPO" == terraform-provider-google* ]]; then
+            UPSTREAM_OWNER=hashicorp
+            clone_repo
+          if [ "$GH_REPO" == "terraform-provider-google" ]; then
+              export VERSION=ga
+            else
+              export VERSION=beta
+            fi
+            make clean-provider
+            make provider
+          elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
+            UPSTREAM_OWNER=GoogleCloudPlatform
+            clone_repo
+            make clean-tgc
+            make tgc
+          elif [ "$GH_REPO" == "docs-examples" ]; then
+            UPSTREAM_OWNER=terraform-google-modules
+            clone_repo
+            make tf-oics
+          else
+            echo "case not supported"
+            exit 1
+          fi
+
+          (current_dir=$(pwd) && cd $OUTPUT_PATH && zip -r "$current_dir/output.zip" .)

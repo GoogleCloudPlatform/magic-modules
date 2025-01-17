@@ -1,0 +1,7 @@
+resource "google_network_connectivity_hub" "{{$.PrimaryResourceId}}"  {
+ name        = "{{index $.Vars "resource_name"}}"
+ description = "A sample hub"
+ labels = {
+    label-one = "value-one"
+  }
+}

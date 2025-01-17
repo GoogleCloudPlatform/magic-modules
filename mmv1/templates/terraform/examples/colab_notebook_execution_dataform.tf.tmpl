@@ -1,0 +1,48 @@
+resource "google_colab_runtime_template" "my_runtime_template" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  display_name = "Runtime template"
+  location = "us-central1"
+
+  machine_spec {
+    machine_type     = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
+}
+
+resource "google_storage_bucket" "output_bucket" {
+  name          = "{{index $.Vars "bucket"}}"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_dataform_repository" "hello_world_repo" {
+  name        = "hello-world-repo"
+  display_name = "Hello World Repository"
+  region      = "us-central1"
+}
+
+resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
+  display_name = "Notebook execution Dataform"
+  location = "us-central1"
+
+  dataform_repository_source {
+  commit_sha = "859e1d608182a2f2e89a03f8e6010deff28e759e"
+  dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.hello_world_repo.name}"
+  }
+ 
+  notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
+  
+  gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
+  
+  execution_user = "bcreddy@google.com"
+
+  depends_on = [
+    google_colab_runtime_template.my_runtime_template,
+    google_storage_bucket.output_bucket,
+  ]
+  
+}
