@@ -89,7 +89,7 @@ func BootstrapAllPSARoles(t *testing.T, prefix string, agentNames, roles []strin
 			})
 		}
 	}
-	BootstrapIamMembers(t, members, roles)
+	BootstrapIamMembers(t, members)
 	// Always return false because we now wait for IAM propagation.
 	return false
 }
