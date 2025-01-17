@@ -15,6 +15,27 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
+func bootstrapGkeTagManagerServiceAgents(t *testing.T) {
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagAdmin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagHoldAdmin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+		{
+			Member: "serviceAccount:{project_number}@cloudservices.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
+}
+
 func TestAccContainerCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -62,19 +83,14 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	pid := envvar.GetTestProjectFromEnv()
-	project := envvar.GetTestProjectNumberFromEnv()
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) ||
-		acctest.BootstrapPSARole(t, project, "@cloudservices", "roles/resourcemanager.tagUser") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
-
+	
+	bootstrapGkeTagManagerServiceAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -3638,17 +3654,13 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	pid := envvar.GetTestProjectFromEnv()
-	project := envvar.GetTestProjectNumberFromEnv()
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
 	clusterNetName := fmt.Sprintf("tf-test-container-net-%s", randomSuffix)
 	clusterSubnetName := fmt.Sprintf("tf-test-container-subnet-%s", randomSuffix)
 
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) ||
-		acctest.BootstrapPSARole(t, project, "@cloudservices", "roles/resourcemanager.tagUser") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	bootstrapGkeTagManagerServiceAgents(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

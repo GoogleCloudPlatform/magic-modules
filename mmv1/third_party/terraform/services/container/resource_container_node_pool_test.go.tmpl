@@ -40,7 +40,6 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 	pid := envvar.GetTestProjectFromEnv()
-	project := envvar.GetTestProjectNumberFromEnv()
 
 	randomSuffix := acctest.RandString(t, 10)
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", randomSuffix)
@@ -48,10 +47,7 @@ func TestAccContainerNodePool_resourceManagerTags(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", []string{"roles/resourcemanager.tagAdmin", "roles/resourcemanager.tagHoldAdmin", "roles/resourcemanager.tagUser"}) ||
-		acctest.BootstrapPSARole(t, project, "@cloudservices", "roles/resourcemanager.tagUser") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	bootstrapGkeTagManagerServiceAgents(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
