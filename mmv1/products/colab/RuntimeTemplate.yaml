@@ -94,7 +94,6 @@ properties:
         type: enum
         description: |
                 The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-        default_from_api: true
         enum_values:
           - 'NVIDIA_TESLA_V100'
           - 'NVIDIA_TESLA_T4'
