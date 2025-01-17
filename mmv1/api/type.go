@@ -1082,7 +1082,7 @@ func (t *Type) IsForceNew() bool {
 	}
 
 	parent := t.Parent()
-	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
+	return !t.WriteOnly && (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
 		(t.Immutable ||
 			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
 				(parent == nil ||
