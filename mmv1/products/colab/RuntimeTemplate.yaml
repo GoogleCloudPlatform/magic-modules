@@ -103,6 +103,7 @@ properties:
           - 'NVIDIA_L4'
       - name: 'acceleratorCount'
         type: Integer
+        default_from_api: true
         description: 'The number of accelerators used by the runtime.'
   - name: dataPersistentDiskSpec
     default_from_api: true
