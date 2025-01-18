@@ -34,7 +34,6 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 }
 
 func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest(t *testing.T) {
-
 	context := map[string]interface{}{
 		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
