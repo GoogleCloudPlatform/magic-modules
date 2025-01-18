@@ -434,33 +434,6 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		},
 	})
 }
-func TestAccFilestoreInstance_replication(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"location_1"   : "us-central1",
-		"location_2"   : "us-west1",
-		"tier"         : "ENTERPRISE",
-	}
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccFilestoreInstance_replication(context),
-			},
-			{
-				ResourceName:      "google_filestore_instance.replica-instance",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"zone","initial_replication"},
-
-			},
-		},
-	})
-}
 
 func testAccFileInstanceTags(name string, tags map[string]string) string {
 	r := fmt.Sprintf(`
@@ -486,6 +459,33 @@ tags = {`, name)
 
 	l += fmt.Sprintf("}\n}")
 	return r + l
+}
+
+func TestAccFilestoreInstance_replication(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location_1":    "us-central1",
+		"location_2":    "us-west1",
+		"tier":          "ENTERPRISE",
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_replication(context),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica-instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+			},
+		},
+	})
 }
 
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
