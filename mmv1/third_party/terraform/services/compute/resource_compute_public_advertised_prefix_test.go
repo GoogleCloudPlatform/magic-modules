@@ -16,8 +16,8 @@ import (
 // Since we only have access to one test prefix range we cannot run tests in parallel
 func TestAccComputePublicPrefixes(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"delegated_prefix":  testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
-		"advertised_prefix": testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
+		"delegated_prefix":            testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
+		"advertised_prefix":           testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
 		"advertised_prefix_pdp_scope": testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
 	}
 
