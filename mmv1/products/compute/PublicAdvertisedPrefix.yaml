@@ -70,6 +70,14 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - name: 'pdpScope'
+    type: Enum
+    description: |
+      Specifies how child public delegated prefix will be scoped. pdpScope
+      must be one of: GLOBAL, REGIONAL
+    enum_values:
+      - 'GLOBAL'
+      - 'REGIONAL'
   - name: 'sharedSecret'
     type: String
     description: |

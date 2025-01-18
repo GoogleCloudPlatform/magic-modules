@@ -1,0 +1,16 @@
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name = "{{index $.Vars "prefixes_name"}}"
+  description = "{{index $.TestEnvVars "desc"}}"
+  dns_verification_ip = "2001:db8::"
+  ip_cidr_range = "2001:db8::/32"
+  pdp_scope = "REGIONAL"
+}
+
+resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "prefixes_name"}}"
+  region = "us-central1"
+  description = "test-delegation-mode-pdp"
+  ip_cidr_range = "2001:db8::/40"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+  mode = "DELEGATION"
+}
