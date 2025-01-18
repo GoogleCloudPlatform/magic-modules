@@ -367,9 +367,9 @@ attributes – for a full reference, see
 - `bootstrap_iam`: specify member/role pairs that should always exist for the default project. This avoids race
   conditions when modifying the IAM permissions for the default test project. Permissions attached to resources created
   _in_ a test should instead be provisioned with standard terraform resources.
-- `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced by key inside `{{$.Vars}}`.
-  All resource IDs (even for resources not under test) should be declared with variables that contain a `-` or `_`; this will
-  ensure that, in tests, the resources are created with a random suffix to avoid name collisions.
+- `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
+  with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
+  contain a `-` or `_`; this will ensure that, in tests, the resources are created with a random suffix to avoid name collisions.
 - `test_env_vars`: Key/value pairs of variable names and special values indicating variables that should be pulled from the
   environment during tests. These will receive a neutral default value in documentation. Common special values include:
   `PROJECT_NAME`, `REGION`, `ORG_ID`, `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
