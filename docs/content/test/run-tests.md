@@ -60,7 +60,7 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
-    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
 > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
@@ -68,7 +68,7 @@ aliases:
 1. Optional: Save verbose test output (including API requests and responses) to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -100,7 +100,7 @@ aliases:
 1. Optional: Save verbose test output to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
