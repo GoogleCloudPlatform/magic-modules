@@ -68,7 +68,20 @@ resource "google_compute_router_peer" "peer" {
   }
 }
 ```
+## Example Usage - Router Zero Custom Learend Route Priority
 
+
+```hcl
+resource "google_compute_router_peer" "peer" {
+  name                      = "my-router-peer"
+  router                    = "my-router"
+  region                    = "us-central1"
+  interface                 = "interface-1"
+  peer_asn                  = 65513
+  custom_learned_route_priority = 0
+  zero_custom_learned_route_priority = true
+}
+```
 ## Example Usage - Router Zero Advertised Route Priority
 
 
@@ -439,6 +452,11 @@ The following arguments are supported:
   This value is applied to all custom learned route ranges for the session.
   You can choose a value from 0 to 65335. If you don't provide a value,
   Google Cloud assigns a priority of 100 to the ranges.
+
+* `zero_custom_learned_route_priority` -
+  (Optional)
+  The user-defined zero-custom-learned-route-priority for a custom-learned-route-priority in BGP session.
+  This value has to be set true to force the custom_learned_route_priority to be 0.
 
 * `custom_learned_ip_ranges` -
   (Optional)
