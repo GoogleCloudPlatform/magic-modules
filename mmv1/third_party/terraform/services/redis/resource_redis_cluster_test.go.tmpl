@@ -691,7 +691,7 @@ func createOrUpdateRedisCluster(params *ClusterParams) string {
 			provider = google-beta
 			name = "%s"
 			location = "us-central1"
-			service_class = "gcp-memorystore-redis-autopush"
+			service_class = "gcp-memorystore-redis"
 			description   = "my basic service connection policy"
 			network = google_compute_network.producer_net.id
 			psc_config {
