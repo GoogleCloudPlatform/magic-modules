@@ -51,7 +51,9 @@ func TestAccComputeStoragePool_computeStoragePool_update(t *testing.T) {
 func testAccComputeStoragePool_computeStoragePool_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-full" {
-  name                     = "tf-test-storage-pool-full%{random_suffix}"
+  name = "tf-test-storage-pool-full%{random_suffix}"
+
+  description = "Hyperdisk Balanced storage pool"
 
   capacity_provisioning_type   = "STANDARD"
   pool_provisioned_capacity_gb = "11264"
@@ -63,6 +65,8 @@ resource "google_compute_storage_pool" "test-storage-pool-full" {
   storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
 
 	deletion_protection = false
+
+	zone = "us-central1-a"
 }
 
 data "google_project" "project" {}
