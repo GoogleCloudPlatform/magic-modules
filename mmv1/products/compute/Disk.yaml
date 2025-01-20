@@ -176,6 +176,16 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        conflicts:
+          - 'disk_encryption_key.0.rawKeyWo'
+      - name: 'rawKeyWo'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        write_only: true
+        conflicts:
+          - 'disk_encryption_key.0.rawKey'
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -183,6 +193,16 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        conflicts:
+          - 'disk_encryption_key.0.rsaEncryptedKeyWo'
+      - name: 'rsaEncryptedKeyWo'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        write_only: true
+        conflicts:
+          - 'disk_encryption_key.0.rsaEncryptedKey'
       - name: 'sha256'
         type: String
         description: |
