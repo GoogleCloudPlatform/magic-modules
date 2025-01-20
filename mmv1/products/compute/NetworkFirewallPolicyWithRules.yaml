@@ -41,14 +41,15 @@ custom_code:
 legacy_long_form_project: true
 examples:
   - name: 'compute_network_firewall_policy_with_rules_full'
-    primary_resource_id: 'network-firewall-policy-with-rules'
+    primary_resource_id: 'primary'
     vars:
-      policy_name: 'tf-fw-policy-with-rules'
-      address_group_name: 'tf-address-group'
-      tag_key_name: 'tf-tag-key'
-      tag_value_name: 'tf-tag-value'
-      security_profile_group_name: 'tf-security-profile-group'
-      security_profile_name: 'tf-security-profile'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+      security_profile_group: 'spg'
+      security_profile: 'sp'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -184,6 +185,33 @@ properties:
               min_version: 'beta'
               item_type:
                 type: String
+            - name: 'srcNetworkScope'
+              type: Enum
+              description: |
+                Network scope of the traffic source.
+              min_version: beta
+              enum_values:
+                - 'INTERNET'
+                - 'INTRA_VPC'
+                - 'NON_INTERNET'
+                - 'VPC_NETWORKS'
+            - name: 'srcNetworks'
+              type: Array
+              description: |
+                Networks of the traffic source. It can be either a full or partial url.
+              min_version: beta
+              item_type:
+                type: String
+            - name: 'destNetworkScope'
+              type: Enum
+              description: |
+                Network scope of the traffic destination.
+              min_version: beta
+              enum_values:
+                - 'INTERNET'
+                - 'INTRA_VPC'
+                - 'NON_INTERNET'
+                - 'VPC_NETWORKS'
             - name: 'srcThreatIntelligences'
               type: Array
               description: |

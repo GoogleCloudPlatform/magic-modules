@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"net/http"
+
 {{ if ne $.TargetVersionName `ga` -}}
 	// For beta tests only
-	"net/http"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-
 {{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -1747,7 +1747,6 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	return accessToken, nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 // For bootstrapping Developer Connect git repository link
 const SharedGitRepositoryLinkIdPrefix = "tf-bootstrap-git-repository-"
 
@@ -2057,8 +2056,6 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 
 	return codeRepositoryIndexId
 }
-
-{{- end }}
 
 const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
 

@@ -1,8 +1,54 @@
+package apigee_test
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"random_suffix":   acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeEndpointAttachmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context),
+			},
+			{
+				ResourceName:            "google_apigee_endpoint_attachment.apigee_endpoint_attachment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"endpoint_attachment_id", "org_id"},
+			},
+		},
+	})
+}
+
+func testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "{{index $.TestEnvVars "org_id"}}"
-  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
   deletion_policy = "DELETE"
 }
 
@@ -114,7 +160,7 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id
-  ip_cidr_range = "10.0.0.0/16"
+  ip_cidr_range = "10.0.1.0/24"
 
   project = google_project.project.project_id
 }
@@ -125,7 +171,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
-  ip_cidr_range = "10.1.0.0/16"
+  ip_cidr_range = "10.0.1.0/24"
 
   project = google_project.project.project_id
 }
@@ -153,10 +199,50 @@ resource "google_apigee_organization" "apigee_org" {
   ]
 }
 
-resource "google_apigee_endpoint_attachment" "{{$.PrimaryResourceId}}" {
+resource "google_apigee_endpoint_attachment" "apigee_endpoint_attachment" {
   org_id                 = google_apigee_organization.apigee_org.id
   endpoint_attachment_id = "test1"
   location               = "us-west2"
   service_attachment     = google_compute_service_attachment.psc_ilb_service_attachment.id
 }
+`, context)
+}
 
+func testAccCheckApigeeEndpointAttachmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_apigee_endpoint_attachment" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{ApigeeBasePath}}{{org_id}}/endpointAttachments/{{endpoint_attachment_id}}")
+			if err != nil {
+				return err
+			}
+
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   billingProject,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err == nil {
+				return fmt.Errorf("ApigeeEndpointAttachment still exists at %s", url)
+			}
+		}
+
+		return nil
+	}
+}

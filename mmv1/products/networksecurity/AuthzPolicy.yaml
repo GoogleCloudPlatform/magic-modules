@@ -58,6 +58,9 @@ examples:
       url_name: 'l7-ilb-map'
       target_proxy_name: 'l7-ilb-proxy'
       forwarding_rule_name: 'l7-ilb-forwarding-rule'
+      callouts_instance_name: 'l7-ilb-callouts-ins'
+      callouts_instance_group_name: 'l7-ilb-callouts-ins-group'
+      callouts_health_check_name: 'l7-ilb-callouts-healthcheck'
       backend_authz_name: 'authz-service'
       authz_extension_name: 'my-authz-ext'
     test_env_vars:

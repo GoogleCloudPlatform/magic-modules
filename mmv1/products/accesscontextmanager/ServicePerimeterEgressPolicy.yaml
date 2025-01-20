@@ -43,7 +43,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
 exclude_import: true
@@ -71,6 +71,7 @@ nested_query:
 custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_egress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -192,3 +193,9 @@ properties:
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true

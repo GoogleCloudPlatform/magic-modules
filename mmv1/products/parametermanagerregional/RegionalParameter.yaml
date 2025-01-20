@@ -119,8 +119,8 @@ properties:
   - name: 'format'
     type: Enum
     description: |
-      The format type of the regional parameter. Default value is UNFORMATTED.
-    default_from_api: true
+      The format type of the regional parameter.
+    default_value: 'UNFORMATTED'
     immutable: true
     enum_values:
       - 'UNFORMATTED'

@@ -39,6 +39,7 @@ self_link: '{{name}}'
 create_url: '{{parent}}/accessLevels'
 update_verb: 'PATCH'
 update_mask: true
+mutex: '{{parent}}'
 import_format:
   - '{{name}}'
 timeouts:

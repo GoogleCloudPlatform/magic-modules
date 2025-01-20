@@ -27,7 +27,7 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 		return nil, fmt.Errorf("invalid repository format: %w", err)
 	}
 
-	sinceTime, err := time.Parse(time.RFC3339, since)
+	sinceTime, err := time.Parse("2006-01-02", since) // input format YYYY-MM-DD
 	if err != nil {
 		return nil, fmt.Errorf("invalid since time format: %w", err)
 	}
@@ -50,16 +50,7 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 		if err != nil {
 			return nil, fmt.Errorf("listing issues: %w", err)
 		}
-
-		// Convert github.Issue to our Issue type
-		for _, issue := range issues {
-			labels := make([]Label, len(issue.Labels))
-			for i, l := range issue.Labels {
-				labels[i] = Label{Name: *l.Name}
-			}
-
-			allIssues = append(allIssues, issue)
-		}
+		allIssues = append(allIssues, issues...)
 
 		if resp.NextPage == 0 {
 			break
@@ -75,7 +66,8 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
-		if !issue.IsPullRequest() {
+		// Skip pull requests
+		if issue.IsPullRequest() {
 			continue
 		}
 
@@ -104,7 +96,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
 
-		affectedResources := ExtractAffectedResources(*issue.Body)
+		affectedResources := ExtractAffectedResources(issue.GetBody())
 		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
 			desired[needed] = struct{}{}
 		}
@@ -118,8 +110,10 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 			}
 			sort.Strings(issueUpdate.Labels)
 
-			issueUpdate.Number = *issue.Number
-			issueUpdates = append(issueUpdates, issueUpdate)
+			issueUpdate.Number = issue.GetNumber()
+			if issueUpdate.Number > 0 {
+				issueUpdates = append(issueUpdates, issueUpdate)
+			}
 		}
 	}
 
