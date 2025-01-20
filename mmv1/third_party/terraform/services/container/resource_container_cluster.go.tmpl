@@ -1268,31 +1268,31 @@ func ResourceContainerCluster() *schema.Resource {
 							Description: `Configuration for Google Cloud Managed Services for Prometheus.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-						            		"enabled": {
-						                		Type:        schema.TypeBool,
-						                		Required:    true,
-						                		Description: `Whether or not the managed collection is enabled.`,
-						            		},
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether or not the managed collection is enabled.`,
+									},
 									{{- if ne $.TargetVersionName "ga" }}
-						            		"auto_monitoring_config": {
-						                		Type:        schema.TypeSet,
-						                		Optional:    true,
-						                		MaxItems:    1,
-						                		Description: `Configuration for GKE Workload Auto-Monitoring.`,
-						                		Elem: &schema.Resource{
-						                    			Schema: map[string]*schema.Schema{
-						                       				"scope": {
-						                            				Type:         schema.TypeString,
-						                            				Required:     true,
-						                            				Description:  `The scope of auto-monitoring.`,
-						                            				ValidateFunc: validation.StringInSlice([]string{"ALL", "NONE"}, false),
-						                        			},
-						                    			},
-						                		},
-						           		},
+									"auto_monitoring_config": {
+										Type:        schema.TypeSet,
+										Optional:    true,
+										MaxItems:    1,
+										Description: `Configuration for GKE Workload Auto-Monitoring.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"scope": {
+													Type:         schema.TypeString,
+													Required:     true,
+													Description:  `The scope of auto-monitoring.`,
+													ValidateFunc: validation.StringInSlice([]string{"ALL", "NONE"}, false),
+												},
+											},
+										},
+									},
 									{{- end }}
-						        	},
-						    	},
+								},
+							},
 						},
 						"advanced_datapath_observability_config": {
 							Type:        schema.TypeList,
