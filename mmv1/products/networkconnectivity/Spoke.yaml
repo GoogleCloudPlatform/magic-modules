@@ -100,7 +100,6 @@ examples:
       spoke_name: "vpc-spoke"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
-examples:
   - name: 'network_connectivity_spoke_linked_vpc_network_ipv6_support'
     primary_resource_id: 'primary'
     vars:
