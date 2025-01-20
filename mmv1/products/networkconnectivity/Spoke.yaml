@@ -112,6 +112,7 @@ examples:
       network_name: 'basic-network'
       gateway_name: 'vpn-gateway'
       external_gateway_name: 'external-vpn-gateway'
+      router_name: 'external-vpn-gateway'
       vpn_tunnel_1_name: 'tunnel1'
       hub_name: 'basic-hub1'
       vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke-ipv6'
