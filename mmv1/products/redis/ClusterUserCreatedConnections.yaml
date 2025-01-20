@@ -16,10 +16,14 @@ name: 'ClusterUserCreatedConnections'
 api_resource_type_kind: Cluster
 description: |
   Manages user created connections for Redis cluster
+docs:
+  note: |
+    If you remove a connections item from the resource, the corresponding forwarding rule will no longer be functioning.
+    If the corresponding forwarding rule is represented in your terraform configuration it is recommended to delete that
+    google_compute_forwarding_rule at the same time.
 references:
   guides:
   api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
-docs:
 id_format: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
