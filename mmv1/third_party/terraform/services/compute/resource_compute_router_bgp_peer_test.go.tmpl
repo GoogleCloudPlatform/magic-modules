@@ -3,7 +3,7 @@ package compute_test
 import (
 	"fmt"
 	"testing"
-  "regexp"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -25,9 +25,10 @@ func TestAccComputeRouterPeer_basic(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerKeepRouter(routerName),
@@ -86,9 +87,10 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerEnable(routerName, false),
@@ -96,9 +98,10 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerEnable(routerName, true),
@@ -106,9 +109,10 @@ func TestAccComputeRouterPeer_enable(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
@@ -129,9 +133,10 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerBfd(routerName, "DISABLED"),
@@ -139,9 +144,10 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerBasic(routerName),
@@ -149,9 +155,10 @@ func TestAccComputeRouterPeer_bfd(t *testing.T) {
 					t, "google_compute_router_peer.foobar"),
 			},
 			{
-				ResourceName:      "google_compute_router_peer.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_peer.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
@@ -199,9 +206,10 @@ func TestAccComputeRouterPeer_Ipv6Basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
@@ -226,9 +234,10 @@ func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerUpdateIpv4Address(routerName),
@@ -241,9 +250,10 @@ func TestAccComputeRouterPeer_Ipv4BasicCreateUpdate(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
@@ -295,9 +305,10 @@ func TestAccComputeRouterPeer_UpdateIpv6Address(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerUpdateIpv6Address(routerName, true),
@@ -308,9 +319,10 @@ func TestAccComputeRouterPeer_UpdateIpv6Address(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
@@ -335,9 +347,10 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerIpv6(routerName, true),
@@ -348,9 +361,10 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 			{
 				Config: testAccComputeRouterPeerIpv6(routerName, false),
@@ -361,9 +375,10 @@ func TestAccComputeRouterPeer_EnableDisableIpv6(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"is_advertised_route_priority_set"},
 			},
 		},
 	})
