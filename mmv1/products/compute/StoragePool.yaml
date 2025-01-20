@@ -37,6 +37,8 @@ iam_policy:
   method_name_separator: "/"
   import_format:
     - "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}"
+  iam_conditions_request_type: "QUERY_PARAM"
+  allowed_iam_role: "roles/compute.viewer"
 examples:
   - name: "compute_storage_pool_basic"
     primary_resource_id: "test-storage-pool-basic"
@@ -128,48 +130,58 @@ properties:
         type: String
         description: |
           Timestamp of the last successful resize in RFC3339 text format.
+        output: true
       - name: "diskCount"
         type: String
         description: |
           Number of disks used.
+        output: true
       - name: "poolUsedCapacityBytes"
         type: String
         description: |
           Space used by data stored in disks within the storage pool (in bytes).
           This will reflect the total number of bytes written to the disks in the pool,
           in contrast to the capacity of those disks.
+        output: true
       - name: "poolUserWrittenBytes"
         type: String
         description: |
           Amount of data written into the pool, before it is compacted.
+        output: true
       - name: "totalProvisionedDiskCapacityGb"
         type: String
         description: |
           Sum of all the capacity provisioned in disks in this storage pool.
           A disk's provisioned capacity is the same as its total capacity.
+        output: true
       - name: "maxTotalProvisionedDiskCapacityGb"
         type: String
         description: |
           Maximum allowed aggregate disk size in gigabytes.
+        output: true
       - name: "poolUsedIops"
         type: String
         description: |
           Sum of all the disks' provisioned IOPS, minus some amount
           that is allowed per disk that is not counted towards pool's IOPS capacity.
           For more information, see https://cloud.google.com/compute/docs/disks/storage-pools.
+        output: true
       - name: "totalProvisionedDiskIops"
         type: String
         description: |
           Sum of all the disks' provisioned IOPS.
+        output: true
       - name: "poolUsedThroughput"
         type: String
         description: |
           Sum of all the disks' provisioned throughput in MB/s.
+        output: true
       - name: "totalProvisionedDiskThroughput"
         type: String
         description: |
           Sum of all the disks' provisioned throughput in MB/s,
           minus some amount that is allowed per disk that is not counted towards pool's throughput capacity.
+        output: true
   - name: "storagePoolType"
     type: String
     description: |
@@ -186,45 +198,55 @@ properties:
         type: String
         description: |
           Timestamp of the last successful resize in RFC3339 text format.
+        output: true
       - name: "diskCount"
         type: String
         description: |
           Number of disks used.
+        output: true
       - name: "poolUsedCapacityBytes"
         type: String
         description: |
           Space used by data stored in disks within the storage pool (in bytes).
           This will reflect the total number of bytes written to the disks in the pool, in contrast to the capacity of those disks.
+        output: true
       - name: "poolUserWrittenBytes"
         type: String
         description: |
           Amount of data written into the pool, before it is compacted.
+        output: true
       - name: "totalProvisionedDiskCapacityGb"
         type: String
         description: |
           Sum of all the capacity provisioned in disks in this storage pool.
           A disk's provisioned capacity is the same as its total capacity.
+        output: true
       - name: "maxTotalProvisionedDiskCapacityGb"
         type: String
         description: |
           Maximum allowed aggregate disk size in gigabytes.
+        output: true
       - name: "poolUsedIops"
         type: String
         description: |
           Sum of all the disks' provisioned IOPS, minus some amount that is allowed per disk that is not counted towards pool's IOPS capacity. For more information, see https://cloud.google.com/compute/docs/disks/storage-pools.
+        output: true
       - name: "totalProvisionedDiskIops"
         type: String
         description: |
           Sum of all the disks' provisioned IOPS.
+        output: true
       - name: "poolUsedThroughput"
         type: String
         description: |
           Sum of all the disks' provisioned throughput in MB/s.
+        output: true
       - name: "totalProvisionedDiskThroughput"
         type: String
         description: |
           Sum of all the disks' provisioned throughput in MB/s,
           minus some amount that is allowed per disk that is not counted towards pool's throughput capacity.
+        output: true
   - name: "capacityProvisioningType"
     type: Enum
     description: |
