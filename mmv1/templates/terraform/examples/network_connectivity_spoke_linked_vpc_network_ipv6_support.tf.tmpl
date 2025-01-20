@@ -14,15 +14,13 @@ resource "google_network_connectivity_hub" "basic_hub" {
 resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
   name = "{{index $.Vars "spoke_name"}}"
   location = "global"
-  description = "A sample spoke with a linked VPC that include export ranges of all IPv6, all private IPv4 and all PUPI IPv4"
+  description = "A sample spoke with a linked VPC that include export ranges of all IPv6"
   labels = {
     label-one = "value-one"
   }
   hub = google_network_connectivity_hub.basic_hub.id
   linked_vpc_network {
     include_export_ranges = [
-      "ALL_PRIVATE_IPV4_RANGES",
-      "ALL_PUPI_IPV4_RANGES",
       "ALL_IPV6_RANGES"
     ]
     uri = google_compute_network.network.self_link
