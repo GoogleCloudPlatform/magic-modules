@@ -19,34 +19,13 @@ import (
 	"fmt"
 	utils "magician/utility"
 	"math/rand"
+	"slices"
 	"time"
 
 	"golang.org/x/exp/maps"
 )
 
 type UserType int64
-
-type date struct {
-	year  int
-	month int
-	day   int
-	loc   *time.Location
-}
-
-type onVacationReviewer struct {
-	id        string
-	startDate date
-	endDate   date
-}
-
-func newDate(year, month, day int, loc *time.Location) date {
-	return date{
-		year:  year,
-		month: month,
-		day:   day,
-		loc:   loc,
-	}
-}
 
 const (
 	CommunityUserType UserType = iota
@@ -110,23 +89,25 @@ func GetRandomReviewer(excludedReviewers []string) string {
 }
 
 func AvailableReviewers(excludedReviewers []string) []string {
-	return available(time.Now(), maps.Keys(reviewerRotation), onVacationReviewers, excludedReviewers)
+	return available(time.Now(), reviewerRotation, excludedReviewers)
 }
 
-func available(nowTime time.Time, allReviewers []string, vacationList []onVacationReviewer, excludedReviewers []string) []string {
-	excludedReviewers = append(excludedReviewers, onVacation(nowTime, vacationList)...)
-	return utils.Removes(allReviewers, excludedReviewers)
+func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
+	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
+	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
+	slices.Sort(ret)
+	return ret
 }
 
-func onVacation(nowTime time.Time, vacationList []onVacationReviewer) []string {
+func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) []string {
 	var onVacationList []string
-	for _, reviewer := range vacationList {
-		start := time.Date(reviewer.startDate.year, time.Month(reviewer.startDate.month), reviewer.startDate.day, 0, 0, 0, 0, reviewer.startDate.loc)
-		end := time.Date(reviewer.endDate.year, time.Month(reviewer.endDate.month), reviewer.endDate.day, 0, 0, 0, 0, reviewer.endDate.loc).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
-		if nowTime.Before(start) || nowTime.After(end) {
-			continue
+	for reviewer, config := range reviewerRotation {
+		for _, v := range config.vacations {
+			if nowTime.Before(v.GetStart(config.timezone)) || nowTime.After(v.GetEnd(config.timezone)) {
+				continue
+			}
+			onVacationList = append(onVacationList, reviewer)
 		}
-		onVacationList = append(onVacationList, reviewer.id)
 	}
 	return onVacationList
 }
