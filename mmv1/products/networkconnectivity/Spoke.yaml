@@ -104,8 +104,17 @@ examples:
     primary_resource_id: 'primary'
     vars:
       network_name: 'net'
-      hub_name: 'hub1-ipv6'
+      hub_name: 'hub1'
       spoke_name: 'spoke1-ipv6'
+  - name: 'network_connectivity_spoke_vpn_tunnel_ipv6_support'
+    primary_resource_id: 'tunnel1'
+    vars:
+      network_name: 'basic-network'
+      gateway_name: 'vpn-gateway'
+      external_gateway_name: 'external-vpn-gateway'
+      vpn_tunnel_1_name: 'tunnel1'
+      hub_name: 'basic-hub1'
+      vpn_tunnel_1_spoke_name: 'vpn-tunnel-1-spoke-ipv6'
 parameters:
   - name: 'location'
     type: String
