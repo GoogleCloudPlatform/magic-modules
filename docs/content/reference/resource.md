@@ -364,12 +364,12 @@ attributes – for a full reference, see
 - `primary_resource_id`: The id of the resource under test. This is used by tests to automatically run additional checks.
   Configuration files should reference this to avoid getting out of sync. For example:
   `resource "google_compute_address" ""{{$.PrimaryResourceId}}" {`
-- `bootstrap_iam`: specify member/role pairs that should always exist for the default project. This avoids race
-  conditions when modifying the IAM permissions for the default test project. Permissions attached to resources created
-  _in_ a test should instead be provisioned with standard terraform resources.
+- `bootstrap_iam`: specify member/role pairs that should always exist. `{project_number}` will be replaced with the
+  default project's project number. This avoids race conditions when modifying the IAM permissions for the default test project.
+  Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 - `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
   with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
-  contain a `-` or `_`; this will ensure that, in tests, the resources are created with a random suffix to avoid name collisions.
+  contain a `-` or `_`; this will ensure that, in tests, the resources are created with a `tf-test` prefix to allow automatic cleanup of dangling resources and a random suffix to avoid name collisions.
 - `test_env_vars`: Key/value pairs of variable names and special values indicating variables that should be pulled from the
   environment during tests. These will receive a neutral default value in documentation. Common special values include:
   `PROJECT_NAME`, `REGION`, `ORG_ID`, `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
