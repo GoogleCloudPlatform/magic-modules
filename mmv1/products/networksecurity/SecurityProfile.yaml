@@ -195,12 +195,12 @@ properties:
       The configuration for defining the Mirroring Endpoint Group used to
       mirror traffic to third-party collectors.
     properties:
-    - name: mirroringEndpointGroup
-      type: String
-      description: |
-        The Mirroring Endpoint Group to which matching traffic should be mirrored.
-        Format: projects/{project_id}/locations/global/mirroringEndpointGroups/{endpoint_group_id}
-      required: true
+      - name: mirroringEndpointGroup
+        type: String
+        description: |
+          The Mirroring Endpoint Group to which matching traffic should be mirrored.
+          Format: projects/{project_id}/locations/global/mirroringEndpointGroups/{endpoint_group_id}
+        required: true
     conflicts:
       - 'threatPreventionProfile'
       - 'customInterceptProfile'
@@ -210,12 +210,12 @@ properties:
       The configuration for defining the Intercept Endpoint Group used to
       intercept traffic to third-party firewall appliances.
     properties:
-    - name: interceptEndpointGroup
-      type: String
-      description: |
-        The Intercept Endpoint Group to which matching traffic should be intercepted.
-        Format: projects/{project_id}/locations/global/interceptEndpointGroups/{endpoint_group_id}
-      required: true
+      - name: interceptEndpointGroup
+        type: String
+        description: |
+          The Intercept Endpoint Group to which matching traffic should be intercepted.
+          Format: projects/{project_id}/locations/global/interceptEndpointGroups/{endpoint_group_id}
+        required: true
     conflicts:
       - 'threatPreventionProfile'
       - 'customMirroringProfile'
