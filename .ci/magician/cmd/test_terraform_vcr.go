@@ -229,12 +229,11 @@ func unitTest(prNumber string, ctlr *source.Controller, rnr ExecRunner) error {
 	}
 
 	// TODO: only test changed folders from changed files
-	args := []string{"test", "-p", "4", "-timeout=30s", "-cover", "-args",
-		"-test.gocoverdir=/tmp/unittestcov"}
+	args := []string{"testnolint", `TESTARGS="-p 4 -cover -args -test.gocoverdir=/tmp/unittestcov"`}
 	if err := rnr.PushDir(repo.Path); err != nil {
 		return fmt.Errorf("error changing to tpgbRepo dir: %w", err)
 	}
-	_, err = rnr.Run("go", args, nil)
+	_, err = rnr.Run("make", args, nil)
 	if err != nil {
 		return fmt.Errorf("unit test failed with error: %s", err)
 	}
