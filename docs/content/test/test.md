@@ -46,27 +46,37 @@ A create test is a test that creates the target resource and immediately destroy
 
 {{< tabs "create" >}}
 {{< tab "MMv1" >}}
-1. Using an editor of your choice, create a `*.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should include the service name, resource name, and a descriptor. For example, `compute_subnetwork_basic.tf.tmpl`.
-2. Write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
-   ```tf
-   resource "google_compute_subnetwork" "primary" {
-     name          = "my-subnet"
-     ip_cidr_range = "10.1.0.0/16"
-     region        = "us-central1"
-     network       = google_compute_network.network.name
-   }
-
-   resource "google_compute_network" "network" {
-     name                    = "my-network"
-     auto_create_subnetworks = false
-   }
+1. Add an entry to your `RESOURCE_NAME.yaml` file's `examples`. The fields listed here are the most commonly-used. For a comprehensive reference, see [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}}).
+   ```yaml
+   examples:
+     # name must correspond to a configuration file that you'll create in the next step.
+     # The name should include the product name, resource name, and a basic description
+     # of the test. This will be used to generate the test name and the documentation
+     # header.
+     - name: "PRODUCT_RESOURCE_basic"
+       # primary_resource_id will be used for the Terraform resource id in the configuration file.
+       primary_resource_id: "example"
+       # vars contains key/value pairs of variables to inject into the configuration file.
+       # These can be referenced in the configuration file as a key inside `{{$.Vars}}`.
+       # All resource IDs (even for resources not under test) should be declared
+       # with variables that contain a `-` or `_`; this will ensure that, in tests,
+       # the resources are created with a `tf-test` prefix to allow automatic cleanup
+       # of dangling resources and a random suffix to avoid name collisions.
+       vars:
+         network_name: "example-network"
+       # test_vars_overrides contains key/value pairs of literal overrides for
+       # variables used in tests. This can be used to call functions to
+       # generate or determine a variable's value – for example, bootstrapping
+       # a shared network for your product to avoid test failures due to limits
+       # on the default network.
+       test_vars_overrides:
+         network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "PRODUCT-RESOURCE-network-config")'
+       # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+       min_version: beta
    ```
-3. If beta-only fields are being tested:
-   - Add `provider = google-beta` to every resource in the file.
-4. Modify the configuration to use templated values.
-   - Replace the id of the primary resource you are testing with `{{$.PrimaryResourceId}}`.
-   - Replace fields that are identifiers, like `id` or `name`, with an appropriately named variable. For example, `{{index $.Vars "subnetwork_name"}}`.
-   - The resulting configuration for the above example would look like this:
+
+2. Create a `.tf.tmpl` file in [`mmv1/templates/terraform/examples/`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples). The name of the file should match the name of the example created in the previous step. For example, `PRODUCT_RESOURCE_basic.tf.tmpl`.
+3. In that file, write the Terraform configuration for your test. This should include all of the required dependencies. For example, `google_compute_subnetwork` has a dependency on `google_compute_network`:
    ```tf
    resource "google_compute_subnetwork" "{{$.PrimaryResourceId}}" {
      name          = "{{index $.Vars "subnetwork_name"}}"
@@ -80,20 +90,8 @@ A create test is a test that creates the target resource and immediately destroy
      auto_create_subnetworks = false
    }
    ```
-5. Modify the relevant `RESOURCE_NAME.yaml` file under [magic-modules/mmv1/products](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) to include an [`examples`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go) block with your test. The `name` must match the name of your `*.tf.tmpl` file. For example:
-   ```yaml
-   examples:
-     - name: "compute_subnetwork_basic"
-       primary_resource_id: "example"
-       vars:
-         subnetwork_name: "example-subnet"
-         network_name: "example-network"
-   ```
-{{< hint warning >}}
-**Warning:** Values in `vars` must include a `-` (or `_`). They [trigger the addition of a `tf-test` prefix](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go#L224), which the sweeper uses to clean them up after tests run.
-{{< /hint >}}
-6. If beta-only fields are being tested:
-   - Add `min_version: 'beta'` to the `examples` block in `RESOURCE_NAME.yaml`.
+4. If the resource or the example is beta-only:
+   - Add `provider = google-beta` to every resource in the file.
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 This section assumes you've used the [Add a resource]({{< ref "/develop/add-resource" >}}) guide to create your handwritten resource, and you have a working MMv1 config.
@@ -273,7 +271,7 @@ func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
 }
 ```
 
-## Skip tests in VCR replaying mode
+## Skip tests in VCR replaying mode {#skip-vcr}
 
 Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP requests and responses) to reduce the time it takes to present results to contributors. However, not all resources or tests are possible to run in replaying mode. Incompatible tests should be skipped during VCR replaying mode. They will still run in our nightly test suite.
 
