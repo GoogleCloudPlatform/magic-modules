@@ -245,6 +245,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
+		"-cover",
 		"-args",
 		"-test.gocoverdir=/tmp/vcrtestcov",
 	)
