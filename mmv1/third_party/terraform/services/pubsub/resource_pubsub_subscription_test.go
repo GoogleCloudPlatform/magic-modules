@@ -244,11 +244,11 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-			Role: "roles/bigquery.dataEditor",
+			Role:   "roles/bigquery.dataEditor",
 		},
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-			Role: "roles/bigquery.metadataViewer",
+			Role:   "roles/bigquery.metadataViewer",
 		},
 	})
 

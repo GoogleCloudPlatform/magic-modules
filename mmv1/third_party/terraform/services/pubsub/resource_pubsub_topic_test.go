@@ -51,7 +51,7 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 
