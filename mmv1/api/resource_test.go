@@ -208,6 +208,21 @@ func TestLeafProperties(t *testing.T) {
 		expected    Type
 	}{
 		{
+			description: "non-nested type",
+			obj: Resource{
+				BaseUrl: "test",
+				Properties: []*Type{
+					{
+						Name: "basic",
+						Type: "String",
+					},
+				},
+			},
+			expected: Type{
+				Name: "basic",
+			},
+		},
+		{
 			description: "nested type",
 			obj: Resource{
 				BaseUrl: "test",

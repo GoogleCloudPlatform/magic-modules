@@ -5,8 +5,7 @@ api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
 api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
 fields:
 {{- range $p := $.LeafProperties }}
-  -
-    field: '{{ $p.MetadataLineage }}'
+  - field: '{{ $p.MetadataLineage }}'
     {{- if and (ne $p.MetadataLineage $p.MetadataApiLineage) (not $p.ProviderOnly) }}
     api_field: '{{ $p.MetadataApiLineage }}'
     {{- end }}

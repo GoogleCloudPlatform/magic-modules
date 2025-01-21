@@ -626,7 +626,7 @@ func (r Resource) RootProperties() []*Type {
 func (r Resource) LeafProperties() []*Type {
 	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
 
-	// Remove types that have children, becasue we only want "leaf" fields
+	// Remove types that have children, because we only want "leaf" fields
 	types = slices.DeleteFunc(types, func(t *Type) bool {
 		nestedProperties := t.NestedProperties()
 		return len(nestedProperties) > 0
