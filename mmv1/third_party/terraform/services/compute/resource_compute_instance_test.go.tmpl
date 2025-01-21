@@ -5651,27 +5651,6 @@ func testAccCheckComputeInstanceDiskKmsEncryptionKey(n string, instance *compute
 	}
 }
 
-func testAccCheckIfForceAttachIsNotUpdated(resourceName, diskObj string, expectedValue bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", resourceName)
-		}
-
-		forceAttachAttr := fmt.Sprintf("%s.force_attach", diskObj)
-		forceAttach, ok := rs.Primary.Attributes[forceAttachAttr]
-		if !ok {
-			return fmt.Errorf("force_attach attribute not found in state")
-		}
-
-		if forceAttach == fmt.Sprintf("%t", expectedValue) {
-			return fmt.Errorf("force_attach attribute in state is %s, expected %t", forceAttach, expectedValue)
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckComputeInstanceTag(instance *compute.Instance, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if instance.Tags == nil {
