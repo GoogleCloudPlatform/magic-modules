@@ -350,3 +350,68 @@ properties:
   - name: 'fieldOne'
     type: String
 ```
+
+## Examples
+
+### `examples`
+
+A list of configurations that are used to generate documentation and tests. Each example supports the following common
+attributes – for a full reference, see
+[examples.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/examples.go):
+
+- `name`: snake_case name of the example. This corresponds to the configuration file in
+  [mmv1/templates/terraform/examples](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/templates/terraform/examples) (excluding the `.go.tmpl` suffix) and is used to generate the test name and the documentation header.
+- `primary_resource_id`: The id of the resource under test. This is used by tests to automatically run additional checks.
+  Configuration files should reference this to avoid getting out of sync. For example:
+  `resource "google_compute_address" ""{{$.PrimaryResourceId}}" {`
+- `bootstrap_iam`: specify member/role pairs that should always exist. `{project_number}` will be replaced with the
+  default project's project number. This avoids race conditions when modifying the IAM permissions for the default test project.
+  Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
+- `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
+  with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
+  contain a `-` or `_`; this will ensure that, in tests, the resources are created with a `tf-test` prefix to allow automatic cleanup of dangling resources and a random suffix to avoid name collisions.
+- `test_env_vars`: Key/value pairs of variable names and special values indicating variables that should be pulled from the
+  environment during tests. These will receive a neutral default value in documentation. Common special values include:
+  `PROJECT_NAME`, `REGION`, `ORG_ID`, `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
+- `test_vars_overrides`: Key/value pairs of literal overrides for variables used in tests. This can be used to call functions to
+  generate or determine a variable's value.
+- `min_version`: Set this to `beta` if the resource is in the `google` provider but the example will only work with the
+  `google-beta` provider (for example, because it includes a beta-only field.)
+- `ignore_read_extra`: Properties to not check on import. This should be used in cases where a property will not be set on import,
+  for example write-only fields.
+- `exclude_test`: If set to `true`, no test will be generated based on this example.
+- `exclude_docs`: If set to `true`, no documentation will be generated based on this example.
+- `exclude_import_test`: If set to `true`, no import test will be generated for this example.
+- `skip_vcr`: See [Skip tests in VCR replaying mode]({{< ref "/test/test#skip-vcr" >}}) for more information about this flag.
+- `skip_test`: If not empty, the test generated based on this example will always be skipped. In most cases, the value should be a
+  link to a ticket explaining the issue that needs to be resolved before the test can be unskipped.
+- `external_providers`: A list of external providers that are needed for the testcase. This does add some latency to the testcase,
+  so only use if necessary. Common external providers: `random`, `time`.
+
+Example:
+
+```yaml
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+    vars:
+      dataset_id: "my-dataset"
+      network_name: "my-network"
+    test_env_vars:
+      org_id: "ORG_ID"
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedServiceNetworkingConnection(t, "service-resource-network-config")'
+    min_version: "beta"
+    ignore_read_extra: 
+      - 'foo'
+    exclude_test: true
+    exclude_docs: true
+    exclude_import_test: true
+    skip_vcr: true
+    skip_test: "https://github.com/hashicorp/terraform-provider-google/issues/20574"
+    external_providers:
+      - "time"
+```
