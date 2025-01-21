@@ -45,6 +45,15 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
+  - name: 'public_advertised_prefixes_pdp_scope'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'my-pap'
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'
@@ -70,6 +79,14 @@ properties:
       The IPv4 address range, in CIDR format, represented by this public
       advertised prefix.
     required: true
+  - name: 'pdpScope'
+    type: Enum
+    description: |
+      Specifies how child public delegated prefix will be scoped. pdpScope
+      must be one of: GLOBAL, REGIONAL
+    enum_values:
+      - 'GLOBAL'
+      - 'REGIONAL'
   - name: 'sharedSecret'
     type: String
     description: |
