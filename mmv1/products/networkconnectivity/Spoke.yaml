@@ -183,7 +183,7 @@ properties:
         type: Array
         description: |
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES" ans ""ALL_IPV6_RANGES"".
+          The only allowed value for now is "ALL_IPV4_RANGES" and "ALL_IPV6_RANGES".
         item_type:
           type: String
       - name: 'includeExportRanges'
@@ -218,12 +218,12 @@ properties:
         type: Array
         description: |
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES" ans ""ALL_IPV6_RANGES"".
+          The only allowed value for now is "ALL_IPV4_RANGES" and "ALL_IPV6_RANGES".
+        item_type:
+          type: String
       - name: 'includeExportRanges'
         type: Array
         description: IP ranges allowed to be included from peering.
-        item_type:
-          type: String
         item_type:
           type: String
   - name: 'linkedRouterApplianceInstances'
@@ -267,7 +267,7 @@ properties:
         type: Array
         description: |
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
-          The only allowed value for now is "ALL_IPV4_RANGES" ans ""ALL_IPV6_RANGES"".
+          The only allowed value for now is "ALL_IPV4_RANGES" and "ALL_IPV6_RANGES".
         item_type:
           type: String
       - name: 'includeExportRanges'
