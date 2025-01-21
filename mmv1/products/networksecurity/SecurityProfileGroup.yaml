@@ -104,3 +104,7 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the custom mirroring configuration for the SecurityProfileGroup.
+  - name: 'customInterceptProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the CustomIntercept configuration.

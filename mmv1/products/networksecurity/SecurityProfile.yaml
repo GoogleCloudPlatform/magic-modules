@@ -63,6 +63,16 @@ examples:
       endpoint_group_id: 'my-eg'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-security-profile'
+      network_name: 'my-network'
+      deployment_group_id: 'my-dg'
+      endpoint_group_id: 'my-eg'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'name'
     type: String
@@ -178,6 +188,7 @@ properties:
                 - 'SPYWARE'
     conflicts:
       - 'customMirroringProfile'
+      - 'customInterceptProfile'
   - name: 'customMirroringProfile'
     type: NestedObject
     description: |
@@ -192,6 +203,22 @@ properties:
       required: true
     conflicts:
       - 'threatPreventionProfile'
+      - 'customInterceptProfile'
+  - name: 'customInterceptProfile'
+    type: NestedObject
+    description: |
+      The configuration for defining the Intercept Endpoint Group used to
+      intercept traffic to third-party firewall appliances.
+    properties:
+    - name: interceptEndpointGroup
+      type: String
+      description: |
+        The Intercept Endpoint Group to which matching traffic should be intercepted.
+        Format: projects/{project_id}/locations/global/interceptEndpointGroups/{endpoint_group_id}
+      required: true
+    conflicts:
+      - 'threatPreventionProfile'
+      - 'customMirroringProfile'
   - name: 'type'
     type: Enum
     description: The type of security profile.
@@ -200,3 +227,4 @@ properties:
     enum_values:
       - 'THREAT_PREVENTION'
       - 'CUSTOM_MIRRORING'
+      - 'CUSTOM_INTERCEPT'
