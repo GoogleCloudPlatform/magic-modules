@@ -65,6 +65,7 @@ examples:
       network_name: 'colab-test-default'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
 parameters:
   - name: 'location'
     type: String
