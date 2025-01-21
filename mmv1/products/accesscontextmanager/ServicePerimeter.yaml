@@ -47,7 +47,7 @@ self_link: '{{name}}'
 create_url: '{{parent}}/servicePerimeters'
 update_verb: 'PATCH'
 update_mask: true
-mutex: '{{name}}'
+mutex: '{{parent}}'
 import_format:
   - '{{name}}'
 timeouts:
