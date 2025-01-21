@@ -23,9 +23,6 @@ docs:
 base_url: 'environments'
 self_link: '{{org_id}}/environments/{{name}}'
 create_url: '{{org_id}}/environments'
-update_url: '{{org_id}}/environments/{{name}}'
-update_verb: 'PATCH'
-update_mask: true
 import_format:
   - '{{org_id}}/environments/{{name}}'
   - '{{org_id}}/{{name}}'
