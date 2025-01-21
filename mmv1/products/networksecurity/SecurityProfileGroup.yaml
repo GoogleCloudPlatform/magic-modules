@@ -100,3 +100,7 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the threat prevention configuration for the SecurityProfileGroup.
+  - name: 'customMirroringProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the custom mirroring configuration for the SecurityProfileGroup.
