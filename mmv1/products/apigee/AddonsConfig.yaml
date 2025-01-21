@@ -122,3 +122,28 @@ properties:
               Flag that specifies whether the Advanced API Ops add-on is
               enabled.
             output: true
+      - name: 'analyticsConfig'
+        type: NestedObject
+        description: Configuration for the Analytics add-on.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description:
+              Flag that specifies whether the Analytics add-on is
+              enabled.
+          - name: 'expireTimeMillis'
+            type: String
+            description:
+              Time at which the Analytics add-on expires in milliseconds
+              since epoch. If unspecified, the add-on will never expire.
+            output: true
+          - name: 'updateTime'
+            type: String
+            description:
+              The latest update time.
+            output: true
+          - name: 'state'
+            type: String
+            description:
+              The actual state of the Analytics add-on.
+            output: true
