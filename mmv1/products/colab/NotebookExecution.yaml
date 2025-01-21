@@ -58,6 +58,7 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-notebook-execution%s", context["random_suffix"])'
     vars:
       notebook_execution_job_id: 'colab-notebook-execution'
+      runtime_template_name: 'runtime-template-name'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
     test_env_vars:
