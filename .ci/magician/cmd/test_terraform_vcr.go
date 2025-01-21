@@ -163,10 +163,14 @@ The following environment variables are required:
 			// TODO: return err
 			fmt.Printf("failed to run vcr test: %s", err)
 		}
+		out, err := rnr.Run("ls", []string{"/tmp/vcrtestcov"}, nil)
+		fmt.Printf("ls /tmp/vcrtestcov = %s, %s\n", out, err)
 		if err := unitTest(args[0], ctlr, rnr); err != nil {
 			// TODO: return err
 			fmt.Printf("failed to run unit test: %s", err)
 		}
+		out, err = rnr.Run("ls", []string{"/tmp/unittestcov"}, nil)
+		fmt.Printf("ls /tmp/unittestcov = %s, %s\n", out, err)
 		if err := mergeCovData(rnr); err != nil {
 			return fmt.Errorf("failed to run merge cov data: %s", err)
 		}

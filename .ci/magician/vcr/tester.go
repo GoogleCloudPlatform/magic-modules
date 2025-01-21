@@ -245,10 +245,14 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
-		"-cover",
-		"-args",
-		"-test.gocoverdir=/tmp/vcrtestcov",
 	)
+	if opt.Mode == Replaying {
+		args = append(args, []string{
+			"-cover",
+			"-args",
+			"-test.gocoverdir=/tmp/vcrtestcov",
+		}...)
+	}
 	env := map[string]string{
 		"VCR_PATH":                 cassettePath,
 		"VCR_MODE":                 opt.Mode.Upper(),
@@ -395,8 +399,13 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		replayingTimeout,
 		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
 		"-vet=off",
-		"-args",
-		"-test.gocoverdir=/tmp/vcrtestcov",
+	}
+	if mode == Replaying {
+		args = append(args, []string{
+			"-cover",
+			"-args",
+			"-test.gocoverdir=/tmp/vcrtestcov",
+		}...)
 	}
 	env := map[string]string{
 		"VCR_PATH":                 cassettePath,
