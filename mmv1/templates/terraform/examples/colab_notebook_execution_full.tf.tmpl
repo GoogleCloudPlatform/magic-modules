@@ -72,9 +72,6 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   service_account = "{{index $.TestEnvVars "service_account"}}"
 
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-  labels = {
-    k = "val"
-  }
   
   custom_environment_spec {
     machine_spec {

@@ -67,7 +67,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   
   gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
   
-  service_account = "{{index $.TestEnvVars "service_account"}}"
+  execution_user = "gterraformtestuser@gmail.com"
 
   depends_on = [
     google_colab_runtime_template.my_runtime_template,

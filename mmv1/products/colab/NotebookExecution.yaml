@@ -38,10 +38,10 @@ examples:
     primary_resource_id: 'notebook-execution'
     vars:
       notebook_execution_job_id: 'colab-notebook-execution'
+      runtime_template_name: 'runtime-template-name'
       bucket: 'my_bucket'
     test_env_vars:
       project_id: 'PROJECT_NAME'
-      service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - direct_notebook_source.0.content
   - name: 'colab_notebook_execution_full'
@@ -213,6 +213,3 @@ properties:
       - execution_user
       - service_account
     description: 'The service account to run the execution as.'
-  - name: 'labels'
-    type: KeyValueLabels
-    description: 'Labels to identify and group the Notebook Execution.'
