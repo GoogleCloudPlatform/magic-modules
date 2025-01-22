@@ -137,7 +137,6 @@ properties:
     default_from_api: true
     conflicts:
       - max_throughput
-    immutable: false
   - name: 'maxThroughput'
     type: Integer
     description: |
