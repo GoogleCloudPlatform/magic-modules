@@ -48,10 +48,14 @@ autogen_status: U2VjdXJpdHlHYXRld2F5
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Must be omitted or set to `global`.
+    deprecation_message: '`location` is deprecated and will be removed in a future major release.'
     immutable: true
     url_param_only: true
-    required: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'
+    required: false
   - name: securityGatewayId
     type: String
     description: |-
