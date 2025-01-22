@@ -330,5 +330,6 @@ These tests can still run in VCR replaying mode; however, REPLAYING mode can't b
 
 ## References
 
+* [Official Terraform documentation on Acceptance Tests](https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests)
 * [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}})
 
