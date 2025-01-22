@@ -25,10 +25,9 @@ self_link: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/schedules?{{name}}'
 async:
   type: 'OpAsync'
+  actions: ['delete']
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
-custom_code:
-  encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
 examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
@@ -53,15 +52,6 @@ examples:
       service_account: 'SERVICE_ACCT'
       start_time: 'time.Now().Add(time.Hour * (12)).Format(time.RFC3339)'
       end_time: 'time.Now().Add(time.Hour * (240)).Format(time.RFC3339)'
-  - name: 'colab_schedule_dataform'
-    primary_resource_id: 'schedule'
-    primary_resource_name: 'fmt.Sprintf("tf-test-colab-schedule%s", context["random_suffix"])'
-    vars:
-      name: 'colab-schedule'
-      bucket: 'my_bucket'
-      network_name: 'colab-test-default'
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
@@ -110,142 +100,138 @@ properties:
     exactly_one_of:
       - create_notebook_execution_job_request
     properties:
-      - name: 'displayName'
+      - name: 'parent'
         type: String
         description:
-          Required. The display name of the Notebook Execution.
-        required: true
-      - name: 'dataformRepositorySource'
+          Notebook Execution Job Info.
+      - name: 'notebookExecutionJob'
         type: NestedObject
-        description: 'The Dataform Repository containing the input notebook.'
-        exactly_one_of:
-          - dataform_repository_source
-          - gcs_notebook_source
-          - direct_notebook_source
+        description:
+          Notebook Execution Job Info.
         properties:
-          - name: 'dataformRepositoryResourceName'
+          - name: 'displayName'
             type: String
-            description: 'The resource name of the Dataform Repository.'
-            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-          - name: 'commitSha'
-            type: String
-            description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
-      - name: 'gcsNotebookSource'
-        type: NestedObject
-        description: 'The Cloud Storage uri for the input notebook.'
-        exactly_one_of:
-          - dataform_repository_source
-          - gcs_notebook_source
-          - direct_notebook_source
-        properties:
-          - name: 'uri'
-            type: String
-            description: 'The Cloud Storage uri pointing to the ipynb file.'
-          - name: 'generation'
-            type: String
-            description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
-      - name: 'directNotebookSource'
-        type: NestedObject
-        description: 'The content of the input notebook in ipynb format.'
-        exactly_one_of:
-          - dataform_repository_source
-          - gcs_notebook_source
-          - direct_notebook_source
-        properties:
-          - name: 'content'
-            type: String
-            description: 'The base64-encoded contents of the input notebook file.'
-      - name: executionTimeout
-        type: String
-        description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
-      - name: 'notebookRuntimeTemplateResourceName'
-        type: String
-        description: 'The NotebookRuntimeTemplate to source compute configuration from.'
-        exactly_one_of:
-          - notebook_runtime_template_resource_name
-          - custom_environment_spec
-      - name: 'customEnvironmentSpec'
-        type: NestedObject
-        description: 'The custom compute configuration for an execution job.'
-        exactly_one_of:
-          - notebook_runtime_template_resource_name
-          - custom_environment_spec
-        properties:
-          - name: machineSpec
+            description:
+              Required. The display name of the Notebook Execution.
+            required: true
+          - name: 'dataformRepositorySource'
             type: NestedObject
-            default_from_api: true
-            description: 'The machine configuration of the runtime.'
+            description: 'The Dataform Repository containing the input notebook.'
+            exactly_one_of:
+              - dataform_repository_source
+              - gcs_notebook_source
             properties:
-              - name: 'machineType'
-                type: string
-                default_from_api: true
-                description: |
-                        The Compute Engine machine type selected for the runtime.
-              - name: 'acceleratorType'
-                type: enum
-                description: |
-                        The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-                enum_values:
-                  - 'NVIDIA_TESLA_V100'
-                  - 'NVIDIA_TESLA_T4'
-                  - 'NVIDIA_TESLA_A100'
-                  - 'NVIDIA_A100_80GB'
-                  - 'NVIDIA_L4'
-              - name: 'acceleratorCount'
-                type: Integer
-                default_from_api: true
-                description: 'The number of accelerators used by the runtime.'
-          - name: persistentDiskSpec
-            default_from_api: true
-            type: NestedObject
-            description: 'The configuration for the data disk of the runtime.'
-            properties:
-              - name: 'diskType'
-                type: enum
-                description: 'The type of the persistent disk.'
-                default_from_api: true
-                enum_values:
-                  - 'pd-standard'
-                  - 'pd-ssd'
-                  - 'pd-balanced'
-                  - 'pd-extreme'
-              - name: 'diskSizeGb'
-                type: int
-                default_from_api: true
-                description: The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
-          - name: networkSpec
-            type: NestedObject
-            default_from_api: true
-            description: 'The network configuration for the runtime.'
-            properties:
-              - name: 'enableInternetAccess'
-                type: Boolean
-                description: Enable public internet access for the runtime.
-              - name: 'network'
-                default_from_api: true
+              - name: 'dataformRepositoryResourceName'
                 type: String
-                description: 'The name of the VPC that this runtime is in.'
+                description: 'The resource name of the Dataform Repository.'
                 diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-              - name: 'subnetwork'
+              - name: 'commitSha'
                 type: String
-                description: 'The name of the subnetwork that this runtime is in.'
-                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-      - name: 'gcsOutputUri'
-        required: true
-        type: String
-        description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
-      - name: 'executionUser'
-        type: String
-        exactly_one_of:
-          - execution_user
-          - service_account
-        description: 'The user email to run the execution as. Only supported by Colab runtimes.'
-      - name: 'serviceAccount'
-        type: String
-        exactly_one_of:
-          - execution_user
-          - service_account
-        description: 'The service account to run the execution as.'
-      - name: 'labels'
-        type: KeyValuePairs
-        description: 'Labels to identify and group the Notebook Execution.'
+                description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
+          - name: 'gcsNotebookSource'
+            type: NestedObject
+            description: 'The Cloud Storage uri for the input notebook.'
+            exactly_one_of:
+              - dataform_repository_source
+              - gcs_notebook_source
+            properties:
+              - name: 'uri'
+                type: String
+                description: 'The Cloud Storage uri pointing to the ipynb file.'
+              - name: 'generation'
+                type: String
+                description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
+          - name: executionTimeout
+            type: String
+            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
+          - name: 'notebookRuntimeTemplateResourceName'
+            type: String
+            description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+            exactly_one_of:
+              - notebook_runtime_template_resource_name
+              - custom_environment_spec
+          - name: 'customEnvironmentSpec'
+            type: NestedObject
+            description: 'The custom compute configuration for an execution job.'
+            exactly_one_of:
+              - notebook_runtime_template_resource_name
+              - custom_environment_spec
+            properties:
+              - name: machineSpec
+                type: NestedObject
+                default_from_api: true
+                description: 'The machine configuration of the runtime.'
+                properties:
+                  - name: 'machineType'
+                    type: string
+                    default_from_api: true
+                    description: |
+                            The Compute Engine machine type selected for the runtime.
+                  - name: 'acceleratorType'
+                    type: enum
+                    description: |
+                            The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+                    enum_values:
+                      - 'NVIDIA_TESLA_V100'
+                      - 'NVIDIA_TESLA_T4'
+                      - 'NVIDIA_TESLA_A100'
+                      - 'NVIDIA_A100_80GB'
+                      - 'NVIDIA_L4'
+                  - name: 'acceleratorCount'
+                    type: Integer
+                    default_from_api: true
+                    description: 'The number of accelerators used by the runtime.'
+              - name: persistentDiskSpec
+                default_from_api: true
+                type: NestedObject
+                description: 'The configuration for the data disk of the runtime.'
+                properties:
+                  - name: 'diskType'
+                    type: enum
+                    description: 'The type of the persistent disk.'
+                    default_from_api: true
+                    enum_values:
+                      - 'pd-standard'
+                      - 'pd-ssd'
+                      - 'pd-balanced'
+                      - 'pd-extreme'
+                  - name: 'diskSizeGb'
+                    type: int
+                    default_from_api: true
+                    description: The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+              - name: networkSpec
+                type: NestedObject
+                default_from_api: true
+                description: 'The network configuration for the runtime.'
+                properties:
+                  - name: 'enableInternetAccess'
+                    type: Boolean
+                    description: Enable public internet access for the runtime.
+                  - name: 'network'
+                    default_from_api: true
+                    type: String
+                    description: 'The name of the VPC that this runtime is in.'
+                    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+                  - name: 'subnetwork'
+                    type: String
+                    description: 'The name of the subnetwork that this runtime is in.'
+                    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          - name: 'gcsOutputUri'
+            required: true
+            type: String
+            description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+          - name: 'executionUser'
+            type: String
+            exactly_one_of:
+              - execution_user
+              - service_account
+            description: 'The user email to run the execution as. Only supported by Colab runtimes.'
+          - name: 'serviceAccount'
+            type: String
+            exactly_one_of:
+              - execution_user
+              - service_account
+            description: 'The service account to run the execution as.'
+          - name: 'labels'
+            type: KeyValuePairs
+            description: 'Labels to identify and group the Notebook Execution.'
