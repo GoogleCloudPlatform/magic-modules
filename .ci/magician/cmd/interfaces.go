@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"magician/github"
+	"magician/teamcity"
 )
 
 type GithubClient interface {
@@ -39,6 +40,15 @@ type GithubClient interface {
 
 type CloudbuildClient interface {
 	ApproveDownstreamGenAndTest(prNumber, commitSha string) error
+}
+
+type CloudstorageClient interface {
+	WriteToGCSBucket(bucketName, objectName, filePath string) error
+}
+
+type TeamcityClient interface {
+	GetBuilds(project, finishCut, startCut string) (teamcity.Builds, error)
+	GetTestResults(build teamcity.Build) (teamcity.TestResults, error)
 }
 
 type ExecRunner interface {
