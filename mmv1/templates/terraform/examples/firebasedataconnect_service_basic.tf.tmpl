@@ -1,0 +1,15 @@
+# Enable Firebase Data Connect API
+resource "google_project_service" "fdc" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  service = "firebasedataconnect.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Create an FDC service
+resource "google_firebasedataconnect_service" "default" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  location = "us-central1"
+  service_id = "{{index $.Vars "service_id"}}"
+
+  depends_on = [google_project_service.fdc]
+}
