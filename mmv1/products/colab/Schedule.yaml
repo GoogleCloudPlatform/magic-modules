@@ -46,6 +46,8 @@ examples:
       name: 'colab-schedule'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
+      start_time: '2025-01-01T00:00:00Z'
+      end_time: '2025-01-01T12:00:00Z'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
