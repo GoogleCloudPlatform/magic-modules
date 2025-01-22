@@ -33,17 +33,8 @@ resource "google_secret_manager_secret_version" "secret_version" {
   secret_data = "secret-data"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
-  crypto_key_id =  "{{index $.Vars "key_name"}}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  members = [
-    "serviceAccount:{{index $.TestEnvVars "service_account"}}",
-  ]
-}
-
 resource "google_dataform_repository" "dataform_repository" {
-  name = "dataform_repository"
+  name = "dataform-repository"
   display_name = "dataform_repository"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
   kms_key_name = "{{index $.Vars "key_name"}}"
@@ -64,9 +55,6 @@ resource "google_dataform_repository" "dataform_repository" {
     table_prefix = "prefix_"
   }
 
-  depends_on = [
-    google_kms_crypto_key_iam_binding.crypto_key_binding
-  ]
 }
 
 resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
@@ -74,7 +62,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
 
   dataform_repository_source {
-  commit_sha = "859e1d608182a2f2e89a03f8e6010deff28e759e"
+  commit_sha = "randomsha123"
   dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.dataform_repository.name}"
   }
  
@@ -88,7 +76,6 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     google_colab_runtime_template.my_runtime_template,
     google_storage_bucket.output_bucket,
     google_secret_manager_secret_version.secret_version,
-    google_kms_crypto_key_iam_binding.crypto_key_binding,
     google_dataform_repository.dataform_repository,
   ]
   
