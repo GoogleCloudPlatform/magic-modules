@@ -41,6 +41,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
 examples:
