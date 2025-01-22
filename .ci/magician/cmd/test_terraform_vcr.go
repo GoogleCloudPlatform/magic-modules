@@ -197,9 +197,33 @@ func mergeCovData(rnr ExecRunner, buildID string) error {
 	}
 	out, err := rnr.Run("ls", []string{"/tmp/mergedcov"}, nil)
 	fmt.Printf("ls /tmp/mergedcov = %s, %s\n", out, err)
-	args := []string{"-m", "-q", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
+
+	out, err = rnr.Run("go", []string{"tool", "covdata", "percent", "-i=/tmp/mergedcov"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to calculate coverage data: %s", err)
+	}
+	fmt.Println(out)
+
+	_, err = rnr.Run("go", []string{"tool", "covdata", "textfmt", "-i=/tmp/mergedcov", "-o=/tmp/profile.txt"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert coverage data to text format: %s", err)
+	}
+
+	_, err = rnr.Run("go", []string{"tool", "cover", "-html=/tmp/profile.txt", "-o=/tmp/profile.html"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert coverage data to text format: %s", err)
+	}
+
+	args := []string{"-m", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
 	if _, err := rnr.Run("gsutil", args, nil); err != nil {
-		return fmt.Errorf("error upload cov data %w", err)
+		// return fmt.Errorf("error upload cov data %w", err)
+		fmt.Println(err)
+	}
+
+	args = []string{"-m", "cp", "/tmp/profile.html", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
+	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+		// return fmt.Errorf("error upload cov data %w", err)
+		fmt.Println(err)
 	}
 	return nil
 }
