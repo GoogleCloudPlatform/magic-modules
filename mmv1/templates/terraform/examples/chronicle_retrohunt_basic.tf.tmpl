@@ -1,0 +1,20 @@
+resource "google_chronicle_rule" "my-rule" {
+ provider = "google-beta"
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ deletion_policy = "FORCE"
+ text = <<-EOT
+             rule test_rule { meta: events:  $userid = $e.principal.user.userid  match: $userid over 10m condition: $e }
+         EOT
+}
+
+resource "google_chronicle_retrohunt" "{{$.PrimaryResourceId}}" {
+ provider = "google-beta"
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ rule = element(split("/", resource.google_chronicle_rule.my-rule.name), length(split("/", resource.google_chronicle_rule.my-rule.name)) - 1)
+ process_interval {
+    start_time = "{{index $.Vars "start_time"}}"
+    end_time = "{{index $.Vars "end_time"}}"
+ }
+}
