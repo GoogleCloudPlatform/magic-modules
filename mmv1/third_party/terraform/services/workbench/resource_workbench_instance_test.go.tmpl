@@ -298,6 +298,19 @@ func TestAccWorkbenchInstance_updateMetadata(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccWorkbenchInstance_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+                    	resource.TestCheckResourceAttr(
+                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+                ),
+			},
+			{
+				ResourceName:            "google_workbench_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
