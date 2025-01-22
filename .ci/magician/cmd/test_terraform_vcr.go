@@ -228,12 +228,23 @@ func unitTest(prNumber string, ctlr *source.Controller, rnr ExecRunner) error {
 		return fmt.Errorf("failed to compute unified=0 diff: %w", err)
 	}
 
-	// TODO: only test changed folders from changed files
-	args := []string{"testnolint", `TESTARGS="-p 4 -cover -args -test.gocoverdir=/tmp/unittestcov"`}
+	services, _ := modifiedPackages(repo.ChangedFiles, provider.Beta)
+	if len(services) == 0 {
+		fmt.Println("Skipping tests: No go files or test fixtures changed")
+		return nil
+	}
+	var testDirs []string
+	for service := range services {
+		servicePath := "./" + filepath.Join(provider.Beta.ProviderName(), "services", service)
+		testDirs = append(testDirs, servicePath)
+	}
+	args := []string{"test", "-p", "4", "-cover"}
+	args = append(args, testDirs...)
+	args = append(args, []string{"-args", "-test.gocoverdir=/tmp/unittestcov"}...)
 	if err := rnr.PushDir(repo.Path); err != nil {
 		return fmt.Errorf("error changing to tpgbRepo dir: %w", err)
 	}
-	_, err = rnr.Run("make", args, nil)
+	_, err = rnr.Run("go", args, nil)
 	if err != nil {
 		return fmt.Errorf("unit test failed with error: %s", err)
 	}
