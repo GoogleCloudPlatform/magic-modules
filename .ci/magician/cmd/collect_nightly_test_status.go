@@ -58,8 +58,10 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 	It then performs the following operations:
 	1. Collects nightly test status of the execution day or the specified test date (if provided)
 	2. Stores the collected data in JSON files
-	3. Uploads the JSON files to GCS`,
+	3. Uploads the JSON files to GCS
 
+	The following environment variables are required:
+` + listCNTSRequiredEnvironmentVariables(),
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string)
@@ -94,6 +96,14 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 
 		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
+}
+
+func listCNTSRequiredEnvironmentVariables() string {
+	var result string
+	for i, ev := range cntsRequiredEnvironmentVariables {
+		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
+	}
+	return result
 }
 
 func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs CloudstorageClient) error {
