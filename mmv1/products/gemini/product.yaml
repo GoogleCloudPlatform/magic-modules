@@ -19,5 +19,5 @@ scopes:
 versions:
   - base_url: https://cloudaicompanion.googleapis.com/v1/
     name: 'ga'
-  - base_url: https://cloudaicompanion.googleapis.com/v1/
+  - base_url: https://staging-cloudaicompanion.sandbox.googleapis.com/v1/
     name: 'beta'

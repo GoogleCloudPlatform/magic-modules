@@ -1,0 +1,6 @@
+resource "google_gemini_logging_setting" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+    logging_setting_id = "{{index $.Vars "name"}}"
+    location = "global"
+    log_prompts_and_responses = true
+}
