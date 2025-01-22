@@ -222,8 +222,8 @@ func mergeCovData(rnr ExecRunner, buildID string) error {
 
 	args = []string{"-m", "cp", "/tmp/profile.html", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
 	if _, err := rnr.Run("gsutil", args, nil); err != nil {
-		// return fmt.Errorf("error upload cov data %w", err)
 		fmt.Println(err)
+		return fmt.Errorf("error upload cov data %w", err)
 	}
 	return nil
 }
