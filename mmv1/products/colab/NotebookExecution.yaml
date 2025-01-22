@@ -42,8 +42,6 @@ examples:
       bucket: 'my_bucket'
     test_env_vars:
       project_id: 'PROJECT_NAME'
-      org_domain: 'ORG_DOMAIN'
-      identity_user: 'IDENTITY_USER'
       service_account: 'SERVICE_ACCT'
     ignore_read_extra:
       - direct_notebook_source.0.content
