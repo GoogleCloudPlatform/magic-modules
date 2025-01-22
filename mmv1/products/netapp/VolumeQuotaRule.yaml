@@ -91,7 +91,7 @@ properties:
       - 'DEFAULT_USER_QUOTA'
       - 'DEFAULT_GROUP_QUOTA'
   - name: 'diskLimitMib'
-    type: String
+    type: Integer
     description:
       The maximum allowed disk space in MiB.
     required: true

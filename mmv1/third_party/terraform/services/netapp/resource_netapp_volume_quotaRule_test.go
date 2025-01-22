@@ -65,19 +65,46 @@ resource "google_netapp_volume" "default" {
   protocols = ["NFSV3"]
 }
 
-resource "google_netapp_volume_quota_rule" "test_quotaRule" {
+resource "google_netapp_volume_quota_rule" "test_default_user_quotaRule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
   description = "This is a test description"
   type = "DEFAULT_USER_QUOTA"
-  disk_limit_mib = 50
-  target = "user1"
-  labels = {
-	key= "test"
-	value= "quota_rule"
-  }
+  disk_limit_mib = 15
+}
+  
+resource "google_netapp_volume_quota_rule" "test_default_group_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "DEFAULT_GROUP_QUOTA"
+  disk_limit_mib = 20
+}
+
+resource "google_netapp_volume_quota_rule" "test_individual_user_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "INDIVIDUAL_USER_QUOTA"
+  disk_limit_mib = 25
+  target = "001"
+}
+
+resource "google_netapp_volume_quota_rule" "test_individual_group_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "INDIVIDUAL_GROUP_QUOTA"
+  disk_limit_mib = 30
+  target = "011"
 }
 
 data "google_compute_network" "default" {
@@ -105,19 +132,46 @@ resource "google_netapp_volume" "default" {
   protocols = ["NFSV3"]
 }
 
-resource "google_netapp_volume_quota_rule" "test_quotaRule" {
+resource "google_netapp_volume_quota_rule" "test_default_user_quotaRule" {
   depends_on = [google_netapp_volume.default]
   location = google_netapp_volume.default.location
   volume_name = google_netapp_volume.default.name
   name = "testvolumequotaRule%{random_suffix}"
-  description = "This is a updated description"
+  description = "This is a test description"
   type = "DEFAULT_USER_QUOTA"
+  disk_limit_mib = 35
+}
+  
+resource "google_netapp_volume_quota_rule" "test_default_group_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "DEFAULT_GROUP_QUOTA"
+  disk_limit_mib = 40
+}
+
+resource "google_netapp_volume_quota_rule" "test_individual_user_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "INDIVIDUAL_USER_QUOTA"
+  disk_limit_mib = 45
+  target = "001"
+}
+
+resource "google_netapp_volume_quota_rule" "test_individual_group_quotaRule" {
+  depends_on = [google_netapp_volume.default]
+  location = google_netapp_volume.default.location
+  volume_name = google_netapp_volume.default.name
+  name = "testvolumequotaRule%{random_suffix}"
+  description = "This is a test description"
+  type = "INDIVIDUAL_GROUP_QUOTA"
   disk_limit_mib = 50
-  target = "user1"
-  labels = {
-	key= "test"
-	value= "quota_rule_update"
-  }
+  target = "011"
 }
 
 data "google_compute_network" "default" {
