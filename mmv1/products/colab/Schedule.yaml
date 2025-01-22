@@ -28,6 +28,8 @@ async:
   actions: ['delete']
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
 examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
@@ -62,6 +64,8 @@ properties:
   - name: 'name'
     type: String
     description: 'The resource name of the Schedule'
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description:
@@ -71,6 +75,7 @@ properties:
     type: String
     description:
       The timestamp after which the first run can be scheduled. Defaults to the schedule creation time. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+    default_from_api: true
   - name: 'endTime'
     type: String
     description:
@@ -232,6 +237,3 @@ properties:
               - execution_user
               - service_account
             description: 'The service account to run the execution as.'
-          - name: 'labels'
-            type: KeyValuePairs
-            description: 'Labels to identify and group the Notebook Execution.'

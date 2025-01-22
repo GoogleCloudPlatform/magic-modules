@@ -96,10 +96,6 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
 
     gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
     service_account = "{{index $.TestEnvVars "service_account"}}"
-    labels = {
-        k = "val"
-    }
-
   }
 
   depends_on = [
