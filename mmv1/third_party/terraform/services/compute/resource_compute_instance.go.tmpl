@@ -3641,8 +3641,8 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 			result["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 		}
-		if disk.DiskEncryptionKey.KmsKeyServiceAccount != "" {
-			result["disk_encryption_service_account"] = disk.DiskEncryptionKey.KmsKeyServiceAccount
+		if v, ok := d.GetOk("boot_disk.0.disk_encryption_service_account"); ok {
+			result["disk_encryption_service_account"] = v.(string)
 		}
 	}
 
