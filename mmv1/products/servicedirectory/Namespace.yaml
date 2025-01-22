@@ -46,10 +46,6 @@ examples:
     primary_resource_id: 'example'
     vars:
       namespace_id: 'example-namespace'
-  - name: 'service_directory_namespace_ga'
-    primary_resource_id: 'example-ga'
-    vars:
-      namespace_id: 'example-namespace-ga'
 parameters:
   - name: 'location'
     type: String
