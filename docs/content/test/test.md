@@ -327,3 +327,8 @@ These tests can still run in VCR replaying mode; however, REPLAYING mode can't b
 ## What's next?
 
 [Run your tests]({{< ref "/test/run-tests" >}})
+
+## References
+
+* [MMv1 resource reference: `examples` ↗]({{<ref "/reference/resource#examples" >}})
+
