@@ -58,10 +58,8 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 	It then performs the following operations:
 	1. Collects nightly test status of the execution day or the specified test date (if provided)
 	2. Stores the collected data in JSON files
-	3. Uploads the JSON files to GCS
+	3. Uploads the JSON files to GCS`,
 
-	The following environment variables are required:
-` + listCNTSRequiredEnvironmentVariables(),
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string)
@@ -76,13 +74,19 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		tc := teamcity.NewClient(env["TEAMCITY_TOKEN"])
 		gcs := cloudstorage.NewClient()
 
-		date := time.Now()
+		now := time.Now()
+
+		loc, err := time.LoadLocation("America/Los_Angeles")
+		if err != nil {
+			return fmt.Errorf("Error loading location: %s", err)
+		}
+		date := now.In(loc)
 		customDate := args[0]
-		//
+		// check if a specific date is provided
 		if customDate != "" {
 			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
 			// Set the time to 6pm PT
-			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 18, 0, 0, 0, parsedDate.Location())
+			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 18, 0, 0, 0, loc)
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
@@ -90,14 +94,6 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 
 		return execCollectNightlyTestStatus(date, tc, gcs)
 	},
-}
-
-func listCNTSRequiredEnvironmentVariables() string {
-	var result string
-	for i, ev := range cntsRequiredEnvironmentVariables {
-		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
-	}
-	return result
 }
 
 func execCollectNightlyTestStatus(now time.Time, tc TeamcityClient, gcs CloudstorageClient) error {
@@ -128,17 +124,24 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 
 	var testInfoList []TestInfo
 	for _, build := range builds.Builds {
+		// Get service package name
+		serviceName, err := convertServiceName(build.BuildTypeId)
+		if err != nil {
+			return fmt.Errorf("failed to convert test service name for %s: %v", build.BuildTypeId, err)
+		}
+		// Skip sweeper package
+		if serviceName == "sweeper" {
+			continue
+		}
+
+		// Get test results
 		serviceTestResults, err := tc.GetTestResults(build)
 		if err != nil {
 			return fmt.Errorf("failed to get test results: %v", err)
 		}
 		if len(serviceTestResults.TestResults) == 0 {
+			fmt.Printf("Service %s has no tests\n", serviceName)
 			continue
-		}
-		// Get service package name
-		serviceName, err := convertServiceName(build.BuildTypeId)
-		if err != nil {
-			return fmt.Errorf("failed to convert test service name for %s: %v", build.BuildTypeId, err)
 		}
 
 		for _, testResult := range serviceTestResults.TestResults {
@@ -199,6 +202,8 @@ func convertErrorMessage(rawErrorMessage string) string {
 
 	if startIndex != -1 {
 		startIndex += len(startMarker)
+	} else {
+		startIndex = 0
 	}
 
 	if endIndex == -1 {
