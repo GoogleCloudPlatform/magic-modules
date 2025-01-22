@@ -5213,6 +5213,7 @@ resource "google_compute_instance_template" "foobar" {
 	source_image = data.google_compute_image.my_image.self_link
 	auto_delete  = true
 	disk_size_gb = 10
+	architecture = "X86_64"
 	boot         = true
 	guest_os_features = %{guest_os_features}
   }
