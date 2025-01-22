@@ -1,0 +1,247 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'Schedule'
+description: |
+  'Colab Enterprise Notebook Execution Schedules.'
+references:
+  guides:
+    'Schedule a notebook run': 'https://cloud.google.com/colab/docs/schedule-notebook-run'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.schedules'
+base_url: 'projects/{{project}}/locations/{{location}}/schedules'
+self_link: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/schedules?{{name}}'
+async:
+  type: 'OpAsync'
+  operation:
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
+examples:
+  - name: 'colab_schedule_basic'
+    primary_resource_id: 'schedule'
+    vars:
+      name: 'colab-schedule'
+      bucket: 'my_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - direct_notebook_source.0.content
+  - name: 'colab_schedule_full'
+    primary_resource_id: 'schedule'
+    vars:
+      name: 'colab-schedule'
+      bucket: 'my_bucket'
+      network_name: 'colab-test-default'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
+  - name: 'colab_schedule_dataform'
+    primary_resource_id: 'schedule'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-schedule%s", context["random_suffix"])'
+    vars:
+      name: 'colab-schedule'
+      bucket: 'my_bucket'
+      network_name: 'colab-test-default'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+properties:
+  - name: 'name'
+    type: String
+    description: 'The resource name of the Schedule'
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Schedule.
+    required: true
+  - name: 'startTime'
+    type: String
+    description:
+      The timestamp after which the first run can be scheduled. Defaults to the schedule creation time. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
+  - name: 'endTime'
+    type: String
+    description:
+      Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count.
+  - name: 'maxRunCount'
+    type: int
+    description:
+      The max runs for the schedule.
+  - name: 'cron'
+    type: string
+    description: |
+      Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+    exactly_one_of:
+      - cron
+  - name: 'maxConcurrentRunCount'
+    type: int
+    required: true
+    description:
+      Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
+  - name: 'allowQueueing'
+    type: boolean
+    description:
+      Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
+  - name: 'createNotebookExecutionJobRequest'
+    type: NestedObject
+    description: Request for google_colab_notebook_execution.
+    exactly_one_of:
+      - create_notebook_execution_job_request
+    properties:
+      - name: 'displayName'
+        type: String
+        description:
+          Required. The display name of the Notebook Execution.
+        required: true
+      - name: 'dataformRepositorySource'
+        type: NestedObject
+        description: 'The Dataform Repository containing the input notebook.'
+        exactly_one_of:
+          - dataform_repository_source
+          - gcs_notebook_source
+          - direct_notebook_source
+        properties:
+          - name: 'dataformRepositoryResourceName'
+            type: String
+            description: 'The resource name of the Dataform Repository.'
+            diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          - name: 'commitSha'
+            type: String
+            description: 'The commit SHA to read repository with. If unset, the file will be read at HEAD.'
+      - name: 'gcsNotebookSource'
+        type: NestedObject
+        description: 'The Cloud Storage uri for the input notebook.'
+        exactly_one_of:
+          - dataform_repository_source
+          - gcs_notebook_source
+          - direct_notebook_source
+        properties:
+          - name: 'uri'
+            type: String
+            description: 'The Cloud Storage uri pointing to the ipynb file.'
+          - name: 'generation'
+            type: String
+            description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
+      - name: 'directNotebookSource'
+        type: NestedObject
+        description: 'The content of the input notebook in ipynb format.'
+        exactly_one_of:
+          - dataform_repository_source
+          - gcs_notebook_source
+          - direct_notebook_source
+        properties:
+          - name: 'content'
+            type: String
+            description: 'The base64-encoded contents of the input notebook file.'
+      - name: executionTimeout
+        type: String
+        description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
+      - name: 'notebookRuntimeTemplateResourceName'
+        type: String
+        description: 'The NotebookRuntimeTemplate to source compute configuration from.'
+        exactly_one_of:
+          - notebook_runtime_template_resource_name
+          - custom_environment_spec
+      - name: 'customEnvironmentSpec'
+        type: NestedObject
+        description: 'The custom compute configuration for an execution job.'
+        exactly_one_of:
+          - notebook_runtime_template_resource_name
+          - custom_environment_spec
+        properties:
+          - name: machineSpec
+            type: NestedObject
+            default_from_api: true
+            description: 'The machine configuration of the runtime.'
+            properties:
+              - name: 'machineType'
+                type: string
+                default_from_api: true
+                description: |
+                        The Compute Engine machine type selected for the runtime.
+              - name: 'acceleratorType'
+                type: enum
+                description: |
+                        The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+                enum_values:
+                  - 'NVIDIA_TESLA_V100'
+                  - 'NVIDIA_TESLA_T4'
+                  - 'NVIDIA_TESLA_A100'
+                  - 'NVIDIA_A100_80GB'
+                  - 'NVIDIA_L4'
+              - name: 'acceleratorCount'
+                type: Integer
+                default_from_api: true
+                description: 'The number of accelerators used by the runtime.'
+          - name: persistentDiskSpec
+            default_from_api: true
+            type: NestedObject
+            description: 'The configuration for the data disk of the runtime.'
+            properties:
+              - name: 'diskType'
+                type: enum
+                description: 'The type of the persistent disk.'
+                default_from_api: true
+                enum_values:
+                  - 'pd-standard'
+                  - 'pd-ssd'
+                  - 'pd-balanced'
+                  - 'pd-extreme'
+              - name: 'diskSizeGb'
+                type: int
+                default_from_api: true
+                description: The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+          - name: networkSpec
+            type: NestedObject
+            default_from_api: true
+            description: 'The network configuration for the runtime.'
+            properties:
+              - name: 'enableInternetAccess'
+                type: Boolean
+                description: Enable public internet access for the runtime.
+              - name: 'network'
+                default_from_api: true
+                type: String
+                description: 'The name of the VPC that this runtime is in.'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+              - name: 'subnetwork'
+                type: String
+                description: 'The name of the subnetwork that this runtime is in.'
+                diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: 'gcsOutputUri'
+        required: true
+        type: String
+        description: 'The Cloud Storage location to upload the result to. Format:`gs://bucket-name`'
+      - name: 'executionUser'
+        type: String
+        exactly_one_of:
+          - execution_user
+          - service_account
+        description: 'The user email to run the execution as. Only supported by Colab runtimes.'
+      - name: 'serviceAccount'
+        type: String
+        exactly_one_of:
+          - execution_user
+          - service_account
+        description: 'The service account to run the execution as.'
+      - name: 'labels'
+        type: KeyValuePairs
+        description: 'Labels to identify and group the Notebook Execution.'
