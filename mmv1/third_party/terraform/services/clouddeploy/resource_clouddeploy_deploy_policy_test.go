@@ -119,7 +119,7 @@ resource "google_clouddeploy_deploy_policy" "deploy-policy" {
     }
     rules {
       rollout_restriction {
-        id = "norolloutsMondays"
+        id = "norolloutsmondays"
         time_windows {
           time_zone = "America/New_York"
           weekly_windows {
