@@ -171,7 +171,7 @@ The following environment variables are required:
 		}
 		out, err = rnr.Run("ls", []string{"/tmp/unittestcov"}, nil)
 		fmt.Printf("ls /tmp/unittestcov = %s, %s\n", out, err)
-		if err := mergeCovData(rnr); err != nil {
+		if err := mergeCovData(rnr, args[2]); err != nil {
 			return fmt.Errorf("failed to run merge cov data: %s", err)
 		}
 
@@ -188,14 +188,16 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func mergeCovData(rnr ExecRunner) error {
+func mergeCovData(rnr ExecRunner, buildID string) error {
 	rnr.Mkdir("/tmp/mergedcov")
 
 	_, err := rnr.Run("go", []string{"tool", "covdata", "merge", "-i=/tmp/unittestcov,/tmp/vcrtestcov", "-o=/tmp/mergedcov"}, nil)
 	if err != nil {
 		return fmt.Errorf("failed to merge coverage data: %s", err)
 	}
-	args := []string{"-m", "-q", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/"}
+	out, err := rnr.Run("ls", []string{"/tmp/mergedcov"}, nil)
+	fmt.Printf("ls /tmp/mergedcov = %s, %s\n", out, err)
+	args := []string{"-m", "-q", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
 	if _, err := rnr.Run("gsutil", args, nil); err != nil {
 		return fmt.Errorf("error upload cov data %w", err)
 	}
