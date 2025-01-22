@@ -72,9 +72,7 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     }
 
     notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
-
     gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-
     service_account = "{{index $.TestEnvVars "service_account"}}"
 
   }
@@ -85,5 +83,4 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     google_secret_manager_secret_version.secret_version,
     google_dataform_repository.dataform_repository,
   ]
-
 }

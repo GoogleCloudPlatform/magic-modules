@@ -69,9 +69,7 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     }
 
     notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
-
     gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-
     execution_user = "{{index $.TestEnvVars "identity_user"}}@{{index $.TestEnvVars "org_domain"}}"
 
   }
@@ -80,5 +78,4 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     google_colab_runtime_template.my_runtime_template,
     google_storage_bucket.output_bucket,
   ]
-
 }
