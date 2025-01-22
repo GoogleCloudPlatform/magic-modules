@@ -3,3 +3,13 @@ generation_type: 'mmv1'
 api_service_name: '{{ $.ProductMetadata.ServiceName }}'
 api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
 api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
+fields:
+{{- range $p := $.LeafProperties }}
+  - field: '{{ $p.MetadataLineage }}'
+    {{- if and (ne $p.MetadataLineage $p.MetadataApiLineage) (not $p.ProviderOnly) }}
+    api_field: '{{ $p.MetadataApiLineage }}'
+    {{- end }}
+    {{- if $p.ProviderOnly }}
+    provider_only: true
+    {{- end }}
+{{- end }}

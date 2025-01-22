@@ -16,9 +16,10 @@ import (
 // Since we only have access to one test prefix range we cannot run tests in parallel
 func TestAccComputePublicPrefixes(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"delegated_prefix":      testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
-		"advertised_prefix":     testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
-		"delegated_prefix_ipv6": testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
+		"delegated_prefix":            testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
+		"advertised_prefix":           testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
+		"delegated_prefix_ipv6":       testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
+		"advertised_prefix_pdp_scope": testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
 	}
 
 	for name, tc := range testCases {
@@ -31,6 +32,41 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 			tc(t)
 		})
 	}
+}
+
+func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest(t *testing.T) {
+	context := map[string]interface{}{
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputePublicAdvertisedPrefixDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeExample(context),
+			},
+			{
+				ResourceName:      "google_compute_public_advertised_prefix.prefix",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "prefix" {
+  name = "tf-test-my-prefix%{random_suffix}"
+  description = "%{description}"
+  dns_verification_ip = "127.127.0.0"
+  ip_cidr_range = "127.127.0.0/16"
+  pdp_scope = "REGIONAL"
+}
+`, context)
 }
 
 func testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest(t *testing.T) {
@@ -157,7 +193,7 @@ resource "google_compute_public_advertised_prefix" "advertised" {
 resource "google_compute_public_delegated_prefix" "prefix" {
   name = "tf-test-my-root-pdp%{random_suffix}"
   description = "test-delegation-mode-pdp"
-  region = "us-central1"
+  region = "us-central2"
   ip_cidr_range = "2001:db8::/40"
   parent_prefix = google_compute_public_advertised_prefix.advertised.id
   mode = "DELEGATION"
@@ -166,7 +202,7 @@ resource "google_compute_public_delegated_prefix" "prefix" {
 resource "google_compute_public_delegated_prefix" "subprefix" {
   name = "tf-test-my-sub-pdp%{random_suffix}"
   description = "test-forwarding-rule-mode-pdp"
-  region = "us-central1"
+  region = "us-central2"
   ip_cidr_range = "2001:db8::/48"
   parent_prefix = google_compute_public_delegated_prefix.prefix.id
   mode = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
