@@ -57,32 +57,6 @@ resource "google_dataform_repository" "dataform_repository" {
 
 }
 
-resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
-  display_name = "Notebook execution Dataform"
-  location = "us-central1"
-
-  dataform_repository_source {
-  commit_sha = "randomsha123"
-  dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.dataform_repository.name}"
-  }
-
-  notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
-
-  gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-
-  service_account = "{{index $.TestEnvVars "service_account"}}"
-
-  depends_on = [
-    google_colab_runtime_template.my_runtime_template,
-    google_storage_bucket.output_bucket,
-    google_secret_manager_secret_version.secret_version,
-    google_dataform_repository.dataform_repository,
-  ]
-
-}
-
-
-
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   display_name = "Notebook Schedule basic"
   location = "us-central1"
@@ -108,6 +82,8 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   depends_on = [
     google_colab_runtime_template.my_runtime_template,
     google_storage_bucket.output_bucket,
+    google_secret_manager_secret_version.secret_version,
+    google_dataform_repository.dataform_repository,
   ]
 
 }
