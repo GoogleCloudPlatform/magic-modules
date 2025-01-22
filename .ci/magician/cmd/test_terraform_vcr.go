@@ -195,7 +195,7 @@ func mergeCovData(rnr ExecRunner) error {
 	if err != nil {
 		return fmt.Errorf("failed to merge coverage data: %s", err)
 	}
-	args := []string{"-m", "-q", "cp", "/tmp/mergedcov", "test-coverage-data" + "/cov/"}
+	args := []string{"-m", "-q", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/"}
 	if _, err := rnr.Run("gsutil", args, nil); err != nil {
 		return fmt.Errorf("error upload cov data %w", err)
 	}
