@@ -49,6 +49,8 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
+      start_time: 'time.Now().Add(time.Hour * (12)).Format(time.RFC3339)'
+      end_time: 'time.Now().Add(time.Hour * (240)).Format(time.RFC3339)'
   - name: 'colab_schedule_dataform'
     primary_resource_id: 'schedule'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-schedule%s", context["random_suffix"])'

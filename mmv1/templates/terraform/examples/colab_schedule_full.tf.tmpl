@@ -66,8 +66,8 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   max_concurrent_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
-  start_time = "2026-01-01T00:00:00-05:00"
-  end_time = "2026-08-24T23:03:45Z"
+  start_time = "{{index $.TestEnvVars "start_time"}}"
+  end_time = "{{index $.TestEnvVars "start_time"}}"
 
   create_notebook_execution_job_request {
     display_name = "Notebook execution"
@@ -98,8 +98,7 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
     }
 
     gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-
-    execution_user = "{{index $.TestEnvVars "identity_user"}}@{{index $.TestEnvVars "org_domain"}}"
+    service_account = "{{index $.TestEnvVars "service_account"}}"
 
     labels = {
         k = "val"
