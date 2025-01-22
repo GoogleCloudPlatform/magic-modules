@@ -62,23 +62,23 @@ resource "google_storage_bucket_object" "notebook" {
 
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   display_name = "Notebook Schedule basic"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "location"}}"
   max_concurrent_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
 
   create_notebook_execution_job_request {
-    parent = "projects/bcreddy-sandbox/locations/us-central1"
+    parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}"
     notebook_execution_job {
-    display_name = "Notebook execution"
-    gcs_notebook_source {
-      uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
-      generation = google_storage_bucket_object.notebook.generation
-    }
+      display_name = "Notebook execution"
+      gcs_notebook_source {
+        uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
+        generation = google_storage_bucket_object.notebook.generation
+      }
 
-    notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
-    gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-    service_account = "{{index $.TestEnvVars "service_account"}}"
-    }
+      notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
+      gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
+      service_account = "{{index $.TestEnvVars "service_account"}}"
+      }
   }
 
   depends_on = [

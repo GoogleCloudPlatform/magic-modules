@@ -38,11 +38,13 @@ examples:
       bucket: 'my_bucket'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+      location: 'REGION'
       service_account: 'SERVICE_ACCT'
-    ignore_read_extra:
-      - direct_notebook_source.0.content
   - name: 'colab_schedule_full'
     primary_resource_id: 'schedule'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       name: 'colab-schedule'
       bucket: 'my_bucket'
@@ -51,6 +53,7 @@ examples:
       end_time: '2025-01-01T12:00:00Z'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+      location: 'REGION'
       service_account: 'SERVICE_ACCT'
       start_time: 'time.Now().Add(time.Hour * (12)).Format(time.RFC3339)'
       end_time: 'time.Now().Add(time.Hour * (240)).Format(time.RFC3339)'

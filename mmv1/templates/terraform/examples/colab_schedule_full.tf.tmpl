@@ -58,7 +58,7 @@ resource "google_dataform_repository" "dataform_repository" {
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "schedule"}}"
   display_name = "Notebook Schedule full"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "location"}}"
   allow_queueing = true
   max_concurrent_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
@@ -67,41 +67,45 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   end_time = "{{index $.Vars "start_time"}}"
 
   create_notebook_execution_job_request {
-    display_name = "Notebook execution"
-    execution_timeout = "86400s"
+    parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}"
+    notebook_execution_job {
+      display_name = "Notebook execution"
+      execution_timeout = "86400s"
 
-    dataform_repository_source {
-      commit_sha = "randomsha123"
-      dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.dataform_repository.name}"
+      dataform_repository_source {
+        commit_sha = "randomsha123"
+        dataform_repository_resource_name = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}/repositories/${google_dataform_repository.dataform_repository.name}"
+      }
+
+      custom_environment_spec {
+          machine_spec {
+          machine_type     = "n1-standard-2"
+          accelerator_type = "NVIDIA_TESLA_T4"
+          accelerator_count = "1"
+          }
+
+          persistent_disk_spec {
+          disk_type    = "pd-standard"
+          disk_size_gb = 200
+          }
+
+          network_spec {
+          enable_internet_access = true
+          network = google_compute_network.my_network.id
+          subnetwork = google_compute_subnetwork.my_subnetwork.id
+          }
+      }
+
+      gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
+      service_account = "{{index $.TestEnvVars "service_account"}}"
     }
-
-    custom_environment_spec {
-        machine_spec {
-        machine_type     = "n1-standard-2"
-        accelerator_type = "NVIDIA_TESLA_T4"
-        accelerator_count = "1"
-        }
-
-        persistent_disk_spec {
-        disk_type    = "pd-standard"
-        disk_size_gb = 200
-        }
-
-        network_spec {
-        enable_internet_access = true
-        network = google_compute_network.my_network.id
-        subnetwork = google_compute_subnetwork.my_subnetwork.id
-        }
-    }
-
-    gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
-    service_account = "{{index $.TestEnvVars "service_account"}}"
   }
 
   depends_on = [
     google_compute_network.my_network,
     google_compute_subnetwork.my_subnetwork,
-    google_storage_bucket_object.notebook,
     google_storage_bucket.output_bucket,
+    google_secret_manager_secret_version.secret_version,
+    google_dataform_repository.dataform_repository,
   ]
 }
