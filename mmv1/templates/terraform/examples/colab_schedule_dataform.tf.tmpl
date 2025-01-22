@@ -1,13 +1,15 @@
-resource "google_compute_network" "my_network" {
-  name = "{{index $.Vars "network_name"}}"
-  auto_create_subnetworks = false
-}
+resource "google_colab_runtime_template" "my_runtime_template" {
+  name = "{{index $.Vars "runtime_template_name"}}"
+  display_name = "Runtime template"
+  location = "us-central1"
 
-resource "google_compute_subnetwork" "my_subnetwork" {
-  name   = "{{index $.Vars "network_name"}}"
-  network = google_compute_network.my_network.id
-  region = "us-central1"
-  ip_cidr_range = "10.0.1.0/24"
+  machine_spec {
+    machine_type     = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
 }
 
 resource "google_storage_bucket" "output_bucket" {
@@ -17,100 +19,94 @@ resource "google_storage_bucket" "output_bucket" {
   uniform_bucket_level_access = true
 }
 
-resource "google_storage_bucket_object" "notebook" {
-  name   = "hello_world.ipynb"
-  bucket = google_storage_bucket.output_bucket.name
-  content = <<EOF
-    {
-      "cells": [
-        {
-          "cell_type": "code",
-          "execution_count": null,
-          "metadata": {},
-          "outputs": [],
-          "source": [
-            "print(\"Hello, World!\")"
-          ]
-        }
-      ],
-      "metadata": {
-        "kernelspec": {
-          "display_name": "Python 3",
-          "language": "python",
-          "name": "python3"
-        },
-        "language_info": {
-          "codemirror_mode": {
-            "name": "ipython",
-            "version": 3
-          },
-          "file_extension": ".py",
-          "mimetype": "text/x-python",
-          "name": "python",
-          "nbconvert_exporter": "python",
-          "pygments_lexer": "ipython3",
-          "version": "3.8.5"
-        }
-      },
-      "nbformat": 4,
-      "nbformat_minor": 4
-    }
-    EOF
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "my-secret"
+
+  replication {
+    auto {}
+  }
 }
 
-resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
-  name        = "{{index $.Vars "schedule"}}"
-  display_name = "Notebook Schedule full"
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret = google_secret_manager_secret.secret.id
+
+  secret_data = "secret-data"
+}
+
+resource "google_dataform_repository" "dataform_repository" {
+  name = "dataform-repository"
+  display_name = "dataform_repository"
+  npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
+  kms_key_name = "{{index $.Vars "key_name"}}"
+
+  labels = {
+    label_foo1 = "label-bar1"
+  }
+
+  git_remote_settings {
+      url = "https://github.com/OWNER/REPOSITORY.git"
+      default_branch = "main"
+      authentication_token_secret_version = google_secret_manager_secret_version.secret_version.id
+  }
+
+  workspace_compilation_overrides {
+    default_database = "database"
+    schema_suffix = "_suffix"
+    table_prefix = "prefix_"
+  }
+
+}
+
+resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
+  display_name = "Notebook execution Dataform"
   location = "us-central1"
-  allow_queueing = true
+
+  dataform_repository_source {
+  commit_sha = "randomsha123"
+  dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.dataform_repository.name}"
+  }
+
+  notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
+
+  gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
+
+  service_account = "{{index $.TestEnvVars "service_account"}}"
+
+  depends_on = [
+    google_colab_runtime_template.my_runtime_template,
+    google_storage_bucket.output_bucket,
+    google_secret_manager_secret_version.secret_version,
+    google_dataform_repository.dataform_repository,
+  ]
+
+}
+
+
+
+resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
+  display_name = "Notebook Schedule basic"
+  location = "us-central1"
   max_concurrent_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
-  max_run_count = 5
-  start_time = "2026-01-01T00:00:00-05:00"
-  end_time = "2026-08-24T23:03:45Z"
 
   create_notebook_execution_job_request {
     display_name = "Notebook execution"
-    execution_timeout = "86400s"
 
-    gcs_notebook_source {
-      uri = "gs://${google_storage_bucket_object.notebook.bucket}/${google_storage_bucket_object.notebook.name}"
-      generation = google_storage_bucket_object.notebook.generation
+    dataform_repository_source {
+      commit_sha = "randomsha123"
+      dataform_repository_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/repositories/${google_dataform_repository.dataform_repository.name}"
     }
 
-    custom_environment_spec {
-        machine_spec {
-        machine_type     = "n1-standard-2"
-        accelerator_type = "NVIDIA_TESLA_T4"
-        accelerator_count = "1"
-        }
-
-        persistent_disk_spec {
-        disk_type    = "pd-standard"
-        disk_size_gb = 200
-        }
-
-        network_spec {
-        enable_internet_access = true
-        network = google_compute_network.my_network.id
-        subnetwork = google_compute_subnetwork.my_subnetwork.id
-        }
-    }
+    notebook_runtime_template_resource_name = "projects/${google_colab_runtime_template.my_runtime_template.project}/locations/${google_colab_runtime_template.my_runtime_template.location}/notebookRuntimeTemplates/${google_colab_runtime_template.my_runtime_template.name}"
 
     gcs_output_uri = "gs://${google_storage_bucket.output_bucket.name}"
 
-    execution_user = "{{index $.TestEnvVars "identity_user"}}@{{index $.TestEnvVars "org_domain"}}"
-
-    labels = {
-        k = "val"
-    }
+    service_account = "{{index $.TestEnvVars "service_account"}}"
 
   }
 
   depends_on = [
-    google_compute_network.my_network,
-    google_compute_subnetwork.my_subnetwork,
-    google_storage_bucket_object.notebook,
+    google_colab_runtime_template.my_runtime_template,
     google_storage_bucket.output_bucket,
   ]
 
