@@ -1,0 +1,97 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'OrganizationSourceFinding'
+# Resource description for the provider documentation.
+description: |
+  An organization source finding is an individual piece of security analysis data identified within Security Command Center.
+references:
+  guides:
+    'Manage Findings': 'https://cloud.google.com/security-command-center/docs/how-to-manage-findings'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources.findings'
+
+# URL for the resource's standard List method. https://google.aip.dev/132
+base_url: 'organizations/{{organization}}/sources/{{source}}/findings'
+# URL for the resource's standard Get method. https://google.aip.dev/131
+self_link: 'organizations/{{organization}}/sources/{{source}}/findings/{{name}}'
+
+# If true, the resource and all its fields are considered immutable - that is,
+# only creatable, not updatable. Individual fields can override this if they
+# have a custom update method in the API.
+immutable: false
+
+# URL for the resource's standard Create method. https://google.aip.dev/133
+create_url: 'organizations/{{organization}}/sources/{{source}}/findings?findingId={{name}}'
+
+# URL for the resource's standard Update method. https://google.aip.dev/134
+update_url: 'organizations/{{organization}}/sources/{{source}}/findings/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+
+# If true, code for handling long-running operations is generated along with the resource.
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+
+parameters:
+  - name: 'organization'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The organization ID where the finding resides.
+  - name: 'source'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The source ID within the organization for this finding.
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The unique identifier for the finding.
+
+properties:
+  - name: 'category'
+    type: String
+    required: true
+    description: |
+      The category of the finding (e.g., misconfiguration, vulnerability).
+  - name: 'severity'
+    type: String
+    required: false
+    description: |
+      The severity level of the finding (e.g., CRITICAL, HIGH, MEDIUM, LOW).
+  - name: 'state'
+    type: String
+    required: false
+    description: |
+      The current state of the finding (e.g., ACTIVE, INACTIVE).
+  - name: 'event_time'
+    type: String
+    required: false
+    description: |
+      The time at which the event was detected.
+  - name: 'source_properties'
+    type: Map
+    required: false
+    description: |
+      A map of additional properties related to the finding.
