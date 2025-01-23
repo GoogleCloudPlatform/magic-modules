@@ -1,14 +1,14 @@
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
-	name = "{{index $.Vars "trigger_name"}}"
-	location = "us-central1"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		workflow = google_workflows_workflow.workflow.id
-	}
-	service_account = google_service_account.trigger_service_account.email
+  name     = "{{index $.Vars "trigger_name"}}"
+  location = "us-central1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    workflow = google_workflows_workflow.workflow.id
+  }
+  service_account = google_service_account.trigger_service_account.email
 }
 
 resource "google_service_account" "trigger_service_account" {
@@ -16,10 +16,10 @@ resource "google_service_account" "trigger_service_account" {
 }
 
 resource "google_workflows_workflow" "workflow" {
-  name = "{{index $.Vars "workflow_name"}}"
+  name                = "{{index $.Vars "workflow_name"}}"
   deletion_protection = false
-  region = "us-central1"
-  source_contents = <<-EOF
+  region              = "us-central1"
+  source_contents     = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
   # This workflow does the following:

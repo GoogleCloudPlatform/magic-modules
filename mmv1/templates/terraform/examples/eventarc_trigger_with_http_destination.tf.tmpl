@@ -1,20 +1,20 @@
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
-	name = "{{index $.Vars "trigger_name"}}"
-	location = "us-central1"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		http_endpoint {
-			uri = "http://10.10.10.8:80/route"
-		}
+  name     = "{{index $.Vars "trigger_name"}}"
+  location = "us-central1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    http_endpoint {
+      uri = "http://10.10.10.8:80/route"
+    }
     network_config {
       network_attachment = google_compute_network_attachment.psc.id
     }
 
-	}
-	service_account = google_service_account.trigger_service_account.email
+  }
+  service_account = google_service_account.trigger_service_account.email
 }
 
 resource "google_service_account" "trigger_service_account" {
@@ -43,4 +43,3 @@ resource "google_compute_network_attachment" "psc" {
     google_compute_subnetwork.psc.self_link
   ]
 }
-
