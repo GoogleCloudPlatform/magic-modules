@@ -114,6 +114,7 @@ properties:
     description: |-
       The subscription id used to reference the subscription.
     output: true
+    ignore_read: true
   - name: 'creation_time'
     type: String
     description: |-
