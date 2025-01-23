@@ -22,7 +22,6 @@ resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}"  {
   linked_vpc_network {
     include_export_ranges = [
       "ALL_IPV6_RANGES",
-      "ALL_ALL_PUPI_IPV4_RANGES",
       "ALL_PRIVATE_IPV4_RANGES"
     ]
     uri = google_compute_network.network.self_link
