@@ -56,15 +56,18 @@ func Provider() *schema.Provider {
 					Schema: map[string]*schema.Schema{
 						"audience": {
 							Type:     schema.TypeString,
-							Required: true, // TODO: validate audience is non-empty string
+							Required: true,
+							ValidateFunc: ValidateEmptyStrings,
 						},
 						"service_account_email": {
-							Type:     schema.TypeString, // TODO: validate service_account_email is non-empty string that is a valid email address
+							Type:     schema.TypeString,
 							Required: true,
+							ValidateFunc: ValidateServiceAccountEmail,
 						},
 						"identity_token_file": {
-							Type:     schema.TypeString, // TODO: validate identity_token is non-empty string that is a valid JWT
+							Type:     schema.TypeString,
 							Required: true,
+							ValidateFunc: ValidateJWT,
 						},
 					},
 				},
