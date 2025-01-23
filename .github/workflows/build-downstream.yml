@@ -25,25 +25,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@036ef458ddccddb148a2b9fb67e95a22fdbf728b # v1.160.0
-        with:
-          ruby-version: '3.1'
-
-      - name: Cache Bundler gems
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
-        with:
-          path: mmv1/vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('mmv1/**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
-
-      - name: Install Ruby dependencies
-        run: |
-          bundle config path mmv1/vendor/bundle
-          bundle install
-        working-directory: mmv1
-
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:

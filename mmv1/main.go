@@ -45,9 +45,6 @@ var forceProvider = flag.String("provider", "", "optional provider name. If spec
 
 var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
 
-// Example usage: --yaml
-var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
-
 var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
 
 func main() {

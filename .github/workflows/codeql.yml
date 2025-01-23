@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'go', 'ruby' ]
+        language: [ 'go' ]
 
     steps:
     - name: Checkout repository
