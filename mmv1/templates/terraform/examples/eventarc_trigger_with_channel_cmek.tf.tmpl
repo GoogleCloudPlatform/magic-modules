@@ -1,15 +1,5 @@
-resource "google_kms_crypto_key" "crypto_key" {
-  name     = "{{index $.Vars "key_name"}}"
-  key_ring = google_kms_key_ring.key_ring.id
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "{{index $.Vars "key_ring_name"}}"
-  location = "us-central1"
-}
-
 resource "google_kms_crypto_key_iam_member" "key_member" {
-  crypto_key_id = google_kms_crypto_key.crypto_key.id
+  crypto_key_id = "{{index $.Vars "key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
@@ -17,7 +7,7 @@ resource "google_kms_crypto_key_iam_member" "key_member" {
 resource "google_eventarc_channel" "test_channel" {
   location             = "us-central1"
   name                 = "{{index $.Vars "channel_name"}}"
-  crypto_key_name      = google_kms_crypto_key.crypto_key.id
+  crypto_key_name      = "{{index $.Vars "key_name"}}"
   third_party_provider = "${data.google_project.project.id}/locations/us-central1/providers/datadog"
   depends_on           = [google_kms_crypto_key_iam_member.key_member]
 }
@@ -66,4 +56,6 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   channel         = google_eventarc_channel.test_channel.id
 }
 
-data "google_project" "project" {}
+data "google_project" "project" {
+  project_id = "{{index $.TestEnvVars "project"}}"
+}

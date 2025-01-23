@@ -57,7 +57,10 @@ examples:
       service_name: some-service
       channel_name: some-channel
       key_name: some-key
-      key_ring_name: some-key-ring
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
     exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary
