@@ -51,7 +51,6 @@ func testAccBeyondcorpApplication_beyondcorpSecurityGatewayApplicationBasicExamp
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "default" {
   security_gateway_id = "default%{random_suffix}"
-  location = "global"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
@@ -70,7 +69,6 @@ func testAccBeyondcorpApplication_beyondcorpSecurityGatewayApplicationBasicExamp
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "default" {
   security_gateway_id = "default%{random_suffix}"
-  location = "global"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
