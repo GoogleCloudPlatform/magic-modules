@@ -18,6 +18,8 @@ resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
   location             = "us-central1"
   name                 = "{{index $.Vars "channel_name"}}"
   crypto_key_name      = google_kms_crypto_key.crypto_key.id
-  third_party_provider = "projects/${data.google_project.test_project.project_id}/locations/us-central1/providers/datadog"
+  third_party_provider = "projects/${data.google_project.project.project_id}/locations/us-central1/providers/datadog"
   depends_on           = [google_kms_crypto_key_iam_member.key_member]
 }
+
+data "google_project" "project" {}

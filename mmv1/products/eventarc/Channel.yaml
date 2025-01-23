@@ -17,7 +17,7 @@ legacy_long_form_project: true
 base_url: projects/{{project}}/locations/{{location}}/channels
 create_url: projects/{{project}}/locations/{{location}}/channels?channelId={{name}}
 self_link: projects/{{project}}/locations/{{location}}/channels/{{name}}
-update_verb: :PATCH
+update_verb: PATCH
 update_mask: true
 references:
   guides:
@@ -33,6 +33,20 @@ async:
 autogen_async: true
 description: |
  The Eventarc Channel resource
+error_retry_predicates:
+  - transport_tpg.EventarcChannel403Retry
+examples:
+  - name: eventarc_channel_with_cmek
+    primary_resource_id: primary
+    vars:
+      channel_name: some-channel
+      key_ring_name: some-key-ring
+      key_name: some-key
+  - name: eventarc_channel
+    primary_resource_id: primary
+    vars:
+      channel_name: some-channel
+    exclude_docs: true
 parameters:
   - name: location
     type: String
@@ -40,12 +54,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-properties:
   - name: name
     type: String
     description: Required. The resource name of the channel. Must be unique within the location on the project.
     required: true
     immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/eventarc_channel_name.go.tmpl
+properties:
   - name: uid
     type: String
     description: Output only. Server assigned unique identifier for the channel. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
@@ -82,4 +98,5 @@ properties:
     output: true
   - name: cryptoKeyName
     type: String
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     description: Optional. Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt their event data. It must match the pattern `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
