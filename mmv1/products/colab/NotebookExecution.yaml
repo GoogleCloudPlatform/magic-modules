@@ -37,7 +37,6 @@ examples:
   - name: 'colab_notebook_execution_basic'
     primary_resource_id: 'notebook-execution'
     vars:
-      notebook_execution_job_id: 'colab-notebook-execution'
       runtime_template_name: 'runtime-template-name'
       bucket: 'my_bucket'
     test_env_vars:
@@ -61,10 +60,10 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
-      notebook_execution_job_id: 'colab-notebook-execution'
+      secret: 'secret'
+      dataform_repository: 'dataform-repository'
       runtime_template_name: 'runtime-template-name'
       bucket: 'my_bucket'
-      network_name: 'colab-test-default'
       key_name: 'my-crypto-key'
     test_env_vars:
       project_id: 'PROJECT_NAME'
