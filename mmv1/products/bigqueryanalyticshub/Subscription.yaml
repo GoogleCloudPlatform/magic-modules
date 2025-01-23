@@ -90,7 +90,7 @@ properties:
           - name: 'projectId'
             type: String
             description: The ID of the project containing this dataset.
-          required: true
+            required: true
       - name: 'friendlyName'
         type: String
         description: A descriptive name for the dataset.
