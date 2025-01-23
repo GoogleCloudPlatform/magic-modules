@@ -22,6 +22,7 @@ create_url: projects/{{project}}/locations/{{location}}/googleChannelConfig
 create_verb: PATCH
 update_url: projects/{{project}}/locations/{{location}}/googleChannelConfig
 update_verb: PATCH
+update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
 references:
@@ -36,8 +37,11 @@ examples:
   - name: eventarc_google_channel_config_with_cmek
     primary_resource_id: primary
     vars:
-      key_ring_name: some-key-ring
       key_name: some-key
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-google-channel-config-key").CryptoKey.Name'
 parameters:
   - name: location
     type: String

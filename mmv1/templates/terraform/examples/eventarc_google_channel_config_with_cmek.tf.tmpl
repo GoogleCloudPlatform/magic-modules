@@ -1,17 +1,9 @@
-data "google_project" "project" {}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "{{index $.Vars "key_ring_name"}}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "{{index $.Vars "key_name"}}"
-  key_ring = google_kms_key_ring.key_ring.id
+data "google_project" "project" {
+  project_id = "{{index $.TestEnvVars "project"}}"
 }
 
 resource "google_kms_crypto_key_iam_member" "key_member" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "{{index $.Vars "key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
@@ -19,6 +11,6 @@ resource "google_kms_crypto_key_iam_member" "key_member" {
 resource "google_eventarc_google_channel_config" "{{$.PrimaryResourceId}}" {
   location        = "us-central1"
   name            = "googleChannelConfig"
-  crypto_key_name = google_kms_crypto_key.key.id
+  crypto_key_name = "{{index $.Vars "key_name"}}"
   depends_on      = [google_kms_crypto_key_iam_member.key_member]
 }

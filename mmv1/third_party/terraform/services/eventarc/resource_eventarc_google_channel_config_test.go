@@ -12,11 +12,14 @@ import (
 func TestAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 	t.Parallel()
 
+	region := envvar.GetTestRegionFromEnv()
 	context := map[string]interface{}{
 		"project_name":   envvar.GetTestProjectFromEnv(),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
-		"region":         envvar.GetTestRegionFromEnv(),
+		"region":         region,
 		"random_suffix":  acctest.RandString(t, 10),
+		"key1":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-google-channel-config-key1").CryptoKey.Name,
+		"key2":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-google-channel-config-key2").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -48,119 +51,63 @@ func TestAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 
 func testAccEventarcGoogleChannelConfig_setCryptoKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_key_ring" "test_key_ring" {
-	name     = "tf-keyring%{random_suffix}"
-	location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key1" {
-	name     = "tf-key1%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "tf-key2%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "key1_member" {
-	crypto_key_id = google_kms_crypto_key.key1.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "key2_member" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_google_channel_config" "primary" {
-	location = "%{region}"
-	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
-	crypto_key_name =  google_kms_crypto_key.key1.id
-	depends_on = [google_kms_crypto_key_iam_member.key1_member]
+  location        = "%{region}"
+  name            = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
+  crypto_key_name = "%{key1}"
+  depends_on      = [google_kms_crypto_key_iam_member.key1_member]
 }
-	`, context)
+`, context)
 }
 
 func testAccEventarcGoogleChannelConfig_cryptoKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_key_ring" "test_key_ring" {
-	name     = "tf-keyring%{random_suffix}"
-	location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key1" {
-	name     = "tf-key1%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "tf-key2%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "key1_member" {
-	crypto_key_id = google_kms_crypto_key.key1.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "key2_member" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key2}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_google_channel_config" "primary" {
-	location = "%{region}"
-	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
-	crypto_key_name = google_kms_crypto_key.key2.id
-	depends_on = [google_kms_crypto_key_iam_member.key2_member]
+  location        = "%{region}"
+  name            = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
+  crypto_key_name = "%{key2}"
+  depends_on      = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
-	`, context)
+`, context)
 }
 
 func testAccEventarcGoogleChannelConfig_deleteCryptoKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_key_ring" "test_key_ring" {
-	name     = "tf-keyring%{random_suffix}"
-	location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key1" {
-	name     = "tf-key1%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "tf-key2%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "key1_member" {
-	crypto_key_id = google_kms_crypto_key.key1.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "key2_member" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key2}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_google_channel_config" "primary" {
-	location = "%{region}"
-	name     = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
-	crypto_key_name = ""
+  location        = "%{region}"
+  name            = "projects/%{project_name}/locations/%{region}/googleChannelConfig"
+  crypto_key_name = ""
+  depends_on      = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
-	`, context)
+`, context)
 }
