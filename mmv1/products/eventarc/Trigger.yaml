@@ -34,14 +34,45 @@ autogen_async: true
 description: |
  The Eventarc Trigger resource
 examples:
-  - name: eventarc_basic_trigger
+  - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
     vars:
-      name: name
-      topic: topic
-      eventarc_service: eventarc-service
-      project: my-project-name
-    exclude_test: true
+      trigger_name: some-trigger
+      topic_name: some-topic
+      service_name: some-service
+  - name: eventarc_trigger_with_http_destination
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      network_name: some-network
+      subnet_name: some-subnet
+      network_attachment_name: some-na
+    exclude_docs: true
+  - name: eventarc_trigger_with_channel_cmek
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      service_name: some-service
+      channel_name: some-channel
+      key_name: some-key
+      key_ring_name: some-key-ring
+    exclude_docs: true
+  - name: eventarc_trigger_with_workflow_destination
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      workflow_name: some-workflow
+    exclude_docs: true
+  - name: eventarc_trigger_with_path_pattern_filter
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      service_name: some-service
+    exclude_docs: true
 parameters:
   - name: location
     type: String
