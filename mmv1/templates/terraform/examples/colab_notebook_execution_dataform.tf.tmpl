@@ -77,6 +77,7 @@ resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
     google_storage_bucket.output_bucket,
     google_secret_manager_secret_version.secret_version,
     google_dataform_repository.dataform_repository,
+    google_secret_manager_secret.secret,
   ]
   
 }
