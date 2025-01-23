@@ -83,13 +83,13 @@ properties:
         required: true
         description: A reference that identifies the destination dataset.
         properties:
-        - name: 'datasetId'
-          type: String
-          description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
-          required: true
-        - name: 'projectId'
-          type: String
-          description: The ID of the project containing this dataset.
+          - name: 'datasetId'
+            type: String
+            description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
+            required: true
+          - name: 'projectId'
+            type: String
+            description: The ID of the project containing this dataset.
           required: true
       - name: 'friendlyName'
         type: String
