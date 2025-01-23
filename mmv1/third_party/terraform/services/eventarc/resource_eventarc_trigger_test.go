@@ -55,48 +55,46 @@ func TestAccEventarcTrigger_BasicHandWritten(t *testing.T) {
 func testAccEventarcTrigger_BasicHandWritten(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_trigger" "primary" {
-	name = "tf-test-name%{random_suffix}"
-	location = "europe-west1"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		cloud_run_service {
-			service = google_cloud_run_service.default.name
-			region = "europe-west1"
-		}
-	}
-	labels = {
-		foo = "bar"
-	}
+  name     = "tf-test-name%{random_suffix}"
+  location = "europe-west1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default.name
+      region  = "europe-west1"
+    }
+  }
+  labels = {
+    foo = "bar"
+  }
 }
 
 resource "google_pubsub_topic" "foo" {
-	name = "tf-test-topic%{random_suffix}"
+  name = "tf-test-topic%{random_suffix}"
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "tf-test-eventarc-service%{random_suffix}"
-	location = "europe-west1"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}"
+  location = "europe-west1"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 `, context)
@@ -105,73 +103,69 @@ resource "google_cloud_run_service" "default" {
 func testAccEventarcTrigger_BasicHandWrittenUpdate0(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_trigger" "primary" {
-	name = "tf-test-name%{random_suffix}"
-	location = "europe-west1"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		cloud_run_service {
-			service = google_cloud_run_service.default.name
-			region = "europe-west1"
-		}
-	}
-	transport {
-		pubsub {
-			topic = google_pubsub_topic.foo.id
-		}
-	}
+  name     = "tf-test-name%{random_suffix}"
+  location = "europe-west1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default.name
+      region  = "europe-west1"
+    }
+  }
+  transport {
+    pubsub {
+      topic = google_pubsub_topic.foo.id
+    }
+  }
 }
 
 resource "google_pubsub_topic" "foo" {
-	name = "tf-test-topic%{random_suffix}"
+  name = "tf-test-topic%{random_suffix}"
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "tf-test-eventarc-service%{random_suffix}"
-	location = "europe-west1"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}"
+  location = "europe-west1"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 resource "google_cloud_run_service" "default2" {
-	name     = "tf-test-eventarc-service%{random_suffix}2"
-	location = "europe-north1"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}2"
+  location = "europe-north1"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 `, context)
@@ -180,82 +174,78 @@ resource "google_cloud_run_service" "default2" {
 func testAccEventarcTrigger_BasicHandWrittenUpdate1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_trigger" "primary" {
-	name = "tf-test-name%{random_suffix}"
-	location = "europe-west1"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		cloud_run_service {
-			service = google_cloud_run_service.default2.name
-			region = "europe-north1"
-		}
-	}
-	transport {
-		pubsub {
-			topic = google_pubsub_topic.foo.id
-		}
-	}
-	labels = {
-		foo = "bar"
-	}
-	service_account = google_service_account.eventarc-sa.email
+  name     = "tf-test-name%{random_suffix}"
+  location = "europe-west1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default2.name
+      region  = "europe-north1"
+    }
+  }
+  transport {
+    pubsub {
+      topic = google_pubsub_topic.foo.id
+    }
+  }
+  labels = {
+    foo = "bar"
+  }
+  service_account = google_service_account.eventarc-sa.email
 }
 
 resource "google_service_account" "eventarc-sa" {
-	account_id   = "tf-test-sa%{random_suffix}"
-	display_name = "Test Service Account"
+  account_id   = "tf-test-sa%{random_suffix}"
+  display_name = "Test Service Account"
 }
 
 resource "google_pubsub_topic" "foo" {
-	name = "tf-test-topic%{random_suffix}"
+  name = "tf-test-topic%{random_suffix}"
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "tf-test-eventarc-service%{random_suffix}"
-	location = "europe-west1"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}"
+  location = "europe-west1"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 resource "google_cloud_run_service" "default2" {
-	name     = "tf-test-eventarc-service%{random_suffix}2"
-	location = "europe-north1"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}2"
+  location = "europe-north1"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 `, context)
@@ -293,52 +283,50 @@ func TestAccEventarcTrigger_AlternateForm(t *testing.T) {
 func testAccEventarcTrigger_AlternateForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_pubsub_topic" "foo" {
-	name = "tf-test-topic%{random_suffix}"
+  name = "tf-test-topic%{random_suffix}"
 }
 
 resource "google_cloud_run_service" "default" {
-	name     = "tf-test-eventarc-service%{random_suffix}"
-	location = "%{region}"
-
-	template {
-		spec {
-			containers {
-				image = "gcr.io/cloudrun/hello"
-				ports {
-					container_port = 8080
-				}
-			}
-			container_concurrency = 50
-			timeout_seconds = 100
-		}
-	}
-
-	traffic {
-		percent         = 100
-		latest_revision = true
-	}
+  name     = "tf-test-eventarc-service%{random_suffix}"
+  location = "%{region}"
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+      }
+      container_concurrency = 50
+      timeout_seconds       = 100
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
 }
 
 resource "google_eventarc_trigger" "primary" {
-	name = "projects/%{project_name}/locations/%{region}/triggers/tf-test-trigger%{random_suffix}"
-	project = "projects/%{project_name}"
-	location = "long/form/%{region}"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		cloud_run_service {
-			service = google_cloud_run_service.default.name
-			region = "%{region}"
-		}
-	}
-	transport {
-		pubsub {
-			topic = "tf-test-topic%{random_suffix}"
-		}
-	}
-    depends_on = [google_cloud_run_service.default, google_pubsub_topic.foo]
+  name     = "projects/%{project_name}/locations/%{region}/triggers/tf-test-trigger%{random_suffix}"
+  project  = "projects/%{project_name}"
+  location = "long/form/%{region}"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    cloud_run_service {
+      service = google_cloud_run_service.default.name
+      region  = "%{region}"
+    }
+  }
+  transport {
+    pubsub {
+      topic = "tf-test-topic%{random_suffix}"
+    }
+  }
+  depends_on = [google_cloud_run_service.default, google_pubsub_topic.foo]
 }
 `, context)
 }
@@ -373,24 +361,24 @@ func TestAccEventarcTrigger_ShortFormWorkflow(t *testing.T) {
 func testAccEventarcTrigger_ShortFormWorkflow(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_trigger" "primary" {
-	name = "tf-test-name%{random_suffix}"
-	location = "%{region}"
-	matching_criteria {
-		attribute = "type"
-		value = "google.cloud.pubsub.topic.v1.messagePublished"
-	}
-	destination {
-		workflow = "tf-test-eventarc-workflow%{random_suffix}"
-	}
-	service_account = "%{service_account}"
-	depends_on = [google_workflows_workflow.example]
+  name     = "tf-test-name%{random_suffix}"
+  location = "%{region}"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    workflow = "tf-test-eventarc-workflow%{random_suffix}"
+  }
+  service_account = "%{service_account}"
+  depends_on      = [google_workflows_workflow.example]
 }
 
 resource "google_workflows_workflow" "example" {
-  name = "tf-test-eventarc-workflow%{random_suffix}"
+  name                = "tf-test-eventarc-workflow%{random_suffix}"
   deletion_protection = false
-  region = "%{region}"
-  source_contents = <<-EOF
+  region              = "%{region}"
+  source_contents     = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
   # This workflow does the following:
