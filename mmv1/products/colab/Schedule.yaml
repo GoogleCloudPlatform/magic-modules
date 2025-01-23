@@ -22,7 +22,7 @@ references:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.schedules'
 base_url: 'projects/{{project}}/locations/{{location}}/schedules'
 self_link: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/schedules?{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/schedules'
 async:
   type: 'OpAsync'
   actions: ['delete']
@@ -34,7 +34,6 @@ examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
     vars:
-      name: 'colab-schedule'
       bucket: 'my_bucket'
     test_env_vars:
       project_id: 'PROJECT_NAME'
@@ -46,7 +45,6 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
-      name: 'colab-schedule'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
       secret: 'secret'
@@ -71,8 +69,7 @@ properties:
   - name: 'name'
     type: String
     description: 'The resource name of the Schedule'
-    default_from_api: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    output : true
   - name: 'displayName'
     type: String
     description:
@@ -161,73 +158,6 @@ properties:
             description: 'The NotebookRuntimeTemplate to source compute configuration from.'
             exactly_one_of:
               - notebook_runtime_template_resource_name
-              - custom_environment_spec
-          - name: 'customEnvironmentSpec'
-            type: NestedObject
-            description: 'The custom compute configuration for an execution job.'
-            exactly_one_of:
-              - notebook_runtime_template_resource_name
-              - custom_environment_spec
-            properties:
-              - name: machineSpec
-                type: NestedObject
-                default_from_api: true
-                description: 'The machine configuration of the runtime.'
-                properties:
-                  - name: 'machineType'
-                    type: string
-                    default_from_api: true
-                    description: |
-                            The Compute Engine machine type selected for the runtime.
-                  - name: 'acceleratorType'
-                    type: enum
-                    description: |
-                            The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
-                    enum_values:
-                      - 'NVIDIA_TESLA_V100'
-                      - 'NVIDIA_TESLA_T4'
-                      - 'NVIDIA_TESLA_A100'
-                      - 'NVIDIA_A100_80GB'
-                      - 'NVIDIA_L4'
-                  - name: 'acceleratorCount'
-                    type: Integer
-                    default_from_api: true
-                    description: 'The number of accelerators used by the runtime.'
-              - name: persistentDiskSpec
-                default_from_api: true
-                type: NestedObject
-                description: 'The configuration for the data disk of the runtime.'
-                properties:
-                  - name: 'diskType'
-                    type: enum
-                    description: 'The type of the persistent disk.'
-                    default_from_api: true
-                    enum_values:
-                      - 'pd-standard'
-                      - 'pd-ssd'
-                      - 'pd-balanced'
-                      - 'pd-extreme'
-                  - name: 'diskSizeGb'
-                    type: int
-                    default_from_api: true
-                    description: The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
-              - name: networkSpec
-                type: NestedObject
-                default_from_api: true
-                description: 'The network configuration for the runtime.'
-                properties:
-                  - name: 'enableInternetAccess'
-                    type: Boolean
-                    description: Enable public internet access for the runtime.
-                  - name: 'network'
-                    default_from_api: true
-                    type: String
-                    description: 'The name of the VPC that this runtime is in.'
-                    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
-                  - name: 'subnetwork'
-                    type: String
-                    description: 'The name of the subnetwork that this runtime is in.'
-                    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           - name: 'gcsOutputUri'
             required: true
             type: String
