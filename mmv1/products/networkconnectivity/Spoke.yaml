@@ -176,11 +176,6 @@ properties:
           The only allowed value for now is "ALL_IPV4_RANGES".
         item_type:
           type: String
-      - name: 'includeExportRanges'
-        type: Array
-        description: IP ranges allowed to be included from peering.
-        item_type:
-          type: String
   - name: 'linkedInterconnectAttachments'
     type: NestedObject
     description: A collection of VLAN attachment resources. These resources should be redundant attachments that all advertise the same prefixes to Google Cloud. Alternatively, in active/passive configurations, all attachments should be capable of advertising the same prefixes.
@@ -209,11 +204,6 @@ properties:
         description: |
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
           The only allowed value for now is "ALL_IPV4_RANGES".
-        item_type:
-          type: String
-      - name: 'includeExportRanges'
-        type: Array
-        description: IP ranges allowed to be included from peering.
         item_type:
           type: String
   - name: 'linkedRouterApplianceInstances'
@@ -258,11 +248,6 @@ properties:
         description: |
           IP ranges allowed to be included during import from hub (does not control transit connectivity).
           The only allowed value for now is "ALL_IPV4_RANGES".
-        item_type:
-          type: String
-      - name: 'includeExportRanges'
-        type: Array
-        description: IP ranges allowed to be included from peering.
         item_type:
           type: String
   - name: 'linkedVpcNetwork'
