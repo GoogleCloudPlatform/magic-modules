@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"golang.org/x/exp/slices"
 )
@@ -37,6 +38,7 @@ func RequestCall(url, method, credentials string, result any, body any) error {
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 	fmt.Println("")
 	fmt.Println("request url: ", url)
 	fmt.Println("request body: ", string(jsonBody)) // Convert to string
@@ -80,4 +82,17 @@ func Removes(s1 []string, s2 []string) []string {
 		}
 	}
 	return result
+}
+
+func WriteToJson(data interface{}, path string) error {
+	rsBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
+	}
+
+	if err := os.WriteFile(path, rsBytes, 0644); err != nil {
+		return fmt.Errorf("failed to write data to file: %v", err)
+	}
+
+	return nil
 }

@@ -1,4 +1,14 @@
-{{- define "IamContext" }}
+{{- define "IamTestSetup" }}
+{{- if $.FirstTestExample.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+{{- range $iam := $.FirstTestExample.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+{{- end}}
+	})
+{{- end }}
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"role":          "{{ $.IamPolicy.AllowedIamRole }}",

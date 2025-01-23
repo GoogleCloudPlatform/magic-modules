@@ -32,7 +32,7 @@ import (
 {{ $example := $.FirstTestExample }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 	t.Parallel()
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -78,7 +78,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 
 func TestAcc{{ $.ResourceName }}IamMemberGenerated(t *testing.T) {
 	t.Parallel()
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -116,7 +116,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{ if $.IamPolicy.AdminIamRole }}
 	// This may skip test, so do it first
 	sa := envvar.GetTestServiceAccountFromEnv(t)
-{{-  end }}{{ template "IamContext" $ }}
+{{-  end }}{{ template "IamTestSetup" $ }}
 {{- if $.IamPolicy.AdminIamRole }}
 	context["service_account"] = sa
 {{-  end }}
@@ -165,7 +165,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated(t *testing.T) {
 {{ if $.IamPolicy.IamConditionsRequestType }}
 func TestAcc{{ $.ResourceName }}IamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -201,7 +201,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -248,7 +248,7 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated_withAndWithoutCondition(t *t
 func TestAcc{{ $.ResourceName }}IamMemberGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -284,7 +284,7 @@ func TestAcc{{ $.ResourceName }}IamMemberGenerated_withAndWithoutCondition(t *te
 	// Multiple fine-grained resources
 	acctest.SkipIfVcr(t)
 	t.Parallel()
-{{ template "IamContext" $ }}
+{{ template "IamTestSetup" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -334,7 +334,7 @@ func TestAcc{{ $.ResourceName }}IamPolicyGenerated_withCondition(t *testing.T) {
 	// This may skip test, so do it first
 	sa := envvar.GetTestServiceAccountFromEnv(t)
 {{-  end }}
-{{- template "IamContext" $ }}
+{{- template "IamTestSetup" $ }}
 {{- if $.IamPolicy.AdminIamRole }}
 	context["service_account"] = sa
 {{-  end }}

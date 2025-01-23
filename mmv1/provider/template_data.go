@@ -170,7 +170,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_test_setup.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
