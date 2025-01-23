@@ -49,14 +49,18 @@ examples:
       name: 'colab-schedule'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
-      start_time: '2025-01-01T00:00:00Z'
-      end_time: '2025-01-01T12:00:00Z'
+      secret: 'secret'
+      dataform_repository: 'dataform-repository'
+      start_time: '2014-10-02T15:01:23Z'
+      end_time: '2014-10-10T15:01:23Z'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
       service_account: 'SERVICE_ACCT'
-      start_time: 'time.Now().Add(time.Hour * (12)).Format(time.RFC3339)'
-      end_time: 'time.Now().Add(time.Hour * (240)).Format(time.RFC3339)'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
+      end_time: 'time.Now().AddDate(0, 0, 10).Format(time.RFC3339)'
 parameters:
   - name: 'location'
     type: String
@@ -99,7 +103,7 @@ properties:
     description:
       Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
   - name: 'allowQueueing'
-    type: boolean
+    type: Boolean
     description:
       Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
   - name: 'createNotebookExecutionJobRequest'

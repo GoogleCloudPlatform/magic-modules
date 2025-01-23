@@ -18,8 +18,7 @@ resource "google_storage_bucket" "output_bucket" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "my-secret"
-
+  secret_id = "{{index $.Vars "secret"}}"
   replication {
     auto {}
   }
@@ -27,12 +26,11 @@ resource "google_secret_manager_secret" "secret" {
 
 resource "google_secret_manager_secret_version" "secret_version" {
   secret = google_secret_manager_secret.secret.id
-
   secret_data = "secret-data"
 }
 
 resource "google_dataform_repository" "dataform_repository" {
-  name = "dataform-repository"
+  name = "{{index $.Vars "dataform_repository"}}"
   display_name = "dataform_repository"
   npmrc_environment_variables_secret_version = google_secret_manager_secret_version.secret_version.id
   kms_key_name = "{{index $.Vars "key_name"}}"
