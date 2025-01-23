@@ -7783,7 +7783,15 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_region_disk" "regionaldisk" {
-  name  		= "%s"
+  name  		= "%s-1"
+  size  		= 10
+  type  		= "pd-ssd"
+  region 		= "us-central1"
+  replica_zones = ["us-central1-a", "us-central1-b"]
+}
+
+resource "google_compute_region_disk" "regionaldisk2" {
+  name  		= "%s-2"
   size  		= 10
   type  		= "pd-ssd"
   region 		= "us-central1"
@@ -7806,11 +7814,16 @@ resource "google_compute_instance" "foobar" {
     force_attach = %t
   }
 
+  attached_disk {
+    source       = google_compute_region_disk.regionaldisk2.self_link
+    force_attach = %t
+  }
+
   network_interface {
     network = "default"
   }
 }
-`, disk, instance, force_attach)
+`, disk, disk, instance, force_attach, force_attach)
 }
 
 func testAccComputeInstance_attachedDisk_forceAttach_zonal(disk, instance string, force_attach bool) string {
@@ -7821,7 +7834,14 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_disk" "foobar" {
-  name = "%s"
+  name = "%s-1"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_disk" "foobar2" {
+  name = "%s-2"
   size = 10
   type = "pd-ssd"
   zone = "us-central1-a"
@@ -7843,11 +7863,16 @@ resource "google_compute_instance" "foobar" {
 	force_attach = %t
   }
 
+  attached_disk {
+    source = google_compute_disk.foobar2.name
+    force_attach = %t
+  }
+
   network_interface {
     network = "default"
   }
 }
-`, disk, instance, force_attach)
+`, disk, disk, instance, force_attach, force_attach)
 }
 
 func testAccComputeInstance_bootDisk_source(disk, instance string) string {

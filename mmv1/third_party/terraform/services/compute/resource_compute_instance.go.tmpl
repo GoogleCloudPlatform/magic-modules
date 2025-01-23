@@ -54,12 +54,10 @@ func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 }
 
 func DisksForceAttachDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	if new == "true" && new != old {
-		return false
-	} else if new == "false" && new != old {
-		return false
+	if new == old {
+		return true
 	}
-	return true
+	return false
 }
 
 var (
@@ -562,6 +560,7 @@ func ResourceComputeInstance() *schema.Resource {
 						"force_attach": {
 							Type:             schema.TypeBool,
 							Optional:         true,
+							Default:          false,
 							AtLeastOneOf:     bootDiskKeys,
 							ForceNew:         true,
 							DiffSuppressFunc: DisksForceAttachDiffSuppress,
@@ -883,8 +882,9 @@ func ResourceComputeInstance() *schema.Resource {
 						},
 
 						"force_attach": {
-							Type:        schema.TypeBool,
-							Optional:    true,
+							Type:         schema.TypeBool,
+							Optional:     true,
+							Default:      false,
 							ForceNew:     true,
 							DiffSuppressFunc: DisksForceAttachDiffSuppress,
 							Description: `Whether to force attach the regional disk even if it's currently attached to another instance. If you try to force attach a zonal disk to an instance, you will receive an error. Setting this parameter cause VM recreation.`,
@@ -2092,7 +2092,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 				"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
-				"force_attach": d.Get("attached_disk.0.force_attach"),
 			}
 			if key := disk.DiskEncryptionKey; key != nil {
 				if inConfig {
@@ -2116,6 +2115,10 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 				if key.Sha256 != "" {
 					di["disk_encryption_key_sha256"] = key.Sha256
 				}
+			}
+
+			if v, ok := d.GetOk(fmt.Sprintf("attached_disk.%d.force_attach", adIndex)); ok {
+				di["force_attach"] = v.(bool)
 			}
 
 			// We want the disks to remain in the order we set in the config, so if a disk
@@ -3633,6 +3636,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
         if _,ok := d.GetOk("boot_disk.0.interface"); ok {
                result["interface"] = disk.Interface
         }
+	if v, ok := d.GetOk("boot_disk.0.force_attach"); ok {
+		result["force_attach"] = v.(bool)
+	}
 
 	diskDetails, err := getDisk(disk.Source, d, config)
 
