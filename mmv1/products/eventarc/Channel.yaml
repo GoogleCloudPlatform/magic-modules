@@ -40,8 +40,11 @@ examples:
     primary_resource_id: primary
     vars:
       channel_name: some-channel
-      key_ring_name: some-key-ring
       key_name: some-key
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
   - name: eventarc_channel
     primary_resource_id: primary
     vars:

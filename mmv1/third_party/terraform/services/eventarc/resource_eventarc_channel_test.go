@@ -12,10 +12,13 @@ import (
 func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 	t.Parallel()
 
+	region := envvar.GetTestRegionFromEnv()
 	context := map[string]interface{}{
-		"region":         envvar.GetTestRegionFromEnv(),
+		"region":         region,
 		"project_name":   envvar.GetTestProjectFromEnv(),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"key1":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key1").CryptoKey.Name,
+		"key2":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key2").CryptoKey.Name,
 		"random_suffix":  acctest.RandString(t, 10),
 	}
 
@@ -45,58 +48,36 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 
 func testAccEventarcChannel_setCryptoKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_key_ring" "test_key_ring" {
-	name     = "tf-keyring%{random_suffix}"
-	location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key1" {
-	name     = "tf-key1%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "key1_member" {
-	crypto_key_id = google_kms_crypto_key.key1.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_channel" "primary" {
-	location = "%{region}"
-	name     = "tf-test-name%{random_suffix}"
-	crypto_key_name =  google_kms_crypto_key.key1.id
-	third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
-	depends_on = [google_kms_crypto_key_iam_member.key1_member]
+  location             = "%{region}"
+  name                 = "tf-test-name%{random_suffix}"
+  crypto_key_name      = "%{key1}"
+  third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+  depends_on           = [google_kms_crypto_key_iam_member.key1_member]
 }
 `, context)
 }
 
 func testAccEventarcChannel_cryptoKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_key_ring" "test_key_ring" {
-	name     = "tf-keyring%{random_suffix}"
-	location = "us-central1"
-}
-	
-resource "google_kms_crypto_key" "key2" {
-	name     = "tf-key2%{random_suffix}"
-	key_ring = google_kms_key_ring.test_key_ring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "key2_member" {
-	crypto_key_id = google_kms_crypto_key.key2.id
-	role      = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	
-	member = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  crypto_key_id = "%{key2}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_channel" "primary" {
-	location = "%{region}"
-	name     = "tf-test-name%{random_suffix}"
-	crypto_key_name = google_kms_crypto_key.key2.id
-	third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
-	depends_on = [google_kms_crypto_key_iam_member.key2_member]
+  location             = "%{region}"
+  name                 = "tf-test-name%{random_suffix}"
+  crypto_key_name      = "%{key2}"
+  third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+  depends_on           = [google_kms_crypto_key_iam_member.key2_member]
 }
 `, context)
 }
@@ -130,10 +111,10 @@ func TestAccEventarcChannel_LongForm(t *testing.T) {
 func testAccEventarcChannel_LongForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_channel" "primary" {
-	location = "long/form/%{region}"
-	project  = "projects/%{project_name}"
-	name     = "projects/%{project_name}/locations/%{region}/channels/tf-test-name%{random_suffix}"
-	third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
+  location             = "long/form/%{region}"
+  project              = "projects/%{project_name}"
+  name                 = "projects/%{project_name}/locations/%{region}/channels/tf-test-name%{random_suffix}"
+  third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
 }
 `, context)
 }
