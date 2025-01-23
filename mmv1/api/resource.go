@@ -331,6 +331,10 @@ type Resource struct {
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 
+	// The API "resource type kind" used for this resource e.g., "Function".
+	// If this is not set, then :name is used instead, which is strongly
+	// preferred wherever possible. Its main purpose is for supporting
+	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
 	ImportPath string `yaml:"-"`
@@ -496,6 +500,12 @@ func (r Resource) UserParameters() []*Type {
 	})
 }
 
+func (r Resource) UserVirtualFields() []*Type {
+	return google.Reject(r.VirtualFields, func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
 func (r Resource) ServiceVersion() string {
 	if r.CaiBaseUrl != "" {
 		return extractVersionFromBaseUrl(r.CaiBaseUrl)
@@ -609,6 +619,28 @@ func (r Resource) RootProperties() []*Type {
 		}
 	}
 	return props
+}
+
+// Returns a sorted list of all "leaf" properties, meaning properties that have
+// no children.
+func (r Resource) LeafProperties() []*Type {
+	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
+
+	// Remove types that have children, because we only want "leaf" fields
+	types = slices.DeleteFunc(types, func(t *Type) bool {
+		nestedProperties := t.NestedProperties()
+		return len(nestedProperties) > 0
+	})
+
+	// Sort types by lineage
+	slices.SortFunc(types, func(a, b *Type) int {
+		if a.MetadataLineage() < b.MetadataLineage() {
+			return -1
+		}
+		return 1
+	})
+
+	return types
 }
 
 // Return the product-level async object, or the resource-specific one

@@ -57,6 +57,7 @@ func NewOperation() *Operation {
 	return op
 }
 
+// It is only used in openapi-generate
 func NewAsync() *Async {
 	oa := &Async{
 		Actions:   []string{"create", "delete", "update"},
@@ -118,6 +119,9 @@ func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
 		return err
 	}
 
+	if a.Type == "" {
+		a.Type = "OpAsync"
+	}
 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}

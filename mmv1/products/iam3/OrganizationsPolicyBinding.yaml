@@ -13,6 +13,7 @@
 
 ---
 name: 'OrganizationsPolicyBinding'
+api_resource_type_kind: PolicyBinding
 description: A policy binding to an organizations
 references:
   guides:

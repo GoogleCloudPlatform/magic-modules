@@ -394,7 +394,6 @@ properties:
     description: |
       Initial type of the private cloud.
     immutable: true
-    ignore_read: true
     diff_suppress_func: 'vmwareenginePrivateCloudStandardTypeDiffSuppressFunc'
     enum_values:
       - 'STANDARD'

@@ -743,9 +743,12 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 		},
 	}
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:     func() { acctest.AccTestPreCheck(t) },
@@ -2999,6 +3002,31 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_resourcePolicySpread(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var instance compute.Instance
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_resourcePolicySpread(instanceName, acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceHasStatus(&instance, "RUNNING"),
+					testAccCheckComputeInstanceHasAvailabilityDomain(&instance, 3),
+				),
+			},
+			computeInstanceImportStep("us-east4-b", instanceName, []string{"allow_stopping_for_update"}),
+		},
+	})
+}
+
 func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 	t.Parallel()
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -3529,6 +3557,43 @@ func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstance_metadataStartupScript_gracefulSwitch(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_metadataStartupScript(instanceName, "e2-medium", "abc"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMetadata(
+						&instance, "foo", "abc"),
+					testAccCheckComputeInstanceMetadata(
+						&instance, "startup-script", "echo hi > /test.txt"),
+				),
+			},
+			{
+				Config: testAccComputeInstance_metadataStartupScript_gracefulSwitch(instanceName, "e2-medium", "abc"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceMetadata(
+						&instance, "foo", "abc"),
+					testAccCheckComputeInstanceMetadata(
+						&instance, "startup-script", "echo hi > /test.txt"),
 				),
 			},
 		},
@@ -4216,6 +4281,27 @@ func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_NicStackType_IPV6(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"instance_name": fmt.Sprintf("tf-test-compute-instance-%s", acctest.RandString(t, 10)),
+		"suffix":        acctest.RandString(t, 10),
+		"env_region":    envvar.GetTestRegionFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_nicStackTypeUpdate_ipv6(context),
+			},
+		},
+	})
+}
+
+
 func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -4393,6 +4479,23 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 
 		if !reflect.DeepEqual(*instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant) {
 			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v",instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceHasAvailabilityDomain(instance *compute.Instance, availabilityDomain int64) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instance == nil {
+			return fmt.Errorf("instance is nil")
+		}
+		if instance.Scheduling == nil {
+			return fmt.Errorf("no scheduling")
+		}
+
+		if instance.Scheduling.AvailabilityDomain != availabilityDomain {
+			return fmt.Errorf("got the wrong availability domain: have %d; want %d", instance.Scheduling.AvailabilityDomain, availabilityDomain)
 		}
 
 		return nil
@@ -9312,6 +9415,50 @@ resource "google_compute_resource_policy" "foo" {
 `, instance, instance, suffix)
 }
 
+func testAccComputeInstance_resourcePolicySpread(instance, suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%s"
+  machine_type   = "e2-standard-4"
+  zone           = "us-east4-b"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  //deletion_protection = false is implicit in this config due to default value
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+	availability_domain = 3
+  }
+
+  resource_policies = [google_compute_resource_policy.foo.self_link]
+}
+
+resource "google_compute_resource_policy" "foo" {
+  name   = "tf-test-policy-%s"
+  region = "us-east4"
+  group_placement_policy {
+    availability_domain_count = 3
+  }
+}
+
+`, instance, suffix)
+}
+
 func testAccComputeInstance_subnetworkUpdate(suffix, instance string) string {
 	return fmt.Sprintf(`
 	data "google_compute_image" "my_image" {
@@ -9976,6 +10123,39 @@ resource "google_compute_instance" "foobar" {
 `, instance, machineType, metadata)
 }
 
+func testAccComputeInstance_metadataStartupScript_gracefulSwitch(instance, machineType, metadata string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name           = "%s"
+  machine_type   = "%s"
+  zone           = "us-central1-a"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "%s"
+	startup-script = "echo hi > /test.txt"
+  }
+
+  allow_stopping_for_update = true
+}
+`, instance, machineType, metadata)
+}
 
 func testAccComputeInstance_regionBootDisk(instance, diskName, suffix string) string {
 	return fmt.Sprintf(`
@@ -11096,10 +11276,10 @@ func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
                 ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
                 Steps: []resource.TestStep{
                         {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "h3-standard-88", "NVME", false),
+                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "c3-standard-22", "NVME", false),
                                 Check: resource.ComposeTestCheckFunc(
                                         resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "h3-standard-88"),
+                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "c3-standard-22"),
                                 ),
                         },
                         //computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
@@ -11209,6 +11389,50 @@ resource "google_compute_instance" "foobar" {
 	}
 
 	key_revocation_action_type = %{key_revocation_action_type}
+}
+`, context)
+}
+
+func testAccComputeInstance_nicStackTypeUpdate_ipv6(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+	family  = "debian-11"
+	project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network" {
+	name = "tf-test-network-%{suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork" {
+	name          = "tf-test-compute-subnet-%{suffix}"
+	region        = "%{env_region}"
+	ipv6_access_type = "EXTERNAL"
+	stack_type = "IPV6_ONLY"
+	network       = google_compute_network.inst-test-network.id
+}
+
+resource "google_compute_instance" "foobar" {
+	name         = "%{instance_name}"
+	machine_type = "e2-medium"
+	zone         = "%{env_region}-a"
+
+	boot_disk {
+		initialize_params {
+			image = data.google_compute_image.my_image.self_link
+		}
+	}
+
+	network_interface {
+		network = google_compute_network.inst-test-network.id
+		subnetwork = google_compute_subnetwork.inst-test-subnetwork.id
+		stack_type = "IPV6_ONLY"
+
+		ipv6_access_config {
+			network_tier = "PREMIUM"
+	  	}
+	}
 }
 `, context)
 }

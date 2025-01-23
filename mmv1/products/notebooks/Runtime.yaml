@@ -13,6 +13,7 @@
 
 ---
 name: 'Runtime'
+api_resource_type_kind: NotebookRuntime
 description: |
   A Cloud AI Platform Notebook runtime.
 

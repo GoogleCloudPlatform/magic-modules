@@ -6,7 +6,7 @@ resource "google_compute_interconnect" "foobar" {
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_10G_LR"
   requested_link_count = 1
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-a" # Special location only available for Google testing.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-nciadf-a" # Special location only available for Google testing.
 }
 
 resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
@@ -19,6 +19,7 @@ resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
   vlan_tag8021q            = 1000
   region                   = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-east4"
   stack_type               = "IPV4_ONLY"
+  labels                   = { mykey = "myvalue" }
 }
 
 resource "google_compute_router" "foobar" {
