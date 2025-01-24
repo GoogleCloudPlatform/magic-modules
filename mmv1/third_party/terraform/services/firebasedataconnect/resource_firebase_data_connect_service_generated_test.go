@@ -35,7 +35,7 @@ func TestAccFirebaseDataConnectService_Update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id": org_id.GetTestOrgFromEnv(t),
+		"project_id":    org_id.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -57,9 +57,9 @@ func TestAccFirebaseDataConnectService_Update(t *testing.T) {
 				Config: testAccFirebaseDataConnectService_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						 plancheck.ExpectResourceAction("google_firebasedataconnect_service.default", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_firebasedataconnect_service.default", plancheck.ResourceActionUpdate),
 					},
-			 },
+				},
 			},
 			{
 				ResourceName:            "google_firebasedataconnect_service.default",
