@@ -45,6 +45,21 @@ func execComputeNewLabels() error {
 	affectedResources := labeler.ExtractAffectedResources(issueBody)
 	labels := labeler.ComputeLabels(affectedResources, regexpLabels)
 
+	// If there are more than 3 service labels, treat this as a cross-provider issue
+	var serviceLabels []string
+	var nonServiceLabels []string
+	for _, l := range labels {
+		if strings.HasPrefix(l, "service/") {
+			serviceLabels = append(serviceLabels, l)
+		} else {
+			nonServiceLabels = append(serviceLabels, l)
+		}
+	}
+	if len(serviceLabels) > 3 {
+		serviceLabels = []string{"service/terraform"}
+	}
+	labels = append(nonServiceLabels, serviceLabels...)
+
 	if len(labels) > 0 {
 		labels = append(labels, "forward/review")
 		sort.Strings(labels)
