@@ -15,9 +15,9 @@
 name: FirebaseDataConnect
 display_name: Firebase Data Connect
 versions:
-- name: ga
-  base_url: https://firebasedataconnect.googleapis.com/v1/
-- name: beta
-  base_url: https://firebasedataconnect.googleapis.com/v1beta/
+  - name: ga
+    base_url: https://firebasedataconnect.googleapis.com/v1/
+  - name: beta
+    base_url: https://firebasedataconnect.googleapis.com/v1beta/
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
