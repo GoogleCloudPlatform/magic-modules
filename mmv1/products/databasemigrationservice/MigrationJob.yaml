@@ -156,7 +156,9 @@ properties:
           A list of messages that carry the error details.
         output: true
         item_type:
-          type: KeyValuePairs
+          type: NestedObject
+          properties:
+            []
   - name: 'type'
     type: Enum
     description: |
