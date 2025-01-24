@@ -131,6 +131,7 @@ properties:
     properties:
       - name: 'severityOverrides'
         type: Array
+        is_set: true
         description: The configuration for overriding threats actions by severity match.
         item_type:
           type: NestedObject
@@ -156,6 +157,7 @@ properties:
                 - 'MEDIUM'
       - name: 'threatOverrides'
         type: Array
+        is_set: true
         description: |
           The configuration for overriding threats actions by threat id match.
           If a threat is matched both by configuration provided in severity overrides
