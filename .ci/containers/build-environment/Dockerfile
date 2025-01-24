@@ -1,4 +1,3 @@
-# Stage 1: Building Go dependencies
 FROM golang:1.23-bullseye AS builder
 
 # Set working directory
@@ -33,7 +32,3 @@ RUN git config --global user.email "magic-modules@google.com"
 
 RUN go install golang.org/x/tools/cmd/goimports@d088b475e3360caabc032aaee1dc66351d4e729a
 RUN go install github.com/github/hub@v2.11.2+incompatible
-
-# Copy Go dependencies from builder stage
-COPY --from=builder /go/pkg /go/pkg
-
