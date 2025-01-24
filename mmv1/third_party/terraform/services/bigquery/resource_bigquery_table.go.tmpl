@@ -449,6 +449,38 @@ func validateBigQueryTableSchema(v interface{}, k string) (warnings []string, er
 	return
 }
 
+// For backwards compatibility, we need to maintain original behavior where `view.use_legacy_sql`
+// defaults "true" when nothing is set. However, if the newly introduced `view.foreign_definitions` field
+// is set, then don't set any default value for `view.use_legacy_sql`.
+func resourceBigQueryViewCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	view, hasView := d.GetOk("view")
+	if !hasView {
+		return nil
+	}
+
+	log.Printf("[DEBUG] >>>>>>>>>>>>>>> In resourceBigQueryViewCustomizeDiff, view is %v", view)
+	configValue := d.GetRawConfig().GetAttr("view").Index(cty.NumberIntVal(0)).AsValueMap()
+	foreignDefinitionsValue := configValue["foreign_definitions"]
+	useLegacySQLValue := configValue["use_legacy_sql"]
+	log.Printf("[DEBUG] >>>>>>>>>>>>>>> configValue is %v", view)
+	log.Printf("[DEBUG] >>>>>>>>>>>>>>> foreignDefinitionsValue is %v", foreignDefinitionsValue)
+	log.Printf("[DEBUG] >>>>>>>>>>>>>>> useLegacySQLValue is %v", useLegacySQLValue)
+	if foreignDefinitionsValue.LengthInt() == 0 && useLegacySQLValue.IsNull() {
+		log.Printf("[DEBUG] >>>>>>>>>>>>>>> Setting view.use_legacy_sql to true")
+		// Set like flattening
+		raw := view.([]interface{})[0].(map[string]interface{})
+		result := map[string]interface{}{"query": raw["query"]}
+		result["foreign_definitions"] = raw["foreign_definitions"]
+		result["use_legacy_sql"] = true
+		log.Printf("[DEBUG] >>>>>>>>>>>>>>> result is %v", result)
+		if err := d.SetNew("view", result); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func ResourceBigQueryTable() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigQueryTableCreate,
@@ -462,6 +494,7 @@ func ResourceBigQueryTable() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceBigQueryTableSchemaCustomizeDiff,
 			tpgresource.SetLabelsDiff,
+			resourceBigQueryViewCustomizeDiff,
 		),
 		Schema: map[string]*schema.Schema{
 			// TableId: [Required] The ID of the table. The ID must contain only
