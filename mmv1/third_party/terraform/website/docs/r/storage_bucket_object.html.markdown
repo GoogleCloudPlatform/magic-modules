@@ -13,6 +13,10 @@ Creates a new object inside an existing bucket in Google cloud storage service (
 and 
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
 
+A datasource can be used to retrive data of the object
+
+* `google_storage_bucket_object_content`: Retrieves the data of the object
+
 
 ## Example Usage
 
