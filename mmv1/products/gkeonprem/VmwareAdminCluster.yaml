@@ -24,7 +24,7 @@ description: "A Google VMware Admin Cluster."
 exclude_delete: true
 id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
-timeouts: !ruby/object:Api::Timeouts
+timeouts:
   insert_minutes: 60
   delete_minutes: 60
   update_minutes: 60
@@ -33,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkeonprem#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 taint_resource_on_failed_create: true
 examples:
