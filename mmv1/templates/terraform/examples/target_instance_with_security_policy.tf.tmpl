@@ -43,7 +43,6 @@ resource "google_compute_instance" "target-vm" {
 }
 
 resource "google_compute_region_security_policy" "policyddosprotection" {
-  provider    = google-beta
   region      = "southamerica-west1"
   name        = "tf-test-policyddos%{random_suffix}"
   description = "ddos protection security policy to set target instance"
@@ -54,14 +53,12 @@ resource "google_compute_region_security_policy" "policyddosprotection" {
 }
 
 resource "google_compute_network_edge_security_service" "edge_sec_service" {
-  provider        = google-beta
   region          = "southamerica-west1"
   name            = "tf-test-edgesec%{random_suffix}"
   security_policy = google_compute_region_security_policy.policyddosprotection.self_link
 }
 
 resource "google_compute_region_security_policy" "regionsecuritypolicy" {
-  provider    = google-beta
   name        = "{{index $.Vars "region_sec_policy"}}"
   region      = "southamerica-west1"
   description = "basic security policy for target instance"
