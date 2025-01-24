@@ -1,4 +1,3 @@
-# Stage 1: Building Go dependencies
 FROM golang:1.23-bullseye AS builder
 
 # Set working directory
