@@ -116,7 +116,6 @@ Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA
 &lt;li>all related PR presubmit tests have been completed successfully, including:
 &lt;ul>
 &lt;li>terraform-provider-breaking-change-test&lt;/li>
-&lt;li>presubmit-rake-tests&lt;/li>
 &lt;li>terraform-provider-google-build-and-unit-tests&lt;/li>
 &lt;li>terraform-provider-google-beta-build-and-unit-tests&lt;/li>
 &lt;li>VCR-test
