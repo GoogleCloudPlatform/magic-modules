@@ -1,0 +1,68 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ResourcePolicyAttachment'
+api_resource_type_kind: Instance
+description: 'Attaches resource policies to compute instances'
+id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
+base_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
+self_link: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
+create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies'
+delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
+delete_verb: 'POST'
+immutable: true
+
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+
+identity:
+  - name
+
+nested_query:
+  keys:
+    - resourcePolicies
+  is_list_of_ids: true
+  modify_by_patch: false
+
+custom_code:
+  encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
+
+parameters:
+  - name: 'instance'
+    type: ResourceRef
+    required: true
+    resource: 'Instance'
+    imports: 'name'
+  - name: 'zone'
+    type: ResourceRef
+    required: true
+    resource: 'Zone'
+    imports: 'name'
+
+properties:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
