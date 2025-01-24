@@ -74,3 +74,38 @@ resource "google_biglake_database" "database" {
 }
 `, context)
 }
+
+func TestAccBiglakeDatabase_biglakeDatabase_nonexec(t *testing.T) {
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBiglakeDatabaseDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBiglakeDatabase_biglakeDatabaseExample(context),
+			},
+			{
+				ResourceName:            "google_biglake_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
+			},
+			{
+				Config: testAccBiglakeDatabase_biglakeDatabase_update(context),
+			},
+			{
+				ResourceName:            "google_biglake_database.database",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "catalog"},
+			},
+		},
+	})
+}
