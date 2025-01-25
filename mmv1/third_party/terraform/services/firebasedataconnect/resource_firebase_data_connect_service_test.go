@@ -18,31 +18,27 @@
 package firebasedataconnect_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccFirebaseDataConnectService_Update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    org_id.GetTestOrgFromEnv(t),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckFirebaseDataConnectServiceDestroyProducer(t), // TODO: removed
+		CheckDestroy:             testAccCheckFirebaseDataConnectServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseDataConnectService_basic(context),
