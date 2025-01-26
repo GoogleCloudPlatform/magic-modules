@@ -63,7 +63,13 @@ aliases:
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
     ```
 
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+    ```
+
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output (including API requests and responses) to a file for analysis.
 
@@ -95,7 +101,14 @@ aliases:
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+    ```
+
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output to a file for analysis.
 
@@ -289,6 +302,26 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
     ```bash
     TF_LOG=DEBUG TF_LOG_PATH=output.log TF_CLI_CONFIG_FILE="$HOME/tf-dev-override.tfrc" terraform apply
     ```
+
+### Run Tests with VCR Locally
+
+Running tests in "replaying" mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
+
+It can also be helpful for debugging tests that seem to work locally, but fail in CI in replaying mode.
+   
+Make sure `$VCR_PATH` is set, and points to a local directory which exists, and set `VCR_MODE` appropriately.
+
+If you don't already have an existing cassette that's up to date, first do a run in "recording" mode:
+   
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=RECORDING  make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
+
+Now run the same test again in "replaying" mode:
+
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=REPLAYING make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
 
 ### Cleanup
 
