@@ -174,7 +174,7 @@ properties:
     update_url: 'projects/{{project}}/global/haVpnGateways/{{name}}/setLabels'
     update_verb: 'POST'
     description: |
-      Labels for this resource. These can only be added or modified by the setLabels method. 
+      Labels for this resource. These can only be added or modified by the setLabels method.
       Each label key/value pair must comply with RFC1035. Label values may be empty.
   - name: 'labelFingerprint'
     type: Fingerprint
