@@ -2075,14 +2075,14 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					if rawKey != "" {
 						di["disk_encryption_key_raw"] = rawKey
 					}
+					if serviceAccount := d.Get(fmt.Sprintf("attached_disk.%d.disk_encryption_service_account", adIndex)); serviceAccount != "" {
+						di["disk_encryption_service_account"] = serviceAccount
+					}
 				}
 				if key.KmsKeyName != "" {
 					// The response for crypto keys often includes the version of the key which needs to be removed
 					// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 					di["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
-				}
-				if key.KmsKeyServiceAccount != "" {
-					di["disk_encryption_service_account"] = key.KmsKeyServiceAccount
 				}
 				if key.Sha256 != "" {
 					di["disk_encryption_key_sha256"] = key.Sha256
@@ -3222,6 +3222,11 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d *schema.ResourceDat
 	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
 	if kmsServiceAccountOk {
 		if kmsServiceAccount != "" {
+			if disk.DiskEncryptionKey == nil {
+				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+					KmsKeyServiceAccount: kmsServiceAccount.(string),
+				}
+			}
 			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
 		}
 	}
