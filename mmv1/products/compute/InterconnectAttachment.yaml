@@ -18,7 +18,7 @@ description: |
   Represents an InterconnectAttachment (VLAN attachment) resource. For more
   information, see Creating VLAN Attachments.
 references:
-  guides: 
+  guides:
     'Create a Interconnect attachment': 'https://cloud.google.com/network-connectivity/docs/interconnect/how-to/dedicated/creating-vlan-attachments'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/interconnectAttachments'
 docs:
