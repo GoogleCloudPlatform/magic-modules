@@ -1,7 +1,6 @@
 package container
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -240,10 +239,11 @@ func schemaNodeConfig() *schema.Schema {
 				},
 
 				"resource_labels": {
-					Type:        schema.TypeMap,
-					Optional:    true,
-					Elem:        &schema.Schema{Type: schema.TypeString},
-					Description: `The GCE resource labels (a map of key/value pairs) to be applied to the node pool.`,
+					Type:             schema.TypeMap,
+					Optional:         true,
+					Elem:             &schema.Schema{Type: schema.TypeString},
+					DiffSuppressFunc: containerNodePoolResourceLabelsDiffSuppress,
+					Description:      `The GCE resource labels (a map of key/value pairs) to be applied to the node pool.`,
 				},
 
 				"local_ssd_count": {
@@ -1858,14 +1858,6 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 {{- end }}
 
 func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Node configs are embedded into multiple resources (container cluster and
-	// container node pool) so we determine the node config key dynamically.
-	idx := strings.Index(k, ".resource_labels.")
-	if idx < 0 {
-		return false
-	}
-
-	root := k[:idx]
 	// Suppress diffs for server-specified labels
 	for _, label := range containerNodePoolProvidedResourceLabels {
 		if strings.Contains(k, label) && new == "" {
@@ -1874,7 +1866,7 @@ func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.R
 	}
 
 	// Let diff be determined by resource_labels (above)
-	if strings.Contains(k, fmt.Sprintf("%s%%", root)) {
+	if strings.Contains(k, "resource_labels.%") {
 		return true
 	}
 
