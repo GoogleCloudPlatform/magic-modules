@@ -399,6 +399,39 @@ func (t Type) Lineage() string {
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
 }
 
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for resource metadata, to be used for connecting a Terraform
+// type with a corresponding API type.
+func (t Type) MetadataLineage() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	// Skip arrays because otherwise the array name will be included twice
+	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataLineage(), google.Underscore(t.Name))
+}
+
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for to represent an API type.
+func (t Type) MetadataApiLineage() string {
+	apiName := t.ApiName
+	if t.ParentMetadata == nil {
+		return google.Underscore(apiName)
+	}
+
+	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataApiLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), google.Underscore(apiName))
+}
+
 // Returns the lineage in snake case
 func (t Type) LineageAsSnakeCase() string {
 	if t.ParentMetadata == nil {
@@ -1063,6 +1096,22 @@ func (t *Type) IsForceNew() bool {
 				(parent == nil ||
 					(parent.IsForceNew() &&
 						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+}
+
+// Returns true if the type does not correspond to an API type
+func (t *Type) ProviderOnly() bool {
+	// These are special case fields created by the generator which have no API counterpart
+	if t.IsA("KeyValueEffectiveLabels") || t.IsA("KeyValueTerraformLabels") {
+		return true
+	}
+
+	if t.UrlParamOnly || t.ClientSide {
+		return true
+	}
+
+	// The type is provider-only if any of its ancestors are provider-only (it is inherited)
+	parent := t.Parent()
+	return parent != nil && parent.ProviderOnly()
 }
 
 // Returns an updated path for a given Terraform field path (e.g.

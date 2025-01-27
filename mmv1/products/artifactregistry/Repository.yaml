@@ -300,6 +300,7 @@ properties:
       Provides additional configuration details for repositories of the maven
       format type.
     allow_empty_object: true
+    diff_suppress_func: 'emptyMavenConfigDiffSuppress'
     properties:
       # Maven properties.
       - name: 'allowSnapshotOverwrites'
