@@ -886,10 +886,9 @@ properties:
 
                 Label values can be templatized by using variables. The only available
                 variable names are the names of the labels in the PromQL result,
-                including "\_\_name\_\_" and "value", although "\_\_name\_\_" are
-                reserved for internal use only and the user cannot overwrite them.
-                "labels" may be empty.This field is intended to be used for organizing
-                and identifying the AlertPolicy.
+                although label names beginning with \_\_ (two "\_") are reserved for
+                internal use. "labels" may be empty. This field is intended to be used
+                for organizing and identifying the AlertPolicy.
             - name: 'ruleGroup'
               type: String
               description: |
