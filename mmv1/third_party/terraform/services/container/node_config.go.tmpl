@@ -1,6 +1,7 @@
 package container
 
 import (
+	"fmt"
 	"log"
 {{- if ne $.TargetVersionName "ga" }}
 	"strings"
@@ -1857,6 +1858,37 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 	return true
 }
 {{- end }}
+
+func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Node configs are embedded into multiple resources (container cluster and
+	// container node pool) so we determine the node config key dynamically.
+	idx := strings.Index(k, ".resource_labels.")
+	if idx < 0 {
+		return false
+	}
+
+	root := k[:idx]
+	// Suppress diffs for server-specified labels
+	for _, label := range containerNodePoolProvidedResourceLabels {
+		if strings.Contains(k, label) && new == "" {
+			return true
+		}
+	}
+
+	// Let diff be determined by resource_labels (above)
+	if strings.Contains(k, fmt.Sprintf("%s%%", root)) {
+		return true
+	}
+
+	// For other keys, don't suppress diff.
+	return false
+}
+
+var containerNodePoolProvidedResourceLabels = []string{
+	"goog-gke-accelerator-type",
+	"goog-gke-tpu-node-pool-type",
+	"goog-gke-node-pool-provisioning-model",
+}
 
 func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
