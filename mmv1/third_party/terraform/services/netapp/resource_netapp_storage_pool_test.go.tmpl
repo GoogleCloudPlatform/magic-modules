@@ -340,6 +340,7 @@ func TestAccNetappStoragePool_FlexRegionalStoragePoolNoZone(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
+		},
 	})
 }
 
