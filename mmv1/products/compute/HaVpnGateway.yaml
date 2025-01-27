@@ -171,14 +171,14 @@ properties:
           imports: 'selfLink'
   - name: 'labels'
     type: KeyValueLabels
-    update_url: 'projects/{{project}}/global/haVpnGateways/{{name}}/setLabels'
+    update_url: 'projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels'
     update_verb: 'POST'
     description: |
       Labels for this resource. These can only be added or modified by the setLabels method.
       Each label key/value pair must comply with RFC1035. Label values may be empty.
   - name: 'labelFingerprint'
     type: Fingerprint
-    update_url: 'projects/{{project}}/global/haVpnGateways/{{name}}/setLabels'
+    update_url: 'projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}/setLabels'
     update_verb: 'POST'
     description: |
       A fingerprint for the labels being applied to this VpnGateway, which is essentially a hash
