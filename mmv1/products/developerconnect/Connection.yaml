@@ -84,7 +84,6 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
-  error: {}
   include_project: false
 autogen_status: Q29ubmVjdGlvbg==
 parameters:
