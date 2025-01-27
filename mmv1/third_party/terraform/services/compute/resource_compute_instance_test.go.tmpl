@@ -6656,7 +6656,7 @@ resource "google_compute_instance" "foobar" {
   attached_disk {
 	source                  = google_compute_disk.foobar5.self_link
 	disk_encryption_key_rsa = "%s"
-	kms_key_service_account = data.google_compute_default_service_account.default.email
+	disk_encryption_service_account = data.google_compute_default_service_account.default.email
   }
 
   network_interface {
