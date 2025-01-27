@@ -30,7 +30,7 @@ provider "google" {
 resource "google_pubsub_lite_subscription" "example" {
   name  = "example-subscription"
   topic = "my-topic"
-  zone = "us-central1a"
+  zone = "us-central1-a"
   delivery_config {
     delivery_requirement = "DELIVER_AFTER_STORED"
   }

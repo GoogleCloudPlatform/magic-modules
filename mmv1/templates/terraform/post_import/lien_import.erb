@@ -1,7 +1,0 @@
-parent, err := tpgresource.ReplaceVars(d, config, "projects/{{parent}}")
-if err != nil {
-		return nil, err
-}
-if err := d.Set("parent", parent); err != nil {
-	return nil, fmt.Errorf("Error setting parent: %s", err)
-}

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,16 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: TpuV2
-display_name: Cloud TPU v2
+---
+name: 'TpuV2'
+display_name: 'Cloud TPU v2'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://tpu.googleapis.com/v2/
+  - name: 'beta'
+    # The v2alpha1 version of the Cloud TPU API is best suited for the google-beta Terraform provider.
+    # This more closely matches current Cloud TPU API usage and is recommended by the Cloud TPU team.
+    base_url: 'https://tpu.googleapis.com/v2alpha1/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
-apis_required:
-  - !ruby/object:Api::Product::ApiReference
-    name: Cloud TPU API
-    url: https://console.cloud.google.com/apis/library/tpu.googleapis.com/
+  - 'https://www.googleapis.com/auth/cloud-platform'

@@ -1,0 +1,3 @@
+if err := waitForRegistrationActive(d, config, d.Timeout(schema.TimeoutCreate)-time.Minute); err != nil {
+	return fmt.Errorf("Error waiting for Registration %q to be ACTIVE during creation: %q", d.Get("name").(string), err)
+}

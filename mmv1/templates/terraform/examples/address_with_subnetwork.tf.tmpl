@@ -1,0 +1,18 @@
+resource "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_address" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "address_name"}}"
+  subnetwork   = google_compute_subnetwork.default.id
+  address_type = "INTERNAL"
+  address      = "10.0.42.42"
+  region       = "us-central1"
+}

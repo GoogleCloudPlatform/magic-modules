@@ -1,0 +1,3 @@
+func InterconnectTypeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    return old == "IT_PRIVATE" && new == "DEDICATED"
+}

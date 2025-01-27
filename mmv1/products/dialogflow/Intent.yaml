@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,156 +11,164 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Intent'
-base_url: 'projects/{{project}}/agent/intents/'
-self_link: '{{name}}'
-update_verb: :PATCH
 description: |
   Represents a Dialogflow intent. Intents convert a number of user expressions or patterns into an action. An action
   is an extraction of a user command or sentence semantics.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/docs/'
   api: 'https://cloud.google.com/dialogflow/docs/reference/rest/v2/projects.agent.intents'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/agent/intents/'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflow_intent_basic'
+  - name: 'dialogflow_intent_basic'
     primary_resource_id: 'basic_intent'
-    skip_test: true
     vars:
       intent_name: 'basic-intent'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflow_intent_full'
+    exclude_test: true
+  - name: 'dialogflow_intent_full'
     primary_resource_id: 'full_intent'
     vars:
       project_id: 'my-project'
       account_id: 'my-account'
       intent_name: 'full-intent'
     test_env_vars:
-      org_id: :ORG_ID
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: '{{name}}'
-import_format: ['{{name}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
-  post_create: 'templates/terraform/post_create/set_computed_name.erb'
+      org_id: 'ORG_ID'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of this intent.
       Format: projects/<Project ID>/agent/intents/<Intent ID>.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       The name of this intent to be displayed on the console.
-  - !ruby/object:Api::Type::Enum
-    name: 'webhookState'
+    required: true
+  - name: 'webhookState'
+    type: Enum
     description: |
       Indicates whether webhooks are enabled for the intent.
       * WEBHOOK_STATE_ENABLED: Webhook is enabled in the agent and in the intent.
       * WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING: Webhook is enabled in the agent and in the intent. Also, each slot
       filling prompt is forwarded to the webhook.
-    values:
-      - :WEBHOOK_STATE_ENABLED
-      - :WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING
     default_from_api: true
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+    enum_values:
+      - 'WEBHOOK_STATE_ENABLED'
+      - 'WEBHOOK_STATE_ENABLED_FOR_SLOT_FILLING'
+  - name: 'priority'
+    type: Integer
     description: |
       The priority of this intent. Higher numbers represent higher priorities.
         - If the supplied value is unspecified or 0, the service translates the value to 500,000, which corresponds
         to the Normal priority in the console.
         - If the supplied value is negative, the intent is ignored in runtime detect intent requests.
     default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'isFallback'
+  - name: 'isFallback'
+    type: Boolean
     description: |
       Indicates whether this is a fallback intent.
     default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'mlDisabled'
+  - name: 'mlDisabled'
+    type: Boolean
     description: |
       Indicates whether Machine Learning is disabled for the intent.
       Note: If mlDisabled setting is set to true, then this intent is not taken into account during inference in ML
       ONLY match mode. Also, auto-markup in the UI is turned off.
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'inputContextNames'
-    item_type: Api::Type::String
+  - name: 'inputContextNames'
+    type: Array
     description: |
       The list of context names required for this intent to be triggered.
       Format: projects/<Project ID>/agent/sessions/-/contexts/<Context ID>.
-  - !ruby/object:Api::Type::Array
-    name: 'events'
-    item_type: Api::Type::String
+    item_type:
+      type: String
+  - name: 'events'
+    type: Array
     description: |
       The collection of event names that trigger the intent. If the collection of input contexts is not empty, all of
       the contexts must be present in the active user session for an event to trigger this intent. See the
       [events reference](https://cloud.google.com/dialogflow/docs/events-overview) for more details.
-  - !ruby/object:Api::Type::String
-    name: 'action'
+    item_type:
+      type: String
+  - name: 'action'
+    type: String
     description: |
       The name of the action associated with the intent.
       Note: The action name must not contain whitespaces.
     default_from_api: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'resetContexts'
+  - name: 'resetContexts'
+    type: Boolean
     description: |
       Indicates whether to delete all contexts in the current session when this intent is matched.
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'defaultResponsePlatforms'
+  - name: 'defaultResponsePlatforms'
+    type: Array
     description: |
       The list of platforms for which the first responses will be copied from the messages in PLATFORM_UNSPECIFIED
       (i.e. default platform).
-    item_type: !ruby/object:Api::Type::Enum
-      name: 'platform'
+    item_type:
+      type: Enum
       description: |
         Represents different platforms that a rich message can be intended for.
-      values:
-        - :FACEBOOK
-        - :SLACK
-        - :TELEGRAM
-        - :KIK
-        - :SKYPE
-        - :LINE
-        - :VIBER
-        - :ACTIONS_ON_GOOGLE
-        - :GOOGLE_HANGOUTS
-  - !ruby/object:Api::Type::String
-    name: 'rootFollowupIntentName'
+      enum_values:
+        - 'FACEBOOK'
+        - 'SLACK'
+        - 'TELEGRAM'
+        - 'KIK'
+        - 'SKYPE'
+        - 'LINE'
+        - 'VIBER'
+        - 'ACTIONS_ON_GOOGLE'
+        - 'GOOGLE_HANGOUTS'
+  - name: 'rootFollowupIntentName'
+    type: String
     description: |
       The unique identifier of the root intent in the chain of followup intents. It identifies the correct followup
       intents chain for this intent.
       Format: projects/<Project ID>/agent/intents/<Intent ID>.
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'parentFollowupIntentName'
+  - name: 'parentFollowupIntentName'
+    type: String
     description: |
       The unique identifier of the parent intent in the chain of followup intents.
       Format: projects/<Project ID>/agent/intents/<Intent ID>.
     immutable: true
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: 'followupIntentInfo'
-    output: true
+  - name: 'followupIntentInfo'
+    type: Array
     description: |
       Information about all followup intents that have this intent as a direct or indirect parent. We populate this field
       only in the output.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'followupIntentName'
+        - name: 'followupIntentName'
+          type: String
           description: |
             The unique identifier of the followup intent.
             Format: projects/<Project ID>/agent/intents/<Intent ID>.
-        - !ruby/object:Api::Type::String
-          name: 'parentFollowupIntentName'
+        - name: 'parentFollowupIntentName'
+          type: String
           description: |
             The unique identifier of the followup intent's parent.
             Format: projects/<Project ID>/agent/intents/<Intent ID>.

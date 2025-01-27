@@ -1,8 +1,0 @@
-resource "google_network_security_address_group" "<%= ctx[:primary_resource_id] %>" {
-  name        = "<%= ctx[:vars]['resource_name'] %>"
-  parent      = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
-  location    = "us-central1"
-  type        = "IPV4"
-  capacity    = "100"
-  items       = ["208.80.154.224/32"]
-}

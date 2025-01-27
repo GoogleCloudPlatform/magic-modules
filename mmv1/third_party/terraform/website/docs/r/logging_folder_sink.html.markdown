@@ -4,7 +4,7 @@ description: |-
   Manages a folder-level logging sink.
 ---
 
-# google\_logging\_folder\_sink
+# google_logging_folder_sink
 
 Manages a folder-level logging sink. For more information see:
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/folders.sinks)
@@ -56,13 +56,13 @@ The following arguments are supported:
 * `folder` - (Required) The folder to be exported to the sink. Note that either `[FOLDER_ID]` or `folders/[FOLDER_ID]` is
     accepted.
 
-* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a
-    Cloud Storage bucket, a PubSub topic, a BigQuery dataset or a Cloud Logging bucket. Examples:
+* `destination` - (Required) The destination of the sink (or, in other words, where logs are written to). Can be a Cloud Storage bucket, a PubSub topic, a BigQuery dataset, a Cloud Logging bucket, or a Google Cloud project. Examples:
 
     - `storage.googleapis.com/[GCS_BUCKET]`
     - `bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]`
     - `pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]`
-    - `logging.googleapis.com/projects/[PROJECT_ID]]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]/locations/global/buckets/[BUCKET_ID]`
+    - `logging.googleapis.com/projects/[PROJECT_ID]`
 
     The writer associated with the sink must have access to write to the above resource.
 
@@ -76,6 +76,9 @@ The following arguments are supported:
 
 * `include_children` - (Optional) Whether or not to include children folders in the sink export. If true, logs
     associated with child projects are also exported; otherwise only logs relating to the provided folder are included.
+
+* `intercept_children` - (Optional) Whether or not to intercept logs from child projects. If true, matching logs will not
+   match with sinks in child resources, except _Required sinks. This sink will be visible to child resources when listing sinks.
 
 * `bigquery_options` - (Optional) Options that affect sinks exporting data to BigQuery. Structure [documented below](#nested_bigquery_options).
 

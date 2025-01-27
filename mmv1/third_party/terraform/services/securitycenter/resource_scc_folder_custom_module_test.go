@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -70,6 +70,7 @@ func testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleBasicExample(c
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
+  deletion_protection = false
 }
 
 resource "time_sleep" "wait_1_minute" {
@@ -107,6 +108,7 @@ func testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleFullExample(co
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
+  deletion_protection = false
 }
 
 resource "google_scc_folder_custom_module" "example" {
@@ -149,6 +151,7 @@ func testAccSecurityCenterFolderCustomModule_sccFolderCustomModuleUpdate(context
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
+  deletion_protection = false
 }
 
 resource "google_scc_folder_custom_module" "example" {

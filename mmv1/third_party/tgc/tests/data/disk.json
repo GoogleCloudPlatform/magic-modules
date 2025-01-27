@@ -10,7 +10,8 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "labels": {
-          "disk-label-key-a": "disk-label-val-a"
+          "disk-label-key-a": "disk-label-val-a",
+          "goog-terraform-provisioned": "true"
         },
         "name": "my-disk",
         "sourceImage": "projects/debian-cloud/global/images/debian-8-jessie-v20170523",

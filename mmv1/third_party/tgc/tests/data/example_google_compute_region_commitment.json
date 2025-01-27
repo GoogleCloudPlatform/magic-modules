@@ -1,0 +1,38 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-east1/commitments",
+        "asset_type": "compute.googleapis.com/Commitment",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "Commitment",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoRenew": true,
+                "category": "MACHINE",
+                "creationTimestamp": "",
+                "description": "some description",
+                "id": "projects/{{.Provider.project}}/regions/us-east1/commitments/my-full-commitment",
+                "name": "my-full-commitment",
+                "plan": "THIRTY_SIX_MONTH",
+                "project": "{{.Provider.project}}",
+                "region": "us-east1",
+                "resources": [
+                    {
+                        "amount": "4",
+                        "type": "VCPU"
+                    },
+                    {
+                        "amount": "9",
+                        "type": "MEMORY"
+                    }
+                ],
+                "type": "MEMORY_OPTIMIZED"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

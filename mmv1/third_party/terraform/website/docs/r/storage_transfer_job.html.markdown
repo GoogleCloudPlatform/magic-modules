@@ -4,7 +4,7 @@ description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---
 
-# google\_storage\_transfer\_job
+# google_storage_transfer_job
 
 Creates a new Transfer Job in Google Cloud Storage Transfer.
 
@@ -112,9 +112,13 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
 
 The following arguments are supported:
 
+* `name` - (Optional) The name of the Transfer Job. This name must start with "transferJobs/" prefix and end with a letter or a number, and should be no more than 128 characters ( `transferJobs/^(?!OPI)[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For transfers involving PosixFilesystem, this name must start with transferJobs/OPI specifically ( `transferJobs/OPI^[A-Za-z0-9-._~]*[A-Za-z0-9]$` ). For all other transfer types, this name must not start with transferJobs/OPI. Default the provider will assign a random unique name with `transferJobs/{{name}}` format, where `name` is a numeric value.
+
 * `description` - (Required) Unique description to identify the Transfer Job.
 
-* `transfer_spec` - (Required) Transfer specification. Structure [documented below](#nested_transfer_spec).
+* `transfer_spec` - (Optional) Transfer specification. Structure [documented below](#nested_transfer_spec). One of `transfer_spec`, or `replication_spec` can be specified.
+
+* `replication_spec` - (Optional) Replication specification. Structure [documented below](#nested_replication_spec). User should not configure `schedule`, `event_stream` with this argument. One of `transfer_spec`, or `replication_spec` must be specified.
 
 - - -
 
@@ -152,6 +156,18 @@ The following arguments are supported:
 * `http_data_source` - (Optional) A HTTP URL data source. Structure [documented below](#nested_http_data_source).
 
 * `azure_blob_storage_data_source` - (Optional) An Azure Blob Storage data source. Structure [documented below](#nested_azure_blob_storage_data_source).
+
+* `hdfs_data_source` - (Optional) An HDFS data source. Structure [documented below](#nested_hdfs_data_source).
+
+<a name="nested_replication_spec"></a>The `replication_spec` block supports:
+
+* `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
+
+* `gcs_data_source` - (Optional) A Google Cloud Storage data source. Structure [documented below](#nested_gcs_data_source).
+
+* `object_conditions` - (Optional) Only objects that satisfy these object conditions are included in the set of data source and data sink objects. Object conditions based on objects' `last_modification_time` do not exclude objects in a data sink. Structure [documented below](#nested_object_conditions).
+
+* `transfer_options` - (Optional) Characteristics of how to treat files from datasource and sink during job. If the option `delete_objects_unique_in_sink` is true, object conditions based on objects' `last_modification_time` are ignored and do not exclude objects in a data source or a data sink. Structure [documented below](#nested_transfer_options).
 
 <a name="nested_schedule"></a>The `schedule` block supports:
 
@@ -217,6 +233,10 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `root_directory` - (Required) Root directory path to the filesystem.
 
+<a name="nested_hdfs_data_source"></a>The `hdfs_data_source` block supports:
+
+* `path` - (Required) Root directory path to the filesystem.
+
 <a name="nested_aws_s3_data_source"></a>The `aws_s3_data_source` block supports:
 
 * `bucket_name` - (Required) S3 Bucket name.
@@ -245,7 +265,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `azure_credentials` - (Required) Credentials used to authenticate API requests to Azure block.
+* `credentials_secret` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+
+* `azure_credentials` - (Required in GA, Optional in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
 
 The `azure_credentials` block supports:
 

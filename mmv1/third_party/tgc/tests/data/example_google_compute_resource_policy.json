@@ -1,0 +1,29 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/resourcePolicies/gce-policy",
+        "asset_type": "compute.googleapis.com/ResourcePolicy",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "ResourcePolicy",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "diskConsistencyGroupPolicy": null,
+                "name": "gce-policy",
+                "region": "projects/{{.Provider.project}}/global/regions/us-central1",
+                "snapshotSchedulePolicy": {
+                    "schedule": {
+                        "dailySchedule": {
+                            "daysInCycle": 1,
+                            "startTime": "04:00"
+                        }
+                    }
+                }
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

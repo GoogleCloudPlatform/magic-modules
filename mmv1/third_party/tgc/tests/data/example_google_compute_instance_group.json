@@ -1,0 +1,21 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-central1-a/instanceGroups/placeholder-VM3roEyE",
+        "asset_type": "compute.googleapis.com/InstanceGroup",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "InstanceGroup",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "description": "Terraform test instance group",
+                "name": "terraform-test",
+                "zone": "https://www.googleapis.com/compute/v1/projects/{{.Provider.project}}/zones/us-central1-a"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

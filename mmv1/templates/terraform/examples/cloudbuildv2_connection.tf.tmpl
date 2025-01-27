@@ -1,0 +1,12 @@
+resource "google_cloudbuildv2_connection" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  name = "{{index $.Vars "connection_name"}}"
+
+  github_config {
+    app_installation_id = 0
+
+    authorizer_credential {
+      oauth_token_secret_version = "projects/gcb-terraform-creds/secrets/github-pat/versions/1"
+    }
+  }
+}

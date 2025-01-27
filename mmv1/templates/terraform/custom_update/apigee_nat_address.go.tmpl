@@ -1,0 +1,34 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+  return err
+}
+
+billingProject := ""
+
+obj := make(map[string]interface{})
+nameProp, err := expandApigeeNatAddressName(d.Get("name"), d, config)
+if err != nil {
+  return err
+} else if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+  obj["name"] = nameProp
+}
+
+log.Printf("[DEBUG] Updating NatAddress %q: %#v", d.Id(), obj)
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+  billingProject = bp
+}
+
+if d.HasChange("activate") {
+  if !d.Get("activate").(bool) {
+    return fmt.Errorf("NatAddress %q allows only the activation action", d.Id())
+  } else if d.Get("state").(string) == "RESERVED" {
+    log.Printf("[DEBUG] Activating for NatAddress %q to become ACTIVE", d.Id())
+    if err := resourceApigeeNatAddressActivate(config, d, billingProject, userAgent); err != nil {
+      return fmt.Errorf("Error activating NatAddress: %s", err)
+    }
+  }
+}
+
+return resourceApigeeNatAddressRead(d, meta)

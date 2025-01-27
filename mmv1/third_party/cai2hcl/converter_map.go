@@ -1,52 +1,38 @@
 package cai2hcl
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/resourcemanager"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tpg_provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 
-var allConverterNames = []map[string]string{
-	compute.ConverterNames,
-	resourcemanager.ConverterNames,
+var provider *schema.Provider = tpg_provider.Provider()
+
+// AssetTypeToConverter is a mapping from Asset Type to converter instance.
+var AssetTypeToConverter = map[string]string{
+	compute.ComputeInstanceAssetType:       "google_compute_instance",
+	compute.ComputeForwardingRuleAssetType: "google_compute_forwarding_rule",
+
+	compute.ComputeBackendServiceAssetType:       "google_compute_backend_service",
+	compute.ComputeRegionBackendServiceAssetType: "google_compute_region_backend_service",
+
+	compute.ComputeRegionHealthCheckAssetType: "google_compute_region_health_check",
+
+	resourcemanager.ProjectAssetType:        "google_project",
+	resourcemanager.ProjectBillingAssetType: "google_project",
 }
 
-var allConverterMaps = []map[string]common.Converter{
-	compute.ConverterMap,
-	resourcemanager.ConverterMap,
-}
+// ConverterMap is a collection of converters instances, indexed by name.
+var ConverterMap = map[string]common.Converter{
+	"google_compute_instance":        compute.NewComputeInstanceConverter(provider),
+	"google_compute_forwarding_rule": compute.NewComputeForwardingRuleConverter(provider),
 
-var ConverterNames = joinConverterNames(allConverterNames)
-var ConverterMap = joinConverterMaps(allConverterMaps)
+	"google_compute_backend_service":        compute.NewComputeBackendServiceConverter(provider),
+	"google_compute_region_backend_service": compute.NewComputeRegionBackendServiceConverter(provider),
 
-func joinConverterNames(arr []map[string]string) map[string]string {
-	result := make(map[string]string)
+	"google_compute_region_health_check": compute.NewComputeRegionHealthCheckConverter(provider),
 
-	for _, m := range arr {
-		for key, value := range m {
-			if _, hasKey := result[key]; hasKey {
-				panic("Converters from different services are not unique")
-			}
-
-			result[key] = value
-		}
-	}
-
-	return result
-}
-
-func joinConverterMaps(arr []map[string]common.Converter) map[string]common.Converter {
-	result := make(map[string]common.Converter)
-
-	for _, m := range arr {
-		for key, value := range m {
-			if _, hasKey := result[key]; hasKey {
-				panic("Converters from different services are not unique")
-			}
-
-			result[key] = value
-		}
-	}
-
-	return result
+	"google_project": resourcemanager.NewProjectConverter(provider),
 }

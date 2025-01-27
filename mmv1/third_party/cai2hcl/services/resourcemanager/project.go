@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
 
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
@@ -19,6 +19,9 @@ const ProjectAssetType string = "cloudresourcemanager.googleapis.com/Project"
 // ProjectAssetType is the CAI asset type name for project.
 const ProjectBillingAssetType string = "cloudbilling.googleapis.com/ProjectBillingInfo"
 
+// ProjectSchemaName is the TF resource schema name for resourcemanager project.
+const ProjectSchemaName string = "google_project"
+
 // ProjectConverter for compute project resource.
 type ProjectConverter struct {
 	name     string
@@ -27,9 +30,11 @@ type ProjectConverter struct {
 }
 
 // NewProjectConverter returns an HCL converter for compute project.
-func NewProjectConverter(name string, schema map[string]*tfschema.Schema) common.Converter {
+func NewProjectConverter(provider *tfschema.Provider) common.Converter {
+	schema := provider.ResourcesMap[ProjectSchemaName].Schema
+
 	return &ProjectConverter{
-		name:     name,
+		name:     ProjectSchemaName,
 		schema:   schema,
 		billings: make(map[string]string),
 	}

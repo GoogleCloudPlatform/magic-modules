@@ -2,6 +2,7 @@
   "name": "{{template}}",
   "project": "{{project}}",
   "location": "{{region}}",
+  "maximumLifetime": "172800s",
   "predefinedValues": {
     "keyUsage": {
       "baseKeyUsage": {

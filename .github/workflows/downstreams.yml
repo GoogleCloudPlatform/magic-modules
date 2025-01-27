@@ -4,7 +4,8 @@ permissions: read-all
 on:
   push:
     branches:
-      - scott-test-*
+      - main
+      - 'FEATURE-BRANCH-*'
 
 concurrency:
   group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-terraform {
+ 
+ terraform {
   required_providers {
     google = {
       source = "hashicorp/google-beta"
@@ -28,8 +28,10 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "image-store" {
-  name     = "image-store-bucket"
+  name     = "new-bucket-test-tf"
   location = "EU"
+
+  public_access_prevention = "enforced"
 
   website {
     main_page_suffix = "index.html"

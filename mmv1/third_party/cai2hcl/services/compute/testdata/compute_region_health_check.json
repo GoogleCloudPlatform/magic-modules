@@ -1,0 +1,55 @@
+
+[
+    {
+        "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/healthChecks/hc-1",
+        "asset_type": "compute.googleapis.com/RegionHealthCheck",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "RegionHealthCheck",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "checkIntervalSec": 5,
+                "description": "",
+                "healthyThreshold": 2,
+                "name": "hc",
+                "region": "projects/cn-fe-playground/regions/us-central1",
+                "tcpHealthCheck": {
+                  "port": 80,
+                  "proxyHeader": "NONE"
+                },
+                "timeoutSec": 5,
+                "type": "TCP",
+                "unhealthyThreshold": 2
+              }
+        }
+    },
+    {
+        "name": "//compute.googleapis.com/projects/myproj/regions/us-central1/healthChecks/hc-1",
+        "asset_type": "compute.googleapis.com/RegionHealthCheck",
+        "ancestry_path": "organizations/123/folders/456/project/myproj",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "RegionHealthCheck",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/myproj",
+            "data": {
+                "checkIntervalSec": 5,
+                "description": "descr",
+                "healthyThreshold": 2,
+                "name": "hc",
+                "region": "projects/cn-fe-playground/regions/us-central1",
+                "tcpHealthCheck": {
+                  "port": 8,
+                  "proxyHeader": "PROXY_V1",
+                  "request": "a",
+                  "response": "b"
+                },
+                "timeoutSec": 5,
+                "type": "TCP",
+                "unhealthyThreshold": 2
+              }
+        }
+    }
+]
