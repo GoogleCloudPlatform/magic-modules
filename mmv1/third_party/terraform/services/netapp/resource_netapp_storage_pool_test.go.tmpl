@@ -348,7 +348,7 @@ func testAccNetappStoragePool_FlexRegionalStoragePoolNoZone(context map[string]i
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east1"
+  location = "us-east1-a"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
