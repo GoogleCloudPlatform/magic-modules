@@ -5,8 +5,7 @@ go 1.23
 require (
 	bitbucket.org/creachadair/stringset v0.0.11
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.76.0
-	github.com/golang/glog v1.1.2
-	github.com/hashicorp/hcl v1.0.0
+	github.com/golang/glog v1.2.4
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nasa9084/go-openapi v0.0.0-20210722142352-4a81d737faf6
 	gopkg.in/yaml.v2 v2.4.0
@@ -18,7 +17,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-cpy v0.0.0-20211218193943-a9c933c06932 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.5 // indirect
