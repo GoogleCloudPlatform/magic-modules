@@ -1858,11 +1858,9 @@ func containerNodePoolLabelsSuppress(k, old, new string, d *schema.ResourceData)
 {{- end }}
 
 func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for server-specified labels
-	for _, label := range containerNodePoolProvidedResourceLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
+	// Suppress diffs for server-specified labels prefixed with "goog-gke"
+	if strings.Contains(k, "resource_labels.goog-gke") && new == "" {
+		return true
 	}
 
 	// Let diff be determined by resource_labels (above)
@@ -1872,12 +1870,6 @@ func containerNodePoolResourceLabelsDiffSuppress(k, old, new string, d *schema.R
 
 	// For other keys, don't suppress diff.
 	return false
-}
-
-var containerNodePoolProvidedResourceLabels = []string{
-	"goog-gke-accelerator-type",
-	"goog-gke-tpu-node-pool-type",
-	"goog-gke-node-pool-provisioning-model",
 }
 
 func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface{} {
