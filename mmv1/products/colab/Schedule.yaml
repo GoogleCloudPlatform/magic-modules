@@ -69,6 +69,7 @@ properties:
   - name: 'name'
     type: String
     description: 'The resource name of the Schedule'
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     output : true
   - name: 'displayName'
     type: String
