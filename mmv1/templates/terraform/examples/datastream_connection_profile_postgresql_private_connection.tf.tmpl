@@ -11,7 +11,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_datastream_private_connection" "private_connection" {
-    display_name          = "Connection profile"
+    display_name          = "Private connection"
     location              = "us-central1"
     private_connection_id = "{{index $.Vars "private_connection_id"}}"
 
@@ -55,7 +55,6 @@ resource "google_sql_user" "user" {
 
 resource "google_compute_address" "nat_vm_ip" {
   name         = "{{index $.Vars "nat_vm_ip_name"}}"
-  region       = "us-central1"
 }
 
 resource "google_compute_instance" "nat_vm" {
@@ -81,7 +80,7 @@ resource "google_compute_instance" "nat_vm" {
   metadata_startup_script = <<EOT
 #! /bin/bash
 # See https://cloud.google.com/datastream/docs/private-connectivity#set-up-reverse-proxy
-export DB_ADDR=${google_sql_database_instance.instance.private_ip_address}
+export DB_ADDR=${google_sql_database_instance.instance.public_ip_address}
 export DB_PORT=5432
 echo 1 > /proc/sys/net/ipv4/ip_forward
 md_url_prefix="http://169.254.169.254/computeMetadata/v1/instance"
