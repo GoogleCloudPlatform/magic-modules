@@ -23,6 +23,9 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/schedules'
 self_link: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/schedules'
+update_url: 'projects/{{project}}/locations/{{location}}/schedules/{{name}}'
+update_mask: true
+update_verb: 'PATCH'
 async:
   type: 'OpAsync'
   actions: ['delete']
@@ -105,6 +108,7 @@ properties:
     description:
       Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
   - name: 'createNotebookExecutionJobRequest'
+    immutable: true
     type: NestedObject
     description: Request for google_colab_notebook_execution.
     exactly_one_of:
