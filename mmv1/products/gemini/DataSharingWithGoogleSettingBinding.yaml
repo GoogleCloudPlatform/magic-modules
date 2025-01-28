@@ -24,14 +24,14 @@ import_format:
   - projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
 examples:
-- name: gemini_data_sharing_with_google_setting_binding_basic
-  min_version: 'beta'
-  primary_resource_id: example
-  vars:
-    data_sharing_with_google_setting_id: ls-tf1
-    setting_binding_id: ls-tf1b1
-    project_id: aandrei-test
-    target: projects/980109375338
+  - name: gemini_data_sharing_with_google_setting_binding_basic
+    min_version: 'beta'
+    primary_resource_id: example
+    vars:
+      data_sharing_with_google_setting_id: ls-tf1
+      setting_binding_id: ls-tf1b1
+      project_id: aandrei-test
+      target: projects/980109375338
 autogen_async: true
 async:
   operation:
@@ -51,54 +51,54 @@ async:
   include_project: false
 autogen_status: U2V0dGluZ0JpbmRpbmc=
 parameters:
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: dataSharingWithGoogleSettingId
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: settingBindingId
-  type: String
-  description: |-
-    Required. Id of the requesting object.
-    If auto-generating Id server-side, remove this field and
-    setting_id from the method_signature of Create RPC.
-  immutable: true
-  url_param_only: true
-  required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dataSharingWithGoogleSettingId
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: settingBindingId
+    type: String
+    description: |-
+      Required. Id of the requesting object.
+      If auto-generating Id server-side, remove this field and
+      setting_id from the method_signature of Create RPC.
+    immutable: true
+    url_param_only: true
+    required: true
 properties:
-- name: product
-  type: String
-  description: |-
-    Required. Product type of the setting binding.
-    Possible values:
-    PRODUCT_UNSPECIFIED
-    GEMINI_CLOUD_ASSIST
-    GEMINI_CODE_ASSIST
-- name: name
-  type: String
-  description: |-
-    Identifier. Name of the resource.
-    Format:projects/{project}/locations/{location}/{settingType}/{setting}/settingBindings/{setting_binding}
-  output: true
-- name: createTime
-  type: String
-  description: Output only. [Output only] Create time stamp.
-  output: true
-- name: updateTime
-  type: String
-  description: Output only. [Output only] Update time stamp.
-  output: true
-- name: labels
-  type: KeyValueLabels
-  description: Optional. Labels as key value pairs.
-- name: target
-  type: String
-  description: Required. Target of the binding.
-  required: true
+  - name: product
+    type: String
+    description: |-
+      Required. Product type of the setting binding.
+      Possible values:
+      PRODUCT_UNSPECIFIED
+      GEMINI_CLOUD_ASSIST
+      GEMINI_CODE_ASSIST
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the resource.
+      Format:projects/{project}/locations/{location}/{settingType}/{setting}/settingBindings/{setting_binding}
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. [Output only] Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. [Output only] Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs.
+  - name: target
+    type: String
+    description: Required. Target of the binding.
+    required: true
