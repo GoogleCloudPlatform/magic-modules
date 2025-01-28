@@ -1,0 +1,16 @@
+resource "google_gemini_data_sharing_with_google_setting" "basic" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "{{index $.Vars "data_sharing_with_google_setting_id"}}"
+    location = "global"
+    project = "{{index $.Vars "project_id"}}"
+    enable_preview_data_sharing = true
+}
+
+resource "google_gemini_data_sharing_with_google_setting_binding" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "{{index $.Vars "data_sharing_with_google_setting_id"}}"
+    setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.Vars "target"}}"
+    depends_on = [google_gemini_data_sharing_with_google_setting.basic]
+}
