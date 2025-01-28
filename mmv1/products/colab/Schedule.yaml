@@ -33,6 +33,8 @@ async:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
   post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
+  post_update: 'templates/terraform/post_update/colab_schedule.go.tmpl'
+  constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
 examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
@@ -42,6 +44,16 @@ examples:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
       service_account: 'SERVICE_ACCT'
+  - name: 'colab_schedule_stopped'
+    primary_resource_id: 'schedule'
+    vars:
+      bucket: 'my_bucket'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      location: 'REGION'
+      service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - 'desired_state'
   - name: 'colab_schedule_full'
     primary_resource_id: 'schedule'
     bootstrap_iam:
@@ -62,6 +74,12 @@ examples:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
       end_time: 'time.Now().AddDate(0, 0, 10).Format(time.RFC3339)'
+virtual_fields:
+  - name: 'desired_state'
+    description: |
+      Desired state of the Colab Schedule. Set this field to `ACTIVE` to start/resume the schedule, and `PAUSED` to pause the schedule.
+    type: String
+    default_from_api: true
 parameters:
   - name: 'location'
     type: String
@@ -108,6 +126,11 @@ properties:
     send_empty_value: true
     description:
       Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
+  - name: 'state'
+    type: String
+    description: |
+      Output only. The state of the schedule.
+    output: true
   - name: 'createNotebookExecutionJobRequest'
     immutable: true
     type: NestedObject

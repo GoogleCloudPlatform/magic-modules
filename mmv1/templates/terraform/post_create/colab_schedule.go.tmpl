@@ -13,3 +13,10 @@ parts := strings.Split(longName, "/")
 parts[1] = project
 updatedLongName := strings.Join(parts, "/")
 d.SetId(updatedLongName)
+
+if p, ok := d.GetOk("desired_state"); ok && p.(string) == "PAUSED" {
+  _, err := modifyScheduleState(config, d, project, billingProject, userAgent, "pause")
+  if err != nil {
+    return err
+  }
+}

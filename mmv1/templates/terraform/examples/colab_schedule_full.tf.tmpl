@@ -65,6 +65,8 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   start_time = "{{index $.Vars "start_time"}}"
   end_time = "{{index $.Vars "end_time"}}"
 
+  desired_state = "ACTIVE"
+
   create_notebook_execution_job_request {
     parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}"
     notebook_execution_job {
