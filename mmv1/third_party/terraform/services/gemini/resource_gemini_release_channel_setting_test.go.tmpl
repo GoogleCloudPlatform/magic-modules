@@ -13,7 +13,6 @@ func TestAccGeminiReleaseChannelSetting_geminiReleaseChannelSettingBasicExample_
 	t.Parallel()
 	context := map[string]interface{}{
 		"setting_id": "ls-tf1",
-		"project_id": "aandrei-test",
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -51,7 +50,6 @@ resource "google_gemini_release_channel_setting" "example" {
     provider = google-beta
     release_channel_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
     release_channel = "EXPERIMENTAL"
 }
 `, context)
@@ -62,7 +60,6 @@ resource "google_gemini_release_channel_setting" "example" {
     provider = google-beta
     release_channel_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
     release_channel = "STABLE"
 }
 `, context)

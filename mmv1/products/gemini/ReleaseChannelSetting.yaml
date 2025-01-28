@@ -65,7 +65,6 @@ properties:
     description: |-
       Optional. Release channel to be used.
       Possible values:
-      CHANNEL_TYPE_UNSPECIFIED
       STABLE
       EXPERIMENTAL
   - name: name
