@@ -13,7 +13,7 @@
 
 ---
 name: DataSharingWithGoogleSetting
-description: The resource for managing DataSharingWithGoogle settings for Admin Control. 
+description: The resource for managing DataSharingWithGoogle settings for Admin Control.
 base_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
