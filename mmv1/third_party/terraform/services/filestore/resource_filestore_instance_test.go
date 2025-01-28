@@ -524,10 +524,10 @@ resource "google_filestore_instance" "replica-instance" {
   }
 
   initial_replication {
-	replicas {
-	  peer_instance = google_filestore_instance.instance.id
-	     }
-	}
+    replicas {
+      peer_instance = google_filestore_instance.instance.id
+    }
+  }
 }
 `, context)
 }
