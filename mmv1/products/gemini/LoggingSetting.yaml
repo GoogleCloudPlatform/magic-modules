@@ -73,6 +73,6 @@ properties:
   - name: logPromptsAndResponses
     type: Boolean
     description: Optional. Whether to log prompts and responses.
-  - name: slogMetadata
+  - name: logMetadata
     type: Boolean
     description: Optional. Whether to log metadata.

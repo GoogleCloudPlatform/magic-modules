@@ -53,6 +53,7 @@ resource "google_gemini_logging_setting" "example" {
     location = "global"
 	project = "%{project_id}"
 	log_prompts_and_responses = true
+	log_metadata = true
 }
 `, context)
 }
@@ -64,6 +65,7 @@ resource "google_gemini_logging_setting" "example" {
     location = "global"
 	project = "%{project_id}"
 	log_prompts_and_responses = false
+	log_metadata = false
 }
 `, context)
 }
