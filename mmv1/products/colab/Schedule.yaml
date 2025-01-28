@@ -74,6 +74,8 @@ examples:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
       start_time: 'time.Now().AddDate(0, 0, 1).Format(time.RFC3339)'
       end_time: 'time.Now().AddDate(0, 0, 10).Format(time.RFC3339)'
+    ignore_read_extra:
+      - 'desired_state'
 virtual_fields:
   - name: 'desired_state'
     description: |
