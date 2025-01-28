@@ -98,6 +98,7 @@ properties:
     properties:
       - name: 'dataformRepositoryResourceName'
         type: String
+        required: true
         description: 'The resource name of the Dataform Repository.'
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'commitSha'
@@ -114,6 +115,7 @@ properties:
       - name: 'uri'
         type: String
         description: 'The Cloud Storage uri pointing to the ipynb file.'
+        required: true
       - name: 'generation'
         type: String
         description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
@@ -128,6 +130,7 @@ properties:
     properties:
       - name: 'content'
         type: String
+        required: true
         description: 'The base64-encoded contents of the input notebook file.'
         custom_flatten: 'templates/terraform/custom_flatten/colab_notebook_execution_direct_content.go.tmpl'
   - name: executionTimeout
