@@ -1,0 +1,16 @@
+resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
+    provider = google-beta
+    gemini_gcp_enablement_setting_id = "{{index $.Vars "gemini_gcp_enablement_setting_id"}}"
+    location = "global"
+    project = "{{index $.Vars "project_id"}}"
+    enable_customer_data_sharing = true
+}
+
+resource "google_gemini_gemini_gcp_enablement_setting_binding" "{{$.PrimaryResourceId}}" {
+    provider = google-beta
+    gemini_gcp_enablement_setting_id = "{{index $.Vars "gemini_gcp_enablement_setting_id"}}"
+    setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.Vars "target"}}"
+    depends_on = [google_gemini_gemini_gcp_enablement_setting.basic]
+}
