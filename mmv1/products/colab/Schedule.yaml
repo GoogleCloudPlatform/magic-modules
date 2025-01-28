@@ -133,6 +133,7 @@ properties:
             properties:
               - name: 'dataformRepositoryResourceName'
                 type: String
+                required: true
                 description: 'The resource name of the Dataform Repository.'
                 diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
               - name: 'commitSha'
@@ -147,6 +148,7 @@ properties:
             properties:
               - name: 'uri'
                 type: String
+                required: true
                 description: 'The Cloud Storage uri pointing to the ipynb file.'
               - name: 'generation'
                 type: String
