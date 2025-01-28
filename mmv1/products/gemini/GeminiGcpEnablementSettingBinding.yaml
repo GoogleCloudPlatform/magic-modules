@@ -102,4 +102,3 @@ properties:
     type: String
     description: Output only. [Output only] Update time stamp.
     output: true
-
