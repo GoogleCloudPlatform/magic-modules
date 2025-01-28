@@ -100,7 +100,7 @@ EOT
 }
 
 resource "google_compute_firewall" "rules" {
-  name        = "ingress-rule"
+  name        = "{{index $.Vars "ingress_firewall_name"}}"
   network     = google_datastream_private_connection.private_connection.vpc_peering_config.0.vpc
   description = "Allow traffic into NAT VM"
   direction   = "INGRESS"
