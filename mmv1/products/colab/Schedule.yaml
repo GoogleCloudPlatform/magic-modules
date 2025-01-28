@@ -105,6 +105,7 @@ properties:
       Maximum number of runs that can be started concurrently for this Schedule. This is the limit for starting the scheduled requests and not the execution of the notebook execution jobs created by the requests.
   - name: 'allowQueueing'
     type: Boolean
+    send_empty_value: true
     description:
       Whether new scheduled runs can be queued when max_concurrent_runs limit is reached. If set to true, new runs will be queued instead of skipped. Default to false.
   - name: 'createNotebookExecutionJobRequest'
