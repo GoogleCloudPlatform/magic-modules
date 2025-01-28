@@ -301,6 +301,9 @@ func mergeResourceFieldSets(allFields ResourceFieldSetsWithKeys, currentField Re
 }
 
 func mergeFieldSets(allFields map[string]FieldSet, currentField []FieldSet) map[string]FieldSet {
+	if allFields == nil {
+		allFields = make(map[string]FieldSet)
+	}
 	for _, fieldSet := range currentField {
 		allFields[setKey(fieldSet)] = fieldSet
 	}
