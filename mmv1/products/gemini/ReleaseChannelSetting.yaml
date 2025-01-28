@@ -21,7 +21,7 @@ create_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings?r
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+  - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 examples:
   - name: gemini_release_channel_setting_basic
