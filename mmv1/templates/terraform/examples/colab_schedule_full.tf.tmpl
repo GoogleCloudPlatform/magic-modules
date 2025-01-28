@@ -63,7 +63,7 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   cron = "TZ=America/Los_Angeles * * * * *"
   max_run_count = 5
   start_time = "{{index $.Vars "start_time"}}"
-  end_time = "{{index $.Vars "start_time"}}"
+  end_time = "{{index $.Vars "end_time"}}"
 
   create_notebook_execution_job_request {
     parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}"
