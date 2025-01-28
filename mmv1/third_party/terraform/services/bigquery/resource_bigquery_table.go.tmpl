@@ -96,6 +96,14 @@ func jsonCompareWithMapKeyOverride(key string, a, b interface{}, compareMapKeyVa
 			unionOfKeys[subKey] = true
 		}
 
+		{{- if ne $.TargetVersionName "ga" }}
+		// Disregard "type" and "fields" if "foreignTypeDefinition" is present since they may have been modified by the server.
+		if _, ok := unionOfKeys["foreignTypeDefinition"]; ok {
+			delete(unionOfKeys, "type")
+			delete(unionOfKeys, "fields")
+		}
+
+		{{- end }}
 		for subKey := range unionOfKeys {
 			eq := compareMapKeyVal(subKey, objectA, objectB)
 			if !eq {
@@ -323,6 +331,15 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 		for key := range objectNew {
 			unionOfKeys[key] = true
 		}
+
+		{{- if ne $.TargetVersionName "ga" }}
+		// Disregard "type" and "fields" if "foreignTypeDefinition" is present since they may have been modified by the server.
+		if _, ok := unionOfKeys["foreignTypeDefinition"]; ok {
+			delete(unionOfKeys, "type")
+			delete(unionOfKeys, "fields")
+		}
+
+		{{- end }}
 		for key := range unionOfKeys {
 			valOld := objectOld[key]
 			valNew := objectNew[key]
@@ -992,6 +1009,26 @@ func ResourceBigQueryTable() *schema.Resource {
 				DiffSuppressFunc: bigQueryTableSchemaDiffSuppress,
 				Description:      `A JSON schema for the table.`,
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			// SchemaForeignTypeInfo: [Optional] Specifies metadata of the foreign data type definition in field schema.
+			"schema_foreign_type_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: "Specifies metadata of the foreign data type definition in field schema.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// TypeSystem: [Required] Specifies the system which defines the foreign data type.
+						"type_system": {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      `Specifies the system which defines the foreign data type.`,
+						},
+					},
+				},
+			},
+			{{- end }}
 			// View: [Optional] If specified, configures this table as a view.
 			"view": {
 				Type:        schema.TypeList,
@@ -1627,6 +1664,14 @@ func resourceTable(d *schema.ResourceData, meta interface{}) (*bigquery.Table, e
 		table.Schema = schema
 	}
 
+	{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := d.GetOk("schema_foreign_type_info"); ok {
+		if table.Schema != nil {
+			table.Schema.ForeignTypeInfo = expandForeignTypeInfo(v)
+		}
+	}
+
+	{{- end }}
 	if v, ok := d.GetOk("time_partitioning"); ok {
 		table.TimePartitioning = expandTimePartitioning(v)
 	}
@@ -1930,6 +1975,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 		if err := d.Set("schema", schema); err != nil {
 			return fmt.Errorf("Error setting schema: %s", err)
 		}
+		{{- if ne $.TargetVersionName "ga" }}
+		if res.Schema.ForeignTypeInfo != nil {
+			foreignTypeInfo := flattenForeignTypeInfo(res.Schema.ForeignTypeInfo)
+			if err := d.Set("schema_foreign_type_info", foreignTypeInfo); err != nil {
+				return fmt.Errorf("Error setting schema_foreign_type_info: %s", err)
+			}
+		}
+		{{- end }}
 	}
 
 	if res.View != nil {
@@ -2733,6 +2786,32 @@ func schemaHasRequiredFields(schema *bigquery.TableSchema) bool {
 	return false
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func expandForeignTypeInfo(configured interface{}) *bigquery.ForeignTypeInfo {
+	if len(configured.([]interface{})) == 0 {
+		return nil
+	}
+
+	raw := configured.([]interface{})[0].(map[string]interface{})
+	fti := &bigquery.ForeignTypeInfo{}
+
+	if v, ok := raw["type_system"]; ok {
+		fti.TypeSystem = v.(string)
+	}
+
+	return fti
+}
+
+func flattenForeignTypeInfo(fti *bigquery.ForeignTypeInfo) []map[string]interface{} {
+	if fti == nil {
+		return nil
+	}
+
+	result := map[string]interface{}{"type_system": fti.TypeSystem}
+	return []map[string]interface{}{result}
+}
+
+{{- end }}
 func expandTimePartitioning(configured interface{}) *bigquery.TimePartitioning {
 	raw := configured.([]interface{})[0].(map[string]interface{})
 	tp := &bigquery.TimePartitioning{Type: raw["type"].(string)}

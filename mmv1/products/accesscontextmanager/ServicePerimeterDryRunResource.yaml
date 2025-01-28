@@ -68,9 +68,10 @@ nested_query:
   modify_by_patch: true
 custom_code:
   encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_dry_run_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
@@ -106,3 +107,8 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of perimeter resources on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of resources. The resource to add or remove is merged into that list and then this etag is sent with the PATCH call along with the updated resource list.
