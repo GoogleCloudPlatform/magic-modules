@@ -73,12 +73,9 @@ resource "google_compute_network_firewall_policy" "basic_network_firewall_policy
 resource "google_compute_network_firewall_policy_packet_mirroring_rule" "primary" {
   provider                = google-beta
   action                  = "do_not_mirror"
-  description             = "This is a simple packet mirroring rule description"
   direction               = "INGRESS"
-  disabled                = false
   firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
   priority                = 1000
-  rule_name               = "test-rule"
 
   match {
     src_ip_ranges = ["10.100.0.1/32"]
@@ -130,7 +127,7 @@ resource "google_compute_network_firewall_policy_packet_mirroring_rule" "primary
   security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
 
   target_secure_tags {
-   name = "tagValues/${google_tags_tag_value.secure_tag_value_1.name}"
+    name = "tagValues/${google_tags_tag_value.secure_tag_value_1.name}"
   }
 
 }

@@ -34,8 +34,8 @@ resource "google_compute_network_firewall_policy_packet_mirroring_rule" "{{$.Pri
   security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
 
   target_secure_tags {
-        name = "tagValues/${google_tags_tag_value.secure_tag_value_1.name}"
-      }
+    name = "tagValues/${google_tags_tag_value.secure_tag_value_1.name}"
+  }
 }
 
 resource "google_network_security_mirroring_deployment_group" "default" {
