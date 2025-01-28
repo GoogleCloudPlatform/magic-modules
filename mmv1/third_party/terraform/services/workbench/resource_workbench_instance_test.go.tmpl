@@ -681,7 +681,6 @@ resource "google_workbench_instance" "instance" {
 `, context)
 }
 
-
 func testAccWorkbenchInstance_updateDataDisk(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_workbench_instance" "instance" {
@@ -779,6 +778,7 @@ resource "google_workbench_instance" "instance" {
 }
 `, context)
 }
+
 
 func TestAccWorkbenchInstance_updateCustomContainers(t *testing.T) {
 	t.Parallel()
