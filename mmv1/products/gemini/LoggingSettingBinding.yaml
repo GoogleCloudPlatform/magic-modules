@@ -21,17 +21,17 @@ id_format: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging
 update_verb: PATCH
 update_mask: true
 import_format:
-- projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings/{{setting_binding_id}}
+  - projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings/{{setting_binding_id}}
 mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
 examples:
-- name: gemini_logging_setting_binding_basic
-  min_version: 'beta'
-  primary_resource_id: example
-  vars:
-    logging_setting_id: ls-tf1
-    setting_binding_id: ls-tf1b1
-    project_id: aandrei-test
-    target: projects/980109375338
+  - name: gemini_logging_setting_binding_basic
+    min_version: 'beta'
+    primary_resource_id: example
+    vars:
+      logging_setting_id: ls-tf1
+      setting_binding_id: ls-tf1b1
+      project_id: aandrei-test
+      target: projects/980109375338
 autogen_async: true
 timeouts:
   insert_minutes: 90
@@ -45,9 +45,9 @@ async:
       delete_minutes: 90
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
