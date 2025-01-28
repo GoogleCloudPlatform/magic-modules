@@ -69,4 +69,3 @@ properties:
   - name: enableCustomerDataSharing
     type: Boolean
     description: Optional. Whether customer data sharing should be enabled.
-
