@@ -72,6 +72,7 @@ examples:
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+      # Tests use a (relatively static) future date so that VCR cassettes can stay valid for a long time
       start_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339)'
       end_time: 'time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339)'
     ignore_read_extra:
