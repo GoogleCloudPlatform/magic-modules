@@ -216,6 +216,10 @@ resource "google_workstations_workstation_config" "default" {
   persistent_directories {
 	mount_path = "/home"
   }
+
+  labels = {
+	foo = "bar"
+  }
 }
 `, context)
 }
@@ -256,8 +260,8 @@ resource "google_workstations_workstation_config" "default" {
 
   persistent_directories {
 	mount_path = "/home"
-  disk_type = pd-standard
-  disk_size = 50
+	disk_type = pd-standard
+	disk_size = 50
   }
 
   labels = {
