@@ -35,6 +35,8 @@ custom_code:
   post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
   post_update: 'templates/terraform/post_update/colab_schedule.go.tmpl'
   constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
+sweeper:
+  sweepable_identifier_field: 'displayName'
 examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
