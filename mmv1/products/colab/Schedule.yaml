@@ -113,7 +113,7 @@ properties:
   - name: 'maxRunCount'
     type: int
     description:
-      The max runs for the schedule.
+      Maximum run count of the schedule. If specified, The schedule will be completed when either startedRunCount >= maxRunCount or when endTime is reached. If not specified, new runs will keep getting scheduled until this Schedule is paused or deleted. Already scheduled runs will be allowed to complete. Unset if not specified.
   - name: 'cron'
     type: string
     description: |
