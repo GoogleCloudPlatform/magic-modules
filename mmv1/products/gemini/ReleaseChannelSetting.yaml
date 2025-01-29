@@ -29,7 +29,6 @@ examples:
     primary_resource_id: example
     vars:
       release_channel_setting_id: ls1-tf
-      project_id: "aandrei-test"
 autogen_async: false
 autogen_status: UmVsZWFzZUNoYW5uZWxTZXR0aW5n
 parameters:
