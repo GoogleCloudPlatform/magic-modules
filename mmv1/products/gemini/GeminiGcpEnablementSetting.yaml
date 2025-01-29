@@ -29,7 +29,6 @@ examples:
     primary_resource_id: example
     vars:
       gemini_gcp_enablement_setting_id: ls1-tf
-      project_id: "aandrei-test"
 autogen_async: false
 autogen_status: R2VtaW5pR2NwRW5hYmxlbWVudFNldHRpbmc=
 parameters:

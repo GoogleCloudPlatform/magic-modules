@@ -13,7 +13,6 @@ func TestAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBas
 	t.Parallel()
 	context := map[string]interface{}{
 		"setting_id": "ls-tf1",
-		"project_id": "aandrei-test",
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -51,7 +50,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "example" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
 	enable_customer_data_sharing = true
 }
 `, context)
@@ -62,7 +60,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "example" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
 	enable_customer_data_sharing = false
 }
 `, context)
