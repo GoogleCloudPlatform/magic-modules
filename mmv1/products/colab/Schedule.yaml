@@ -150,7 +150,7 @@ properties:
         type: NestedObject
         required: true
         description:
-          Notebook Execution Job Info.
+          The NotebookExecutionJob to create.
         properties:
           - name: 'displayName'
             type: String
