@@ -138,8 +138,7 @@ properties:
     immutable: true
     type: NestedObject
     description: Request for google_colab_notebook_execution.
-    exactly_one_of:
-      - create_notebook_execution_job_request
+    required: true
     properties:
       - name: 'parent'
         type: String
