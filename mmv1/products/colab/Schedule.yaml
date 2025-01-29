@@ -108,7 +108,7 @@ properties:
   - name: 'endTime'
     type: String
     description:
-      Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count.
+      Timestamp after which no new runs can be scheduled. If specified, the schedule will be completed when either end_time is reached or when scheduled_run_count >= max_run_count. Must be in the RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt) format.
   - name: 'maxRunCount'
     type: int
     description:
