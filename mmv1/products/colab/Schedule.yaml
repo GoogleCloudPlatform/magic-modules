@@ -117,8 +117,7 @@ properties:
     type: string
     description: |
       Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
-    exactly_one_of:
-      - cron
+    required: true
   - name: 'maxConcurrentRunCount'
     type: int
     required: true
