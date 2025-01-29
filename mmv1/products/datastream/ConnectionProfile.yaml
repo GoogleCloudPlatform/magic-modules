@@ -64,6 +64,8 @@ examples:
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
+    ignore_read_extra:
+      - 'postgresql_profile.0.password'
   - name: 'datastream_connection_profile_full'
     primary_resource_id: 'default'
     vars:
