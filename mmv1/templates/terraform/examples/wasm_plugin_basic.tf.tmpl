@@ -4,7 +4,6 @@ resource "google_network_services_wasm_plugin" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
   name        = "{{index $.Vars "wasm_plugin_name"}}"
   description = "my wasm plugin"
-  location    = "global"
 
   main_version_id = "v1"
 

@@ -21,9 +21,9 @@ references:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/create-plugin'
   api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.wasmPlugins'
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/wasmPlugins'
-self_link: 'projects/{{project}}/locations/{{location}}/wasmPlugins/{{name}}'
-create_url: 'projects/{{project}}/locations/{{location}}/wasmPlugins?wasmPluginId={{name}}'
+base_url: 'projects/{{project}}/locations/global/wasmPlugins'
+self_link: 'projects/{{project}}/locations/global/wasmPlugins/{{name}}'
+create_url: 'projects/{{project}}/locations/global/wasmPlugins?wasmPluginId={{name}}'
 create_verb: 'POST'
 update_verb: 'PATCH'
 update_mask: true
@@ -49,13 +49,6 @@ examples:
       wasm_plugin_name: 'my-wasm-plugin'
     skip_vcr: true
 parameters:
-  - name: 'location'
-    type: String
-    description: |
-      The location of the traffic extension
-    url_param_only: true
-    required: true
-    immutable: true
   - name: 'name'
     type: String
     description: |
@@ -189,6 +182,8 @@ properties:
       Output only. List of all extensions that use this WasmPlugin resource.
     output: true
     item_type:
-      name: 'name'
-      type: string
-      description: 'Output only. Full name of the resource'
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: string
+          description: 'Output only. Full name of the resource'
