@@ -16,7 +16,6 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 	context := map[string]interface{}{
 		"logging_setting_id": "ls-tf1",
 		"setting_binding_id": "ls-tf1b1",
-		"project_id":         "aandrei-test",
 		"target":             "projects/980109375338",
 		"new_target":         "projects/283661608541",
 	}
@@ -58,7 +57,6 @@ resource "google_gemini_logging_setting" "basic" {
     provider = google-beta
     logging_setting_id = "%{logging_setting_id}"
 	location = "global"
-	project = "%{project_id}"
     log_prompts_and_responses = true
 }
 
@@ -67,7 +65,6 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
     logging_setting_id = "%{logging_setting_id}"
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	project = "%{project_id}"
 	target = "%{target}"
 	depends_on = [google_gemini_logging_setting.basic]
 }
@@ -80,7 +77,6 @@ resource "google_gemini_logging_setting" "basic" {
     provider = google-beta
     logging_setting_id = "%{logging_setting_id}"
 	location = "global"
-	project = "%{project_id}"
     log_prompts_and_responses = true
 }
 
@@ -89,7 +85,6 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
     logging_setting_id = "%{logging_setting_id}"
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	project = "%{project_id}"
 	target = "%{new_target}"
 	depends_on = [google_gemini_logging_setting.basic]
 }
