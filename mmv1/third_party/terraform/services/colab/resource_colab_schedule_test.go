@@ -17,11 +17,11 @@ func TestAccColabSchedule_update(t *testing.T) {
 		"location":           envvar.GetTestRegionFromEnv(),
 		"project_id":         envvar.GetTestProjectFromEnv(),
 		"service_account":    envvar.GetTestServiceAccountFromEnv(t),
-		"end_time":           time.Now().AddDate(0, 0, 10).Format(time.RFC3339),
-		"start_time":         time.Now().AddDate(0, 0, 1).Format(time.RFC3339),
+		"end_time":           time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339),
+		"start_time":         time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339),
 		"random_suffix":      acctest.RandString(t, 10),
-		"updated_start_time": time.Now().AddDate(0, 0, 2).Format(time.RFC3339),
-		"updated_end_time":   time.Now().AddDate(0, 0, 5).Format(time.RFC3339),
+		"updated_start_time": time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 2).Format(time.RFC3339),
+		"updated_end_time":   time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 5).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -58,11 +58,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 		"location":           envvar.GetTestRegionFromEnv(),
 		"project_id":         envvar.GetTestProjectFromEnv(),
 		"service_account":    envvar.GetTestServiceAccountFromEnv(t),
-		"end_time":           time.Now().AddDate(0, 0, 10).Format(time.RFC3339),
-		"start_time":         time.Now().AddDate(0, 0, 1).Format(time.RFC3339),
+		"end_time":           time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 10).Format(time.RFC3339),
+		"start_time":         time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 1).Format(time.RFC3339),
 		"random_suffix":      acctest.RandString(t, 10),
-		"updated_start_time": time.Now().AddDate(0, 0, 2).Format(time.RFC3339),
-		"updated_end_time":   time.Now().AddDate(0, 0, 5).Format(time.RFC3339),
+		"updated_start_time": time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 2).Format(time.RFC3339),
+		"updated_end_time":   time.Date(time.Now().Year(), 12, 31, 0, 0, 0, 0, time.Now().Location()).AddDate(0, 0, 5).Format(time.RFC3339),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
