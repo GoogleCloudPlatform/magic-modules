@@ -142,10 +142,12 @@ properties:
     properties:
       - name: 'parent'
         type: String
+        required: true
         description:
           Notebook Execution Job Info.
       - name: 'notebookExecutionJob'
         type: NestedObject
+        required: true
         description:
           Notebook Execution Job Info.
         properties:
@@ -200,7 +202,7 @@ properties:
             exactly_one_of:
               - execution_user
               - service_account
-            description: 'The user email to run the execution as. Only supported by Colab runtimes.'
+            description: 'The user email to run the execution as.
           - name: 'serviceAccount'
             type: String
             exactly_one_of:
