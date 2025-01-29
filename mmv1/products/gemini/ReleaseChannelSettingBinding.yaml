@@ -46,7 +46,6 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
-  error: {}
   include_project: false
 autogen_status: U2V0dGluZ0JpbmRpbmdCeVByb2plY3RBbmRMb2NhdGlvbkFuZFJlbGVhc2VjaGFubmVsc2V0dGluZw==
 parameters:
