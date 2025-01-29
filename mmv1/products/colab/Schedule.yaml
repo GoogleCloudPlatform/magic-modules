@@ -187,7 +187,7 @@ properties:
                 description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
           - name: executionTimeout
             type: String
-            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs).'
+            description: 'Max running time of the execution job in seconds (default 86400s / 24 hrs). A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".'
           - name: 'notebookRuntimeTemplateResourceName'
             type: String
             description: 'The NotebookRuntimeTemplate to source compute configuration from.'
