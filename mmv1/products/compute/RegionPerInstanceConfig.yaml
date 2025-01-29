@@ -32,7 +32,7 @@ update_verb: 'POST'
 read_verb: 'POST'
 delete_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers/{{region_instance_group_manager}}/deletePerInstanceConfigs'
 delete_verb: 'POST'
-mutex: 'instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}'
+mutex: 'instanceGroupManager/{{project}}/{{region}}/{{region_instance_group_manager}}/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

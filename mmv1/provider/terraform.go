@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -172,7 +173,42 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
+func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
+	// Create regex to match anything between {{ and }}
+	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+
+	// Find all matches in the template URL
+	matches := re.FindAllStringSubmatch(templateURL, -1)
+
+	// Create a map of allowed keys for O(1) lookup
+	allowedKeysMap := make(map[string]bool)
+	for _, key := range allowedKeys {
+		allowedKeysMap[key] = true
+	}
+
+	// Check each found key against the allowed keys
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+
+		// Trim spaces from the key
+		key := strings.TrimSpace(match[1])
+
+		// If the key isn't in our allowed list, return false
+		if !allowedKeysMap[key] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
+	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
+	if !urlContainsOnlyAllowedKeys(object.ListUrlTemplate(), allowedKeys) {
+		return
+	}
 	if object.ExcludeSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.ExcludeDelete {
 		return
 	}
