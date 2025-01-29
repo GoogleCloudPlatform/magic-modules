@@ -30,7 +30,6 @@ examples:
     vars:
       logging_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
-      project_id: aandrei-test
       target: projects/980109375338
 autogen_async: true
 timeouts:
