@@ -100,6 +100,12 @@ examples:
       spoke_name: "vpc-spoke"
       auto_accept_project_1_name: "foo"
       auto_accept_project_2_name: "bar"
+  - name: 'network_connectivity_spoke_linked_vpc_network_ipv6_support'
+    primary_resource_id: 'primary'
+    vars:
+      network_name: 'net'
+      hub_name: 'hub1'
+      spoke_name: 'spoke1-ipv6'
 parameters:
   - name: 'location'
     type: String
