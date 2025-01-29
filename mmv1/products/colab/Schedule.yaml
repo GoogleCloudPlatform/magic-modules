@@ -181,7 +181,7 @@ properties:
               - name: 'uri'
                 type: String
                 required: true
-                description: 'The Cloud Storage uri pointing to the ipynb file.'
+                description: 'The Cloud Storage uri pointing to the ipynb file. Format: gs://bucket/notebook_file.ipynb'
               - name: 'generation'
                 type: String
                 description: 'The version of the Cloud Storage object to read. If unset, the current version of the object is read. See https://cloud.google.com/storage/docs/metadata#generation-number.'
