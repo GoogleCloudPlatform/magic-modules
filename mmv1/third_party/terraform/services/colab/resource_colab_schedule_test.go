@@ -40,6 +40,11 @@ func TestAccColabSchedule_update(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
