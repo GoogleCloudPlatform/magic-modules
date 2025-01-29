@@ -1,5 +1,5 @@
 if p, ok := d.GetOk("desired_state"); ok && p.(string) == "STOPPED" {
-  _, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, "stop")
+  _, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, "pause")
   if err != nil {
     return err
   }
