@@ -56,7 +56,7 @@ resource "google_dataform_repository" "dataform_repository" {
 }
 
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
-  display_name = "{{index $.Vars "display_name"}}"
+  display_name = "{{index $.Vars "displayName"}}"
   location = "{{index $.TestEnvVars "location"}}"
   allow_queueing = true
   max_concurrent_run_count = 2
