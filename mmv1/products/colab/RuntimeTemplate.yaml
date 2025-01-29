@@ -14,6 +14,7 @@
 ---
 
 name: 'RuntimeTemplate'
+api_resource_type_kind: NotebookRuntimeTemplate
 description: |
   'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM,
    as well as common settings such as the network and whether public internet access is enabled. When you create

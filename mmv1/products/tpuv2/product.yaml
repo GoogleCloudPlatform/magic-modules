@@ -16,6 +16,8 @@ name: 'TpuV2'
 display_name: 'Cloud TPU v2'
 versions:
   - name: 'beta'
-    base_url: 'https://tpu.googleapis.com/v2/'
+    # The v2alpha1 version of the Cloud TPU API is best suited for the google-beta Terraform provider.
+    # This more closely matches current Cloud TPU API usage and is recommended by the Cloud TPU team.
+    base_url: 'https://tpu.googleapis.com/v2alpha1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
