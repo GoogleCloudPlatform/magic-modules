@@ -191,8 +191,7 @@ properties:
           - name: 'notebookRuntimeTemplateResourceName'
             type: String
             description: 'The NotebookRuntimeTemplate to source compute configuration from.'
-            exactly_one_of:
-              - notebook_runtime_template_resource_name
+            required: true
           - name: 'gcsOutputUri'
             required: true
             type: String
