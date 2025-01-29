@@ -13,7 +13,6 @@ func TestAccGeminiLoggingSetting_geminiLoggingSettingBasicExample_update(t *test
 	t.Parallel()
 	context := map[string]interface{}{
 		"setting_id": "ls-tf1",
-		"project_id": "aandrei-test",
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -51,7 +50,6 @@ resource "google_gemini_logging_setting" "example" {
     provider = google-beta
     logging_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
 	log_prompts_and_responses = true
 	log_metadata = true
 }
@@ -63,7 +61,6 @@ resource "google_gemini_logging_setting" "example" {
     provider = google-beta
     logging_setting_id = "%{setting_id}"
     location = "global"
-	project = "%{project_id}"
 	log_prompts_and_responses = false
 	log_metadata = false
 }

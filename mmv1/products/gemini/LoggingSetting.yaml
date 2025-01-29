@@ -29,7 +29,6 @@ examples:
     primary_resource_id: "example"
     vars:
       logging_setting_id: ls1-tf
-      project_id: "aandrei-test"
 autogen_async: false
 timeouts:
   insert_minutes: 90
