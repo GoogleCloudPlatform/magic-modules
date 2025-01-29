@@ -337,7 +337,8 @@ type Resource struct {
 	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
-	ImportPath string `yaml:"-"`
+	ImportPath     string `yaml:"-"`
+	SourceYamlFile string `yaml:"-"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {

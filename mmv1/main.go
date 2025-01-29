@@ -256,6 +256,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 
 		resource := &api.Resource{}
 		api.Compile(resourceYamlPath, resource, overrideDirectory)
+		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = *version
 		resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
