@@ -14,6 +14,10 @@
 ---
 name: 'Instance'
 description: A Workbench instance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs/workbench/instances/introduction'
+  api: 'https://cloud.google.com/vertex-ai/docs/workbench/reference/rest/v2/projects.locations.instances'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'

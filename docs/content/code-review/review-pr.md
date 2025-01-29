@@ -46,7 +46,6 @@ The following types of PRs may require additional scrutiny and/or multiple revie
       * for example - a bugfix should test the bug (or explain why it's not feasible to do so in the description, including manual results when possible) and an enhancement should test the new behaviour(s).
    1. all related PR presubmit tests have been completed successfully, including:
       * terraform-provider-breaking-change-test
-      * presubmit-rake-tests
       * terraform-provider-google-build-and-unit-tests
       * terraform-provider-google-beta-build-and-unit-tests
       * VCR-test
