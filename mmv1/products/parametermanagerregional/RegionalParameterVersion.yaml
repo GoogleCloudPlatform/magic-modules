@@ -45,18 +45,12 @@ examples:
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
-      data: 'parameter_data_json_format.yaml'
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_json_format.json"'
   - name: 'regional_parameter_version_with_yaml_format'
     primary_resource_id: 'regional-parameter-version-with-yaml-format'
     min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
-      data: 'parameter_data_yaml_format.yaml'
-    test_vars_overrides:
-      'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
 custom_code:
   pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
   custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'
