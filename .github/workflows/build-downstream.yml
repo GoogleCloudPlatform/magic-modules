@@ -10,14 +10,14 @@ on:
         type: string
 
 concurrency:
-  group: ${{ inputs.repo  }}-${{ github.event_name == 'pull_request' && format('pr-{0}-', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
+  group: ${{ inputs.repo }}-${{ github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
   cancel-in-progress: true
 
 jobs:
   generate-repository:
     runs-on: ubuntu-22.04
     env:
-      BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+      BASE_BRANCH: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_ref || github.event.pull_request.base.ref || github.ref_name }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Repository
