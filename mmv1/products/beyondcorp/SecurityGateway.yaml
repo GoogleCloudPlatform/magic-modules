@@ -22,9 +22,19 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
+iam_policy:
+  method_name_separator: ':'
+  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
+  allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
+  parent_resource_attribute: 'security_gateway_id'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}'
+    - '{{security_gateway_id}}'
 examples:
   - name: beyondcorp_security_gateway_basic
     primary_resource_id: example
+    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"])'
+    region_override: 'global'
     vars:
       security_gateway_name: default
 autogen_async: true
