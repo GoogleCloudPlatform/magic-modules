@@ -87,6 +87,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_active(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -96,6 +101,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_paused(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -105,6 +115,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_active(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -114,6 +129,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_full(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -123,6 +143,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_paused(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -132,6 +157,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",
@@ -141,6 +171,11 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 			},
 			{
 				Config: testAccColabSchedule_active(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_colab_schedule.schedule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_colab_schedule.schedule",

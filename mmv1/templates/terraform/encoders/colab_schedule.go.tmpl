@@ -9,6 +9,11 @@ if err != nil {
     return nil, err
 }
 
+// createNotebookExecutionJobRequest does not exist in update requests
+if obj["createNotebookExecutionJobRequest"] == nil {
+    return obj, nil
+}
+
 jobRequest, ok := obj["createNotebookExecutionJobRequest"].(map[string]interface{})
 if !ok {
     return nil, fmt.Errorf("createNotebookExecutionJobRequest is not of type map[string]interface{} or is nil")
