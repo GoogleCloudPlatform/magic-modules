@@ -61,7 +61,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
-  display_name = "{{index $.Vars "displayName"}}"
+  display_name = "{{index $.Vars "display_name"}}"
   location = "{{index $.TestEnvVars "location"}}"
   max_concurrent_run_count = 2
   cron = "TZ=America/Los_Angeles * * * * *"
