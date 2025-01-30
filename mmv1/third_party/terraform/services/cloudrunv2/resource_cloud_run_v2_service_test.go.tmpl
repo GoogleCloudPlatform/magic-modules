@@ -12,6 +12,96 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
+func TestAccCloudRunV2Service_cloudrunv2ServiceSidecarUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2ServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceSidecar(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceSidecarUpdate(context),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceSidecar(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  deletion_protection = false
+  template {
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        name = "http1"
+        container_port = 8080
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccCloudRunV2Service_cloudrunv2ServiceSidecarUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_service" "default" {
+  name     = "tf-test-cloudrun-service%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  deletion_protection = false
+  template {
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      env {
+        name = "PORT"
+        value = "9090"
+      }
+      startup_probe {
+        tcp_socket {
+          port = 9090
+        }
+      }
+    }
+    containers {
+      name = "container-2"
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      ports {
+        name = "http1"
+        container_port = 8080
+      }
+      depends_on = ["container-1"]
+    }
+  }
+}
+`, context)
+}
+
 func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 	t.Parallel()
 
