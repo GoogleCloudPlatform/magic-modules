@@ -68,7 +68,6 @@ resource "google_colab_schedule" "{{$.PrimaryResourceId}}" {
   desired_state = "ACTIVE"
 
   create_notebook_execution_job_request {
-    parent = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "location"}}"
     notebook_execution_job {
       display_name = "Notebook execution"
       execution_timeout = "86400s"

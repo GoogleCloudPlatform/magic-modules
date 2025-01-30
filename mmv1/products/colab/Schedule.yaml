@@ -32,6 +32,7 @@ async:
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
+  encoder: 'templates/terraform/encoders/colab_schedule.go.tmpl'
   post_create: 'templates/terraform/post_create/colab_schedule.go.tmpl'
   post_update: 'templates/terraform/post_update/colab_schedule.go.tmpl'
   constants: 'templates/terraform/constants/colab_schedule.go.tmpl'
@@ -140,11 +141,6 @@ properties:
     description: Request for google_colab_notebook_execution.
     required: true
     properties:
-      - name: 'parent'
-        type: String
-        required: true
-        description:
-          Notebook Execution Job Info.
       - name: 'notebookExecutionJob'
         type: NestedObject
         required: true

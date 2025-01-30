@@ -1,1 +1,13 @@
-obj["createNotebookExecutionJobRequest"]["parent"] = "projects/{{project}}/locations/{{location}}"
+config := meta.(*transport_tpg.Config)
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+ 	return nil, err
+}
+
+location, err := tpgresource.GetRegion(d, config)
+if err != nil {
+    return nil, err
+}
+
+obj["createNotebookExecutionJobRequest"].(map[string]interface{})["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+return obj, nil
