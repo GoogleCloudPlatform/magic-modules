@@ -355,7 +355,7 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
+						resource.TestCheckResourceAttr(
                         		"google_workbench_instance.instance", "state", "ACTIVE"),
                 ),
 			},
