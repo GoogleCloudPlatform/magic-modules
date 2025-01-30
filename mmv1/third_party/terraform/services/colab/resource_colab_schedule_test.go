@@ -227,7 +227,6 @@ resource "google_colab_schedule" "schedule" {
   end_time = "%{end_time}"
 
   create_notebook_execution_job_request {
-    parent = "projects/%{project_id}/locations/%{location}"
     notebook_execution_job {
       display_name = "Notebook execution"
       gcs_notebook_source {
@@ -326,7 +325,6 @@ resource "google_colab_schedule" "schedule" {
   desired_state = "PAUSED"
 
   create_notebook_execution_job_request {
-    parent = "projects/%{project_id}/locations/%{location}"
     notebook_execution_job {
       display_name = "Notebook execution"
       gcs_notebook_source {
@@ -425,7 +423,6 @@ resource "google_colab_schedule" "schedule" {
   desired_state = "ACTIVE"
 
   create_notebook_execution_job_request {
-    parent = "projects/%{project_id}/locations/%{location}"
     notebook_execution_job {
       display_name = "Notebook execution"
       gcs_notebook_source {
@@ -522,7 +519,6 @@ resource "google_colab_schedule" "schedule" {
   end_time = "%{updated_end_time}"
 
   create_notebook_execution_job_request {
-    parent = "projects/%{project_id}/locations/%{location}"
     notebook_execution_job {
       display_name = "Notebook execution"
       gcs_notebook_source {
