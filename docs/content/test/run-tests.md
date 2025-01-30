@@ -307,7 +307,7 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 
 VCR tests record HTTP request/response interactions in cassettes and replay them in future runs without calling the real API.
 
-Running tests in "REPLAYING" mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
+Running tests in `REPLAYING` mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
 
 It can also be helpful for debugging tests that seem to work locally, but fail in CI in replaying mode.
    
