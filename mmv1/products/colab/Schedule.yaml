@@ -48,15 +48,17 @@ examples:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
       service_account: 'SERVICE_ACCT'
-  - name: 'colab_schedule_stopped'
+  - name: 'colab_schedule_paused'
     primary_resource_id: 'schedule'
     vars:
-      display_name: 'Stopped schedule'
+      display_name: 'Paused schedule'
       bucket: 'my_bucket'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
       service_account: 'SERVICE_ACCT'
+    ignore_read_extra:
+      - desired_state
   - name: 'colab_schedule_full'
     primary_resource_id: 'schedule'
     bootstrap_iam:
