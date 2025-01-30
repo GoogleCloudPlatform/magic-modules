@@ -11,7 +11,7 @@ Get the value and metadata from a Parameter Manager Regional Parameter version w
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta datasources.
 
-~> **Warning:** To use this data source, we must grant the `Secret Manager Secret Accessor` role to the pincipal of the parameter. Please note that it can take up to 7 minutes for the role to take effect. Hence, we might need to wait approximately 7 minutes after granting  `Secret Manager Secret Accessor` role to the pincipal of the parameter. For more information see the [access change propagation documentation](https://cloud.google.com/iam/docs/access-change-propagation).
+~> **Warning:** To use this data source, we must grant the `Secret Manager Secret Accessor` role to the principal of the parameter. Please note that it can take up to 7 minutes for the role to take effect. Hence, we might need to wait approximately 7 minutes after granting  `Secret Manager Secret Accessor` role to the principal of the parameter. For more information see the [access change propagation documentation](https://cloud.google.com/iam/docs/access-change-propagation).
 
 ## Example Usage
 
