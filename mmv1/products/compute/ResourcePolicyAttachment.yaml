@@ -22,7 +22,6 @@ create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResou
 delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
 delete_verb: 'POST'
 immutable: true
-
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
