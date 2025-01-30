@@ -49,7 +49,12 @@ if d.HasChange("gce_setup.0.metadata") {
   old_metadata_interface, new_metadata_interface := d.GetChange("gce_setup.0.metadata")
   old_metadata := old_metadata_interface.(map[string]interface{})
   new_metadata := new_metadata_interface.(map[string]interface{})
-  obj["gceSetup"].(map[string]interface{})["metadata"] = mergeMaps(old_metadata,new_metadata)
+
+  gceSetup, exists := obj["gceSetup"]
+  if !exists {
+      return fmt.Errorf("gceSetup cannot be empty")
+  }
+  gceSetup.(map[string]interface{})["metadata"] = mergeMaps(old_metadata,new_metadata)
 }
 
 name := d.Get("name").(string)
