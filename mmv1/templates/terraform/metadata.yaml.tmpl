@@ -1,7 +1,7 @@
 resource: '{{ $.TerraformName }}'
 generation_type: 'mmv1'
 source_file: '{{ $.SourceYamlFile }}'
-has_generated_sweeprs: {{ $.ShouldGenerateSweepers }}
+has_generated_sweepers: {{ $.ShouldGenerateSweepers }}
 api_service_name: '{{ $.ProductMetadata.ServiceName }}'
 api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
 api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
