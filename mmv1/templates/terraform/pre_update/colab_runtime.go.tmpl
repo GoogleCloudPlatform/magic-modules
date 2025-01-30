@@ -1,0 +1,27 @@
+name := d.Get("name").(string)
+state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
+
+if desired_state != "" && state != desired_state {
+  var verb string
+
+  switch desired_state {
+    case "STOPPED":
+      verb = "stop"
+    case "ACTIVE":
+      verb = "start"
+    default:
+      return fmt.Errorf("desired_state has to be ACTIVE or STOPPED")
+  }
+
+  dRes, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, verb)
+  if err != nil {
+    return err
+  }
+  if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+    return fmt.Errorf("Error stopping Colab runtime: %s", err)
+  }
+
+} else {
+  log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
+}
