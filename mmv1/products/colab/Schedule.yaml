@@ -159,7 +159,7 @@ properties:
             description: 'The Dataform Repository containing the input notebook.'
             exactly_one_of:
               - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
-              - gcs_notebook_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
             properties:
               - name: 'dataformRepositoryResourceName'
                 type: String
@@ -173,8 +173,8 @@ properties:
             type: NestedObject
             description: 'The Cloud Storage uri for the input notebook.'
             exactly_one_of:
-              - dataform_repository_source
-              - gcs_notebook_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.gcs_notebook_source
             properties:
               - name: 'uri'
                 type: String
@@ -197,12 +197,12 @@ properties:
           - name: 'executionUser'
             type: String
             exactly_one_of:
-              - execution_user
-              - service_account
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
             description: 'The user email to run the execution as.'
           - name: 'serviceAccount'
             type: String
             exactly_one_of:
-              - execution_user
-              - service_account
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.execution_user
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.service_account
             description: 'The service account to run the execution as.'
