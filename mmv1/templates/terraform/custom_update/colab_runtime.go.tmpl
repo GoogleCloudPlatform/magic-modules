@@ -37,9 +37,4 @@ if desired_state != "" && state != desired_state {
   log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
 }
 
-if d.Get("upgrade_runtime").(bool) {
-  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, "upgrade"); err != nil {
-    return err
-  }
-}
 return nil
