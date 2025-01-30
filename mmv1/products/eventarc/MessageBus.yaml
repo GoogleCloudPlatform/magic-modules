@@ -47,16 +47,21 @@ parameters:
   immutable: true
   url_param_only: true
   required: true
+- name: messageBusId
+  type: String
+  description: |-
+    Required. The user-provided ID to be assigned to the MessageBus. It should match the
+    format `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+  immutable: true
+  url_param_only: true
+  required: true
+properties:
 - name: name
   type: String
   description: |-
     Identifier. Resource name of the form
     projects/{project}/locations/{location}/messageBuses/{message_bus}
-  required: true
-  immutable: true
-  diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
-  custom_expand: templates/terraform/custom_expand/eventarc_message_bus_name.go.tmpl
-properties:
+  output: true
 - name: loggingConfig
   type: NestedObject
   description: |-
