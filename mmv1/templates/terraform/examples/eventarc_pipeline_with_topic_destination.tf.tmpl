@@ -1,0 +1,37 @@
+resource "google_pubsub_topic" "topic" {
+  name = "{{index $.Vars "topic_name"}}"
+}
+
+resource "google_compute_network" "psc" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "psc" {
+  name   = "{{index $.Vars "subnet_name"}}"
+  region = "us-central1"
+
+  network       = google_compute_network.psc.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "psc" {
+  name                  = "{{index $.Vars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_AUTOMATIC"
+
+  subnetworks = [
+    google_compute_subnetwork.psc.self_link
+  ]
+}
+
+resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
+  location    = "us-central1"
+  pipeline_id = "{{index $.Vars "pipeline_name"}}"
+  destinations {
+    topic = google_pubsub_topic.topic.id
+    network_config {
+      network_attachment = google_compute_network_attachment.psc.id
+    }
+  }
+}
