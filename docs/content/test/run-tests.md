@@ -105,7 +105,7 @@ aliases:
     To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
 
     ```bash
-    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
     > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
@@ -305,19 +305,25 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
 
 ### Run Tests with VCR Locally
 
-Running tests in "replaying" mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
+VCR tests record HTTP request/response interactions in cassettes and replay them in future runs without calling the real API.
+
+Running tests in "REPLAYING" mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
 
 It can also be helpful for debugging tests that seem to work locally, but fail in CI in replaying mode.
    
-Make sure `$VCR_PATH` is set, and points to a local directory which exists, and set `VCR_MODE` appropriately.
+VCR is controlled via two variables:
+- `VCR_MODE`: `REPLAYING` or `RECORDING` mode 
+- `VCR_PATH`: Path where recorded cassettes are stored. 
 
-If you don't already have an existing cassette that's up to date, first do a run in "recording" mode:
+Ensure both variables are configured to properly trigger VCR tests locally.
+
+If you don't already have an existing cassette that's up to date, first do a run in `RECORDING` mode:
    
 ```bash
 VCR_PATH=$HOME/.vcr/ VCR_MODE=RECORDING  make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
 ```
 
-Now run the same test again in "replaying" mode:
+Now run the same test again in `REPLAYING` mode:
 
 ```bash
 VCR_PATH=$HOME/.vcr/ VCR_MODE=REPLAYING make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
