@@ -1,6 +1,9 @@
 if p, ok := d.GetOk("desired_state"); ok && p.(string) == "STOPPED" {
-  _, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, "pause")
+  dRes, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, "stop")
   if err != nil {
     return err
+  }
+  if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+    return fmt.Errorf("Error stopping Colab runtime: %s", err)
   }
 }
