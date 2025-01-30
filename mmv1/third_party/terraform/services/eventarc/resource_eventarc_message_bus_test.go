@@ -11,6 +11,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+// We make sure not to run tests in parallel, since only one MessageBus per project is supported.
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"basic": testAccEventarcMessageBus_basic,

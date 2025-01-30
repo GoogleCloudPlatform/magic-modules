@@ -41,7 +41,7 @@ examples:
   vars:
     message_bus_id: some-message-bus
   # We don't auto-generate tests since we can't support concurrent tests, as long as
-  # only one MessageBus is supported per location per project.
+  # only one MessageBus is supported per project.
   exclude_test: true
 parameters:
 - name: location
