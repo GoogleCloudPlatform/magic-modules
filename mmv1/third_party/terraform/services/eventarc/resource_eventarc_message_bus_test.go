@@ -14,6 +14,7 @@ import (
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"basic": testAccEventarcMessageBus_basic,
+		"full":  testAccEventarcMessageBus_full,
 	}
 
 	for name, tc := range testCases {
@@ -54,8 +55,55 @@ func testAccEventarcMessageBus_basic(t *testing.T) {
 func testAccEventarcMessageBus_basicCfg(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_message_bus" "primary" {
-  location = "%{region}"
-  name     = "tf-test-messagebus%{random_suffix}"
+  location       = "%{region}"
+  message_bus_id = "tf-test-messagebus%{random_suffix}"
+}
+`, context)
+}
+
+func testAccEventarcMessageBus_full(t *testing.T) {
+	region := envvar.GetTestRegionFromEnv()
+
+	context := map[string]interface{}{
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"region":         region,
+		"key":            acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-messagebus-key").CryptoKey.Name,
+		"random_suffix":  acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMessageBusDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEventarcMessageBus_fullCfg(context),
+			},
+			{
+				ResourceName:      "google_eventarc_message_bus.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccEventarcMessageBus_fullCfg(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_kms_crypto_key_iam_member" "key_member" {
+  crypto_key_id = "%{key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+}
+
+resource "google_eventarc_message_bus" "primary" {
+  location        = "%{region}"
+  message_bus_id  = "tf-test-messagebus%{random_suffix}"
+  crypto_key_name = "%{key}"
+  logging_config {
+    log_severity = "ALERT"
+  }
+  depends_on = [google_kms_crypto_key_iam_member.key_member]
 }
 `, context)
 }

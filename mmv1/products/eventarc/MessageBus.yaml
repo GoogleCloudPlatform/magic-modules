@@ -14,10 +14,13 @@
 ---
 name: MessageBus
 base_url: projects/{{project}}/locations/{{location}}/messageBuses
-self_link: projects/{{project}}/locations/{{location}}/messageBuses/{{name}}
-create_url: projects/{{project}}/locations/{{location}}/messageBuses?messageBusId={{name}}
+self_link: projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
+create_url: projects/{{project}}/locations/{{location}}/messageBuses?messageBusId={{message_bus_id}}
 update_verb: PATCH
 update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
+import_format:
+- projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/publish-events/create-bus'
@@ -36,7 +39,7 @@ examples:
 - name: eventarc_message_bus
   primary_resource_id: primary
   vars:
-    message_bus_name: some-message-bus
+    message_bus_id: some-message-bus
   # We don't auto-generate tests since we can't support concurrent tests, as long as
   # only one MessageBus is supported per location per project.
   exclude_test: true
@@ -67,12 +70,14 @@ properties:
   description: |-
     The configuration for Platform Telemetry logging for Eventarc Advanced
     resources.
+  default_from_api: true
   properties:
   - name: logSeverity
     type: Enum
     description: |-
       Optional. The minimum severity of logs that will be sent to Stackdriver/Platform
       Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
+    default_from_api: true
     enum_values:
       - LOG_SEVERITY_UNSPECIFIED
       - NONE
