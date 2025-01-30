@@ -1197,7 +1197,7 @@ properties:
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
     output: true
-  - name: 'iapEnable'
+  - name: 'iapEnabled'
     type: Boolean
     description: |
       Used to enable/disable IAP for the service.
