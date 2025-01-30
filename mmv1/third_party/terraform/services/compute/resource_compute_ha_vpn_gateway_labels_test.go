@@ -1,6 +1,7 @@
 package compute_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -48,7 +49,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 }
 
 func testAccComputeHaVpnGateway_updateLabels(suffix, key, value string) string {
-	return acctest.Nprintf(`
+	return fmt.Sprintf(`
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   region   = "us-central1"
   name     = "tf-test-ha-vpn-1%s"
