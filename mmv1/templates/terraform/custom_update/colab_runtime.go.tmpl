@@ -29,15 +29,17 @@ if desired_state != "" && state != desired_state {
       return fmt.Errorf("desired_state has to be RUNNING or STOPPED")
   }
 
-  dRes, err := modifyColabRuntimeState(config, d, project, billingProject, userAgent, verb)
-  if err != nil {
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, verb); err != nil {
     return err
-  }
-  if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
-    return fmt.Errorf("Error stopping Colab runtime: %s", err)
   }
 
 } else {
   log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
+}
+
+if d.Get("upgrade_runtime").(bool) {
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, "upgrade"); err != nil {
+    return err
+  }
 }
 return nil

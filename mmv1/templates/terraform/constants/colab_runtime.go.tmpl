@@ -1,5 +1,5 @@
-func modifyColabRuntimeState(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, state string) (map[string]interface{}, error) {
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ColabBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/notebookRuntimes/{{"{{"}}name{{"}}"}}:"+state)
+func ModifyColabRuntimeOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, method string) (map[string]interface{}, error) {
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ColabBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/notebookRuntimes/{{"{{"}}name{{"}}"}}:"+method)
 	if err != nil {
 		return nil, err
 	}
@@ -12,7 +12,7 @@ func modifyColabRuntimeState(config *transport_tpg.Config, d *schema.ResourceDat
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Unable to %q google_colab_runtime %q: %s", state, d.Id(), err)
+		return nil, fmt.Errorf("Unable to %q google_colab_runtime %q: %s", method, d.Id(), err)
 	}
 	return res, nil
 }
@@ -21,10 +21,21 @@ func modifyColabRuntimeState(config *transport_tpg.Config, d *schema.ResourceDat
 func waitForColabOperation(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, response map[string]interface{}) error {
 	var opRes map[string]interface{}
 	err := ColabOperationWaitTimeWithResponse(
-		config, response, &opRes, project, "Modifying Colab Runtime state", userAgent,
+		config, response, &opRes, project, "Waiting for Colab Runtime Operation", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func ModifyColabRuntime(config *transport_tpg.Config, d *schema.ResourceData, project string, billingProject string, userAgent string, method string) error {
+	dRes, err := ModifyColabRuntimeOperation(config, d, project, billingProject, userAgent, method)
+	if err != nil {
+		return err
+	}
+	if err := waitForColabOperation(config, d, project, billingProject, userAgent, dRes); err != nil {
+		return fmt.Errorf("Error with Colab runtime method: %s", err)
 	}
 	return nil
 }
