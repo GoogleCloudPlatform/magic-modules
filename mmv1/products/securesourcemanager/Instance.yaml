@@ -68,11 +68,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      keyring_name: 'my-keyring'
-      key_name: 'my-key'
+      kms_key_name: 'my-key'
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
       'prevent_destroy': 'false'
   - name: 'secure_source_manager_instance_private'

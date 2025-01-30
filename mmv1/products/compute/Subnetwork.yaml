@@ -124,6 +124,18 @@ examples:
       network_name: 'network-reserved-secondary-range'
       primary_range_name: 'reserved-primary'
       secondary_range_name: 'reserved-secondary'
+  - name: 'subnetwork_ipv6_only_internal'
+    primary_resource_id: 'subnetwork-ipv6-only'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-ipv6-only'
+      network_name: 'network-ipv6-only'
+  - name: 'subnetwork_ipv6_only_external'
+    primary_resource_id: 'subnetwork-ipv6-only'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-ipv6-only'
+      network_name: 'network-ipv6-only'
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |
@@ -403,6 +415,7 @@ properties:
     enum_values:
       - 'IPV4_ONLY'
       - 'IPV4_IPV6'
+      - 'IPV6_ONLY'
   - name: 'ipv6AccessType'
     type: Enum
     description: |

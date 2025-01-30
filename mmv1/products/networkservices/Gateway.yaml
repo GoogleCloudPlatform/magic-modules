@@ -48,7 +48,7 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
@@ -147,7 +147,6 @@ properties:
       The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
       limited to 1 port. Gateways of type 'OPEN_MESH' listen on 0.0.0.0 and support multiple ports.
     required: true
-    immutable: true
     item_type:
       type: Integer
   - name: 'scope'
