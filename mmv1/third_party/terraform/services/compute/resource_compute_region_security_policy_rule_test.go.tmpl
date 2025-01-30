@@ -1,5 +1,4 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
   "fmt"
@@ -1114,4 +1113,3 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 }
 `, spName)
 }
-{{- end }}
