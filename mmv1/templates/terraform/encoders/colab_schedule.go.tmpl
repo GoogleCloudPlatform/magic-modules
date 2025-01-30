@@ -9,5 +9,10 @@ if err != nil {
     return nil, err
 }
 
-obj["createNotebookExecutionJobRequest"].(map[string]interface{})["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+jobRequest, ok := obj["createNotebookExecutionJobRequest"].(map[string]interface{})
+if !ok {
+    return nil, fmt.Errorf("createNotebookExecutionJobRequest is not of type map[string]interface{} or is nil")
+}
+jobRequest["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+
 return obj, nil
