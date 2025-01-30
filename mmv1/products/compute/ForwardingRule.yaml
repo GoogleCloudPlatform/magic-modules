@@ -94,14 +94,13 @@ examples:
       - 'port_range'
   - name: 'forwarding_rule_externallb_byoipv6'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
-      forwarding_rule_name: 'test-byoipv6-forwarding-rule'
+      forwarding_rule_name: 'byoipv6-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
       ip_address: '2600:1901:4457:1::/96'
     test_vars_overrides:
-      ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", rand.Intn(9999), rand.Intn(9999))'
+      ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
     ignore_read_extra:
       - 'port_range'
   - name: 'forwarding_rule_global_internallb'
@@ -667,6 +666,7 @@ properties:
       - 'IPV6'
   - name: ipCollection
     type: String
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
       in EXTERNAL_IPV6_FORWARDING_RULE_CREATION mode.
