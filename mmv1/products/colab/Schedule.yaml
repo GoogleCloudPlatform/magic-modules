@@ -156,7 +156,7 @@ properties:
             type: NestedObject
             description: 'The Dataform Repository containing the input notebook.'
             exactly_one_of:
-              - dataform_repository_source
+              - create_notebook_execution_job_request.0.notebook_execution_job.0.dataform_repository_source
               - gcs_notebook_source
             properties:
               - name: 'dataformRepositoryResourceName'
