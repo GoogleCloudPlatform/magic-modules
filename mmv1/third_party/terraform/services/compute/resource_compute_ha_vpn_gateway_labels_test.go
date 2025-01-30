@@ -1,12 +1,9 @@
 package compute_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -28,7 +25,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName
+				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "network", "region", "terraform_labels"},
@@ -41,7 +38,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName
+				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "network", "region", "terraform_labels"},
