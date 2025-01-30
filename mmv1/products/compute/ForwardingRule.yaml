@@ -99,6 +99,9 @@ examples:
       forwarding_rule_name: 'test-byoipv6-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
+      ip_address: '2600:1901:4457:1::/96'
+    test_vars_overrides:
+      ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", rand.Intn(9999), rand.Intn(9999))'
     ignore_read_extra:
       - 'port_range'
   - name: 'forwarding_rule_global_internallb'

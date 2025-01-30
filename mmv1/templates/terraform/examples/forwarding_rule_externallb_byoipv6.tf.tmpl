@@ -8,7 +8,7 @@ resource "google_compute_forwarding_rule" "{{$.PrimaryResourceId}}" {
   ip_protocol           = "TCP"
   ip_version            = "IPV6"
   load_balancing_scheme = "EXTERNAL"
-  ip_address            = "2600:1901:4457:1::/96"
+  ip_address            = "{{index $.Vars "ip_address"}}"
   network_tier          = "PREMIUM"
   backend_service       = google_compute_region_backend_service.backend.id
   ip_collection         = "https://www.googleapis.com/compute/beta/projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
@@ -24,7 +24,7 @@ resource "google_compute_region_backend_service" "backend" {
 
 resource "google_compute_region_health_check" "hc" {
   provider           = google-beta
-  name               = "check-{{index $.Vars "backend_name"}}"
+  name               = "{{index $.Vars "backend_name"}}"
   check_interval_sec = 1
   timeout_sec        = 1
   region             = "us-central1"
