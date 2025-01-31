@@ -903,3 +903,19 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 		},
 	}
 }
+
+func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if key == nil {
+		return []map[string]interface{}{}
+	}
+	return []map[string]interface{}{
+		{
+			"raw_key": key.RawKey,
+			"rsa_encrypted_key": key.RsaEncryptedKey,
+			"kms_key_name": key.KmsKeyName,
+			"sha256": key.Sha256,
+			"kms_key_service_account": key.KmsKeyServiceAccount,
+			
+		},
+	}
+}
