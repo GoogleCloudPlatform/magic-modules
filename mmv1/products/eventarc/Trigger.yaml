@@ -83,14 +83,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+properties:
   - name: name
     type: String
     description: Required. The resource name of the trigger. Must be unique within the location on the project.
     required: true
     immutable: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
-    custom_expand: templates/terraform/custom_expand/eventarc_trigger_name.go.tmpl
-properties:
   - name: uid
     type: String
     description: Output only. Server assigned unique identifier for the trigger. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.
@@ -184,7 +183,6 @@ properties:
       - name: workflow
         type: String
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
-        custom_expand: templates/terraform/custom_expand/eventarc_trigger_destination_workflow.go.tmpl
         description: 'The resource name of the Workflow whose Executions are triggered by the events. The Workflow resource should be deployed in the same project as the trigger. Format: `projects/{project}/locations/{location}/workflows/{workflow}`'
       - name: httpEndpoint
         type: NestedObject
@@ -219,7 +217,6 @@ properties:
             diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
             description: 'Optional. The name of the Pub/Sub topic created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/topics/{TOPIC_NAME}. You may set an existing topic for triggers of the type google.cloud.pubsub.topic.v1.messagePublished` only. The topic you provide here will not be deleted by Eventarc at trigger deletion.'
             immutable: true
-            custom_expand: templates/terraform/custom_expand/eventarc_trigger_transport_pubsub_topic.go.tmpl
           - name: subscription
             type: String
             description: 'Output only. The name of the Pub/Sub subscription created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_NAME}`.'

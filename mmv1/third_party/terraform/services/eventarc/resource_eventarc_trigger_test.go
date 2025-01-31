@@ -20,6 +20,7 @@ func TestAccEventarcTrigger_BasicHandWritten(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcTrigger_BasicHandWritten(context),
@@ -265,6 +266,7 @@ func TestAccEventarcTrigger_AlternateForm(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcTrigger_AlternateForm(context),
@@ -344,6 +346,7 @@ func TestAccEventarcTrigger_ShortFormWorkflow(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcTrigger_ShortFormWorkflow(context),
