@@ -54,7 +54,7 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
         }
       }
 
-      title = "ingress policy title"
+      title = "ingress_policy_title"
     }
 
     egress_policies {
@@ -66,7 +66,7 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
         identity_type = "ANY_USER_ACCOUNT"
       }
 
-      title = "egress policy title"
+      title = "egress_policy_title"
     }
   }
 }
