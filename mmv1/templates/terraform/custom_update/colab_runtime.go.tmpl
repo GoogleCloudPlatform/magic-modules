@@ -37,4 +37,10 @@ if desired_state != "" && state != desired_state {
   log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
 }
 
+if d.Get("auto_upgrade").(bool) && d.Get("is_upgradable").(bool) {
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, "upgrade"); err != nil {
+    return err
+  }
+}
+
 return nil
