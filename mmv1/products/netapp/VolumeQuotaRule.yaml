@@ -15,11 +15,11 @@
 name: 'VolumeQuotaRule'
 api_resource_type_kind: QuotaRule
 description: |
- <TO BE FILLED>
+ QuotaRule specifies the maximum capacity a user or group can use within a volume. They can be used for creating default and individual quota rules.
 references:
   guides:
-    'Documentation': <TBD>
-  api: <TBD>
+    'Documentation': https://cloud.google.com/netapp/volumes/docs/configure-and-use/volumes/overview#volume_user_and_group_quotas
+  api: https://cloud.google.com/netapp/volumes/docs/reference/rest/v1/projects.locations.volumes.quotaRules
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules'
 self_link: 'projects/{{project}}/locations/{{location}}/volumes/{{volume_name}}/quotaRules/{{name}}'
@@ -79,7 +79,18 @@ properties:
   - name: 'target'
     type: String
     description: |
-      The quota rule applies to the specified user or group, identified by a Unix UID/GID, Windows SID, or null for default.
+      The quota rule applies to the specified user or group.
+      Valid targets for volumes with NFS protocol enabled:
+
+        - UNIX UID for individual user quota
+        - UNIX GID for individual group quota
+
+      Valid targets for volumes with SMB protocol enabled:
+        - Windows SID for individual user quota
+      
+      Leave empty for default quotas
+Valid targets for volumes with SMB protocol enabled:
+Windows SID for individual user quota
   - name: 'type'
     type: Enum
     description: |
@@ -93,7 +104,7 @@ properties:
   - name: 'diskLimitMib'
     type: Integer
     description:
-      The maximum allowed disk space in MiB.
+      The maximum allowed capacity in MiB.
     required: true
   - name: 'state'
     type: String
