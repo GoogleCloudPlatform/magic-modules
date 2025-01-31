@@ -94,7 +94,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"SirGitsalot": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 1, 18),
+					endDate:   newDate(2025, 1, 25),
+				},
+			},
 		},
 		"slevenick": {
 			vacations: []Vacation{},

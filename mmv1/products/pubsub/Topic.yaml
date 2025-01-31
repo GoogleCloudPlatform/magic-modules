@@ -91,6 +91,14 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_aws_msk'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_confluent_cloud'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 parameters:
 properties:
   - name: 'name'
@@ -186,6 +194,8 @@ properties:
           - 'aws_kinesis'
           - 'cloud_storage'
           - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
         properties:
           - name: 'streamArn'
             type: String
@@ -221,6 +231,8 @@ properties:
           - 'aws_kinesis'
           - 'cloud_storage'
           - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
         properties:
           - name: 'bucket'
             type: String
@@ -320,6 +332,8 @@ properties:
           - 'aws_kinesis'
           - 'cloud_storage'
           - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
         properties:
           - name: 'resourceGroup'
             type: String
@@ -351,3 +365,75 @@ properties:
               The GCP service account to be used for Federated Identity authentication
               with Azure (via a `AssumeRoleWithWebIdentity` call for the provided
               role).
+      - name: 'awsMsk'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Amazon Managed Streaming for Apache Kafka.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
+        properties:
+          - name: 'clusterArn'
+            type: String
+            description: |
+              ARN that uniquely identifies the MSK cluster.
+            required: true
+          - name: 'topic'
+            type: String
+            description: |
+              The name of the MSK topic that Pub/Sub will import from.
+            required: true
+          - name: 'awsRoleArn'
+            type: String
+            description: |
+              AWS role ARN to be used for Federated Identity authentication with
+              MSK. Check the Pub/Sub docs for how to set up this role and the
+              required permissions that need to be attached to it.
+            required: true
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with MSK (via a `AssumeRoleWithWebIdentity` call for the provided
+              role). The `awsRoleArn` must be set up with `accounts.google.com:sub`
+              equals to this service account number.
+            required: true
+      - name: 'confluentCloud'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Confluent Cloud.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
+        properties:
+          - name: 'bootstrapServer'
+            type: String
+            description: |
+              The Confluent Cloud bootstrap server. The format is url:port.
+            required: true
+          - name: 'clusterId'
+            type: String
+            description: |
+              The Confluent Cloud cluster ID.
+          - name: 'topic'
+            type: String
+            description: |
+              Name of the Confluent Cloud topic that Pub/Sub will import from.
+            required: true
+          - name: 'identityPoolId'
+            type: String
+            description: |
+              Identity pool ID to be used for Federated Identity authentication with Confluent Cloud.
+            required: true
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Confluent Cloud.
+            required: true
