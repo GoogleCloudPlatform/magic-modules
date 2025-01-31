@@ -1,0 +1,93 @@
+package gemini_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"data_sharing_with_google_setting_id": "ls-tf1",
+		"setting_binding_id": "ls-tf1b1",
+		"target":             "projects/980109375338",
+		"new_target":         "projects/283661608541",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_basic(context),
+			},
+			{
+				ResourceName:            "google_gemini_data_sharing_with_google_setting_binding.basic_binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "data_sharing_with_google_setting_id", "terraform_labels"},
+			},
+			{
+				Config: testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_gemini_data_sharing_with_google_setting_binding.basic_binding", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_gemini_data_sharing_with_google_setting_binding.basic_binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "data_sharing_with_google_setting_id", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_gemini_data_sharing_with_google_setting" "basic" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
+	location = "global"
+    enable_preview_data_sharing = true
+}
+
+resource "google_gemini_data_sharing_with_google_setting_binding" "basic_binding" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
+    setting_binding_id = "%{setting_binding_id}"
+	location = "global"
+	target = "%{target}"
+	depends_on = [google_gemini_data_sharing_with_google_setting.basic]
+}
+`, context)
+}
+
+func testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_gemini_data_sharing_with_google_setting" "basic" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
+	location = "global"
+    enable_preview_data_sharing = true
+}
+
+resource "google_gemini_data_sharing_with_google_setting_binding" "basic_binding" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
+    setting_binding_id = "%{setting_binding_id}"
+	location = "global"
+	target = "%{new_target}"
+	depends_on = [google_gemini_data_sharing_with_google_setting.basic]
+}
+`, context)
+}
+{{ end }}
