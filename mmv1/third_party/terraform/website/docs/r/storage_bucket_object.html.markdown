@@ -15,7 +15,7 @@ and
 
 A datasource can be used to retrive data of the object
 
-* `google_storage_bucket_object_content`: Retrieves the data of the object
+* `google_storage_bucket_object_content`: Gets an existing object content inside an bucket in Google Cloud Storage service (GCS)
 
 
 ## Example Usage
