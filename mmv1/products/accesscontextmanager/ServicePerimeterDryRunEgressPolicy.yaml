@@ -209,7 +209,3 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
-  - name: 'title'
-    type: 'string'
-    description: |
-      Human readable title. Must be unique within the perimeter. Does not effect behavior.
