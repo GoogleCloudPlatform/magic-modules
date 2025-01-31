@@ -1,10 +1,12 @@
 resource "google_kms_crypto_key_iam_member" "key_member" {
+  provider      = google-beta
   crypto_key_id = "{{index $.Vars "key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
+  provider             = google-beta
   location             = "us-central1"
   name                 = "{{index $.Vars "channel_name"}}"
   crypto_key_name      = "{{index $.Vars "key_name"}}"
@@ -13,5 +15,6 @@ resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
 }
 
 data "google_project" "project" {
+  provider   = google-beta
   project_id = "{{index $.TestEnvVars "project"}}"
 }
