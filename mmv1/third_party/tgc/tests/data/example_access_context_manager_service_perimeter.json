@@ -22,7 +22,8 @@
                       "accessLevel": "accessPolicies/987654/accessLevels/restrict_storage"
                     }
                   ]
-              }
+              },
+              "title": "egress_policy_title"
             }
           ],
           "ingressPolicies": [
@@ -49,7 +50,8 @@
                 "resources": [
                   "*"
                 ]
-              }
+              },
+              "title": "ingress_policy_title"
             }
           ],
           "resources": [

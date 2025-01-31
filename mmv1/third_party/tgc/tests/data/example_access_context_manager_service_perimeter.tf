@@ -53,6 +53,8 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
           }
         }
       }
+
+      title = "ingress policy title"
     }
 
     egress_policies {
@@ -63,6 +65,8 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
 	source_restriction = "SOURCE_RESTRICTION_ENABLED"
         identity_type = "ANY_USER_ACCOUNT"
       }
+
+      title = "egress policy title"
     }
   }
 }
