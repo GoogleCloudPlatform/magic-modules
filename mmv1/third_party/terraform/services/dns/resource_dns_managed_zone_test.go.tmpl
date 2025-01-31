@@ -718,14 +718,14 @@ resource "google_dns_managed_zone" "sd-zone" {
 resource "google_service_directory_namespace" "example" {
   provider = google-beta
 
-  namespace_id = "example"
+  namespace_id = "tf-test-example%{random_suffix}"
   location     = "us-central1"
 }
 
 resource "google_compute_network" "network" {
   provider = google-beta
 
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 `, context)
@@ -758,14 +758,14 @@ resource "google_dns_managed_zone" "sd-zone" {
 resource "google_service_directory_namespace" "example" {
   provider = google-beta
 
-  namespace_id = "example"
+  namespace_id = "tf-test-example%{random_suffix}"
   location     = "us-central1"
 }
 
 resource "google_compute_network" "network" {
   provider = google-beta
 
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 `, context)
