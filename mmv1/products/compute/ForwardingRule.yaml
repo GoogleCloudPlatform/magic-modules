@@ -98,9 +98,11 @@ examples:
       forwarding_rule_name: 'byoipv6-forwarding-rule'
       backend_name: 'website-backend'
       network_name: 'website-net'
-      ip_address: '2600:1901:4457:1::/96'
+      ip_address: '"2600:1901:4457:1::/96"'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
     test_vars_overrides:
       ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
     ignore_read_extra:
       - 'port_range'
   - name: 'forwarding_rule_global_internallb'
@@ -666,7 +668,7 @@ properties:
       - 'IPV6'
   - name: ipCollection
     type: String
-    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+    diff_suppress_func: 'IpCollectionDiffSuppress'
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
       in EXTERNAL_IPV6_FORWARDING_RULE_CREATION mode.
