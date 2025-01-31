@@ -1275,8 +1275,9 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 									{{- if ne $.TargetVersionName "ga" }}
 									"auto_monitoring_config": {
-										Type:        schema.TypeSet,
+										Type:        schema.TypeList,
 										Optional:    true,
+										Computed:    true,
 										MaxItems:    1,
 										Description: `Configuration for GKE Workload Auto-Monitoring.`,
 										Elem: &schema.Resource{
