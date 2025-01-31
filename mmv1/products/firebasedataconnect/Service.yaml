@@ -14,6 +14,10 @@
 ---
 name: Service
 description: A Firebase Data Connect service.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/data-connect'
+  api: 'https://firebase.google.com/docs/reference/data-connect/rest'
 base_url: projects/{{project}}/locations/{{location}}/services
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/services/{{service_id}}
@@ -47,7 +51,7 @@ autogen_status: U2VydmljZQ==
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The region in which the service resides, e.g. "us-central1" or "asia-east1".
     immutable: true
     url_param_only: true
     required: true
