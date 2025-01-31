@@ -668,7 +668,7 @@ properties:
             - name: 'title'
               type: 'string'
               description: |
-                Human readable title. Must be unique within the perimeter. Does not effect behavior. 
+                Human readable title. Must be unique within the perimeter. Does not effect behavior.
       - name: 'egressPolicies'
         type: Array
         description: |
@@ -785,7 +785,7 @@ properties:
             - name: 'title'
               type: 'string'
               description: |
-                Human readable title. Must be unique within the perimeter. Does not effect behavior. 
+                Human readable title. Must be unique within the perimeter. Does not effect behavior.
   - name: 'useExplicitDryRunSpec'
     type: Boolean
     description: |

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
- # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
+# This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
 api_resource_type_kind: ServicePerimeter
 description: |
