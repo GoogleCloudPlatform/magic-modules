@@ -223,6 +223,64 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 	})
 }
 
+// Validate cluster Mode Enabled instance
+func TestAccMemorystoreInstance_createClusterInstance(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create instance with AOF enabled
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, mode: "CLUSTER"}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "psc_auto_connections.#"),
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "psc_auto_connections.0.ip_address"),
+				),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			}
+		},
+	})
+}
+
+// Validate cluster Mode Disabled instance
+func TestAccMemorystoreInstance_createClusterDisabledInstance(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create instance with AOF enabled
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 1, preventDestroy: true, mode: "CLUSTER_DISABLED"}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "endpoints.#"),
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "endpoints.0.connections.#"),
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "endpoints.0.connections.0.psc_auto_connection.#"),
+					resource.TestCheckResourceAttrSet("google_memorystore_instance.test", "endpoints.0.connections.0.psc_auto_connection.0.ip_address"),
+				),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			}
+		},
+	})
+}
+
 type InstanceParams struct {
 	name                      string
 	replicaCount              int
@@ -234,6 +292,7 @@ type InstanceParams struct {
 	zone                      string
 	deletionProtectionEnabled bool
 	persistenceMode           string
+	mode                      string
 }
 
 func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
@@ -247,6 +306,13 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 	var strBuilder strings.Builder
 	for key, value := range params.engineConfigs {
 		strBuilder.WriteString(fmt.Sprintf("%s =  \"%s\"\n", key, value))
+	}
+
+	modeBlock := ``
+	if params.mode != "" {
+		modeBlock = fmt.Sprintf(`
+		mode = "%s"
+		`, params.mode)
 	}
 
 	zoneDistributionConfigBlock := ``
@@ -287,6 +353,7 @@ resource "google_memorystore_instance" "test" {
 			google_network_connectivity_service_connection_policy.default
 		]
 	%s
+	%s
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
@@ -314,5 +381,5 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, modeBlock, lifecycleBlock, params.name, params.name, params.name)
 }
