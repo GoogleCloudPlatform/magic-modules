@@ -188,7 +188,7 @@ func listTTVRequiredEnvironmentVariables() string {
 	return result
 }
 
-func mergeCovData(rnr ExecRunner, buildID string) error {
+func mergeCovData(rnr ExecRunner, buildID string, prNumber string, gh GithubClient) error {
 	rnr.Mkdir("/tmp/mergedcov")
 
 	_, err := rnr.Run("go", []string{"tool", "covdata", "merge", "-i=/tmp/unittestcov,/tmp/vcrtestcov", "-o=/tmp/mergedcov"}, nil)
@@ -224,6 +224,12 @@ func mergeCovData(rnr ExecRunner, buildID string) error {
 	if _, err := rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("error upload cov data %w", err)
+	}
+	out += "\n"
+	out += fmt.Sprintf("Here's the [coverate details](https://storage.cloud.google.com/test-coverage-data/cov/%s/profile.html" + buildID)
+
+	if err := gh.PostComment(prNumber, out); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
 	}
 	return nil
 }
