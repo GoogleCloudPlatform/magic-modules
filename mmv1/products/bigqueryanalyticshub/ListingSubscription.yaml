@@ -42,13 +42,13 @@ examples:
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
 parameters:
-  - name: 'data_exchange_id'
+  - name: 'dataExchangeId'
     type: String
     description: |-
       The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
-  - name: 'listing_id'
+  - name: 'listingId'
     type: String
     description: |-
       The ID of the listing. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
@@ -63,7 +63,7 @@ parameters:
     custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 properties:
-  - name: 'destination_dataset'
+  - name: 'destinationDataset'
     type: NestedObject
     required: true
     ignore_read: true
@@ -78,20 +78,20 @@ properties:
         required: true
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
         diff_suppress_func: 'tpgresource.CaseDiffSuppress'
-      - name: 'dataset_reference'
+      - name: 'datasetReference'
         type: NestedObject
         required: true
         description: A reference that identifies the destination dataset.
         properties:
-          - name: 'dataset_id'
+          - name: 'datasetId'
             type: String
             description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
             required: true
-          - name: 'project_id'
+          - name: 'projectId'
             type: String
             description: The ID of the project containing this dataset.
             required: true
-      - name: 'friendly_name'
+      - name: 'friendlyName'
         type: String
         description: A descriptive name for the dataset.
       - name: 'description'
@@ -107,28 +107,28 @@ properties:
     description: |-
       The resource name of the subscription. e.g. "projects/myproject/locations/US/subscriptions/123"
     output: true
-  - name: 'subscription_id'
+  - name: 'subscriptionId'
     type: String
     description: |-
       The subscription id used to reference the subscription.
     output: true
     ignore_read: true
-  - name: 'creation_time'
+  - name: 'creationTime'
     type: Time
     description: |-
       Timestamp when the subscription was created.
     output: true
-  - name: 'last_modify_time'
+  - name: 'lastModifyTime'
     type: Time
     description: |-
       Timestamp when the subscription was last modified.
     output: true
-  - name: 'organization_id'
+  - name: 'organizationId'
     type: String
     description: |-
       Organization of the project this subscription belongs to.
     output: true
-  - name: 'organization_display_name'
+  - name: 'organizationDisplayName'
     type: String
     description: |-
       Display name of the project of this subscription.
@@ -138,17 +138,17 @@ properties:
     description: |-
       Current state of the subscription.
     output: true
-  - name: 'subscriber_contact'
+  - name: 'subscriberContact'
     type: String
     description: |-
       Email of the subscriber.
     output: true
-  - name: 'resource_type'
+  - name: 'resourceType'
     type: String
     description: |-
       Listing shared asset type.
     output: true
-  - name: 'linked_dataset_map'
+  - name: 'linkedDatasetMap'
     output: true
     type: Map
     description: |-
@@ -164,11 +164,11 @@ properties:
           type: string
           description: Output only. Listing for which linked resource is created.
           output: true
-        - name: linked_dataset
+        - name: linkedDataset
           type: string
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
-  - name: linked_resources
+  - name: linkedResources
     type: Array
     description: |
       Output only. Linked resources created in the subscription. Only contains values if state = STATE_ACTIVE.
@@ -180,7 +180,7 @@ properties:
           type: string
           description: Output only. Listing for which linked resource is created.
           output: true
-        - name: linked_dataset
+        - name: linkedDataset
           type: string
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
