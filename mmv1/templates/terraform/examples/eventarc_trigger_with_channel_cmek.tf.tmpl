@@ -1,21 +1,18 @@
 resource "google_kms_crypto_key_iam_member" "key_member" {
-  provider      = google-beta
   crypto_key_id = "{{index $.Vars "key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
 resource "google_eventarc_channel" "test_channel" {
-  provider             = google-beta
   location             = "us-central1"
   name                 = "{{index $.Vars "channel_name"}}"
   crypto_key_name      = "{{index $.Vars "key_name"}}"
-  third_party_provider = "${data.google_project.project.id}/locations/us-central1/providers/datadog"
+  third_party_provider = "projects/{{index $.TestEnvVars "project_id"}}/locations/us-central1/providers/datadog"
   depends_on           = [google_kms_crypto_key_iam_member.key_member]
 }
 
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "{{index $.Vars "service_name"}}"
   location = "us-central1"
 
@@ -38,13 +35,7 @@ resource "google_cloud_run_service" "default" {
   }
 }
 
-resource "google_service_account" "trigger_service_account" {
-  provider   = google-beta
-  account_id = "{{index $.Vars "service_account_id"}}"
-}
-
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name     = "{{index $.Vars "trigger_name"}}"
   location = "us-central1"
   matching_criteria {
@@ -57,11 +48,6 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
       region  = "us-central1"
     }
   }
-  service_account = google_service_account.trigger_service_account.email
+  service_account = "{{index $.TestEnvVars "service_account"}}"
   channel         = google_eventarc_channel.test_channel.id
-}
-
-data "google_project" "project" {
-  provider   = google-beta
-  project_id = "{{index $.TestEnvVars "project"}}"
 }

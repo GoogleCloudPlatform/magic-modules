@@ -44,21 +44,23 @@ examples:
     primary_resource_id: primary
     vars:
       trigger_name: some-trigger
-      service_account_id: trigger-sa
       network_name: some-network
       subnet_name: some-subnet
       network_attachment_name: some-na
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
     exclude_docs: true
   - name: eventarc_trigger_with_channel_cmek
     primary_resource_id: primary
     vars:
       trigger_name: some-trigger
-      service_account_id: trigger-sa
       service_name: some-service
       channel_name: some-channel
       key_name: some-key
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project_id: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
+      service_account: 'SERVICE_ACCT'
     test_vars_overrides:
       'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
     exclude_docs: true
@@ -66,8 +68,9 @@ examples:
     primary_resource_id: primary
     vars:
       trigger_name: some-trigger
-      service_account_id: trigger-sa
       workflow_name: some-workflow
+    test_env_vars:
+      service_account: 'SERVICE_ACCT'
     exclude_docs: true
   - name: eventarc_trigger_with_path_pattern_filter
     primary_resource_id: primary
@@ -183,6 +186,7 @@ properties:
       - name: workflow
         type: String
         diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+        custom_expand: templates/terraform/custom_expand/eventarc_trigger_destination_workflow.go.tmpl
         description: 'The resource name of the Workflow whose Executions are triggered by the events. The Workflow resource should be deployed in the same project as the trigger. Format: `projects/{project}/locations/{location}/workflows/{workflow}`'
       - name: httpEndpoint
         type: NestedObject
@@ -217,6 +221,7 @@ properties:
             diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
             description: 'Optional. The name of the Pub/Sub topic created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/topics/{TOPIC_NAME}. You may set an existing topic for triggers of the type google.cloud.pubsub.topic.v1.messagePublished` only. The topic you provide here will not be deleted by Eventarc at trigger deletion.'
             immutable: true
+            custom_expand: templates/terraform/custom_expand/eventarc_trigger_transport_pubsub_topic.go.tmpl
           - name: subscription
             type: String
             description: 'Output only. The name of the Pub/Sub subscription created and managed by Eventarc system as a transport for the event delivery. Format: `projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_NAME}`.'

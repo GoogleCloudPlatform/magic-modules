@@ -8,11 +8,7 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   destination {
     workflow = google_workflows_workflow.workflow.id
   }
-  service_account = google_service_account.trigger_service_account.email
-}
-
-resource "google_service_account" "trigger_service_account" {
-  account_id = "{{index $.Vars "service_account_id"}}"
+  service_account = "{{index $.TestEnvVars "service_account"}}"
 }
 
 resource "google_workflows_workflow" "workflow" {
