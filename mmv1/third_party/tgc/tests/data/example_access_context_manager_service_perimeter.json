@@ -25,7 +25,8 @@
                       "resource": "projects/4321"
                     }
                   ]
-              }
+              },
+              "title": "egress_policy_title"
             }
           ],
           "ingressPolicies": [
@@ -52,7 +53,8 @@
                 "resources": [
                   "*"
                 ]
-              }
+              },
+              "title": "ingress_policy_title"
             }
           ],
           "resources": [
