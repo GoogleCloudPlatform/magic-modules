@@ -662,17 +662,6 @@ resource "google_dns_managed_zone" "foobar" {
 `, suffix, suffix, description, project)
 }
 
-func testAccDnsManagedZone_basicWithProject(suffix, description, project string) string {
-	return fmt.Sprintf(`
-resource "google_dns_managed_zone" "foobar" {
-  name        = "mzone-test-%s"
-  dns_name    = "tf-acctest-%s.hashicorptest.com."
-  description = "%s"
-  project     = "%s"
-}
-`, suffix, suffix, description, project)
-}
-
 func TestAccDNSManagedZone_dnsManagedZoneUpdateWithServiceDirectory(t *testing.T) {
 	t.Parallel()
 
