@@ -954,6 +954,11 @@ properties:
             description: |
               Not more than one notification per period.
               A duration in seconds with up to nine fractional digits, terminated by 's'. Example "60.5s".
+        conflicts:
+          - conditions.0.condition_absent
+          - conditions.0.condition_monitoring_query_language
+          - conditions.0.condition_threshold
+          - conditions.0.condition_prometheus_query_language
       - name: 'autoClose'
         type: String
         description: |
