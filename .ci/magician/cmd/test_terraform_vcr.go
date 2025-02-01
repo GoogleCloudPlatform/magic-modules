@@ -226,7 +226,7 @@ func mergeCovData(rnr ExecRunner, buildID string, prNumber string, gh GithubClie
 		return fmt.Errorf("error upload cov data %w", err)
 	}
 	out += "\n"
-	out += fmt.Sprintf("Here's the [coverate details](https://storage.cloud.google.com/test-coverage-data/cov/%s/profile.html" + buildID)
+	out += fmt.Sprintf("Here's the [coverate details](https://storage.cloud.google.com/test-coverage-data/cov/%s/profile.html", buildID)
 
 	if err := gh.PostComment(prNumber, out); err != nil {
 		return fmt.Errorf("error posting comment: %w", err)
