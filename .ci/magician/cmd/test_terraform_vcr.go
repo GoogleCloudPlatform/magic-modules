@@ -171,7 +171,7 @@ The following environment variables are required:
 		}
 		out, err = rnr.Run("ls", []string{"/tmp/unittestcov"}, nil)
 		fmt.Printf("ls /tmp/unittestcov = %s, %s\n", out, err)
-		if err := mergeCovData(rnr, args[2]); err != nil {
+		if err := mergeCovData(rnr, args[2], args[0], gh); err != nil {
 			return fmt.Errorf("failed to run merge cov data: %s", err)
 		}
 
