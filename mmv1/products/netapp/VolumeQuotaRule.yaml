@@ -44,13 +44,13 @@ custom_code:
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
 examples:
-  - name: 'netapp_volume_quotaRule_basic'
-    primary_resource_id: 'test_quotaRule'
+  - name: 'netapp_volume_quota_rule_basic'
+    primary_resource_id: 'test_quota_rule'
     vars:
       volume_name: 'test-volume'
       pool_name: 'test-pool'
       network_name: 'test-network'
-      quotaRule_name: 'testvolumequotaRule'
+      quotaRule_name: 'testvolume-quotarule'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
