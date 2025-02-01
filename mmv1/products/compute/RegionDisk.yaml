@@ -126,7 +126,7 @@ properties:
       you do not need to provide a key to use the disk later.
     immutable: true
     properties:
-      - name: 'rawKey'
+      - name: 'rawKeyICHEN'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in

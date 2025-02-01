@@ -119,6 +119,7 @@ func (ar *Runner) AppendFile(name, data string) error {
 // Run the given command with the given args and env, return output and error if any
 func (ar *Runner) Run(name string, args []string, env map[string]string) (string, error) {
 	cmd := exec.Command(name, args...)
+	fmt.Println(cmd.String())
 	cmd.Dir = ar.cwd
 	for ev, val := range env {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", ev, val))
