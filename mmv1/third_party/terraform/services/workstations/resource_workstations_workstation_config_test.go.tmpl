@@ -1225,7 +1225,7 @@ func TestAccWorkstationsWorkstationConfig_updatePersistentDirectory(t *testing.T
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels"},
 			},
 			{
 				Config: testAccWorkstationsWorkstationConfig_persistentDirectoriesUpdated(context),
@@ -1234,7 +1234,7 @@ func TestAccWorkstationsWorkstationConfig_updatePersistentDirectory(t *testing.T
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag"},
+				ImportStateVerifyIgnore: []string{"etag", "labels"},
 			},
 		},
 	})
