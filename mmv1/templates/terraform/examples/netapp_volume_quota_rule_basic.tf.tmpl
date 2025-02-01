@@ -21,7 +21,7 @@ resource "google_netapp_volume_quota_rule" "{{$.PrimaryResourceId}}" {
   volume_name = google_netapp_volume.default.name
   type = "DEFAULT_USER_QUOTA"
   disk_limit_mib = 50
-  name = "{{index $.Vars "quotaRule_name"}}"
+  name = "{{index $.Vars "quota_rule_name"}}"
 }
 
 data "google_compute_network" "default" {

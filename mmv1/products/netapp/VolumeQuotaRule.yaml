@@ -50,7 +50,7 @@ examples:
       volume_name: 'test-volume'
       pool_name: 'test-pool'
       network_name: 'test-network'
-      quotaRule_name: 'testvolume-quotarule'
+      quota_rule_name: 'test-volume-quota_rule'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
 parameters:
