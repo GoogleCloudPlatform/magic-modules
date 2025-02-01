@@ -293,11 +293,11 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
 {{- range $prop := $.GettableProperties }}
 {{-  if $.InIdFormat $prop }}
-{{-    if $prop.Output }}
+{{-    if and $prop.Output (not $prop.IgnoreRead) }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
-{{-    else if $prop.DefaultFromApi }}
+{{-    else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
     // {{ underscore $prop.Name }} is set by API when unset
     if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
         if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
