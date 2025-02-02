@@ -42,7 +42,6 @@ nested_query:
     - resourcePolicies
   is_list_of_ids: true
   modify_by_patch: false
-
 custom_code:
   encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
