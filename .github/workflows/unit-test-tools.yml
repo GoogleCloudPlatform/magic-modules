@@ -5,6 +5,7 @@ permissions: read-all
 on:
   pull_request:
     paths:
+      - 'docs/**'
       - 'tools/**'
       - '.github/workflows/unit-test-tools.yml'
 
