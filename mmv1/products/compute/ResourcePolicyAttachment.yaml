@@ -36,7 +36,6 @@ async:
 
 identity:
   - name
-
 nested_query:
   keys:
     - resourcePolicies
