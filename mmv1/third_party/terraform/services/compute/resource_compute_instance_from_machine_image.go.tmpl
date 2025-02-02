@@ -64,6 +64,39 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 		ForceNew:    true,
 		Description: `Name or self link of a machine image to create the instance from on.`,
 	}
+	s["source_machine_image_encryption_key"] = &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Description: `Optional encryption key fields for the source machine image." + 
+			"Supported fields: raw_key, rsa_encrypted_key, kms_key_name, sha256, kms_key_service_account."`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"raw_key": {
+					Type:      schema.TypeString,
+					Optional:  true,
+					Sensitive: true,
+				},
+				"rsa_encrypted_key": {
+					Type:      schema.TypeString,
+					Optional:  true,
+					Sensitive: true,
+				},
+				"kms_key_name": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"sha256": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"kms_key_service_account": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
 
 	// Modifying the schema to disable disk overrides, due to an API bug (b/170964971)
 	// TODO: (camthornton) Remove this when disk override functionality in the API is restored
@@ -128,6 +161,14 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	src := d.Get("source_machine_image").(string)
 	instance.SourceMachineImage = src
+
+	if v, ok := d.GetOk("source_machine_image_encryption_key"); ok {
+		list := v.([]interface{})
+		if len(list) > 0 && list[0] != nil {
+			instance.SourceMachineImageEncryptionKey = expandSourceMachineImageEncryptionKey(list[0].(map[string]interface{}))
+		}
+	}
+	
 
 	tpl, err := tpgresource.ParseMachineImageFieldValue(src, d, config)
 	if err != nil {
@@ -194,6 +235,27 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	return resourceComputeInstanceRead(d, meta)
 }
+func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
+	key := &compute.CustomerEncryptionKey{}
+
+	if raw, ok := m["raw_key"].(string); ok && raw != "" {
+		key.RawKey = raw
+	}
+	if rsa, ok := m["rsa_encrypted_key"].(string); ok && rsa != "" {
+		key.RsaEncryptedKey = rsa
+	}
+	if kms, ok := m["kms_key_name"].(string); ok && kms != "" {
+		key.KmsKeyName = kms
+	}
+	if sha, ok := m["sha256"].(string); ok && sha != "" {
+		key.Sha256 = sha
+	}
+	if sa, ok := m["kms_key_service_account"].(string); ok && sa != "" {
+		key.KmsKeyServiceAccount = sa
+	}
+	return key
+}
+
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
