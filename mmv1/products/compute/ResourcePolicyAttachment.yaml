@@ -47,7 +47,6 @@ custom_code:
   encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
-
 parameters:
   - name: 'instance'
     type: ResourceRef
