@@ -59,7 +59,6 @@ parameters:
     required: true
     resource: 'Zone'
     imports: 'name'
-
 properties:
   - name: 'name'
     type: String
