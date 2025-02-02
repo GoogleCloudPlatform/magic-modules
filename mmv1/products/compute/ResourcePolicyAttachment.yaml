@@ -32,7 +32,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-
 identity:
   - name
 nested_query:
