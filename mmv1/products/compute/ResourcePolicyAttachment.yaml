@@ -25,7 +25,6 @@ immutable: true
 timeouts:
   insert_minutes: 20
   delete_minutes: 20
-
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
