@@ -16,6 +16,7 @@ func TestAccGeminiReleaseChannelSettingBinding_geminiReleaseChannelSettingBindin
 	context := map[string]interface{}{
 		"release_channel_setting_id": "ls-tf1",
 		"setting_binding_id": "ls-tf1b1",
+        "product":            "PRODUCT_UNSPECIFIED"
 		"target":             "projects/980109375338",
 		"new_target":         "projects/283661608541",
 	}
@@ -62,11 +63,10 @@ resource "google_gemini_release_channel_setting" "basic" {
 
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
-    release_channel_setting_id = "%{release_channel_setting_id}"
+    release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{target}"
-	depends_on = [google_gemini_release_channel_setting.basic]
 }
 `, context)
 }
@@ -82,11 +82,10 @@ resource "google_gemini_release_channel_setting" "basic" {
 
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
-    release_channel_setting_id = "%{release_channel_setting_id}"
+    release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{new_target}"
-	depends_on = [google_gemini_release_channel_setting.basic]
 }
 `, context)
 }
