@@ -17,28 +17,23 @@ concurrency:
 jobs:
 
   terraform-provider-google:
-    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-provider-google'
   terraform-provider-google-beta:
-    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-provider-google-beta'
   terraform-google-conversion:
-    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'terraform-google-conversion'
   docs-examples:
-    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/build-downstream.yml
     with:
       repo: 'docs-examples'
 
   unit-test-terraform-provider-google:
-    if: ${{ github.event_name != 'pull_request' }}
     name: terraform-provider-google
     needs: terraform-provider-google
     uses: ./.github/workflows/unit-test-tpg.yml
@@ -46,7 +41,6 @@ jobs:
       repo: 'terraform-provider-google'
 
   unit-test-terraform-provider-googele-beta:
-    if: ${{ github.event_name != 'pull_request' }}
     name: terraform-provider-google-beta
     needs: terraform-provider-google-beta
     uses: ./.github/workflows/unit-test-tpg.yml
@@ -54,7 +48,6 @@ jobs:
       repo: 'terraform-provider-google-beta'
 
   unit-test-terraform-google-conversion:
-    if: ${{ github.event_name != 'pull_request' }}
     name: terraform-google-conversion
     needs: [terraform-google-conversion, terraform-provider-google-beta]
     uses: ./.github/workflows/unit-test-tgc.yml
