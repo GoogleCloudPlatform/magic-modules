@@ -19,7 +19,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHaVpnGateway_updateLabels(rnd),
+				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test", "test"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.test", "test"),
@@ -32,10 +32,10 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test", "test-updated"),
+				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "testUpdated", "testUpdated"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
-					resource.TestCheckResourceAttr(resourceName, "labels.test", "test-updated"),
+					resource.TestCheckResourceAttr(resourceName, "labels.testUpdated", "testUpdated"),
 				),
 			},
 			{
