@@ -40,10 +40,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-sweeper:
-  regions:
-    - "us-central1"
-    - "global"
 examples:
   - name: 'certificate_manager_trust_config'
     primary_resource_id: 'default'

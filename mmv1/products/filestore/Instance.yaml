@@ -46,12 +46,6 @@ error_abort_predicates:
   - 'transport_tpg.Is429QuotaError'
 schema_version: 1
 state_upgraders: true
-sweeper:
-  regions:
-    - "us-west1"
-    - "us-central1"
-    - "us-central1-b"
-    - "us-east1"
 examples:
   - name: 'filestore_instance_basic'
     primary_resource_id: 'instance'
