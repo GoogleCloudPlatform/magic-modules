@@ -1,0 +1,10 @@
+resource "google_compute_disk" "foo" {
+  name = "foo"
+  type = "pd-ssd"
+  size = 10
+}
+
+resource "google_compute_instant_snapshot" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "instance_name"}}"
+  source_disk  = google_compute_disk.foo.self_link
+}
