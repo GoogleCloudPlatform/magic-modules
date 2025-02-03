@@ -80,7 +80,7 @@ properties:
     type: String
     description: 'An optional description of this resource.'
     required: false
-  - name : 'sourceDiskId'
+  - name: 'sourceDiskId'
     type: String
     description: 'The ID value of the disk used to create this InstantSnapshot.'
     output: true
