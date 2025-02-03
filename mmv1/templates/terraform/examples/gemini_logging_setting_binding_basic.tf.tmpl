@@ -10,6 +10,6 @@ resource "google_gemini_logging_setting_binding" "{{$.PrimaryResourceId}}" {
     logging_setting_id = google_gemini_logging_setting.basic.logging_setting_id
     setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
     location = "global"
-    product = "PRODUCT_UNSPECIFIED"
     target = "{{index $.Vars "target"}}"
+    product = "{{index $.Vars "product"}}"
 }
