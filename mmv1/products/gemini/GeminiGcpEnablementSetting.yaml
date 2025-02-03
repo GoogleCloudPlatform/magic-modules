@@ -14,6 +14,7 @@
 ---
 name: GeminiGcpEnablementSetting
 description: The resource for managing GeminiGcpEnablement settings for Admin Control.
+min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
