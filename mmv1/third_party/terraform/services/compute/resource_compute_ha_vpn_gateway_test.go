@@ -19,7 +19,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHaVpnGateway_base(rnd),
+				Config: testAccComputeHaVpnGateway_updateLabels(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.test", "test"),
@@ -29,33 +29,34 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "network", "region", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeHaVpnGateway_update(rnd),
+				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test", "test-updated"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
-					resource.TestCheckResourceAttr(resourceName, "labels.test-updated", "test-updated"),
+					resource.TestCheckResourceAttr(resourceName, "labels.test", "test-updated"),
 				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "network", "region", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccComputeHaVpnGateway_base(suffix string) string {
+func testAccComputeHaVpnGateway_updateLabels(suffix, key, value string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   region   = "us-central1"
   name     = "tf-test-ha-vpn-1%s"
   network  = google_compute_network.network1.id
+
   labels = {
-    test = "test"
+    %s = "%s"
   }
 }
 
@@ -63,23 +64,5 @@ resource "google_compute_network" "network1" {
   name                    = "network1%s"
   auto_create_subnetworks = false
 }
-`, suffix, suffix)
-}
-
-func testAccComputeHaVpnGateway_update(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
-  region   = "us-central1"
-  name     = "tf-test-ha-vpn-1%s"
-  network  = google_compute_network.network1.id
-  labels = {
-    test-updated = "test-upadated"
-  }
-}
-
-resource "google_compute_network" "network1" {
-  name                    = "network1%s"
-  auto_create_subnetworks = false
-}
-`, suffix, suffix)
+`, suffix, key, value, suffix)
 }
