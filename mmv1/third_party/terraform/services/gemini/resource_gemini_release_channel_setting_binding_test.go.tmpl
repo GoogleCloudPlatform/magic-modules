@@ -67,6 +67,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{target}"
+    product = "%{product}"
 }
 `, context)
 }
@@ -86,6 +87,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{new_target}"
+    product = "%{product}"
 }
 `, context)
 }
