@@ -567,7 +567,6 @@ func ResourceStorageBucket() *schema.Resource {
 					},
 				},
 			},
-{{- if ne $.TargetVersionName "ga" }}
 			"ip_filter": {
 				Type:             schema.TypeList,
 				MaxItems:         1,
@@ -645,7 +644,6 @@ func ResourceStorageBucket() *schema.Resource {
 					return false
 				},
 			},
-{{- end }}
 		},
 		UseJSONNumber: true,
 	}
@@ -797,11 +795,9 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		sb.HierarchicalNamespace = expandBucketHierachicalNamespace(v.([]interface{}))
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := d.GetOk("ip_filter"); ok {
 		sb.IpFilter = expandBucketIpFilter(v.([]interface{}))
 	}
-{{- end }}
 
 	var res *storage.Bucket
 
@@ -987,13 +983,11 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("ip_filter") {
 		if v, ok := d.GetOk("ip_filter"); ok {
 			sb.IpFilter = expandBucketIpFilter(v.([]interface{}))
 		}
 	}
-{{- end }}
 
 	res, err := config.NewStorageClient(userAgent).Buckets.Patch(d.Get("name").(string), sb).Do()
 	if err != nil {
@@ -1056,11 +1050,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
 	// to make sure it exists before moving on
-{{ if ne $.TargetVersionName "ga" -}}
 	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
-{{ else }}
-	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
-{{ end }}
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
@@ -1910,7 +1900,6 @@ func lockRetentionPolicy(bucketsService *storage.BucketsService, bucketName stri
 	return nil
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func flattenBucketIpFilter(ipFilter *storage.BucketIpFilter) []map[string]interface{} {
 	ipFilterList := make([]map[string]interface{}, 0, 1)
 
@@ -2010,7 +1999,7 @@ func expandBucketIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFi
 	}
 
 	return vpcnwsrcs
-}{{- end }}
+}
 
 // d.HasChange("lifecycle_rule") always returns true, giving false positives. This function detects changes
 // to the list size or the actions/conditions of rules directly.
@@ -2156,11 +2145,9 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		}
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if err := d.Set("ip_filter", flattenBucketIpFilter(res.IpFilter)); err != nil {
 		return fmt.Errorf("Error setting ip_filter: %s", err)
 	}
-{{- end }}
 
 	d.SetId(res.Id)
 	return nil
