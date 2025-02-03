@@ -14,6 +14,7 @@
 ---
 name: ReleaseChannelSetting
 description: The resource for managing ReleaseChannel settings for Admin Control.
+min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
