@@ -63,12 +63,11 @@ resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
 
 resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     provider = google-beta
-    gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
+    gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{target}"
 	product = "%{product}"
-	depends_on = [google_gemini_gemini_gcp_enablement_setting.basic]
 }
 `, context)
 }
@@ -84,12 +83,11 @@ resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
 
 resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     provider = google-beta
-    gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
+    gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "%{new_target}"
 	product = "%{product}"
-	depends_on = [google_gemini_gemini_gcp_enablement_setting.basic]
 }
 `, context)
 }
