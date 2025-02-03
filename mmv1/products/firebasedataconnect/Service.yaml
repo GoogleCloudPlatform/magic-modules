@@ -25,12 +25,16 @@ create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{ser
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/services/{{service_id}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/services/{{service_id}}
+  - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+  - '{{project}}/{{location}}/{{service_id}}'
+  - '{{location}}/{{service_id}}'
 examples:
   - name: firebasedataconnect_service_basic
-    primary_resource_id: example
+    primary_resource_id: default
     vars:
-      resource_name: example-service
+      service_id: example-service
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 autogen_async: true
 async:
   operation:
@@ -77,7 +81,7 @@ properties:
       service.
     output: true
   - name: etag
-    type: String
+    type: Fingerprint
     description: |-
       Output only. This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the
