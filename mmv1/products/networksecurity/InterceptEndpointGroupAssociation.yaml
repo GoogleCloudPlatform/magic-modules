@@ -37,6 +37,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+sweeper:
+  regions:
+    - "global"
 examples:
   - name: 'network_security_intercept_endpoint_group_association_basic'
     config_path: 'templates/terraform/examples/network_security_intercept_endpoint_group_association_basic.tf.tmpl'

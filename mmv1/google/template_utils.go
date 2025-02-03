@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"text/template"
@@ -108,12 +109,12 @@ func TrimTemplate(templatePath string, e any) string {
 
 	tmpl, err := template.New(templateFileName).Funcs(templateFunctions).ParseFiles(templates...)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exitf("Error: %v\nStack trace:\n%s", err, debug.Stack())
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
+		glog.Exitf("Error: %v\nStack trace:\n%s", err, debug.Stack())
 	}
 
 	rs := contents.String()

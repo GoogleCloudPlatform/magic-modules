@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 
@@ -232,7 +233,7 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 
 	err = os.WriteFile(filePath, sourceByte, 0644)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exitf("Error: %v\nStack trace:\n%s", err, debug.Stack())
 	}
 }
 
