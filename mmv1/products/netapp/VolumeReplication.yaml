@@ -118,7 +118,6 @@ parameters:
     description: |
       Name of region for this resource. The resource needs to be created in the region of the destination volume.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'volumeName'
     type: String

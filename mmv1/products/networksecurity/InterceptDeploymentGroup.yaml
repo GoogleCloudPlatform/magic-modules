@@ -53,7 +53,6 @@ parameters:
     for resource type `networksecurity.googleapis.com/InterceptDeploymentGroup`. '
     min_version: 'beta'
     url_param_only: true
-    required: true
     immutable: true
   - name: 'interceptDeploymentGroupId'
     type: String

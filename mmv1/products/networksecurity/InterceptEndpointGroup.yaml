@@ -51,7 +51,6 @@ parameters:
     description: 'The location of the Intercept Endpoint Group, currently restricted to `global`.'
     min_version: 'beta'
     url_param_only: true
-    required: true
     immutable: true
   - name: 'interceptEndpointGroupId'
     type: String

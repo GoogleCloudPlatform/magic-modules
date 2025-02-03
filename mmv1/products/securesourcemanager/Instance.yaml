@@ -143,7 +143,6 @@ parameters:
     description: |
       The location for the Instance.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'instance_id'
     type: String

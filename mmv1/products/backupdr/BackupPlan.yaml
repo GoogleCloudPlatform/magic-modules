@@ -40,7 +40,6 @@ examples:
 parameters:
   - name: 'location'
     type: String
-    required: true
     url_param_only: true
     description: |
       The location for the backup plan

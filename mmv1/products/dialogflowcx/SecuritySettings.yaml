@@ -63,7 +63,6 @@ properties:
       The location these settings are located in. Settings can only be applied to an agent in the same location.
       See [Available Regions](https://cloud.google.com/dialogflow/cx/docs/concept/region#avail) for a list of supported locations.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'displayName'
     type: String

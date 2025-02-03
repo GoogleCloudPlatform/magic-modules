@@ -73,7 +73,6 @@ parameters:
     description: |
       The location (zone) of the firewall endpoint.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'parent'
     type: String

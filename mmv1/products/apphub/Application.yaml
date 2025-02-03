@@ -77,7 +77,6 @@ parameters:
     type: String
     description: 'Part of `parent`. See documentation of `projectsId`.'
     url_param_only: true
-    required: true
     immutable: true
   - name: 'applicationId'
     type: String

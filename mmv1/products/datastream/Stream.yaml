@@ -227,7 +227,6 @@ parameters:
     description: |
       The name of the location this stream is located in.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'
@@ -1210,7 +1209,6 @@ properties:
                     description: |
                       The geographic location where the dataset should reside.
                       See https://cloud.google.com/bigquery/docs/locations for supported locations.
-                    required: true
                   - name: 'datasetIdPrefix'
                     type: String
                     description: |

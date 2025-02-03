@@ -48,7 +48,6 @@ parameters:
     type: String
     description: 'The location of the group.'
     url_param_only: true
-    required: true
     immutable: true
   - name: 'groupId'
     type: String

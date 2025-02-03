@@ -78,7 +78,6 @@ parameters:
       Location of the Membership
     min_version: 'beta'
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'membershipRbacRoleBindingId'

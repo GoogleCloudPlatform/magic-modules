@@ -54,7 +54,6 @@ properties:
     type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
     url_param_only: true
-    required: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/resource_from_self_link.go.tmpl'

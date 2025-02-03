@@ -40,7 +40,6 @@ parameters:
     description: |
       The geographic location where the Catalog should reside.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

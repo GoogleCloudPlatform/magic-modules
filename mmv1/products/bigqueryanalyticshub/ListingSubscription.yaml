@@ -59,7 +59,6 @@ parameters:
     description: |
       The name of the location for this subscription.
     url_param_only: true
-    required: true
     custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
 properties:
@@ -75,7 +74,6 @@ properties:
         description: |
           The geographic location where the dataset should reside.
           See https://cloud.google.com/bigquery/docs/locations for supported locations.
-        required: true
         custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
         diff_suppress_func: 'tpgresource.CaseDiffSuppress'
       - name: 'datasetReference'

@@ -57,7 +57,6 @@ parameters:
       `gcloud beta service-directory locations list`.
     min_version: 'beta'
     url_param_only: true
-    required: true
     immutable: true
     ignore_read: true
   - name: 'namespaceId'

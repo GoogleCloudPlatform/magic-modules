@@ -43,7 +43,6 @@ parameters:
       https://cloud.google.com/managed-kafka/docs/locations for a list of
       supported locations."
     url_param_only: true
-    required: true
     immutable: true
   - name: 'cluster'
     type: String

@@ -90,7 +90,6 @@ parameters:
     description: |
       The location where the data scan should reside.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'dataScanId'
     type: String

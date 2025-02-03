@@ -91,7 +91,6 @@ parameters:
       The location of the gateway security policy.
       The default value is `global`.
     url_param_only: true
-    required: true
 properties:
   - name: 'description'
     type: String

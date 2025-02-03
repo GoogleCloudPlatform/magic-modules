@@ -69,7 +69,6 @@ parameters:
     type: String
     description: "The location for the resource"
     url_param_only: true
-    required: true
   - name: 'domainName'
     type: String
     description: "Required. The domain name. Unicode domain names must be expressed in Punycode format."

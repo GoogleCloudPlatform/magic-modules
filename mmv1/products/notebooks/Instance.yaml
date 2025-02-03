@@ -108,7 +108,6 @@ parameters:
     type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
     url_param_only: true
-    required: true
     immutable: true
     resource: 'Location'
     imports: 'selfLink'

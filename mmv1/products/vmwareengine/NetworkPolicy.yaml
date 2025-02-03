@@ -67,7 +67,6 @@ parameters:
       Resource names are schemeless URIs that follow the conventions in https://cloud.google.com/apis/design/resource_names.
       For example: projects/my-project/locations/us-central1
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

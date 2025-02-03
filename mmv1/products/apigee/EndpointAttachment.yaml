@@ -70,7 +70,6 @@ properties:
     type: String
     description: |
       Location of the endpoint attachment.
-    required: true
   - name: 'host'
     type: String
     description: |

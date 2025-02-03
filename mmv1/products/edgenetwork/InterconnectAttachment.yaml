@@ -55,14 +55,12 @@ parameters:
     description: |
       The Google Cloud region to which the target Distributed Cloud Edge zone belongs.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'zone'
     type: String
     description: |
       The name of the target Distributed Cloud Edge zone.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'interconnect_attachment_id'
     type: String

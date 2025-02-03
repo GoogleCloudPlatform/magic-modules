@@ -59,7 +59,6 @@ properties:
        This is a one time step but at the moment you can only [configure location settings](https://cloud.google.com/dialogflow/cx/docs/concept/region#location-settings) via the Dialogflow CX console.
        Another options is to use global location so you don't need to manually configure location settings.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'displayName'
     type: String

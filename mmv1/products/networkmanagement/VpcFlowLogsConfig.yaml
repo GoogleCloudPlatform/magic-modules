@@ -84,7 +84,6 @@ parameters:
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `networkmanagement.googleapis.com/VpcFlowLogsConfig`.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'vpcFlowLogsConfigId'
     type: String

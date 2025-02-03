@@ -99,7 +99,6 @@ parameters:
       within its parent collection as described in https://google.aip.dev/122. See documentation
       for resource type `memorystore.googleapis.com/CertificateAuthority`. "
     url_param_only: true
-    required: true
     immutable: true
   - name: 'instanceId'
     type: String

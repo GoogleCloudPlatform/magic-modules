@@ -68,7 +68,6 @@ parameters:
     type: ResourceRef
     description: |
       The zone where the reservation is made.
-    required: true
     immutable: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'

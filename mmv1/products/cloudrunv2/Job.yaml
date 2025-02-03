@@ -134,7 +134,6 @@ parameters:
     type: String
     description: The location of the cloud run job
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

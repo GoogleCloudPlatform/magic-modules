@@ -139,7 +139,6 @@ properties:
     type: String
     description: |
       Required. Compute Engine location where the instance resides.
-    required: true
     immutable: true
   - name: 'peeringCidrRange'
     type: String
