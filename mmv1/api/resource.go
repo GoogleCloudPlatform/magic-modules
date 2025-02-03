@@ -451,7 +451,7 @@ func (r *Resource) Validate() {
 	for _, property := range r.AllProperties() {
 		property.Validate(r.Name)
 		if (property.Name == "zone" || property.Name == "location") && property.Required {
-			log.Fatalf("Property %s in resource %s cannot be marked as required", property.Name, r.Name)
+			log.Fatalf("Property %s in resource %s cannot be marked as required to preserve provider-level defaults", property.Name, r.Name)
 		}
 	}
 
