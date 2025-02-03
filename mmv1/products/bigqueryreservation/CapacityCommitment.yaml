@@ -109,6 +109,7 @@ properties:
     type: String
     description: |
       The plan this capacity commitment is converted to after commitmentEndTime passes. Once the plan is changed, committed period is extended according to commitment plan. Only applicable for some commitment plans.
+    diff_suppress_func: 'bigqueryReservationCapacityCommitmentPlanDiffSuppressFunc'
   - name: 'edition'
     type: String
     description: |
