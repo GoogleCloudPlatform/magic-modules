@@ -5915,11 +5915,10 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 		}
 		{{- if ne $.TargetVersionName "ga" }}
 		if autoMonitoring, ok := managed_prometheus["auto_monitoring_config"]; ok {
-		    if autoMonitoringSet, ok := autoMonitoring.(*schema.Set); ok {
-		        autoMonitoringList := autoMonitoringSet.List()
+		    if autoMonitoringList, ok := autoMonitoring.([]interface{}); ok {
 		        if len(autoMonitoringList) > 0 {
 		            autoMonitoringConfig := autoMonitoringList[0].(map[string]interface{})
-		            if scope, ok := autoMonitoringConfig["scope"].(string); ok {
+		            if scope, ok := autoMonitoringConfig["scope"].(string); ok && scope != "" {
 		                mc.ManagedPrometheusConfig.AutoMonitoringConfig = &container.AutoMonitoringConfig{
 		                    Scope: scope,
 		                }
