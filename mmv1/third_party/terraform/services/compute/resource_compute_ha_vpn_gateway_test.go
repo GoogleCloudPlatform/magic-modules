@@ -32,10 +32,10 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "testUpdated", "testUpdated"),
+				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "testupdated", "testupdated"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
-					resource.TestCheckResourceAttr(resourceName, "labels.testUpdated", "testUpdated"),
+					resource.TestCheckResourceAttr(resourceName, "labels.testupdated", "testupdated"),
 				),
 			},
 			{
