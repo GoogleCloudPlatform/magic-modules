@@ -119,3 +119,13 @@ properties:
     description: |
       Output only. Checks if the NotebookRuntime is upgradable.
     output: true
+  - name: expirationTime
+    type: String
+    description: |
+      Output only. Timestamp when this NotebookRuntime will be expired.
+    output: true
+  - name: notebookRuntimeType
+    type: String
+    description: |
+      Output only. The type of the notebook runtime.
+    output: true
