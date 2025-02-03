@@ -31,6 +31,9 @@ async:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
 custom_code:
   encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'
+  post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/colab_runtime.go.tmpl'
+  constants: 'templates/terraform/constants/colab_runtime.go.tmpl'
 examples:
   - name: 'colab_runtime_basic'
     primary_resource_id: 'runtime'
@@ -38,6 +41,14 @@ examples:
     region_override: 'us-central1'
     vars:
       runtime_name: 'colab-runtime'
+  - name: 'colab_runtime_stopped'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+    ignore_read_extra:
+      - 'desired_state'
   - name: 'colab_runtime_full'
     primary_resource_id: 'runtime'
     primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
@@ -47,16 +58,26 @@ examples:
       key_name: 'my-crypto-key'
     test_vars_overrides:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'desired_state'
+virtual_fields:
+  - name: 'desired_state'
+    description: |
+      Desired state of the Colab Runtime. Set this field to `RUNNING` to start the runtime, and `STOPPED` to stop it.
+    type: String
+    default_value: "RUNNING"
 parameters:
   - name: 'location'
     type: String
     required: true
     url_param_only: true
     description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+    immutable: true
   - name: 'name'
     type: String
     url_param_only: true
     description: 'The resource name of the Runtime'
+    immutable: true
 properties:
   - name: notebookRuntimeTemplateRef
     type: NestedObject
@@ -65,18 +86,27 @@ properties:
     properties:
       - name: 'notebookRuntimeTemplate'
         type: String
+        immutable: true
         required: true
         description: 'The resource name of the NotebookRuntimeTemplate based on which a NotebookRuntime will be created.'
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'runtimeUser'
     type: String
     required: true
+    immutable: true
     description: 'The user email of the NotebookRuntime.'
   - name: 'displayName'
     type: String
+    immutable: true
     description:
       Required. The display name of the Runtime.
     required: true
   - name: description
     type: String
+    immutable: true
     description: 'The description of the Runtime.'
+  - name: state
+    type: String
+    description: |
+      Output only. The state of the runtime.
+    output: true

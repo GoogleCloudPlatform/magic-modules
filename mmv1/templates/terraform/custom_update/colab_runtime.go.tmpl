@@ -1,0 +1,40 @@
+name := d.Get("name").(string)
+state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+ 	return err
+}
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+  return err
+}
+
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+  billingProject = bp
+}
+
+if desired_state != "" && state != desired_state {
+  var verb string
+
+  switch desired_state {
+    case "STOPPED":
+      verb = "stop"
+    case "RUNNING":
+      verb = "start"
+    default:
+      return fmt.Errorf("desired_state has to be RUNNING or STOPPED")
+  }
+
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, verb); err != nil {
+    return err
+  }
+
+} else {
+  log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
+}
+
+return nil
