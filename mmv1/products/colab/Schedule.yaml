@@ -42,8 +42,9 @@ examples:
   - name: 'colab_schedule_basic'
     primary_resource_id: 'schedule'
     vars:
-      display_name: 'Basic schedule'
+      display_name: 'basic-schedule'
       bucket: 'my_bucket'
+      runtime_template_name: 'runtime-template'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
@@ -51,8 +52,9 @@ examples:
   - name: 'colab_schedule_paused'
     primary_resource_id: 'schedule'
     vars:
-      display_name: 'Paused schedule'
+      display_name: 'paused-schedule'
       bucket: 'my_bucket'
+      runtime_template_name: 'runtime-template'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       location: 'REGION'
@@ -65,9 +67,10 @@ examples:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
-      display_name: 'Full schedule'
+      display_name: 'full-schedule'
       bucket: 'my_bucket'
       network_name: 'colab-test-default'
+      runtime_template_name: 'runtime-template'
       secret: 'secret'
       dataform_repository: 'dataform-repository'
       start_time: '2014-10-02T15:01:23Z'
