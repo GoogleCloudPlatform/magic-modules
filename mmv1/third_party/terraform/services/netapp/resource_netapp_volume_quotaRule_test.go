@@ -28,7 +28,25 @@ func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample_update(t *te
 				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume_quota_rule.test_quota_rule",
+				ResourceName:            "google_netapp_volume_quota_rule.test_default_user_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_default_group_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_individual_user_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_individual_group_quota_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
@@ -37,7 +55,25 @@ func TestAccNetappVolumeQuotaRule_netappVolumeQuotaRuleBasicExample_update(t *te
 				Config: testAccNetappVolumeQuotaRule_netappVolumeQuotaRuleFull_update(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume_quota_rule.test_quota_rule",
+				ResourceName:            "google_netapp_volume_quota_rule.test_default_user_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_default_group_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_individual_user_quota_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
+			},
+			{
+				ResourceName:            "google_netapp_volume_quota_rule.test_individual_group_quota_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "volume_name"},
