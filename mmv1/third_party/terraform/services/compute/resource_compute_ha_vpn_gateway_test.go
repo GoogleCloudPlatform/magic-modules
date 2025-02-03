@@ -19,7 +19,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test", "test"),
+				Config: testAccComputeHaVpnGateway_base(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.test", "test"),
@@ -32,7 +32,7 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "network", "region", "terraform_labels"},
 			},
 			{
-				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test-updated", "test-updated"),
+				Config: testAccComputeHaVpnGateway_update(rnd),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.test-updated", "test-updated"),
@@ -48,14 +48,14 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 	})
 }
 
-func testAccComputeHaVpnGateway_updateLabels(suffix, key, value string) string {
+func testAccComputeHaVpnGateway_base(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
   region   = "us-central1"
   name     = "tf-test-ha-vpn-1%s"
   network  = google_compute_network.network1.id
   labels = {
-    %s = "%s"
+    test = "test"
   }
 }
 
@@ -63,5 +63,23 @@ resource "google_compute_network" "network1" {
   name                    = "network1%s"
   auto_create_subnetworks = false
 }
-`, suffix, key, value, suffix)
+`, suffix, suffix)
+}
+
+func testAccComputeHaVpnGateway_update(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
+  region   = "us-central1"
+  name     = "tf-test-ha-vpn-1%s"
+  network  = google_compute_network.network1.id
+  labels = {
+    test-updated = "test-upadated"
+  }
+}
+
+resource "google_compute_network" "network1" {
+  name                    = "network1%s"
+  auto_create_subnetworks = false
+}
+`, suffix, suffix)
 }
