@@ -70,6 +70,16 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
+sweeper:
+  regions:
+    - "southamerica-west1"
+    - "us-south1"
+    - "us-west2"
+    - "us-central1"
+    - "us-east1"
+    - "europe-west1"
+    - "us-west1"
+    - "europe-west4"
 examples:
   - name: 'subnetwork_basic'
     primary_resource_id: 'network-with-private-secondary-ip-ranges'
