@@ -38,6 +38,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+sweeper:
+  regions:
+    - "global"
 examples:
   - name: 'scc_v2_project_big_query_export_config_basic'
     primary_resource_id: 'custom_big_query_export_config'
