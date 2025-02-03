@@ -11,7 +11,7 @@ import (
 )
 
 func TestNotificationState(t *testing.T) {
-	availableReviewers := membership.AvailableReviewers()
+	availableReviewers := membership.AvailableReviewers(nil)
 	firstCoreReviewer := availableReviewers[0]
 	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
@@ -964,7 +964,7 @@ func TestShouldNotify(t *testing.T) {
 }
 
 func TestFormatReminderComment(t *testing.T) {
-	availableReviewers := membership.AvailableReviewers()
+	availableReviewers := membership.AvailableReviewers(nil)
 	firstCoreReviewer := availableReviewers[0]
 	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {

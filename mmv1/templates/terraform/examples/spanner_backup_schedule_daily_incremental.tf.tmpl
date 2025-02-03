@@ -38,4 +38,8 @@ resource "google_spanner_backup_schedule" "{{$.PrimaryResourceId}}" {
   }
   // The schedule creates incremental backup chains.
   incremental_backup_spec {}
+
+    encryption_config {
+    encryption_type = "GOOGLE_DEFAULT_ENCRYPTION"
+  }
 }

@@ -14,6 +14,10 @@
 ---
 name: 'Instance'
 description: A Workbench instance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs/workbench/instances/introduction'
+  api: 'https://cloud.google.com/vertex-ai/docs/workbench/reference/rest/v2/projects.locations.instances'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -48,6 +52,10 @@ custom_code:
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
+sweeper:
+  regions:
+    - "us-west1-a"
+    - "us-central1-a"
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'

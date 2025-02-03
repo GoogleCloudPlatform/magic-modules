@@ -198,3 +198,120 @@ func TestResourceServiceVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestLeafProperties(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		obj         Resource
+		expected    Type
+	}{
+		{
+			description: "non-nested type",
+			obj: Resource{
+				BaseUrl: "test",
+				Properties: []*Type{
+					{
+						Name: "basic",
+						Type: "String",
+					},
+				},
+			},
+			expected: Type{
+				Name: "basic",
+			},
+		},
+		{
+			description: "nested type",
+			obj: Resource{
+				BaseUrl: "test",
+				Properties: []*Type{
+					{
+						Name: "root",
+						Type: "NestedObject",
+						Properties: []*Type{
+							{
+								Name: "foo",
+								Type: "NestedObject",
+								Properties: []*Type{
+									{
+										Name: "bars",
+										Type: "Array",
+										ItemType: &Type{
+											Type: "NestedObject",
+											Properties: []*Type{
+												{
+													Name: "fooBar",
+													Type: "String",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: Type{
+				Name: "fooBar",
+			},
+		},
+		{
+			description: "nested virtual",
+			obj: Resource{
+				BaseUrl: "test",
+				VirtualFields: []*Type{
+					{
+						Name: "root",
+						Type: "NestedObject",
+						Properties: []*Type{
+							{
+								Name: "foo",
+								Type: "String",
+							},
+						},
+					},
+				},
+			},
+			expected: Type{
+				Name: "foo",
+			},
+		},
+		{
+			description: "nested param",
+			obj: Resource{
+				BaseUrl: "test",
+				Parameters: []*Type{
+					{
+						Name: "root",
+						Type: "NestedObject",
+						Properties: []*Type{
+							{
+								Name: "foo",
+								Type: "String",
+							},
+						},
+					},
+				},
+			},
+			expected: Type{
+				Name: "foo",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+
+			tc.obj.SetDefault(nil)
+			if got, want := tc.obj.LeafProperties(), tc.expected; got[0].Name != want.Name {
+				t.Errorf("expected %q to be %q", got[0].Name, want.Name)
+			}
+		})
+	}
+}
