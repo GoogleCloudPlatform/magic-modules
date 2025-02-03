@@ -58,5 +58,10 @@ resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
     %s = "%s"
   }
 }
-`, suffix, key, value)
+
+resource "google_compute_network" "network1" {
+  name                    = "network1%s"
+  auto_create_subnetworks = false
+}
+`, suffix, key, value, suffix)
 }
