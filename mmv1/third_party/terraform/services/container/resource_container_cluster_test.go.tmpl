@@ -15,6 +15,27 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
+func bootstrapGkeTagManagerServiceAgents(t *testing.T) {
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagAdmin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagHoldAdmin",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+		{
+			Member: "serviceAccount:{project_number}@cloudservices.gserviceaccount.com",
+			Role:   "roles/resourcemanager.tagUser",
+		},
+	})
+}
+
 func TestAccContainerCluster_basic(t *testing.T) {
 	t.Parallel()
 
@@ -68,11 +89,8 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-
-	if acctest.BootstrapPSARole(t, "service-", "container-engine-robot", "roles/resourcemanager.tagHoldAdmin") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
-
+	
+	bootstrapGkeTagManagerServiceAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -433,6 +451,50 @@ func TestAccContainerCluster_withLocalSsdEncryptionMode(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_container_cluster.local_ssd_encryption_mode",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	npName := fmt.Sprintf("tf-test-node-pool-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withMaxRunDuration(clusterName, npName, networkName, subnetworkName, "3600s"),
+			},
+			{
+				ResourceName:            "google_container_cluster.max_run_duration",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withMaxRunDuration(clusterName, npName, networkName, subnetworkName, "1800s"),
+			},
+			{
+				ResourceName:            "google_container_cluster.max_run_duration",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_disableMaxRunDuration(clusterName, npName, networkName, subnetworkName),
+			},
+			{
+				ResourceName:            "google_container_cluster.max_run_duration",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
@@ -2349,9 +2411,12 @@ func TestAccContainerCluster_withBootDiskKmsKey(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -3642,6 +3707,8 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 	clusterNetName := fmt.Sprintf("tf-test-container-net-%s", randomSuffix)
 	clusterSubnetName := fmt.Sprintf("tf-test-container-subnet-%s", randomSuffix)
 
+	bootstrapGkeTagManagerServiceAgents(t)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -3666,6 +3733,10 @@ func TestAccContainerCluster_withAutopilotResourceManagerTags(t *testing.T) {
 			{
 				Config: testAccContainerCluster_withAutopilotResourceManagerTagsUpdate1(pid, clusterName, clusterNetName, clusterSubnetName, randomSuffix),
 				Check: resource.ComposeTestCheckFunc(
+					// Small sleep, to avoid case where cluster is ready but underlying GCE
+					// resources apparently aren't.
+					// b/390456348
+					acctest.SleepInSecondsForTest(30),
 					resource.TestCheckResourceAttrSet("google_container_cluster.with_autopilot", "node_pool_auto_config.0.resource_manager_tags.%"),
 				),
 			},
@@ -4390,9 +4461,12 @@ func TestAccContainerCluster_nodeAutoprovisioningDefaultsBootDiskKmsKey(t *testi
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -5520,14 +5594,20 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 	// *ALL* Cloud KMS keys in the project.  A more realistic usage would be to
 	// grant the service agent the necessary roles only on the individual keys
 	// we have created.
-	roles := []string{
-		"roles/container.cloudKmsKeyUser",
-		"roles/privateca.certificateManager",
-		"roles/cloudkms.cryptoKeyEncrypterDecrypter",
-	}
-	if acctest.BootstrapPSARoles(t, "service-", "container-engine-robot", roles) {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role: "roles/container.cloudKmsKeyUser",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role: "roles/privateca.certificateManager",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	// Find an active cryptoKeyVersion on the signing key.
 	var signingCryptoKeyVersion *cloudkms.CryptoKeyVersion
@@ -6701,6 +6781,55 @@ resource "google_container_cluster" "local_ssd_encryption_mode" {
   subnetwork    = "%s"
 }
 `, clusterName, npName, mode, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_disableMaxRunDuration(clusterName, npName, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "max_run_duration" {
+  name               = "%s"
+  location           = "us-central1-a"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "n1-standard-2"
+    }
+  }
+
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, clusterName, npName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withMaxRunDuration(clusterName, npName, networkName, subnetworkName, duration string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "max_run_duration" {
+  name               = "%s"
+  location           = "us-central1-a"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  node_pool {
+    name = "%s"
+    initial_node_count = 1
+    node_config {
+      machine_type = "n1-standard-2"
+	  max_run_duration = "%s"
+    }
+  }
+
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+}
+`, clusterName, npName, duration, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName, subnetworkName string) string {
@@ -11440,9 +11569,12 @@ func TestAccContainerCluster_withConfidentialBootDisk(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -11503,9 +11635,12 @@ func TestAccContainerCluster_withConfidentialBootDiskNodeConfig(t *testing.T) {
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
@@ -11769,38 +11904,6 @@ data "google_project" "project" {
   project_id = "%[1]s"
 }
 
-resource "google_project_iam_member" "tagHoldAdmin" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagHoldAdmin"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "tagUser1" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "google_project_iam_member" "tagUser2" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tagHoldAdmin,
-    google_project_iam_member.tagUser1,
-    google_project_iam_member.tagUser2,
-  ]
-}
-
 resource "google_tags_tag_key" "key1" {
   parent      = data.google_project.project.id
   short_name  = "foobarbaz-%[2]s"
@@ -11855,8 +11958,6 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
   network             = "%[4]s"
   subnetwork          = "%[5]s"
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName, tagResourceNumber)
 }
@@ -11865,38 +11966,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTags(projectID, cluster
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tagHoldAdmin" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagHoldAdmin"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "tagUser1" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "google_project_iam_member" "tagUser2" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tagHoldAdmin,
-    google_project_iam_member.tagUser1,
-    google_project_iam_member.tagUser2,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -11993,8 +12062,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
@@ -12003,38 +12070,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTagsUpdate1(projectID, 
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tagHoldAdmin" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagHoldAdmin"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "tagUser1" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "google_project_iam_member" "tagUser2" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tagHoldAdmin,
-    google_project_iam_member.tagUser1,
-    google_project_iam_member.tagUser2,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -12132,8 +12167,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
@@ -12142,38 +12175,6 @@ func testAccContainerCluster_withAutopilotResourceManagerTagsUpdate2(projectID, 
 	return fmt.Sprintf(`
 data "google_project" "project" {
   project_id = "%[1]s"
-}
-
-resource "google_project_iam_member" "tagHoldAdmin" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagHoldAdmin"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "tagUser1" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "google_project_iam_member" "tagUser2" {
-  project = "%[1]s"
-  role    = "roles/resourcemanager.tagUser"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudservices.gserviceaccount.com"
-
-  depends_on = [google_project_iam_member.tagHoldAdmin]
-}
-
-resource "time_sleep" "wait_120_seconds" {
-  create_duration = "120s"
-
-  depends_on = [
-    google_project_iam_member.tagHoldAdmin,
-    google_project_iam_member.tagUser1,
-    google_project_iam_member.tagUser2,
-  ]
 }
 
 resource "google_tags_tag_key" "key1" {
@@ -12264,8 +12265,6 @@ resource "google_container_cluster" "with_autopilot" {
   vertical_pod_autoscaling {
     enabled = true
   }
-
-  depends_on = [time_sleep.wait_120_seconds]
 }
 `, projectID, randomSuffix, clusterName, networkName, subnetworkName)
 }
