@@ -14,6 +14,7 @@
 ---
 name: ReleaseChannelSettingBinding
 description: The resource for managing ReleaseChannel setting bindings for Admin Control.
+min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings
 self_link: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings/{{setting_binding_id}}
 create_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
