@@ -2770,7 +2770,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 	var bucket storage.Bucket
 	var disabled storage.Bucket
 	var noIPfilter storage.Bucket
-	bucketName := acctest.TestBucketName(t)
+	bucketName := fmt.Sprintf("tf-test-ip-filter-bucket-%d", acctest.RandInt(t))
 	nwSuffix := acctest.RandString(t, 8)
   project := envvar.GetTestProjectFromEnv()
   serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
@@ -2782,8 +2782,8 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBucket_IPFilter(
-          bucketName, nwSuffix, project, serviceAccount,
-        ),
+					bucketName, nwSuffix, project, serviceAccount,
+				),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &bucket),
