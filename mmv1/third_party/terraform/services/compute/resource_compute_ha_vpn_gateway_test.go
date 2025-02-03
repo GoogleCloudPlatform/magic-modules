@@ -20,6 +20,11 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "test", "test"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.test", "test"),
@@ -33,6 +38,11 @@ func TestAccComputeHaVpnGateway_updateLabels(t *testing.T) {
 			},
 			{
 				Config: testAccComputeHaVpnGateway_updateLabels(rnd, "testupdated", "testupdated"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "labels.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "labels.testupdated", "testupdated"),
