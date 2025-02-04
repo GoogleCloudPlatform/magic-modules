@@ -104,7 +104,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this InstantSnapshot.
-    update_url: 'projects/{{project}}/zones{{zone}}/instantSnapshots/{{name}}/setLabels'
+    update_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels'
     update_verb: 'POST'
   - name: 'labelFingerprint'
     type: Fingerprint
