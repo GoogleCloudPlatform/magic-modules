@@ -1,0 +1,3 @@
+resource "google_os_config_policy_orchestration_basic" "{{$.PrimaryResourceId}}" {
+    policy_orchestrator_id = {{index $.Vars "policy_orchestrator_id"}}
+}

@@ -1,0 +1,3516 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OS Config API",
+    "description": "OS management tools that can be used for patch management, patch compliance, and configuration management on VM instances.",
+    "version": "v2beta",
+    "x-google-revision": "0"
+  },
+  "servers": [
+    {
+      "url": "https://osconfig.googleapis.com",
+      "description": "Global Endpoint"
+    }
+  ],
+  "paths": {
+    "/v2beta/projects/{project}/locations/global/operations": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListOperations",
+        "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "The standard list filter.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The standard list page size.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "The standard list page token.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOperationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/folders/{folder}/locations/{location}/operations": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListOperationsByFolderAndLocation",
+        "x-google-operation-name" : "ListOperations",
+        "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "The standard list filter.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The standard list page size.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "The standard list page token.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOperationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/locations/global/operations": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListOperationsByOrganization",
+        "x-google-operation-name" : "ListOperations",
+        "description": "Lists operations that match the specified filter in the request. If the\nserver doesn't support this method, it returns `UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "The standard list filter.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "The standard list page size.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "The standard list page token.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOperationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/projects/{project}/locations/global/operations/{operation}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetOperation",
+        "description": "Gets the latest state of a long-running operation.  Clients can use this\nmethod to poll the operation result at intervals as recommended by the API\nservice.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeleteOperation",
+        "description": "Deletes a long-running operation. This method indicates that the client is\nno longer interested in the operation result. It does not cancel the\noperation. If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/folders/{folder}/locations/{location}/operations/{operation}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetOperationByFolderAndLocationAndOperation",
+        "x-google-operation-name" : "GetOperation",
+        "description": "Gets the latest state of a long-running operation.  Clients can use this\nmethod to poll the operation result at intervals as recommended by the API\nservice.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeleteOperationByFolderAndLocationAndOperation",
+        "x-google-operation-name" : "DeleteOperation",
+        "description": "Deletes a long-running operation. This method indicates that the client is\nno longer interested in the operation result. It does not cancel the\noperation. If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/locations/global/operations/{operation}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetOperationByOrganizationAndOperation",
+        "x-google-operation-name" : "GetOperation",
+        "description": "Gets the latest state of a long-running operation.  Clients can use this\nmethod to poll the operation result at intervals as recommended by the API\nservice.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeleteOperationByOrganizationAndOperation",
+        "x-google-operation-name" : "DeleteOperation",
+        "description": "Deletes a long-running operation. This method indicates that the client is\nno longer interested in the operation result. It does not cancel the\noperation. If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/projects/{project}/locations/global/operations/{operation}:cancel": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CancelOperation",
+        "description": "Starts asynchronous cancellation on a long-running operation.  The server\nmakes a best effort to cancel the operation, but success is not\nguaranteed.  If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.  Clients can use\nOperations.GetOperation or\nother methods to check whether the cancellation succeeded or whether the\noperation completed despite cancellation. On successful cancellation,\nthe operation is not deleted; instead, it becomes an operation with\nan Operation.error value with a google.rpc.Status.code of `1`,\ncorresponding to `Code.CANCELLED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/folders/{folder}/locations/{location}/operations/{operation}:cancel": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CancelOperationByFolderAndLocationAndOperation",
+        "x-google-operation-name" : "CancelOperation",
+        "description": "Starts asynchronous cancellation on a long-running operation.  The server\nmakes a best effort to cancel the operation, but success is not\nguaranteed.  If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.  Clients can use\nOperations.GetOperation or\nother methods to check whether the cancellation succeeded or whether the\noperation completed despite cancellation. On successful cancellation,\nthe operation is not deleted; instead, it becomes an operation with\nan Operation.error value with a google.rpc.Status.code of `1`,\ncorresponding to `Code.CANCELLED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organization}/locations/global/operations/{operation}:cancel": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CancelOperationByOrganizationAndOperation",
+        "x-google-operation-name" : "CancelOperation",
+        "description": "Starts asynchronous cancellation on a long-running operation.  The server\nmakes a best effort to cancel the operation, but success is not\nguaranteed.  If the server doesn't support this method, it returns\n`google.rpc.Code.UNIMPLEMENTED`.  Clients can use\nOperations.GetOperation or\nother methods to check whether the cancellation succeeded or whether the\noperation completed despite cancellation. On successful cancellation,\nthe operation is not deleted; instead, it becomes an operation with\nan Operation.error value with a google.rpc.Status.code of `1`,\ncorresponding to `Code.CANCELLED`.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organization",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "description": "Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelOperationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organizationsId}/locations/global/policyOrchestrators": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CreatePolicyOrchestratorForOrganization",
+        "description": "Creates a new policy orchestrator under the given organizations resource.\n\n`name` field of the given orchestrator are ignored and instead replaced by\na product of `parent` and `policy_orchestrator_id`.\n\nOrchestrator state field might be only set to `ACTIVE`, `STOPPED` or\nomitted (in which case, the created resource will be in `ACTIVE` state\nanyway).",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organizationsId",
+            "description": "Part of `parent`. Required. The parent resource name in the form of:\n* `organizations/{organization_id}/locations/global`\n* `folders/{folder_id}/locations/global`\n* `projects/{project_id_or_number}/locations/global`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorId",
+            "description": "Required. The logical identifier of the policy orchestrator, with the following\nrestrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the parent.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes since the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorForOrganizationOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListPolicyOrchestratorsForOrganization",
+        "description": "Lists the policy orchestrators under the given parent organization\nresource.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organizationsId",
+            "description": "Part of `parent`. Required. The parent resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "Optional. Requested page size. Server may return fewer items than requested.\nIf unspecified, server will pick an appropriate default.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Optional. Filtering results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Optional. Hint for how to order the results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__ListPolicyOrchestratorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/folders/{foldersId}/locations/global/policyOrchestrators": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CreatePolicyOrchestratorForFolder",
+        "description": "Creates a new policy orchestrator under the given folder resource.\n\n`name` field of the given orchestrator are ignored and instead replaced by\na product of `parent` and `policy_orchestrator_id`.\n\nOrchestrator state field might be only set to `ACTIVE`, `STOPPED` or\nomitted (in which case, the created resource will be in `ACTIVE` state\nanyway).",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "foldersId",
+            "description": "Part of `parent`. Required. The parent resource name in the form of:\n* `organizations/{organization_id}/locations/global`\n* `folders/{folder_id}/locations/global`\n* `projects/{project_id_or_number}/locations/global`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorId",
+            "description": "Required. The logical identifier of the policy orchestrator, with the following\nrestrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the parent.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes since the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorForFolderOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListPolicyOrchestratorsForFolder",
+        "description": "Lists the policy orchestrators under the given parent folder resource.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "foldersId",
+            "description": "Part of `parent`. Required. The parent resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "Optional. Requested page size. Server may return fewer items than requested.\nIf unspecified, server will pick an appropriate default.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Optional. Filtering results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Optional. Hint for how to order the results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__ListPolicyOrchestratorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/projects/{projectsId}/locations/global/policyOrchestrators": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "post": {
+        "tags": ["osconfig"],
+        "operationId": "CreatePolicyOrchestrator",
+        "description": "Creates a new policy orchestrator under the given project resource.\n\n`name` field of the given orchestrator are ignored and instead replaced by\na product of `parent` and `policy_orchestrator_id`.\n\nOrchestrator state field might be only set to `ACTIVE`, `STOPPED` or\nomitted (in which case, the created resource will be in `ACTIVE` state\nanyway).",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. Required. The parent resource name in the form of:\n* `organizations/{organization_id}/locations/global`\n* `folders/{folder_id}/locations/global`\n* `projects/{project_id_or_number}/locations/global`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorId",
+            "description": "Required. The logical identifier of the policy orchestrator, with the following\nrestrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the parent.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes since the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be created.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "ListPolicyOrchestrators",
+        "description": "Lists the policy orchestrators under the given parent project resource.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `parent`. Required. The parent resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageSize",
+            "description": "Optional. Requested page size. Server may return fewer items than requested.\nIf unspecified, server will pick an appropriate default.",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageToken",
+            "description": "Optional. A token identifying a page of results the server should return.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "description": "Optional. Filtering results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "description": "Optional. Hint for how to order the results",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__ListPolicyOrchestratorsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/organizations/{organizationsId}/locations/global/policyOrchestrators/{policyOrchestratorsId}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetPolicyOrchestratorForOrganization",
+        "description": "Retrieves an existing policy orchestrator, parented by an organization.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organizationsId",
+            "description": "Part of `name`. Required. The resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `organizationsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["osconfig"],
+        "operationId": "UpdatePolicyOrchestratorForOrganization",
+        "description": "Updates an existing policy orchestrator, parented by an organization.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organizationsId",
+            "description": "Part of `policyOrchestrator.name`. Immutable. Identifier. In form of\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `policyOrchestrator.name`. See documentation of `organizationsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Optional. The list of fields to update.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be updated.\n\nThe policy orchestrator's `name` field is used to identify the resource to\nupdate. Format:\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{policy_orchestrator_id}`",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorForOrganizationOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeletePolicyOrchestratorForOrganization",
+        "description": "Deletes an existing policy orchestrator resource, parented by an\norganization.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organizationsId",
+            "description": "Part of `name`. Required. Name of the resource to be deleted.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `organizationsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes after the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "Optional. The current etag of the policy orchestrator.\nIf an etag is provided and does not match the current etag of the policy\norchestrator, deletion will be blocked and an ABORTED error will be\nreturned.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorForOrganizationOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/folders/{foldersId}/locations/global/policyOrchestrators/{policyOrchestratorsId}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetPolicyOrchestratorForFolder",
+        "description": "Retrieves an existing policy orchestrator, parented by a folder.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "foldersId",
+            "description": "Part of `name`. Required. The resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `foldersId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["osconfig"],
+        "operationId": "UpdatePolicyOrchestratorForFolder",
+        "description": "Updates an existing policy orchestrator, parented by a folder.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "foldersId",
+            "description": "Part of `policyOrchestrator.name`. Immutable. Identifier. In form of\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `policyOrchestrator.name`. See documentation of `foldersId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Optional. The list of fields to update.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be updated.\n\nThe policy orchestrator's `name` field is used to identify the resource to\nupdate. Format:\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{policy_orchestrator_id}`",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorForFolderOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeletePolicyOrchestratorForFolder",
+        "description": "Deletes an existing policy orchestrator resource, parented by a folder.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "foldersId",
+            "description": "Part of `name`. Required. Name of the resource to be deleted.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `foldersId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes after the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "Optional. The current etag of the policy orchestrator.\nIf an etag is provided and does not match the current etag of the policy\norchestrator, deletion will be blocked and an ABORTED error will be\nreturned.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorForFolderOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2beta/projects/{projectsId}/locations/global/policyOrchestrators/{policyOrchestratorsId}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/alt"},
+        { "$ref": "#/components/parameters/callback"},
+        { "$ref": "#/components/parameters/prettyPrint"},
+        { "$ref": "#/components/parameters/_.xgafv"}
+      ],
+      "get": {
+        "tags": ["osconfig"],
+        "operationId": "GetPolicyOrchestrator",
+        "description": "Retrieves an existing policy orchestrator, parented by a project.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. Required. The resource name.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["osconfig"],
+        "operationId": "UpdatePolicyOrchestrator",
+        "description": "Updates an existing policy orchestrator, parented by a project.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `policyOrchestrator.name`. Immutable. Identifier. In form of\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `policyOrchestrator.name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "Optional. The list of fields to update.",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(\\s*[^,\\s.]+(\\s*[,.]\\s*[^,\\s.]+)*)?$",
+              "format": "google-fieldmask"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Required. The policy orchestrator to be updated.\n\nThe policy orchestrator's `name` field is used to identify the resource to\nupdate. Format:\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{policy_orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{policy_orchestrator_id}`",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        },
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorOperation"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["osconfig"],
+        "operationId": "DeletePolicyOrchestrator",
+        "description": "Deletes an existing policy orchestrator resource, parented by a project.",
+        "security": [
+          {
+            "google_oauth_implicit": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "google_oauth_code": [
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "bearer_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectsId",
+            "description": "Part of `name`. Required. Name of the resource to be deleted.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyOrchestratorsId",
+            "description": "Part of `name`. See documentation of `projectsId`.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "description": "Optional. An optional request ID to identify requests. Specify a unique request ID\nso that if you must retry your request, the server will know to ignore\nthe request if it has already been completed. The server will guarantee\nthat for at least 60 minutes after the first request.\n\nFor example, consider a situation where you make an initial request and the\nrequest times out. If you make the request again with the same request\nID, the server can check if original operation with the same request ID\nwas received, and if so, will ignore the second request. This prevents\nclients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is\nnot supported (00000000-0000-0000-0000-000000000000).",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "etag",
+            "description": "Optional. The current etag of the policy orchestrator.\nIf an etag is provided and does not match the current etag of the policy\norchestrator, deletion will be blocked and an ABORTED error will be\nreturned.",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-google-lro" : "true",
+        "responses": {
+          "default": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorOperation"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "alt": {
+        "name": "$alt",
+        "description": "Data format for response.",
+        "schema": {
+          "default": "json",
+          "enum": [
+            "json",
+            "media",
+            "proto"
+          ],
+          "x-google-enum-descriptions": [
+            "Responses with Content-Type of application/json",
+            "Media download with context-dependent Content-Type",
+            "Responses with Content-Type of application/x-protobuf"
+          ],
+          "type": "string"
+        },
+        "in": "query"
+      },
+      "callback": {
+        "name": "$callback",
+        "description": "JSONP",
+        "schema": {
+          "type": "string"
+        },
+        "in": "query"
+      },
+      "prettyPrint": {
+        "name": "$prettyPrint",
+        "description": "Returns response with indentations and line breaks.",
+        "schema": {
+          "default": "true",
+          "type": "boolean"
+        },
+        "in": "query"
+      },
+      "_.xgafv": {
+        "name": "$.xgafv",
+        "description": "V1 error format.",
+        "schema": {
+          "enum": [
+            "1",
+            "2"
+          ],
+          "x-google-enum-descriptions": [
+            "v1 error format",
+            "v2 error format"
+          ],
+          "type": "string"
+        },
+        "in": "query"
+      }
+    },
+    "securitySchemes": {
+      "google_oauth_implicit": {
+        "type": "oauth2",
+        "description": "Google Oauth 2.0 implicit authentication flow.",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+            }
+          }
+        }
+      },
+      "google_oauth_code": {
+        "type": "oauth2",
+        "description": "Google Oauth 2.0 authorizationCode authentication flow.",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+            "tokenUrl": "https://oauth2.googleapis.com/token",
+            "refreshUrl": "https://oauth2.googleapis.com/token",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+            }
+          }
+        }
+      },
+      "bearer_auth": {
+        "type": "http",
+        "description": "Http bearer authentication.",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ListOperationsResponse": {
+        "description": "The response message for Operations.ListOperations.",
+        "type": "object",
+        "properties": {
+          "operations": {
+            "description": "A list of operations that matches the specified filter in the request.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          },
+          "nextPageToken": {
+            "description": "The standard List next-page token.",
+            "type": "string"
+          }
+        }
+      },
+      "Status": {
+        "description": "The `Status` type defines a logical error model that is suitable for\ndifferent programming environments, including REST APIs and RPC APIs. It is\nused by [gRPC](https://github.com/grpc). Each `Status` message contains\nthree pieces of data: error code, error message, and error details.\n\nYou can find out more about this error model and how to work with it in the\n[API Design Guide](https://cloud.google.com/apis/design/errors).",
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "The status code, which should be an enum value of google.rpc.Code.",
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "description": "A developer-facing error message, which should be in English. Any\nuser-facing error message should be localized and sent in the\ngoogle.rpc.Status.details field, or localized by the client.",
+            "type": "string"
+          },
+          "details": {
+            "description": "A list of messages that carry the error details.  There is a common set of\nmessage types for APIs to use.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "description": "Properties of the object. Contains field @type with type URL."
+              }
+            }
+          }
+        }
+      },
+      "Empty": {
+        "description": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:\n\n    service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }",
+        "type": "object"
+      },
+      "CancelOperationRequest": {
+        "description": "The request message for Operations.CancelOperation.",
+        "type": "object"
+      },
+      "GoogleCloudOsconfigV2beta__PolicyOrchestrator": {
+        "description": "PolicyOrchestrator helps managing project+zone level policy resources (e.g.\nOS Policy Assignments), by providing tools to create, update and delete them\nacross projects and locations, at scale.\n\nPolicy orchestrator functions as an endless loop. Each iteration\norchestrator computes a set of resources that should be affected, then\nprogressively applies changes to them. If for some reason this set of\nresources changes over time (e.g. new projects are added), the future loop\niterations will address that.\n\nOrchestrator can either upsert or delete policy resources. For more details,\nsee the description of the `action`, and `orchestrated_resource` fields.\n\nNote that policy orchestrator do not \"manage\" the resources it creates. Every\niteration is independent and only minimal history of past actions is retained\n(apart from Cloud Logging). If orchestrator gets deleted, it does not affect\nthe resources it created in the past. Those will remain where they\nwere. Same applies if projects are removed from the orchestrator's scope.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Immutable. Identifier. In form of\n* `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`\n* `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`",
+            "x-google-immutable": true,
+            "x-google-identifier": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Optional. Freeform text describing the purpose of the resource.",
+            "type": "string"
+          },
+          "etag": {
+            "description": "Output only. This checksum is computed by the server based on the value of other\nfields, and may be sent on update and delete requests to ensure the\nclient has an up-to-date value before proceeding.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "state": {
+            "description": "Optional. State of the orchestrator. Can be updated to change orchestrator behaviour.\nAllowed values:\n- `ACTIVE` - orchestrator is actively looking for actions to be taken.\n- `STOPPED` - orchestrator won't make any changes.\n\nNote: There might be more states added in the future. We use string here\ninstead of an enum, to avoid the need of propagating new states to all the\nclient code.",
+            "type": "string"
+          },
+          "reconciling": {
+            "description": "Output only. Set to true, if the there are ongoing changes being applied by the\norchestrator.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "orchestrationScope": {
+            "description": "Optional. Defines scope for the orchestration, in context of the enclosing\nPolicyOrchestrator resource.\n\nScope is expanded into a list of  pairs, in which the\nrollout action will take place. Expansion starts with a Folder resource\nparenting the PolicyOrchestrator resource:\n- All the descendant projects are listed.\n- List of project is cross joined with a list of all available zones.\n- Resulting list of  pairs is filtered according to the\nselectors.",
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OrchestrationScope"
+            }]
+          },
+          "action": {
+            "description": "Required. Action to be done by the orchestrator in\n`projects/{project_id}/zones/{zone_id}` locations defined by the\n`orchestration_scope`. Allowed values:\n- `UPSERT` - Orchestrator will create or update target resources.\n- `DELETE` - Orchestrator will delete target resources, if they exist",
+            "type": "string"
+          },
+          "orchestratedResource": {
+            "description": "Required. Resource to be orchestrated by the policy orchestrator.",
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OrchestratedResource"
+            }]
+          },
+          "orchestrationState": {
+            "description": "Output only. State of the orchestration.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_PolicyOrchestrator_OrchestrationState"
+            }]
+          },
+          "createTime": {
+            "description": "Output only. Timestamp when the policy orchestrator resource was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "updateTime": {
+            "description": "Output only. Timestamp when the policy orchestrator resource was last modified.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "labels": {
+            "description": "Optional. Labels as key value pairs",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "action",
+          "orchestratedResource"
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__OrchestrationScope": {
+        "description": "Defines a set of selectors which drive which resources are in scope of policy\norchestration.",
+        "type": "object",
+        "properties": {
+          "selectors": {
+            "description": "Optional. Selectors of the orchestration scope. There is a logical AND between each\nselector defined.\n\nWhen there is no explicit `ResourceHierarchySelector` selector specified,\nthe scope is by default bounded to the parent of the policy orchestrator\nresource.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_OrchestrationScope_Selector"
+            }
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta_OrchestrationScope_Selector": {
+        "description": "Selector for the resources in scope of orchestration.",
+        "type": "object",
+        "properties": {
+          "resourceHierarchySelector": {
+            "description": "Selector for selecting resource hierarchy.",
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_OrchestrationScope_ResourceHierarchySelector"
+            }]
+          },
+          "locationSelector": {
+            "description": "Selector for selecting locations.",
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_OrchestrationScope_LocationSelector"
+            }]
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta_OrchestrationScope_ResourceHierarchySelector": {
+        "description": "Selector containing Cloud Resource Manager resource hierarchy nodes.",
+        "type": "object",
+        "properties": {
+          "includedProjects": {
+            "description": "Optional. Names of the projects in scope.\nFormat: `projects/{project_number}`",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "includedFolders": {
+            "description": "Optional. Names of the folders in scope.\nFormat: `folders/{folder_id}`",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta_OrchestrationScope_LocationSelector": {
+        "description": "Selector containing locations in scope.",
+        "type": "object",
+        "properties": {
+          "includedLocations": {
+            "description": "Optional. Names of the locations in scope.\nFormat: `us-central1-a`",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta__OrchestratedResource": {
+        "description": "Represents a resource that is being orchestrated by the policy orchestrator.",
+        "type": "object",
+        "properties": {
+          "osPolicyAssignmentV1Payload": {
+            "description": "Optional. OSPolicyAssignment resource to be created, updated or deleted. Name field\nis ignored and replace with a generated value.\n\nWith this field set, orchestrator will perform actions on\n`project/{project}/locations/{zone}/osPolicyAssignments/{resource_id}`\nresources, where `project` and `zone` pairs come from the expanded scope,\nand `resource_id` comes from the `resource_id` field of orchestrator\nresource.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyAssignment"
+            }]
+          },
+          "id": {
+            "description": "Optional. ID of the resource to be used while generating set of affected resources.\n\nFor UPSERT action the value is auto-generated during PolicyOrchestrator\ncreation when not set. When the value is set it should following next\nrestrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the project.\n\nFor DELETE action, ID must be specified explicitly during\nPolicyOrchestrator creation.",
+            "type": "string"
+          }
+        }
+      },
+      "OSPolicyAssignment": {
+        "description": "OS policy assignment is an API resource that is used to\napply a set of OS policies to a dynamically targeted group of Compute Engine\nVM instances.\n\nAn OS policy is used to define the desired state configuration for a\nCompute Engine VM instance through a set of configuration resources that\nprovide capabilities such as installing or removing software packages, or\nexecuting a script.\n\nFor more information about the OS policy resource definitions and examples,\nsee\n[OS policy and OS policy\nassignment](https://cloud.google.com/compute/docs/os-configuration-management/working-with-os-policies).",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Resource name.\n\nFormat:\n`projects/{project_number}/locations/{location}/osPolicyAssignments/{os_policy_assignment_id}`\n\nThis field is ignored when you create an OS policy assignment.",
+            "type": "string"
+          },
+          "description": {
+            "description": "OS policy assignment description.\nLength of the description is limited to 1024 characters.",
+            "type": "string"
+          },
+          "osPolicies": {
+            "description": "Required. List of OS policies to be applied to the VMs.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicy"
+            }
+          },
+          "instanceFilter": {
+            "description": "Required. Filter to select VMs.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyAssignmentInstanceFilter"
+            }]
+          },
+          "rollout": {
+            "description": "Required. Rollout to deploy the OS policy assignment.\nA rollout is triggered in the following situations:\n1) OSPolicyAssignment is created.\n2) OSPolicyAssignment is updated and the update contains changes to one of\nthe following fields:\n   - instance_filter\n   - os_policies\n3) OSPolicyAssignment is deleted.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyAssignmentRollout"
+            }]
+          },
+          "revisionId": {
+            "description": "Output only. The assignment revision ID\nA new revision is committed whenever a rollout is triggered for a OS policy\nassignment",
+            "readOnly": true,
+            "type": "string"
+          },
+          "revisionCreateTime": {
+            "description": "Output only. The timestamp that the revision was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "etag": {
+            "description": "The etag for this OS policy assignment.\nIf this is provided on update, it must match the server's etag.",
+            "type": "string"
+          },
+          "rolloutState": {
+            "description": "Output only. OS policy assignment rollout state",
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value",
+              "The rollout is in progress.",
+              "The rollout is being cancelled.",
+              "The rollout is cancelled.",
+              "The rollout has completed successfully."
+            ],
+            "enum": [
+              "ROLLOUT_STATE_UNSPECIFIED",
+              "IN_PROGRESS",
+              "CANCELLING",
+              "CANCELLED",
+              "SUCCEEDED"
+            ]
+          },
+          "baseline": {
+            "description": "Output only. Indicates that this revision has been successfully rolled out in this zone\nand new VMs will be assigned OS policies from this revision.\n\nFor a given OS policy assignment, there is only one revision with a value\nof `true` for this field.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "deleted": {
+            "description": "Output only. Indicates that this revision deletes the OS policy assignment.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "reconciling": {
+            "description": "Output only. Indicates that reconciliation is in progress for the revision.\nThis value is `true` when the `rollout_state` is one of:\n* IN_PROGRESS\n* CANCELLING",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "uid": {
+            "description": "Output only. Server generated unique id for the OS policy assignment resource.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "osPolicies",
+          "instanceFilter",
+          "rollout"
+        ]
+      },
+      "OSPolicy": {
+        "description": "An OS policy defines the desired state configuration for a VM.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Required. The id of the OS policy with the following restrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the assignment.",
+            "type": "string"
+          },
+          "description": {
+            "description": "Policy description.\nLength of the description is limited to 1024 characters.",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Required. Policy mode",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid mode",
+              "This mode checks if the configuration resources in the policy are in\ntheir desired state. No actions are performed if they are not in the\ndesired state. This mode is used for reporting purposes.",
+              "This mode checks if the configuration resources in the policy are in\ntheir desired state, and if not, enforces the desired state."
+            ],
+            "enum": [
+              "MODE_UNSPECIFIED",
+              "VALIDATION",
+              "ENFORCEMENT"
+            ]
+          },
+          "resourceGroups": {
+            "description": "Required. List of resource groups for the policy.\nFor a particular VM, resource groups are evaluated in the order specified\nand the first resource group that is applicable is selected and the rest\nare ignored.\n\nIf none of the resource groups are applicable for a VM, the VM is\nconsidered to be non-compliant w.r.t this policy. This behavior can be\ntoggled by the flag `allow_no_resource_group_match`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyResourceGroup"
+            }
+          },
+          "allowNoResourceGroupMatch": {
+            "description": "This flag determines the OS policy compliance status when none of the\nresource groups within the policy are applicable for a VM. Set this value\nto `true` if the policy needs to be reported as compliant even if the\npolicy has nothing to validate or enforce.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "mode",
+          "resourceGroups"
+        ]
+      },
+      "OSPolicyResourceGroup": {
+        "description": "Resource groups provide a mechanism to group OS policy resources.\n\nResource groups enable OS policy authors to create a single OS policy\nto be applied to VMs running different operating Systems.\n\nWhen the OS policy is applied to a target VM, the appropriate resource\ngroup within the OS policy is selected based on the `OSFilter` specified\nwithin the resource group.",
+        "type": "object",
+        "properties": {
+          "inventoryFilters": {
+            "description": "List of inventory filters for the resource group.\n\nThe resources in this resource group are applied to the target VM if it\nsatisfies at least one of the following inventory filters.\n\nFor example, to apply this resource group to VMs running either `RHEL` or\n`CentOS` operating systems, specify 2 items for the list with following\nvalues:\ninventory_filters[0].os_short_name='rhel' and\ninventory_filters[1].os_short_name='centos'\n\nIf the list is empty, this resource group will be applied to the target\nVM unconditionally.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyInventoryFilter"
+            }
+          },
+          "resources": {
+            "description": "Required. List of resources configured for this resource group.\nThe resources are executed in the exact order specified here.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyResource"
+            }
+          }
+        },
+        "required": [
+          "resources"
+        ]
+      },
+      "OSPolicyInventoryFilter": {
+        "description": "Filtering criteria to select VMs based on inventory details.",
+        "type": "object",
+        "properties": {
+          "osShortName": {
+            "description": "Required. The OS short name",
+            "type": "string"
+          },
+          "osVersion": {
+            "description": "The OS version\n\nPrefix matches are supported if asterisk(*) is provided as the\nlast character. For example, to match all versions with a major\nversion of `7`, specify the following value for this field `7.*`\n\nAn empty string matches all OS versions.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "osShortName"
+        ]
+      },
+      "OSPolicyResource": {
+        "description": "An OS policy resource is used to define the desired state configuration\nand provides a specific functionality like installing/removing packages,\nexecuting a script etc.\n\nThe system ensures that resources are always in their desired state by\ntaking necessary actions if they have drifted from their desired state.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Required. The id of the resource with the following restrictions:\n\n* Must contain only lowercase letters, numbers, and hyphens.\n* Must start with a letter.\n* Must be between 1-63 characters.\n* Must end with a number or a letter.\n* Must be unique within the OS policy.",
+            "type": "string"
+          },
+          "pkg": {
+            "description": "Package resource",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResource"
+            }]
+          },
+          "repository": {
+            "description": "Package repository resource",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceRepositoryResource"
+            }]
+          },
+          "exec": {
+            "description": "Exec resource",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceExecResource"
+            }]
+          },
+          "file": {
+            "description": "File resource",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFileResource"
+            }]
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "OSPolicyResourcePackageResource": {
+        "description": "A resource that manages a system package.",
+        "type": "object",
+        "properties": {
+          "desiredState": {
+            "description": "Required. The desired state the agent should maintain for this package.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified is invalid.",
+              "Ensure that the package is installed.",
+              "The agent ensures that the package is not installed and\nuninstalls it if detected."
+            ],
+            "enum": [
+              "DESIRED_STATE_UNSPECIFIED",
+              "INSTALLED",
+              "REMOVED"
+            ]
+          },
+          "apt": {
+            "description": "A package managed by Apt.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceAPT"
+            }]
+          },
+          "deb": {
+            "description": "A deb package file.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceDeb"
+            }]
+          },
+          "yum": {
+            "description": "A package managed by YUM.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceYUM"
+            }]
+          },
+          "zypper": {
+            "description": "A package managed by Zypper.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceZypper"
+            }]
+          },
+          "rpm": {
+            "description": "An rpm package file.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceRPM"
+            }]
+          },
+          "googet": {
+            "description": "A package managed by GooGet.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceGooGet"
+            }]
+          },
+          "msi": {
+            "description": "An MSI package.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourcePackageResourceMSI"
+            }]
+          }
+        },
+        "required": [
+          "desiredState"
+        ]
+      },
+      "OSPolicyResourcePackageResourceAPT": {
+        "description": "A package managed by APT.\n- install: `apt-get update && apt-get -y install [name]`\n- remove: `apt-get -y remove [name]`",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Required. Package name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OSPolicyResourcePackageResourceDeb": {
+        "description": "A deb package file. dpkg packages only support INSTALLED state.",
+        "type": "object",
+        "properties": {
+          "source": {
+            "description": "Required. A deb package.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFile"
+            }]
+          },
+          "pullDeps": {
+            "description": "Whether dependencies should also be installed.\n- install when false: `dpkg -i package`\n- install when true: `apt-get update && apt-get -y install\npackage.deb`",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "OSPolicyResourceFile": {
+        "description": "A remote or local file.",
+        "type": "object",
+        "properties": {
+          "remote": {
+            "description": "A generic remote file.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFileRemote"
+            }]
+          },
+          "gcs": {
+            "description": "A Cloud Storage object.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFileGcs"
+            }]
+          },
+          "localPath": {
+            "description": "A local path within the VM to use.",
+            "type": "string"
+          },
+          "allowInsecure": {
+            "description": "Defaults to false. When false, files are subject to validations\nbased on the file type:\n\nRemote: A checksum must be specified.\nCloud Storage: An object generation number must be specified.",
+            "type": "boolean"
+          }
+        }
+      },
+      "OSPolicyResourceFileRemote": {
+        "description": "Specifies a file available via some URI.",
+        "type": "object",
+        "properties": {
+          "uri": {
+            "description": "Required. URI from which to fetch the object. It should contain both the\nprotocol and path following the format `{protocol}://{location}`.",
+            "type": "string"
+          },
+          "sha256Checksum": {
+            "description": "SHA256 checksum of the remote file.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ]
+      },
+      "OSPolicyResourceFileGcs": {
+        "description": "Specifies a file available as a Cloud Storage Object.",
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "description": "Required. Bucket of the Cloud Storage object.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Required. Name of the Cloud Storage object.",
+            "type": "string"
+          },
+          "generation": {
+            "description": "Generation number of the Cloud Storage object.",
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "bucket",
+          "object"
+        ]
+      },
+      "OSPolicyResourcePackageResourceYUM": {
+        "description": "A package managed by YUM.\n- install: `yum -y install package`\n- remove: `yum -y remove package`",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Required. Package name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OSPolicyResourcePackageResourceZypper": {
+        "description": "A package managed by Zypper.\n- install: `zypper -y install package`\n- remove: `zypper -y rm package`",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Required. Package name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OSPolicyResourcePackageResourceRPM": {
+        "description": "An RPM package file. RPM packages only support INSTALLED state.",
+        "type": "object",
+        "properties": {
+          "source": {
+            "description": "Required. An rpm package.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFile"
+            }]
+          },
+          "pullDeps": {
+            "description": "Whether dependencies should also be installed.\n- install when false: `rpm --upgrade --replacepkgs package.rpm`\n- install when true: `yum -y install package.rpm` or\n`zypper -y install package.rpm`",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "OSPolicyResourcePackageResourceGooGet": {
+        "description": "A package managed by GooGet.\n- install: `googet -noconfirm install package`\n- remove: `googet -noconfirm remove package`",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Required. Package name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OSPolicyResourcePackageResourceMSI": {
+        "description": "An MSI package. MSI packages only support INSTALLED state.",
+        "type": "object",
+        "properties": {
+          "source": {
+            "description": "Required. The MSI package.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFile"
+            }]
+          },
+          "properties": {
+            "description": "Additional properties to use during installation.\nThis should be in the format of Property=Setting.\nAppended to the defaults of `ACTION=INSTALL\nREBOOT=ReallySuppress`.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "source"
+        ]
+      },
+      "OSPolicyResourceRepositoryResource": {
+        "description": "A resource that manages a package repository.",
+        "type": "object",
+        "properties": {
+          "apt": {
+            "description": "An Apt Repository.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceRepositoryResourceAptRepository"
+            }]
+          },
+          "yum": {
+            "description": "A Yum Repository.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceRepositoryResourceYumRepository"
+            }]
+          },
+          "zypper": {
+            "description": "A Zypper Repository.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceRepositoryResourceZypperRepository"
+            }]
+          },
+          "goo": {
+            "description": "A Goo Repository.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceRepositoryResourceGooRepository"
+            }]
+          }
+        }
+      },
+      "OSPolicyResourceRepositoryResourceAptRepository": {
+        "description": "Represents a single apt package repository. These will be added to\na repo file that will be managed at\n`/etc/apt/sources.list.d/google_osconfig.list`.",
+        "type": "object",
+        "properties": {
+          "archiveType": {
+            "description": "Required. Type of archive files in this repository.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified is invalid.",
+              "Deb indicates that the archive contains binary files.",
+              "Deb-src indicates that the archive contains source files."
+            ],
+            "enum": [
+              "ARCHIVE_TYPE_UNSPECIFIED",
+              "DEB",
+              "DEB_SRC"
+            ]
+          },
+          "uri": {
+            "description": "Required. URI for this repository.",
+            "type": "string"
+          },
+          "distribution": {
+            "description": "Required. Distribution of this repository.",
+            "type": "string"
+          },
+          "components": {
+            "description": "Required. List of components for this repository. Must contain at least one\nitem.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gpgKey": {
+            "description": "URI of the key file for this repository. The agent maintains a\nkeyring at `/etc/apt/trusted.gpg.d/osconfig_agent_managed.gpg`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "archiveType",
+          "uri",
+          "distribution",
+          "components"
+        ]
+      },
+      "OSPolicyResourceRepositoryResourceYumRepository": {
+        "description": "Represents a single yum package repository. These are added to a\nrepo file that is managed at\n`/etc/yum.repos.d/google_osconfig.repo`.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Required. A one word, unique name for this repository. This is  the `repo\nid` in the yum config file and also the `display_name` if\n`display_name` is omitted. This id is also used as the unique\nidentifier when checking for resource conflicts.",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "The display name of the repository.",
+            "type": "string"
+          },
+          "baseUrl": {
+            "description": "Required. The location of the repository directory.",
+            "type": "string"
+          },
+          "gpgKeys": {
+            "description": "URIs of GPG keys.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "baseUrl"
+        ]
+      },
+      "OSPolicyResourceRepositoryResourceZypperRepository": {
+        "description": "Represents a single zypper package repository. These are added to a\nrepo file that is managed at\n`/etc/zypp/repos.d/google_osconfig.repo`.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Required. A one word, unique name for this repository. This is the `repo\nid` in the zypper config file and also the `display_name` if\n`display_name` is omitted. This id is also used as the unique\nidentifier when checking for GuestPolicy conflicts.",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "The display name of the repository.",
+            "type": "string"
+          },
+          "baseUrl": {
+            "description": "Required. The location of the repository directory.",
+            "type": "string"
+          },
+          "gpgKeys": {
+            "description": "URIs of GPG keys.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "baseUrl"
+        ]
+      },
+      "OSPolicyResourceRepositoryResourceGooRepository": {
+        "description": "Represents a Goo package repository. These are added to a repo file\nthat is managed at\n`C:/ProgramData/GooGet/repos/google_osconfig.repo`.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Required. The name of the repository.",
+            "type": "string"
+          },
+          "url": {
+            "description": "Required. The url of the repository.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
+      },
+      "OSPolicyResourceExecResource": {
+        "description": "A resource that allows executing scripts on the VM.\n\nThe `ExecResource` has 2 stages: `validate` and `enforce` and both stages\naccept a script as an argument to execute.\n\nWhen the `ExecResource` is applied by the agent, it first executes the\nscript in the `validate` stage. The `validate` stage can signal that the\n`ExecResource` is already in the desired state by returning an exit code\nof `100`. If the `ExecResource` is not in the desired state, it should\nreturn an exit code of `101`. Any other exit code returned by this stage\nis considered an error.\n\nIf the `ExecResource` is not in the desired state based on the exit code\nfrom the `validate` stage, the agent proceeds to execute the script from\nthe `enforce` stage. If the `ExecResource` is already in the desired\nstate, the `enforce` stage will not be run.\nSimilar to `validate` stage, the `enforce` stage should return an exit\ncode of `100` to indicate that the resource in now in its desired state.\nAny other exit code is considered an error.\n\nNOTE: An exit code of `100` was chosen over `0` (and `101` vs `1`) to\nhave an explicit indicator of `in desired state`, `not in desired state`\nand errors. Because, for example, Powershell will always return an exit\ncode of `0` unless an `exit` statement is provided in the script. So, for\nreasons of consistency and being explicit, exit codes `100` and `101`\nwere chosen.",
+        "type": "object",
+        "properties": {
+          "validate": {
+            "description": "Required. What to run to validate this resource is in the desired state.\nAn exit code of 100 indicates \"in desired state\", and exit code of 101\nindicates \"not in desired state\". Any other exit code indicates a\nfailure running validate.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceExecResourceExec"
+            }]
+          },
+          "enforce": {
+            "description": "What to run to bring this resource into the desired state.\nAn exit code of 100 indicates \"success\", any other exit code indicates\na failure running enforce.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceExecResourceExec"
+            }]
+          }
+        },
+        "required": [
+          "validate"
+        ]
+      },
+      "OSPolicyResourceExecResourceExec": {
+        "description": "A file or script to execute.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "A remote or local file.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFile"
+            }]
+          },
+          "script": {
+            "description": "An inline script.\nThe size of the script is limited to 32KiB.",
+            "type": "string"
+          },
+          "args": {
+            "description": "Optional arguments to pass to the source during execution.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "interpreter": {
+            "description": "Required. The script interpreter to use.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value, the request will return validation error.",
+              "If an interpreter is not specified, the\nsource is executed directly. This execution, without an\ninterpreter, only succeeds for executables and scripts that have shebang lines.",
+              "Indicates that the script runs with `/bin/sh` on Linux and\n`cmd.exe` on Windows.",
+              "Indicates that the script runs with PowerShell."
+            ],
+            "enum": [
+              "INTERPRETER_UNSPECIFIED",
+              "NONE",
+              "SHELL",
+              "POWERSHELL"
+            ]
+          },
+          "outputFilePath": {
+            "description": "Only recorded for enforce Exec.\nPath to an output file (that is created by this Exec) whose\ncontent will be recorded in OSPolicyResourceCompliance after a\nsuccessful run. Absence or failure to read this file will result in\nthis ExecResource being non-compliant. Output file size is limited to\n500K bytes.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "interpreter"
+        ]
+      },
+      "OSPolicyResourceFileResource": {
+        "description": "A resource that manages the state of a file.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "A remote or local source.",
+            "allOf": [{
+              "$ref": "#/components/schemas/OSPolicyResourceFile"
+            }]
+          },
+          "content": {
+            "description": "A a file with this content.\nThe size of the content is limited to 32KiB.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Required. The absolute path of the file within the VM.",
+            "type": "string"
+          },
+          "state": {
+            "description": "Required. Desired state of the file.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Unspecified is invalid.",
+              "Ensure file at path is present.",
+              "Ensure file at path is absent.",
+              "Ensure the contents of the file at path matches. If the file does\nnot exist it will be created."
+            ],
+            "enum": [
+              "DESIRED_STATE_UNSPECIFIED",
+              "PRESENT",
+              "ABSENT",
+              "CONTENTS_MATCH"
+            ]
+          },
+          "permissions": {
+            "description": "Consists of three octal digits which represent, in\norder, the permissions of the owner, group, and other users for the\nfile (similarly to the numeric mode used in the linux chmod\nutility). Each digit represents a three bit number with the 4 bit\ncorresponding to the read permissions, the 2 bit corresponds to the\nwrite bit, and the one bit corresponds to the execute permission.\nDefault behavior is 755.\n\nBelow are some examples of permissions and their associated values:\nread, write, and execute: 7\nread and execute: 5\nread and write: 6\nread only: 4",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "state"
+        ]
+      },
+      "OSPolicyAssignmentInstanceFilter": {
+        "description": "Filters to select target VMs for an assignment.\n\nIf more than one filter criteria is specified below, a VM will be selected\nif and only if it satisfies all of them.",
+        "type": "object",
+        "properties": {
+          "all": {
+            "description": "Target all VMs in the project. If true, no other criteria is\npermitted.",
+            "type": "boolean"
+          },
+          "inclusionLabels": {
+            "description": "List of label sets used for VM inclusion.\n\nIf the list has more than one `LabelSet`, the VM is included if any\nof the label sets are applicable for the VM.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyAssignmentLabelSet"
+            }
+          },
+          "exclusionLabels": {
+            "description": "List of label sets used for VM exclusion.\n\nIf the list has more than one label set, the VM is excluded if any\nof the label sets are applicable for the VM.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyAssignmentLabelSet"
+            }
+          },
+          "inventories": {
+            "description": "List of inventories to select VMs.\n\nA VM is selected if its inventory data matches at least one of the\nfollowing inventories.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OSPolicyAssignmentInstanceFilterInventory"
+            }
+          }
+        }
+      },
+      "OSPolicyAssignmentLabelSet": {
+        "description": "Message representing label set.\n* A label is a key value pair set for a VM.\n* A LabelSet is a set of labels.\n* Labels within a LabelSet are ANDed. In other words, a LabelSet is\n  applicable for a VM only if it matches all the labels in the\n  LabelSet.\n* Example: A LabelSet with 2 labels: `env=prod` and `type=webserver` will\n           only be applicable for those VMs with both labels\n           present.",
+        "type": "object",
+        "properties": {
+          "labels": {
+            "description": "Labels are identified by key/value pairs in this map.\nA VM should contain all the key/value pairs specified in this\nmap to be selected.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OSPolicyAssignmentInstanceFilterInventory": {
+        "description": "VM inventory details.",
+        "type": "object",
+        "properties": {
+          "osShortName": {
+            "description": "Required. The OS short name",
+            "type": "string"
+          },
+          "osVersion": {
+            "description": "The OS version\n\nPrefix matches are supported if asterisk(*) is provided as the\nlast character. For example, to match all versions with a major\nversion of `7`, specify the following value for this field `7.*`\n\nAn empty string matches all OS versions.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "osShortName"
+        ]
+      },
+      "OSPolicyAssignmentRollout": {
+        "description": "Message to configure the rollout at the zonal level for the OS policy\nassignment.",
+        "type": "object",
+        "properties": {
+          "disruptionBudget": {
+            "description": "Required. The maximum number (or percentage) of VMs per zone to disrupt at\nany given moment.",
+            "allOf": [{
+              "$ref": "#/components/schemas/FixedOrPercent"
+            }]
+          },
+          "minWaitDuration": {
+            "description": "Required. This determines the minimum duration of time to wait after the\nconfiguration changes are applied through the current rollout. A\nVM continues to count towards the `disruption_budget` at least\nuntil this duration of time has passed after configuration changes are\napplied.",
+            "type": "string",
+            "format": "google-duration"
+          }
+        },
+        "required": [
+          "disruptionBudget",
+          "minWaitDuration"
+        ]
+      },
+      "FixedOrPercent": {
+        "description": "Message encapsulating a value that can be either absolute (\"fixed\") or\nrelative (\"percent\") to a value.",
+        "type": "object",
+        "properties": {
+          "fixed": {
+            "description": "Specifies a fixed value.",
+            "type": "integer",
+            "format": "int32"
+          },
+          "percent": {
+            "description": "Specifies the relative value defined as a percentage, which will be\nmultiplied by a reference value.",
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta_PolicyOrchestrator_OrchestrationState": {
+        "description": "Describes the state of the orchestration process.",
+        "type": "object",
+        "properties": {
+          "currentIterationState": {
+            "description": "Output only. Current Wave iteration state.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_PolicyOrchestrator_IterationState"
+            }]
+          },
+          "previousIterationState": {
+            "description": "Output only. Previous Wave iteration state.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta_PolicyOrchestrator_IterationState"
+            }]
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta_PolicyOrchestrator_IterationState": {
+        "description": "Describes the state of a single iteration of the orchestrator.",
+        "type": "object",
+        "properties": {
+          "state": {
+            "description": "Output only. State of the iteration.",
+            "readOnly": true,
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Default value. This value is unused.",
+              "Iteration is in progress.",
+              "Iteration completed, with all actions being successful.",
+              "Iteration completed, with failures.",
+              "Iteration was explicitly cancelled.",
+              "Impossible to determine current state of the iteration."
+            ],
+            "enum": [
+              "STATE_UNSPECIFIED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED",
+              "UNKNOWN"
+            ]
+          },
+          "rolloutResource": {
+            "description": "Output only. Handle to the Progressive Rollouts API rollout resource, which contains\ndetailed information about a particular orchestration iteration.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "progress": {
+            "description": "Output only. An estimated percentage of the progress. Number between 0 and 100.",
+            "readOnly": true,
+            "type": "number",
+            "format": "float"
+          },
+          "performedActions": {
+            "description": "Output only. Overall number of actions done by the orchestrator so far.",
+            "readOnly": true,
+            "type": "string",
+            "format": "int64"
+          },
+          "failedActions": {
+            "description": "Output only. Number of orchestration actions which failed so far. For more details,\nquery the Cloud Logs.",
+            "readOnly": true,
+            "type": "string",
+            "format": "int64"
+          },
+          "startTime": {
+            "description": "Output only. Start time of the wave iteration.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishTime": {
+            "description": "Output only. Finish time of the wave iteration.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "description": "Output only. Error thrown in the wave iteration.",
+            "readOnly": true,
+            "allOf": [{
+              "$ref": "#/components/schemas/Status"
+            }]
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta__OperationMetadata": {
+        "description": "Represents the metadata of the long-running operation.",
+        "type": "object",
+        "properties": {
+          "createTime": {
+            "description": "Output only. The time the operation was created.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "description": "Output only. The time the operation finished running.",
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "target": {
+            "description": "Output only. Server-defined resource path for the target of the operation.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "verb": {
+            "description": "Output only. Name of the verb executed by the operation.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "statusMessage": {
+            "description": "Output only. Human-readable status of the operation, if any.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "requestedCancellation": {
+            "description": "Output only. Identifies whether the user has requested cancellation\nof the operation. Operations that have been cancelled successfully\nhave Operation.error value with a google.rpc.Status.code of 1,\ncorresponding to `Code.CANCELLED`.",
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "apiVersion": {
+            "description": "Output only. API version used to start the operation.",
+            "readOnly": true,
+            "type": "string"
+          }
+        }
+      },
+      "GoogleCloudOsconfigV2beta__ListPolicyOrchestratorsResponse": {
+        "description": "Response for the list policy orchestrator resources.",
+        "type": "object",
+        "properties": {
+          "policyOrchestrators": {
+            "description": "The policy orchestrators for the specified parent resource.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+            }
+          },
+          "nextPageToken": {
+            "description": "A token, which can be sent as `page_token` to retrieve the next page.\nIf this field is omitted, there are no subsequent pages.",
+            "type": "string"
+          },
+          "unreachable": {
+            "description": "Locations that could not be reached.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OSPolicyAssignmentOperationMetadata": {
+        "description": "OS policy assignment operation metadata provided by OS policy assignment API\nmethods that return long running operations.",
+        "type": "object",
+        "properties": {
+          "osPolicyAssignment": {
+            "description": "Reference to the `OSPolicyAssignment` API resource.\n\nFormat:\n`projects/{project_number}/locations/{location}/osPolicyAssignments/{os_policy_assignment_id@revision_id}`",
+            "type": "string"
+          },
+          "apiMethod": {
+            "description": "The OS policy assignment API method.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value",
+              "Create OS policy assignment API method",
+              "Update OS policy assignment API method",
+              "Delete OS policy assignment API method"
+            ],
+            "enum": [
+              "API_METHOD_UNSPECIFIED",
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "rolloutState": {
+            "description": "State of the rollout",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value",
+              "The rollout is in progress.",
+              "The rollout is being cancelled.",
+              "The rollout is cancelled.",
+              "The rollout has completed successfully."
+            ],
+            "enum": [
+              "ROLLOUT_STATE_UNSPECIFIED",
+              "IN_PROGRESS",
+              "CANCELLING",
+              "CANCELLED",
+              "SUCCEEDED"
+            ]
+          },
+          "rolloutStartTime": {
+            "description": "Rollout start time",
+            "type": "string",
+            "format": "date-time"
+          },
+          "rolloutUpdateTime": {
+            "description": "Rollout update time",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GoogleCloudOsconfigV1__OSPolicyAssignmentOperationMetadata": {
+        "description": "OS policy assignment operation metadata provided by OS policy assignment API\nmethods that return long running operations.",
+        "type": "object",
+        "properties": {
+          "osPolicyAssignment": {
+            "description": "Reference to the `OSPolicyAssignment` API resource.\n\nFormat:\n`projects/{project_number}/locations/{location}/osPolicyAssignments/{os_policy_assignment_id@revision_id}`",
+            "type": "string"
+          },
+          "apiMethod": {
+            "description": "The OS policy assignment API method.",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value",
+              "Create OS policy assignment API method",
+              "Update OS policy assignment API method",
+              "Delete OS policy assignment API method"
+            ],
+            "enum": [
+              "API_METHOD_UNSPECIFIED",
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "rolloutState": {
+            "description": "State of the rollout",
+            "type": "string",
+            "x-google-enum-descriptions": [
+              "Invalid value",
+              "The rollout is in progress.",
+              "The rollout is being cancelled.",
+              "The rollout is cancelled.",
+              "The rollout has completed successfully."
+            ],
+            "enum": [
+              "ROLLOUT_STATE_UNSPECIFIED",
+              "IN_PROGRESS",
+              "CANCELLING",
+              "CANCELLED",
+              "SUCCEEDED"
+            ]
+          },
+          "rolloutStartTime": {
+            "description": "Rollout start time",
+            "type": "string",
+            "format": "date-time"
+          },
+          "rolloutUpdateTime": {
+            "description": "Rollout update time",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BaseOperation": {
+        "description": "This resource represents a long-running operation that is the result of a\nnetwork API call.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The server-assigned name, which is only unique within the same service that\noriginally returns it. If you use the default HTTP mapping, the\n`name` should be a resource name ending with `operations/{unique_id}`.",
+            "type": "string"
+          },
+          "done": {
+            "description": "If the value is `false`, it means the operation is still in progress.\nIf `true`, the operation is completed, and either `error` or `response` is\navailable.",
+            "type": "boolean"
+          },
+          "error": {
+            "description": "The error result of the operation in case of failure or cancellation.",
+            "allOf": [{
+              "$ref": "#/components/schemas/Status"
+            }]
+          }
+        }
+      },
+      "Operation": {
+        "description": "This resource represents a long-running operation that is the result of a\nnetwork API call.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "description": "Service-specific metadata associated with the operation.  It typically\ncontains progress information and common metadata such as create time.\nSome services might not provide such metadata.  Any method that returns a\nlong-running operation should document the metadata type, if any.",
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Properties of the object. Contains field @type with type URL."
+                }
+              },
+              "response": {
+                "description": "The normal, successful response of the operation.  If the original\nmethod returns no data on success, such as `Delete`, the response is\n`google.protobuf.Empty`.  If the original method is standard\n`Get`/`Create`/`Update`, the response should be the resource.  For other\nmethods, the response should have the type `XxxResponse`, where `Xxx`\nis the original method name.  For example, if the original method name\nis `TakeSnapshot()`, the inferred response type is\n`TakeSnapshotResponse`.",
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Properties of the object. Contains field @type with type URL."
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorForOrganizationOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorForFolderOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__CreatePolicyOrchestratorOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorForOrganizationOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorForFolderOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__UpdatePolicyOrchestratorOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__PolicyOrchestrator"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorForOrganizationOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorForFolderOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        ]
+      },
+      "GoogleCloudOsconfigV2beta__DeletePolicyOrchestratorOperation": {
+        "description": "This resource represents a long-running operation where metadata and response fields are strongly typed.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "$ref": "#/components/schemas/GoogleCloudOsconfigV2beta__OperationMetadata"
+              },
+              "response": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+  ,
+  "externalDocs": {
+    "description": "Find more info here.",
+    "url": "https://cloud.google.com/compute/docs/osconfig/rest"
+  }
+}
