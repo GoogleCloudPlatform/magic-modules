@@ -1989,16 +1989,16 @@ func expandBucketIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFi
 		return nil
 	}
 
-	transformedvpcNetworkSources := make([]*storage.BucketIpFilterVpcNetworkSources, 0, len(vnss))
+	transformedvpcNetworkSources := make([]*storage.BucketIpFilterVpcNetworkSources, 0, len(vpcNetworkSources))
 	for i := range vpcNetworkSources {
 		transformedvpcNetworkSource := vpcNetworkSources[i].(map[string]interface{})
 		transformedvpcNetworkSources = append(transformedvpcNetworkSources, &storage.BucketIpFilterVpcNetworkSources{
-			AllowedIpCidrRanges: tpgresource.ConvertStringArr(vpcNetworkSource["allowed_ip_cidr_ranges"].([]interface{})),
-			Network:             vpcNetworkSource["network"].(string),
+			AllowedIpCidrRanges: tpgresource.ConvertStringArr(transformedvpcNetworkSource["allowed_ip_cidr_ranges"].([]interface{})),
+			Network:             transformedvpcNetworkSource["network"].(string),
 		})
 	}
 
-	return vpcnwsrcs
+	return transformedvpcNetworkSources
 }
 
 // d.HasChange("lifecycle_rule") always returns true, giving false positives. This function detects changes

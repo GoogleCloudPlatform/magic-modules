@@ -1600,6 +1600,82 @@ func TestAccStorageBucket_hns_force_destroy(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_IPFilter(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	var disabled storage.Bucket
+	var noIPfilter storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-ip-filter-bucket-%d", acctest.RandInt(t))
+	nwSuffix := acctest.RandString(t, 8)
+  project := envvar.GetTestProjectFromEnv()
+  serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+      {
+				Config: testAccStorageBucket_withoutIPFilter(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_IPFilter(
+					bucketName, nwSuffix, project, serviceAccount,
+				),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_IPFilter_disable(bucketName, nwSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &disabled),
+					testAccCheckStorageBucketWasUpdated(&disabled, &bucket),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccStorageBucket_withoutIPFilter(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
+					testAccCheckStorageBucketWasUpdated(&noIPfilter, &disabled),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func testAccCheckStorageBucketPutFolderItem(t *testing.T, bucketName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
@@ -2761,82 +2837,6 @@ resource "google_storage_bucket" "bucket" {
   }
 }
 `, bucketName)
-}
-
-func TestAccStorageBucket_IPFilter(t *testing.T) {
-	t.Parallel()
-
-	var bucket storage.Bucket
-	var disabled storage.Bucket
-	var noIPfilter storage.Bucket
-	bucketName := fmt.Sprintf("tf-test-ip-filter-bucket-%d", acctest.RandInt(t))
-	nwSuffix := acctest.RandString(t, 8)
-  project := envvar.GetTestProjectFromEnv()
-  serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
-		Steps: []resource.TestStep{
-      {
-				Config: testAccStorageBucket_withoutIPFilter(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_IPFilter(
-					bucketName, nwSuffix, project, serviceAccount,
-				),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &bucket),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_IPFilter_disable(bucketName, nwSuffix),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &disabled),
-					testAccCheckStorageBucketWasUpdated(&disabled, &bucket),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_withoutIPFilter(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
-					testAccCheckStorageBucketWasUpdated(&noIPfilter, &disabled),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-		},
-	})
 }
 
 func testAccStorageBucket_IPFilter(bucketName string, nwSuffix string, project string, serviceAccount string) string {
