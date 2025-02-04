@@ -63,7 +63,6 @@ parameters:
     description: |
       Name of the snapshot location. Snapshots are child resources of volumes and live in the same location.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'volume_name'
     type: String

@@ -130,7 +130,6 @@ parameters:
     description: |
       The location where the alloydb cluster should reside.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

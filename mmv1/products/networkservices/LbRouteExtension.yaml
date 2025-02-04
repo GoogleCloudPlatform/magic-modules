@@ -72,7 +72,6 @@ parameters:
     description: |
       The location of the route extension
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

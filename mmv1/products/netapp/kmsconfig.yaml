@@ -69,7 +69,6 @@ parameters:
     description: |
       Name of the policy location. CMEK policies apply to the whole region.
     url_param_only: true
-    required: true
     immutable: true
     # OK: This needs to be 'name' IMHO
   - name: 'name'

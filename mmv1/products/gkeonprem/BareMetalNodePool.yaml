@@ -72,7 +72,6 @@ parameters:
     type: String
     description: The location of the resource.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'displayName'

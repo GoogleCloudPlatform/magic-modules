@@ -58,7 +58,6 @@ parameters:
     description: |
       Location (region) of the backup vault.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

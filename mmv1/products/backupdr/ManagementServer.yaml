@@ -55,7 +55,6 @@ parameters:
       The location for the management server (management console)
     min_version: 'beta'
     url_param_only: true
-    required: true
   - name: 'name'
     type: String
     description: |-

@@ -54,7 +54,6 @@ parameters:
     description: |
       The name of the location of the instance. This can be a region for ENTERPRISE tier instances.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

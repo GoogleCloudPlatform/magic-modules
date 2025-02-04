@@ -51,7 +51,6 @@ parameters:
     type: String
     description: "The GCP location for the backup vault. "
     url_param_only: true
-    required: true
     immutable: true
   - name: 'backupVaultId'
     type: String

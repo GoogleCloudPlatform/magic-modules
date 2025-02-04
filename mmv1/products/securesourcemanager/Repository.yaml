@@ -75,7 +75,6 @@ parameters:
     description: |
       The location for the Repository.
     url_param_only: true
-    required: true
   - name: 'repository_id'
     type: String
     description: |

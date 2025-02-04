@@ -68,7 +68,6 @@ parameters:
       Location of the CaPool. A full list of valid locations can be found by
       running `gcloud privateca locations list`.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

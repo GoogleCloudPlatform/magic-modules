@@ -77,7 +77,6 @@ parameters:
     type: String
     description: 'Part of `parent`.  Full resource name of a parent Application. Example: projects/{HOST_PROJECT_ID}/locations/{LOCATION}/applications/{APPLICATION_ID}'
     url_param_only: true
-    required: true
     immutable: true
   - name: 'applicationId'
     type: String

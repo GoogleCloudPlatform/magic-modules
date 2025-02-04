@@ -68,7 +68,6 @@ parameters:
     type: String
     description: "Location of the resource, eg: global."
     url_param_only: true
-    required: true
     immutable: true
   - name: 'postureId'
     type: String

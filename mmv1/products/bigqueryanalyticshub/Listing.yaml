@@ -93,7 +93,6 @@ properties:
     description: |
       The name of the location this data exchange listing.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'displayName'
     type: String

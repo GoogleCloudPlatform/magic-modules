@@ -98,7 +98,6 @@ parameters:
     description: |
       Location to create the discovery config in.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

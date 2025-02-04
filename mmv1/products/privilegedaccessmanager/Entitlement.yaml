@@ -58,7 +58,6 @@ parameters:
     description: |
       The region of the Entitlement resource.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'entitlementId'
     type: String

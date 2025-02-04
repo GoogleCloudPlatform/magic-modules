@@ -74,7 +74,6 @@ parameters:
     description: |
       Name of the pool location. Usually a region name, expect for some STANDARD service level pools which require a zone name.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

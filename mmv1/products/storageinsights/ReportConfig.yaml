@@ -42,7 +42,6 @@ parameters:
       The location of the ReportConfig. The source and destination buckets specified in the ReportConfig
       must be in the same location.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

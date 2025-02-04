@@ -56,7 +56,6 @@ parameters:
     description: |
       The location of the Policy Binding
     url_param_only: true
-    required: true
     immutable: true
   - name: 'policyBindingId'
     type: String

@@ -77,7 +77,6 @@ properties:
     description: |
       The location for the resource
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

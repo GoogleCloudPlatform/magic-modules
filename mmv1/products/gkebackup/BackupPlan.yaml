@@ -164,7 +164,6 @@ parameters:
     description: |
       The region of the Backup Plan.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'

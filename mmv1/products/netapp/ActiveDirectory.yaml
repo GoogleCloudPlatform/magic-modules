@@ -56,7 +56,6 @@ parameters:
     description: |
       Name of the region for the policy to apply to.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

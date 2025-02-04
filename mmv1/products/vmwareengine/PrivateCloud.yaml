@@ -89,7 +89,6 @@ parameters:
     description: |
       The location where the PrivateCloud should reside.
     url_param_only: true
-    required: true
     immutable: true
   - name: 'name'
     type: String

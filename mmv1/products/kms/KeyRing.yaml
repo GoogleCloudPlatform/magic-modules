@@ -56,7 +56,6 @@ parameters:
     description: |
       The location for the KeyRing.
       A full list of valid locations can be found by running `gcloud kms locations list`.
-    required: true
     ignore_read: true
 properties:
   - name: 'name'

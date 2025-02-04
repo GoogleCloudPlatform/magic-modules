@@ -45,7 +45,6 @@ parameters:
   - name: 'zone'
     type: ResourceRef
     description: 'The zone the managed instance group resides.'
-    required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'

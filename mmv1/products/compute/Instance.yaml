@@ -49,7 +49,6 @@ parameters:
   - name: 'zone'
     type: ResourceRef
     description: 'A reference to the zone where the machine resides.'
-    required: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'

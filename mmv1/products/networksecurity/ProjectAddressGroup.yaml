@@ -65,4 +65,3 @@ properties:
     description: |
       The location of the gateway security policy.
     url_param_only: true
-    required: true
