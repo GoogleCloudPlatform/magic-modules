@@ -43,6 +43,13 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  regions:
+    - "us-west1"
+    - "us-west2"
+    - "us-east1"
+    - "us-central1"
+    - "us-south1"
 examples:
   - name: 'network_security_gateway_security_policy_basic'
     primary_resource_id: 'default'

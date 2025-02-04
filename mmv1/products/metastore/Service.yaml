@@ -28,9 +28,9 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 timeouts:
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
+  insert_minutes: 75
+  update_minutes: 75
+  delete_minutes: 75
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -38,9 +38,9 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 75
+      update_minutes: 75
+      delete_minutes: 75
   result:
     resource_inside_response: false
 iam_policy:

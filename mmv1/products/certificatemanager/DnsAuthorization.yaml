@@ -38,6 +38,10 @@ async:
 custom_code:
 schema_version: 1
 state_upgraders: true
+sweeper:
+  regions:
+    - "global"
+    - "us-central1"
 examples:
   - name: 'certificate_manager_dns_authorization_basic'
     primary_resource_id: 'default'

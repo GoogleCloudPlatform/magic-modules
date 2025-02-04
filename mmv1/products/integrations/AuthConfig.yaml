@@ -38,6 +38,18 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/integrations_auth_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
+sweeper:
+  regions:
+    - "us-west3"
+    - "asia-east2"
+    - "asia-east1"
+    - "southamerica-east1"
+    - "us-west2"
+    - "southamerica-west1"
+    - "us-west4"
+    - "northamerica-northeast2"
+    - "northamerica-northeast1"
+    - "us-south1"
 examples:
   - name: 'integrations_auth_config_basic'
     primary_resource_id: 'basic_example'
