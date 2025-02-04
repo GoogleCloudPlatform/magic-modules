@@ -54,6 +54,16 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 
 func testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+resource "google_project_iam_member" "basic_permission" {
+  project = "980109375338"
+  role    = "roles/cloudaicompanion.settingsAdmin"
+
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudaicompanion.iam.gserviceaccount.com" # Replace with the service account email
+}
+
 resource "google_gemini_logging_setting" "basic" {
     provider = google-beta
     logging_setting_id = "%{logging_setting_id}"
@@ -74,6 +84,16 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
 
 func testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+resource "google_project_iam_member" "basic_permission" {
+  project = "980109375338"
+  role    = "roles/cloudaicompanion.settingsAdmin"
+
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudaicompanion.iam.gserviceaccount.com" # Replace with the service account email
+}
+
 resource "google_gemini_logging_setting" "basic" {
     provider = google-beta
     logging_setting_id = "%{logging_setting_id}"
