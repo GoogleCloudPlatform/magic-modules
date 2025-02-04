@@ -30,7 +30,7 @@ resource "google_service_account" "accessor" {
 }
 
 resource "google_storage_bucket" "test_bucket" {
-  name          = "sdk-pubsub-test-bucket"
+  name          = "sd-pubsub-test-bucket"
   location      = "US"
   storage_class = "STANDARD"
 
@@ -54,7 +54,7 @@ resource "google_storage_bucket_iam_policy" "bucket_policy" {
 }
 
 resource "google_pubsub_topic" "topic" {
-  name = "sdk-pubsub-test-bucket-topic"
+  name = "sd-pubsub-test-bucket-topic"
 }
 
 resource "google_storage_notification" "storage_notification" {
