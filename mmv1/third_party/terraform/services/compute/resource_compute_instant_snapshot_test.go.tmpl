@@ -8,7 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"google.golang.org/api/compute/v1"
+
+	{{ if eq $.TargetVersionName `ga` }}
+		"google.golang.org/api/compute/v1"
+	{{- else }}
+		compute "google.golang.org/api/compute/v0.beta"
+	{{- end }}
 )
 
 func TestAccComputeInstantSnapshot_basicFeatures(t *testing.T) {
