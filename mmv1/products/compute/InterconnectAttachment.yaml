@@ -17,6 +17,10 @@ kind: 'compute#interconnectAttachment'
 description: |
   Represents an InterconnectAttachment (VLAN attachment) resource. For more
   information, see Creating VLAN Attachments.
+references:
+  guides:
+    'Create a Interconnect attachment': 'https://cloud.google.com/network-connectivity/docs/interconnect/how-to/dedicated/creating-vlan-attachments'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/interconnectAttachments'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
 has_self_link: true
