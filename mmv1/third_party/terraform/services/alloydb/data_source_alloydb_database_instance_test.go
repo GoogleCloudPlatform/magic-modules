@@ -55,8 +55,8 @@ data "google_compute_network" "default" {
 }
 
 data "google_alloydb_instance" "default" {
-  name = google_alloydb_instance.default.name
-  location = "us-central1"
+  cluster = google_alloydb_cluster.default.name
+  instance_id = google_alloydb_instance.default.id
 }
 `, context)
 }

@@ -13,10 +13,7 @@ func DataSourceAlloydbDatabaseInstance() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceAlloydbInstance().Schema)
 
 	// Set 'Required' schema elements
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
-
-	// Set 'Optional' schema elements
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster", "instance_id")
 
 	return &schema.Resource{
 		Read:   dataSourceAlloydbDatabaseInstanceRead,
@@ -27,19 +24,19 @@ func DataSourceAlloydbDatabaseInstance() *schema.Resource {
 func dataSourceAlloydbDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	location, err := tpgresource.GetLocation(d, config)
-	if err != nil {
-		return err
-	}
+	// location, err := tpgresource.GetLocation(d, config)
+	// if err != nil {
+	// 	return err
+	// }
 
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
+	// project, err := tpgresource.GetProject(d, config)
+	// if err != nil {
+	// 	return err
+	// }
 
-	id := fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, d.Get("name").(string))
+	id, err := tpgresource.ReplaceVars(d, config, "{{cluster}}/instances/{{instance_id}}")
 	if err != nil {
-		return err
+		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
