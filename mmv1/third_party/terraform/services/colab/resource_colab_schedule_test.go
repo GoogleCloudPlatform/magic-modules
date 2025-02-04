@@ -180,7 +180,7 @@ func TestAccColabSchedule_update_state(t *testing.T) {
 func testAccColabSchedule_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_colab_runtime_template" "my_runtime_template" {
-  name = ""
+  name = "tf-test-runtime-template%{random_suffix}"
   display_name = "Runtime template"
   location = "us-central1"
 
@@ -242,7 +242,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_schedule" "schedule" {
-  display_name = "Notebook Schedule full"
+  display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
@@ -276,7 +276,7 @@ resource "google_colab_schedule" "schedule" {
 func testAccColabSchedule_paused(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_colab_runtime_template" "my_runtime_template" {
-  name = ""
+  name = "tf-test-runtime-template%{random_suffix}"
   display_name = "Runtime template"
   location = "us-central1"
 
@@ -338,7 +338,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_schedule" "schedule" {
-  display_name = "Notebook Schedule full"
+  display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
@@ -374,7 +374,7 @@ resource "google_colab_schedule" "schedule" {
 func testAccColabSchedule_active(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_colab_runtime_template" "my_runtime_template" {
-  name = ""
+  name = "tf-test-runtime-template%{random_suffix}"
   display_name = "Runtime template"
   location = "us-central1"
 
@@ -436,7 +436,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_schedule" "schedule" {
-  display_name = "Notebook Schedule full"
+  display_name = "tf-test-schedule%{random_suffix}"
   location = "%{location}"
   allow_queueing = true
   max_concurrent_run_count = 2
@@ -472,7 +472,7 @@ resource "google_colab_schedule" "schedule" {
 func testAccColabSchedule_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_colab_runtime_template" "my_runtime_template" {
-  name = ""
+  name = "tf-test-runtime-template%{random_suffix}"
   display_name = "Runtime template"
   location = "us-central1"
 
@@ -534,7 +534,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_schedule" "schedule" {
-  display_name = "Notebook Schedule updated"
+  display_name = "tf-test-schedule-updated%{random_suffix}"
   location = "%{location}"
   allow_queueing = false
   max_concurrent_run_count = 1
