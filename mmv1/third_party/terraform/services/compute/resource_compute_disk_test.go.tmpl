@@ -966,7 +966,7 @@ func TestAccComputeDisk_sourceStorageObject(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"source_storage_object": "",
+		"source_storage_object": "test-fixtures/empty-image.tar.gz",
 	}
 
 	var disk compute.Disk
@@ -2061,12 +2061,20 @@ resource "google_storage_bucket" "bucket" {
 	location = "US"
 }
 
+resource "google_storage_bucket_object" "object" {
+	name = "tf-test-object-%{random_suffix}.tar.gz"
+	bucket = google_storage_bucket.bucket.name
+	source = "%{source_storage_object}"
+}
+
 resource "google_compute_disk" "foobar" {
 	name = "tf-test-disk-%{random_suffix}"
 	type = "pd-ssd"
 	size = 10
 	zone = "us-central1-a"
-	source_storage_object = "%{source_storage_object}"
+	source_storage_object = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+
+	depends_on = [google_storage_bucket_object.object]
 }
 `, context)
 }
