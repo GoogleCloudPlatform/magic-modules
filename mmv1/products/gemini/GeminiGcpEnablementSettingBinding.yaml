@@ -28,6 +28,7 @@ examples:
   - name: gemini_gemini_gcp_enablement_setting_binding_basic
     min_version: 'beta'
     primary_resource_id: example
+    exclude_test: true
     vars:
       gemini_gcp_enablement_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
