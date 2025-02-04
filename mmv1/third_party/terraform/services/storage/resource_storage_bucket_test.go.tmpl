@@ -2779,6 +2779,19 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
+      {
+				Config: testAccStorageBucket_withoutIPFilter(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						t, "google_storage_bucket.bucket", bucketName, &noIPfilter),
+				),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
 			{
 				Config: testAccStorageBucket_IPFilter(
 					bucketName, nwSuffix, project, serviceAccount,

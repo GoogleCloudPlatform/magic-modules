@@ -584,7 +584,7 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeList,
 							MaxItems:    1,
 							Optional:    true,
-							Description: `The bucket IP filtering configuration.`,
+							Description: `The public network IP address ranges that can access the bucket and its data.`,
 							Elem:        &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"allowed_ip_cidr_ranges": {
@@ -602,13 +602,13 @@ func ResourceStorageBucket() *schema.Resource {
 						"vpc_network_sources": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: `The bucket IP filtering configuration.`,
+							Description: `The list of VPC networks that can access the bucket.`,
 							Elem:        &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"allowed_ip_cidr_ranges": {
 										Type:     schema.TypeList,
 										Required: true,
-										Description: "The list of public IPv4, IPv6 cidr ranges that are allowed to access the bucket.",
+										Description: "The list of public or private IPv4 and IPv6 CIDR ranges that can access the bucket.",
 										Elem:     &schema.Schema{
 											Type: schema.TypeString,
 											ValidateFunc: validation.IsCIDR,
@@ -1951,15 +1951,15 @@ func flattenBucketIpFilterVpcNetworkSources(vpnNetworkSource []*storage.BucketIp
 }
 
 func expandBucketIpFilter(v interface{}) (*storage.BucketIpFilter) {
-	ipfs := v.([]interface{})
-	if len(ipfs) == 0 || ipfs[0] == nil {
+	ipFilterList := v.([]interface{})
+	if len(ipFilterList) == 0 || ipFilterList[0] == nil {
 		return nil
 	}
-	ipf := ipfs[0].(map[string]interface{})
+	ipFilter := ipFilterList[0].(map[string]interface{})
 	return &storage.BucketIpFilter{
-		Mode:                ipf["mode"].(string),
-		PublicNetworkSource: expandBucketIpFilterPublicNetworkSource(ipf["public_network_source"]),
-		VpcNetworkSources:   expandBucketIpFilterVpcNetworkSources(ipf["vpc_network_sources"]),
+		Mode:                ipFilter["mode"].(string),
+		PublicNetworkSource: expandBucketIpFilterPublicNetworkSource(ipFilter["public_network_source"]),
+		VpcNetworkSources:   expandBucketIpFilterVpcNetworkSources(ipFilter["vpc_network_sources"]),
 		ForceSendFields:     []string{"PublicNetworkSource", "VpcNetworkSources"},
 	}
 }
@@ -1969,12 +1969,12 @@ func expandBucketIpFilterPublicNetworkSource(v interface{}) (*storage.BucketIpFi
 			ForceSendFields: []string{"AllowedIpCidrRanges"},
 		}
 
-	pnss := v.([]interface{})
-	if len(pnss) == 0 || pnss[0] == nil {
+	publicNetworkSources := v.([]interface{})
+	if len(publicNetworkSources) == 0 || publicNetworkSources[0] == nil {
 		return e
 	}
-	pns := pnss[0].(map[string]interface{})
-	cidrs := pns["allowed_ip_cidr_ranges"].([]interface{})
+	publicNetworkSource := publicNetworkSources[0].(map[string]interface{})
+	cidrs := publicNetworkSource["allowed_ip_cidr_ranges"].([]interface{})
 	if len(cidrs) == 0 {
 		return e
 	}
@@ -1984,17 +1984,17 @@ func expandBucketIpFilterPublicNetworkSource(v interface{}) (*storage.BucketIpFi
 }
 
 func expandBucketIpFilterVpcNetworkSources(v interface{}) ([]*storage.BucketIpFilterVpcNetworkSources) {
-	vnss := v.([]interface{})
-	if len(vnss) == 0 || vnss[0] == nil {
+	vpcNetworkSources := v.([]interface{})
+	if len(vpcNetworkSources) == 0 || vpcNetworkSources[0] == nil {
 		return nil
 	}
 
-	vpcnwsrcs := make([]*storage.BucketIpFilterVpcNetworkSources, 0, len(vnss))
-	for i := range vnss {
-		s := vnss[i].(map[string]interface{})
-		vpcnwsrcs = append(vpcnwsrcs, &storage.BucketIpFilterVpcNetworkSources{
-			AllowedIpCidrRanges: tpgresource.ConvertStringArr(s["allowed_ip_cidr_ranges"].([]interface{})),
-			Network:             s["network"].(string),
+	transformedvpcNetworkSources := make([]*storage.BucketIpFilterVpcNetworkSources, 0, len(vnss))
+	for i := range vpcNetworkSources {
+		transformedvpcNetworkSource := vpcNetworkSources[i].(map[string]interface{})
+		transformedvpcNetworkSources = append(transformedvpcNetworkSources, &storage.BucketIpFilterVpcNetworkSources{
+			AllowedIpCidrRanges: tpgresource.ConvertStringArr(vpcNetworkSource["allowed_ip_cidr_ranges"].([]interface{})),
+			Network:             vpcNetworkSource["network"].(string),
 		})
 	}
 
