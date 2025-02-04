@@ -1101,7 +1101,27 @@ func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) 
 			"kms_key_name": key.KmsKeyName,
 			"sha256": key.Sha256,
 			"kms_key_service_account": key.KmsKeyServiceAccount,
-			
 		},
 	}
+}
+
+func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
+	key := &compute.CustomerEncryptionKey{}
+
+	if raw, ok := m["raw_key"].(string); ok && raw != "" {
+		key.RawKey = raw
+	}
+	if rsa, ok := m["rsa_encrypted_key"].(string); ok && rsa != "" {
+		key.RsaEncryptedKey = rsa
+	}
+	if kms, ok := m["kms_key_name"].(string); ok && kms != "" {
+		key.KmsKeyName = kms
+	}
+	if sha, ok := m["sha256"].(string); ok && sha != "" {
+		key.Sha256 = sha
+	}
+	if sa, ok := m["kms_key_service_account"].(string); ok && sa != "" {
+		key.KmsKeyServiceAccount = sa
+	}
+	return key
 }

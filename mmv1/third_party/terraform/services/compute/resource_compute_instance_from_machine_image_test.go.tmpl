@@ -336,38 +336,38 @@ func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) fu
 }
 
 func TestAccComputeInstanceFromMachineImage_encryptionKeyKMS(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-  machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-  kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-  
-  context := map[string]interface{}{
-      "instance_name": instanceName,
-      "image_name": machineImageName,
-      "kms_key_name": kmsKey.CryptoKey.Name,
-      "kms_key_service_account": "service-compute@compute.iam.gserviceaccount.com",
-  }
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
+	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
+	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 
-  acctest.VcrTest(t, resource.TestCase{
-      PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-      ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-      CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-      Steps: []resource.TestStep{
-          {
-              Config: testAccComputeInstanceFromMachineImage_encryptionKeyKMS(context),
-              Check: resource.ComposeTestCheckFunc(
-                  testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-                  resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", 
-                      "source_machine_image_encryption_key.0.kms_key_name", context["kms_key_name"].(string)),
-                  resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-                      "source_machine_image_encryption_key.0.kms_key_service_account", 
-                      context["kms_key_service_account"].(string)),
-              ),
-          },
-      },
-  })
+	context := map[string]interface{}{
+		"instance_name": instanceName,
+		"image_name": machineImageName,
+		"kms_key_name": kmsKey.CryptoKey.Name,
+		"kms_key_service_account": "service-compute@compute.iam.gserviceaccount.com",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_encryptionKeyKMS(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", 
+						"source_machine_image_encryption_key.0.kms_key_name", context["kms_key_name"].(string)),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
+						"source_machine_image_encryption_key.0.kms_key_service_account", 
+						context["kms_key_service_account"].(string)),
+				),
+			},
+		},
+	})
 }
 func TestAccComputeInstanceFromMachineImage_encryptionKeyRaw(t *testing.T) {
   t.Parallel()
