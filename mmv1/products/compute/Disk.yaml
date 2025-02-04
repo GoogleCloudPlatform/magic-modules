@@ -281,6 +281,7 @@ properties:
       This flag is not optimized for creating multiple disks from a source storage object.
       To create many disks from a source storage object, use gcloud compute images import instead.
     api_name: sourceStorageObject
+    ignore_read: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'labelFingerprint'
     type: Fingerprint
