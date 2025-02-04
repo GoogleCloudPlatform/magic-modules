@@ -65,7 +65,7 @@ parameters:
     description: |
       The reference of the compute zone scoping this request.
     url_param_only: true
-    required: true
+    required: false
     resource: 'Zone'
     imports: 'name'
   - name: 'instanceGroupManager'

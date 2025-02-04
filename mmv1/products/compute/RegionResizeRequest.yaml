@@ -59,7 +59,7 @@ parameters:
     description: |
       The reference of the compute region scoping this request.
     url_param_only: true
-    required: true
+    required: false
     resource: 'Region'
     imports: 'name'
   - name: 'instanceGroupManager'
