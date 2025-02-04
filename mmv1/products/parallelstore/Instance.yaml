@@ -36,6 +36,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+sweeper:
+  regions:
+    - "us-central1-a"
 examples:
   - name: 'parallelstore_instance_basic_beta'
     primary_resource_id: 'instance'

@@ -55,6 +55,8 @@ resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
 
   desired_state = "ACTIVE"
 
+  auto_upgrade = true
+
   depends_on = [
     google_colab_runtime_template.my_template
   ]
