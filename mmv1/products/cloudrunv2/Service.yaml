@@ -775,7 +775,7 @@ properties:
             - name: 'baseImageUri'
               type: String
               description: |-
-                Base image for this container. Only supported for services. If set, it indicates that the service is enrolled into automatic base image update.
+                Base image for this container. If set, it indicates that the service is enrolled into automatic base image update.
             - name: 'buildInfo'
               type: NestedObject
               description: |-
