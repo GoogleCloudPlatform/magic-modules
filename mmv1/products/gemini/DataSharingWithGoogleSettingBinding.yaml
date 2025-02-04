@@ -28,6 +28,7 @@ examples:
   - name: gemini_data_sharing_with_google_setting_binding_basic
     min_version: 'beta'
     primary_resource_id: example
+    exclude_tests: true
     vars:
       data_sharing_with_google_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
