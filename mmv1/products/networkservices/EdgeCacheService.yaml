@@ -56,6 +56,13 @@ examples:
       origin_name: 'my-origin'
       origin_google: 'origin-google'
       service_name: 'my-service'
+  - name: 'network_services_edge_cache_service_advanced_beta'
+    primary_resource_id: 'instance'
+    vars:
+      bucket_name: 'my-bucket'
+      origin_name: 'my-origin'
+      origin_google: 'origin-google'
+      service_name: 'my-service'
   - name: 'network_services_edge_cache_service_dual_token'
     primary_resource_id: 'instance'
     vars:
@@ -845,6 +852,10 @@ properties:
                         enum_values:
                           - 'DISABLED'
                           - 'AUTOMATIC'
+                      - name: 'wasmAction'
+                        type: String
+                        description: |
+                          The wasmAction resource that is executed on this route.
                   - name: 'origin'
                     type: String
                     description: |
