@@ -165,7 +165,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	if v, ok := d.GetOk("source_machine_image_encryption_key"); ok {
 		list := v.([]interface{})
 		if len(list) > 0 && list[0] != nil {
-			instance.SourceMachineImageEncryptionKey = expandSourceMachineImageEncryptionKey(list[0].(map[string]interface{}))
+			instance.SourceMachineImageEncryptionKey = expandInstanceSourceMachineImageEncryptionKey(list[0].(map[string]interface{}))
 		}
 	}
 	
@@ -235,27 +235,6 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	return resourceComputeInstanceRead(d, meta)
 }
-func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
-	key := &compute.CustomerEncryptionKey{}
-
-	if raw, ok := m["raw_key"].(string); ok && raw != "" {
-		key.RawKey = raw
-	}
-	if rsa, ok := m["rsa_encrypted_key"].(string); ok && rsa != "" {
-		key.RsaEncryptedKey = rsa
-	}
-	if kms, ok := m["kms_key_name"].(string); ok && kms != "" {
-		key.KmsKeyName = kms
-	}
-	if sha, ok := m["sha256"].(string); ok && sha != "" {
-		key.Sha256 = sha
-	}
-	if sa, ok := m["kms_key_service_account"].(string); ok && sa != "" {
-		key.KmsKeyServiceAccount = sa
-	}
-	return key
-}
-
 
 // Instances have disks spread across multiple schema properties. This function
 // ensures that overriding one of these properties does not override the others.
@@ -328,6 +307,27 @@ func adjustInstanceFromMachineImageDisks(d *schema.ResourceData, config *transpo
 	}
 
 	return disks, nil
+}
+
+func expandInstanceSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
+	key := &compute.CustomerEncryptionKey{}
+
+	if raw, ok := m["raw_key"].(string); ok && raw != "" {
+		key.RawKey = raw
+	}
+	if rsa, ok := m["rsa_encrypted_key"].(string); ok && rsa != "" {
+		key.RsaEncryptedKey = rsa
+	}
+	if kms, ok := m["kms_key_name"].(string); ok && kms != "" {
+		key.KmsKeyName = kms
+	}
+	if sha, ok := m["sha256"].(string); ok && sha != "" {
+		key.Sha256 = sha
+	}
+	if sa, ok := m["kms_key_service_account"].(string); ok && sa != "" {
+		key.KmsKeyServiceAccount = sa
+	}
+	return key
 }
 
 {{- else }}
