@@ -3960,6 +3960,8 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
+  // 2025-02-03: current default cluster version is 1.31.5-gke.1023000. This will change over time.
+  // Reference:  https://cloud.google.com/kubernetes-engine/docs/release-notes#current_versions
 }
 
 resource "google_container_node_pool" "np2" {
@@ -3967,6 +3969,8 @@ resource "google_container_node_pool" "np2" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
+  // 2025-02-03: current default cluster version is 1.31.5-gke.1023000. This will change over time.
+  // Reference:  https://cloud.google.com/kubernetes-engine/docs/release-notes#current_versions
 }
 `, cluster, networkName, subnetworkName, np1, np2)
 }
@@ -3987,7 +3991,11 @@ resource "google_container_node_pool" "np1" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  version            = "1.29.4-gke.1043002"
+  version            = "1.32.0-gke.1448000"
+  // This must remain within one minor version of the default cluster version
+  // Cross-ref: https://github.com/hashicorp/terraform-provider-google/issues/21116
+  // Cross-ref: https://github.com/GoogleCloudPlatform/magic-modules/pull/11115
+  // Reference:  https://cloud.google.com/kubernetes-engine/docs/release-notes#current_versions
 }
 
 resource "google_container_node_pool" "np2" {
@@ -3995,7 +4003,11 @@ resource "google_container_node_pool" "np2" {
   location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 2
-  version            = "1.29.4-gke.1043002"
+  version            = "1.32.0-gke.1448000"
+  // This must remain within one minor version of the default cluster version
+  // Cross-ref: https://github.com/hashicorp/terraform-provider-google/issues/21116
+  // Cross-ref: https://github.com/GoogleCloudPlatform/magic-modules/pull/11115
+  // Reference:  https://cloud.google.com/kubernetes-engine/docs/release-notes#current_versions
 }
 `, cluster, networkName, subnetworkName, np1, np2)
 }
