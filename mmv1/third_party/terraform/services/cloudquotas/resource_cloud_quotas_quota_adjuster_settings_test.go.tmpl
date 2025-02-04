@@ -55,12 +55,6 @@ func testAccCloudQuotasQuotaAdjusterSettings_basic(context map[string]interface{
 		provider      = google-beta
 	}
 
-	resource "google_project_service" "cloudquotas" {
-		provider      = google-beta
-		project = data.google_project.project.project_id
-		service 	= "cloudquotas.googleapis.com"
-	}
-
 	resource "google_cloud_quotas_quota_adjuster_settings" "adjuster_settings" {
 		provider      = google-beta
 		parent        = "projects/${data.google_project.project.number}"
@@ -75,12 +69,6 @@ func testAccCloudQuotasQuotaAdjusterSettings_updateEnabelement(context map[strin
 	data "google_project" "project" {
 		provider      = google-beta
 	}
-
-	resource "google_project_service" "cloudquotas" {
-		provider      = google-beta
-		project = data.google_project.project.project_id
-		service 	= "cloudquotas.googleapis.com"
-	}	
 
 	resource "google_cloud_quotas_quota_adjuster_settings" "adjuster_settings" {
 		provider      = google-beta
