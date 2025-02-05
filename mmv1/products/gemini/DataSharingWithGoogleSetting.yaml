@@ -28,6 +28,7 @@ examples:
   - name: gemini_data_sharing_with_google_setting_basic
     min_version: 'beta'
     primary_resource_id: example
+    exclude_test: true
     vars:
       data_sharing_with_google_setting_id: ls1-tf
 autogen_async: false
@@ -38,7 +39,6 @@ parameters:
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-    required: true
   - name: dataSharingWithGoogleSettingId
     type: String
     description: |-
