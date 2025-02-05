@@ -17,8 +17,6 @@ func TestAccGeminiGeminiGcpEnablementSettingBinding_geminiGeminiGcpEnablementSet
 		"gemini_gcp_enablement_setting_id": "ls-tf1",
 		"setting_binding_id": "ls-tf1b1",
 		"product":            "PRODUCT_UNSPECIFIED",
-		"target":             "projects/980109375338",
-		"new_target":         "projects/283661608541",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -54,6 +52,9 @@ func TestAccGeminiGeminiGcpEnablementSettingBinding_geminiGeminiGcpEnablementSet
 
 func testAccGeminiGeminiGcpEnablementSettingBinding_geminiGeminiGcpEnablementSettingBindingBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
@@ -66,7 +67,7 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "%{target}"
+	target = "projects/${data.google_project.project.number}"
 	product = "%{product}"
 }
 `, context)
@@ -74,6 +75,9 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
 
 func testAccGeminiGeminiGcpEnablementSettingBinding_geminiGeminiGcpEnablementSettingBindingBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
@@ -86,7 +90,7 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "%{new_target}"
+	target = "projects/${data.google_project.new_project.number}"
 	product = "%{product}"
 }
 `, context)
