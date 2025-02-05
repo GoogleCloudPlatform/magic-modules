@@ -1,0 +1,7 @@
+resource "google_compute_firewall_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.Vars "policy_name"}}"
+  description = "Example Resource"
+}
