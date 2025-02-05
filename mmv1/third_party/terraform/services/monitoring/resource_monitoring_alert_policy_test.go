@@ -523,6 +523,7 @@ resource "google_monitoring_alert_policy" "sql" {
         comparison = "COMPARISON_GT"
         threshold  = "0"
       }
+    }
   }
 
   severity     = "WARNING"
