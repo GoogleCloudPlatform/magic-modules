@@ -37,6 +37,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+sweeper:
+  regions:
+    - "us-central1-a"
 examples:
   - name: 'network_security_intercept_deployment_basic'
     config_path: 'templates/terraform/examples/network_security_intercept_deployment_basic.tf.tmpl'
