@@ -37,7 +37,6 @@ references:
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/disks'
 has_self_link: true
-immutable: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -168,7 +167,6 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -176,6 +174,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        immutable: true
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
       - name: 'rawKeyWo'
@@ -188,6 +187,7 @@ properties:
           - 'disk_encryption_key.0.rawKey'
       - name: 'rsaEncryptedKey'
         type: String
+        immutable: true
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt
@@ -211,6 +211,7 @@ properties:
         output: true
       - name: 'kmsKeySelfLink'
         type: String
+        immutable: true
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
           in the cloud console. Your project's Compute Engine System service account
@@ -221,6 +222,7 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'kmsKeyServiceAccount'
         type: String
+        immutable: true
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
