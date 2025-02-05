@@ -22,6 +22,7 @@ func TestAccMonitoringAlertPolicy(t *testing.T) {
 		"log":      testAccMonitoringAlertPolicy_log,
 		"forecast": testAccMonitoringAlertPolicy_forecast,
 		"promql":   testAccMonitoringAlertPolicy_promql,
+		"sql":      testAccMonitoringAlertPolicy_sql,
 	}
 
 	for name, tc := range testCases {
@@ -228,6 +229,28 @@ func testAccMonitoringAlertPolicy_promql(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_monitoring_alert_policy.promql",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMonitoringAlertPolicy_sql(t *testing.T) {
+
+	alertName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringAlertPolicy_sqlCfg(alertName, conditionName),
+			},
+			{
+				ResourceName:      "google_monitoring_alert_policy.sql",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -463,6 +486,43 @@ resource "google_monitoring_alert_policy" "promql" {
       rule_group      = "abc"
       disable_metric_validation = true
     }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      duration        = "60s"
+      minutes {
+        periodicity = 600
+      }
+      row_count_test {
+        comparison = "COMPARISON_GT"
+        threshold  = "0"
+      }
   }
 
   severity     = "WARNING"
