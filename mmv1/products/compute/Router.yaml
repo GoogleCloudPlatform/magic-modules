@@ -44,6 +44,11 @@ custom_code:
   constants: 'templates/terraform/constants/router.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
+sweeper:
+  regions:
+    - "us-central1"
+    - "us-east1"
+    - "us-east4"
 examples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'

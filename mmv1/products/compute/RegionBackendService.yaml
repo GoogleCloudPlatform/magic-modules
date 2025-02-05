@@ -52,6 +52,13 @@ custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
+sweeper:
+  regions:
+    - "us-west1"
+    - "us-west2"
+    - "us-central1"
+    - "europe-west1"
+    - "europe-west4"
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'

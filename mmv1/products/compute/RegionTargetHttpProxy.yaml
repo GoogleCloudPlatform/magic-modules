@@ -37,6 +37,11 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  regions:
+    - "us-west1"
+    - "europe-west1"
+    - "us-central1"
 examples:
   - name: 'region_target_http_proxy_basic'
     primary_resource_id: 'default'

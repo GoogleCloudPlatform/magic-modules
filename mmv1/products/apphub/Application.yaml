@@ -40,6 +40,11 @@ custom_code:
   constants: 'templates/terraform/constants/apphub_application.go.tmpl'
 custom_diff:
   - 'apphubApplicationCustomizeDiff'
+sweeper:
+  regions:
+    - "us-central1"
+    - "us-east1"
+    - "global"
 examples:
   - name: 'apphub_application_basic'
     primary_resource_id: 'example'
