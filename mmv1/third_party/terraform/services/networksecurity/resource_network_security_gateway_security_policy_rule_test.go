@@ -145,8 +145,8 @@ resource "google_network_security_gateway_security_policy_rule" "rule1" {
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
-  description             = "First rule"
-  priority                = 1
+  description             = "Highest priority rule"
+  priority                = 0
   session_matcher         = "host() == 'example.com'"
   application_matcher     = "request.method == 'POST'"
   basic_profile           = "ALLOW"
@@ -157,8 +157,8 @@ resource "google_network_security_gateway_security_policy_rule" "rule2" {
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
-  description             = "Second rule"
-  priority                = 2
+  description             = "Rule priority 762"
+  priority                = 762
   session_matcher         = "host() == 'example.com'"
   application_matcher     = "request.method == 'GET'"
   tls_inspection_enabled  = false
@@ -170,8 +170,8 @@ resource "google_network_security_gateway_security_policy_rule" "rule3" {
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
-  description             = "Third rule"
-  priority                = 3
+  description             = "Rule priority 37961"
+  priority                = 37961
   session_matcher         = "host() == 'update.com'"
   application_matcher     = "request.method == 'POST'"
   basic_profile           = "ALLOW"
@@ -182,12 +182,25 @@ resource "google_network_security_gateway_security_policy_rule" "rule4" {
   location                = "us-central1"
   gateway_security_policy = google_network_security_gateway_security_policy.default.name
   enabled                 = true  
-  description             = "Fourth rule"
-  priority                = 4
+  description             = "Rule priority 9572843"
+  priority                = 9572843
   session_matcher         = "host() == 'update.com'"
   application_matcher     = "request.method == 'GET'"
   tls_inspection_enabled  = false
   basic_profile           = "DENY"
 }
+
+resource "google_network_security_gateway_security_policy_rule" "rule5" {
+	name                    = "tf-test-gateway-sp-rule5-%{random_suffix}"
+	location                = "us-central1"
+	gateway_security_policy = google_network_security_gateway_security_policy.default.name
+	enabled                 = true  
+	description             = "Lowest priority rule"
+	priority                = 2147483647
+	session_matcher         = "host() == 'update.com'"
+	application_matcher     = "request.method == 'GET'"
+	tls_inspection_enabled  = false
+	basic_profile           = "DENY"
+  }
 `, context)
 }
