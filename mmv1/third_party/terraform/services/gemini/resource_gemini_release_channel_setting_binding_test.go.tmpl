@@ -56,6 +56,10 @@ data "google_project" "project" {
     provider = google-beta
 }
 
+data "google_project" "new_project" {
+    provider = google-beta
+}
+
 resource "google_gemini_release_channel_setting" "basic" {
     provider = google-beta
     release_channel_setting_id = "%{release_channel_setting_id}"
@@ -75,6 +79,10 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
 
 func testAccGeminiReleaseChannelSettingBinding_geminiReleaseChannelSettingBindingBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+    provider = google-beta
+}
+
 data "google_project" "new_project" {
     provider = google-beta
 }
