@@ -12,7 +12,7 @@ import (
 func TestAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBasicExample_update(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"setting_id": "ls-tf1",
+		"setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
