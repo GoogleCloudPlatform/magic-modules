@@ -117,6 +117,10 @@ resource "google_netapp_volume_quota_rule" "test_default_group_quota_rule" {
   volume_name = google_netapp_volume.default.name
   name = "tf-default-group-quota-rule%{random_suffix}"
   description = "This is a test description"
+  labels = {
+    key   = "test"
+    value =  "quota_rule"
+  }
   type = "DEFAULT_GROUP_QUOTA"
   disk_limit_mib = 20
 }
@@ -184,6 +188,10 @@ resource "google_netapp_volume_quota_rule" "test_default_group_quota_rule" {
   volume_name = google_netapp_volume.default.name
   name = "tf-default-group-quota-rule%{random_suffix}"
   description = "This is a test description"
+  labels = {
+    key   = "test"
+    value =  "quota_rule"
+  }
   type = "DEFAULT_GROUP_QUOTA"
   disk_limit_mib = 40
 }
