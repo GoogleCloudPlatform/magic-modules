@@ -582,7 +582,7 @@ for a list of types.
 
 * `minimum` - (Optional) Minimum amount of the resource in the cluster.
 
-* `maximum` - (Optional) Maximum amount of the resource in the cluster.
+* `maximum` - (Required) Maximum amount of the resource in the cluster.
 
 <a name="nested_auto_provisioning_defaults"></a>The `auto_provisioning_defaults` block supports:
 
@@ -663,6 +663,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
+* `auto_monitoring_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for GKE Auto-Monitoring.
+
+<a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
+
+* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.  
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
@@ -917,6 +922,8 @@ gvnic {
 
 * `resource_labels` - (Optional) The GCP labels (key/value pairs) to be applied to each node. Refer [here](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-managing-labels)
     for how these labels are applied to clusters, node pools and nodes.
+
+* `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.

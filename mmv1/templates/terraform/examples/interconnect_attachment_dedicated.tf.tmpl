@@ -19,6 +19,7 @@ resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
   vlan_tag8021q            = 1000
   region                   = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/regions/us-east4"
   stack_type               = "IPV4_ONLY"
+  labels                   = { mykey = "myvalue" }
 }
 
 resource "google_compute_router" "foobar" {
