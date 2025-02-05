@@ -17,7 +17,6 @@ func TestAccGeminiReleaseChannelSettingBinding_geminiReleaseChannelSettingBindin
 	context := map[string]interface{}{
 		"release_channel_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
-        "product":            "PRODUCT_UNSPECIFIED",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -70,7 +69,6 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
-    product = "%{product}"
 }
 `, context)
 }
@@ -94,7 +92,6 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.new_project.number}"
-    product = "%{product}"
 }
 `, context)
 }
