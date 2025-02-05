@@ -583,3 +583,42 @@ resource "google_pubsub_topic" "foo" {
 }
 `, topic)
 }
+func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedJavascriptUdfSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.topic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_updateWithUpdatedJavascriptUdfSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+	name = "%s"
+
+	message_transforms = [
+		{
+			javascript_udf {
+				function_name = "filter_falsy",
+				code = "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+			}
+			enabled = true
+		}
+	]
+}
+	`, topic)
+}
