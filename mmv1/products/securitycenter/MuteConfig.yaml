@@ -106,6 +106,7 @@ properties:
     type: Enum
     description: |
       The type of the mute config, which determines what type of mute state the config affects.
+    default_value: "DYNAMIC"
     enum_values:
       - 'MUTE_CONFIG_TYPE_UNSPECIFIED'
       - 'STATIC'
