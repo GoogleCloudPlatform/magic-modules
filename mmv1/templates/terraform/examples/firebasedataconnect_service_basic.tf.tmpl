@@ -13,5 +13,14 @@ resource "google_firebase_data_connect_service" "default" {
   # TODO(b/394642094): Cover force deletion once it's supported
   deletion_policy = "DEFAULT"
 
+  labels = {
+    label = "my-label"
+  }
+
+  annotations = {
+    key1 = "value1",
+    key2 = "value2",
+  }
+
   depends_on = [google_project_service.fdc]
 }
