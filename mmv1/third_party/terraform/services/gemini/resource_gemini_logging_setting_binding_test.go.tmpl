@@ -17,7 +17,7 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 	context := map[string]interface{}{
 		"logging_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
-		"product":            "PRODUCT_UNSPECIFIED"
+		"product":            "PRODUCT_UNSPECIFIED",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
