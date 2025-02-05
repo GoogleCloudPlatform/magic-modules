@@ -40,6 +40,7 @@ var (
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
 		"scheduling.0.host_error_timeout_seconds",
+		"scheduling.0.graceful_shutdown",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
