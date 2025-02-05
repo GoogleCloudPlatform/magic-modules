@@ -38,6 +38,11 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
+sweeper:
+  regions:
+    - "europe-west1"
+    - "us-central1"
+    - "us-east4"
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
