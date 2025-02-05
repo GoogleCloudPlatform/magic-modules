@@ -10,7 +10,8 @@ resource "google_firebase_data_connect_service" "default" {
   project = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
   service_id = "{{index $.Vars "service_id"}}"
-  deletion_policy = "FORCE"
+  # TODO(b/394642094): Cover force deletion once it's supported
+  deletion_policy = "DEFAULT"
 
   depends_on = [google_project_service.fdc]
 }

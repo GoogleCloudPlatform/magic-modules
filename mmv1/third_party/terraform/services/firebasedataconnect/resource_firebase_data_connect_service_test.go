@@ -53,6 +53,7 @@ func TestAccFirebaseDataConnectService_Update(t *testing.T) {
 	})
 }
 
+// TODO(b/394642094): Cover force deletion once it's supported
 func testAccFirebaseDataConnectService_update(context map[string]interface{}, display_name string) string {
 	context["display_name"] = display_name
 	return acctest.Nprintf(`
