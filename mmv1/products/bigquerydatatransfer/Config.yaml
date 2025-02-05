@@ -226,14 +226,13 @@ properties:
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
-        required: true
         sensitive: true
-        conflicts:
-          - 'secretAccessKeyWo'
+        exactly_one_of:
+          - 'sensitive_params.0.secretAccessKeyWo'
       - name: 'secretAccessKeyWo'
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
         write_only: true
-        conflicts:
-          - 'secretAccessKey'
+        exactly_one_of:
+          - 'sensitive_params.0.secretAccessKey'
