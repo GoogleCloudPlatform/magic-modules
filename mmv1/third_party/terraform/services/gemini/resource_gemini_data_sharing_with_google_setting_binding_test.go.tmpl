@@ -2,6 +2,7 @@ package gemini_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+    "fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -14,8 +15,8 @@ func TestAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogl
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"data_sharing_with_google_setting_id": "ls-tf1",
-		"setting_binding_id": "ls-tf1b1",
+		"data_sharing_with_google_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
+		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
 		"product":            "PRODUCT_UNSPECIFIED",
 	}
 
