@@ -247,7 +247,22 @@ func testAccMonitoringAlertPolicy_sql(t *testing.T) {
 		CheckDestroy:             testAccCheckAlertPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringAlertPolicy_sqlCfg(alertName, conditionName),
+				Config: testAccMonitoringAlertPolicy_sqlMinutesRowCountCfg(alertName, conditionName),
+			},
+			{
+				Config: testAccMonitoringAlertPolicy_sqlMinutesBooleanCfg(alertName, conditionName),
+			},
+			{
+				Config: testAccMonitoringAlertPolicy_sqlHourlyRowCountCfg(alertName, conditionName),
+			},
+			{
+				Config: testAccMonitoringAlertPolicy_sqlHourlyBooleanCfg(alertName, conditionName),
+			},
+			{
+				Config: testAccMonitoringAlertPolicy_sqlDailyRowCountCfg(alertName, conditionName),
+			},
+			{
+				Config: testAccMonitoringAlertPolicy_sqlDailyBooleanCfg(alertName, conditionName),
 			},
 			{
 				ResourceName:      "google_monitoring_alert_policy.sql",
@@ -503,7 +518,7 @@ resource "google_monitoring_alert_policy" "promql" {
 `, alertName, conditionName)
 }
 
-func testAccMonitoringAlertPolicy_sqlCfg(alertName, conditionName string) string {
+func testAccMonitoringAlertPolicy_sqlMinutesRowCountCfg(alertName, conditionName string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_alert_policy" "sql" {
   display_name = "%s"
@@ -515,13 +530,208 @@ resource "google_monitoring_alert_policy" "sql" {
     
     condition_sql {
       query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
-      duration        = "60s"
       minutes {
-        periodicity = 600
+        periodicity = 30
       }
       row_count_test {
         comparison = "COMPARISON_GT"
         threshold  = "0"
+      }
+    }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlMinutesBooleanCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      minutes {
+        periodicity = 30
+      }
+      boolean_test {
+        column  = "resource"
+      }
+    }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlHourlyRowCountCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      hourly {
+        periodicity = 3
+				minute_offset = 10
+      }
+      row_count_test {
+        comparison = "COMPARISON_GT"
+        threshold  = "0"
+      }
+    }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlHourlyBooleanCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      hourly {
+        periodicity = 3
+				minute_offset = 10
+      }
+      boolean_test {
+        column  = "resource"
+      }
+    }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlDailyRowCountCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      daily {
+        periodicity = 3
+				execution_time {
+					hours = 10
+					minutes = 10
+					seconds = 10
+					nanos = 10
+				}
+      }
+      row_count_test {
+        comparison = "COMPARISON_GT"
+        threshold  = "0"
+      }
+    }
+  }
+
+  severity     = "WARNING"
+
+  documentation {
+    content   = "test content"
+    mime_type = "text/markdown"
+    subject = "test subject"
+    links {
+        display_name = "link display name"
+        url = "http://mydomain.com"
+    }
+  }
+}
+`, alertName, conditionName)
+}
+
+func testAccMonitoringAlertPolicy_sqlDailyBooleanCfg(alertName, conditionName string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_alert_policy" "sql" {
+  display_name = "%s"
+  combiner     = "OR"
+  enabled      = true
+
+  conditions {
+    display_name = "%s"
+    
+    condition_sql {
+      query           = "SELECT severity, resource FROM project.global._Default._AllLogs WHERE severity IS NOT NULL"
+      daily {
+        periodicity = 3
+				execution_time {
+					hours = 10
+					minutes = 10
+					seconds = 10
+					nanos = 10
+				}
+      }
+      boolean_test {
+        column  = "resource"
       }
     }
   }
