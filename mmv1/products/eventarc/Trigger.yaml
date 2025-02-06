@@ -83,6 +83,7 @@ examples:
       trigger_name: some-trigger
       service_account_id: trigger-sa
       service_name: some-service
+    test_env_vars:
       region: 'REGION'
     exclude_docs: true
 parameters:
