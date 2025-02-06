@@ -59,6 +59,11 @@ examples:
     min_version: 'beta'
     vars:
       resource_name: 'my-mesh-noport'
+  - name: 'network_services_mesh_location'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-mesh'
 parameters:
   - name: 'name'
     type: String
@@ -112,4 +117,6 @@ properties:
     url_param_only: true
     immutable: true
     default_value: 'global'
+    validation:
+      regex: '^global$'
 
