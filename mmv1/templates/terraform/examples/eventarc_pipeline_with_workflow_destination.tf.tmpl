@@ -1,7 +1,7 @@
 resource "google_workflows_workflow" "workflow" {
   name                = "{{index $.Vars "workflow_name"}}"
   deletion_protection = false
-  region              = "{{index $.TestEnvVars "region"}}"
+  region              = "us-central1"
   source_contents     = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
@@ -32,12 +32,12 @@ EOF
 }
 
 resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
-  location    = "{{index $.TestEnvVars "region"}}"
+  location    = "us-central1"
   pipeline_id = "{{index $.Vars "pipeline_name"}}"
   destinations {
     workflow = google_workflows_workflow.workflow.id
     network_config {
-      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/{{index $.TestEnvVars "region"}}/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
     }
   }
 }

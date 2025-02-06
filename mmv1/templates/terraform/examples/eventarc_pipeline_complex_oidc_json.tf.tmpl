@@ -1,5 +1,5 @@
 resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
-  location    = "{{index $.TestEnvVars "region"}}"
+  location    = "us-central1"
   pipeline_id = "{{index $.Vars "pipeline_name"}}"
   destinations {
     http_endpoint {
@@ -7,7 +7,7 @@ resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
       message_binding_template = "{\"headers\":{\"new-header-key\": \"new-header-value\"}}"
     }
     network_config {
-      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/{{index $.TestEnvVars "region"}}/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
     }
     authentication_config {
       google_oidc {

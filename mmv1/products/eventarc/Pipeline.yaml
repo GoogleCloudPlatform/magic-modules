@@ -44,7 +44,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
 - name: eventarc_pipeline_with_http_destination
@@ -54,7 +53,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
 - name: eventarc_pipeline_with_workflow_destination
@@ -65,7 +63,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
 - name: eventarc_pipeline_complex_oidc_json
@@ -75,7 +72,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
     service_account: 'SERVICE_ACCT'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
@@ -86,7 +82,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
     service_account: 'SERVICE_ACCT'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
@@ -97,7 +92,6 @@ examples:
     network_attachment_name: some-network-attachment
   test_env_vars:
     project_id: 'PROJECT_NAME'
-    region: 'REGION'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
 parameters:
