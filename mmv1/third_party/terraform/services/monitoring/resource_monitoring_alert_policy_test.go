@@ -245,8 +245,6 @@ func testAccMonitoringAlertPolicy_sql(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringAlertPolicy_sqlCfg(),
-			},
-			{
 				// SQL alerts require additional GCP resources to be created and billed,
 				// so we only run the plan test for now.
 				PlanOnly: true,
