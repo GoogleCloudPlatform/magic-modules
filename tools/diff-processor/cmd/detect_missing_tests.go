@@ -45,8 +45,6 @@ func (o *detectMissingTestsOptions) run(args []string) error {
 		glog.Infof("error reading path: %s, err: %v", path, err)
 	}
 
-	schemaDiff := diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
-
 	missingTests, err := detector.DetectMissingTests(schemaDiff, allTests)
 	if err != nil {
 		return fmt.Errorf("error detecting missing tests: %v", err)
