@@ -56,7 +56,28 @@ data "google_project" "project" {
 	provider = google-beta
 }
 
-data "google_project" "new_project" {
+resource "google_gemini_data_sharing_with_google_setting" "basic" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
+	location = "global"
+    enable_preview_data_sharing = true
+}
+
+resource "google_gemini_data_sharing_with_google_setting_binding" "basic_binding" {
+    provider = google-beta
+    data_sharing_with_google_setting_id = google_gemini_data_sharing_with_google_setting.basic.data_sharing_with_google_setting_id
+    setting_binding_id = "%{setting_binding_id}"
+	location = "global"
+	target = "projects/${data.google_project.project.number}"
+	labels = {}
+    product = "PRODUCT_UNSPECIFIED"
+}
+`, context)
+}
+
+func testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
 	provider = google-beta
 }
 
@@ -73,33 +94,8 @@ resource "google_gemini_data_sharing_with_google_setting_binding" "basic_binding
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
-}
-`, context)
-}
-
-func testAccGeminiDataSharingWithGoogleSettingBinding_geminiDataSharingWithGoogleSettingBindingBasicExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {
-	provider = google-beta
-}
-
-data "google_project" "new_project" {
-	provider = google-beta
-}
-
-resource "google_gemini_data_sharing_with_google_setting" "basic" {
-    provider = google-beta
-    data_sharing_with_google_setting_id = "%{data_sharing_with_google_setting_id}"
-	location = "global"
-    enable_preview_data_sharing = true
-}
-
-resource "google_gemini_data_sharing_with_google_setting_binding" "basic_binding" {
-    provider = google-beta
-    data_sharing_with_google_setting_id = google_gemini_data_sharing_with_google_setting.basic.data_sharing_with_google_setting_id
-    setting_binding_id = "%{setting_binding_id}"
-	location = "global"
-	target = "projects/${data.google_project.new_project.number}"
+	labels = {"my_label":"my_value"}
+    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
