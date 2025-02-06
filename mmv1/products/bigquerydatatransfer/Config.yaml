@@ -228,6 +228,7 @@ properties:
           The Secret Access Key of the AWS account transferring data from.
         sensitive: true
         exactly_one_of:
+          - 'sensitive_params.0.secretAccessKey'
           - 'sensitive_params.0.secretAccessKeyWo'
       - name: 'secretAccessKeyWo'
         type: String
@@ -235,4 +236,5 @@ properties:
           The Secret Access Key of the AWS account transferring data from.
         write_only: true
         exactly_one_of:
+          - 'sensitive_params.0.secretAccessKeyWo'
           - 'sensitive_params.0.secretAccessKey'
