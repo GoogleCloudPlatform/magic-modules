@@ -60,7 +60,7 @@ data "google_project" "project" {
 data "google_project" "new_project" {
 	provider = google-beta
 	project_id = "${new_project_id}"
-	project_name = "${new_project_id}"
+	name = "${new_project_id}"
 }
 
 resource "google_gemini_logging_setting" "basic" {
@@ -89,7 +89,7 @@ data "google_project" "project" {
 data "google_project" "new_project" {
 	provider = google-beta
 	project_id = "${new_project_id}"
-	project_name = "${new_project_id}"
+	name = "${new_project_id}"
 }
 
 resource "google_gemini_logging_setting" "basic" {
