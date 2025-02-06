@@ -228,6 +228,7 @@ func (e *Examples) SetHCLText() {
 	docTestEnvVars := make(map[string]string)
 	docs_defaults := map[string]string{
 		"PROJECT_NAME":         "my-project-name",
+		"PROJECT_NUMBER":       "1111111111111",
 		"CREDENTIALS":          "my/credentials/filename.json",
 		"REGION":               "us-west1",
 		"ORG_ID":               "123456789",
