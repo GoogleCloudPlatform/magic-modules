@@ -17,6 +17,7 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 	context := map[string]interface{}{
 		"logging_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
+		"new_project_id": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -58,6 +59,7 @@ data "google_project" "project" {
 
 data "google_project" "new_project" {
 	provider = google-beta
+	project_id = "${new_project_id}"
 }
 
 resource "google_gemini_logging_setting" "basic" {
@@ -85,6 +87,7 @@ data "google_project" "project" {
 
 data "google_project" "new_project" {
 	provider = google-beta
+	project_id = "${new_project_id}"
 }
 
 resource "google_gemini_logging_setting" "basic" {
