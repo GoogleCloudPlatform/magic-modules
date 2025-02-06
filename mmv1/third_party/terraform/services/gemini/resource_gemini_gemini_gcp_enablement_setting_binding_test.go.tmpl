@@ -56,10 +56,6 @@ data "google_project" "project" {
 	provider = google-beta
 }
 
-data "google_project" "new_project" {
-	provider = google-beta
-}
-
 resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
@@ -73,6 +69,8 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
+	labels = {}
+    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
@@ -80,10 +78,6 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
 func testAccGeminiGeminiGcpEnablementSettingBinding_geminiGeminiGcpEnablementSettingBindingBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
-}
-
-data "google_project" "new_project" {
 	provider = google-beta
 }
 
@@ -99,7 +93,9 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "projects/${data.google_project.new_project.number}"
+	target = "projects/${data.google_project.project.number}"
+	labels = {"my_label":"my_value"}
+    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
