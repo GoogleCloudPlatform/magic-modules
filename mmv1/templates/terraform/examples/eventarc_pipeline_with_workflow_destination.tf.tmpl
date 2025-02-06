@@ -1,30 +1,7 @@
-resource "google_compute_network" "psc" {
-  name                    = "{{index $.Vars "network_name"}}"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "psc" {
-  name   = "{{index $.Vars "subnet_name"}}"
-  region = "us-central1"
-
-  network       = google_compute_network.psc.id
-  ip_cidr_range = "10.0.0.0/16"
-}
-
-resource "google_compute_network_attachment" "psc" {
-  name                  = "{{index $.Vars "network_attachment_name"}}"
-  region                = "us-central1"
-  connection_preference = "ACCEPT_AUTOMATIC"
-
-  subnetworks = [
-    google_compute_subnetwork.psc.self_link
-  ]
-}
-
 resource "google_workflows_workflow" "workflow" {
   name                = "{{index $.Vars "workflow_name"}}"
   deletion_protection = false
-  region              = "us-central1"
+  region              = "{{index $.TestEnvVars "region"}}"
   source_contents     = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #
@@ -55,12 +32,12 @@ EOF
 }
 
 resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
-  location    = "us-central1"
+  location    = "{{index $.TestEnvVars "region"}}"
   pipeline_id = "{{index $.Vars "pipeline_name"}}"
   destinations {
     workflow = google_workflows_workflow.workflow.id
     network_config {
-      network_attachment = google_compute_network_attachment.psc.id
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/{{index $.TestEnvVars "region"}}/networkAttachments/{{index $.Vars "network_attachment_name"}}"
     }
   }
 }
