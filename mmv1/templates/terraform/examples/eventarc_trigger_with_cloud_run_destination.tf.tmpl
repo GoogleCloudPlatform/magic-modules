@@ -1,6 +1,6 @@
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "trigger_name"}}"
-  location = "{{index $.TestEnvVars "region"}}"
+  location = "us-central1"
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.pubsub.topic.v1.messagePublished"
@@ -8,7 +8,7 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   destination {
     cloud_run_service {
       service = google_cloud_run_service.default.name
-      region  = "{{index $.TestEnvVars "region"}}"
+      region  = "us-central1"
     }
   }
   labels = {
@@ -27,7 +27,7 @@ resource "google_pubsub_topic" "foo" {
 
 resource "google_cloud_run_service" "default" {
   name     = "{{index $.Vars "service_name"}}"
-  location = "{{index $.TestEnvVars "region"}}"
+  location = "us-central1"
 
   template {
     spec {
