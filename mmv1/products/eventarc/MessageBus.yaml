@@ -36,10 +36,10 @@ async:
     resource_inside_response: true
 autogen_async: true
 examples:
-- name: eventarc_message_bus
+- name: eventarc_message_bus_with_cmek
   primary_resource_id: primary
-  vars:
-    message_bus_id: some-message-bus
+  test_env_vars:
+    project_name: PROJECT_NAME
   # We don't auto-generate tests since we can't support concurrent tests, as long as
   # only one MessageBus is supported per project.
   exclude_test: true

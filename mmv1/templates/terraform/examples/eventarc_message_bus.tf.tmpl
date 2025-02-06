@@ -1,4 +1,0 @@
-resource "google_eventarc_message_bus" "{{$.PrimaryResourceId}}" {
-  location       = "us-central1"
-  message_bus_id = "{{index $.Vars "message_bus_id"}}"
-}
