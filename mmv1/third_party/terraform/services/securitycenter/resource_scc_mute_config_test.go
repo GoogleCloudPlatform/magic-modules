@@ -59,7 +59,7 @@ resource "google_scc_mute_config" "default" {
   filter         = "category: \"OS_VULNERABILITY\""
   description    = "A Test Mute Config"
   type           = "DYNAMIC"
-  expiry_time    = "2025-02-03T15:01:23Z"
+  expiry_time    = "2215-02-03T15:01:23Z"
 }  
 `, context)
 }
@@ -73,7 +73,7 @@ resource "google_scc_mute_config" "default" {
   filter         = "category: \"OS_VULNERABILITY\""
   description    = "An Updated Test Mute Config"
   type           = "DYNAMIC"
-  expiry_time    = "2025-02-03T15:01:23Z"
+  expiry_time    = "2215-02-03T15:01:23Z"
 }  
 `, context)
 }
