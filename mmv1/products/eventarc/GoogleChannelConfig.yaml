@@ -36,17 +36,11 @@ references:
 description: |
  The Eventarc GoogleChannelConfig resource
 examples:
-  - name: eventarc_google_channel_config
-    primary_resource_id: primary
   - name: eventarc_google_channel_config_with_cmek
     primary_resource_id: primary
-    vars:
-      key_name: some-key
     test_env_vars:
-      project_number: 'PROJECT_NUMBER'
-    test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-google-channel-config-key").CryptoKey.Name'
-    exclude_docs: true
+      project_name: 'PROJECT_NAME'
+    exclude_test: true
 parameters:
   - name: location
     type: String
