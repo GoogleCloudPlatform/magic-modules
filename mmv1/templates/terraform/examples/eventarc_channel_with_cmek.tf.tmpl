@@ -5,9 +5,9 @@ resource "google_kms_crypto_key_iam_member" "key_member" {
 }
 
 resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
-  location             = "{{index $.TestEnvVars "region"}}"
+  location             = "us-central1"
   name                 = "{{index $.Vars "channel_name"}}"
   crypto_key_name      = "{{index $.Vars "key_name"}}"
-  third_party_provider = "projects/{{index $.TestEnvVars "project"}}/locations/{{index $.TestEnvVars "region"}}/providers/datadog"
+  third_party_provider = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/providers/datadog"
   depends_on           = [google_kms_crypto_key_iam_member.key_member]
 }
