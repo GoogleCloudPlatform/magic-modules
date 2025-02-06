@@ -17,7 +17,6 @@ func TestAccGeminiReleaseChannelSettingBinding_geminiReleaseChannelSettingBindin
 	context := map[string]interface{}{
 		"release_channel_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
-        "new_project_id": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
