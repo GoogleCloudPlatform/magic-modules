@@ -3,7 +3,7 @@ resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
   pipeline_id = "{{index $.Vars "pipeline_name"}}"
   destinations {
     http_endpoint {
-      uri = "https://10.10.10.8:80/route"
+      uri = "https://10.77.0.0:80/route"
     }
     network_config {
       network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/{{index $.TestEnvVars "region"}}/networkAttachments/{{index $.Vars "network_attachment_name"}}"
