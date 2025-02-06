@@ -332,7 +332,7 @@ properties:
                   - name: 'title'
                     type: 'string'
                     description: |
-                      Human readable title. Must be unique within the perimeter. Does not effect behavior.
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
             - name: 'egressPolicies'
               type: Array
               description: |
@@ -448,7 +448,7 @@ properties:
                   - name: 'title'
                     type: 'string'
                     description: |
-                      Human readable title. Must be unique within the perimeter. Does not effect behavior.
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
         - name: 'spec'
           type: NestedObject
           description: |
@@ -639,7 +639,7 @@ properties:
                   - name: 'title'
                     type: 'string'
                     description: |
-                      Human readable title. Must be unique within the perimeter. Does not effect behavior.
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
             - name: 'egressPolicies'
               type: Array
               description: |
@@ -757,7 +757,7 @@ properties:
                   - name: 'title'
                     type: 'string'
                     description: |
-                      Human readable title. Must be unique within the perimeter. Does not effect behavior.
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
         - name: 'useExplicitDryRunSpec'
           type: Boolean
           description: |

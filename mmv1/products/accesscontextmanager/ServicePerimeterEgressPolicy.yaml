@@ -199,7 +199,7 @@ properties:
   - name: 'title'
     type: 'string'
     description: |
-      Human readable title. Must be unique within the perimeter. Does not effect behavior.
+      Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'
     type: String
     description: |
