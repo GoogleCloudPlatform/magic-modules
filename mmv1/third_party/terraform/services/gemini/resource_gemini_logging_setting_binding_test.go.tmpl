@@ -76,6 +76,8 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
+	labels = {}
+	product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
@@ -105,6 +107,8 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.new_project.number}"
+	labels = {}
+	product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
