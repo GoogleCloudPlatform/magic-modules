@@ -59,7 +59,6 @@ data "google_project" "project" {
 
 data "google_project" "new_project" {
     provider = google-beta
-    project_id = "${new_project_id}"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
@@ -75,6 +74,8 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
+    labels = {}
+    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
@@ -87,7 +88,6 @@ data "google_project" "project" {
 
 data "google_project" "new_project" {
     provider = google-beta
-    project_id = "${new_project_id}"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
@@ -103,6 +103,8 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.new_project.number}"
+    labels = {"my_label":"my_value"}
+    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
