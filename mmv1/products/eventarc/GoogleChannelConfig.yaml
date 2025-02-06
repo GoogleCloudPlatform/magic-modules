@@ -25,6 +25,10 @@ update_verb: PATCH
 update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
+import_format:
+- 'projects/{{project}}/locations/{{location}}/googleChannelConfig'
+- '{{project}}/{{location}}'
+- '{{location}}'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/eventarc/docs/use-cmek#enable-cmek-google-channel'
@@ -39,9 +43,10 @@ examples:
     vars:
       key_name: some-key
     test_env_vars:
-      project: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
     test_vars_overrides:
       'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-google-channel-config-key").CryptoKey.Name'
+    exclude_docs: true
 parameters:
   - name: location
     type: String
@@ -49,14 +54,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+properties:
   - name: name
     type: String
     description: Required. The resource name of the config. Must be in the format of, `projects/{project}/locations/{location}/googleChannelConfig`.
     required: true
     immutable: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
-    custom_expand: templates/terraform/custom_expand/eventarc_google_channel_config_name.go.tmpl
-properties:
   - name: updateTime
     type: String
     description: Output only. The last-modified time.
