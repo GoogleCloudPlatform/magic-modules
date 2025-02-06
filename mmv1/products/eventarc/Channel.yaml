@@ -43,12 +43,16 @@ examples:
       key_name: some-key
     test_env_vars:
       project: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
+      region: 'REGION'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
+      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", envvar.GetTestRegionFromEnv(), "tf-bootstrap-eventarc-channel-key").CryptoKey.Name'
   - name: eventarc_channel
     primary_resource_id: primary
     vars:
       channel_name: some-channel
+    test_env_vars:
+      region: 'REGION'
     exclude_docs: true
 parameters:
   - name: location

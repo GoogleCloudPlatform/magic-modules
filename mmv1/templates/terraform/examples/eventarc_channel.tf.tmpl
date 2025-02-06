@@ -1,4 +1,4 @@
 resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "region"}}"
   name     = "{{index $.Vars "channel_name"}}"
 }
