@@ -142,7 +142,28 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return false
+					localMd5Hash := ""
+					if source, ok := d.GetOkExists("source"); ok {
+						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
+					}
+
+					if content, ok := d.GetOkExists("content"); ok {
+						localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+					}
+
+					// If `source` or `content` is dynamically set, both field will be empty.
+					// We should not suppress the diff to avoid the following error:
+					// 'Mismatch reason: extra attributes: detect_md5hash'
+					if localMd5Hash == "" {
+						return false
+					}
+
+					// `old` is the md5 hash we retrieved from the server in the ReadFunc
+					if old != localMd5Hash {
+						return false
+					}
+
+					return true
 				},
 			},
 
@@ -367,7 +388,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("source") || d.HasChange("source_md5hash") {
+	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
@@ -442,6 +463,9 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
+	}
+	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
+		return fmt.Errorf("Error setting detect_md5hash: %s", err)
 	}
 	if err := d.Set("source_md5hash", d.Get("source_md5hash")); err != nil {
 		return fmt.Errorf("Error setting source_md5hash: %s", err)
@@ -591,15 +615,33 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	if hasObjectContentChanges(d) {
-		d.SetNewComputed("crc32c")
-		d.SetNewComputed("generation")
-		d.SetNewComputed("md5hash")
+	localMd5Hash := ""
+	if source, ok := d.GetOkExists("source"); ok {
+		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
+	}
+	if content, ok := d.GetOkExists("content"); ok {
+		localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+	}
+	if localMd5Hash == "" {
+		return nil
 	}
 
-	if d.HasChange("source_md5hash") {
-		d.SetNewComputed("crc32c")
-		d.SetNewComputed("md5hash")
+	oldMd5Hash, ok := d.GetOkExists("md5hash")
+	if ok && oldMd5Hash == localMd5Hash {
+		return nil
+	}
+
+	err := d.SetNewComputed("md5hash")
+	if err != nil {
+		return fmt.Errorf("Error re-setting md5hash: %s", err)
+	}
+	err = d.SetNewComputed("crc32c")
+	if err != nil {
+		return fmt.Errorf("Error re-setting crc32c: %s", err)
+	}
+	err = d.SetNewComputed("generation")
+	if err != nil {
+		return fmt.Errorf("Error re-setting generation: %s", err)
 	}
 	return nil
 }
