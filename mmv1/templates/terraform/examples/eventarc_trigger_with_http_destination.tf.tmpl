@@ -1,6 +1,6 @@
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "trigger_name"}}"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "region"}}"
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.pubsub.topic.v1.messagePublished"

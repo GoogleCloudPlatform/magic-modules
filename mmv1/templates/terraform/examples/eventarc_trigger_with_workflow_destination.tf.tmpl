@@ -1,6 +1,6 @@
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "trigger_name"}}"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "region"}}"
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.pubsub.topic.v1.messagePublished"
@@ -14,7 +14,7 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
 resource "google_workflows_workflow" "workflow" {
   name                = "{{index $.Vars "workflow_name"}}"
   deletion_protection = false
-  region              = "us-central1"
+  region              = "{{index $.TestEnvVars "region"}}"
   source_contents     = <<-EOF
   # This is a sample workflow, feel free to replace it with your source code
   #

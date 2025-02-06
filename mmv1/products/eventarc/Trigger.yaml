@@ -40,6 +40,8 @@ examples:
       trigger_name: some-trigger
       topic_name: some-topic
       service_name: some-service
+    test_env_vars:
+      region: 'REGION'
   - name: eventarc_trigger_with_http_destination
     primary_resource_id: primary
     vars:
@@ -62,8 +64,9 @@ examples:
       project_id: 'PROJECT_NAME'
       project_number: 'PROJECT_NUMBER'
       service_account: 'SERVICE_ACCT'
+      region: 'REGION'
     test_vars_overrides:
-      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
+      'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", envvar.GetTestRegionFromEnv(), "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
     exclude_docs: true
   - name: eventarc_trigger_with_workflow_destination
     primary_resource_id: primary
@@ -72,6 +75,7 @@ examples:
       workflow_name: some-workflow
     test_env_vars:
       service_account: 'SERVICE_ACCT'
+      region: 'REGION'
     exclude_docs: true
   - name: eventarc_trigger_with_path_pattern_filter
     primary_resource_id: primary
@@ -79,6 +83,7 @@ examples:
       trigger_name: some-trigger
       service_account_id: trigger-sa
       service_name: some-service
+      region: 'REGION'
     exclude_docs: true
 parameters:
   - name: location

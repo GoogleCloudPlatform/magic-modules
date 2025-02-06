@@ -5,16 +5,16 @@ resource "google_kms_crypto_key_iam_member" "key_member" {
 }
 
 resource "google_eventarc_channel" "test_channel" {
-  location             = "us-central1"
+  location             = "{{index $.TestEnvVars "region"}}"
   name                 = "{{index $.Vars "channel_name"}}"
   crypto_key_name      = "{{index $.Vars "key_name"}}"
-  third_party_provider = "projects/{{index $.TestEnvVars "project_id"}}/locations/us-central1/providers/datadog"
+  third_party_provider = "projects/{{index $.TestEnvVars "project_id"}}/locations/{{index $.TestEnvVars "region"}}/providers/datadog"
   depends_on           = [google_kms_crypto_key_iam_member.key_member]
 }
 
 resource "google_cloud_run_service" "default" {
   name     = "{{index $.Vars "service_name"}}"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "region"}}"
 
   template {
     spec {
@@ -37,7 +37,7 @@ resource "google_cloud_run_service" "default" {
 
 resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "trigger_name"}}"
-  location = "us-central1"
+  location = "{{index $.TestEnvVars "region"}}"
   matching_criteria {
     attribute = "type"
     value     = "datadog.v1.alert"
@@ -45,7 +45,7 @@ resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
   destination {
     cloud_run_service {
       service = google_cloud_run_service.default.name
-      region  = "us-central1"
+      region  = "{{index $.TestEnvVars "region"}}"
     }
   }
   service_account = "{{index $.TestEnvVars "service_account"}}"
