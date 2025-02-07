@@ -70,7 +70,6 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
-    labels = {}
 }
 `, context)
 }

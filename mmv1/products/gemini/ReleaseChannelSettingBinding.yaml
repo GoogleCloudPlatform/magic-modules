@@ -97,7 +97,7 @@ properties:
   - name: product
     type: Enum
     description: |-
-      Required. Product type of the setting binding.
+      Product type of the setting binding.
       Possible values:
       PRODUCT_UNSPECIFIED
       GEMINI_CLOUD_ASSIST
