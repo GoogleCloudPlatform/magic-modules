@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 	"slices"
 	"sort"
 

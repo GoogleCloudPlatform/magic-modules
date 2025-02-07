@@ -3,8 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 
 	"io"
 	"os"

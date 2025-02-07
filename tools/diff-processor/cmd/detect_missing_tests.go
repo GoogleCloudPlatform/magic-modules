@@ -2,15 +2,12 @@ package cmd
 
 import (
 	"encoding/json"
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 	"io"
 
 	"fmt"
 	"os"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
-	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
