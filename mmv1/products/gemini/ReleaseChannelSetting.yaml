@@ -61,15 +61,12 @@ properties:
     type: KeyValueLabels
     description: Labels as key value pairs.
   - name: releaseChannel
-    type: Enum
+    type: String
     description: |-
       Release channel to be used.
       Possible values:
       STABLE
       EXPERIMENTAL
-    enum_values:
-      - 'STABLE'
-      - 'EXPERIMENTAL'
   - name: name
     type: String
     description: |-
