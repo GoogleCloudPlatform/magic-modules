@@ -33,6 +33,9 @@ examples:
       release_channel_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
       target: projects/980109375338
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
 autogen_async: true
 async:
   operation:
