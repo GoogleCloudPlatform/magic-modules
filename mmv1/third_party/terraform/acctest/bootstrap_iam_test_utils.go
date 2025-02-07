@@ -1,7 +1,6 @@
 package acctest
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -68,8 +67,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		setPolicyRequest := &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}
 		policy, err = client.Projects.SetIamPolicy(project.ProjectId, setPolicyRequest).Do()
 		if err == nil {
-			msg +=
-				t.Logf("[DEBUG] Waiting for IAM bootstrapping to propagate for project %s.")
+			t.Logf("[DEBUG] Waiting for IAM bootstrapping to propagate for project %s.", project.ProjectId)
 			time.Sleep(3 * time.Minute)
 			break
 		}
