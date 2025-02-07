@@ -15,8 +15,8 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"logging_setting_id": fmt.Sprintf("tf-binding-ls-%s", acctest.RandString(t, 10)),
-		"setting_binding_id": fmt.Sprintf("tf-binding-lsb-%s", acctest.RandString(t, 10)),
+		"logging_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
+		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
