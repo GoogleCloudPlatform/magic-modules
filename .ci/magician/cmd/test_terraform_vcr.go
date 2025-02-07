@@ -156,7 +156,27 @@ The following environment variables are required:
 			return fmt.Errorf("wrong number of arguments %d, expected 5", len(args))
 		}
 
-		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
+		rnr.Mkdir("/tmp/unittestcov")
+		rnr.Mkdir("/tmp/vcrtestcov")
+
+		if err := execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt); err != nil {
+			// TODO: return err
+			fmt.Printf("failed to run vcr test: %s", err)
+		}
+		out, err := rnr.Run("ls", []string{"/tmp/vcrtestcov"}, nil)
+		fmt.Printf("ls /tmp/vcrtestcov = %s, %s\n", out, err)
+		if err := unitTest(args[0], ctlr, rnr); err != nil {
+			// TODO: return err
+			fmt.Printf("failed to run unit test: %s", err)
+		}
+		out, err = rnr.Run("ls", []string{"/tmp/unittestcov"}, nil)
+		fmt.Printf("ls /tmp/unittestcov = %s, %s\n", out, err)
+		if err := mergeCovData(rnr, args[1], args[2], args[0], gh); err != nil {
+			return fmt.Errorf("failed to run merge cov data: %s", err)
+		}
+
+		return nil
+
 	},
 }
 
@@ -166,6 +186,105 @@ func listTTVRequiredEnvironmentVariables() string {
 		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
 	}
 	return result
+}
+
+func mergeCovData(rnr ExecRunner, commitSha string, buildID string, prNumber string, gh GithubClient) error {
+	rnr.Mkdir("/tmp/mergedcov")
+
+	_, err := rnr.Run("go", []string{"tool", "covdata", "merge", "-i=/tmp/unittestcov,/tmp/vcrtestcov", "-o=/tmp/mergedcov"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to merge coverage data: %s", err)
+	}
+	out, err := rnr.Run("ls", []string{"/tmp/mergedcov"}, nil)
+	fmt.Printf("ls /tmp/mergedcov = %s, %s\n", out, err)
+
+	out, err = rnr.Run("go", []string{"tool", "covdata", "percent", "-i=/tmp/mergedcov"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to calculate coverage data: %s", err)
+	}
+	fmt.Println(out)
+
+	_, err = rnr.Run("go", []string{"tool", "covdata", "textfmt", "-i=/tmp/mergedcov", "-o=/tmp/profile.txt"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert coverage data to text format: %s", err)
+	}
+
+	_, err = rnr.Run("go", []string{"tool", "cover", "-html=/tmp/profile.txt", "-o=/tmp/profile.html"}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to convert coverage data to text format: %s", err)
+	}
+
+	args := []string{"-m", "cp", "/tmp/mergedcov/*", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
+	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+		// return fmt.Errorf("error upload cov data %w", err)
+		fmt.Println(err)
+	}
+
+	args = []string{"-m", "cp", "/tmp/profile.html", "gs://test-coverage-data" + "/cov/" + buildID + "/"}
+	if _, err := rnr.Run("gsutil", args, nil); err != nil {
+		fmt.Println(err)
+		return fmt.Errorf("error upload cov data %w", err)
+	}
+	out += "\n"
+	covURL := "https://storage.cloud.google.com/test-coverage-data/cov/" + buildID + "/profile.html"
+	out += fmt.Sprintf("Here's the [coverate details](%s)", covURL)
+
+	if err := gh.PostComment(prNumber, out); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
+	}
+	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", covURL, commitSha); err != nil {
+		return fmt.Errorf("error posting pending status: %w", err)
+	}
+	return nil
+}
+
+func unitTest(prNumber string, ctlr *source.Controller, rnr ExecRunner) error {
+	newBranch := "auto-pr-" + prNumber
+	oldBranch := newBranch + "-old"
+	repo := &source.Repo{
+		Name:   "terraform-provider-google-beta",
+		Owner:  "modular-magician",
+		Branch: newBranch,
+	}
+
+	ctlr.SetPath(repo)
+	if err := ctlr.Clone(repo); err != nil {
+		return fmt.Errorf("error cloning repo: %w", err)
+	}
+	if err := ctlr.Fetch(repo, oldBranch); err != nil {
+		return fmt.Errorf("failed to fetch old branch: %w", err)
+	}
+	changedFiles, err := ctlr.DiffNameOnly(repo, oldBranch, newBranch)
+	if err != nil {
+		return fmt.Errorf("failed to compute name-only diff: %w", err)
+	}
+	repo.ChangedFiles = changedFiles
+	repo.UnifiedZeroDiff, err = ctlr.DiffUnifiedZero(repo, oldBranch, newBranch)
+	if err != nil {
+		return fmt.Errorf("failed to compute unified=0 diff: %w", err)
+	}
+
+	services, _ := modifiedPackages(repo.ChangedFiles, provider.Beta)
+	if len(services) == 0 {
+		fmt.Println("Skipping tests: No go files or test fixtures changed")
+		return nil
+	}
+	var testDirs []string
+	for service := range services {
+		servicePath := "./" + filepath.Join(provider.Beta.ProviderName(), "services", service)
+		testDirs = append(testDirs, servicePath)
+	}
+	args := []string{"test", "-p", "4", "-cover"}
+	args = append(args, testDirs...)
+	args = append(args, []string{"-args", "-test.gocoverdir=/tmp/unittestcov"}...)
+	if err := rnr.PushDir(repo.Path); err != nil {
+		return fmt.Errorf("error changing to tpgbRepo dir: %w", err)
+	}
+	_, err = rnr.Run("go", args, nil)
+	if err != nil {
+		return fmt.Errorf("unit test failed with error: %s", err)
+	}
+	return nil
 }
 
 func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
