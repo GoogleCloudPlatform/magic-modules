@@ -466,7 +466,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location_1":    "us-central1",
+		"location_1":    "us-east1",
 		"location_2":    "us-west1",
 		"tier":          "ENTERPRISE",
 	}
