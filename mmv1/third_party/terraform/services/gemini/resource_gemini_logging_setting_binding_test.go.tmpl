@@ -94,7 +94,7 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
-	labels = {"my_label":"my_value"}
+	labels = {"my_key":"my_value"}
 	product = "GEMINI_CODE_ASSIST"
 }
 `, context)
