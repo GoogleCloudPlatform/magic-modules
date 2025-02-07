@@ -58,8 +58,9 @@ data "google_project" "project" {
 }
 
 resource "google_project" "new_project" {
-  project_id = "%{new_project_id}"
-  name       = "Terraform Acc Test Project"
+    provider = google-beta
+    project_id = "%{new_project_id}"
+    name = "Terraform Acc Test Project"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
@@ -87,8 +88,9 @@ data "google_project" "project" {
 }
 
 resource "google_project" "new_project" {
-  project_id = "%{new_project_id}"
-  name       = "Terraform Acc Test Project"
+    provider = google-beta
+    project_id = "%{new_project_id}"
+    name = "Terraform Acc Test Project"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
