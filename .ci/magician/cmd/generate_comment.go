@@ -208,24 +208,26 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
-			fmt.Println("Failed to clone repo at new branch: ", err)
+			fmt.Printf("Failed to clone repo %q at branch %q: %s\n", repo.Name, newBranch, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at new branch")
 			repo.Cloned = false
 		}
 		if err := ctlr.Fetch(repo, oldBranch); err != nil {
-			fmt.Println("Failed to fetch old branch: ", err)
+			fmt.Printf("Failed to fetch branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
 			continue
 		}
 		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
 			if err := ctlr.Checkout(repo, oldBranch); err != nil {
+				fmt.Printf("Failed to checkout branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
 				repo.Cloned = false
 				continue
 			}
 			rnr.PushDir(repo.Path)
 			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
+				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
 				repo.Cloned = false
 			}
