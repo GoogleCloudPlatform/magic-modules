@@ -25,6 +25,9 @@ id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{servic
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
 autogen_async: true
+sweeper:
+  regions:
+    - "us-west2"
 parameters:
   - name: location
     type: String

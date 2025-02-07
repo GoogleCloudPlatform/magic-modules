@@ -44,6 +44,11 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+sweeper:
+  regions:
+    - "us-central1"
+    - "asia-northeast3"
+    - "europe-west4"
 examples:
   - name: 'region_network_endpoint_group_functions'
     primary_resource_id: 'function_neg'

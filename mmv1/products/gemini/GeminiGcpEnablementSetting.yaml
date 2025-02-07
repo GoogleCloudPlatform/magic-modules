@@ -1,0 +1,71 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: GeminiGcpEnablementSetting
+description: The resource for managing GeminiGcpEnablement settings for Admin Control.
+min_version: 'beta'
+base_url: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
+create_url: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings?geminiGcpEnablementSettingId={{gemini_gcp_enablement_setting_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
+mutex: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
+examples:
+  - name: gemini_gemini_gcp_enablement_setting_basic
+    min_version: 'beta'
+    primary_resource_id: example
+    vars:
+      gemini_gcp_enablement_setting_id: ls1-tf
+autogen_async: false
+autogen_status: R2VtaW5pR2NwRW5hYmxlbWVudFNldHRpbmc=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: geminiGcpEnablementSettingId
+    type: String
+    description: |-
+      Required. Id of the requesting object.
+      If auto-generating Id server-side, remove this field and
+      gemini_gcp_enablement_setting_id from the method_signature of Create RPC
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the resource.
+      Format:projects/{project}/locations/{location}/geminiGcpEnablementSettings/{geminiGcpEnablementSetting}
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. [Output only] Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. [Output only] Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs.
+  - name: enableCustomerDataSharing
+    type: Boolean
+    description: Optional. Whether customer data sharing should be enabled.

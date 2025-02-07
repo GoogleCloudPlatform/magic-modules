@@ -60,6 +60,11 @@ error_retry_predicates:
 schema_version: 2
 state_upgrade_base_schema_version: 1
 state_upgraders: true
+sweeper:
+  regions:
+    - "us-central1"
+    - "europe-west1"
+    - "europe-north1"
 examples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
