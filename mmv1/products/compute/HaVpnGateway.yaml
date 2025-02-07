@@ -41,7 +41,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-  post_create: 'templates/terraform/post_create/labels.tmpl'
 schema_version: 1
 state_upgraders: true
 examples:
