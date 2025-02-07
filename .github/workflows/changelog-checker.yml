@@ -32,4 +32,4 @@ jobs:
           GITHUB_TOKEN: ${{github.token}}
         run: |
           cd repo/tools/go-changelog/cmd/changelog-pr-body-check
-          ./changelog-pr-body-check ${{github.event.pull_request.number}}
+          ./changelog-pr-body-check ${{github.event.number}}
