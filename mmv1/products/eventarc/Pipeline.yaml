@@ -85,15 +85,18 @@ examples:
     service_account: 'SERVICE_ACCT'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
-- name: eventarc_pipeline_complex_avro
+- name: eventarc_pipeline_complex_cmek_avro
   primary_resource_id: primary
   vars:
     pipeline_name: some-pipeline
     network_attachment_name: some-network-attachment
+    key_name: some-key
   test_env_vars:
     project_id: 'PROJECT_NAME'
+    project_number: 'PROJECT_NUMBER'
   test_vars_overrides:
     'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
+    'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
 parameters:
 - name: location
   type: String
