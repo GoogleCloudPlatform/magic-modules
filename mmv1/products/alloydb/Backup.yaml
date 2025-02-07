@@ -94,7 +94,7 @@ parameters:
   - name: 'backupId'
     type: String
     description: |
-      The ID of the alloydb backup.UPDATED
+      The ID of the alloydb backup.
     url_param_only: true
     required: true
     immutable: true

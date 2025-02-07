@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'ClusterRenamed'
+name: 'Cluster'
 description: 'A managed alloydb cluster.'
 references:
   guides:
