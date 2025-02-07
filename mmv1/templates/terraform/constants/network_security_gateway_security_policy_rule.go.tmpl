@@ -1,38 +1,21 @@
 // Get the wait time for creation sleep
-// Use the PRIORITY to calculate
+// Use the time.Now().Nanosecond()
+// It reverts the nanoseconds and multiply by a random number
 // Return the duration to use
-func sleep_wait_time(priority int) time.Duration {
-	lowerMultiplier := time.Duration(random_int(1, 10))
-	timeMultiplier := time.Second
-	higherMultiplier := time.Duration(random_int(10, 15))
-
-	switch {
-	case priority > 120 && priority <= 1000:
-		timeMultiplier = time.Second / higherMultiplier
-	case priority > 1000 && priority <= 12000:
-		timeMultiplier = time.Millisecond * higherMultiplier
-	case priority > 12000 && priority <= 40000:
-		timeMultiplier = time.Millisecond * lowerMultiplier
-	case priority > 40000 && priority <= 120000:
-		timeMultiplier = time.Millisecond
-	case priority > 120000 && priority <= 1000000:
-		timeMultiplier = time.Microsecond * higherMultiplier
-	case priority > 1000000 && priority <= 40000000:
-		timeMultiplier = time.Microsecond * lowerMultiplier
-	case priority > 40000000 && priority <= 120000000:
-		timeMultiplier = time.Microsecond
-	case priority > 120000000 && priority <= 1000000000:
-		timeMultiplier = time.Nanosecond * higherMultiplier
-	case priority > 1000000000:
-		timeMultiplier = time.Nanosecond * (higherMultiplier * lowerMultiplier)
-	default:
-		timeMultiplier = time.Second
-	}
-
-	return (time.Duration(priority) * timeMultiplier)
+func get_sleep_time(nanosec int) time.Duration {
+	reverse_nano := reverse_int(nanosec)
+	return (time.Duration(reverse_nano) * time.Microsecond)
 }
 
-// Return a random int over a range
-func random_int(min, max int) int {
-	return (rand.Intn(max-min) + min)
+// Flip integer number order
+func reverse_int(n int) int {
+	new_int := 0
+	for n > 0 {
+		remainder := n % 10
+		new_int *= 10
+		new_int += remainder
+		n /= 10
+	}
+	return new_int * 100
+	return new_int
 }

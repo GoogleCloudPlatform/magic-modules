@@ -83,6 +83,11 @@ func TestAccNetworkSecurityGatewaySecurityPolicyRule_multiple(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+      {
+				ResourceName:      "google_network_security_gateway_security_policy_rule.rule5",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -191,16 +196,16 @@ resource "google_network_security_gateway_security_policy_rule" "rule4" {
 }
 
 resource "google_network_security_gateway_security_policy_rule" "rule5" {
-	name                    = "tf-test-gateway-sp-rule5-%{random_suffix}"
-	location                = "us-central1"
-	gateway_security_policy = google_network_security_gateway_security_policy.default.name
-	enabled                 = true  
-	description             = "Lowest priority rule"
-	priority                = 2147483647
-	session_matcher         = "host() == 'update.com'"
-	application_matcher     = "request.method == 'GET'"
-	tls_inspection_enabled  = false
-	basic_profile           = "DENY"
-  }
+  name                    = "tf-test-gateway-sp-rule5-%{random_suffix}"
+  location                = "us-central1"
+  gateway_security_policy = google_network_security_gateway_security_policy.default.name
+  enabled                 = true  
+  description             = "Lowest priority rule"
+  priority                = 2147483647
+  session_matcher         = "host() == 'update.com'"
+  application_matcher     = "request.method == 'GET'"
+  tls_inspection_enabled  = false
+  basic_profile           = "DENY"
+}
 `, context)
 }
