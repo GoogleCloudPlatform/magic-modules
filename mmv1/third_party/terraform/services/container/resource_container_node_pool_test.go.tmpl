@@ -554,8 +554,8 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
                                                 "node_config.0.kubelet_config.0.image_minimum_gc_age", "1m"),
 					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
                                                 "node_config.0.kubelet_config.0.image_maximum_gc_age", "10m"),
-					resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
-                                                "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
+					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+					//      "node_config.0.kubelet_config.0.allowed_unsafe_sysctls.0", "kernel.shm*"),
 				),
 			},
 			{
@@ -3181,6 +3181,7 @@ resource "google_container_node_pool" "with_sandbox_config" {
 }
 {{- end }}
 
+// TODO: add allowed_unsafe_sysctls in the test after GKE version 1.32.0-gke.1448000 is default version in regular channel and used in Terraform test.
 func testAccContainerNodePool_withKubeletConfig(cluster, np, policy, period, networkName, subnetworkName, insecureKubeletReadonlyPortEnabled, containerLogMaxSize, imageMinimumGcAge, imageMaximumGcAge string, quota bool, podPidsLimit, containerLogMaxFiles, imageGcLowThresholdPercent, imageGcHighThresholdPercent int) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -3218,7 +3219,7 @@ resource "google_container_node_pool" "with_kubelet_config" {
       image_gc_high_threshold_percent        = %d
       image_minimum_gc_age                   = %q
       image_maximum_gc_age                   = %q
-      allowed_unsafe_sysctls                 = ["kernel.shm*", "kernel.msg*", "kernel.sem", "fs.mqueue.*", "net.*"]
+      # allowed_unsafe_sysctls               = ["kernel.shm*", "kernel.msg*", "kernel.sem", "fs.mqueue.*", "net.*"]
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
