@@ -7,13 +7,14 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   kms_key = google_kms_crypto_key.kmskey.id
   region = "us-central1"
   depends_on = [
-    google_network_connectivity_service_connection_policy.default
+    google_network_connectivity_service_connection_policy.default,
+    google_kms_crypto_key_iam_binding.kms_key_iam_decrypter
   ]
 }
 
 resource "google_kms_key_ring" "keyring" {
   name     = "{{index $.Vars "kms_ring_name"}}"
-  location = "global"
+  location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "kmskey" {
@@ -26,7 +27,7 @@ resource "google_kms_crypto_key_iam_binding" "kms_key_iam_decrypter" {
   crypto_key_id = google_kms_crypto_key.kmskey.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   members       = [
-    "service-${data.google_project.project.number}@cloud-redis.iam.serviceaccount.com",
+    "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.serviceaccount.com",
   ]
 }
 
