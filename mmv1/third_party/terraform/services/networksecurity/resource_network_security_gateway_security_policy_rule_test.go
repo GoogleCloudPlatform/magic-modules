@@ -83,7 +83,7 @@ func TestAccNetworkSecurityGatewaySecurityPolicyRule_multiple(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				ResourceName:      "google_network_security_gateway_security_policy_rule.rule5",
 				ImportState:       true,
 				ImportStateVerify: true,
