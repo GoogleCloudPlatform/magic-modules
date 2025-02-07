@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -16,9 +17,9 @@ import (
 // We make sure not to run tests in parallel, since only one MessageBus per project is supported.
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":           testAccEventarcMessageBus_basic,
-		"cryptoKey":       testAccEventarcMessageBus_cryptoKey,
-		"updateCryptoKey": testAccEventarcMessageBus_updateCryptoKey,
+		"basic":     testAccEventarcMessageBus_basic,
+		"cryptoKey": testAccEventarcMessageBus_cryptoKey,
+		"update":    testAccEventarcMessageBus_update,
 	}
 
 	for name, tc := range testCases {
@@ -112,7 +113,7 @@ resource "google_eventarc_message_bus" "primary" {
 `, context)
 }
 
-func testAccEventarcMessageBus_updateCryptoKey(t *testing.T) {
+func testAccEventarcMessageBus_update(t *testing.T) {
 	region := envvar.GetTestRegionFromEnv()
 
 	context := map[string]interface{}{
@@ -129,7 +130,7 @@ func testAccEventarcMessageBus_updateCryptoKey(t *testing.T) {
 		CheckDestroy:             testAccCheckEventarcMessageBusDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEventarcMessageBus_setCryptoKeyCfg(context),
+				Config: testAccEventarcMessageBus_setCfg(context),
 			},
 			{
 				ResourceName:      "google_eventarc_message_bus.primary",
@@ -137,7 +138,12 @@ func testAccEventarcMessageBus_updateCryptoKey(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEventarcMessageBus_updateCryptoKeyCfg(context),
+				Config: testAccEventarcMessageBus_updateCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_message_bus.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_eventarc_message_bus.primary",
@@ -145,7 +151,12 @@ func testAccEventarcMessageBus_updateCryptoKey(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEventarcMessageBus_deleteCryptoKeyCfg(context),
+				Config: testAccEventarcMessageBus_deleteCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_message_bus.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_eventarc_message_bus.primary",
@@ -156,7 +167,7 @@ func testAccEventarcMessageBus_updateCryptoKey(t *testing.T) {
 	})
 }
 
-func testAccEventarcMessageBus_setCryptoKeyCfg(context map[string]interface{}) string {
+func testAccEventarcMessageBus_setCfg(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_kms_crypto_key_iam_member" "key1_member" {
   crypto_key_id = "%{key1}"
@@ -168,12 +179,15 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = "%{key1}"
-  depends_on      = [google_kms_crypto_key_iam_member.key1_member]
+  logging_config {
+    log_severity = "ALERT"
+  }
+  depends_on = [google_kms_crypto_key_iam_member.key1_member]
 }
 `, context)
 }
 
-func testAccEventarcMessageBus_updateCryptoKeyCfg(context map[string]interface{}) string {
+func testAccEventarcMessageBus_updateCfg(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_kms_crypto_key_iam_member" "key1_member" {
   crypto_key_id = "%{key1}"
@@ -191,12 +205,15 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = "%{key2}"
-  depends_on      = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
+  logging_config {
+    log_severity = "DEBUG"
+  }
+  depends_on = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
 `, context)
 }
 
-func testAccEventarcMessageBus_deleteCryptoKeyCfg(context map[string]interface{}) string {
+func testAccEventarcMessageBus_deleteCfg(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_kms_crypto_key_iam_member" "key1_member" {
   crypto_key_id = "%{key1}"
@@ -214,6 +231,9 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = ""
+  logging_config {
+    log_severity = "DEBUG"
+  }
 }
 `, context)
 }
