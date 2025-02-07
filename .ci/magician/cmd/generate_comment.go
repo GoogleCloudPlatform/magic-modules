@@ -73,6 +73,10 @@ type diffCommentData struct {
 	Errors          []Errors
 }
 
+type simpleSchemaDiff struct {
+	AddedResources, ModifiedResources, RemovedResources []string
+}
+
 const allowBreakingChangesLabel = "override-breaking-change"
 
 var gcEnvironmentVariables = [...]string{
@@ -303,7 +307,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			data.MissingTests = missingTests
 		}
 
-		affectedResources, err := changedSchemaResources(diffProcessorPath, rnr)
+		affectedResources, err := computeAffectedResources(diffProcessorPath, rnr, repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
@@ -460,27 +464,31 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]Breakin
 	return changes, rnr.PopDir()
 }
 
-func changedSchemaResources(diffProcessorPath string, rnr ExecRunner) ([]string, error) {
+func computeAffectedResources(diffProcessorPath string, rnr ExecRunner, repo source.Repo) ([]string, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
 		return nil, err
 	}
 
-	output, err := rnr.Run("bin/diff-processor", []string{"changed-schema-resources"}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"schema-diff"}, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("Resources with changed schemas: " + output)
+	fmt.Printf("Schema diff for %q: %s\n", repo.Name, output)
 
-	var labels []string
-	if err = json.Unmarshal([]byte(output), &labels); err != nil {
+	var simpleDiff simpleSchemaDiff
+	if err = json.Unmarshal([]byte(output), &simpleDiff); err != nil {
 		return nil, err
 	}
 
 	if err = rnr.PopDir(); err != nil {
 		return nil, err
 	}
-	return labels, nil
+	var resources []string
+	resources = append(resources, simpleDiff.AddedResources...)
+	resources = append(resources, simpleDiff.ModifiedResources...)
+	resources = append(resources, simpleDiff.RemovedResources...)
+	return resources, nil
 }
 
 // Run the missing test detector and return the results.
