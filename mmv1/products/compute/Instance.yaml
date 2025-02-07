@@ -54,7 +54,7 @@ parameters:
     resource: 'Zone'
     imports: 'name'
 properties:
-  - name: 'canIpForwardICHEN'
+  - name: 'canIpForward'
     type: Boolean
     description: |
       Allows this instance to send and receive packets with non-matching
