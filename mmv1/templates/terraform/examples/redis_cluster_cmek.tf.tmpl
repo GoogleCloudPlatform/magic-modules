@@ -4,7 +4,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
-  kms
+  kms_key = google_kms_crypto_key.kmskey.id
   region = "us-central1"
   depends_on = [
     google_network_connectivity_service_connection_policy.default
