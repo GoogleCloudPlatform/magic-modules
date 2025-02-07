@@ -17,6 +17,7 @@ func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
 	context := map[string]interface{}{
 		"release_channel_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
+        "new_project_id": fmt.Sprintf("tf-test-prj-%s", acctest.RandString(t, 6)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -56,6 +57,11 @@ data "google_project" "project" {
     provider = google-beta
 }
 
+resource "google_project" "new_project" {
+  project_id = "%{new_project_id}"
+  name       = "Terraform Acc Test Project"
+}
+
 resource "google_gemini_release_channel_setting" "basic" {
     provider = google-beta
     release_channel_setting_id = "%{release_channel_setting_id}"
@@ -80,6 +86,11 @@ data "google_project" "project" {
     provider = google-beta
 }
 
+resource "google_project" "new_project" {
+  project_id = "%{new_project_id}"
+  name       = "Terraform Acc Test Project"
+}
+
 resource "google_gemini_release_channel_setting" "basic" {
     provider = google-beta
     release_channel_setting_id = "%{release_channel_setting_id}"
@@ -93,7 +104,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "projects/${data.google_project.project.number}"
+	target = "projects/${data.google_project.new_project.number}"
     labels = {"my_key" = "my_value"}
     product = "GEMINI_CODE_ASSIST"
 }
