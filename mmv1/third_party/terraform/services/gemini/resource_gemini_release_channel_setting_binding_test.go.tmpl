@@ -76,7 +76,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "projects/${data.google_project.new_project.number}"
+	target = "projects/${resource.google_project.new_project.number}"
 }
 `, context)
 }
@@ -106,7 +106,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
-	target = "projects/${data.google_project.new_project.number}"
+	target = "projects/${resource.google_project.new_project.number}"
     labels = {"my_key" = "my_value"}
     product = "GEMINI_CODE_ASSIST"
 }
