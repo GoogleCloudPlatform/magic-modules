@@ -51,22 +51,25 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: releaseChannel
-    type: String
+    type: Enum
     description: |-
-      Optional. Release channel to be used.
+      Release channel to be used.
       Possible values:
       STABLE
       EXPERIMENTAL
+    enum_values:
+      - 'STABLE'
+      - 'EXPERIMENTAL'
   - name: name
     type: String
     description: |-

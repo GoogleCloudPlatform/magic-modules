@@ -70,7 +70,6 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
 	location = "global"
 	target = "projects/${data.google_project.project.number}"
     labels = {}
-    product = "PRODUCT_UNSPECIFIED"
 }
 `, context)
 }
@@ -95,7 +94,7 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
 	location = "global"
 	target = "projects/${data.google_project.new_project.number}"
     labels = {"my_label":"my_value"}
-    product = "PRODUCT_UNSPECIFIED"
+    product = "GEMINI_CODE_ASSIST"
 }
 `, context)
 }

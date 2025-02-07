@@ -11,5 +11,4 @@ resource "google_gemini_release_channel_setting_binding" "{{$.PrimaryResourceId}
     setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
     location = "global"
     target = "{{index $.Vars "target"}}"
-    product = "{{index $.Vars "product"}}"
 }
