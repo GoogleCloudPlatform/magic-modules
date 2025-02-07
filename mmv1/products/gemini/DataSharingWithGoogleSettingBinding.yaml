@@ -74,13 +74,17 @@ parameters:
     required: true
 properties:
   - name: product
-    type: String
+    type: Enum
     description: |-
-      Required. Product type of the setting binding.
+      Product type of the setting binding.
       Possible values:
       PRODUCT_UNSPECIFIED
       GEMINI_CLOUD_ASSIST
       GEMINI_CODE_ASSIST
+    enum_values:
+      - 'PRODUCT_UNSPECIFIED'
+      - 'GEMINI_CLOUD_ASSIST'
+      - 'GEMINI_CODE_ASSIST'
     default_from_api: true
   - name: name
     type: String
@@ -90,16 +94,16 @@ properties:
     output: true
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: target
     type: String
-    description: Required. Target of the binding.
+    description: Target of the binding.
     required: true
