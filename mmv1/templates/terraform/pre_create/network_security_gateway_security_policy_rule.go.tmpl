@@ -1,6 +1,0 @@
-// When creating more than one rule sometimes the creation conflicts.
-// https://github.com/hashicorp/terraform-provider-google/issues/20892
-// Workaround: Get sleep wait time based on the priority.
-sleepTime := sleep_wait_time(priorityProp.(int))
-log.Printf("[DEBUG] Waiting %s to create GatewaySecurityPolicyRule with priority %d", sleepTime,  priorityProp.(int))
-time.Sleep(sleepTime)
