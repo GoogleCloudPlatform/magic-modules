@@ -25,11 +25,11 @@ import (
  // TODO: remove dependency on hashicorp flags
  // need to blank import hashicorp sweeper code to maintain the flags declared in their package
 	_ "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	
+
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 )
 
-func TestSweepers(t *testing.T) {
+func TestAccExecuteSweepers(t *testing.T) {
 	sweeper.ExecuteSweepers(t)
 }
 
