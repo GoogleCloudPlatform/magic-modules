@@ -4,27 +4,31 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
+  kms
   region = "us-central1"
-  zone_distribution_config {
-    mode = "SINGLE_ZONE"
-    zone = "us-central1-f"
-  }
-  maintenance_policy {
-    weekly_maintenance_window {
-      day = "MONDAY"
-      start_time {
-        hours = 1
-        minutes = 0
-        seconds = 0
-        nanos = 0
-      }
-    }
-  }
-  deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
+}
 
+resource "google_kms_key_ring" "keyring" {
+  name     = "{{index $.Vars "kms_ring_name"}}"
+  location = "global"
+}
+
+resource "google_kms_crypto_key" "kmskey" {
+  name            = "{{index $.Vars "kms_key_name"}}"
+  key_ring        = google_kms_key_ring.keyring.id
+  rotation_period = "7776000s"
+}
+
+resource "google_kms_crypto_key_iam_binding" "kms_key_iam_decrypter" {
+  crypto_key_id = google_kms_crypto_key.kmsKey.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members       = "service-${data.google_project.project.number}@cloud-redis.iam.serviceaccount.com"
+}
+
+data "google_project" "project" {
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
@@ -49,3 +53,4 @@ resource "google_compute_network" "consumer_net" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
+
