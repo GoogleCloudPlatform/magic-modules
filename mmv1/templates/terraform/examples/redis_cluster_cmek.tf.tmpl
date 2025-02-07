@@ -23,7 +23,7 @@ resource "google_kms_crypto_key" "kmskey" {
 }
 
 resource "google_kms_crypto_key_iam_binding" "kms_key_iam_decrypter" {
-  crypto_key_id = google_kms_crypto_key.kmsKey.id
+  crypto_key_id = google_kms_crypto_key.kmskey.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   members       = "service-${data.google_project.project.number}@cloud-redis.iam.serviceaccount.com"
 }
