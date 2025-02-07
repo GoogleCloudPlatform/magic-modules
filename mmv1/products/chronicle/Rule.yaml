@@ -27,6 +27,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: UnVsZQ==
 
 examples:
   - name: 'chronicle_rule_basic'
