@@ -68,13 +68,13 @@ resource "google_project_service" "servicenetworking" {
 }
 
 resource "google_compute_network" "apigee_network" {
-  name       = "apigee-network"
+  name       = "tf-test-apigee-network%{random_suffix}"
   project    = google_project.project.project_id
   depends_on = [google_project_service.compute]
 }
 
 resource "google_compute_global_address" "apigee_range" {
-  name          = "apigee-range"
+  name          = "tf-test-apigee-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 16
@@ -90,7 +90,7 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
 }
 
 resource "google_compute_address" "psc_ilb_consumer_address" {
-  name   = "psc-ilb-consumer-address"
+  name   = "tf-test-psc-ilb-consumer-address%{random_suffix}"
   region = "us-west2"
 
   subnetwork   = "default"
@@ -101,7 +101,7 @@ resource "google_compute_address" "psc_ilb_consumer_address" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
-  name   = "psc-ilb-consumer-forwarding-rule"
+  name   = "tf-test-psc-ilb-cfr%{random_suffix}"
   region = "us-west2"
 
   target                = google_compute_service_attachment.psc_ilb_service_attachment.id
@@ -113,7 +113,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_consumer" {
 }
 
 resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
-  name   = "producer-forwarding-rule"
+  name   = "tf-test-producer-fr%{random_suffix}"
   region = "us-west2"
 
   load_balancing_scheme = "INTERNAL"
@@ -126,7 +126,7 @@ resource "google_compute_forwarding_rule" "psc_ilb_target_service" {
 }
 
 resource "google_compute_region_backend_service" "producer_service_backend" {
-  name   = "producer-service"
+  name   = "tf-test-producer-service%{random_suffix}"
   region = "us-west2"
 
   health_checks = [google_compute_health_check.producer_service_health_check.id]
@@ -135,7 +135,7 @@ resource "google_compute_region_backend_service" "producer_service_backend" {
 }
 
 resource "google_compute_health_check" "producer_service_health_check" {
-  name = "producer-service-health-check"
+  name = "tf-test-producer-service-hc%{random_suffix}"
 
   check_interval_sec = 1
   timeout_sec        = 1
@@ -148,7 +148,7 @@ resource "google_compute_health_check" "producer_service_health_check" {
 }
 
 resource "google_compute_network" "psc_ilb_network" {
-  name = "psc-ilb-network"
+  name = "tf-test-psc-ilb-network%{random_suffix}"
   auto_create_subnetworks = false
 
   project     = google_project.project.project_id
@@ -156,7 +156,7 @@ resource "google_compute_network" "psc_ilb_network" {
 }
 
 resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
-  name   = "psc-ilb-producer-subnetwork"
+  name   = "tf-test-psc-ilb-producer-sn%{random_suffix}"
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id
@@ -166,7 +166,7 @@ resource "google_compute_subnetwork" "psc_ilb_producer_subnetwork" {
 }
 
 resource "google_compute_subnetwork" "psc_ilb_nat" {
-  name   = "psc-ilb-nat"
+  name   = "tf-test-psc-ilb-nat%{random_suffix}"
   region = "us-west2"
 
   network       = google_compute_network.psc_ilb_network.id
@@ -177,7 +177,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 }
 
 resource "google_compute_service_attachment" "psc_ilb_service_attachment" {
-  name        = "my-psc-ilb"
+  name        = "tf-test-my-psc-ilb%{random_suffix}"
   region      = "us-west2"
   description = "A service attachment configured with Terraform"
 
