@@ -587,7 +587,7 @@ resource "google_data_loss_prevention_discovery_config" "basic" {
         tag_resources {
             tag_conditions {
                 tag {
-                    namespaced_value = "%{project}/environment/prod"
+                    namespaced_value = "%{project}/tf_test_environment%{random_suffix}/tf_test_prod%{random_suffix}"
                 }
                 sensitivity_score {
                     score = "SENSITIVITY_HIGH"
