@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_update(t *testing.T) {
+func TestAccGeminiLoggingSettingBinding_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -24,7 +24,7 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_basic(context),
+				Config: testAccGeminiLoggingSettingBinding_basic(context),
 			},
 			{
 				ResourceName:            "google_gemini_logging_setting_binding.basic_binding",
@@ -33,7 +33,7 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 				ImportStateVerifyIgnore: []string{"labels", "location", "logging_setting_id", "terraform_labels"},
 			},
 			{
-				Config: testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_update(context),
+				Config: testAccGeminiLoggingSettingBinding_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_gemini_logging_setting_binding.basic_binding", plancheck.ResourceActionUpdate),
@@ -50,7 +50,7 @@ func TestAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_
 	})
 }
 
-func testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_basic(context map[string]interface{}) string {
+func testAccGeminiLoggingSettingBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
 	provider = google-beta
@@ -74,7 +74,7 @@ resource "google_gemini_logging_setting_binding" "basic_binding" {
 `, context)
 }
 
-func testAccGeminiLoggingSettingBinding_geminiLoggingSettingBindingBasicExample_update(context map[string]interface{}) string {
+func testAccGeminiLoggingSettingBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
 	provider = google-beta
