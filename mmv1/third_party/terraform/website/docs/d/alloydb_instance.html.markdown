@@ -20,14 +20,23 @@ data "google_alloydb_instance" "qa" {
 
 The following arguments are supported:
 
-* `cluster` -
+* `cluster_id` -
   (Required)
-  Identifies the alloydb cluster. Must be in the format
-  'projects/{project}/locations/{location}/clusters/{cluster_id}'
+  The ID of the alloydb cluster that the instance belongs to.
+  'alloydb_cluster_id'
 
 * `instance_id` -
   (Required)
   The ID of the alloydb instance.
+  'alloydb_instance_id'
+
+* `project` - 
+  (optional) 
+  The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
+
+* `location` -
+  (optional)
+  The canonical id of the location.If it is not provided, the provider project is used. For example: us-east1.
 
 ## Attributes Reference
 
