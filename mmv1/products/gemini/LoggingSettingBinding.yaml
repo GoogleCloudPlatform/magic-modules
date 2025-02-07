@@ -33,7 +33,6 @@ examples:
       logging_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
       target: projects/980109375338
-      product: PRODUCT_UNSPECIFIED
 autogen_async: true
 timeouts:
   insert_minutes: 90
@@ -85,14 +84,12 @@ properties:
     description: Target of the binding.
     required: true
   - name: product
-    type: String
+    type: Enum
     description: |-
       Product type of the setting binding.
-      Possible values:
-      PRODUCT_UNSPECIFIED
-      GEMINI_CLOUD_ASSIST
-      GEMINI_CODE_ASSIST
-    default_from_api: true
+    enum_values:
+      - 'GEMINI_CLOUD_ASSIST'
+      - 'GEMINI_CODE_ASSIST'
   - name: name
     type: String
     description: |-
