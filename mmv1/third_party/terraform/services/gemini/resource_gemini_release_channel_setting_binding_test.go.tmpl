@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+    "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
@@ -18,6 +19,8 @@ func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
 		"release_channel_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
         "new_project_id": fmt.Sprintf("tf-test-prj-%s", acctest.RandString(t, 6)),
+        "org_id": envvar.GetTestOrgFromEnv(t),
+        "billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -61,6 +64,8 @@ resource "google_project" "new_project" {
     provider = google-beta
     project_id = "%{new_project_id}"
     name = "Terraform Acc Test Project"
+    org_id = "%{org_id}"
+    billing_account = "%{billing_account}"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
