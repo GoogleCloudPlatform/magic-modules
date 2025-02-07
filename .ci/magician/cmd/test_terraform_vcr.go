@@ -232,7 +232,7 @@ func mergeCovData(rnr ExecRunner, commitSha string, buildID string, prNumber str
 	if err := gh.PostComment(prNumber, out); err != nil {
 		return fmt.Errorf("error posting comment: %w", err)
 	}
-	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", covURL, commitSha); err != nil {
+	if err := gh.PostBuildStatus(prNumber, "test-cov", "success", covURL, commitSha); err != nil {
 		return fmt.Errorf("error posting pending status: %w", err)
 	}
 	return nil
