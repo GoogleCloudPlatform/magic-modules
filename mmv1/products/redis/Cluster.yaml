@@ -197,6 +197,7 @@ examples:
       network_name: "mynetwork"
       kms_key_name: "mykey"
       kms_ring_name: "mykeyring"
+      deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
     oics_vars_overrides:

@@ -6,6 +6,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   }
   kms_key = google_kms_crypto_key.kmskey.id
   region = "us-central1"
+  deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
   depends_on = [
     google_network_connectivity_service_connection_policy.default,
     google_kms_crypto_key_iam_binding.kms_key_iam_decrypter
