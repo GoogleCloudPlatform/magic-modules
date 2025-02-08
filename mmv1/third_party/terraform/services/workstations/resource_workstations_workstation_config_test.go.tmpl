@@ -260,8 +260,11 @@ resource "google_workstations_workstation_config" "default" {
 
   persistent_directories {
 	mount_path = "/home"
-	disk_type = pd-standard
-	disk_size = 50
+
+  gce_pd {
+    disk_type = pd-standard
+    disk_size = 50
+    }
   }
 
   labels = {
