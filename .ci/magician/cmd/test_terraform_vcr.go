@@ -92,7 +92,7 @@ It expects the following arguments:
 	3. Build ID
 	4. Project ID where Cloud Builds are located
 	5. Build step number
-	
+
 The following environment variables are required:
 ` + listTTVRequiredEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
