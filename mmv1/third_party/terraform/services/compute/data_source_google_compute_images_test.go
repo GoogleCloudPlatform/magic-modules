@@ -26,6 +26,11 @@ func TestAccDataSourceComputeImages_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Test schema
 					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.0.name"),
+					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.1.name"),
+					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.0.self_link"),
+					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.1.self_link"),
+					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.0.image_id"),
+					resource.TestCheckResourceAttrSet("data.google_compute_images.all", "images.1.image_id"),
 				),
 			},
 		},
