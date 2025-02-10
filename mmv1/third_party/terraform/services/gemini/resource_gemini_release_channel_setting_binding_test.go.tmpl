@@ -22,9 +22,6 @@ func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiReleaseChannelSettingBinding_basic(context),
@@ -89,7 +86,6 @@ resource "google_gemini_release_channel_setting" "basic" {
     location = "global"
     labels = {"my_key" = "my_value"}
     release_channel = "EXPERIMENTAL"
-    depends_on = [time_sleep.wait_1_min]
 }
 
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
