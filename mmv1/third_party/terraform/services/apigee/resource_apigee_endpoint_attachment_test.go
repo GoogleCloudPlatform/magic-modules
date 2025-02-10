@@ -171,7 +171,7 @@ resource "google_compute_subnetwork" "psc_ilb_nat" {
 
   network       = google_compute_network.psc_ilb_network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
-  ip_cidr_range = "10.0.1.0/24"
+  ip_cidr_range = "10.0.36.0/24"
 
   project = google_project.project.project_id
 }
