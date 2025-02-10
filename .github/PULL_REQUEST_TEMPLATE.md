@@ -11,6 +11,6 @@ For example: Fixes https://github.com/hashicorp/terraform-provider-google/issues
 
 See [Write release notes](https://googlecloudplatform.github.io/magic-modules/contribute/release-notes/) for guidance.
 
-```release-note:bug
-discoveryengine: fixed URL templating issue in `google_discovery_engine_target_site` that caused invalid host name errors (fixes #19621)
+```release-note:REPLACEME
+
 ```
