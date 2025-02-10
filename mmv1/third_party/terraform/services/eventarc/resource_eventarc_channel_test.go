@@ -67,6 +67,12 @@ resource "google_eventarc_channel" "primary" {
 
 func testAccEventarcChannel_cryptoKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_kms_crypto_key_iam_member" "key1_member" {
+  crypto_key_id = "%{key1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+}
+
 resource "google_kms_crypto_key_iam_member" "key2_member" {
   crypto_key_id = "%{key2}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -83,7 +89,7 @@ resource "google_eventarc_channel" "primary" {
 `, context)
 }
 
-func TestAccEventarcChannel_LongForm(t *testing.T) {
+func TestAccEventarcChannel_longForm(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -98,7 +104,7 @@ func TestAccEventarcChannel_LongForm(t *testing.T) {
 		CheckDestroy:             testAccCheckEventarcChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEventarcChannel_LongForm(context),
+				Config: testAccEventarcChannel_longForm(context),
 			},
 			{
 				ResourceName:            "google_eventarc_channel.primary",
@@ -110,7 +116,7 @@ func TestAccEventarcChannel_LongForm(t *testing.T) {
 	})
 }
 
-func testAccEventarcChannel_LongForm(context map[string]interface{}) string {
+func testAccEventarcChannel_longForm(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_channel" "primary" {
   location             = "long/form/%{region}"
