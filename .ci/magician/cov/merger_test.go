@@ -1,6 +1,7 @@
 package cov
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,8 +17,9 @@ type MockRunner interface {
 type ParameterList []any
 
 type mockRunner struct {
-	dirs     []string
-	commands []ParameterList
+	dirs       []string
+	commands   []ParameterList
+	cmdResults map[string]string
 }
 
 func (r *mockRunner) Mkdir(path string) error {
@@ -27,6 +29,10 @@ func (r *mockRunner) Mkdir(path string) error {
 
 func (r *mockRunner) Run(name string, args []string, env map[string]string) (string, error) {
 	r.commands = append(r.commands, ParameterList{name, args})
+	cmd := fmt.Sprintf("%s %v", name, args)
+	if result, ok := r.cmdResults[cmd]; ok {
+		return result, nil
+	}
 	return "", nil
 }
 
@@ -119,5 +125,36 @@ func TestUploadToGCS(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantCommands, rnr.commands); diff != "" {
 		t.Errorf("UploadToGCS got different commands: %s", diff)
+	}
+}
+
+func TestPackageCovComment(t *testing.T) {
+	workdir := os.TempDir()
+	rnr := &mockRunner{
+		cmdResults: map[string]string{
+			"go [tool covdata percent -i=" + filepath.Join(workdir, "merged-test-cov]"): "pkg1 10%\npkg2 20%",
+		},
+	}
+	merger := Merger{
+		rnr:       rnr,
+		workDir:   workdir,
+		MergedDir: filepath.Join(workdir, "merged-test-cov"),
+	}
+
+	got, err := merger.PackageCovComment()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := strings.TrimSpace(`
+Test Coverage:
+
+<blockquote>
+pkg1 10%
+pkg2 20%
+</blockquote>	 
+	`)
+	if got != want {
+		t.Errorf("PackageCovComment got = %s, want = %s", got, want)
 	}
 }

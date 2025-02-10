@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 )
 
 // Merger stores coverage related folders and files with a command line runner.
@@ -105,8 +106,8 @@ func (m *Merger) UploadToGCS(gcsPrefix string, buildID string) (string, error) {
 	return fmt.Sprintf("https://storage.cloud.google.com/%s/%s/cov.html", bucketName, buildID), nil
 }
 
-func (m *Merger) PackageCov() (string, error) {
-	return m.rnr.Run(
+func (m *Merger) PackageCovComment() (string, error) {
+	out, err := m.rnr.Run(
 		"go",
 		[]string{
 			"tool",
@@ -116,6 +117,26 @@ func (m *Merger) PackageCov() (string, error) {
 		},
 		nil,
 	)
+	if err != nil {
+		return "", err
+	}
+
+	commentTemplate := `
+Test Coverage:
+
+<blockquote>
+{{.}}
+</blockquote>	 
+	`
+
+	// Create a new template and parse the letter into it.
+	sb := new(strings.Builder)
+	t := template.Must(template.New("commentTemplate").Parse(commentTemplate))
+	err = t.Execute(sb, out)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(sb.String()), nil
 }
 
 func isFolderEmpty(dirPath string) bool {

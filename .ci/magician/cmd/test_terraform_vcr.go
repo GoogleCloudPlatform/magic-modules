@@ -393,11 +393,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 				fmt.Printf("Failed to generate coverage: %s\n", err)
 			}
 
-			out, err := covMerger.PackageCov()
+			out, err := covMerger.PackageCovComment()
 			if err != nil {
 				fmt.Printf("failed to get package coverage: %s\n", err)
 			} else {
-				comment += "\n" + out
+				comment += "\n\n" + out
 			}
 		}
 		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
@@ -430,11 +430,11 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 				fmt.Printf("Failed to generate coverage: %s\n", err)
 			}
 
-			out, err := covMerger.PackageCov()
+			out, err := covMerger.PackageCovComment()
 			if err != nil {
 				fmt.Printf("failed to get package coverage: %s\n", err)
 			} else {
-				comment += "\n" + out
+				comment += "\n\n" + out
 			}
 		}
 		if err := gh.PostComment(prNumber, comment); err != nil {
