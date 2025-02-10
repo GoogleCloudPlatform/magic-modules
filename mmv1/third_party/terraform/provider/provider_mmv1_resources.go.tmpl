@@ -150,6 +150,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_kms_key_handle":                            kms.DataSourceGoogleKmsKeyHandle(),
 	"google_kms_autokey_config":                        kms.DataSourceGoogleKmsAutokeyConfig(),
+	"google_kms_key_handles":							kms.DataSourceGoogleKmsKeyHandles(),
 	{{- end }}
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
@@ -184,6 +185,17 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_oracle_database_cloud_vm_clusters":			oracledatabase.DataSourceOracleDatabaseCloudVmClusters(),
 	"google_oracle_database_cloud_vm_cluster":          oracledatabase.DataSourceOracleDatabaseCloudVmCluster(),
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
+	"google_organizations":                             resourcemanager.DataSourceGoogleOrganizations(),
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_parameter_manager_parameter":               parametermanager.DataSourceParameterManagerParameter(),
+	"google_parameter_manager_parameters":              parametermanager.DataSourceParameterManagerParameters(),
+	"google_parameter_manager_parameter_version":       parametermanager.DataSourceParameterManagerParameterVersion(),
+	"google_parameter_manager_parameter_version_render":parametermanager.DataSourceParameterManagerParameterVersionRender(),
+	"google_parameter_manager_regional_parameter":      parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameter(),
+	"google_parameter_manager_regional_parameters":     parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameters(),
+	"google_parameter_manager_regional_parameter_version": parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameterVersion(),
+	"google_parameter_manager_regional_parameter_version_render":parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameterVersionRender(),
+	{{- end }}
 	"google_privateca_certificate_authority":           privateca.DataSourcePrivatecaCertificateAuthority(),
 	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
 	"google_project":                                   resourcemanager.DataSourceGoogleProject(),
