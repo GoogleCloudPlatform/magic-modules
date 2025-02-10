@@ -47,7 +47,7 @@ self_link: 'folders/{{name}}/locations/global/managementHub'
 # the field values from the resource at runtime.
 custom_code:
   pre_delete: templates/terraform/constants/storage_management_hub.go.tmpl
-  pre_read:   templates/terraform/constants/storage_management_hub.go.tmpl
+  pre_read: templates/terraform/constants/storage_management_hub.go.tmpl
   pre_update: templates/terraform/constants/storage_management_hub.go.tmpl
   custom_create: templates/terraform/custom_create/storage_folder_management_hub.go.tmpl
 # Overrides the URL for the resource's standard Update method. (If unset, the
@@ -61,7 +61,7 @@ update_verb: 'PATCH'
 # fields when updating the resource. If false, it does not.
 update_mask: true
 
-create_url:  'folders/{{name}}/locations/global/managementHub?updateMask=editionConfig,filter'
+create_url: 'folders/{{name}}/locations/global/managementHub?updateMask=editionConfig,filter'
 create_verb: 'PATCH'
 
 exclude_delete: true
