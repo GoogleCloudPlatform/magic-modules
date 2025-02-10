@@ -33,7 +33,6 @@ async:
 autogen_async: true
 description: |
  The Eventarc Trigger resource
-
 sweeper:
     url_substitutions:
       - region: "us-central1"

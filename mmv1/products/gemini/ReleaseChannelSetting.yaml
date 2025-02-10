@@ -24,7 +24,6 @@ id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{
 import_format:
   - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
-
 sweeper:
     url_substitutions:
       - region: "global"

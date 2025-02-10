@@ -51,7 +51,6 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_network_endpoint_group.go.tmpl'
-
 sweeper:
     url_substitutions:
       - zone: "us-central1-a"

@@ -45,7 +45,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.tmpl'
-
 sweeper:
     url_substitutions:
       - region: "us-central1"

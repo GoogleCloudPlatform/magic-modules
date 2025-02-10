@@ -24,7 +24,6 @@ id_format: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettin
 import_format:
   - projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
-
 sweeper:
     url_substitutions:
       - region: "global"

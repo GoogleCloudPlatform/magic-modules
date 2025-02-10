@@ -24,7 +24,6 @@ id_format: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSett
 import_format:
   - projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
-
 sweeper:
     url_substitutions:
       - region: "global"
