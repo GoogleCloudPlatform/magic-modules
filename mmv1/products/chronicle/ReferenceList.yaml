@@ -28,6 +28,7 @@ import_format:
 update_verb: PATCH
 update_mask: true
 exclude_delete: true
+autogen_status: UmVmZXJlbmNlTGlzdA==
 
 examples:
   - name: 'chronicle_referencelist_basic'
