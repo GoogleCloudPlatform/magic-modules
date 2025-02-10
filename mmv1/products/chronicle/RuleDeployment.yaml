@@ -29,6 +29,7 @@ create_verb: PATCH
 update_verb: PATCH
 update_mask: true
 exclude_delete: true
+autogen_status: UnVsZURlcGxveW1lbnQ=
 
 examples:
   - name: 'chronicle_ruledeployment_basic'
