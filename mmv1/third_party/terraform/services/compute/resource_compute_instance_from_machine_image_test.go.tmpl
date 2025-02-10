@@ -315,26 +315,6 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 	})
 }
 
-func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := acctest.GoogleProviderConfig(t)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_instance_from_machine_image" {
-				continue
-			}
-
-			_, err := config.NewComputeClient(config.UserAgent).Instances.Get(
-				config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID).Do()
-			if err == nil {
-				return fmt.Errorf("Instance still exists")
-			}
-		}
-
-		return nil
-	}
-}
-
 func TestAccComputeInstanceFromMachineImage_encryptionKeyKMS(t *testing.T) {
 	t.Parallel()
 
@@ -369,93 +349,117 @@ func TestAccComputeInstanceFromMachineImage_encryptionKeyKMS(t *testing.T) {
 		},
 	})
 }
+
 func TestAccComputeInstanceFromMachineImage_encryptionKeyRaw(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-  machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-  
-  context := map[string]interface{}{
-      "instance_name": instanceName,
-      "image_name": machineImageName,
-      "raw_key": "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
-  }
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
+	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
 
-  acctest.VcrTest(t, resource.TestCase{
-      PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-      ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-      CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-      Steps: []resource.TestStep{
-          {
-              Config: testAccComputeInstanceFromMachineImage_encryptionKeyRaw(context),
-              Check: resource.ComposeTestCheckFunc(
-                  testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-                  resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-                      "source_machine_image_encryption_key.0.raw_key", context["raw_key"].(string)),
-              ),
-          },
-      },
-  })
+	context := map[string]interface{}{
+		"instance_name": instanceName,
+		"image_name": machineImageName,
+		"raw_key": "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_encryptionKeyRaw(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
+						"source_machine_image_encryption_key.0.raw_key", context["raw_key"].(string)),
+				),
+			},
+		},
+	})
 }
+
 func TestAccComputeInstanceFromMachineImage_encryptionKeySha(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-  machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-  
-  context := map[string]interface{}{
-      "instance_name": instanceName,
-      "image_name": machineImageName,
-      "sha256": "LKV0jGTF7BXTrQqiwcN4kKBZZiYHcQBX1Pg4gNPvVs8=",
-  }
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
+	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
 
-  acctest.VcrTest(t, resource.TestCase{
-      PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-      ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-      CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-      Steps: []resource.TestStep{
-          {
-              Config: testAccComputeInstanceFromMachineImage_encryptionKeySha(context),
-              Check: resource.ComposeTestCheckFunc(
-                  testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-                  resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-                      "source_machine_image_encryption_key.0.sha256", context["sha256"].(string)),
-              ),
-          },
-      },
-  })
+	context := map[string]interface{}{
+		"instance_name": instanceName,
+		"image_name": machineImageName,
+		"sha256": "LKV0jGTF7BXTrQqiwcN4kKBZZiYHcQBX1Pg4gNPvVs8=",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_encryptionKeySha(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
+						"source_machine_image_encryption_key.0.sha256", context["sha256"].(string)),
+				),
+			},
+		},
+	})
 }
+
 func TestAccComputeInstanceFromMachineImage_encryptionKeyRSA(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-  machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-  
-  context := map[string]interface{}{
-      "instance_name": instanceName,
-      "image_name": machineImageName,
-      "rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-  }
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
+	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
 
-  acctest.VcrTest(t, resource.TestCase{
-      PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-      ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-      CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-      Steps: []resource.TestStep{
-          {
-              Config: testAccComputeInstanceFromMachineImage_encryptionKeyRSA(context),
-              Check: resource.ComposeTestCheckFunc(
-                  testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-                  resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-                      "source_machine_image_encryption_key.0.rsa_encrypted_key", context["rsa_encrypted_key"].(string)),
-              ),
-          },
-      },
-  })
+	context := map[string]interface{}{
+		"instance_name": instanceName,
+		"image_name": machineImageName,
+		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_encryptionKeyRSA(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
+						"source_machine_image_encryption_key.0.rsa_encrypted_key", context["rsa_encrypted_key"].(string)),
+				),
+			},
+		},
+	})
 }
+
+func testAccCheckComputeInstanceFromMachineImageDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_compute_instance_from_machine_image" {
+				continue
+			}
+
+			_, err := config.NewComputeClient(config.UserAgent).Instances.Get(
+				config.Project, rs.Primary.Attributes["zone"], rs.Primary.ID).Do()
+			if err == nil {
+				return fmt.Errorf("Instance still exists")
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccComputeInstanceFromMachineImage_basic(instance, newInstance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_instance" "vm" {
@@ -1240,149 +1244,62 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, projectID, projectID, org, billingId, instance, instance, newInstance)
 }
+
 func testAccComputeInstanceFromMachineImage_encryptionKeyKMS(context map[string]interface{}) string {
-  return fmt.Sprintf(`
-resource "google_compute_instance" "vm" {
-name         = "%s"
-machine_type = "n1-standard-1"
-zone         = "us-central1-a"
-
-boot_disk {
-  initialize_params {
-    image = "debian-cloud/debian-9"
-  }
-}
-
-network_interface {
-  network = "default"
-}
-}
-
-resource "google_compute_machine_image" "foobar" {
-name            = "%s"
-source_instance = google_compute_instance.vm.self_link
-}
-
+	return fmt.Sprintf(`
 resource "google_compute_instance_from_machine_image" "foobar" {
-name  = "instance-test"
-zone  = "us-central1-a"
-
-source_machine_image = google_compute_machine_image.foobar.self_link
-
-source_machine_image_encryption_key {
-  kms_key_name             = "%s"
-  kms_key_service_account  = "%s"
-}
-}
-`, context["instance_name"], context["image_name"], context["kms_key_name"], context["kms_key_service_account"])
+		provider = google-beta
+		name = "%s"
+		zone = "us-central1-a"
+		source_machine_image = google_compute_machine_image.foobar.self_link
+		source_machine_image_encryption_key {
+			kms_key_name = "%s"
+			kms_key_service_account = "%s"
+		}
+	}
+`, context["instance_name"].(string), context["kms_key_name"].(string), context["kms_key_service_account"].(string))
 }
 
 func testAccComputeInstanceFromMachineImage_encryptionKeyRaw(context map[string]interface{}) string {
-  return fmt.Sprintf(`
-resource "google_compute_instance" "vm" {
-name         = "%s"
-machine_type = "n1-standard-1"
-zone         = "us-central1-a"
-
-boot_disk {
-  initialize_params {
-    image = "debian-cloud/debian-9"
-  }
-}
-
-network_interface {
-  network = "default"
-}
-}
-
-resource "google_compute_machine_image" "foobar" {
-name            = "%s"
-source_instance = google_compute_instance.vm.self_link
-}
-
+	return fmt.Sprintf(`
 resource "google_compute_instance_from_machine_image" "foobar" {
-name  = "instance-test"
-zone  = "us-central1-a"
-
-source_machine_image = google_compute_machine_image.foobar.self_link
-
-source_machine_image_encryption_key {
-  raw_key = "%s"
-}
-}
-`, context["instance_name"], context["image_name"], context["raw_key"])
+		provider = google-beta
+		name = "%s"
+		zone = "us-central1-a"
+		source_machine_image = google_compute_machine_image.foobar.self_link
+		source_machine_image_encryption_key {
+			raw_key = "%s"
+		}
+	}
+`, context["instance_name"].(string), context["raw_key"].(string))
 }
 
 func testAccComputeInstanceFromMachineImage_encryptionKeySha(context map[string]interface{}) string {
-  return fmt.Sprintf(`
-resource "google_compute_instance" "vm" {
-name         = "%s"
-machine_type = "n1-standard-1"
-zone         = "us-central1-a"
-
-boot_disk {
-  initialize_params {
-    image = "debian-cloud/debian-9"
-  }
-}
-
-network_interface {
-  network = "default"
-}
-}
-
-resource "google_compute_machine_image" "foobar" {
-name            = "%s"
-source_instance = google_compute_instance.vm.self_link
-}
-
+	return fmt.Sprintf(`
 resource "google_compute_instance_from_machine_image" "foobar" {
-name  = "instance-test"
-zone  = "us-central1-a"
-
-source_machine_image = google_compute_machine_image.foobar.self_link
-
-source_machine_image_encryption_key {
-  sha256 = "%s"
-}
-}
-`, context["instance_name"], context["image_name"], context["sha256"])
+		provider = google-beta
+		name = "%s"
+		zone = "us-central1-a"
+		source_machine_image = google_compute_machine_image.foobar.self_link
+		source_machine_image_encryption_key {
+			sha256 = "%s"
+		}
+	}
+`, context["instance_name"].(string), context["sha256"].(string))
 }
 
 func testAccComputeInstanceFromMachineImage_encryptionKeyRSA(context map[string]interface{}) string {
-  return fmt.Sprintf(`
-resource "google_compute_instance" "vm" {
-name         = "%s"
-machine_type = "n1-standard-1"
-zone         = "us-central1-a"
-
-boot_disk {
-  initialize_params {
-    image = "debian-cloud/debian-9"
-  }
-}
-
-network_interface {
-  network = "default"
-}
-}
-
-resource "google_compute_machine_image" "foobar" {
-name            = "%s"
-source_instance = google_compute_instance.vm.self_link
-}
-
+	return fmt.Sprintf(`
 resource "google_compute_instance_from_machine_image" "foobar" {
-name  = "instance-test"
-zone  = "us-central1-a"
-
-source_machine_image = google_compute_machine_image.foobar.self_link
-
-source_machine_image_encryption_key {
-  rsa_encrypted_key = "%s"
-}
-}
-`, context["instance_name"], context["image_name"], context["rsa_encrypted_key"])
+		provider = google-beta
+		name = "%s"
+		zone = "us-central1-a"
+		source_machine_image = google_compute_machine_image.foobar.self_link
+		source_machine_image_encryption_key {
+			rsa_encrypted_key = "%s"
+		}
+	}
+`, context["instance_name"].(string), context["rsa_encrypted_key"].(string))
 }
 
 {{- else }}

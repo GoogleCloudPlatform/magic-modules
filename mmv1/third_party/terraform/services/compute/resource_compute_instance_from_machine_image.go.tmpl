@@ -166,7 +166,11 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		list := v.([]interface{})
 		if len(list) > 0 && list[0] != nil {
 			instance.SourceMachineImageEncryptionKey = expandInstanceSourceMachineImageEncryptionKey(list[0].(map[string]interface{}))
+		} else {
+			return fmt.Errorf("source_machine_image_encryption_key must be provided")
 		}
+	} else {
+		return fmt.Errorf("source_machine_image_encryption_key is missing")
 	}
 	
 

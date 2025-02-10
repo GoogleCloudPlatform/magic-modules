@@ -1090,38 +1090,67 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 	}
 }
 
-func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) []map[string]interface{} {
-	if key == nil {
-		return []map[string]interface{}{}
+func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
+	if m == nil {
+		return nil
 	}
-	return []map[string]interface{}{
-		{
-			"raw_key": key.RawKey,
-			"rsa_encrypted_key": key.RsaEncryptedKey,
-			"kms_key_name": key.KmsKeyName,
-			"sha256": key.Sha256,
-			"kms_key_service_account": key.KmsKeyServiceAccount,
-		},
+
+	key := &compute.CustomerEncryptionKey{}
+	key.ForceSendFields = make([]string, 0, 5)
+
+	if v, ok := m["raw_key"].(string); ok && v != "" {
+		key.RawKey = v
+		key.ForceSendFields = append(key.ForceSendFields, "RawKey")
 	}
+	if v, ok := m["rsa_encrypted_key"].(string); ok && v != "" {
+		key.RsaEncryptedKey = v
+		key.ForceSendFields = append(key.ForceSendFields, "RsaEncryptedKey")
+	}
+	if v, ok := m["kms_key_name"].(string); ok && v != "" {
+		key.KmsKeyName = v
+		key.ForceSendFields = append(key.ForceSendFields, "KmsKeyName")
+	}
+	if v, ok := m["sha256"].(string); ok && v != "" {
+		key.Sha256 = v
+		key.ForceSendFields = append(key.ForceSendFields, "Sha256")
+	}
+	if v, ok := m["kms_key_service_account"].(string); ok && v != "" {
+		key.KmsKeyServiceAccount = v
+		key.ForceSendFields = append(key.ForceSendFields, "KmsKeyServiceAccount")
+	}
+
+	if len(key.ForceSendFields) == 0 {
+		return nil
+	}
+
+	return key
 }
 
-func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.CustomerEncryptionKey {
-	key := &compute.CustomerEncryptionKey{}
+func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if key == nil {
+		return nil
+	}
 
-	if raw, ok := m["raw_key"].(string); ok && raw != "" {
-		key.RawKey = raw
+	m := map[string]interface{}{}
+	if key.RawKey != "" {
+		m["raw_key"] = key.RawKey
 	}
-	if rsa, ok := m["rsa_encrypted_key"].(string); ok && rsa != "" {
-		key.RsaEncryptedKey = rsa
+	if key.RsaEncryptedKey != "" {
+		m["rsa_encrypted_key"] = key.RsaEncryptedKey
 	}
-	if kms, ok := m["kms_key_name"].(string); ok && kms != "" {
-		key.KmsKeyName = kms
+	if key.KmsKeyName != "" {
+		m["kms_key_name"] = key.KmsKeyName
 	}
-	if sha, ok := m["sha256"].(string); ok && sha != "" {
-		key.Sha256 = sha
+	if key.Sha256 != "" {
+		m["sha256"] = key.Sha256
 	}
-	if sa, ok := m["kms_key_service_account"].(string); ok && sa != "" {
-		key.KmsKeyServiceAccount = sa
+	if key.KmsKeyServiceAccount != "" {
+		m["kms_key_service_account"] = key.KmsKeyServiceAccount
 	}
-	return key
+
+	// Only return the map if it's not empty
+	if len(m) > 0 {
+		return []map[string]interface{}{m}
+	}
+	return nil
 }
