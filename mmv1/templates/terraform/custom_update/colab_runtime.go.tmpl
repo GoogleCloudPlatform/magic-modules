@@ -37,4 +37,25 @@ if desired_state != "" && state != desired_state {
   log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
 }
 
+var upgrade_runtime bool
+if d.Get("auto_upgrade").(bool) && d.Get("is_upgradable").(bool) {
+  upgrade_runtime = true
+}
+
+expiration_time_string := d.Get("expiration_time").(string)
+expiration_time, err := time.Parse(time.RFC3339Nano, expiration_time_string)
+if err != nil {
+  return err
+}
+
+if expiration_time.Before(time.Now()) && d.Get("notebook_runtime_type").(string) == "USER_DEFINED" {
+  upgrade_runtime = true
+}
+
+if upgrade_runtime {
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, "upgrade"); err != nil {
+    return err
+  }
+}
+
 return nil

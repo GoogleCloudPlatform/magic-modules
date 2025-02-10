@@ -60,12 +60,17 @@ examples:
       key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'desired_state'
+      - 'auto_upgrade'
 virtual_fields:
   - name: 'desired_state'
     description: |
       Desired state of the Colab Runtime. Set this field to `RUNNING` to start the runtime, and `STOPPED` to stop it.
     type: String
     default_value: "RUNNING"
+  - name: 'auto_upgrade'
+    description: |
+      Triggers an upgrade anytime the runtime is started if it is upgradable.
+    type: Boolean
 parameters:
   - name: 'location'
     type: String
@@ -109,4 +114,19 @@ properties:
     type: String
     description: |
       Output only. The state of the runtime.
+    output: true
+  - name: isUpgradable
+    type: Boolean
+    description: |
+      Output only. Checks if the NotebookRuntime is upgradable.
+    output: true
+  - name: expirationTime
+    type: String
+    description: |
+      Output only. Timestamp when this NotebookRuntime will be expired.
+    output: true
+  - name: notebookRuntimeType
+    type: String
+    description: |
+      Output only. The type of the notebook runtime.
     output: true
