@@ -496,6 +496,7 @@ properties:
           Primary disk for asynchronous disk replication.
         required: true
   - name: 'architecture'
+    ignore_read: true
     type: String
       The architecture of the disk.
     enum_values:
