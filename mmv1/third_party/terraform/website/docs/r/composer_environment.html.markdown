@@ -1370,9 +1370,9 @@ The following arguments are supported:
 * `airflow_metadata_retention_config` - 
   (Optional)
   The retention policy for airflow metadata database. Structure is
-  [documented below](#nested_task_logs_retention_config_c3).
+  [documented below](#nested_airflow_metadata_retention_config_c3).
 
-<a name="nested_task_logs_retention_config_c3"></a>The `airflow_metadata_retention_config` block supports:
+<a name="nested_airflow_metadata_retention_config_c3"></a>The `airflow_metadata_retention_config` block supports:
 * `retention_mode` - 
   (Optional)
   Retention can be either enabled or disabled. Values for retention_mode are 
