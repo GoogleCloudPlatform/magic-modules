@@ -51,19 +51,19 @@ parameters:
 properties:
   - name: createTime
     type: String
-    description: Create time stamp.
+    description: Output only. [Output only] Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Update time stamp.
+    description: Output only. [Output only] Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Labels as key value pairs.
+    description: Optional. Labels as key value pairs.
   - name: releaseChannel
     type: String
     description: |-
-      Release channel to be used.
+      Optional. Release channel to be used.
       Possible values:
       STABLE
       EXPERIMENTAL
