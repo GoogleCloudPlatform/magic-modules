@@ -487,13 +487,8 @@ Google Cloud KMS.`,
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							{{- if eq $.TargetVersionName `ga` }}
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
-							{{- else }}
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, and IRDMA`,
-							{{- end }}
 						},
 						"access_config": {
 							Type:        schema.TypeList,
@@ -556,7 +551,7 @@ Google Cloud KMS.`,
 							Optional:     true,
 							Computed:     true,
 							ForceNew:    true,
-							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", ""}, false),
+							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", "IPV6_ONLY", ""}, false),
 							Description: `The stack type for this network interface to identify whether the IPv6 feature is enabled or not. If not specified, IPV4_ONLY will be used.`,
 						},
 

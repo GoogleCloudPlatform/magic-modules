@@ -331,9 +331,14 @@ type Resource struct {
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
 	Compiler string `yaml:"-"`
 
+	// The API "resource type kind" used for this resource e.g., "Function".
+	// If this is not set, then :name is used instead, which is strongly
+	// preferred wherever possible. Its main purpose is for supporting
+	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
-	ImportPath string `yaml:"-"`
+	ImportPath     string `yaml:"-"`
+	SourceYamlFile string `yaml:"-"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -496,6 +501,12 @@ func (r Resource) UserParameters() []*Type {
 	})
 }
 
+func (r Resource) UserVirtualFields() []*Type {
+	return google.Reject(r.VirtualFields, func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
 func (r Resource) ServiceVersion() string {
 	if r.CaiBaseUrl != "" {
 		return extractVersionFromBaseUrl(r.CaiBaseUrl)
@@ -609,6 +620,28 @@ func (r Resource) RootProperties() []*Type {
 		}
 	}
 	return props
+}
+
+// Returns a sorted list of all "leaf" properties, meaning properties that have
+// no children.
+func (r Resource) LeafProperties() []*Type {
+	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
+
+	// Remove types that have children, because we only want "leaf" fields
+	types = slices.DeleteFunc(types, func(t *Type) bool {
+		nestedProperties := t.NestedProperties()
+		return len(nestedProperties) > 0
+	})
+
+	// Sort types by lineage
+	slices.SortFunc(types, func(a, b *Type) int {
+		if a.MetadataLineage() < b.MetadataLineage() {
+			return -1
+		}
+		return 1
+	})
+
+	return types
 }
 
 // Return the product-level async object, or the resource-specific one
@@ -1754,4 +1787,46 @@ func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
 		caiBaseUrl = r.BaseUrl
 	}
 	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
+}
+
+func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
+	// Create regex to match anything between {{ and }}
+	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+
+	// Find all matches in the template URL
+	matches := re.FindAllStringSubmatch(templateURL, -1)
+
+	// Create a map of allowed keys for O(1) lookup
+	allowedKeysMap := make(map[string]bool)
+	for _, key := range allowedKeys {
+		allowedKeysMap[key] = true
+	}
+
+	// Check each found key against the allowed keys
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+
+		// Trim spaces from the key
+		key := strings.TrimSpace(match[1])
+
+		// If the key isn't in our allowed list, return false
+		if !allowedKeysMap[key] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (r Resource) ShouldGenerateSweepers() bool {
+	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
+	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
+		return false
+	}
+	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PreDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete {
+		return false
+	}
+	return true
 }

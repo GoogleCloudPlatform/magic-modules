@@ -413,9 +413,9 @@ func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, sc
 			  file_format = "PARQUET"
 			  table_format = "ICEBERG"
 			}
-		
+
 			schema = jsonencode(%s)
-		
+
 			depends_on = [
 			  google_project_iam_member.test
 			]
@@ -1852,6 +1852,33 @@ func TestAccBigQueryTable_externalCatalogTableOptions(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_foreignTypeInfo(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_id":      envvar.GetTestProjectFromEnv(),
+		"dataset_id":      fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10)),
+		"table_id":        fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTable_foreignTypeInfo_basic(context),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 {{- end }}
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -2200,6 +2227,14 @@ resource "google_bigquery_table" "test" {
   {
     "name": "some_int",
     "type": "INTEGER"
+  },
+  {
+    "name": "reserved_word_for",
+    "type": "STRING"
+  },
+  {
+    "name": "flexible-column-name-dash",
+    "type": "STRING"
   }
 ]
 EOH
@@ -3108,7 +3143,7 @@ resource "google_bigquery_table" "test" {
   # Depends on Iceberg Table Files
   depends_on = [
 	google_storage_bucket_object.empty_data_folder,
-	google_storage_bucket_object.metadata, 
+	google_storage_bucket_object.metadata,
   ]
 }
 `, datasetID, bucketName, tableID)
@@ -3136,7 +3171,7 @@ resource "google_storage_bucket_object" "datafile" {
 
 # Upload Metadata file
 resource "google_storage_bucket_object" "manifest" {
-	name = "%s" 
+	name = "%s"
 	content = "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.datafile.name}"
 	bucket = google_storage_bucket.test.name
 }
@@ -4588,7 +4623,7 @@ resource "google_bigquery_table" "test" {
 ]
 EOF
 
-  external_catalog_table_options { 
+  external_catalog_table_options {
     parameters = {
       owner = "hashicorp-terraform"
     }
@@ -4643,7 +4678,7 @@ resource "google_bigquery_table" "test" {
 ]
 EOF
 
-  external_catalog_table_options { 
+  external_catalog_table_options {
     parameters = {
       owner = "hashicorp-terraform-updated"
     }
@@ -4657,6 +4692,39 @@ EOF
       }
     }
     connection_id = "${google_bigquery_connection.test.name}"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryTable_foreignTypeInfo_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+
+  dataset_id = "%{dataset_id}"
+  location = "EU"
+}
+
+resource "google_bigquery_table" "test" {
+  provider = google-beta
+
+  deletion_protection = false
+  dataset_id = "${google_bigquery_dataset.test.dataset_id}"
+  table_id   = "%{table_id}"
+
+  schema = <<EOF
+[
+  {
+    "name": "struct_",
+    "type": "FOREIGN",
+    "foreignTypeDefinition": "STRUCT<id:STRING, name:STRING>"
+  }
+]
+EOF
+
+  schema_foreign_type_info {
+    type_system = "HIVE"
   }
 }
 `, context)
