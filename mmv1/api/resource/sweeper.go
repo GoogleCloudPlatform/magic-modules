@@ -16,7 +16,7 @@ package resource
 type Sweeper struct {
 	// The field checked by sweeper to determine
 	// eligibility for deletion for generated resources
-	IdentifierField string   `yaml:"sweepable_identifier_field"`
+	IdentifierField string   `yaml:"identifier_field"`
 	Regions         []string `yaml:"regions,omitempty"`
 	Prefixes        []string `yaml:"prefixes,omitempty"`
 }
