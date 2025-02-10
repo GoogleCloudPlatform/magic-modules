@@ -29,6 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+autogen_status: V29ya2xvYWQK
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

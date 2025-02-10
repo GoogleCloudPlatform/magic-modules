@@ -70,6 +70,7 @@ examples:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       region: 'REGION'
+    min_version: beta
   - name: 'region_network_firewall_policy_rule_network_scope_ingress'
     primary_resource_id: 'primary'
     vars:
@@ -79,6 +80,7 @@ examples:
       org_id: 'ORG_ID'
       project_name: 'PROJECT_NAME'
       region: 'REGION'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
