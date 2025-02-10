@@ -76,19 +76,12 @@ resource "google_gemini_release_channel_setting" "basic" {
     release_channel = "EXPERIMENTAL"
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [null_resource.previous]
-
-  create_duration = "30s"
-}
-
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
 	location = "global"
 	target = "projects/${resource.google_project.new_project.number}"
-    depends_on = [time_sleep.wait_30_seconds]
 }
 `, context)
 }
@@ -113,12 +106,6 @@ resource "google_gemini_release_channel_setting" "basic" {
     release_channel = "EXPERIMENTAL"
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [null_resource.previous]
-
-  create_duration = "30s"
-}
-
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
@@ -127,7 +114,6 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
 	target = "projects/${resource.google_project.new_project.number}"
     labels = {"my_key" = "my_value"}
     product = "GEMINI_CODE_ASSIST"
-    depends_on = [time_sleep.wait_30_seconds]
 }
 `, context)
 }
