@@ -484,7 +484,7 @@ resource "google_developer_connect_connection" "my-connection" {
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
 
   bitbucket_cloud_config {
-    workspace = "proctor-test-dc"
+    workspace = "proctor-test"
 
     webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
 
@@ -514,7 +514,7 @@ resource "google_developer_connect_connection" "my-connection" {
   }
 
   bitbucket_cloud_config {
-    workspace = "proctor-test-dc"
+    workspace = "proctor-test"
 
     webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
 
@@ -523,7 +523,7 @@ resource "google_developer_connect_connection" "my-connection" {
     }
 
     authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token/versions/latest"
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token-update/versions/latest"
     }
   }
 }
@@ -611,7 +611,7 @@ resource "google_developer_connect_connection" "my-connection" {
     }
 
     authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-auth-token/versions/latest"
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-auth-token-update/versions/latest"
     }
   }
 }
@@ -664,7 +664,7 @@ resource "google_developer_connect_connection" "my-connection" {
       user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbdc-priv-auth-token/versions/latest"
     }
 
-    ssl_ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIEHTCCAwWgAwIBAgIUCk2ykAx9GRqKXh1nDYx3I+78W2AwDQYJKoZIhvcNAQEL\nBQAwgZ0xCzAJBgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVE9ST05U\nTzEPMA0GA1UECgwGR09PR0xFMQ4wDAYDVQQLDAVDTE9VRDErMCkGA1UEAwwicHJp\ndmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTEhMB8GCSqGSIb3DQEJARYS\ncHJvY3RvckBnb29nbGUuY29tMB4XDTIzMTAzMDE4NTcxMVoXDTMzMTAyNzE4NTcx\nMVowgZ0xCzAJBgNVBAYTAkNBMQswCQYDVQQIDAJPTjEQMA4GA1UEBwwHVE9ST05U\nTzEPMA0GA1UECgwGR09PR0xFMQ4wDAYDVQQLDAVDTE9VRDErMCkGA1UEAwwicHJp\ndmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTEhMB8GCSqGSIb3DQEJARYS\ncHJvY3RvckBnb29nbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAppbL/4O1RY6tcrR5VzbilYX8SMW6aa1rLSNIneaqh+yDNMTJNNujUuYmrtEW\n9NFFOU6DKpdC4MtMS5vn8IApXi0iZ/ReB9h6CeH2ryjqPKp5cbBgUL2Jfk9URmuT\nBP7+4LjFfwubd28Qhpzla9yumJkci2bMq2qhu5ag9FVec1qq+2qT8KxjabwoK5ZG\nklGTSLmyX/wUkDFp7AeEql4K/rm1/EH5VlBlecDvhAcolxVNM6H4cEh8GGQpSGEt\nfQO9Jg26bTlwvTzuPFwxTepV/ECNlHiCTnaLZEGgWgMTSI+7PTeuhym70T5FhVoO\nTf+5TgF3Rry76l77J1mxNoe+rwIDAQABo1MwUTAdBgNVHQ4EFgQU45QTuJ+Ar75Y\nwGUAOl7gUD16NtcwHwYDVR0jBBgwFoAU45QTuJ+Ar75YwGUAOl7gUD16NtcwDwYD\nVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAZIJxni/FvFYHM+rKm/u/\n9L+8PS6yArs9rIpqAoNgvvQnyGth1yWCeYXbgiWvjeVfBbp+eHHoQ31106MmBCsO\nqS6H0oJGsCKlYBuwOLDCabjBDq2O7NFxaR4jHwoaoOMDYD1KlnF2qk0DfuNbZdKq\nLU6p1u9rreI2i5ZBNVH48/Ncd+8SfBPXumqLthnZwVyIyhEVi3OlvVfQ+H/nbsfr\nIPhvu+yu6SMrQfJqH41RbBl5E6B6gUNeNM0WjpSXzUOCt0ndZV6beOQpB82mN6uk\nwxpA+AbtfK2FkWWOjvU6zt/zQyrliODusnUcFbXdCO22XHRsRxnXfpUdgr8CwjHX\nwg==\n-----END CERTIFICATE-----\n"
+    ssl_ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIEWDCCA0CgAwIBAgIUPHTFNv00au9lCZnZIbpDZOVNz8swDQYJKoZIhvcNAQEL\nBQAwgaIxCzAJBgNVBAYTAkNBMRAwDgYDVQQIDAdPbnRhcmlvMRAwDgYDVQQHDAdU\nb3JvbnRvMQ8wDQYDVQQKDAZHb29nbGUxDDAKBgNVBAsMA0dDUDErMCkGA1UEAwwi\ncHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTEjMCEGCSqGSIb3DQEJ\nARYUbW9uaWNhbGl1QGdvb2dsZS5jb20wHhcNMjUwMTEzMjIyODU5WhcNMzUwMTEx\nMjIyODU5WjCBojELMAkGA1UEBhMCQ0ExEDAOBgNVBAgMB09udGFyaW8xEDAOBgNV\nBAcMB1Rvcm9udG8xDzANBgNVBAoMBkdvb2dsZTEMMAoGA1UECwwDR0NQMSswKQYD\nVQQDDCJwcml2YXRlLWJpdGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMSMwIQYJKoZI\nhvcNAQkBFhRtb25pY2FsaXVAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD\nggEPADCCAQoCggEBAKNbLKjUD04cq5S9Z0HIdPjOSNsswegSDy4+DCN/tWYU+CiB\nKFFHVT+WUa5IGWCzUh2qXtJAls3zpsEP/EwiF2gnIR2nerLv5ppQdd5ejo57jo/u\nPqm7NVnjWEnruCt9UXyVbvCocj/FBcubBDkRzNsEx7e/aPk/deaj3YjJBbdKbNJu\nXmU5bOfnHjAqsiAsAj09W9f/ZifMZnQdGCpopbaJA+0Rr8ZcxMPsBauI5MClIy2R\n2hNWtiOLJpp4hplnIy1M2npn/sjT8FBTrClzpaDDicI4EiBVZPQTOwERd1Gdk3Us\nXBxUIi3Jje9utZeVQTEPuiUnOqIQ7GHn9ynRW3kCAwEAAaOBgzCBgDAdBgNVHQ4E\nFgQUpAZEKba/ZJUJGJ0+4q9kCCfEOv4wHwYDVR0jBBgwFoAUpAZEKba/ZJUJGJ0+\n4q9kCCfEOv4wDwYDVR0TAQH/BAUwAwEB/zAtBgNVHREEJjAkgiJwcml2YXRlLWJp\ndGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMA0GCSqGSIb3DQEBCwUAA4IBAQA8TqtB\nQGF+ibVmcwQZeI295w8Xfy7hBiKPrl6h+ReB1zJKyspCfvSLzfFyvBWIzbVCaGIh\nRbeDPh9divTKI4w1jhNhUbL7pLVnpvX4kAvnZzbAljQwzvHfwyuMsZNtfp0c7Rc/\nbowtxNce5Mgqver477od2zwLlQjyeKWaolILKGGL0NfRIx2VeZzpXblo0pksKpLb\n3Ncw41hFYI552FTQ3eqjbCYNNWn2nzBg+FqEL8eYRHIUGCj9bcm8dvBGp1fffuNp\nlFQt8ifUATTRqUt8q3/ukN9IYCJSKc5TGrWu34/QVyReOnZ6EBL0JFSd9u+/ckXn\ntOIt3W2yI+EOFLUJ\n-----END CERTIFICATE-----"
 
     service_directory_config {
       service = "projects/devconnect-terraform-creds/locations/us-central1/namespaces/my-namespace/services/terraform-bbdc"
