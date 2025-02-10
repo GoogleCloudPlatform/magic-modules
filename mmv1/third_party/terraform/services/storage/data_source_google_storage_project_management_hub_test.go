@@ -17,7 +17,7 @@ func TestAccDataSourceGoogleStorageProjectManagementHub_basic(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
@@ -42,4 +42,3 @@ data "google_storage_project_management_hub" "project_management_hub" {
 }
 `, context)
 }
-
