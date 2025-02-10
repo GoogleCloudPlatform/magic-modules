@@ -45,6 +45,8 @@ collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  iam_conditions_request_type: 'QUERY_PARAM'
+  allowed_iam_role: 'roles/compute.storageAdmin'
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}'
 examples:
@@ -66,9 +68,9 @@ parameters:
   - name: 'zone'
     type: ResourceRef
     description: 'A reference to the zone where the disk is located.'
-    immutable: true
-    required: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    default_from_api: true
+    required: false
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Zone'
     imports: 'name'

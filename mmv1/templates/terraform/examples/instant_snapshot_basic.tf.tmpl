@@ -6,5 +6,6 @@ resource "google_compute_disk" "foo" {
 
 resource "google_compute_instant_snapshot" "{{$.PrimaryResourceId}}" {
   name         = "{{index $.Vars "instance_name"}}"
+  zone         = "us-central1-a"
   source_disk  = google_compute_disk.foo.self_link
 }
