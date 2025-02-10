@@ -732,7 +732,7 @@ func ResourceComposerEnvironment() *schema.Resource {
 									},
 									"airflow_metadata_retention_config": {
 										Type:         schema.TypeList,
-										Description: `Optional. The configuration setting for database retention.`,
+										Description: `Optional. The policy for airflow metadata database retention.`,
 										Optional:     true,
 										Computed:     true,
 										Elem: &schema.Resource{
