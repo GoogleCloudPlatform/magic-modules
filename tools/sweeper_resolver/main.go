@@ -31,6 +31,17 @@ type MetaData struct {
 	SourceFile     string `yaml:"source_file,omitempty"`
 }
 
+// LocationPair represents a correlated region-zone pair from a test configuration
+type LocationPair struct {
+	Region string
+	Zone   string
+}
+
+// ResourceLocations stores the unique location pairs for a resource
+type ResourceLocations struct {
+	LocationPairs []LocationPair
+}
+
 func main() {
 	// Define command line flags
 	dirPath := flag.String("dir", "", "Path to services directory")
@@ -47,61 +58,85 @@ func main() {
 
 	logger.Printf("Starting program with directory path: %s", *dirPath)
 
-	if *dirPath == "" {
+	// Check for empty directory path after trimming spaces
+	if strings.TrimSpace(*dirPath) == "" {
 		log.Fatal("Please provide a directory path using -dir flag")
 	}
 
-	allTests, errs := reader.ReadAllTests(*dirPath)
+	// Clean the path and verify it exists
+	cleanPath := filepath.Clean(*dirPath)
+	if _, err := os.Stat(cleanPath); os.IsNotExist(err) {
+		log.Fatalf("Directory does not exist: %s", cleanPath)
+	}
+
+	allTests, errs := reader.ReadAllTests(cleanPath)
 	if errs != nil {
 		logger.Printf("Warning: Errors encountered while reading tests: %v", errs)
 	}
 	logger.Printf("Found %d tests", len(allTests))
 
-	resourceMap, err := processServicesDirectory(*dirPath, logger)
+	resourceMap, err := processServicesDirectory(cleanPath, logger)
 	if err != nil {
 		log.Fatalf("Error processing directory: %v", err)
 	}
 	logger.Printf("Processed %d resources from directory", len(resourceMap))
 
-	regions := map[string][]string{}
+	// Track location pairs for each resource
+	locations := map[string]*ResourceLocations{}
 
-	// In the main processing loop:
+	// Process tests to find region-zone pairs
 	for testIndex, test := range allTests {
 		logger.Printf("Processing test %d", testIndex)
 		for stepIndex, config := range test.Steps {
 			for resourceName, resourceConfig := range config {
 				logger.Printf("Found resource config in test %d, step %d", testIndex, stepIndex)
-				for _, fields := range resourceConfig {
-					logger.Printf("resourceConfig: %v", fields)
 
-					_, hasMmv1Resource := resourceMap[resourceName]
-					if !hasMmv1Resource {
-						logger.Printf("Resource %s not found in MMv1 resources, skipping", resourceName)
-						continue
+				_, hasMmv1Resource := resourceMap[resourceName]
+				if !hasMmv1Resource {
+					logger.Printf("Resource %s not found in MMv1 resources, skipping", resourceName)
+					continue
+				}
+
+				// Initialize locations for this resource if not exists
+				if _, exists := locations[resourceName]; !exists {
+					locations[resourceName] = &ResourceLocations{
+						LocationPairs: []LocationPair{},
 					}
+				}
 
-					logger.Printf("fields %v", fields)
+				// Process each configuration block
+				for _, fields := range resourceConfig {
+					logger.Printf("Processing fields: %v", fields)
 
+					// Extract and process region/location
+					var regionStr string
 					region, hasRegion := fields["region"]
 					if !hasRegion {
 						region, hasRegion = fields["location"]
-						if !hasRegion {
-							logger.Printf("No region/location found for resource %s", resourceName)
-							continue
-						}
+					}
+					if hasRegion && region != "" {
+						regionStr = processLocationString(region.(string), config, nil, logger)
 					}
 
-					if region != "" {
-						// Clean and resolve any region references
-						regionStr := strings.Trim(region.(string), `"`)
-						if strings.Contains(regionStr, ".") {
-							regionStr = resolveRegionReference(regionStr, config, nil, logger)
+					// Extract and process zone
+					var zoneStr string
+					zone, hasZone := fields["zone"]
+					if hasZone && zone != "" {
+						zoneStr = processLocationString(zone.(string), config, nil, logger)
+					}
+
+					// If we have either a region or zone, create a location pair
+					if regionStr != "" || zoneStr != "" {
+						pair := LocationPair{
+							Region: regionStr,
+							Zone:   zoneStr,
 						}
 
-						// Skip empty regions after cleanup
-						if regionStr != "" && regionStr != "true" && !strings.Contains(regionStr, "%") && !strings.Contains(regionStr, "/") && !strings.Contains(regionStr, ".") {
-							logger.Printf("Adding region %v for resource %s", regionStr, resourceName)
-							regions[resourceName] = append(regions[resourceName], regionStr)
+						// Only add if this pair doesn't already exist
+						if !containsLocationPair(locations[resourceName].LocationPairs, pair) {
+							locations[resourceName].LocationPairs = append(locations[resourceName].LocationPairs, pair)
+							logger.Printf("Added location pair for resource %s: region=%s, zone=%s",
+								resourceName, pair.Region, pair.Zone)
 						}
 					}
 				}
@@ -109,22 +144,11 @@ func main() {
 		}
 	}
 
-	logger.Printf("Found regions for %d resources", len(regions))
+	logger.Printf("Found locations for %d resources", len(locations))
 
-	for resourceName, resourceRegions := range regions {
-		logger.Printf("Processing regions for resource: %s", resourceName)
-
-		uniqueRegions := make(map[string]bool)
-		for _, region := range resourceRegions {
-			uniqueRegions[region] = true
-		}
-
-		var finalRegions []string
-		for region := range uniqueRegions {
-			finalRegions = append(finalRegions, region)
-		}
-		logger.Printf("Found %d unique regions for resource %s: %v",
-			len(finalRegions), resourceName, finalRegions)
+	// Process and update resources
+	for resourceName, resourceLocations := range locations {
+		logger.Printf("Processing locations for resource: %s", resourceName)
 
 		mmv1Resource, exists := resourceMap[resourceName]
 		if !exists {
@@ -132,26 +156,33 @@ func main() {
 			continue
 		}
 
-		defaultRegion := []string{"us-central1"}
-		logger.Printf("Comparing regions for %s - Current: %v, Default: %v, Sweeper: %v",
-			resourceName, finalRegions, defaultRegion, mmv1Resource.Sweeper.Regions)
+		if len(resourceLocations.LocationPairs) > 0 {
+			logger.Printf("Found location pairs for resource %s", resourceName)
 
-		if !equalRegions(finalRegions, defaultRegion) && !equalRegions(finalRegions, mmv1Resource.Sweeper.Regions) {
-			logger.Printf("Regions differ for resource %s, updating YAML", resourceName)
+			// Check if we need to update
+			if !shouldSkipUpdate(resourceLocations.LocationPairs, mmv1Resource.Sweeper) {
+				fmt.Printf("Resource: %s\n", resourceName)
+				fmt.Printf("sweeper:\n  url_substitutions:\n")
+				for _, pair := range resourceLocations.LocationPairs {
+					if pair.Region != "" && pair.Zone != "" {
+						fmt.Printf("    - region: \"%s\"\n      zone: \"%s\"\n", pair.Region, pair.Zone)
+					} else if pair.Region != "" {
+						fmt.Printf("    - region: \"%s\"\n", pair.Region)
+					} else if pair.Zone != "" {
+						fmt.Printf("    - zone: \"%s\"\n", pair.Zone)
+					}
+				}
+				fmt.Println()
 
-			// Print what we're going to do
-			fmt.Printf("Resource: %s\nsweepers:\n  regions:\n", resourceName)
-			for _, region := range finalRegions {
-				fmt.Printf("    - \"%s\"\n", region)
-			}
-			fmt.Println()
-
-			// Update the YAML file
-			if err := updateYamlFile(mmv1Resource.SourceYamlFile, finalRegions); err != nil {
-				logger.Printf("Error updating YAML file: %v", err)
+				// Update the YAML file
+				if err := updateYamlFile(mmv1Resource.SourceYamlFile, resourceLocations.LocationPairs, mmv1Resource.Sweeper); err != nil {
+					logger.Printf("Error updating YAML file: %v", err)
+				}
+			} else {
+				logger.Printf("Skipping update for resource %s (matches existing configuration)", resourceName)
 			}
 		} else {
-			logger.Printf("Regions match defaults for resource %s, skipping", resourceName)
+			logger.Printf("No location pairs found for resource %s, skipping", resourceName)
 		}
 	}
 }
@@ -185,7 +216,7 @@ func processServicesDirectory(dirPath string, logger *debugLogger) (map[string]*
 			}
 
 			resourceModel := InitializeResource(metadata.SourceFile)
-			logger.Printf(" shouldgen: %v", resourceModel.ShouldGenerateSweepers())
+			logger.Printf("shouldgen: %v", resourceModel.ShouldGenerateSweepers())
 
 			if !resourceModel.ShouldGenerateSweepers() {
 				logger.Printf("Resource %s should not generate sweepers, skipping", metadata.Resource)
@@ -229,57 +260,61 @@ func processYAMLFile(filePath string) (*MetaData, error) {
 	return &metadata, nil
 }
 
-func equalRegions(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	aMap := make(map[string]bool)
-	for _, val := range a {
-		aMap[val] = true
-	}
-
-	for _, val := range b {
-		if !aMap[val] {
-			return false
+func containsLocationPair(pairs []LocationPair, newPair LocationPair) bool {
+	for _, pair := range pairs {
+		if pair.Region == newPair.Region && pair.Zone == newPair.Zone {
+			return true
 		}
 	}
-
-	return true
+	return false
 }
 
-func resolveRegionReference(regionRef string, config reader.Step, seen map[string]bool, logger *debugLogger) string {
+func processLocationString(location string, config reader.Step, seen map[string]bool, logger *debugLogger) string {
+	locationStr := strings.Trim(location, `"`)
+	if strings.Contains(locationStr, ".") {
+		locationStr = resolveLocationReference(locationStr, config, seen, logger)
+	}
+
+	// Skip invalid locations
+	if locationStr != "" && locationStr != "true" &&
+		!strings.Contains(locationStr, "%") &&
+		!strings.Contains(locationStr, "/") &&
+		!strings.Contains(locationStr, ".") {
+		return locationStr
+	}
+	return ""
+}
+
+func resolveLocationReference(ref string, config reader.Step, seen map[string]bool, logger *debugLogger) string {
 	if seen == nil {
 		seen = make(map[string]bool)
 	}
 
 	// Prevent infinite recursion
-	if seen[regionRef] {
-		logger.Printf("Circular reference detected for: %s", regionRef)
-		return regionRef
+	if seen[ref] {
+		logger.Printf("Circular reference detected for: %s", ref)
+		return ref
 	}
-	seen[regionRef] = true
+	seen[ref] = true
 
-	parts := strings.Split(strings.Trim(regionRef, `"`), ".")
+	parts := strings.Split(strings.Trim(ref, `"`), ".")
 	if len(parts) != 3 {
-		return regionRef // Not a reference, return as is
+		return ref // Not a reference, return as is
 	}
 
-	resourceType := parts[0] // e.g., "google_compute_subnetwork"
-	resourceName := parts[1] // e.g., "subnetwork"
-	field := parts[2]        // e.g., "region"
+	resourceType := parts[0]
+	resourceName := parts[1]
+	field := parts[2]
 
-	// Look for the referenced resource in the config
 	if resources, exists := config[resourceType]; exists {
 		if resource, exists := resources[resourceName]; exists {
 			if value, exists := resource[field]; exists {
-				logger.Printf("Found value for reference %s: %v", regionRef, value)
+				logger.Printf("Found value for reference %s: %v", ref, value)
 
-				// If the value is itself a reference, resolve it recursively
 				if strValue, ok := value.(string); ok {
 					strValue = strings.Trim(strValue, `"`)
 					if strings.Contains(strValue, ".") && strings.Count(strValue, ".") == 2 {
-						return resolveRegionReference(strValue, config, seen, logger)
+						return resolveLocationReference(strValue, config, seen, logger)
 					}
 					return strValue
 				}
@@ -288,6 +323,6 @@ func resolveRegionReference(regionRef string, config reader.Step, seen map[strin
 		}
 	}
 
-	logger.Printf("Could not resolve region reference: %s", regionRef)
+	logger.Printf("Could not resolve location reference: %s", ref)
 	return ""
 }
