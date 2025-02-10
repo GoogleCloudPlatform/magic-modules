@@ -41,12 +41,12 @@ custom_code:
 schema_version: 1
 state_upgraders: true
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-east1"
-    - "us-south1"
-    - "us-west1"
-    - "us-west2"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-west2"
+    - region: "us-west1"
+    - region: "us-south1"
 examples:
   - name: 'certificate_manager_google_managed_certificate_dns'
     primary_resource_id: 'default'

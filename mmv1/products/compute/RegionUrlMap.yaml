@@ -35,10 +35,10 @@ async:
 collection_url_key: 'items'
 custom_code:
 sweeper:
-  regions:
-    - "europe-west1"
-    - "us-central1"
-    - "us-west1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_url_map_basic'
     primary_resource_id: 'regionurlmap'
