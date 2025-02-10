@@ -388,7 +388,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") {
+	if d.HasChange("content") || d.HasChange("detect_md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
@@ -616,10 +616,6 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if hasObjectContentChanges(d) {
-		return d.SetNewComputed("generation")
-	}
-
-	if d.HasChange("source_md5hash") {
 		d.SetNewComputed("crc32")
 		d.SetNewComputed("md5hash")
 		d.SetNewComputed("generation")
@@ -630,8 +626,6 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 
 func hasObjectContentChanges(d *schema.ResourceDiff) bool {
 	for _, key := range []string{
-		"source",
-		"content",
 		"source_md5hash",
 	} {
 		if d.HasChange(key) {
