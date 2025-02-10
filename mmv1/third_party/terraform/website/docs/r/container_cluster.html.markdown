@@ -582,7 +582,7 @@ for a list of types.
 
 * `minimum` - (Optional) Minimum amount of the resource in the cluster.
 
-* `maximum` - (Optional) Maximum amount of the resource in the cluster.
+* `maximum` - (Required) Maximum amount of the resource in the cluster.
 
 <a name="nested_auto_provisioning_defaults"></a>The `auto_provisioning_defaults` block supports:
 
@@ -663,6 +663,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
+* `auto_monitoring_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for GKE Auto-Monitoring.
+
+<a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
+
+* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.  
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
@@ -917,6 +922,8 @@ gvnic {
 
 * `resource_labels` - (Optional) The GCP labels (key/value pairs) to be applied to each node. Refer [here](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-managing-labels)
     for how these labels are applied to clusters, node pools and nodes.
+
+* `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
@@ -1341,6 +1348,24 @@ such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 
 * `pod_pids_limit` - (Optional) Controls the maximum number of processes allowed to run in a pod. The value must be greater than or equal to 1024 and less than 4194304.
+
+* `container_log_max_size` - (Optional) Defines the maximum size of the
+  container log file before it is rotated. Specified as a positive number and a
+  unit suffix, such as `"100Ki"`, `"10Mi"`. Valid units are "Ki", "Mi", "Gi".
+  The value must be between `"10Mi"` and `"500Mi"`, inclusive. And the total container log size
+  (`container_log_max_size` * `container_log_max_files`) cannot exceed 1% of the total storage of the node.
+
+* `container_log_max_files` - (Optional) Defines the maximum number of container log files that can be present for a container. The integer must be between 2 and 10, inclusive.
+
+* `image_gc_low_threshold_percent` - (Optional) Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to. The integer must be between 10 and 85, inclusive.
+
+* `image_gc_high_threshold_percent` - (Optional) Defines the percent of disk usage after which image garbage collection is always run. The integer must be between 10 and 85, inclusive.
+
+* `image_minimum_gc_age` - (Optional) Defines the minimum age for an unused image before it is garbage collected. Specified as a sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`. The value cannot be greater than "2m".
+
+* `image_maximum_gc_age` - (Optional) Defines the maximum age an image can be unused before it is garbage collected. Specified as a sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`, and `"2h45m"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". The value must be a positive duration.
+
+* `allowed_unsafe_sysctls` - (Optional) Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods. The allowed sysctl groups are `kernel.shm*`, `kernel.msg*`, `kernel.sem`, `fs.mqueue.*`, and `net.*`.
 
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 

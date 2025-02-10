@@ -173,7 +173,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.ExcludeSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.ExcludeDelete {
+	if !object.ShouldGenerateSweepers() {
 		return
 	}
 
@@ -499,7 +499,7 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 
 func (t Terraform) addHashicorpCopyRightHeader(outputFolder, target string) {
 	if !expectedOutputFolder(outputFolder) {
-		log.Printf("Unexpected output folder (%s) detected"+
+		log.Printf("Unexpected output folder (%s) detected "+
 			"when deciding to add HashiCorp copyright headers.\n"+
 			"Watch out for unexpected changes to copied files", outputFolder)
 	}
