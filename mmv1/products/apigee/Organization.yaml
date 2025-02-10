@@ -43,6 +43,8 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
+sweeper:
+  identifier_field: organization
 examples:
   - name: 'apigee_organization_cloud_basic'
     exclude_test: true
