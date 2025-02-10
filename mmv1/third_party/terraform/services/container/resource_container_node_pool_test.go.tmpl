@@ -3985,7 +3985,7 @@ resource "google_container_cluster" "cluster" {
   deletion_protection = false
   network             = "%s"
   subnetwork          = "%s"
-  version             = "1.32.0-gke.1448000"
+  min_master_version  = "1.32.0-gke.1448000"
 }
 
 resource "google_container_node_pool" "np1" {
