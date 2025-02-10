@@ -26,6 +26,9 @@ func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiReleaseChannelSettingBinding_basic(context),
@@ -56,22 +59,19 @@ func TestAccGeminiReleaseChannelSettingBinding_update(t *testing.T) {
 
 func testAccGeminiReleaseChannelSettingBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-    provider = google-beta
-}
-
 resource "google_project" "new_project" {
     provider = google-beta
     project_id = "%{new_project_id}"
     name = "Terraform Acc Test Project"
     org_id = "%{org_id}"
     billing_account = "%{billing_account}"
+    deletion_policy = "DELETE"
 }
 
 resource "google_gemini_release_channel_setting" "basic" {
     provider = google-beta
     release_channel_setting_id = "%{release_channel_setting_id}"
-	location = "global"
+    location = "global"
     labels = {"my_key" = "my_value"}
     release_channel = "EXPERIMENTAL"
 }
@@ -80,42 +80,42 @@ resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
-	location = "global"
-	target = "projects/${resource.google_project.new_project.number}"
-    depends_on = [google_gemini_release_channel_setting.basic]
+    location = "global"
+    target = "projects/${resource.google_project.new_project.number}"
 }
 `, context)
 }
 
 func testAccGeminiReleaseChannelSettingBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-    provider = google-beta
-}
-
 resource "google_project" "new_project" {
     provider = google-beta
     project_id = "%{new_project_id}"
     name = "Terraform Acc Test Project"
 }
 
+resource "time_sleep" "wait_1_min" {
+    depends_on = [google_project.new_project]
+    create_duration = "60s"
+}
+
 resource "google_gemini_release_channel_setting" "basic" {
     provider = google-beta
     release_channel_setting_id = "%{release_channel_setting_id}"
-	location = "global"
+    location = "global"
     labels = {"my_key" = "my_value"}
     release_channel = "EXPERIMENTAL"
+    depends_on = [time_sleep.wait_1_min]
 }
 
 resource "google_gemini_release_channel_setting_binding" "basic_binding" {
     provider = google-beta
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "%{setting_binding_id}"
-	location = "global"
-	target = "projects/${resource.google_project.new_project.number}"
+    location = "global"
+    target = "projects/${resource.google_project.new_project.number}"
     labels = {"my_key" = "my_value"}
     product = "GEMINI_CODE_ASSIST"
-    depends_on = [google_gemini_release_channel_setting.basic]
 }
 `, context)
 }
