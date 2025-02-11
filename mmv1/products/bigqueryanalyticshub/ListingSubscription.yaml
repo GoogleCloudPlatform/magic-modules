@@ -13,6 +13,7 @@
 
 ---
 name: 'ListingSubscription'
+api_resource_type_kind: Subscription
 description: A Bigquery Analytics Hub listing subscription
 references:
   guides:
