@@ -8,26 +8,26 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleCloudRunService() *schema.Resource {
+func DataSourceGoogleStorageFolderManagementHub() *schema.Resource {
 
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceStorageProjectManagementHub().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceStorageFolderManagementHub().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleStorageManagementHubRead,
+		Read:   dataSourceGoogleStorageFolderManagementHubRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceGoogleStorageManagementHubRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleStorageFolderManagementHubRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{name}}/locations/global/managementHub")
+	id, err := tpgresource.ReplaceVars(d, config, "folders/{{name}}/locations/global/managementHub")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	err = resourceStorageProjectManagementHubRead(d, meta)
+	err = resourceStorageFolderManagementHubRead(d, meta)
 	if err != nil {
 		return err
 	}
