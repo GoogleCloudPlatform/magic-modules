@@ -14,6 +14,9 @@
 ---
 name: GeminiGcpEnablementSettingBinding
 description: The resource for managing GeminiGcpEnablementSetting setting bindings for Admin Control.
+references:
+  guides:
+    'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
 min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}/settingBindings
 self_link: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}/settingBindings/{{setting_binding_id}}
@@ -65,9 +68,7 @@ parameters:
   - name: settingBindingId
     type: String
     description: |-
-      Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      setting_id from the method_signature of Create RPC.
+      Id of the setting binding.
     immutable: true
     url_param_only: true
     required: true
@@ -90,7 +91,7 @@ properties:
     type: String
     description: |-
       Identifier. Name of the resource.
-      Format:projects/{project}/locations/{location}/{settingType}/{setting}/settingBindings/{setting_binding}
+      Format:projects/{project}/locations/{location}/geminiGcpEnablementSettings/{setting}/settingBindings/{setting_binding}
     output: true
   - name: createTime
     type: String
