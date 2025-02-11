@@ -13,13 +13,6 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   ]
 }
 
-resource "google_kms_crypto_key_iam_binding" "kms_key_iam_decrypter" {
-  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members       = [
-    "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com",
-  ]
-}
 
 data "google_project" "project" {
 }
