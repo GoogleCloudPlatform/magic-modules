@@ -1,9 +1,27 @@
 resource "google_network_connectivity_hub" "{{$.PrimaryResourceId}}" {
-  name        = "{{index $.Vars "resource_name"}}"
-  description = "A sample hub with preset policy mode"
-  labels = {
+ name        = "{{index $.Vars "resource_name"}}"
+ description = "A sample hub with policy_mode set to CUSTOM"
+ policy_mode = "CUSTOM"
+ labels = {
     label-one = "value-one"
   }
-  policy_mode     = "PRESET"
-  preset_topology = "MESH"
+}
+
+resource "google_network_connectivity_hub" "{{$.PrimaryResourceId}}" {
+ name        = "{{index $.Vars "resource_name"}}"
+ description = "A sample hub with PRESET policy_mode (default topology should be MESH)"
+ policy_mode = "PRESET"
+ labels = {
+    label-one = "value-one"
+  }
+}
+
+resource "google_network_connectivity_hub" "{{$.PrimaryResourceId}}" {
+ name            = "{{index $.Vars "resource_name"}}"
+ description     = "A sample hub with PRESET policy_mode and STAR topology"
+ policy_mode     = "PRESET"
+ preset_topology = "STAR"
+ labels = {
+    label-one = "value-one"
+  }
 }
