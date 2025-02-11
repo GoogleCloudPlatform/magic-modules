@@ -203,7 +203,6 @@ examples:
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
-      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Id'
 parameters:
   - name: 'name'
     type: String
