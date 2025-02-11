@@ -262,8 +262,8 @@ resource "google_workstations_workstation_config" "default" {
 	mount_path = "/home"
 
   gce_pd {
-    disk_type = pd-standard
-    disk_size = 50
+    disk_type = "pd-standard"
+    disk_size = 100
     }
   }
 
