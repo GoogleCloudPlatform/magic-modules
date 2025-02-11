@@ -36,3 +36,7 @@ func RemovingAFieldMessages(resource string, resourceDiff diff.ResourceDiff) []s
 	}
 	return messages
 }
+
+func AddingExactlyOneOf(resource string, resourceDiff diff.ResourceDiff) []string {
+	return nil
+}
