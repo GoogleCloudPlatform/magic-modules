@@ -190,6 +190,9 @@ examples:
       'deletion_protection_enabled': 'false'
   - name: "redis_cluster_cmek"
     primary_resource_id: "cluster-cmek"
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       cluster_name: "cmek-cluster"
       policy_name: "my-policy"
