@@ -64,6 +64,12 @@ resource "google_eventarc_message_bus" "primary" {
   location       = "%{region}"
   message_bus_id = "tf-test-messagebus%{random_suffix}"
   display_name   = "basic bus"
+  labels = {
+    test_label = "test-eventarc-label"
+  }
+  annotations = {
+    test_annotation = "test-eventarc-annotation"
+  }
 }
 `, context)
 }
