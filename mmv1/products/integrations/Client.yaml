@@ -38,19 +38,19 @@ custom_code:
   decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
   pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
 sweeper:
-  regions:
-    - "us-east1"
-    - "asia-east1"
-    - "southamerica-west1"
-    - "northamerica-northeast1"
-    - "us-central1"
-    - "us-south1"
-    - "southamerica-east1"
-    - "us-west2"
-    - "us-west4"
-    - "northamerica-northeast2"
-    - "us-west3"
-    - "asia-east2"
+  url_substitutions:
+    - region: "asia-east1"
+    - region: "southamerica-west1"
+    - region: "asia-east2"
+    - region: "us-south1"
+    - region: "northamerica-northeast2"
+    - region: "us-central1"
+    - region: "us-west4"
+    - region: "us-west2"
+    - region: "us-west3"
+    - region: "southamerica-east1"
+    - region: "northamerica-northeast1"
+    - region: "us-east1"
 examples:
   - name: 'integrations_client_basic'
     primary_resource_id: 'example'

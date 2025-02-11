@@ -42,8 +42,8 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'scc_v2_project_notification_config_basic'
     primary_resource_id: 'custom_notification_config'

@@ -24,6 +24,9 @@ id_format: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging
 import_format:
   - projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: gemini_logging_setting_basic
     min_version: 'beta'
