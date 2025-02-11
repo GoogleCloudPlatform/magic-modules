@@ -1,11 +1,57 @@
+# Service account setup only required once per project.
+resource "google_service_account" "service_account" {
+  provider = google-beta
+
+  project = "{{index $.TestEnvVars "project_id"}}"
+
+  # Must be firebase-app-hosting-compute
+  account_id                   = "firebase-app-hosting-compute"
+  display_name                 = "Firebase App Hosting compute service account"
+
+  # Do not throw if already exists
+  create_ignore_already_exists = true
+}
+
+resource "google_project_iam_member" "app_hosting_sa_developerconnect" {
+  provider = google-beta
+
+  project = "{{index $.TestEnvVars "project_id"}}"
+
+  # For reading connected Github repos
+  role   = "roles/developerconnect.readTokenAccessor"
+  member = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "app_hosting_sa_adminsdk" {
+  provider = google-beta
+
+  project = "{{index $.TestEnvVars "project_id"}}"
+
+  # For Firebase Admin SDK
+  role   = "roles/firebase.sdkAdminServiceAgent"
+  member = google_service_account.service_account.member
+}
+
+resource "google_project_iam_member" "app_hosting_sa_runner" {
+  provider = google-beta
+
+  project = "{{index $.TestEnvVars "project_id"}}"
+
+  # For App Hosting
+  role   = "roles/firebaseapphosting.computeRunner"
+  member = google_service_account.service_account.member
+}
+
 resource "google_firebase_app_hosting_backend" "example" {
+  provider = google-beta
+
   project          = "{{index $.TestEnvVars "project_id"}}"
   location         = "{{index $.Vars "location"}}"
   backend_id       = "{{index $.Vars "backend_id"}}"
   app_id           = "{{index $.Vars "app_id"}}"
   display_name     = "{{index $.Vars "display_name"}}"
   serving_locality = "{{index $.Vars "serving_locality"}}"
-  service_account  = "firebase-app-hosting-compute@{{index $.TestEnvVars "project_id"}}.iam.gserviceaccount.com"
+  service_account  = google_service_account.service_account.email
   environment      = "prod"
 
   annotations = {
