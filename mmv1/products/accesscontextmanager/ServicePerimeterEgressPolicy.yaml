@@ -62,6 +62,7 @@ async:
 identity:
   - egressFrom
   - egressTo
+  - title
 nested_query:
   keys:
     - status
@@ -77,6 +78,8 @@ exclude_tgc: true
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeter_egress_policy'
+    vars:
+      egress_policy_title: 'egress policy title'
     exclude_test: true
 parameters:
   - name: 'perimeter'
@@ -202,6 +205,10 @@ properties:
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
+  - name: 'title'
+    type: 'string'
+    description: |
+      Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'
     type: String
     description: |
