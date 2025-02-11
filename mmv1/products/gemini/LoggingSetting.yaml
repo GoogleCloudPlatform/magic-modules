@@ -46,9 +46,7 @@ parameters:
   - name: loggingSettingId
     type: String
     description: |-
-      Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      setting_id from the method_signature of Create RPC.
+      Id of the setting binding.
     immutable: true
     url_param_only: true
     required: true
