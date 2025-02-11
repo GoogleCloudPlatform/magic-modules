@@ -16,12 +16,12 @@ name: GoogleChannelConfig
 legacy_long_form_project: true
 base_url: projects/{{project}}/locations/{{location}}
 self_link: projects/{{project}}/locations/{{location}}/googleChannelConfig
-create_url: projects/{{project}}/locations/{{location}}/googleChannelConfig
 # This is a singleton resource that is already created, so create
 # is really an update, and therefore should be PATCHed.
 create_verb: PATCH
-update_url: projects/{{project}}/locations/{{location}}/googleChannelConfig
+create_url: projects/{{project}}/locations/{{location}}/googleChannelConfig?updateMask=cryptoKeyName
 update_verb: PATCH
+update_url: projects/{{project}}/locations/{{location}}/googleChannelConfig
 update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
@@ -40,6 +40,7 @@ examples:
     primary_resource_id: primary
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    # All tests are handwritten to ensure they don't run in parallel.
     exclude_test: true
 parameters:
   - name: location
