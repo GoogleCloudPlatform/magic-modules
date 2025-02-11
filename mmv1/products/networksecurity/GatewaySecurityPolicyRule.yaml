@@ -43,15 +43,7 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
-mutex: 'gatewaySecurityPolicies/rules/{{priority}}'
-custom_code:
-  constants: 'templates/terraform/constants/network_security_gateway_security_policy_rule.go.tmpl'
-  pre_create: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
-  pre_update: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
-  pre_delete: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
-  post_create: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
-  post_update: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
-  post_delete: 'templates/terraform/constants/network_security_gateway_security_policy_rule_sleep.go.tmpl'
+mutex: 'gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
 examples:
   - name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'
