@@ -20,13 +20,13 @@ references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.grpcRoutes'
 docs:
-base_url: 'projects/{{project}}/locations/global/grpcRoutes'
-self_link: 'projects/{{project}}/locations/global/grpcRoutes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/grpcRoutes?grpcRouteId={{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/grpcRoutes'
+self_link: 'projects/{{project}}/locations/{{location}}/grpcRoutes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/grpcRoutes?grpcRouteId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/grpcRoutes/{{name}}'
+  - 'projects/{{project}}/locations/{{location}}/grpcRoutes/{{name}}'
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -44,6 +44,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+schema_version: 1
+state_upgraders: true
 examples:
   - name: 'network_services_grpc_route_basic'
     primary_resource_id: 'default'
@@ -56,6 +58,11 @@ examples:
     vars:
       resource_name: 'my-grpc-route'
   - name: 'network_services_grpc_route_actions'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-grpc-route'
+  - name: 'network_services_grpc_route_location'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -283,3 +290,13 @@ properties:
                   description: |
                     Specifies the allowed number of retries.
                   min_version: 'beta'
+  - name: 'location'
+    type: String
+    description: |
+      Location (region) of the GRPCRoute resource to be created. Only the value 'global' is currently allowed; defaults to 'global' if omitted.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'
