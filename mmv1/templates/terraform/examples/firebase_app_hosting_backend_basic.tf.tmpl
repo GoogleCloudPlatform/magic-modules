@@ -1,0 +1,18 @@
+resource "google_firebase_app_hosting_backend" "example" {
+  project          = "{{index $.TestEnvVars "project_id"}}"
+  location         = "{{index $.Vars "location"}}"
+  backend_id       = "{{index $.Vars "backend_id"}}"
+  app_id           = "{{index $.Vars "app_id"}}"
+  display_name     = "{{index $.Vars "display_name"}}"
+  serving_locality = "{{index $.Vars "serving_locality"}}"
+  service_account  = "firebase-app-hosting-compute@{{index $.TestEnvVars "project_id"}}.iam.gserviceaccount.com"
+  environment      = "prod"
+
+  annotations = {
+    "key" = "value"
+  }
+
+  labels = {
+    "key" = "value"
+  }
+}
