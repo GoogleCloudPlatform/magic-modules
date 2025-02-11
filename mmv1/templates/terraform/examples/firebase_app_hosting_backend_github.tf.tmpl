@@ -1,4 +1,6 @@
 resource "google_firebase_app_hosting_backend" "example" {
+  provider = google-beta
+
   project          = "{{index $.TestEnvVars "project_id"}}"
   location         = "{{index $.Vars "location"}}"
   backend_id       = "{{index $.Vars "backend_id"}}"
@@ -23,6 +25,8 @@ resource "google_firebase_app_hosting_backend" "example" {
 }
 
 resource "google_developer_connect_connection" "my-connection" {
+  provider = google-beta
+
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "{{index $.Vars "location"}}"
   connection_id = "tf-test-connection-new"
@@ -33,6 +37,8 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 
 resource "google_developer_connect_git_repository_link" "my-repository" {
+  provider = google-beta
+
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "{{index $.Vars "location"}}"
 
@@ -49,11 +55,15 @@ output "next_steps" {
 # Setup permissions. Only needed once per project
 resource "google_project_service_identity" "devconnect-p4sa" {
   provider = google-beta
+
+  provider = google-beta
   project  = "{{index $.TestEnvVars "project_id"}}"
   service  = "developerconnect.googleapis.com"
 }
 
 resource "google_project_iam_member" "devconnect-secret" {
+  provider = google-beta
+
   project  = "{{index $.TestEnvVars "project_id"}}"
   role     = "roles/secretmanager.admin"
   member   = google_project_service_identity.devconnect-p4sa.member
