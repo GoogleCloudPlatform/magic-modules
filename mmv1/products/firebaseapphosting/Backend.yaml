@@ -199,12 +199,14 @@ properties:
       properties:
         - name: runService
           type: NestedObject
+          output: true
           description: |-
             A managed Cloud Run
             [`service`](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#resource:-service).
           properties:
             - name: service
               type: String
+              output: true
               description: |-
                 The name of the Cloud Run
                 [`service`](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#resource:-service),
