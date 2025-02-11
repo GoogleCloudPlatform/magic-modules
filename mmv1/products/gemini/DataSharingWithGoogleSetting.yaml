@@ -42,9 +42,7 @@ parameters:
   - name: dataSharingWithGoogleSettingId
     type: String
     description: |-
-      Required. Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      data_sharing_with_google_setting_id from the method_signature of Create RPC
+      Id of the Data Sharing With Google Setting.
     immutable: true
     url_param_only: true
     required: true
@@ -57,15 +55,15 @@ properties:
     output: true
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: enablePreviewDataSharing
     type: Boolean
-    description: Optional. Whether preview data sharing should be enabled.
+    description: Whether preview data sharing should be enabled.
