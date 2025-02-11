@@ -472,8 +472,8 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-
-	if d.HasChange("password") || d.HasChange("password_policy") {
+	isNewPasswordWO, _ := d.GetRawConfigAt(cty.GetAttrPath("new_wo_password"))
+	if d.HasChange("password") || d.HasChange("password_policy") || isNewPasswordWO.Equals(cty.BoolVal(true)).True() {
 		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return err
@@ -481,8 +481,13 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		name := d.Get("name").(string)
 		instance := d.Get("instance").(string)
-		password := d.Get("password").(string)
 		host := d.Get("host").(string)
+		var password string
+		if pw, ok := d.GetOk("password"); ok {
+			password = pw.(string)
+		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
+			password = pwWo.AsString()
+		}
 
 		user := &sqladmin.User{
 			Name:     name,
