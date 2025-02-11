@@ -27,6 +27,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: V2F0Y2hsaXN0
 custom_code:
   encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
   post_create: 'templates/terraform/post_create/chronicle_watchlist_id.go.tmpl'

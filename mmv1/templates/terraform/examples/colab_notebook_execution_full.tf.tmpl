@@ -1,4 +1,5 @@
 resource "google_colab_runtime_template" "my_runtime_template" {
+  provider = google-beta
   name = "{{index $.Vars "runtime_template_name"}}"
   display_name = "Runtime template"
   location = "us-central1"
@@ -13,6 +14,7 @@ resource "google_colab_runtime_template" "my_runtime_template" {
 }
 
 resource "google_storage_bucket" "output_bucket" {
+  provider = google-beta
   name          = "{{index $.Vars "bucket"}}"
   location      = "US"
   force_destroy = true
@@ -20,6 +22,7 @@ resource "google_storage_bucket" "output_bucket" {
 }
 
 resource "google_storage_bucket_object" "notebook" {
+  provider = google-beta
   name   = "hello_world.ipynb"
   bucket = google_storage_bucket.output_bucket.name
   content = <<EOF
@@ -61,6 +64,7 @@ resource "google_storage_bucket_object" "notebook" {
 }
 
 resource "google_colab_notebook_execution" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   notebook_execution_job_id = "{{index $.Vars "notebook_execution_job_id"}}"
   display_name = "Notebook execution full"
   location = "us-central1"

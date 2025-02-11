@@ -1,0 +1,17 @@
+resource "google_eventarc_trigger" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "trigger_name"}}"
+  location = "us-central1"
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.pubsub.topic.v1.messagePublished"
+  }
+  destination {
+    http_endpoint {
+      uri = "http://10.77.0.0:80/route"
+    }
+    network_config {
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+    }
+  }
+  service_account = "{{index $.TestEnvVars "service_account"}}"
+}
