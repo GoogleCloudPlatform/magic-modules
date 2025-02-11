@@ -41,8 +41,8 @@ custom_code:
 custom_diff:
   - 'tpuNodeCustomizeDiff'
 sweeper:
-    url_substitutions:
-      - zone: "us-central1-b"
+  url_substitutions:
+    - zone: "us-central1-b"
 examples:
   - name: 'tpu_node_basic'
     primary_resource_id: 'tpu'

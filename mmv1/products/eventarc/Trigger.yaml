@@ -34,9 +34,9 @@ autogen_async: true
 description: |
  The Eventarc Trigger resource
 sweeper:
-    url_substitutions:
-      - region: "us-central1"
-      - region: "europe-west1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
