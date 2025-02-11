@@ -42,9 +42,7 @@ parameters:
   - name: dataSharingWithGoogleSettingId
     type: String
     description: |-
-      Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      data_sharing_with_google_setting_id from the method_signature of Create RPC
+      Id of the Data Sharing With Google Setting.
     immutable: true
     url_param_only: true
     required: true
