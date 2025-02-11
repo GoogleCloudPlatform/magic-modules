@@ -49,9 +49,10 @@ func testAccEventarcMessageBus_basic(t *testing.T) {
 				Config: testAccEventarcMessageBus_basicCfg(context),
 			},
 			{
-				ResourceName:      "google_eventarc_message_bus.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_message_bus.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
 		},
 	})
@@ -62,6 +63,7 @@ func testAccEventarcMessageBus_basicCfg(context map[string]interface{}) string {
 resource "google_eventarc_message_bus" "primary" {
   location       = "%{region}"
   message_bus_id = "tf-test-messagebus%{random_suffix}"
+  display_name   = "basic bus"
 }
 `, context)
 }
@@ -85,9 +87,10 @@ func testAccEventarcMessageBus_cryptoKey(t *testing.T) {
 				Config: testAccEventarcMessageBus_cryptoKeyCfg(context),
 			},
 			{
-				ResourceName:      "google_eventarc_message_bus.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_message_bus.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
 		},
 	})
@@ -133,9 +136,10 @@ func testAccEventarcMessageBus_update(t *testing.T) {
 				Config: testAccEventarcMessageBus_setCfg(context),
 			},
 			{
-				ResourceName:      "google_eventarc_message_bus.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_message_bus.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
 			{
 				Config: testAccEventarcMessageBus_updateCfg(context),
@@ -146,9 +150,10 @@ func testAccEventarcMessageBus_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:      "google_eventarc_message_bus.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_message_bus.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
 			{
 				Config: testAccEventarcMessageBus_deleteCfg(context),
@@ -159,9 +164,10 @@ func testAccEventarcMessageBus_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:      "google_eventarc_message_bus.primary",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_eventarc_message_bus.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
 		},
 	})
