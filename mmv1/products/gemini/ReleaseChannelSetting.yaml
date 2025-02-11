@@ -42,28 +42,26 @@ parameters:
   - name: releaseChannelSettingId
     type: String
     description: |-
-      Required. Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      release_channel_setting_id from the method_signature of Create RPC
+      Id of the Release Channel Setting.
     immutable: true
     url_param_only: true
     required: true
 properties:
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: releaseChannel
     type: String
     description: |-
-      Optional. Release channel to be used.
+      Release channel to be used.
       Possible values:
       STABLE
       EXPERIMENTAL
