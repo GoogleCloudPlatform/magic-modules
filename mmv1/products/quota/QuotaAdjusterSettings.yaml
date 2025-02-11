@@ -28,12 +28,12 @@ update_mask: true
 immutable: false
 
 parameters:
-  - name: 'project'
+  - name: 'name'
     type: String
     required: true
     immutable: true
     description: |
-      The ID of the project in which the quota adjuster should be enabled.
+      Name of the configuration, in the following format: projects/PROJECT_NUMBER/locations/global/quotaAdjusterSettings. Replace PROJECT_NUMBER with the project number for your project.
 
 properties:
   - name: 'enablement'
@@ -57,4 +57,4 @@ properties:
     output: true
     optional: true
     description: |
-      The ETag of the QuotaAdjusterSettings. Used for concurrency control when updating.
+      The current ETag of the QuotaAdjusterSettings. If an ETag is provided on update and does not match the current server's ETag in the QuotaAdjusterSettings, the request is blocked and returns an ABORTED error
