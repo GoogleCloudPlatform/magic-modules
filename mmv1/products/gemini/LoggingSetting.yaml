@@ -46,7 +46,7 @@ parameters:
   - name: loggingSettingId
     type: String
     description: |-
-      Id of the logging setting.
+      Id of the Logging Setting.
     immutable: true
     url_param_only: true
     required: true
