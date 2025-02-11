@@ -99,6 +99,16 @@ func testSweep{{ $.ResourceName }}(_ string) error {
 		t := &testing.T{}
 		billingId := envvar.GetTestBillingAccountFromEnv(t)
 
+		// Set fallback values for empty region/zone
+		if sub.region == "" {
+			log.Printf("[INFO][SWEEPER_LOG] Empty region provided, falling back to us-central1")
+			sub.region = "us-central1"
+		}
+		if sub.zone == "" {
+			log.Printf("[INFO][SWEEPER_LOG] Empty zone provided, falling back to us-central1-a")
+			sub.zone = "us-central1-a"
+		}
+
 		// Setup variables to replace in list template
 		d := &tpgresource.ResourceDataMock{
 			FieldsInSchema: map[string]interface{}{
@@ -132,7 +142,7 @@ func testSweep{{ $.ResourceName }}(_ string) error {
 		resourceList, ok := res["{{ $.ResourceListKey }}"]
 		if !ok {
 			log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
-			continue
+			return nil
 		}
 
 		{{- if contains $.ListUrlTemplate "/aggregated/" }}
