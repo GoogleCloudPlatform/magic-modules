@@ -69,7 +69,6 @@ func testSweep{{ $.ResourceName }}(_ string) error {
 			zone   string
 		}{
 			region: region,
-			zone:   "-",
 		}
 	}
 	{{- else }}
@@ -78,7 +77,7 @@ func testSweep{{ $.ResourceName }}(_ string) error {
 		region string
 		zone   string
 	}{
-		{region: "us-central1", zone: "-"},
+		{region: "us-central1"},
 	}
 	{{- end }}
 
