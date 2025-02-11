@@ -42,7 +42,7 @@ parameters:
   - name: releaseChannelSettingId
     type: String
     description: |-
-      Id of the release channel.
+      Id of the Release Channel Setting.
     immutable: true
     url_param_only: true
     required: true
