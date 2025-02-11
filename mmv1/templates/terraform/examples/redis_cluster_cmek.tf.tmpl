@@ -4,7 +4,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
-  kms_key = google_kms_crypto_key.kmskey.id
+  kms_key = "{{index $.Vars "kms_key_name"}}"
   region = "us-central1"
   deletion_protection_enabled = {{index $.Vars "deletion_protection_enabled"}}
   depends_on = [
@@ -13,19 +13,8 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   ]
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "{{index $.Vars "kms_ring_name"}}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "kmskey" {
-  name            = "{{index $.Vars "kms_key_name"}}"
-  key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "7776000s"
-}
-
 resource "google_kms_crypto_key_iam_binding" "kms_key_iam_decrypter" {
-  crypto_key_id = google_kms_crypto_key.kmskey.id
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   members       = [
     "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com",
