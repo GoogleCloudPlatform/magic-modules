@@ -62,6 +62,12 @@ resource "google_kms_crypto_key_iam_member" "key1_member" {
   member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
 }
 
+resource "google_kms_crypto_key_iam_member" "key2_member" {
+  crypto_key_id = "%{key2_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+}
+
 resource "google_eventarc_pipeline" "primary" {
   location        = "us-central1"
   pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
@@ -104,7 +110,7 @@ EOF
   logging_config {
     log_severity = "DEBUG"
   }
-  depends_on = [google_kms_crypto_key_iam_member.key1_member]
+  depends_on = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
 `, context)
 }

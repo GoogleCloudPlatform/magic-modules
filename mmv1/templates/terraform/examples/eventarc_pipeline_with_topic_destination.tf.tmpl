@@ -11,4 +11,11 @@ resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
       network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
     }
   }
+  labels = {
+    test_label = "test-eventarc-label"
+  }
+  annotations = {
+    test_annotation = "test-eventarc-annotation"
+  }
+  display_name = "Testing Pipeline"
 }
