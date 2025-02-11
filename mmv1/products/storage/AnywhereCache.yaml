@@ -27,6 +27,12 @@ update_verb: 'PATCH'
 delete_verb: 'POST'
 import_format: ['b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}']
 id_format: '{{bucket}}/{{anywhere_cache_id}}'
+examples:
+  - name: 'storage_anywhere_cache_basic'
+    primary_resource_id: 'cache'
+    vars:
+      bucket_name: 'my-bucket'
+    external_providers: ["time"]
 identity:
   - bucket
   - anywhereCacheId
