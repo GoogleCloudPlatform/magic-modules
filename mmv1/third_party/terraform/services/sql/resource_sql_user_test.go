@@ -70,7 +70,6 @@ func TestAccSqlUser_password_wo(t *testing.T) {
 				Config: testGoogleSqlUser_password_wo(instance, "password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
 				),
 			},
 			{
@@ -78,9 +77,14 @@ func TestAccSqlUser_password_wo(t *testing.T) {
 				Config: testGoogleSqlUser_new_password_wo(instance, "new_password"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user2"),
-					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user3"),
 				),
+			},
+			{
+				ResourceName:            "google_sql_user.user1",
+				ImportStateId:           fmt.Sprintf("%s/%s/gmail.com/admin", envvar.GetTestProjectFromEnv(), instance),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
@@ -429,7 +433,7 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_user" "user1" {
   name     = "admin"
   instance = google_sql_database_instance.instance.name
-  host     = "google.com"
+  host     = "gmail.com"
   password_wo = "%s"
 }
 `, instance, password)
@@ -450,7 +454,7 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_user" "user1" {
   name     = "admin"
   instance = google_sql_database_instance.instance.name
-  host     = "google.com"
+  host     = "gmail.com"
   password_wo = "%s"
   new_wo_password = true
 }
