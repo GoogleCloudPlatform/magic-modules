@@ -26,35 +26,38 @@ import_format:
   - "projects/{{project}}/locations/{{location}}/backends/{{backend_id}}"
   - "{{project}}/{{location}}/{{backend_id}}"
   - "{{location}}/{{backend_id}}"
+min_version: beta
 examples:
   - name: firebase_app_hosting_backend_basic
     primary_resource_id: example
+    min_version: beta
     vars:
-      location: 'us-central1'
-      backend_id: 'my-backend'
-      app_id: '1:0000000000:web:674cde32020e16fbce9dbd'
-      display_name: 'My Backend'
-      serving_locality: 'GLOBAL_ACCESS'
+      location: "us-central1"
+      backend_id: "my-backend"
+      app_id: "1:0000000000:web:674cde32020e16fbce9dbd"
+      display_name: "My Backend"
+      serving_locality: "GLOBAL_ACCESS"
     test_env_vars:
-      project_id: 'PROJECT_NAME'
+      project_id: "PROJECT_NAME"
     test_vars_overrides:
-      'location': '"us-central1"'
-      'serving_locality': '"GLOBAL_ACCESS"'
-      'app_id': '"1:0000000000:web:674cde32020e16fbce9dbd"'
+      "location": '"us-central1"'
+      "serving_locality": '"GLOBAL_ACCESS"'
+      "app_id": '"1:0000000000:web:674cde32020e16fbce9dbd"'
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
+    min_version: beta
     vars:
-      location: 'us-central1'
-      backend_id: 'my-backend-gh'
-      app_id: 'firebase:app:id'
-      display_name: 'My Backend'
-      serving_locality: 'GLOBAL_ACCESS'
+      location: "us-central1"
+      backend_id: "my-backend-gh"
+      app_id: "firebase:app:id"
+      display_name: "My Backend"
+      serving_locality: "GLOBAL_ACCESS"
     test_env_vars:
-      project_id: 'PROJECT_NAME'
+      project_id: "PROJECT_NAME"
     test_vars_overrides:
-      'location': '"us-central1"'
-      'serving_locality': '"GLOBAL_ACCESS"'
-    skip_test: true # Can't establish a Github connection in automated tests.
+      "location": '"us-central1"'
+      "serving_locality": '"GLOBAL_ACCESS"'
+    skip_test: true  # Can't establish a Github connection in automated tests.
 autogen_async: true
 async:
   operation:
