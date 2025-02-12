@@ -27,8 +27,8 @@ import_format:
 autogen_async: true
 autogen_status: U2VydmljZUluc3RhbmNl
 sweeper:
-  regions:
-    - "us-west2"
+  url_substitutions:
+    - region: "us-west2"
 parameters:
   - name: location
     type: String
