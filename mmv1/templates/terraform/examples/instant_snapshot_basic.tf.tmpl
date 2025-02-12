@@ -1,5 +1,5 @@
 resource "google_compute_disk" "foo" {
-  name = "foo"
+  name = "{{index $.Vars "disk_name"}}"
   type = "pd-ssd"
   size = 10
 }
