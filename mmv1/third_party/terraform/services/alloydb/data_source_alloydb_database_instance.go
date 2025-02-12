@@ -34,7 +34,6 @@ func DataSourceAlloydbDatabaseInstance() *schema.Resource {
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "instance_id")
 
 	// Set 'Required' schema elements
-
 	dsSchema_m := tpgresource.MergeSchemas(dsScema_cluster_id, dsSchema)
 
 	return &schema.Resource{
@@ -46,7 +45,7 @@ func DataSourceAlloydbDatabaseInstance() *schema.Resource {
 func dataSourceAlloydbDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	// Get feilds for ID for setting cluster filed in resource
+	// Get feilds for setting cluster field in resource
 	cluster_id := d.Get("cluster_id").(string)
 
 	location, err := tpgresource.GetLocation(d, config)
@@ -64,7 +63,7 @@ func dataSourceAlloydbDatabaseInstanceRead(d *schema.ResourceData, meta interfac
 	}
 	d.SetId(id)
 
-	// Setting cluster field
+	// Setting cluster field as this is set as a required field in instance resource
 	d.Set("cluster", fmt.Sprintf("projects/%s/locations/%s/clusters/%s", project, location, cluster_id))
 
 	err = resourceAlloydbInstanceRead(d, meta)

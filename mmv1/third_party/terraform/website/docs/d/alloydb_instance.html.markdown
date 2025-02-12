@@ -1,7 +1,7 @@
 ---
 subcategory: "AlloyDB"
 description: |-
-  Fetches the details of available locations.
+  Fetches the details of available instance.
 ---
 
 # google_alloydb_instance
