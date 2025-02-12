@@ -76,7 +76,11 @@ func Resource{{$.PathType}}() *schema.Resource {
 {{- end }}
 			Delete: schema.DefaultTimeout({{$.DeleteTimeoutMinutes}} * time.Minute),
 		},
-
+{{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
+		ValidateRawResourceConfigFuncs: []schema.ValidateRawResourceConfigFunc{
+			{{$.CustomTemplate $.CustomCode.ValidateRawResourceConfigFuncs false}},
+		},
+{{- end }}
 {{- if $.CustomizeDiff }}
 		CustomizeDiff: customdiff.All(
  {{- range $cdf := $.CustomizeDiff }}
