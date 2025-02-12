@@ -1,15 +1,15 @@
 data "google_project" "test_project" {
-	project_id = "{{index $.TestEnvVars "project_name"}}"
+  project_id = "{{index $.TestEnvVars "project_name"}}"
 }
 
 data "google_kms_key_ring" "test_key_ring" {
-	name     = "keyring"
-	location = "us-centra1"
+  name     = "keyring"
+  location = "us-centra1"
 }
 
 data "google_kms_crypto_key" "key" {
-	name     = "key"
-	key_ring = data.google_kms_key_ring.test_key_ring.id
+  name     = "key"
+  key_ring = data.google_kms_key_ring.test_key_ring.id
 }
 
 resource "google_kms_crypto_key_iam_member" "key_member" {
