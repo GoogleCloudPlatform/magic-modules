@@ -49,6 +49,14 @@ type PostCreateFunctionDetails struct {
 	Function string
 }
 
+type ValidationFunctionDetails struct {
+	// Function is the name of the function to call. Arguments are decided by
+	// the generated code based on the resource's identity, with the format
+	// (d, config, res).
+	// This function is expected to return an error.
+	Function string
+}
+
 type PreDeleteFunctionDetails struct {
 	// Function is the name of the function to call. Arguments are decided by
 	// the generated code based on the resource's identity, with the format

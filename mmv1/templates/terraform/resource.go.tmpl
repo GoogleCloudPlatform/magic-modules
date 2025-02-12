@@ -134,7 +134,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
         ),
 {{- end}}
-
+{{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
+		ValidateRawResourceConfigFuncs: []schema.ValidateRawResourceConfigFunc{
+			{{$.CustomTemplate $.CustomCode.ValidateRawResourceConfigFuncs false}},
+		},
+{{- end }}
 {{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}

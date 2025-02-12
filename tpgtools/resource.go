@@ -107,6 +107,10 @@ type Resource struct {
 	// after the Creation call for a resource.
 	PostCreateFunction *string
 
+	// ValidationFunction is the name of a function that's called immediately
+	// after the Creation call for a resource.
+	ValidationFunction *string
+
 	// PreDeleteFunction is the name of a function that's called immediately
 	// prior to the Delete call for a resource.
 	PreDeleteFunction *string
@@ -591,6 +595,15 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 	if pdOk {
 		res.PreDeleteFunction = &pd.Function
+	}
+
+	validation := ValidationFunctionDetails{}
+	validationOk, err := overrides.ResourceOverrideWithDetails(Validation, &validation, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode validation function details: %v", err)
+	}
+	if validationOk {
+		res.ValidationFunction = &validation.Function
 	}
 
 	// Resource Override: Customize Diff
