@@ -14,7 +14,6 @@
 ---
 name: DataSharingWithGoogleSetting
 description: The resource for managing DataSharingWithGoogle settings for Admin Control.
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
@@ -29,7 +28,6 @@ sweeper:
     - region: "global"
 examples:
   - name: gemini_data_sharing_with_google_setting_basic
-    min_version: 'beta'
     primary_resource_id: example
     exclude_test: true
     vars:
