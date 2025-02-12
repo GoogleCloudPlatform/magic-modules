@@ -71,15 +71,15 @@ custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
 sweeper:
-  regions:
-    - "southamerica-west1"
-    - "us-south1"
-    - "us-west2"
-    - "us-central1"
-    - "us-east1"
-    - "europe-west1"
-    - "us-west1"
-    - "europe-west4"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "southamerica-west1"
+    - region: "us-west1"
+    - region: "us-south1"
 examples:
   - name: 'subnetwork_basic'
     primary_resource_id: 'network-with-private-secondary-ip-ranges'
