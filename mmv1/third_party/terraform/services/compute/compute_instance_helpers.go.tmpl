@@ -1110,10 +1110,6 @@ func expandSourceMachineImageEncryptionKey(m map[string]interface{}) *compute.Cu
 		key.KmsKeyName = v
 		key.ForceSendFields = append(key.ForceSendFields, "KmsKeyName")
 	}
-	if v, ok := m["sha256"].(string); ok && v != "" {
-		key.Sha256 = v
-		key.ForceSendFields = append(key.ForceSendFields, "Sha256")
-	}
 	if v, ok := m["kms_key_service_account"].(string); ok && v != "" {
 		key.KmsKeyServiceAccount = v
 		key.ForceSendFields = append(key.ForceSendFields, "KmsKeyServiceAccount")
@@ -1147,7 +1143,7 @@ func flattenSourceMachineImageEncryptionKey(key *compute.CustomerEncryptionKey) 
 	if key.KmsKeyServiceAccount != "" {
 		m["kms_key_service_account"] = key.KmsKeyServiceAccount
 	}
-
+	
 	// Only return the map if it's not empty
 	if len(m) > 0 {
 		return []map[string]interface{}{m}
