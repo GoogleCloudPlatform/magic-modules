@@ -66,3 +66,28 @@ properties:
     type: String
     required: true
     immutable: true
+    
+examples:
+  - name: "compute_resource_policy_attachment_basic"
+    primary_resource_id: "policy_attachment"
+    skip_vcr: true
+    vars:
+      instance_name: "test-attachment-instance"
+      policy_name: "test-attachment-policy"
+      zone: "us-central1-a"
+    test_vars_overrides:
+      instance_name: 'fmt.Sprintf("tf-test-attachment-%s", randString(t, 10))'
+      policy_name: 'fmt.Sprintf("tf-test-policy-%s", randString(t, 10))'
+      zone: 'getTestZoneFromEnv()'
+  - name: "compute_resource_policy_attachment_full"
+    primary_resource_id: "policy_attachment_full"
+    skip_vcr: true
+    min_version: beta
+    vars:
+      instance_name: "test-attachment-instance-full"
+      policy_name: "test-attachment-policy-full"
+      zone: "us-central1-a"
+    test_vars_overrides:
+      instance_name: 'fmt.Sprintf("tf-test-attachment-full-%s", acctest.RandString(t, 10))'
+      policy_name: 'fmt.Sprintf("tf-test-policy-full-%s", acctest.RandString(t, 10))'
+      zone: 'acctest.GetTestZoneFromEnv()'
