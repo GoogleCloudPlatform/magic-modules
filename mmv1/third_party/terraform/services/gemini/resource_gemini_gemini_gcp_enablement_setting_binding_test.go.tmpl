@@ -53,14 +53,14 @@ func TestAccGeminiGeminiGcpEnablementSettingBinding_update(t *testing.T) {
 func testAccGeminiGeminiGcpEnablementSettingBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
+    provider = google-beta
 }
 
 resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
-	location = "global"
-	labels = {"my_key": "my_value"}
+    location = "global"
+    labels = {"my_key": "my_value"}
     enable_customer_data_sharing = true
 }
 
@@ -68,8 +68,8 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
-	location = "global"
-	target = "projects/${data.google_project.project.number}"
+    location = "global"
+    target = "projects/${data.google_project.project.number}"
 }
 `, context)
 }
@@ -77,14 +77,14 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
 func testAccGeminiGeminiGcpEnablementSettingBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = google-beta
+    provider = google-beta
 }
 
 resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = "%{gemini_gcp_enablement_setting_id}"
-	location = "global"
-	labels = {"my_key" = "my_value"}
+    location = "global"
+    labels = {"my_key" = "my_value"}
     enable_customer_data_sharing = false
 }
 
@@ -92,9 +92,9 @@ resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
     provider = google-beta
     gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
     setting_binding_id = "%{setting_binding_id}"
-	location = "global"
-	target = "projects/${data.google_project.project.number}"
-	labels = {"my_key" = "my_value"}
+    location = "global"
+    target = "projects/${data.google_project.project.number}"
+    labels = {"my_key" = "my_value"}
     product = "GEMINI_CODE_ASSIST"
 }
 `, context)
