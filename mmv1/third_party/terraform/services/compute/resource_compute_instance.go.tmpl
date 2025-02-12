@@ -1991,6 +1991,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("key_revocation_action_type", instance.KeyRevocationActionType); err != nil {
 		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
 	}
+	if err := d.Set("source_machine_image_encryption_key", flattenSourceMachineImageEncryptionKey(instance.SourceMachineImageEncryptionKey)); err != nil {
+		return fmt.Errorf("Error setting source_machine_image_encryption_key: %s", err)
+	}
 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instance.Name))
 
