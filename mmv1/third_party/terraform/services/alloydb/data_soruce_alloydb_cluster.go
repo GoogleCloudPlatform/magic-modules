@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package alloydb
 
 import (
@@ -13,45 +11,28 @@ import (
 func DataSourceAlloydbDatabaseCluster() *schema.Resource {
 	// Generate datasource schema from resource
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceAlloydbCluster().Schema)
-	// Set custom fields
-	dsScema_cluster_id := map[string]*schema.Schema{
-		"project": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: `Project ID of the project.`,
-		},
-		"location": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: `The canonical ID for the location. For example: "us-east1".`,
-		},
-	}
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster_id")
 
 	// Set 'Required' schema elements
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster_id")
 
-	dsSchema_m := tpgresource.MergeSchemas(dsScema_cluster_id, dsSchema)
+	// Set 'Optional' schema elements
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "location", "project")
 
 	return &schema.Resource{
-		Read:   dataSourceAlloydbDatabaseInstanceRead,
-		Schema: dsSchema_m,
+		Read:   dataSourceAlloydbDatabaseClusterRead,
+		Schema: dsSchema,
 	}
 }
 
 func dataSourceAlloydbDatabaseClusterRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	// Get feilds for ID for setting cluster filed in resource
-	cluster_id := d.Get("cluster_id").(string)
-
+	// Get location for setting location field in resource
 	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
 	}
-	project, err := tpgresource.GetProject(d, config)
-	if err != nil {
-		return err
-	}
+
 	// Store the ID now
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}")
 	if err != nil {
@@ -59,8 +40,8 @@ func dataSourceAlloydbDatabaseClusterRead(d *schema.ResourceData, meta interface
 	}
 	d.SetId(id)
 
-	// Setting cluster field
-	d.Set("cluster", fmt.Sprintf("projects/%s/locations/%s/clusters/%s", project, location, cluster_id))
+	// Setting location field as this is set as a required field in cluster resource
+	d.Set("location", location)
 
 	err = resourceAlloydbClusterRead(d, meta)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccAlloydbDatabaseInstanceDatasourceConfig(t *testing.T) {
+func TestAccAlloydbDatabaseClusterDatasourceConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -18,16 +18,16 @@ func TestAccAlloydbDatabaseInstanceDatasourceConfig(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlloydbDatabaseInstanceDatasourceConfig(context),
+				Config: testAccAlloydbDatabaseClusterDatasourceConfig(context),
 			},
 		},
 	})
 }
 
-func testAccAlloydbDatabaseInstanceDatasourceConfig(context map[string]interface{}) string {
+func testAccAlloydbDatabaseClusterDatasourceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
