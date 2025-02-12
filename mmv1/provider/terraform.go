@@ -173,7 +173,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
-	if object.ExcludeSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.ExcludeDelete {
+	if !object.ShouldGenerateSweepers() {
 		return
 	}
 

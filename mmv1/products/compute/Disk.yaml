@@ -294,6 +294,8 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
   - name: 'size'
     type: Integer
     description: |

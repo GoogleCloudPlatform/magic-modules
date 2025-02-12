@@ -37,6 +37,10 @@ async:
     resource_inside_response: false
 custom_code:
 legacy_long_form_project: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'network_connectivity_spoke_linked_vpc_network_basic'
     primary_resource_id: 'primary'

@@ -14,6 +14,7 @@
 ---
 name: Retrohunt
 description: Retrohunt is an execution of a Rule over a time range in the past.
+min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
@@ -26,6 +27,7 @@ id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/ru
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
 exclude_delete: true
+autogen_status: UmV0cm9odW50
 
 custom_code:
   decoder: 'templates/terraform/decoders/chronicle_retrohunt.go.tmpl'
