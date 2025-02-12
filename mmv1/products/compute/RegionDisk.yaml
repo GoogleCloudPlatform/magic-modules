@@ -59,7 +59,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
   encoder: 'templates/terraform/encoders/disk.tmpl'
-  update_encoder: 'templates/terraform/encoders/update_disk.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
   # validation: 'templates/terraform/validation/compute_region_disk.go.tmpl'
