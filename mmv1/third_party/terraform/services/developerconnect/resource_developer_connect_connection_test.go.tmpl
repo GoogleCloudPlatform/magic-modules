@@ -464,7 +464,7 @@ func TestAccDeveloperConnectConnection_developerConnectConnectionBitbucketCloudU
                                 ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
                         },
                         {
-                                Config: testAccDeveloperConnectConnection_BitbucketCloud(context),
+                                Config: testAccDeveloperConnectConnection_BitbucketCloudUpdate(context),
                         },
                         {
                                 ResourceName:            "google_developer_connect_connection.my-connection",
