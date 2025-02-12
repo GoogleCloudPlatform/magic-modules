@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 // We make sure not to run tests in parallel, since only one GoogleChannelConfig per location is supported.
@@ -49,10 +50,9 @@ func testAccEventarcGoogleChannelConfig_basic(t *testing.T) {
 				Config: testAccEventarcGoogleChannelConfig_basicCfg(context),
 			},
 			{
-				ResourceName:            "google_eventarc_google_channel_config.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ResourceName:      "google_eventarc_google_channel_config.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -156,6 +156,11 @@ func testAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccEventarcGoogleChannelConfig_cryptoKeyUpdateCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_google_channel_config.primary", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_eventarc_google_channel_config.primary",
@@ -164,6 +169,16 @@ func testAccEventarcGoogleChannelConfig_cryptoKeyUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccEventarcGoogleChannelConfig_deleteCryptoKeyCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_google_channel_config.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_eventarc_google_channel_config.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

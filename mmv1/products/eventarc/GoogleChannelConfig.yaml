@@ -17,7 +17,8 @@ legacy_long_form_project: true
 base_url: projects/{{project}}/locations/{{location}}
 self_link: projects/{{project}}/locations/{{location}}/googleChannelConfig
 # This is a singleton resource that is already created, so create
-# is really an update, and therefore should be PATCHed.
+# is really an update, and therefore should be PATCHed. We also
+# hardcode the update mask.
 create_verb: PATCH
 create_url: projects/{{project}}/locations/{{location}}/googleChannelConfig?updateMask=cryptoKeyName
 update_verb: PATCH
@@ -26,9 +27,9 @@ update_mask: true
 # This is a singleton resource that cannot be deleted, so skip delete.
 exclude_delete: true
 import_format:
-- 'projects/{{project}}/locations/{{location}}/googleChannelConfig'
-- '{{project}}/{{location}}'
-- '{{location}}'
+  - 'projects/{{project}}/locations/{{location}}/googleChannelConfig'
+  - '{{project}}/{{location}}'
+  - '{{location}}'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/eventarc/docs/use-cmek#enable-cmek-google-channel'
