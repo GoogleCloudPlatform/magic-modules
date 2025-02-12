@@ -74,41 +74,11 @@ resource "google_eventarc_pipeline" "primary" {
   crypto_key_name = "%{key1_name}"
   destinations {
     http_endpoint {
-      uri                      = "https://10.77.0.0:80/route"
-      message_binding_template = "{\"headers\":{\"new-header-key\": \"new-header-value\"}}"
+      uri = "https://10.77.0.0:80/route"
     }
     network_config {
       network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
     }
-    output_payload_format {
-      avro {
-        schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
-      }
-    }
-  }
-  input_payload_format {
-    avro {
-      schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
-    }
-  }
-  retry_policy {
-    max_retry_delay = "50s"
-    max_attempts    = 2
-    min_retry_delay = "40s"
-  }
-  mediations {
-    transformation {
-      transformation_template = <<-EOF
-{
-"id": message.id,
-"datacontenttype": "application/json",
-"data": "{ \"scrubbed\": \"true\" }"
-}
-EOF
-    }
-  }
-  logging_config {
-    log_severity = "DEBUG"
   }
   depends_on = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
@@ -135,41 +105,11 @@ resource "google_eventarc_pipeline" "primary" {
   crypto_key_name = "%{key2_name}"
   destinations {
     http_endpoint {
-      uri                      = "https://10.77.0.0:80/route"
-      message_binding_template = "{\"headers\":{\"new-header-key\": \"new-header-value\"}}"
+      uri = "https://10.77.0.0:80/route"
     }
     network_config {
       network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
     }
-    output_payload_format {
-      avro {
-        schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
-      }
-    }
-  }
-  input_payload_format {
-    avro {
-      schema_definition = "{\"type\": \"record\", \"name\": \"my_record\", \"fields\": [{\"name\": \"my_field\", \"type\": \"string\"}]}"
-    }
-  }
-  retry_policy {
-    max_retry_delay = "50s"
-    max_attempts    = 2
-    min_retry_delay = "40s"
-  }
-  mediations {
-    transformation {
-      transformation_template = <<-EOF
-{
-"id": message.id,
-"datacontenttype": "application/json",
-"data": "{ \"scrubbed\": \"true\" }"
-}
-EOF
-    }
-  }
-  logging_config {
-    log_severity = "DEBUG"
   }
   depends_on = [google_kms_crypto_key_iam_member.key1_member, google_kms_crypto_key_iam_member.key2_member]
 }
