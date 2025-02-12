@@ -48,8 +48,8 @@ func testAccGeminiLoggingSetting_geminiLoggingSettingBasicExample_basic(context 
 resource "google_gemini_logging_setting" "example" {
     logging_setting_id = "%{setting_id}"
     location = "global"
-	log_prompts_and_responses = true
-	log_metadata = true
+    log_prompts_and_responses = true
+    log_metadata = true
 }
 `, context)
 }
@@ -58,8 +58,8 @@ func testAccGeminiLoggingSetting_geminiLoggingSettingBasicExample_update(context
 resource "google_gemini_logging_setting" "example" {
     logging_setting_id = "%{setting_id}"
     location = "global"
-	log_prompts_and_responses = false
-	log_metadata = false
+    log_prompts_and_responses = false
+    log_metadata = false
 }
 `, context)
 }
