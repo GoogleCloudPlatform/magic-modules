@@ -819,10 +819,6 @@ func TestAccComputeInstance_instanceEncryption(t *testing.T) {
 		"desired_status": "RUNNING",
 	}
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
