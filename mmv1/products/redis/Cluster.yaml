@@ -117,10 +117,10 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-east1"
-    - "europe-west1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
