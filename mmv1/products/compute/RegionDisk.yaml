@@ -59,8 +59,10 @@ iam_policy:
     - '{{name}}'
 custom_code:
   encoder: 'templates/terraform/encoders/disk.tmpl'
+  update_encoder: 'templates/terraform/encoders/update_disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  # validation: 'templates/terraform/validation/compute_region_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
@@ -70,6 +72,14 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-disk'
+      disk_name: 'my-disk'
+      snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
+    primary_resource_id: 'regiondisk'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
+    vars:
+      region_disk_name: 'my-region-disk'
+      raw_key_data: 'write_only_key'
       disk_name: 'my-disk'
       snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
