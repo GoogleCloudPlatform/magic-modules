@@ -598,7 +598,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	validation := ValidationFunctionDetails{}
-	validationOk, err := overrides.ResourceOverrideWithDetails(Validation, &validation, location)
+	validationOk, err := overrides.ResourceOverrideWithDetails(ValidateRawResourceConfigFuncs, &validation, location)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode validation function details: %v", err)
 	}
