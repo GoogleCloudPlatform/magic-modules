@@ -21,7 +21,7 @@ references:
   api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/RuleDeployment'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rules}}/deployments
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
-create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment?updateMask=enabled,alerting,archived,runFrequency
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
@@ -30,6 +30,9 @@ update_verb: PATCH
 update_mask: true
 exclude_delete: true
 autogen_status: UnVsZURlcGxveW1lbnQ=
+
+custom_code:
+  pre_create: 'templates/terraform/pre_create/chronicle_rule_deployment.go.tmpl'
 
 examples:
   - name: 'chronicle_ruledeployment_basic'
