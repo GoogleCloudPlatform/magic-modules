@@ -55,6 +55,7 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-instant-snapshot%s", context["random_suffix"])'
     vars:
       instance_name: 'instant-snapshot'
+      disk_name: 'example-disk'
 parameters:
   - name: 'sourceDisk'
     type: ResourceRef
