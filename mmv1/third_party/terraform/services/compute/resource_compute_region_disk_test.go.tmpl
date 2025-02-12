@@ -108,7 +108,7 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 	})
 }
 
-func TestAccComputeRegionDisk_diskEncryptionKeyWoUpdate(t *testing.T) {
+func TestAccComputeRegionDisk_diskEncryptionKeyWoUpdated(t *testing.T) {
 	t.Parallel()
 
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
