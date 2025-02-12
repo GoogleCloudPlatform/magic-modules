@@ -22,7 +22,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with replica count 1
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -31,7 +31,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// update replica count to 2
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -40,7 +40,7 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -59,7 +59,7 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with shard count 3
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -68,7 +68,7 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 			},
 			{
 				// update shard count to 5
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -77,7 +77,7 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 1, shardCount: 5, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -103,7 +103,12 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 					engineConfigs: map[string]string{
 						"maxmemory-policy": "volatile-ttl",
 					},
-					deletionProtectionEnabled: false}),
+					deletionProtectionEnabled: false,
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -120,7 +125,12 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 						"maxmemory-policy":  "allkeys-lru",
 						"maxmemory-clients": "90%",
 					},
-					deletionProtectionEnabled: false}),
+					deletionProtectionEnabled: false,
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -137,7 +147,12 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 						"maxmemory-policy":  "allkeys-lru",
 						"maxmemory-clients": "90%",
 					},
-					deletionProtectionEnabled: false}),
+					deletionProtectionEnabled: false,
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -161,6 +176,12 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					shardCount:                3,
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: true,
+					deletionProtectionEnabled: false,
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0
 				}),
 			},
 			{
@@ -175,6 +196,12 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					shardCount:                3,
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: false,
+					deletionProtectionEnabled: false,
+					maintenanceDay: "MONDAY",
+					maintenanceHours: 1,
+					maintenanceMinutes: 0,
+					maintenanceSeconds: 0,
+					maintenanceNanos: 0
 				}),
 			},
 			{
@@ -242,7 +269,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with AOF enabled
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -251,7 +278,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// update persitence to RDB
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -260,7 +287,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -301,6 +328,22 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 			zone = "%s"
 		}
 		`, params.zoneDistributionMode, params.zone)
+	}
+	maintenancePolicyBlock := ``
+	if params.maintenanceDay != "" {
+		maintenancePolicyBlock = fmt.Sprintf(`
+		maintenance_policy {
+			weekly_maintenance_window {
+				day = "%s"
+				start_time {
+					hours = %d
+					minutes = %d
+					seconds = %d
+					nanos = %d
+				}
+			}
+		}
+		`, params.maintenanceDay, params.maintenanceHours, params.maintenanceMinutes, params.maintenanceSeconds, params.maintenanceNanos)
 	}
 	persistenceBlock := ``
 	if params.persistenceMode != "" {
@@ -359,5 +402,5 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
 }
