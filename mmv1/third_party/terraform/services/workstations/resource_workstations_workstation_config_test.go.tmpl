@@ -175,6 +175,15 @@ func TestAccWorkstationsWorkstationConfig_persistentDirectories(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccWorkstationsWorkstationConfig_persistentDirectoriesUpdated(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -1207,42 +1216,6 @@ resource "google_workstations_workstation_config" "default" {
 }
 `, context)
 }
-
-
-func TestAccWorkstationsWorkstationConfig_updatePersistentDirectory(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckWorkstationsWorkstationConfigDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccWorkstationsWorkstationConfig_persistentDirectories(context),
-			},
-			{
-				ResourceName:            "google_workstations_workstation_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "labels"},
-			},
-			{
-				Config: testAccWorkstationsWorkstationConfig_persistentDirectoriesUpdated(context),
-			},
-			{
-				ResourceName:            "google_workstations_workstation_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "labels"},
-			},
-		},
-	})
-}
-
 
 func TestAccWorkstationsWorkstationConfig_updatePersistentDirectorySourceSnapshot(t *testing.T) {
 	t.Parallel()
