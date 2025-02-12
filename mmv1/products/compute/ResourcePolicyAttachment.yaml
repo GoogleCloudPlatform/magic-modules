@@ -59,3 +59,19 @@ properties:
     type: String
     required: true
     immutable: true
+examples:
+  - name: "compute_resource_policy_attachment_basic"
+    primary_resource_id: "policy_attachment"
+    skip_vcr: true
+    vars:
+      instance_name: "tf-test-attachment-instance"
+      policy_name: "tf-test-attachment-policy"
+      zone: "us-central1-a"
+  - name: "compute_resource_policy_attachment_full"
+    primary_resource_id: "policy_attachment_full"
+    skip_vcr: true
+    min_version: beta
+    vars:
+      instance_name: "tf-test-attachment-instance-full"
+      policy_name: "tf-test-attachment-policy-full"
+      zone: "us-central1-a"
