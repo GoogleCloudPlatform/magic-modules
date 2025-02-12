@@ -74,6 +74,9 @@ custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
   encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -217,3 +220,8 @@ properties:
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of policies on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of policies. The policy defined in this resource is added or removed from that list, and then this etag is sent with the PATCH call along with the updated policies.

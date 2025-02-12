@@ -44,9 +44,9 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "global"
-    - "eu"
+  url_substitutions:
+    - region: "eu"
+    - region: "global"
 examples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
