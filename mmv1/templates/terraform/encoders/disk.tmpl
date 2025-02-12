@@ -56,5 +56,5 @@ if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt
 		"rawKey": rawKey.AsString(),
 	}
 }
-
+{{- end }}
 return obj, nil
