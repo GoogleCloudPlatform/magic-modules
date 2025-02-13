@@ -18,9 +18,9 @@ func TestAccDataSourceGoogleCloudBackupDRBackup_basic(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	location := "us-central1"
 	backupVaultId := "bv-test"
-	{{- if ne $.TargetVersionName "ga" -}}
+	{{ if ne $.TargetVersionName "ga" -}}
 	dataSourceId := "ds-test"
-	{{- else -}}
+	{{ else -}}
 	dataSourceId := "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
 	{{- end }}
 	
