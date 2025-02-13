@@ -436,7 +436,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			internalIP = iface.NetworkIP
 		}
 
-		{{ if ne $.TargetVersionName `ga` -}}
 		if iface.NetworkAttachment != "" {
 			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
 			if err != nil {
@@ -444,7 +443,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 			flattened[i]["network_attachment"] = networkAttachment
 		}
-		{{- end }}
 
 		{{ if ne $.TargetVersionName `ga` -}}
 		// the security_policy for a network_interface is found in one of its accessConfigs.
@@ -511,8 +509,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 
-
-		{{ if ne $.TargetVersionName `ga` -}}
 		var networkAttachment = ""
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
@@ -523,16 +519,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		if networkAttachment == "" && network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
 		}
-
-		{{- else }}
-
-		network := data["network"].(string)
-		subnetwork := data["subnetwork"].(string)
-		if network == "" && subnetwork == "" {
-			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
-		}
-
-		{{ end }}
 
 		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
 		if err != nil {
@@ -548,9 +534,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
-			{{- if ne $.TargetVersionName "ga" }}
 			NetworkAttachment: networkAttachment,
-			{{- end }}
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
