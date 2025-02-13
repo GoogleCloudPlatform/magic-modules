@@ -229,3 +229,12 @@ properties:
           output: true
           item_type:
             type: KeyValuePairs
+   - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Resource manager tags bound to this resource.
+      For example:
+      "123/environment": "production",
+      "123/costCenter": "marketing"
+    min_version: 'beta'
+
