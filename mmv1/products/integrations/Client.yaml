@@ -56,6 +56,9 @@ examples:
     primary_resource_id: 'example'
   - name: 'integrations_client_full'
     primary_resource_id: 'example'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       key_ring_name: 'my-keyring'
       service_account_id: 'service-acc'
