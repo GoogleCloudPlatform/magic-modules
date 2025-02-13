@@ -31,7 +31,9 @@ examples:
   - name: 'storage_anywhere_cache_basic'
     primary_resource_id: 'cache'
     vars:
-      bucket_name: 'my-bucket'
+      bucket_name: 'bucket-name'
+    test_vars_overrides:
+      bucket_name: '"anywhere-cache-bucket" + acctest.RandString(t, 10)'
     external_providers: ["time"]
 identity:
   - bucket
@@ -41,13 +43,12 @@ custom_code:
 autogen_async: false
 timeouts:
   insert_minutes: 240
-  update_minutes: 240
+  update_minutes: 20
   delete_minutes: 20
 async:
   type: 'OpAsync'
   actions:
     - create
-    - update
   operation:
     full_url: 'selfLink'
   result:
@@ -89,10 +90,6 @@ properties:
     type: Time
     output: true
     description: The modification time of the cache instance metadata in RFC 3339 format.
-  - name: 'id'
-    type: String
-    output: true
-    description: The ID of the resource, it is in format of `{bucket_name}/{anywhere_cache_id}`
   - name: 'pendingUpdate'
     type: Boolean
     output: true
