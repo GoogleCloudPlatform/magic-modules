@@ -50,7 +50,7 @@ if v, ok := d.GetOk("image"); ok {
 	obj["sourceImage"] = imageUrl
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
-{{- if ne $.ResourceMetadata.Compiler "terraformgoogleconversion-codegen" }}
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rawKey")); !rawKey.IsNull() {
 	obj["diskEncryptionKey"] = map[string]interface{}{
 		"rawKey": rawKey.AsString(),
