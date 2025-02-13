@@ -81,7 +81,7 @@ jobs:
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make testnolint TESTARGS="-p 4"
+        make testnolint
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

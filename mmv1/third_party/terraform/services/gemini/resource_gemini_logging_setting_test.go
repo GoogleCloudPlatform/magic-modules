@@ -1,6 +1,7 @@
 package gemini_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -11,7 +12,7 @@ import (
 func TestAccGeminiLoggingSetting_geminiLoggingSettingBasicExample_update(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"setting_id": "ls-tf1",
+		"setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -58,8 +59,9 @@ func testAccGeminiLoggingSetting_geminiLoggingSettingBasicExample_update(context
 resource "google_gemini_logging_setting" "example" {
     logging_setting_id = "%{setting_id}"
     location = "global"
-    log_prompts_and_responses = false
-    log_metadata = false
+	labels = {"my_key" = "my_value"}
+	log_prompts_and_responses = false
+	log_metadata = false
 }
 `, context)
 }
