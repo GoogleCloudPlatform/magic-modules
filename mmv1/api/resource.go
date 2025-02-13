@@ -1846,8 +1846,7 @@ func (r Resource) GithubURL() string {
 func (r Resource) CodeHeader(templatePath string) string {
 	templateUrl := GITHUB_BASE_URL + templatePath
 
-	return fmt.Sprintf(`
-// ----------------------------------------------------------------------------
+	return fmt.Sprintf(`// ----------------------------------------------------------------------------
 //
 //     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***
 //
