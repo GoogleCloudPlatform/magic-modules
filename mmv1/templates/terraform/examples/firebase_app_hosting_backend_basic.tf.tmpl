@@ -42,6 +42,16 @@ resource "google_project_iam_member" "app_hosting_sa_runner" {
   member = google_service_account.service_account.member
 }
 
+# Service enablement only required once per project.
+resource "google_project_service" "fah" {
+  provider = google-beta
+
+  project = "{{index $.TestEnvVars "project_id"}}"
+  service = "firebaseapphosting.googleapis.com"
+
+  disable_on_destroy = false
+}
+
 resource "google_firebase_app_hosting_backend" "example" {
   provider = google-beta
 
@@ -61,4 +71,6 @@ resource "google_firebase_app_hosting_backend" "example" {
   labels = {
     "key" = "value"
   }
+
+  depends_on = [google_project_service.fah]
 }
