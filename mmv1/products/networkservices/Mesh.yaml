@@ -22,13 +22,13 @@ references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
 docs:
-base_url: 'projects/{{project}}/locations/global/meshes'
-self_link: 'projects/{{project}}/locations/global/meshes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/meshes?meshId={{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/meshes'
+self_link: 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/meshes/{{name}}'
+  - 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -46,6 +46,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+schema_version: 1
+state_upgraders: true
 examples:
   - name: 'network_services_mesh_basic'
     primary_resource_id: 'default'
@@ -57,6 +59,11 @@ examples:
     min_version: 'beta'
     vars:
       resource_name: 'my-mesh-noport'
+  - name: 'network_services_mesh_location'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      resource_name: 'my-mesh'
 parameters:
   - name: 'name'
     type: String
@@ -102,3 +109,13 @@ properties:
       '15001' is used as the interception port. This will is applicable only for sidecar proxy
       deployments.
     min_version: 'beta'
+  - name: 'location'
+    type: String
+    description: |
+      Location (region) of the Mesh resource to be created. Only the value 'global' is currently allowed; defaults to 'global' if omitted.
+    min_version: 'beta'
+    url_param_only: true
+    immutable: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'
