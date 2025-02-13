@@ -229,7 +229,7 @@ properties:
           output: true
           item_type:
             type: KeyValuePairs
-   - name: 'tags'
+  - name: 'tags'
     type: KeyValuePairs
     description: |
       Resource manager tags bound to this resource.
