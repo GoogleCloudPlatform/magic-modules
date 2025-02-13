@@ -1783,6 +1783,27 @@ func ResourceContainerCluster() *schema.Resource {
 								},
 							},
 						},
+						"ip_endpoint_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							Computed:    true,
+							Description: `IP endpoints configuration.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										ConflictsWith: []string{
+											"private_cluster_config.0.enable_private_endpoint",
+											"private_cluster_config.0.private_endpoint_subnetwork",
+											"private_cluster_config.0.master_global_access_config",
+										},
+										Description: `Controls whether to allow direct IP access. When this is false, all other ip_endpoint_config values are ignored. Implicitly true if private_cluster_config settings are still used.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -5581,22 +5602,37 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 	}
 
 	ip := &container.IPEndpointsConfig{
-		// There isn't yet a config field to disable IP endpoints, so this is hardcoded to be enabled for the time being.
-		Enabled:         true,
+		// If ip_endpoint_config.enabled isn't configured, it will be set based on the presence of
+		// private_cluster_config fields. These are fields marked using ConflictsWith annotations, so
+		// we won't get contradictory settings.
 		ForceSendFields: []string{"Enabled"},
 	}
-	if v := d.Get("private_cluster_config.0.enable_private_endpoint"); v != nil {
-		ip.EnablePublicEndpoint = !v.(bool)
-		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
+	if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoint_config.0.enabled"); ok {
+		ip.Enabled = v.(bool)
 	}
+
 	if v := d.Get("private_cluster_config.0.private_endpoint_subnetwork"); v != nil {
 		ip.PrivateEndpointSubnetwork = v.(string)
 		ip.ForceSendFields = append(ip.ForceSendFields, "PrivateEndpointSubnetwork")
+		ip.Enabled = true
 	}
+
+	if v := d.Get("private_cluster_config.0.enable_private_endpoint"); v != nil {
+		ip.EnablePublicEndpoint = !v.(bool)
+		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
+		if !ip.Enabled {
+			ip.Enabled = v.(bool)
+		}
+	}
+
 	if v := d.Get("private_cluster_config.0.master_global_access_config.0.enabled"); v != nil {
 		ip.GlobalAccess = v.(bool)
 		ip.ForceSendFields = append(ip.ForceSendFields, "GlobalAccess")
+		if !ip.Enabled {
+			ip.Enabled = v.(bool)
+		}
 	}
+
 	ip.AuthorizedNetworksConfig = expandMasterAuthorizedNetworksConfig(d)
 
 	return &container.ControlPlaneEndpointsConfig{
@@ -6298,6 +6334,7 @@ func flattenControlPlaneEndpointsConfig(c *container.ControlPlaneEndpointsConfig
 	return []map[string]interface{}{
 		{
 			"dns_endpoint_config": flattenDnsEndpointConfig(c.DnsEndpointConfig),
+			"ip_endpoint_config": flattenIpEndpointsConfig(c.IpEndpointsConfig),
 		},
 	}
 }
@@ -6314,6 +6351,18 @@ func flattenDnsEndpointConfig(dns *container.DNSEndpointConfig) []map[string]int
 	}
 }
 
+func flattenIpEndpointsConfig(ip *container.IPEndpointsConfig) []map[string]interface{} {
+	if ip == nil {
+		return nil
+	}
+	v := []map[string]interface{}{
+		{
+			"enabled": ip.Enabled,
+		},
+	}
+	return v
+}
+
 // Most of PrivateClusterConfig has moved to ControlPlaneEndpointsConfig.
 func flattenPrivateClusterConfig(cpec *container.ControlPlaneEndpointsConfig, pcc *container.PrivateClusterConfig, nc *container.NetworkConfig) []map[string]interface{} {
 	if cpec == nil && pcc == nil && nc == nil {
@@ -6321,7 +6370,7 @@ func flattenPrivateClusterConfig(cpec *container.ControlPlaneEndpointsConfig, pc
 	}
 
 	r := map[string]interface{}{}
-	if cpec != nil {
+	if cpec != nil && cpec.IpEndpointsConfig.Enabled {
 		// Note the change in semantics from private to public endpoint.
 		r["enable_private_endpoint"] =     !cpec.IpEndpointsConfig.EnablePublicEndpoint
 		r["private_endpoint"] =            cpec.IpEndpointsConfig.PrivateEndpoint
