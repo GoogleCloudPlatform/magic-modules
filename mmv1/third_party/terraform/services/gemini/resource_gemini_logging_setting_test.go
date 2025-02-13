@@ -1,7 +1,7 @@
 package gemini_test
 
 import (
-    "fmt"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
