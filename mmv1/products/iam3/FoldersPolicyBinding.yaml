@@ -14,7 +14,8 @@
 ---
 name: 'FoldersPolicyBinding'
 api_resource_type_kind: PolicyBinding
-description: A policy binding to a folder
+description: |
+  A policy binding to a folder. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
@@ -44,14 +45,14 @@ async:
   include_project: true
 examples:
   - name: 'iam_folders_policy_binding'
-    primary_resource_id: 'my-folder-binding'
+    primary_resource_id: 'binding-for-all-folder-principals'
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test folder binding'
-      folder_binding_id: 'test-folder-binding'
-      folder_name: 'test folder'
+      display_name: 'binding for all principals in the folder'
+      folder_binding_id: 'binding-for-all-folder-principals'
+      folder_name: 'my folder'
     external_providers: ["time"]
 parameters:
   - name: 'folder'

@@ -14,7 +14,8 @@
 ---
 name: 'OrganizationsPolicyBinding'
 api_resource_type_kind: PolicyBinding
-description: A policy binding to an organizations
+description: |
+  A policy binding to an organization. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
@@ -44,13 +45,13 @@ async:
   include_project: true
 examples:
   - name: 'iam_organizations_policy_binding'
-    primary_resource_id: 'my-org-binding'
+    primary_resource_id: 'binding-for-all-org-principals'
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test org binding'
-      org_binding_id: 'test-org-binding'
+      display_name: 'binding for all principals in the Organization'
+      org_binding_id: 'binding-for-all-org-principals'
     external_providers: ["time"]
 parameters:
   - name: 'organization'
