@@ -42,8 +42,8 @@ iam_policy:
     - '{{data_exchange_id}}'
 custom_code:
 sweeper:
-  regions:
-    - "US"
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_analyticshub_data_exchange_basic'
     primary_resource_id: 'data_exchange'

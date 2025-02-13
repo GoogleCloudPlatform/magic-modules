@@ -53,9 +53,9 @@ custom_code:
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
 sweeper:
-  regions:
-    - "us-west1-a"
-    - "us-central1-a"
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "us-west1-a"
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
@@ -551,3 +551,8 @@ properties:
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
     diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
+  - name: 'enableThirdPartyIdentity'
+    type: Boolean
+    description: |
+      Flag that specifies that a notebook can be accessed with third party
+      identity provider.
