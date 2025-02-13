@@ -48,7 +48,11 @@ data "google_backup_dr_data_source" "foo" {
   project = data.google_project.project.project_id
   location      = "us-central1"
   backup_vault_id = "bv-test"
+	{{- if ne $.TargetVersionName "ga" -}}
   data_source_id = "ds-test"
+	{{- else -}}
+	data_source_id = "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
+	{{- end }}
 }
 
 `, context)
