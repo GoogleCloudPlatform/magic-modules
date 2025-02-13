@@ -28,7 +28,8 @@ self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getAssociation
 create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation'
 delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
-immutable: true
+update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation?replaceExistingAssociation=true'
+update_verb: 'POST'
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
   - '{{firewall_policy}}/{{name}}'
@@ -59,7 +60,6 @@ parameters:
       The firewall policy of the resource.
     ignore_read: true
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_expand: 'templates/terraform/custom_expand/compute_firewall_policy_association.go.tmpl'
     resource: 'FirewallPolicy'
@@ -70,11 +70,13 @@ properties:
     description: |
       The name for an association.
     required: true
+    immutable: true
   - name: 'attachmentTarget'
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'shortName'
     type: String
