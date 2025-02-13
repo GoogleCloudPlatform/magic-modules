@@ -108,6 +108,14 @@ properties:
       - 'MESH'
       - 'STAR'
     default_from_api: true
+  - name: 'policyMode'
+    type: Enum
+    description: Optional. The policy mode of this hub. This field can be either PRESET or CUSTOM. If unspecified, the policyMode defaults to PRESET.
+    immutable: true
+    enum_values:
+      - 'CUSTOM'
+      - 'PRESET'
+    default_from_api: true
   - name: 'exportPsc'
     type: Boolean
     description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.
