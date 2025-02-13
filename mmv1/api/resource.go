@@ -26,7 +26,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1"
+const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/"
 
 type Resource struct {
 	Name string
