@@ -1,0 +1,18 @@
+resource "google_scc_finding" "organization_source_finding_basic" {
+  name             = "{{$.Name}}"
+  primary_resource_id = "{{$.PrimaryResourceId}}"
+  vars {
+    network_name = "{{index $.Vars "network_name"}}"
+  }
+  test_vars_overrides {
+    network_name = "{{index $.TestVarsOverrides "network_name"}}"
+  }
+  min_version = "{{$.MinVersion}}"
+}
+
+# Define the gcloud command as a terraform null_resource
+resource "null_resource" "gcloud_command" {
+  provisioner "local-exec" {
+    command = "gcloud scc findings create organisation_source_finding -organization=688851828130 -location=global -source=6508950616823637626 -state=ACTIVE -category=AUDIT_CONFIG_NOT_MONITORED -event-time=2025-02-12T08:03:24.844Z -resource-name=RESOURCE_NAME"
+  }
+}
