@@ -95,8 +95,8 @@ var createTestFailureTicketCmd = &cobra.Command{
 	  2. Identifies test that 
 	  		a. failed 100% in last 3 days, or 
 			b. failed 50%+ in last 7 days
-	  3. Retrieves existing active and recently closed(within 24 hours) test failrue tickets
-	  4. Creates new tickets dentified failing tests without corresponding tickets detected in step 3.
+	  3. Retrieves existing active and recently closed(within 24 hours) test failure tickets
+	  4. Creates new tickets for identified failing tests detected in step 3 that don't already have a corresponding ticket.
   
 	  The following environment variables are required:
   ` + listCTFTRequiredEnvironmentVariables(),
