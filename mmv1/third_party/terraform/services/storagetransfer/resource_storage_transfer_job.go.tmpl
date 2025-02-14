@@ -295,6 +295,39 @@ func ResourceStorageTransferJob() *schema.Resource {
 				},
 				Description: `Notification configuration.`,
 			},
+			"logging_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_actions": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type:    schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"FIND", "DELETE", "COPY"}, false),
+							},
+							Description: `Specifies the actions to be logged. If empty, no logs are generated. The valid actions are "FIND", "DELETE", "COPY".`,
+						},
+						"log_action_states": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"SUCCEEDED", "FAILED"}, false),
+							},
+							Description: `States in which log_actions are logged. If empty, no logs are generated. The valid states are "SUCCEEDED", "FAILED".`,
+						},
+						"enable_on_prem_gcs_transfer_logs": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `For PosixFilesystem transfers, enables file system transfer logs instead of, or in addition to, Cloud Logging.`,
+					    },
+				    },
+			    },
+				Description: `Logging configuration.`,
+			},
 			"schedule": {
 				Type:          schema.TypeList,
 				Optional:      true,
@@ -699,6 +732,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		TransferSpec:       expandTransferSpecs(d.Get("transfer_spec").([]interface{})),
 		ReplicationSpec:    expandReplicationSpecs(d.Get("replication_spec").([]interface{})),
 		NotificationConfig: expandTransferJobNotificationConfig(d.Get("notification_config").([]interface{})),
+		LoggingConfig:      expandLoggingConfig(d.Get("logging_config").([]interface{})),
 	}
 
 	var res *storagetransfer.TransferJob
@@ -792,6 +826,11 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	err = d.Set("logging_config", flattenLoggingConfig(res.LoggingConfig))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -858,6 +897,15 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 			transferJob.NotificationConfig = expandTransferJobNotificationConfig(v.([]interface{}))
 		} else {
 			transferJob.NotificationConfig = nil
+		}
+	}
+
+	if d.HasChange("logging_config") {
+		fieldMask = append(fieldMask, "logging_config")
+		if v, ok := d.GetOk("logging_config"); ok {
+			transferJob.LoggingConfig = expandLoggingConfig(v.([]interface{}))
+		} else {
+			transferJob.LoggingConfig = nil
 		}
 	}
 
@@ -1464,5 +1512,47 @@ func flattenReplicationSpec(replicationSpec *storagetransfer.ReplicationSpec) []
 	if replicationSpec.TransferOptions != nil {
 		data["transfer_options"] = flattenTransferOption(replicationSpec.TransferOptions)
 	}
+	return []map[string]interface{}{data}
+}
+
+func expandLoggingConfig(loggingConfigs []interface{}) *storagetransfer.LoggingConfig {
+	if len(loggingConfigs) == 0 || loggingConfigs[0] == nil {
+		return nil
+	}
+
+	loggingConfig := loggingConfigs[0].(map[string]interface{})
+	var apiData = &storagetransfer.LoggingConfig{
+		EnableOnpremGcsTransferLogs: loggingConfig["enable_on_prem_gcs_transfer_logs"].(bool),
+	}
+
+	if loggingConfig["log_actions"] != nil {
+		apiData.LogActions = tpgresource.ConvertStringArr(loggingConfig["log_actions"].(*schema.Set).List())
+	}
+
+	if loggingConfig["log_action_states"] != nil {
+		apiData.LogActionStates = tpgresource.ConvertStringArr(loggingConfig["log_action_states"].(*schema.Set).List())
+	}
+
+	log.Printf("[DEBUG] apiData: %v\n\n", apiData)
+	return apiData
+}
+
+func flattenLoggingConfig(loggingConfig *storagetransfer.LoggingConfig) []map[string]interface{} {
+	if loggingConfig == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"enable_on_prem_gcs_transfer_logs": loggingConfig.EnableOnpremGcsTransferLogs,
+	}
+
+	if loggingConfig.LogActions != nil {
+		data["log_actions"] = tpgresource.ConvertStringArrToInterface(loggingConfig.LogActions)
+	}
+
+	if loggingConfig.LogActionStates != nil {
+		data["log_action_states"] = tpgresource.ConvertStringArrToInterface(loggingConfig.LogActionStates)
+	}
+
 	return []map[string]interface{}{data}
 }

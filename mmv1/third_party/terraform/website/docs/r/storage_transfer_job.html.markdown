@@ -133,6 +133,8 @@ The following arguments are supported:
 
 * `notification_config` - (Optional) Notification configuration. This is not supported for transfers involving PosixFilesystem. Structure [documented below](#nested_notification_config).
 
+* `logging_config` - (Optional) Specifies the logging behavior for transfer operations. Structure [documented below](#nested_logging_config).
+
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
 * `source_agent_pool_name` - (Optional) Specifies the agent pool name associated with the posix data source. When unspecified, the default name is used.
@@ -298,6 +300,14 @@ The `azure_credentials` block supports:
 * `event_types` - (Optional) Event types for which a notification is desired. If empty, send notifications for all event types. The valid types are "TRANSFER_OPERATION_SUCCESS", "TRANSFER_OPERATION_FAILED", "TRANSFER_OPERATION_ABORTED".
 
 * `payload_format` - (Required) The desired format of the notification message payloads. One of "NONE" or "JSON".
+
+<a name="nested_logging_config"></a>The `logging_config` block supports:
+
+* `log_actions` - (Optional) Specifies the actions to be logged. If empty, no logs are generated. The valid actions are "FIND", "DELETE", "COPY".
+
+* `log_action_states` - (Optional) States in which log_actions are logged. If empty, no logs are generated. The valid actions are "SUCCEEDED", "FAILED".
+
+* `enable_on_prem_gcs_transfer_logs` - (Optional) For PosixFilesystem transfers, enables file system transfer logs instead of, or in addition to, Cloud Logging.
 
 ## Attributes Reference
 
