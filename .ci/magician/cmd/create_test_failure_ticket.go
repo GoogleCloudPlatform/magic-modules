@@ -44,7 +44,7 @@ const (
 	TotalDays   = 7
 )
 
-var tftRequiredEnvironmentVariables = [...]string{
+var ctftRequiredEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN",
 }
 
@@ -84,16 +84,12 @@ type testFailure struct {
 	BetaFailureRateLabel testFailureRateLabel
 }
 
-// testFailureTicketCmd represents the testFailureTicket command
-var testFailureTicketCmd = &cobra.Command{
-	Use:   "test-failure-ticket",
-	Short: "Creates and manages GitHub test failure tickets",
-	Long: `This command creates and manages GitHub test failure tickets based on nighlty test status.
-  
-  
-	  The command expects the following argument(s):
-	  1. 
-  
+// createTestFailureTicketCmd represents the createTestFailureTicket command
+var createTestFailureTicketCmd = &cobra.Command{
+	Use:   "create-test-failure-ticket",
+	Short: "Creates GitHub test failure tickets",
+	Long: `This command creates GitHub test failure tickets based on nighlty test status.
+
 	  It then performs the following operations:
 	  1. Calculates test failure rate for last 7 days for all tests.
 	  2. Identifies test that 
@@ -103,10 +99,10 @@ var testFailureTicketCmd = &cobra.Command{
 	  4. Creates new tickets dentified failing tests without corresponding tickets detected in step 3.
   
 	  The following environment variables are required:
-  ` + listTFTRequiredEnvironmentVariables(),
+  ` + listCTFTRequiredEnvironmentVariables(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string)
-		for _, ev := range tftRequiredEnvironmentVariables {
+		for _, ev := range ctftRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				return fmt.Errorf("did not provide %s environment variable", ev)
@@ -125,25 +121,26 @@ var testFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		return execTestFailureTicket(date, gh, gcs)
+		return execCreateTestFailureTicket(date, gh, gcs)
 	},
 }
 
-func listTFTRequiredEnvironmentVariables() string {
+func listCTFTRequiredEnvironmentVariables() string {
 	var result string
-	for i, ev := range tftRequiredEnvironmentVariables {
+	for i, ev := range ctftRequiredEnvironmentVariables {
 		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
 	}
 	return result
 }
 
-func execTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageClient) error {
+func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageClient) error {
 	ctx := context.Background()
 
 	gaTestFailuresMap := make(map[string][]bool)
 	betaTestFailuresMap := make(map[string][]bool)
 	testFailuresToday := make(map[string]*testFailure)
 
+	// Get last N-day test status map and today's failing test list
 	lastNDaysTestFailureMap(provider.GA, TotalDays, now, gcs, gaTestFailuresMap, testFailuresToday)
 	lastNDaysTestFailureMap(provider.Beta, TotalDays, now, gcs, betaTestFailuresMap, testFailuresToday)
 
@@ -173,24 +170,10 @@ func execTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageCli
 		return fmt.Errorf("error getting today's closed test failure issues: %w", err)
 	}
 
-	//////////////////////////////////////////////////////////////////
-	// Debug Only
-	writeToFile(existTestNames, "existTestNames.txt")
-	fmt.Println("total existTestNames count: ", len(existTestNames))
-	writeToFile(closedTestNames, "closedTestNames.txt")
-	fmt.Println("total closedTestNames count: ", len(closedTestNames))
-	//////////////////////////////////////////////////////////////////
-
 	// Create tickets
 	for _, testFailure := range testFailuresToday {
-		//////////////////////////////////////////////////////////////////
-		// Debug Only
-		fmt.Println(testFailure.TestName)
-		fmt.Println("GA: ", testFailure.GaFailureRate, " ", testFailure.GaFailureRateLabel.String())
-		fmt.Println("Beta: ", testFailure.BetaFailureRate, " ", testFailure.BetaFailureRateLabel.String())
-		//////////////////////////////////////////////////////////////////
 		if shouldCreateTicket(*testFailure, existTestNames, closedTestNames) {
-			err := createTestFailureTicket(ctx, gh, testFailure)
+			err := createTicket(ctx, gh, testFailure)
 			if err != nil {
 				return fmt.Errorf("error creating test failure ticket: %w", err)
 			}
@@ -335,7 +318,7 @@ func convertTestNameToResource(testName string) string {
 
 	resourceName = strings.ToLower(resourceName)
 
-	if val, ok := resourceNamingConvention[resourceName]; ok {
+	if val, ok := resourceNameConverter[resourceName]; ok {
 		return val
 	}
 
@@ -401,7 +384,7 @@ func ListIssuesWithOpts(ctx context.Context, gh *github.Client, opts *github.Iss
 	return allIssues, nil
 }
 
-func createTestFailureTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
+func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailure) error {
 	issueTitle := fmt.Sprintf("Failing test(s): %s", testFailure.TestName)
 	issueBody, err := formatIssueBody(*testFailure)
 	if err != nil {
@@ -426,13 +409,6 @@ func createTestFailureTicket(ctx context.Context, gh *github.Client, testFailure
 		// https://github.com/hashicorp/terraform-provider-google/milestone/11
 		Milestone: github.Int(11),
 	}
-
-	//////////////////////////////////////////////////////////////////
-	// Debug Only
-	fmt.Println("issueRquest:")
-	fmt.Println(issueRquest.Title, " ", issueRquest.Labels)
-	fmt.Println()
-	//////////////////////////////////////////////////////////////////
 
 	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
 	if err != nil {
@@ -489,12 +465,12 @@ func testNamesFromIssues(issues []*github.Issue) ([]string, error) {
 }
 
 func init() {
-	rootCmd.AddCommand(testFailureTicketCmd)
+	rootCmd.AddCommand(createTestFailureTicketCmd)
 }
 
 var (
 	// TODO(shuyama1): add all mismatch resource names
-	resourceNamingConvention = map[string]string{
+	resourceNameConverter = map[string]string{
 		"google_iam3_projects_policy_binding":        "google_iam_projects_policy_binding",
 		"google_iam3_organizations_policy_binding":   "google_iam_organizations_policy_binding",
 		"google_cloud_backup_dr_data_source":         "google_backup_dr_data_source",
@@ -502,24 +478,3 @@ var (
 		"google_security_posture_posture_deployment": "google_securityposture_posture_deployment",
 	}
 )
-
-//////////////////////////////////////////////////////////////////
-// Debug Only
-func writeToFile(data []string, filename string) {
-	file, err := os.Create(filename)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return
-	}
-	defer file.Close()
-
-	for _, item := range data {
-		_, err := fmt.Fprintln(file, item)
-		if err != nil {
-			fmt.Println("Error writing to file:", err)
-			return
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////
