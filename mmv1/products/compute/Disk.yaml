@@ -72,6 +72,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'test-disk'
+  - name: 'disk_basic_wo'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk'
   - name: 'disk_async'
     primary_resource_id: 'primary'
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
