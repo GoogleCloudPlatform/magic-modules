@@ -14,7 +14,7 @@ resource "google_compute_disk" "disk" {
   size  = 50
   type  = "pd-ssd"
   zone  = "us-central1-a"
-  disk_encryption_key = {
+  disk_encryption_key {
     raw_key_wo = "{{index $.Vars "raw_key_data"}}"
   }
 }
