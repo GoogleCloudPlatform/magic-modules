@@ -113,6 +113,7 @@ func ResourceSqlUser() *schema.Resource {
 
 			"password_wo_version": {
 				Type:        schema.TypeInt,
+				Optional:    true,
 				RequiredWith: []string{"password_wo"},
 				Description: `The version of the password_wo.`,
 			},
