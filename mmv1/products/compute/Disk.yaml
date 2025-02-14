@@ -183,18 +183,26 @@ properties:
         immutable: true
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
+      - name: 'rawKeyWoVersion'
+        type: Integer
+        description: |
+          Triggers update of write-only rawKey
+        immutable: true
       - name: 'rawKeyWo'
         type: String
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         write_only: true
+        required_with:
+          - 'disk_encryption_key.0.rawKeyWoVersion'
         conflicts:
           - 'disk_encryption_key.0.rawKey'
-      - name: 'newKeysWo'
-        type: Boolean
+      - name: 'rsaEncryptedKeyWoVersion'
+        type: Integer
         description: |
-          Triggers update of write-only attributes
+          Triggers update of write-only rsaEncryptedKey
+        immutable: true
       - name: 'rsaEncryptedKey'
         type: String
         immutable: true
@@ -211,6 +219,8 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         write_only: true
+        required_with:
+          - 'disk_encryption_key.0.rsaEncryptedKeyWoVersion'
         conflicts:
           - 'disk_encryption_key.0.rsaEncryptedKey'
       - name: 'sha256'
