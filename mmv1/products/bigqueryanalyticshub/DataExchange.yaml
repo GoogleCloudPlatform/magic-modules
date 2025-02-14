@@ -41,6 +41,9 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
     - '{{data_exchange_id}}'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_analyticshub_data_exchange_basic'
     primary_resource_id: 'data_exchange'

@@ -17,7 +17,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
 
@@ -58,6 +57,7 @@ func NewOperation() *Operation {
 	return op
 }
 
+// It is only used in openapi-generate
 func NewAsync() *Async {
 	oa := &Async{
 		Actions:   []string{"create", "delete", "update"},
@@ -71,23 +71,13 @@ func NewAsync() *Async {
 type OpAsync struct {
 	Result OpAsyncResult
 
-	Status OpAsyncStatus `yaml:"status,omitempty"`
-
-	Error OpAsyncError
-
 	// If true, include project as an argument to OperationWaitTime.
 	// It is intended for resources that calculate project/region from a selflink field
 	IncludeProject bool `yaml:"include_project"`
 }
 
 type OpAsyncOperation struct {
-	Kind string `yaml:"kind,omitempty"`
-
-	Path string `yaml:"path,omitempty"`
-
 	BaseUrl string `yaml:"base_url,omitempty"`
-
-	WaitMs int `yaml:"wait_ms,omitempty"`
 
 	// Use this if the resource includes the full operation url.
 	FullUrl string `yaml:"full_url,omitempty"`
@@ -96,27 +86,6 @@ type OpAsyncOperation struct {
 // Represents the results of an Operation request
 type OpAsyncResult struct {
 	ResourceInsideResponse bool `yaml:"resource_inside_response,omitempty"`
-
-	Path string `yaml:"path,omitempty"`
-}
-
-// Provides information to parse the result response to check operation
-// status
-type OpAsyncStatus struct {
-	Path string `yaml:"path,omitempty"`
-
-	Complete bool `yaml:"complete,omitempty"`
-
-	Allowed []bool `yaml:"allowed,omitempty"`
-}
-
-// Provides information on how to retrieve errors of the executed operations
-type OpAsyncError struct {
-	google.YamlValidator `yaml:"-"`
-
-	Path string `yaml:"path,omitempty"`
-
-	Message string `yaml:"message,omitempty"`
 }
 
 // Async implementation for polling in Terraform
@@ -150,6 +119,9 @@ func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
 		return err
 	}
 
+	if a.Type == "" {
+		a.Type = "OpAsync"
+	}
 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}

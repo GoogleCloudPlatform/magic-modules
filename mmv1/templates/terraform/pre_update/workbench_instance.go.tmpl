@@ -27,6 +27,10 @@ if d.HasChange("gce_setup.0.metadata") {
 if d.HasChange("effective_labels") {
     newUpdateMask = append(newUpdateMask, "labels")
 }
+if d.HasChange("gce_setup.0.container_image") {
+    newUpdateMask = append(newUpdateMask, "gce_setup.container_image")
+    stopInstance = true
+}
 updateMask = newUpdateMask
 // Overwrite the previously set mask.
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(newUpdateMask, ",")})
@@ -38,7 +42,19 @@ if d.HasChange("effective_labels") {
   old_labels_interface, new_labels_interface := d.GetChange("effective_labels")
   old_labels := old_labels_interface.(map[string]interface{})
   new_labels := new_labels_interface.(map[string]interface{})
-  obj["labels"] = mergeLabels(old_labels,new_labels)
+  obj["labels"] = mergeMaps(old_labels,new_labels)
+}
+
+if d.HasChange("gce_setup.0.metadata") {
+  old_metadata_interface, new_metadata_interface := d.GetChange("gce_setup.0.metadata")
+  old_metadata := old_metadata_interface.(map[string]interface{})
+  new_metadata := new_metadata_interface.(map[string]interface{})
+
+  gceSetup, exists := obj["gceSetup"]
+  if !exists {
+      return fmt.Errorf("gceSetup cannot be empty")
+  }
+  gceSetup.(map[string]interface{})["metadata"] = mergeMaps(old_metadata,new_metadata)
 }
 
 name := d.Get("name").(string)

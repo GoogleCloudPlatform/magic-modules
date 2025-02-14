@@ -170,7 +170,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_test_setup.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -203,7 +203,14 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	funcMap := template.FuncMap{
+		"TemplatePath": func() string { return templatePath },
+	}
+	for k, v := range google.TemplateFunctions {
+		funcMap[k] = v
+	}
+
+	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
