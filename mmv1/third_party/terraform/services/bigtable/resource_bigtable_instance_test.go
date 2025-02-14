@@ -1007,7 +1007,6 @@ resource "time_offset" "week-in-future" {
 `
 }
 
-
 type cluster struct {
 	clusterId         string
 	zone              string
