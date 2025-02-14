@@ -322,6 +322,10 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 		if !membership.IsCoreReviewer(*review.User.Login) {
 			continue
 		}
+		// Ignore reviews by the PR author
+		if review.User.GetLogin() == pr.User.GetLogin() {
+			continue
+		}
 		reviewer := *review.User.Login
 
 		// ignore any reviews by reviewers who had a later approval

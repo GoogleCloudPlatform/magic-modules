@@ -620,6 +620,62 @@ func TestNotificationState(t *testing.T) {
 			expectState: waitingForContributor,
 			expectSince: time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC), // Should use latest ready_for_review time
 		},
+		"ignore reviews from PR author": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForReview, // Should stay in waitingForReview since author's reviews don't count
+			expectSince: time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+
+		// Add case where both author and reviewer comment
+		"reviews from both author and reviewer": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String(firstCoreReviewer)}, // Reviewer's comment
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor, // Should change to waitingForContributor due to reviewer's comment
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC),
+		},
 	}
 
 	for tn, tc := range cases {
