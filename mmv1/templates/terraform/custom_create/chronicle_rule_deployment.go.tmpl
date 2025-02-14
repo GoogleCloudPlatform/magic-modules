@@ -64,7 +64,7 @@ if res != nil {
         }
     } else {
         // Handle the case where "enabled" is missing from the API response
-        if v, ok:= d.GetOkExists("enabled"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+        if v, ok:= d.GetOkExists("enabled"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
             obj["enabled"] = enabledProp
             updateMask = append(updateMask, "enabled")
         }
@@ -79,7 +79,7 @@ if res != nil {
         }
     } else {
         // Handle the case where "alerting" is missing from the API response
-        if v, ok:= d.GetOkExists("alerting"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+        if v, ok:= d.GetOkExists("alerting"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
             obj["alerting"] = alertingProp
             updateMask = append(updateMask, "alerting")
         }
@@ -94,7 +94,7 @@ if res != nil {
         }
     } else {
         // Handle the case where "archived" is missing from the API response
-        if v, ok:= d.GetOkExists("archived"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+        if v, ok:= d.GetOkExists("archived"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
             obj["archived"] = archivedProp
             updateMask = append(updateMask, "archived")
         }
@@ -109,25 +109,25 @@ if res != nil {
         }
     } else {
         // Handle the case where "run_frequency" is missing from the API response
-        if v, ok:= d.GetOkExists("run_frequency"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+        if v, ok:= d.GetOkExists("run_frequency"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
             obj["runFrequency"] = runFrequencyProp
             updateMask = append(updateMask, "runFrequency")
         }
     }
 } else {
-    if v, ok:= d.GetOkExists("enabled"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+    if v, ok:= d.GetOkExists("enabled"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["enabled"] = enabledProp
         updateMask = append(updateMask, "enabled")
     }
-    if v, ok:= d.GetOkExists("alerting"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+    if v, ok:= d.GetOkExists("alerting"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["alerting"] = alertingProp
         updateMask = append(updateMask, "alerting")
     }
-    if v, ok:= d.GetOkExists("archived"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+    if v, ok:= d.GetOkExists("archived"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["archived"] = archivedProp
         updateMask = append(updateMask, "archived")
     }
-    if v, ok:= d.GetOkExists("run_frequency"); ok &&!tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+    if v, ok:= d.GetOkExists("run_frequency"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
         obj["runFrequency"] = runFrequencyProp
         updateMask = append(updateMask, "runFrequency")
     }
