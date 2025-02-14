@@ -8,7 +8,9 @@ resource "google_compute_disk" "default" {
   }
   disk_encryption_key {
     raw_key_wo = "raw_key_wo"
+    raw_key_wo_version = 1
     rsa_encrypted_key_wo = "rsa_encrypted_key_wo"
+    rsa_encrypted_key_wo_version = 1
   }
   physical_block_size_bytes = 4096
 }
