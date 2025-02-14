@@ -6,7 +6,7 @@ resource "google_compute_disk" "default" {
   labels = {
     environment = "dev"
   }
-  disk_encryption_key_wo = {
+  disk_encryption_key {
     raw_key_wo = "raw_key_wo"
     rsa_encrypted_key_wo = "rsa_encrypted_key_wo"
   }
