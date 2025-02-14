@@ -111,11 +111,11 @@ func ResourceSqlUser() *schema.Resource {
 				either CLOUD_IAM_USER or CLOUD_IAM_SERVICE_ACCOUNT.`,
 			},
 
-			"new_wo_password": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				WriteOnly:   true,
-				Description: `If true, the password_wo will be updated.`,
+			"password_wo_version": {
+				Type:        schema.TypeInt,
+				ForceNew:    true,
+				RequiredWith: []string{"password_wo"},
+				Description: `The version of the password_wo.`,
 			},
 
 			"type": {
@@ -476,8 +476,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-	isNewPasswordWO, _ := d.GetRawConfigAt(cty.GetAttrPath("new_wo_password"))
-	if d.HasChange("password") || d.HasChange("password_policy") || isNewPasswordWO.Equals(cty.BoolVal(true)).True() {
+	if d.HasChange("password") || d.HasChange("password_policy") {
 		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return err
