@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagetransfer_test
 
 import (
@@ -806,6 +808,17 @@ resource "google_storage_transfer_job" "transfer_job" {
     ]
     payload_format = "JSON"
   }
+  
+  logging_config {
+    log_actions      = [
+      "COPY",
+      "DELETE"
+    ]
+    log_action_states = [
+      "SUCCEEDED",
+      "FAILED"
+    ]
+  }
 
   depends_on = [
     google_storage_bucket_iam_member.data_source,
@@ -1012,6 +1025,10 @@ resource "google_storage_transfer_job" "transfer_job" {
       path  = "foo/bar/"
     }
   }
+  
+  logging_config {
+    enable_on_prem_gcs_transfer_logs = true
+  }
 
   schedule {
     schedule_start_date {
@@ -1164,6 +1181,10 @@ resource "google_storage_transfer_job" "transfer_job" {
     gcs_data_source {
       bucket_name = google_storage_bucket.data_source.name
     }
+  }
+  
+  logging_config {
+    enable_on_prem_gcs_transfer_logs = false
   }
 
   schedule {
