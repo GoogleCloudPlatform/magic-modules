@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"text/template"
@@ -302,26 +303,30 @@ func (e *Examples) SetHCLText() {
 }
 
 func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+	moduleDir := google.GetModuleRoot()
+
+	// Convert template paths to be relative to module root
 	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+		filepath.Join(moduleDir, templatePath),
+		filepath.Join(moduleDir, "templates/terraform/expand_resource_ref.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/flatten_property_method.go.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/expand_property_method.go.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/update_mask.go.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/nested_query.go.tmpl"),
+		filepath.Join(moduleDir, "templates/terraform/unordered_list_customize_diff.go.tmpl"),
 	}
-	templateFileName := filepath.Base(templatePath)
+
+	templateFileName := filepath.Base(filepath.Join(moduleDir, templatePath))
 
 	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
 	if err != nil {
-		glog.Exit(err)
+		glog.Exitf("Error: %v\nStack trace:\n%s", err, debug.Stack())
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
-		glog.Exit(err)
+		glog.Exitf("Error: %v\nStack trace:\n%s", err, debug.Stack())
 	}
 
 	rs := contents.String()
