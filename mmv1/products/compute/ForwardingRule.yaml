@@ -374,6 +374,9 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL'
       - 'INTERNAL_MANAGED'
+    exactly_one_of:
+      - load_balancing_scheme
+      - network
   - name: 'name'
     type: String
     description: |
@@ -412,6 +415,9 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+    exactly_one_of:
+      - load_balancing_scheme
+      - network
   - name: 'portRange'
     type: String
     description: |
