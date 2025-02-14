@@ -28,6 +28,7 @@ var testResourcePrefixes = []string{
 	"cluster-",            // https://github.com/hashicorp/terraform-provider-google/issues/8924
 	"k8s-fw-",             // firewall rules are getting created and not cleaned up by k8 resources using this prefix
 	"ext-tf-test",         // Cloud Tasks Queues created automatically by tests for `google_firebase_extensions_instance`.
+	"anywhere-cache-bucket", // GCS bucket with anywhere caches on it.
 }
 
 // SharedConfigForRegion returns a common config setup needed for the sweeper
