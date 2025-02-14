@@ -43,7 +43,7 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
-custom_code:
+mutex: 'gatewaySecurityPolicies/{{gateway_security_policy}}/rules'
 examples:
   - name: 'network_security_gateway_security_policy_rules_basic'
     primary_resource_id: 'default'
