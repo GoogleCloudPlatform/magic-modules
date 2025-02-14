@@ -41,7 +41,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
   custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
-  validation: 'templates/terraform/validation/bigquery_data_transfer_config.go.tmpl'
+  # validation: 'templates/terraform/validation/bigquery_data_transfer_config.go.tmpl'
 custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
@@ -211,6 +211,12 @@ properties:
       **NOTE** : If you are attempting to update a parameter that cannot be updated (due to api limitations) [please force recreation of the resource](https://www.terraform.io/cli/state/taint#forcing-re-creation-of-resources).
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/json_to_string_map.go.tmpl'
+
+  - name: 'sensitiveParamsWoVersion'
+    type: Integer
+    immutable: true
+    description: |
+      The version of the sensitive params - used to trigger updates of the write-only params
   - name: 'sensitiveParams'
     type: NestedObject
     description: |
