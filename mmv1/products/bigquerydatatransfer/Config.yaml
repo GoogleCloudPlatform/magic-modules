@@ -239,7 +239,7 @@ properties:
           - 'sensitive_params.0.secretAccessKeyWo'
         conflicts:
           - 'sensitive_params.0.secretAccessKeyWo'
-      - name: 'secretAccessKeyWo'
+      - name: 'secretAccessKeyWo' # Wo is convention for write-only properties
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
