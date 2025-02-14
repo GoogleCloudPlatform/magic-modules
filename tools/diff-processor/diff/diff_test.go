@@ -1193,8 +1193,8 @@ func TestComputeSchemaDiff(t *testing.T) {
 					FieldSets: ResourceFieldSetsDiff{
 						Old: ResourceFieldSets{},
 						New: ResourceFieldSets{
-							ConflictsWith: []FieldSet{
-								{
+							ConflictsWith: map[string]FieldSet{
+								"field_two.field_four,field_two.field_three": FieldSet{
 									"field_two.field_three": {},
 									"field_two.field_four":  {},
 								},
