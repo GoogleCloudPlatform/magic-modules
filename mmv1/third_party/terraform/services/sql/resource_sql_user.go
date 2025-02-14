@@ -113,7 +113,6 @@ func ResourceSqlUser() *schema.Resource {
 
 			"password_wo_version": {
 				Type:        schema.TypeInt,
-				ForceNew:    true,
 				RequiredWith: []string{"password_wo"},
 				Description: `The version of the password_wo.`,
 			},
@@ -476,7 +475,7 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-	if d.HasChange("password") || d.HasChange("password_policy") {
+	if d.HasChange("password") || d.HasChange("password_policy") || d.HasChange("password_wo_version") {
 		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return err
