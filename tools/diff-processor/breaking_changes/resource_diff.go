@@ -57,16 +57,22 @@ func AddingExactlyOneOfMessages(resource string, resourceDiff diff.ResourceDiff)
 		}
 	}
 	// Find old field sets which are subsets of new field sets.
-	for _, oldFieldSet := range oldFieldSets {
-		for _, newFieldSet := range newFieldSets {
+	for _, newFieldSet := range newFieldSets {
+		var addedFields diff.FieldSet
+		found := false
+		for _, oldFieldSet := range oldFieldSets {
 			if oldFieldSet.IsSubsetOf(newFieldSet) {
-				addedFields := newFieldSet.Difference(oldFieldSet)
-				for field := range addedFields {
-					if fieldDiff, ok := resourceDiff.Fields[field]; ok && fieldDiff.Old != nil {
-						messages = append(messages, fmt.Sprintf("Field `%s` within resource `%s` was added to exactly one of", field, resource))
-					}
-				}
+				addedFields = newFieldSet.Difference(oldFieldSet)
+				found = true
 				break
+			}
+		}
+		if !found {
+			addedFields = newFieldSet
+		}
+		for field := range addedFields {
+			if fieldDiff, ok := resourceDiff.Fields[field]; ok && fieldDiff.Old != nil {
+				messages = append(messages, fmt.Sprintf("Field `%s` within resource `%s` was added to exactly one of", field, resource))
 			}
 		}
 	}

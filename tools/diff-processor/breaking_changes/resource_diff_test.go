@@ -169,6 +169,26 @@ var resourceSchemaRule_AddingExactlyOneOf_TestCases = []resourceSchemaTestCase{
 		expectedFields: []string{"field-c"},
 	},
 	{
+		name: "adding new exactly-one-of with an existing field",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a": {"field-a": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+			},
+		},
+		expectedFields: []string{"field-a"},
+	},
+	{
 		name: "adding a new field to exactly-one-of",
 		resourceDiff: diff.ResourceDiff{
 			FieldSets: diff.ResourceFieldSetsDiff{
