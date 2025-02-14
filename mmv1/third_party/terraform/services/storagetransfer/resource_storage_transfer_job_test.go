@@ -81,6 +81,17 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 func TestAccStorageTransferReplicationJob_basic(t *testing.T) {
 	t.Parallel()
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gs-project-accounts.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.publisher",
+		},
+		{
+			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
+			Role:   "roles/storagetransfer.serviceAgent",
+		},
+	})
+
 	testDataSourceBucketName := acctest.RandString(t, 10)
 	testDataSinkName := acctest.RandString(t, 10)
 	testTransferReplicationJobDescription := acctest.RandString(t, 10)
@@ -1677,26 +1688,6 @@ data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
 }
 
-data "google_project" "my_project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_binding" "pubsub_publisher" {
-  project = "%s"
-  role    = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:service-${data.google_project.my_project.number}@gs-project-accounts.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_project_iam_binding" "service_agent_binding" {
-  project = "%s"
-  role    = "roles/storagetransfer.serviceAgent"
-  members = [
-    "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}",
-  ]
-}
-
 resource "google_storage_bucket" "data_source" {
   name          = "%s"
   project       = "%s"
@@ -1742,37 +1733,16 @@ resource "google_storage_transfer_job" "transfer_job" {
 
   depends_on = [
     google_storage_bucket_iam_member.data_source,
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_binding.pubsub_publisher
+    google_storage_bucket_iam_member.data_sink
   ]
 }
-`, project, project, project, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
 
 func testAccStorageTransferReplicationJob_with_transferOptions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, overwriteObjectsAlreadyExistingInSink bool, deleteObjectsUniqueInSink bool, overwriteWhenVal string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
-}
-
-data "google_project" "my_project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_binding" "pubsub_publisher" {
-  project = "%s"
-  role    = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:service-${data.google_project.my_project.number}@gs-project-accounts.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_project_iam_binding" "service_agent_binding" {
-  project = "%s"
-  role    = "roles/storagetransfer.serviceAgent"
-  members = [
-    "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}",
-  ]
 }
 
 resource "google_storage_bucket" "data_source" {
@@ -1838,9 +1808,8 @@ resource "google_storage_transfer_job" "transfer_job" {
 
   depends_on = [
     google_storage_bucket_iam_member.data_source,
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_binding.pubsub_publisher
+    google_storage_bucket_iam_member.data_sink
   ]
 }
-`, project, project, project, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, overwriteWhenVal)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, overwriteWhenVal)
 }
