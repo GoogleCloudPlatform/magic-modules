@@ -237,4 +237,3 @@ properties:
       "123/environment": "production",
       "123/costCenter": "marketing"
     min_version: 'beta'
-
