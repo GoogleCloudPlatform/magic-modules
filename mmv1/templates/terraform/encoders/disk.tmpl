@@ -62,6 +62,8 @@ if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt
 		"rsaEncryptedKey": rawKey.AsString(),
 	}
 }
+
+delete(obj["diskEncryptionKey"].(map[string]interface{}), "newKeysWo")
 {{- end }}
 
 return obj, nil
