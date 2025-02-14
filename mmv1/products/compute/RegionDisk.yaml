@@ -134,7 +134,6 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -142,6 +141,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        immutable: true
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
       - name: 'rawKeyWo'
@@ -161,6 +161,7 @@ properties:
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeyName'
         type: String
+        immutable: true
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
   - name: 'sourceSnapshotEncryptionKey'
