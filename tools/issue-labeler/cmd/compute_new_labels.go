@@ -68,7 +68,7 @@ func execComputeNewLabels() error {
 
 	if len(labels) > 0 {
 		// Forwarding test failure ticket directly
-		if !testFailureIssue{
+		if !testFailureIssue {
 			labels = append(labels, "forward/review")
 		}
 		sort.Strings(labels)
