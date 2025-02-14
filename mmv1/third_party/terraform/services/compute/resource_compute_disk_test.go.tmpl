@@ -1022,7 +1022,7 @@ resource "google_compute_disk" "foobar" {
   size  = 50
   type  = "%s"
   zone  = "us-central1-a"
-  disk_encryption_key_wo {
+  disk_encryption_key {
     raw_key_wo = "raw_key_wo"
     rsa_encrypted_key_wo = "rsa_encrypted_key_wo"
   }
@@ -1046,7 +1046,7 @@ resource "google_compute_disk" "foobar" {
   size  = 50
   type  = "%s"
   zone  = "us-central1-a"
-  disk_encryption_key_wo {
+  disk_encryption_key {
     raw_key_wo = "raw_key_wo_updated"
     rsa_encrypted_key_wo = "rsa_encrypted_key_wo_updated"
   }
