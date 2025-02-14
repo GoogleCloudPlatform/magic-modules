@@ -51,13 +51,13 @@ if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
 {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); !rawKey.IsNull() {
+if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); rawKey.Type().Equals(cty.String) && !rawKey.IsNull() {
 	obj["diskEncryptionKey"] = map[string]interface{}{
 		"rawKey": rawKey.AsString(),
 	}
 }
 
-if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); !rawKey.IsNull() {
+if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); rawKey.Type().Equals(cty.String) && !rawKey.IsNull() {
 	obj["diskEncryptionKey"] = map[string]interface{}{
 		"rsaEncryptedKey": rawKey.AsString(),
 	}
