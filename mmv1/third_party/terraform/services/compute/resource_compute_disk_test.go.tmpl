@@ -974,6 +974,30 @@ resource "google_compute_disk" "foobar" {
 `, diskName, diskType)
 }
 
+func testAccComputeDisk_basic_updated_wo_no_change(diskName string, diskType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 50
+  type  = "%s"
+  zone  = "us-central1-a"
+  disk_encryption_key {
+    raw_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+    rsa_encrypted_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+  }
+  labels = {
+    my-label = "my-label-value"
+  }
+}
+`, diskName, diskType)
+}
+
 func testAccComputeDisk_updated(diskName string, diskType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
