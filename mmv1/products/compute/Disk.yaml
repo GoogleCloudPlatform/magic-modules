@@ -191,6 +191,10 @@ properties:
         write_only: true
         conflicts:
           - 'disk_encryption_key.0.rawKey'
+      - name: 'newKeysWo'
+        type: Boolean
+        description: |
+          Triggers update of write-only attributes
       - name: 'rsaEncryptedKey'
         type: String
         immutable: true

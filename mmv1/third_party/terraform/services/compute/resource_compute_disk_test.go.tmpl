@@ -423,6 +423,15 @@ func TestAccComputeDisk_update_wo(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
+			{
+				Config: testAccComputeDisk_basic_updated_wo_no_change(diskName, diskType),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -1023,8 +1032,8 @@ resource "google_compute_disk" "foobar" {
   type  = "%s"
   zone  = "us-central1-a"
   disk_encryption_key {
-    raw_key_wo = "raw_key_wo"
-    rsa_encrypted_key_wo = "rsa_encrypted_key_wo"
+    raw_key_wo = "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+    rsa_encrypted_key_wo = "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
   }
   labels = {
     my-label = "my-label-value"
@@ -1047,8 +1056,33 @@ resource "google_compute_disk" "foobar" {
   type  = "%s"
   zone  = "us-central1-a"
   disk_encryption_key {
-    raw_key_wo = "raw_key_wo_updated"
-    rsa_encrypted_key_wo = "rsa_encrypted_key_wo_updated"
+    raw_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+	new_keys_wo = true
+    rsa_encrypted_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+  }
+  labels = {
+    my-label = "my-label-value"
+  }
+}
+`, diskName, diskType)
+}
+
+func testAccComputeDisk_basic_updated_wo_no_change(diskName string, diskType string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  image = data.google_compute_image.my_image.self_link
+  size  = 50
+  type  = "%s"
+  zone  = "us-central1-a"
+  disk_encryption_key {
+    raw_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+    rsa_encrypted_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
   }
   labels = {
     my-label = "my-label-value"
