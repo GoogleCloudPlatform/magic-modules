@@ -342,7 +342,6 @@ type Resource struct {
 
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
-	githubUrl      string
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1836,12 +1835,7 @@ func (r Resource) ShouldGenerateSweepers() bool {
 }
 
 func (r Resource) GithubURL() string {
-	if r.githubUrl != "" {
-		return r.githubUrl
-	}
-
-	r.githubUrl = GITHUB_BASE_URL + r.SourceYamlFile
-	return r.githubUrl
+	return GITHUB_BASE_URL + r.SourceYamlFile
 }
 
 func (r Resource) CodeHeader(templatePath string) string {
