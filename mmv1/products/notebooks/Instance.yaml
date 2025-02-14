@@ -60,9 +60,9 @@ state_upgraders: true
 # Check instance availability first before fully removing.
 deprecation_message: '`google_notebook_instance` is deprecated and will be removed in a future major release. Use `google_workbench_instance` instead.'
 sweeper:
-  regions:
-    - "us-west1-a"
-    - "us-central1-a"
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "us-west1-a"
 examples:
   - name: 'notebook_instance_basic'
     primary_resource_id: 'instance'

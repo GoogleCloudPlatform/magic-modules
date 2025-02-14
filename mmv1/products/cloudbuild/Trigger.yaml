@@ -47,9 +47,9 @@ custom_diff:
 schema_version: 2
 state_upgraders: true
 sweeper:
-  regions:
-    - "us-central1"
-    - "global"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'cloudbuild_trigger_filename'
     primary_resource_id: 'filename-trigger'

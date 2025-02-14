@@ -45,10 +45,10 @@ async:
 collection_url_key: 'items'
 custom_code:
 sweeper:
-  regions:
-    - "us-central1"
-    - "asia-northeast3"
-    - "europe-west4"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "asia-northeast3"
 examples:
   - name: 'region_network_endpoint_group_functions'
     primary_resource_id: 'function_neg'

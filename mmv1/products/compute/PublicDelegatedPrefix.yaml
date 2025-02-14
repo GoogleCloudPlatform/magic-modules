@@ -36,9 +36,9 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - us-central1
-    - us-west1
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-west1"
 examples:
   - name: 'public_delegated_prefixes_basic'
     primary_resource_id: 'prefixes'

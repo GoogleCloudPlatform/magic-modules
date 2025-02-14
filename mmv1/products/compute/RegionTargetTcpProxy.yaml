@@ -39,9 +39,9 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "europe-west4"
-    - "us-central1"
+  url_substitutions:
+    - region: "europe-west4"
+    - region: "us-central1"
 examples:
   - name: 'region_target_tcp_proxy_basic'
     primary_resource_id: 'default'

@@ -42,10 +42,10 @@ custom_code:
 custom_diff:
   - 'apphubApplicationCustomizeDiff'
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-east1"
-    - "global"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "global"
 examples:
   - name: 'apphub_application_basic'
     primary_resource_id: 'example'

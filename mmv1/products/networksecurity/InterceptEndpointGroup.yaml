@@ -38,8 +38,8 @@ async:
     resource_inside_response: true
 custom_code:
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_security_intercept_endpoint_group_basic'
     config_path: 'templates/terraform/examples/network_security_intercept_endpoint_group_basic.tf.tmpl'

@@ -32,6 +32,9 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-c"
 examples:
   - name: 'tpu_v2_queued_resource_basic'
     primary_resource_id: 'qr'

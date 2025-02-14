@@ -38,8 +38,8 @@ async:
     resource_inside_response: true
 custom_code:
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_management_vpc_flow_logs_config_interconnect_full'
     primary_resource_id: 'interconnect-test'

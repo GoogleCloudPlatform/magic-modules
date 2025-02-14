@@ -38,10 +38,10 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "us-west1"
-    - "europe-west1"
-    - "us-central1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_target_http_proxy_basic'
     primary_resource_id: 'default'

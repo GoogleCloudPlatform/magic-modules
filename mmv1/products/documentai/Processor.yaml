@@ -28,9 +28,9 @@ timeouts:
   delete_minutes: 20
 custom_code:
 sweeper:
-  regions:
-    - "eu"
-    - "us"
+  url_substitutions:
+    - region: "us"
+    - region: "eu"
 examples:
   - name: 'documentai_processor'
     primary_resource_id: 'processor'

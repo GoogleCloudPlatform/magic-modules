@@ -14,6 +14,10 @@
 ---
 name: Connection
 description: A connection for GitHub, GitHub Enterprise, GitLab, and GitLab Enterprise.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/developer-connect/docs/overview'
+  api: 'https://cloud.google.com/developer-connect/docs/api/reference/rest/v1/projects.locations.connections'
 base_url: projects/{{project}}/locations/{{location}}/connections
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}

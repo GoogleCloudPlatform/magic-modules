@@ -48,12 +48,12 @@ custom_diff:
   - 'forwardingRuleCustomizeDiff'
 legacy_long_form_project: true
 sweeper:
-  regions:
-    - "us-west2"
-    - "us-central1"
-    - "europe-west1"
-    - "europe-west4"
-    - "us-west1"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'internal_http_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'

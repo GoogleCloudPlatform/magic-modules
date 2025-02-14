@@ -1,6 +1,5 @@
 package iambeta_test
 
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"strings"
 	"testing"
@@ -33,4 +32,3 @@ func TestValidateIAMBetaWorkloadIdentityPoolId(t *testing.T) {
 		t.Errorf("Failed to validate WorkloadIdentityPool names: %v", es)
 	}
 }
-{{- end }}

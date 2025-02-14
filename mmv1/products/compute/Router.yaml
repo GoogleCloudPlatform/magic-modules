@@ -45,10 +45,10 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-east1"
-    - "us-east4"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-east4"
 examples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'

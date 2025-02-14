@@ -1,5 +1,4 @@
 resource "google_gemini_gemini_gcp_enablement_setting" "{{$.PrimaryResourceId}}" {
-    provider = google-beta
     gemini_gcp_enablement_setting_id = "{{index $.Vars "gemini_gcp_enablement_setting_id"}}"
     location = "global"
     enable_customer_data_sharing = true
