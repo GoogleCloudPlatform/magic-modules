@@ -4,6 +4,7 @@ func resourceOrgpolicyPolicyRulesConditionExpressionDiffSuppress(_, old, new str
 	return oldReplaced == newReplaced
 }
 
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 func resourceOrgPolicyPolicySpecRulesDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
 	oldCount, newCount := d.GetChange("spec.0.rules.#")
 	var count int
@@ -61,3 +62,4 @@ func resourceOrgPolicyPolicyDryRunSpecRulesDiffSuppress(k, o, n string, d *schem
 
 	return oldSet.Equal(newSet)
 }
+{{- end }}
