@@ -12,9 +12,6 @@ resource "google_vertex_ai_feature_online_store" "featureonlinestore" {
       cpu_utilization_target = 80
     }
   }
-  embedding_management {
-    enabled = true
-  }
 }
 
 resource "google_bigquery_dataset" "tf-test-dataset" {
