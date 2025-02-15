@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -257,28 +255,6 @@ func TestAccBigtableInstance_createWithAutoscalingAndCreateAnotherOne(t *testing
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	cluster1 := &cluster{
-		clusterId:   fmt.Sprintf("%s-c1", instanceName),
-		zone:        "us-central1-a",
-		storageType: "HDD",
-		numNodes:    1,
-		autoscalingConfig: &clusterAutoscalingConfig{
-			minNodes:  1,
-			maxNodes:  3,
-			cpuTarget: 70,
-		},
-	}
-	cluster2 := &cluster{
-		clusterId:   fmt.Sprintf("%s-c2", instanceName),
-		zone:        "us-central1-b",
-		storageType: "HDD",
-		numNodes:    1,
-		autoscalingConfig: &clusterAutoscalingConfig{
-			minNodes:  1,
-			maxNodes:  3,
-			cpuTarget: 70,
-		},
-	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -287,12 +263,12 @@ func TestAccBigtableInstance_createWithAutoscalingAndCreateAnotherOne(t *testing
 		Steps: []resource.TestStep{
 			{
 				// Create Autoscaling config with 1 nodes. Default storage_target is set by service based on storage type.
-				Config: getInstanceResource(instanceName, []cluster{*cluster1}),
+				Config: testAccBigtableInstance_autoscalingClusterWithZone(instanceName, "us-central1-a", 1, 3, 70),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.cluster_id", cluster1.clusterId),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.min_nodes", strconv.Itoa(cluster1.autoscalingConfig.minNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.max_nodes", strconv.Itoa(cluster1.autoscalingConfig.maxNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.cpu_target", strconv.Itoa(cluster1.autoscalingConfig.cpuTarget)),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.cluster_id", fmt.Sprintf("%s-c1", instanceName)),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.min_nodes", "1"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.max_nodes", "3"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.cpu_target", "70"),
 				),
 			},
 			{
@@ -303,16 +279,16 @@ func TestAccBigtableInstance_createWithAutoscalingAndCreateAnotherOne(t *testing
 			},
 			{
 				// Create another cluster
-				Config: getInstanceResource(instanceName, []cluster{*cluster1, *cluster2}),
+				Config: testAccBigtableInstance_2autoscalingClustersWithZone(instanceName, "us-central1-a", "us-central1-b", 1, 3, 70),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.cluster_id", cluster1.clusterId),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.min_nodes", strconv.Itoa(cluster1.autoscalingConfig.minNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.max_nodes", strconv.Itoa(cluster1.autoscalingConfig.maxNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.cpu_target", strconv.Itoa(cluster1.autoscalingConfig.cpuTarget)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.cluster_id", cluster2.clusterId),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.min_nodes", strconv.Itoa(cluster2.autoscalingConfig.minNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.max_nodes", strconv.Itoa(cluster2.autoscalingConfig.maxNodes)),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.cpu_target", strconv.Itoa(cluster2.autoscalingConfig.cpuTarget)),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.cluster_id", fmt.Sprintf("%s-c1", instanceName)),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.min_nodes", "1"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.max_nodes", "3"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.autoscaling_config.0.cpu_target", "70"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.cluster_id", fmt.Sprintf("%s-c2", instanceName)),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.min_nodes", "1"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.max_nodes", "3"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.autoscaling_config.0.cpu_target", "70"),
 				),
 			},
 			{
@@ -857,6 +833,52 @@ func testAccBigtableInstance_autoscalingCluster(instanceName string, min int, ma
 	}`, instanceName, instanceName, min, max, cpuTarget)
 }
 
+func testAccBigtableInstance_autoscalingClusterWithZone(instanceName string, zone string, min int, max int, cpuTarget int) string {
+	return fmt.Sprintf(`resource "google_bigtable_instance" "instance" {
+		name = "%s"
+		cluster {
+			cluster_id   = "%s-c1"
+			storage_type = "HDD"
+			zone         = "%s"
+			autoscaling_config {
+				min_nodes = %d
+				max_nodes = %d
+				cpu_target = %d
+			}
+		}
+	  deletion_protection = false
+
+	}`, instanceName, instanceName, zone, min, max, cpuTarget)
+}
+
+func testAccBigtableInstance_2autoscalingClustersWithZone(instanceName string, zoneCluster1 string, zoneCluster2 string, min int, max int, cpuTarget int) string {
+	return fmt.Sprintf(`resource "google_bigtable_instance" "instance" {
+		name = "%s"
+		cluster {
+			cluster_id   = "%s-c1"
+			storage_type = "HDD"
+			zone         = "%s"
+			autoscaling_config {
+				min_nodes = %d
+				max_nodes = %d
+				cpu_target = %d
+			}
+		}
+		cluster {
+			cluster_id   = "%s-c2"
+			storage_type = "HDD"
+			zone         = "%s"
+			autoscaling_config {
+				min_nodes = %d
+				max_nodes = %d
+				cpu_target = %d
+			}
+		}
+	  deletion_protection = false
+
+	}`, instanceName, instanceName, zoneCluster1, min, max, cpuTarget, instanceName, zoneCluster2, min, max, cpuTarget)
+}
+
 func autoscalingClusterConfigWithStorageTarget(instanceName string, min int, max int, cpuTarget int, storageTarget int) string {
 	return fmt.Sprintf(`resource "google_bigtable_instance" "instance" {
 		name = "%s"
@@ -1005,55 +1027,4 @@ resource "time_offset" "week-in-future" {
   offset_days = 7
 }
 `
-}
-
-type cluster struct {
-	clusterId         string
-	zone              string
-	storageType       string
-	numNodes          int
-	autoscalingConfig *clusterAutoscalingConfig
-}
-
-type clusterAutoscalingConfig struct {
-	minNodes  int
-	maxNodes  int
-	cpuTarget int
-}
-
-func (c *cluster) getClusterResource() string {
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf(`cluster {
-		cluster_id = "%s"
-		zone = "%s"
-		storage_type = "%s"
-		num_nodes = %d
-		`, c.clusterId, c.zone, c.storageType, c.numNodes))
-	if c.autoscalingConfig != nil {
-		sb.WriteString(fmt.Sprintf(`autoscaling_config {
-			min_nodes  = %d
-			max_nodes  = %d
-			cpu_target = %d
-		}
-		`, c.autoscalingConfig.minNodes, c.autoscalingConfig.maxNodes, c.autoscalingConfig.cpuTarget))
-	}
-	sb.WriteString(`}
-	`)
-	return sb.String()
-}
-
-func getInstanceResource(instanceName string, clusters []cluster) string {
-	var sb strings.Builder
-
-	sb.WriteString(fmt.Sprintf(`resource "google_bigtable_instance" "instance" {
-		name = "%s"
-		`, instanceName))
-
-	for _, cluster := range clusters {
-		sb.WriteString(cluster.getClusterResource())
-	}
-	sb.WriteString(`deletion_protection = false
-	}`)
-
-	return sb.String()
 }
