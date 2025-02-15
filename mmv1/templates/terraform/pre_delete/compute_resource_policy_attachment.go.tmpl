@@ -1,0 +1,21 @@
+obj = make(map[string]interface{})
+
+zone, err := tpgresource.GetZone(d, config)
+if err != nil {
+	return err
+}
+
+region := tpgresource.GetRegionFromZone(zone)
+if region == "" {
+	return fmt.Errorf("invalid zone %q", zone)
+}
+
+name, err := expandNestedComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+if err != nil {
+	return err
+}
+
+obj["resourcePolicies"] = []interface{}{
+	fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name),
+}
+return nil
