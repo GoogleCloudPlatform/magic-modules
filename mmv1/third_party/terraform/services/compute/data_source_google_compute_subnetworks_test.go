@@ -78,8 +78,8 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 }
 
 func testAccCheckGoogleSubnetworksConfig(context map[string]interface{}) string {
-       return fmt.Sprintf(`
-locals {
+	return fmt.Sprintf(`
+ locals {
   cidr_one   = "%s"
   cidr_two   = "%s"
   network    = "%s"
