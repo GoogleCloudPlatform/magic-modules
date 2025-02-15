@@ -1301,6 +1301,28 @@ func TestFormatReminderComment(t *testing.T) {
 				"@other-reviewer",
 			},
 		},
+		"waitingForReview with author as core reviewer": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String(firstCoreReviewer)}, // PR author is a core reviewer
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},  // Review requested from author
+					&github.User{Login: github.String(secondCoreReviewer)}, // Review requested from another core reviewer
+					&github.User{Login: github.String("other-reviewer")},   // Non-core reviewer
+				},
+			},
+			state:     waitingForReview,
+			sinceDays: 3,
+			expectedStrings: []string{
+				"waiting for review for 3 weekdays",
+				"disable-review-reminders",
+				"@" + secondCoreReviewer, // Should mention the non-author core reviewer
+			},
+			notExpectedStrings: []string{
+				"@GoogleCloudPlatform/terraform-team",
+				"@" + firstCoreReviewer, // Should not mention the author even though they're a core reviewer
+				"@other-reviewer",
+			},
+		},
 	}
 
 	for tn, tc := range cases {
