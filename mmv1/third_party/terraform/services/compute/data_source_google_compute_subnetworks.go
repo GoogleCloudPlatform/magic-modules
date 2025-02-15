@@ -57,6 +57,10 @@ func DataSourceGoogleComputeSubnetworks() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"purpose": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"self_link": {
 							Type:     schema.TypeString,
 							Computed: true,
