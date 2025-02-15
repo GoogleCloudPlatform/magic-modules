@@ -72,7 +72,8 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 			{
 				
 			},
-		})			
+		},
+	})			
 	
 }
 
