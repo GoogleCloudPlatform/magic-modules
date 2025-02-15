@@ -291,6 +291,7 @@ attributes – for a full reference, see
   `'REQUEST_BODY'`, `'QUERY_PARAM_NESTED'`. Note: `'QUERY_PARAM_NESTED'` should
   only be used if the query param field contains a `.`
 - `min_version: beta`: Marks IAM support as beta-only.
+- `iam_policy_version`: Version number in the request payload. Default: 1
 
 Example:
 
