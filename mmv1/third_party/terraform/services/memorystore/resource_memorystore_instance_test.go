@@ -181,8 +181,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					maintenanceHours: 1,
 					maintenanceMinutes: 0,
 					maintenanceSeconds: 0,
-					maintenanceNanos: 0
-				}),
+					maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -201,8 +200,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					maintenanceHours: 1,
 					maintenanceMinutes: 0,
 					maintenanceSeconds: 0,
-					maintenanceNanos: 0
-				}),
+					maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
