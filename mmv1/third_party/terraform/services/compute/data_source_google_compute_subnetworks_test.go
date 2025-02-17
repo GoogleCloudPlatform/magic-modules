@@ -57,7 +57,10 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 					),
 			},
 			{
-				
+				ResourceName:            "google_compute_subnetwork.subnet_two",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"purpose", "PRIVATE"},				
 			},
 			{
 				Config: testAccCheckGoogleSubnetworks_update(context),
