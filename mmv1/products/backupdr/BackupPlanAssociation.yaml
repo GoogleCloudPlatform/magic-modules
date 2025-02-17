@@ -29,8 +29,7 @@ timeouts:
   insert_minutes: 60
   delete_minutes: 60
 examples:
-  - min_version: beta
-    name: 'backup_dr_bpa'
+  - name: 'backup_dr_bpa'
     primary_resource_id: 'my-backup-plan-association'
     vars:
       backup_plan_association_id: "my-bpa"
