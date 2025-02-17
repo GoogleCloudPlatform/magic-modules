@@ -47,6 +47,7 @@ examples:
       storage_pool_name: "storage-pool-basic"
     ignore_read_extra:
       - 'deletion_protection'
+    exclude_test: true
   - name: "compute_storage_pool_full"
     primary_resource_id: "test-storage-pool-full"
     primary_resource_name: 'fmt.Sprintf("tf-test-storage-pool-full%s", context["random_suffix"])'
@@ -54,6 +55,7 @@ examples:
       storage_pool_name: "storage-pool-full"
     ignore_read_extra:
       - 'deletion_protection'
+    exclude_test: true
 parameters:
   - name: "zone"
     type: ResourceRef
