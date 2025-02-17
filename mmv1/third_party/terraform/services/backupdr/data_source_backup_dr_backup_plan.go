@@ -1,5 +1,4 @@
 package backupdr
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
     "fmt"
@@ -50,4 +49,3 @@ func dataSourceGoogleCloudBackupDRBackupPlanRead(d *schema.ResourceData, meta in
 
 	return nil
 }
-{{- end }}

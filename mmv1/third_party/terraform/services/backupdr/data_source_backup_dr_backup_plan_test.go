@@ -1,5 +1,4 @@
 package backupdr_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -79,4 +78,3 @@ data "google_backup_dr_backup_plan" "fetch-bp" {
   }
 `, context)
 }
-{{- end }}

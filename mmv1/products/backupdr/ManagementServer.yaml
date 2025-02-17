@@ -14,7 +14,6 @@
 ---
 name: 'ManagementServer'
 description: A Backup and DR Management Server (Also referred as Management Console)
-min_version: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'

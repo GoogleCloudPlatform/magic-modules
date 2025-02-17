@@ -12,7 +12,6 @@
 # limitations under the License.
 
 name: 'BackupPlanAssociation'
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
 create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
 self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
