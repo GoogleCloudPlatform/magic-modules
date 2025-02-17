@@ -14,8 +14,8 @@
 ---
 name: HostProjectRegistration
 description: |-
-  Host project registration refers to the registration of a Google cloud project with API hub as a host project. 
-  This is the project where API hub is provisioned. 
+  Host project registration refers to the registration of a Google cloud project with API hub as a host project.
+  This is the project where API hub is provisioned.
   It acts as the consumer project for the API hub instance provisioned.
   Multiple runtime projects can be attached to the host project and these attachments define the scope of API hub.
 base_url: projects/{{project}}/locations/{{location}}/hostProjectRegistrations
