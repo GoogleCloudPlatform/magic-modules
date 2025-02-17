@@ -1,9 +1,9 @@
 package backupdr_test
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
@@ -18,10 +18,10 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa",map[string]struct{}{
-							"resource": {},
-						},
-          ),
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_backup_dr_backup_plan_association.bpa-test", "google_backup_dr_backup_plan_association.bpa", map[string]struct{}{
+						"resource": {},
+					},
+					),
 				),
 			},
 		},
@@ -29,7 +29,7 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(t *testing.T) {
 }
 
 func testAccDataSourceGoogleBackupDRBackupPlanAssociation_basic(context map[string]interface{}) string {
-return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
 resource "google_service_account" "default" {
   account_id   = "tf-test-my-custom-%{random_suffix}"
