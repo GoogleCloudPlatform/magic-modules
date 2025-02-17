@@ -1,6 +1,5 @@
 package iambeta
 
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 
@@ -42,4 +41,3 @@ func dataSourceIAMBetaWorkloadIdentityPoolProviderRead(d *schema.ResourceData, m
 
 	return nil
 }
-{{- end }}

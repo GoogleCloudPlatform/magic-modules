@@ -51,6 +51,7 @@ examples:
       pab_policy_id: 'my-pab-policy'
       display_name: 'test org binding'
       org_binding_id: 'test-org-binding'
+    external_providers: ["time"]
 parameters:
   - name: 'organization'
     type: String
