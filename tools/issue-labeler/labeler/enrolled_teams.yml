@@ -368,8 +368,19 @@ service/filestore:
 service/firebase:
   team: firebase-terraform
   resources:
-  - google_firebase_.*
+  - google_firebase_android.*
+  - google_firebase_apple.*
+  - google_firebase_app_check.*
+  - google_firebase_database.*
+  - google_firebase_extensions.*
+  - google_firebase_hosting.*
+  - google_firebase_project
+  - google_firebase_storage.*
+  - google_firebase_web.*
   - google_firebaserules_.*
+service/firebasedataconnect:
+  resources:
+  - google_firebase_data_connect_.*
 service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule

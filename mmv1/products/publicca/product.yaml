@@ -13,7 +13,7 @@
 
 ---
 name: 'PublicCA'
-display_name: 'Public ca'
+display_name: 'Public CA'
 versions:
   - name: 'ga'
     base_url: 'https://publicca.googleapis.com/v1/'

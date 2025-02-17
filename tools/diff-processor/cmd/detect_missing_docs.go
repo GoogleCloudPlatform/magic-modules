@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 	"slices"
 	"sort"
 
@@ -37,7 +35,7 @@ func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 	o := &detectMissingDocsOptions{
 		rootOptions: rootOptions,
 		computeSchemaDiff: func() diff.SchemaDiff {
-			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
+			return schemaDiff
 		},
 		stdout: os.Stdout,
 	}

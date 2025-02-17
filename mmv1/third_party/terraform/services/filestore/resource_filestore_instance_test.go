@@ -466,7 +466,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location_1":    "us-central1",
+		"location_1":    "us-east1",
 		"location_2":    "us-west1",
 		"tier":          "ENTERPRISE",
 	}
@@ -491,7 +491,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "instance" {
-  name             = "tf-instance-%{random_suffix}"
+  name             = "tf-test-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
   description      = "An instance created during testing."
@@ -508,7 +508,7 @@ resource "google_filestore_instance" "instance" {
 }
 
 resource "google_filestore_instance" "replica-instance" {
-  name          	= "tf-rinstance-%{random_suffix}"
+  name          	= "tf-test-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."

@@ -4068,6 +4068,32 @@ func TestAccContainerCluster_withMonitoringConfig(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			{
+				Config: testAccContainerCluster_withMonitoringConfigScopeAll(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "monitoring_config.0.managed_prometheus.0.auto_monitoring_config.0.scope", "ALL"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withMonitoringConfigScopeNone(clusterName, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "monitoring_config.0.managed_prometheus.0.auto_monitoring_config.0.scope", "NONE"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{{- end }}
 			// Back to basic settings to test setting Prometheus on its own
 			{
 				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
@@ -4528,7 +4554,7 @@ func TestAccContainerCluster_autoprovisioningDefaultsManagement(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_autoprovisioningDefaultsManagement(clusterName, networkName, subnetworkName, false, false),
+				Config: testAccContainerCluster_autoprovisioningDefaultsManagement(clusterName, networkName, subnetworkName, true, false),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_autoprovisioning_management",
@@ -5607,6 +5633,10 @@ func TestAccContainerCluster_WithCPAFeatures(t *testing.T) {
 			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
 			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
+		{
+			Member: "serviceAccount:service-{project_number}@container-engine-robot.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypterViaDelegation",
+		},
 	})
 
 	// Find an active cryptoKeyVersion on the signing key.
@@ -5882,6 +5912,10 @@ resource "google_container_cluster" "with_cpa_features" {
 		google_privateca_ca_pool.etcd_api_ca,
 		google_privateca_ca_pool.etcd_peer_ca,
 		google_privateca_ca_pool.aggregation_ca,
+		google_privateca_certificate_authority.cluster_ca,
+		google_privateca_certificate_authority.etcd_api_ca,
+		google_privateca_certificate_authority.etcd_peer_ca,
+		google_privateca_certificate_authority.aggregation_ca,
 	]
 }
 `, context)
@@ -11108,6 +11142,50 @@ resource "google_container_cluster" "primary" {
 }
 `, name, networkName, subnetworkName)
 }
+
+{{- if ne $.TargetVersionName "ga" }}								
+func testAccContainerCluster_withMonitoringConfigScopeAll(name, networkName, subnetworkName string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+    managed_prometheus {
+      enabled = true
+      auto_monitoring_config {
+        scope = "ALL"
+      }
+    }
+  }
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withMonitoringConfigScopeNone(name, networkName, subnetworkName string) string {
+       return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  monitoring_config {
+    managed_prometheus {
+      enabled = true
+      auto_monitoring_config {
+        scope = "NONE"
+      }
+    }
+  }
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+`, name, networkName, subnetworkName)
+}
+{{- end }}
 
 func testAccContainerCluster_withMonitoringConfigAdvancedDatapathObservabilityConfigEnabled(name string) string {
        return fmt.Sprintf(`

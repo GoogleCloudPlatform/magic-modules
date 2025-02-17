@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	NIGHTLY_DATA_BUCKET = "nightly-test-data"
+	NightlyDataBucket = "nightly-test-data"
 )
 
 var cntsRequiredEnvironmentVariables = [...]string{
@@ -182,7 +182,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 
 	// Upload test status data file to gcs bucket
 	objectName := pVersion.String() + "/" + testStatusFileName
-	err = gcs.WriteToGCSBucket(NIGHTLY_DATA_BUCKET, objectName, testStatusFileName)
+	err = gcs.WriteToGCSBucket(NightlyDataBucket, objectName, testStatusFileName)
 	if err != nil {
 		return err
 	}

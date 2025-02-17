@@ -44,6 +44,7 @@ async:
 examples:
   - name: 'iam_projects_policy_binding'
     primary_resource_id: 'my-project-binding'
+    external_providers: ["time"]
     test_env_vars:
       org_id: 'ORG_ID'
     vars:

@@ -1,0 +1,5 @@
+resource "google_network_services_mesh" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.Vars "resource_name"}}"
+  location    = "global"
+}

@@ -64,6 +64,7 @@ examples:
       fw_policy: 'fw-policy'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    min_version: beta
   - name: 'network_firewall_policy_rule_network_scope_ingress'
     primary_resource_id: 'primary'
     vars:
@@ -71,6 +72,7 @@ examples:
       network: 'network'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef

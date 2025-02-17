@@ -89,11 +89,11 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/tfoics", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
-			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"changed-schema-resources"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
 		},
 	} {
 		if actualCalls, ok := mr.Calls(method); !ok {

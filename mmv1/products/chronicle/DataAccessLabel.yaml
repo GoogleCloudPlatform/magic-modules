@@ -27,6 +27,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: RGF0YUFjY2Vzc0xhYmVs
 
 examples:
   - name: 'chronicle_dataaccesslabel_basic'

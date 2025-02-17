@@ -44,6 +44,9 @@ custom_code:
   constants: 'templates/terraform/constants/tpu_vm.go.tmpl'
 custom_diff:
   - 'acceleratorTypeCustomizeDiff'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-c"
 examples:
   - name: 'tpu_v2_vm_basic'
     primary_resource_id: 'tpu'
