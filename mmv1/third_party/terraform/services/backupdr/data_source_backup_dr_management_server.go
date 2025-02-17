@@ -59,7 +59,7 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 		return err
 	}
 	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/managementServers")
+	url, err := tpgresource.ReplaceVars(d, config, `{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers`)
 	if err != nil {
 		return err
 	}
