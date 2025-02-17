@@ -47,6 +47,57 @@ func flattenBackupDRManagementServerResource(v interface{}, d *schema.ResourceDa
 	transformed["name"] = flattenBackupDRManagementServerName(original["name"], d, config)
 	return transformed
 }
+func flattenBackupDRManagementServerType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenBackupDRManagementServerNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"network":      flattenBackupDRManagementServerNetworksNetwork(original["network"], d, config),
+			"peering_mode": flattenBackupDRManagementServerNetworksPeeringMode(original["peeringMode"], d, config),
+		})
+	}
+	return transformed
+}
+
+func flattenBackupDRManagementServerOauth2ClientId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenBackupDRManagementServerManagementUri(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["web_ui"] =
+		flattenBackupDRManagementServerManagementUriWebUi(original["webUi"], d, config)
+	transformed["api"] =
+		flattenBackupDRManagementServerManagementUriApi(original["api"], d, config)
+	return []interface{}{transformed}
+}
+
+func flattenBackupDRManagementServerManagementUriWebUi(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenBackupDRManagementServerManagementUriApi(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
 
 func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
