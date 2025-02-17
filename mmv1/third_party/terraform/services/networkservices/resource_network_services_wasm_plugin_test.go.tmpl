@@ -19,7 +19,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +55,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesWasmPluginDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -128,7 +128,6 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
 func testAccNetworkServicesWasmPlugin_wasmPluginBasicCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 
@@ -159,7 +158,6 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 func testAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 
@@ -190,7 +188,6 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 func testAccNetworkServicesWasmPlugin_wasmPluginVersionCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 
@@ -230,7 +227,6 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 func testAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 
@@ -269,10 +265,9 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 
 func testAccNetworkServicesWasmPlugin_wasmPluginConfigDataUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" { provider = google-beta }
+data "google_project" "project" {}
 
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 
@@ -303,10 +298,9 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
 
 func testAccNetworkServicesWasmPlugin_wasmPluginConfigUriUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" { provider = google-beta }
+data "google_project" "project" {}
 
 resource "google_network_services_wasm_plugin" "wasm_plugin" {
-  provider    = google-beta
   name        = "tf-test-my-wasm-plugin%{random_suffix}"
   description = "my wasm plugin"
 

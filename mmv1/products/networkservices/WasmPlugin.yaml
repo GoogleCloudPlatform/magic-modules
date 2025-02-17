@@ -15,7 +15,6 @@
 name: 'WasmPlugin'
 description: |
   WasmPlugin is a resource representing a service executing a customer-provided Wasm module.
-min_version: 'beta'
 references:
   guides:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/create-plugin'
@@ -44,7 +43,6 @@ custom_code:
 examples:
   - name: 'wasm_plugin_basic'
     primary_resource_id: 'wasm_plugin'
-    min_version: 'beta'
     vars:
       wasm_plugin_name: 'my-wasm-plugin'
     skip_vcr: true
