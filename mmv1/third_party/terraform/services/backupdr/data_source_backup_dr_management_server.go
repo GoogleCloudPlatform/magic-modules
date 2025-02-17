@@ -18,9 +18,7 @@ func DataSourceGoogleCloudBackupDRService() *schema.Resource {
 		Schema: dsSchema,
 	}
 }
-func flattenBackupDRManagementServerName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
+
 
 func flattenBackupDRManagementServerResourceResp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) map[string]interface{} {
 	if v == nil {
@@ -47,9 +45,6 @@ func flattenBackupDRManagementServerResource(v interface{}, d *schema.ResourceDa
 	transformed["name"] = flattenBackupDRManagementServerName(original["name"], d, config)
 	return transformed
 }
-func flattenBackupDRManagementServerType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
 
 func flattenBackupDRManagementServerNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
@@ -69,41 +64,6 @@ func flattenBackupDRManagementServerNetworks(v interface{}, d *schema.ResourceDa
 		})
 	}
 	return transformed
-}
-
-func flattenBackupDRManagementServerNetworksNetwork(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenBackupDRManagementServerNetworksPeeringMode(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-func flattenBackupDRManagementServerOauth2ClientId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenBackupDRManagementServerManagementUri(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return nil
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["web_ui"] =
-		flattenBackupDRManagementServerManagementUriWebUi(original["webUi"], d, config)
-	transformed["api"] =
-		flattenBackupDRManagementServerManagementUriApi(original["api"], d, config)
-	return []interface{}{transformed}
-}
-
-func flattenBackupDRManagementServerManagementUriWebUi(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
-}
-
-func flattenBackupDRManagementServerManagementUriApi(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
 }
 
 func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta interface{}) error {
