@@ -71,6 +71,13 @@ func flattenBackupDRManagementServerNetworks(v interface{}, d *schema.ResourceDa
 	return transformed
 }
 
+func flattenBackupDRManagementServerNetworksNetwork(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenBackupDRManagementServerNetworksPeeringMode(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
 func flattenBackupDRManagementServerOauth2ClientId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
@@ -127,7 +134,8 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	if err != nil {
 		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
-	resourceResponse := flattenBackupDRManagementServerResourceResp(res["managementServers"], d, config)
+	managementServersResponse := res["managementServers"]
+	resourceResponse := flattenBackupDRManagementServerResourceResp(managementServersResponse, d, config)
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
