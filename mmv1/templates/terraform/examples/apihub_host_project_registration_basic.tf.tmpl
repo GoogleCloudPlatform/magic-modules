@@ -1,0 +1,28 @@
+resource "google_project" "project" {
+    name       = "{{index $.Vars "project_id"}}"
+    project_id = "{{index $.Vars "project_id"}}"
+    org_id     = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
+    deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+    create_duration = "60s"
+    depends_on = [google_project.project]
+}
+
+# Enable API hub API
+resource "google_project_service" "apihub_service" {
+    project = google_project.project.project_id
+    service = "apihub.googleapis.com"
+    depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_apihub_host_project_registration" "{{$.PrimaryResourceId}}"{
+    project = google_project.project.project_id
+    location = "asia-south1"
+    host_project_registration_id = google_project.project.project_id
+    gcp_project = "projects/${google_project.project.project_id}"
+
+    depends_on = [google_project_service.apihub_service]
+}
