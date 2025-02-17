@@ -390,6 +390,75 @@ func TestAccComputeRegionBackendService_subsettingUpdate(t *testing.T) {
 }
 {{- end }}
 
+func TestAccComputeRegionBackendService_withLogConfig(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Test: Initial setup with minimal config
+				Config: testAccComputeRegionBackendService_withLogConfig(serviceName, checkName, 1.0, "INCLUDE_ALL_OPTIONAL"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test: Update to EXCLUDE_ALL_OPTIONAL mode
+				Config: testAccComputeRegionBackendService_withLogConfig(serviceName, checkName, 0.5, "EXCLUDE_ALL_OPTIONAL"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test: Update to CUSTOM mode with fields
+				Config: testAccComputeRegionBackendService_withLogConfigOptionalFields(serviceName, checkName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test: CUSTOM mode with empty fields
+				Config: testAccComputeRegionBackendService_withLogConfigCustomEmpty(serviceName, checkName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test: Minimum sample rate
+				Config: testAccComputeRegionBackendService_withLogConfig(serviceName, checkName, 0.0, "INCLUDE_ALL_OPTIONAL"),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test: Disable logging
+				Config: testAccComputeRegionBackendService_withLogConfigDisabled(serviceName, checkName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeRegionBackendService_ilbBasic_withUnspecifiedProtocol(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
@@ -1224,3 +1293,113 @@ resource "google_compute_region_security_policy" "policy" {
 `, serviceName, polLink, polName)
 }
 {{- end }}
+
+func testAccComputeRegionBackendService_withLogConfig(serviceName, checkName string, sampleRate float64, optionalMode string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  port_name             = "http"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  locality_lb_policy    = "ROUND_ROBIN"
+  
+  log_config {
+    enable      = true
+    sample_rate = %v
+    optional_mode = "%s"
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, sampleRate, optionalMode, checkName)
+}
+
+func testAccComputeRegionBackendService_withLogConfigOptionalFields(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  port_name             = "http"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  locality_lb_policy    = "ROUND_ROBIN"
+  
+  log_config {
+    enable      = true
+    sample_rate = 0.5
+    optional_mode = "CUSTOM"
+    optional_fields = [
+      "PROTOCOL",
+      "RESPONSE_CODE",
+      "REQUEST_METHOD",
+      "URL_MAP",
+      "BACKEND_TARGET"
+    ]
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, checkName)
+}
+
+func testAccComputeRegionBackendService_withLogConfigCustomEmpty(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  port_name             = "http"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  locality_lb_policy    = "ROUND_ROBIN"
+  
+  log_config {
+    enable      = true
+    sample_rate = 0.5
+    optional_mode = "CUSTOM"
+    optional_fields = []
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, checkName)
+}
+
+func testAccComputeRegionBackendService_withLogConfigDisabled(serviceName, checkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  health_checks         = [google_compute_health_check.health_check.self_link]
+  port_name             = "http"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  locality_lb_policy    = "ROUND_ROBIN"
+  
+  log_config {
+    enable = false
+  }
+}
+
+resource "google_compute_health_check" "health_check" {
+  name     = "%s"
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, checkName)
+}

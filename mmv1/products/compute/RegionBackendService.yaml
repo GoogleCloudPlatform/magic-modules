@@ -1297,6 +1297,7 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
       - name: 'sampleRate'
         type: Double
         description: |
@@ -1307,8 +1308,28 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          Specifies the fields to include in logging. This field can only be specified if logging is enabled for this backend service.
+        item_type:
+          type: String
   - name: 'network'
     type: ResourceRef
     description: |
