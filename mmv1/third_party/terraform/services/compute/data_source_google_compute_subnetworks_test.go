@@ -65,6 +65,7 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 				// Test schema
 				resource.TestCheckResourceAttrSet("data.google_compute_subnetworks.all", "subnetworks.1.purpose"),
 				// Test Content
+				resource.TestCheckResourceAttr("data.google_compute_subnetworks.all", "id", id),
 				resource.TestCheckResourceAttr("data.google_compute_subnetworks.one", "subnetworks.0.purpose", "PRIVATE"),
 	                        resource.TestCheckResourceAttr("data.google_compute_subnetworks.two", "subnetworks.0.purpose", "PRIVATE"),
 					),
