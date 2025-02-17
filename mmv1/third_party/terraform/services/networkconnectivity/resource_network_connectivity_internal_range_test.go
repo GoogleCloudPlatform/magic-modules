@@ -272,6 +272,8 @@ resource "google_network_connectivity_internal_range" "default" {
 	"10.4.32.0/24",
 	"10.6.0.0/24",
   ]
+  usage   = "FOR_VPC"
+  peering = "FOR_SELF"
 }
 
 resource "google_compute_network" "default" {
