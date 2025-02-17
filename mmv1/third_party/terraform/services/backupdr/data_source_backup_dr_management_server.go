@@ -19,7 +19,6 @@ func DataSourceGoogleCloudBackupDRService() *schema.Resource {
 	}
 }
 
-
 func flattenBackupDRManagementServerResourceResp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) map[string]interface{} {
 	if v == nil {
 		fmt.Printf("Interface is nil: %s", v)
@@ -46,24 +45,8 @@ func flattenBackupDRManagementServerResource(v interface{}, d *schema.ResourceDa
 	return transformed
 }
 
-func flattenBackupDRManagementServerNetworks(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return v
-	}
-	l := v.([]interface{})
-	transformed := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		original := raw.(map[string]interface{})
-		if len(original) < 1 {
-			// Do not include empty json objects coming back from the api
-			continue
-		}
-		transformed = append(transformed, map[string]interface{}{
-			"network":      flattenBackupDRManagementServerNetworksNetwork(original["network"], d, config),
-			"peering_mode": flattenBackupDRManagementServerNetworksPeeringMode(original["peeringMode"], d, config),
-		})
-	}
-	return transformed
+func flattenBackupDRManagementServerName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
 }
 
 func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta interface{}) error {
