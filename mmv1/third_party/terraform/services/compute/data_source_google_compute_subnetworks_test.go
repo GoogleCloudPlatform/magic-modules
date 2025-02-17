@@ -94,7 +94,7 @@ func testAccCheckGoogleSubnetworks_update(context map[string]interface{}) string
   project_id = "%s"
   region     = "%s"
   subnet_one = "%s"
-  subnet_two = "%s"	
+  subnet_two = "%s"
 }
 
 resource "google_compute_network" "this" {
@@ -241,7 +241,7 @@ locals {
   project_id = "%s"
   region     = "%s"
   subnet_one = "%s"
-  subnet_two = "%s"	
+  subnet_two = "%s"
 }
 
 resource "google_compute_network" "this" {
