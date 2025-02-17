@@ -13,7 +13,7 @@
 
 ---
 name: 'NetworkServices'
-display_name: 'Network services'
+display_name: 'Network Services'
 versions:
   - name: 'beta'
     base_url: 'https://networkservices.googleapis.com/v1/'

@@ -34,6 +34,9 @@ timeouts:
 custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/sleep.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'dialogflowcx_security_settings_basic'
     primary_resource_id: 'basic_security_settings'

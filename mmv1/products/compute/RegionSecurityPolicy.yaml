@@ -40,6 +40,15 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-south1"
+    - region: "us-west2"
+    - region: "us-west1"
+    - region: "asia-southeast1"
+    - region: "europe-west1"
+    - region: "southamerica-west1"
+    - region: "us-central1"
 examples:
   - name: 'region_security_policy_basic'
     primary_resource_id: 'region-sec-policy-basic'

@@ -40,6 +40,13 @@ custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
 schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-west2"
+    - region: "us-west1"
+    - region: "us-south1"
 examples:
   - name: 'certificate_manager_google_managed_certificate_dns'
     primary_resource_id: 'default'

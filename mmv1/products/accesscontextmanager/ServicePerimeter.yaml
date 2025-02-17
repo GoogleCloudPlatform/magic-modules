@@ -348,6 +348,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not affect behavior.
       - name: 'egressPolicies'
         type: Array
         description: |
@@ -384,6 +388,15 @@ properties:
                       - name: 'accessLevel'
                         type: String
                         description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                      - name: 'resource'
+                        type: String
+                        description: |
+                          A Google Cloud resource that is allowed to egress the perimeter.
+                          Requests from these resources are allowed to access data outside the perimeter.
+                          Currently only projects are allowed. Project format: `projects/{project_number}`.
+                          The resource may be in any Google Cloud organization, not just the
+                          organization that the perimeter is defined in. `*` is not allowed, the
+                          case of allowing all Google Cloud resources only is not supported.
                 - name: 'sourceRestriction'
                   type: Enum
                   description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
@@ -463,6 +476,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'spec'
     type: NestedObject
     description: |
@@ -657,6 +674,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not affect behavior.
       - name: 'egressPolicies'
         type: Array
         description: |
@@ -693,6 +714,15 @@ properties:
                       - name: 'accessLevel'
                         type: String
                         description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                      - name: 'resource'
+                        type: String
+                        description: |
+                          A Google Cloud resource that is allowed to egress the perimeter.
+                          Requests from these resources are allowed to access data outside the perimeter.
+                          Currently only projects are allowed. Project format: `projects/{project_number}`.
+                          The resource may be in any Google Cloud organization, not just the
+                          organization that the perimeter is defined in. `*` is not allowed, the
+                          case of allowing all Google Cloud resources only is not supported.
                 - name: 'sourceRestriction'
                   type: Enum
                   description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
@@ -770,6 +800,10 @@ properties:
                               description: |
                                 Value for permission should be a valid Cloud IAM permission for the
                                 corresponding `serviceName` in `ApiOperation`.
+            - name: 'title'
+              type: 'string'
+              description: |
+                Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'useExplicitDryRunSpec'
     type: Boolean
     description: |

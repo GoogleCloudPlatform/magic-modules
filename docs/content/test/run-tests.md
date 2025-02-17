@@ -60,15 +60,21 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
+    ```
+
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output (including API requests and responses) to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -95,12 +101,19 @@ aliases:
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
+    ```
+
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -289,6 +302,32 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
     ```bash
     TF_LOG=DEBUG TF_LOG_PATH=output.log TF_CLI_CONFIG_FILE="$HOME/tf-dev-override.tfrc" terraform apply
     ```
+
+### Run Tests with VCR Locally
+
+VCR tests record HTTP request/response interactions in cassettes and replay them in future runs without calling the real API.
+
+Running tests in `REPLAYING` mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
+
+It can also be helpful for debugging tests that seem to work locally, but fail in CI in replaying mode.
+   
+VCR is controlled via two variables:
+- `VCR_MODE`: `REPLAYING` or `RECORDING` mode 
+- `VCR_PATH`: Path where recorded cassettes are stored. 
+
+Ensure both variables are configured to properly trigger VCR tests locally.
+
+If you don't already have an existing cassette that's up to date, first do a run in `RECORDING` mode:
+   
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=RECORDING  make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
+
+Now run the same test again in `REPLAYING` mode:
+
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=REPLAYING make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
 
 ### Cleanup
 
