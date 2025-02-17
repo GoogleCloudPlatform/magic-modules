@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
+
 func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 	t.Parallel()
 	// Common resource configuration
@@ -54,13 +55,13 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 				resource.TestCheckResourceAttrSet("data.google_compute_subnetworks.all", "subnetworks.1.purpose"),
 				// Test Content
 				resource.TestCheckResourceAttr("data.google_compute_subnetworks.two", "subnetworks.0.purpose", "PEER_MIGRATION"),
-					),
+				),
 			},
 			{
 				ResourceName:            "google_compute_subnetwork.subnet_two",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"purpose", "PRIVATE"},				
+				ImportStateVerifyIgnore: []string{"purpose", "PRIVATE"},
 			},
 			{
 				Config: testAccCheckGoogleSubnetworks_update(context),
@@ -71,17 +72,17 @@ func TestAccDataSourceGoogleSubnetworks_update(t *testing.T) {
 				resource.TestCheckResourceAttr("data.google_compute_subnetworks.all", "id", id),
 				resource.TestCheckResourceAttr("data.google_compute_subnetworks.one", "subnetworks.0.purpose", "PRIVATE"),
 	                        resource.TestCheckResourceAttr("data.google_compute_subnetworks.two", "subnetworks.0.purpose", "PRIVATE"),
-					),
+				),
 			},
 			{
 				ResourceName:            "google_compute_subnetwork.subnet_two",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"purpose", "PRIVATE"},				
+				ImportStateVerifyIgnore: []string{"purpose", "PRIVATE"},
 			},
 		},
-	})			
-	
+	})
+
 }
 
 func testAccCheckGoogleSubnetworks_update(context map[string]interface{}) string {
@@ -159,7 +160,7 @@ data "google_compute_subnetworks" "no_attr" {
 		context["subnet_1"].(string),
 		context["subnet_2"].(string),
 	)
-}			
+}
 
 func TestAccDataSourceGoogleSubnetworks_basic(t *testing.T) {
 	t.Parallel()
