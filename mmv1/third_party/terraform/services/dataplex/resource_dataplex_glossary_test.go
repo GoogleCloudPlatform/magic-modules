@@ -2,6 +2,7 @@ package dataplex_test
 
 import (
 	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -10,36 +11,36 @@ import (
 
 func TestAccDataplexGlossary_update(t *testing.T) {
 	t.Parallel()
-	
+
 	context := map[string]interface{}{
-		"project_name": envvar.GetTestProjectFromEnv(),
+		"project_name":  envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckDataplexGlossaryDestroyProducer(t),
+		CheckDestroy:             testAccCheckDataplexGlossaryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataplexGlossary_full(context),
 			},
 			{
-				ResourceName: "google_dataplex_glossary.test_glossary",
-				ImportState: true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dataplex_glossary.test_glossary",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "glossary_id", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDataplexGlossary_update(context),
 			},
 			{
-				ResourceName: "google_dataplex_glossary.test_glossary",
-				ImportState: true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dataplex_glossary.test_glossary",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "glossary_id", "labels", "terraform_labels"},
 			},
-		}
+		},
 	})
 }
 
