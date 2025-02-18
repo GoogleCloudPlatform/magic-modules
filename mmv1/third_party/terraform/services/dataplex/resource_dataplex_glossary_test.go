@@ -3,15 +3,13 @@ package dataplex_test
 import (
 	"testing"
 
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataplexGlossary_dataplexGlossaryBasicExample(t *testing.T) {
+func TestAccDataplexGlossary_dataplexGlossaryBasic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -45,7 +43,7 @@ resource "google_dataplex_glossary" "glossary_test_id" {
 `, context)
 }
 
-func TestAccDataplexGlossary_dataplexGlossaryFullExample(t *testing.T) {
+func TestAccDataplexGlossary_dataplexGlossaryFull(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
