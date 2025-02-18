@@ -95,7 +95,7 @@ func TestAccWorkstationsWorkstationCluster_tags(t *testing.T) {
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "tags", "terraform_labels"},
 			},
 		},
 	})
