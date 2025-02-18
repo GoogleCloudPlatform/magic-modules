@@ -50,6 +50,8 @@ examples:
     min_version: 'beta'
     vars:
       workstation_cluster_name: 'workstation-cluster'
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
   - name: 'workstation_cluster_private'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -237,3 +239,4 @@ properties:
       "123/environment": "production",
       "123/costCenter": "marketing"
     min_version: 'beta'
+    ignore_read: true
