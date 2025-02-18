@@ -89,13 +89,22 @@ func TestAccWorkstationsWorkstationCluster_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
+				Config: testAccWorkstationsWorkstationCluster_workstationClusterTagsExample(context),
+			},
+			{
+				ResourceName:            "google_workstations_workstation_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
+			},
+			{
 				Config: testAccWorkstationsWorkstationCluster_tags(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "tags", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
 			},
 		},
 	})
