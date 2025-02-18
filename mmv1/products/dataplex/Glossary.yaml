@@ -82,27 +82,27 @@ properties:
     type: String
     description: |
        User specified ID of the glossary.
-    required: true
+    required: false
   - name: 'displayName'
     type: String
     description: |
       User friendly display name of the glossary. This is user-mutable. This will be same as the glossaryId, if not specified.
-    optional: true
+    required: false
   - name: 'description'
     type: String
     description: |
       The user-mutable description of the glossary.
-    optional: true
+    required: false
   - name: 'labels'
     type: Map(String)
     description: |
       User-defined labels for the Glossary.
-    optional: true
+    required: false
   - name: 'etag'
     type: String
     description: |
       Needed for resource freshness validation. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
-    optional: true
+    required: false
   - name: 'uid'
     type: String
     description: |
@@ -122,9 +122,9 @@ properties:
     type: Integer
     description: |
       The number of terms in the glossary.
-    optional: true
+    required: false
   - name: 'categoryCount'
     type: Integer
     description: |
       The number of categories in the glossary.
-    optional: true
+    required: false
