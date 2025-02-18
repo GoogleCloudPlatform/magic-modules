@@ -12,4 +12,5 @@ resource "google_storage_anywhere_cache" "cache" {
   bucket = google_storage_bucket.bucket.name
   zone = "us-central1-f"
   ttl = "3601s"
+  depends_on = [time_sleep.destroy_wait_5000_seconds]
 }

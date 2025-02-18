@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -131,13 +130,11 @@ func testSweepStorageBucket(region string) error {
 			continue
 		}
 
-		if strings.HasPrefix(id, "anywhere-cache-bucket") {
-			readyToDeleteBucket := disableAnywhereCacheIfAny(config, id)
-			if !readyToDeleteBucket {
-				log.Printf("[INFO][SWEEPER_LOG] Bucket %s has anywhere caches, requests have been made to backend to disable them, The bucket would be automatically deleted once caches are deleted from bucket", id)
-				bucketWithCaches++
-				continue
-			}
+		readyToDeleteBucket := disableAnywhereCacheIfAny(config, id)
+		if !readyToDeleteBucket {
+			log.Printf("[INFO][SWEEPER_LOG] Bucket %s has anywhere caches, requests have been made to backend to disable them, The bucket would be automatically deleted once caches are deleted from bucket", id)
+			bucketWithCaches++
+			continue
 		}
 
 		deleteUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s", id)

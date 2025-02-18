@@ -32,14 +32,12 @@ examples:
     primary_resource_id: 'cache'
     vars:
       bucket_name: 'bucket-name'
-    test_vars_overrides:
-      bucket_name: '"anywhere-cache-bucket" + acctest.RandString(t, 10)'
     external_providers: ["time"]
 identity:
   - bucket
   - anywhereCacheId
 custom_code:
-  custom_create: templates/terraform/custom_create/storage_anywhere_cache_custom_create.go.tmpl
+  post_create: templates/terraform/post_create/storage_anywhere_cache_post_create.go.tmpl
 autogen_async: false
 timeouts:
   insert_minutes: 240
