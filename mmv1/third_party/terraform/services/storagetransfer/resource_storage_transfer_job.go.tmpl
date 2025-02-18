@@ -304,7 +304,6 @@ func ResourceStorageTransferJob() *schema.Resource {
 						"log_actions": {
 							Type:     schema.TypeList,
 							Optional: true,
-							RequiredWith: []string{"logging_config.0.log_action_states"},
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
