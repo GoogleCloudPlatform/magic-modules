@@ -25,6 +25,7 @@ timeouts:
   update_minutes: 5
   delete_minutes: 5
 autogen_async: true
+import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}']
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -35,8 +36,10 @@ iam_policy:
   parent_resource_attribute: 'glossary_id'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary-id}}'
-    - '{{glossary-id}}'
+    [
+      'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}',
+      '{{glossary_id}}',
+    ]
 custom_code:
 examples:
   - name: 'dataplex_glossary_basic'
