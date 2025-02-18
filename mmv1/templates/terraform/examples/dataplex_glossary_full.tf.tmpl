@@ -1,6 +1,6 @@
-resource "google_dataplex_glossary" "<%= ctx[:primary_resource_id] %>" {
-  glossary_id = "<%= ctx[:vars]['glossary_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
+resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
+  glossary_id = "{{index $.Vars "glossary_name}}"
+  project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 
   labels = { "tag": "test-tf" }
