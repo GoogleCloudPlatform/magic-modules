@@ -497,6 +497,7 @@ resource "google_compute_region_disk" "regiondisk" {
 
   disk_encryption_key {
     raw_key_wo = "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+	raw_key_wo_version = 1
   }
 }
 `, diskName, diskName, diskName)
@@ -528,7 +529,7 @@ resource "google_compute_region_disk" "regiondisk" {
 
   disk_encryption_key {
     raw_key_wo = "ADFEFG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
-	new_keys_wo = true
+	raw_key_wo_version = 2
   }
 }
 `, diskName, diskName, diskName)
@@ -560,6 +561,7 @@ resource "google_compute_region_disk" "regiondisk" {
 
   disk_encryption_key {
     raw_key_wo = "ADFEFG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
+	raw_key_wo_version = 2
   }
 }
 `, diskName, diskName, diskName)

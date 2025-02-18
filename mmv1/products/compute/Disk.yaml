@@ -181,6 +181,7 @@ properties:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
         immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
       - name: 'rawKeyWoVersion'
@@ -188,6 +189,8 @@ properties:
         description: |
           Triggers update of write-only rawKey
         immutable: true
+        default_value: 0
+        ignore_read: true
       - name: 'rawKeyWo'
         type: String
         description: |
@@ -203,9 +206,12 @@ properties:
         description: |
           Triggers update of write-only rsaEncryptedKey
         immutable: true
+        default_value: 0
+        ignore_read: true
       - name: 'rsaEncryptedKey'
         type: String
         immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_rsa_key_flatten.go.tmpl'
         description: |
           Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
           customer-supplied encryption key to either encrypt or decrypt

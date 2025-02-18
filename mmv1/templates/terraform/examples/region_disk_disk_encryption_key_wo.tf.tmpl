@@ -16,6 +16,7 @@ resource "google_compute_disk" "disk" {
   zone  = "us-central1-a"
   disk_encryption_key {
     raw_key_wo = "{{index $.Vars "raw_key_data"}}"
+    raw_key_wo_version = 1
   }
 }
 
