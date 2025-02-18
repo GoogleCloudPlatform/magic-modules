@@ -7,8 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -27,7 +25,7 @@ func TestAccDataplexGlossary_dataplexGlossaryBasicExample(t *testing.T) {
 		CheckDestroy:             testAccCheckDataplexGlossaryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexGlossary_dataplexGlossaryBasicExample(context),
+				Config: testAccDataplexGlossary_dataplexGlossaryBasic(context),
 			},
 			{
 				ResourceName:            "google_dataplex_glossary.glossary_test_id",
@@ -39,7 +37,7 @@ func TestAccDataplexGlossary_dataplexGlossaryBasicExample(t *testing.T) {
 	})
 }
 
-func testAccDataplexGlossary_dataplexGlossaryBasicExample(context map[string]interface{}) string {
+func testAccDataplexGlossary_dataplexGlossaryBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_glossary" "glossary_test_id" {
   glossary_id = "tf-test-glossary-basic%{random_suffix}"
@@ -61,7 +59,7 @@ func TestAccDataplexGlossary_dataplexGlossaryFullExample(t *testing.T) {
 		CheckDestroy:             testAccCheckDataplexGlossaryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexGlossary_dataplexGlossaryFullExample(context),
+				Config: testAccDataplexGlossary_dataplexGlossaryFull(context),
 			},
 			{
 				ResourceName:            "google_dataplex_glossary.glossary_test_id_full",
@@ -73,7 +71,7 @@ func TestAccDataplexGlossary_dataplexGlossaryFullExample(t *testing.T) {
 	})
 }
 
-func testAccDataplexGlossary_dataplexGlossaryFullExample(context map[string]interface{}) string {
+func testAccDataplexGlossary_dataplexGlossaryFull(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_glossary" "glossary_test_id_full" {
   glossary_id = "tf-test-glossary-full%{random_suffix}"
