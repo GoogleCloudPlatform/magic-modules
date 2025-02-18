@@ -82,7 +82,7 @@ properties:
     type: String
     description: |
        User specified ID of the glossary.
-    required: false
+    required: true
   - name: 'displayName'
     type: String
     description: |
