@@ -5,7 +5,6 @@ go 1.23
 require (
 	cloud.google.com/go/bigtable v1.33.0
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.77.0
-	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dnaeon/go-vcr v1.0.1
 	github.com/gammazero/workerpool v0.0.0-20181230203049-86a96b5d5d92
@@ -41,7 +40,6 @@ require (
 require (
 	bitbucket.org/creachadair/stringset v0.0.8 // indirect
 	cel.dev/expr v0.19.0 // indirect
-	cel.dev/expr v0.16.2 // indirect
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.14.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
@@ -109,7 +107,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.32.0 // indirect
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
