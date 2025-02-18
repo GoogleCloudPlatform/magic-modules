@@ -2,6 +2,7 @@ resource "google_spanner_instance" "main" {
   config       = "regional-us-central1"
   display_name = "main-instance"
   num_nodes    = 1
+  edition     = "ENTERPRISE_PLUS"
 }
 
 resource "google_spanner_instance_partition" "partition" {
