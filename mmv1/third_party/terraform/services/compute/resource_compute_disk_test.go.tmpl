@@ -1010,32 +1010,6 @@ resource "google_compute_disk" "foobar" {
 `, diskName, diskType)
 }
 
-func testAccComputeDisk_basic_wo(diskName string, diskType string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%s"
-  image = data.google_compute_image.my_image.self_link
-  size  = 50
-  type  = "%s"
-  zone  = "us-central1-a"
-  disk_encryption_key {
-    raw_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
-    raw_key_wo_version = 1
-    rsa_encrypted_key_wo = "AGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0="
-	rsa_encrypted_key_wo_version = 1
-  }
-  labels = {
-    my-label = "my-label-value"
-  }
-}
-`, diskName, diskType)
-}
-
 func testAccComputeDisk_basic_updated_wo(diskName string, diskType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1050,10 +1024,8 @@ resource "google_compute_disk" "foobar" {
   type  = "%s"
   zone  = "us-central1-a"
   disk_encryption_key {
-    raw_key_wo = "U29tZSBvdGhlciB2YWxpZCBzdHJpbmc="
-    raw_key_wo_version = 2
-    rsa_encrypted_key_wo = "U29tZSBvdGhlciB2YWxpZCBzdHJpbmc="
-	rsa_encrypted_key_wo_version = 2
+    raw_key_wo = "DWw8Owgk6uhjgXXuATTZ1d9v9OwXXT8/lMYoZsblkM8="
+    raw_key_wo_version = 1
   }
   labels = {
     my-label = "my-label-value"
