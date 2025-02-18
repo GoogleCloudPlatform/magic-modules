@@ -3,3 +3,7 @@ resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
   project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 }
+
+data "google_project" "project" {
+
+}

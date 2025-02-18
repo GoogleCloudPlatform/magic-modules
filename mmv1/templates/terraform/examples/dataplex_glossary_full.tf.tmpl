@@ -7,3 +7,7 @@ resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
   display_name = "terraform glossary"
   description = "glossary created by Terraform"
 }
+
+data "google_project" "project" {
+
+}
