@@ -12,7 +12,7 @@ func TestAccAlloydbDatabaseClusterDatasourceConfig(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-cluster-ds"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -29,16 +29,6 @@ func TestAccAlloydbDatabaseClusterDatasourceConfig(t *testing.T) {
 
 func testAccAlloydbDatabaseClusterDatasourceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-
-  machine_config {
-    cpu_count = 2
-  }
-}
-
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
