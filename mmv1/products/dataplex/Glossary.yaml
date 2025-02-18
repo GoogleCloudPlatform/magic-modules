@@ -73,16 +73,6 @@ properties:
     description: |
       The resource name of the Glossary. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}
     output: true
-  - name: 'location'
-    type: String
-    description: |
-      The location for the glossary.
-    required: true
-  - name: 'glossaryId'
-    type: String
-    description: |
-       User specified ID of the glossary.
-    required: true
   - name: 'displayName'
     type: String
     description: |
