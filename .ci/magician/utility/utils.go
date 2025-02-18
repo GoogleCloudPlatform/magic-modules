@@ -96,3 +96,15 @@ func WriteToJson(data interface{}, path string) error {
 
 	return nil
 }
+
+func ReadFromJson(data interface{}, path string) error {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read data from file: %w", err)
+	}
+	err = json.Unmarshal(content, &data)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal data: %w", err)
+	}
+	return nil
+}
