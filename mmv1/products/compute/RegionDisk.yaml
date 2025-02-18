@@ -79,7 +79,6 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-disk'
-      raw_key_data: 'write_only_key'
       disk_name: 'my-disk'
       snapshot_name: 'my-snapshot'
   - name: 'region_disk_async'
@@ -142,6 +141,7 @@ properties:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
         immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
       - name: 'rawKeyWo'
