@@ -158,6 +158,8 @@ properties:
         type: Integer
         description: |
           Triggers update of write-only rawKey
+        ignore_read: true
+        default_value: 0
         immutable: true
       - name: 'sha256'
         type: String
