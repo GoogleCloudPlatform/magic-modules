@@ -52,6 +52,11 @@ examples:
       workstation_cluster_name: 'workstation-cluster'
       key_short_name: 'keyname'
       value_short_name: 'valuename'
+      org_id: '123456789'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'org_id': 'envvar.GetTestOrgFromEnv(t)'
   - name: 'workstation_cluster_private'
     primary_resource_id: 'default'
     min_version: 'beta'
