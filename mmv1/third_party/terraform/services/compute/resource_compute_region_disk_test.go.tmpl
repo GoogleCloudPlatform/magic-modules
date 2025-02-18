@@ -131,7 +131,7 @@ func TestAccComputeRegionDisk_diskEncryptionKeyWoUpdated(t *testing.T) {
 				ResourceName:      "google_compute_region_disk.regiondisk",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"disk_encryption_key.0.raw_key_wo_version", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeRegionDisk_diskEncryptionKeyWoUpdated(diskName),
@@ -146,7 +146,7 @@ func TestAccComputeRegionDisk_diskEncryptionKeyWoUpdated(t *testing.T) {
 				ResourceName:      "google_compute_region_disk.regiondisk",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"disk_encryption_key.0.raw_key_wo_version", "labels", "terraform_labels"},
 			},
 		},
 	})

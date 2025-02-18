@@ -867,7 +867,7 @@ func TestAccComputeDisk_update_wo(t *testing.T) {
 				ResourceName:      "google_compute_disk.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"raw_key_wo_version", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"disk_encryption_key.0.raw_key_wo_version", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeDisk_basic_updated_wo(diskName, diskType),
@@ -876,7 +876,7 @@ func TestAccComputeDisk_update_wo(t *testing.T) {
 				ResourceName:      "google_compute_disk.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"raw_key_wo_version", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"disk_encryption_key.0.raw_key_wo_version", "labels", "terraform_labels"},
 			},
 		},
 	})
