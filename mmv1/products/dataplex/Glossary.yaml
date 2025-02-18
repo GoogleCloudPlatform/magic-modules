@@ -17,7 +17,7 @@ description: |
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/glossaries?glossary_id={{glossary_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/glossaries?glossaryId={{glossary_id}}'
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
