@@ -18,7 +18,7 @@ description: |
   that can be used to partition data and processing capacity within an instance.
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/spanner/docs'
+    'Official Documentation': 'https://cloud.google.com/spanner/docs/geo-partitioning'
   api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.instancePartitions'
 
 id_format: 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
@@ -32,12 +32,23 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 import_format:
   - 'projects/{{project}}/instances/{{instance}}/instancePartitions/{{name}}'
   - '{{project}}/{{instance}}/{{name}}'
   - '{{instance}}/{{name}}'
-
+examples:
+  - name: 'spanner_instance_partition_basic'
+    primary_resource_id: 'partition'
+    vars:
+      partition_name: 'test-partition'
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: 'templates/terraform/encoders/spanner_instance_partition.go.tmpl'
   pre_update: 'templates/terraform/pre_update/spanner_instance_partition.go.tmpl'

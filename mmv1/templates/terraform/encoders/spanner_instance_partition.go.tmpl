@@ -1,7 +1,3 @@
-// Temp Logic to accommodate autoscaling_config, processing_units and num_nodes
-if obj["processingUnits"] == nil && obj["nodeCount"] == nil {
-	obj["nodeCount"] = 1
-}
 // Wrap the request body in an instancePartition field
 wrapped := make(map[string]interface{})
 wrapped["instancePartitionId"] = obj["name"]

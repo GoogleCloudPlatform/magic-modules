@@ -1,12 +1,11 @@
 resource "google_spanner_instance" "main" {
-  name         = "instance-${local.name_suffix}"
   config       = "regional-us-central1"
   display_name = "main-instance"
   num_nodes    = 1
 }
 
 resource "google_spanner_instance_partition" "partition" {
-  name         = "partition-${local.name_suffix}"
+  name         = "{{index $.Vars "partition_name"}}"
   instance     = google_spanner_instance.main.name
   config       = "regional-us-central1"
   display_name = "test-spanner-partition"

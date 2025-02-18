@@ -1,11 +1,9 @@
 package spanner_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -31,6 +29,38 @@ func TestAccSpannerInstancePartition_basic(t *testing.T) {
 			},
 			{
 				Config: testAccSpannerInstancePartition_update(context),
+			},
+			{
+				ResourceName:      "google_spanner_instance_partition.partition",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstancePartition_processingUnits(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstancePartitionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstancePartition_processingUnits(context),
+			},
+			{
+				ResourceName:      "google_spanner_instance_partition.partition",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccSpannerInstancePartition_processingUnitsUpdate(context),
 			},
 			{
 				ResourceName:      "google_spanner_instance_partition.partition",
@@ -79,21 +109,40 @@ resource "google_spanner_instance_partition" "partition" {
 `, context)
 }
 
-func testAccCheckSpannerInstancePartitionDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := acctest.GoogleProviderConfig(t)
+func testAccSpannerInstancePartition_processingUnits(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name             = "tf-test-spanner-main-%{random_suffix}"
+  config           = "nam6"
+  display_name     = "main-instance"
+  processing_units = 1000
+}
 
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_spanner_instance_partition" {
-				continue
-			}
+resource "google_spanner_instance_partition" "partition" {
+  name             = "tf-test-partition-%{random_suffix}"
+  instance         = google_spanner_instance.main.name
+  config           = "regional-us-central1"
+  display_name     = "test-spanner-partition"
+  processing_units = 1000
+}
+`, context)
+}
 
-			_, err := config.NewSpannerClient(config.UserAgent).Projects.Instances.InstancePartitions.Get(rs.Primary.ID).Do()
-			if err == nil {
-				return fmt.Errorf("Spanner instance partition still exists")
-			}
-		}
+func testAccSpannerInstancePartition_processingUnitsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name             = "tf-test-spanner-main-%{random_suffix}"
+  config           = "nam6"
+  display_name     = "main-instance"
+  processing_units = 1000
+}
 
-		return nil
-	}
+resource "google_spanner_instance_partition" "partition" {
+  name             = "tf-test-partition-%{random_suffix}"
+  instance         = google_spanner_instance.main.name
+  config           = "regional-us-central1"
+  display_name     = "updated-spanner-partition"
+  processing_units = 2000
+}
+`, context)
 }
