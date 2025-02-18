@@ -94,7 +94,7 @@ properties:
       The user-mutable description of the glossary.
     required: false
   - name: 'labels'
-    type: Map(String)
+    type: KeyValueLabels
     description: |
       User-defined labels for the Glossary.
     required: false
