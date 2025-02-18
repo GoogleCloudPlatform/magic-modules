@@ -36,3 +36,40 @@ func TestMaintenanceVersionDiffSuppress(t *testing.T) {
 		})
 	}
 }
+
+func TestDatabaseVersionDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New       string
+		ShouldSuppress bool
+	}{
+		"both old and new MySQL 8.0 versions should suppress diff": {
+			Old:            "MYSQL_8_0_36.R20250213.00_00",
+			New:            "MYSQL_8_0_39.R20250213.00_00",
+			ShouldSuppress: true,
+		},
+		"old MySQL 5.x version with new MySQL 8.0 version should not suppress diff": {
+			Old:            "MYSQL_5_7.R20250213.00_00",
+			New:            "MYSQL_8_0_31.R20250213.00_00",
+			ShouldSuppress: false,
+		},
+		"both old and new MySQL 5.x versions should not suppress diff": {
+			Old:            "MYSQL_5_6.R20250213.00_00",
+			New:            "MYSQL_5_7.R20250213.00_00",
+			ShouldSuppress: false,
+		},
+		"non MySQL versions should not suppress diff": {
+			Old:            "POSTGRES_14.R20250213.00_00",
+			New:            "POSTGRES_15.R20250213.00_00",
+			ShouldSuppress: false,
+		},
+	}
+
+	for testNumber, testCase := range cases {
+		t.Run(testNumber, func(t *testing.T) {
+			t.Parallel()
+			if databaseVersionDiffSuppress("version", testCase.Old, testCase.New, nil) != testCase.ShouldSuppress {
+				t.Fatalf("%q => %q expect DiffSuppress to return %t", testCase.Old, testCase.New, testCase.ShouldSuppress)
+			}
+		})
+	}
+}
