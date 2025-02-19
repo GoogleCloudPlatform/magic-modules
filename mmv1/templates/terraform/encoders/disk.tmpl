@@ -51,18 +51,21 @@ if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
 {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); rawKey.Type().Equals(cty.String) && !rawKey.IsNull() {
+if rawKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); diags.HasError() {
+	return nil, fmt.Errorf("error encoding raw_key_wo: %s", diags)
+} else if rawKey.IsKnown() && !rawKey.IsNull() {
 	obj["diskEncryptionKey"] = map[string]interface{}{
 		"rawKey": rawKey.AsString(),
 	}
 }
 
-if rawKey, _ := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); rawKey.Type().Equals(cty.String) && !rawKey.IsNull() {
+if rsaEncryptedKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); diags.HasError() {
+	return nil, fmt.Errorf("error encoding rsa_encrypted_key_wo: %s", diags)
+} else if rsaEncryptedKey.IsKnown() && !rsaEncryptedKey.IsNull() {
 	obj["diskEncryptionKey"] = map[string]interface{}{
-		"rsaEncryptedKey": rawKey.AsString(),
+		"rsaEncryptedKey": rsaEncryptedKey.AsString(),
 	}
 }
-
 {{- end }}
 
 return obj, nil
