@@ -14,7 +14,7 @@ steps:
     #   waitFor: ["collect-nightly-test-status"]
     #   args:
     #     - 'create-test-failure-ticket'
-    # - name: 'gcr.io/graphite-docker-images/go-plus'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       id: manage-test-failure-ticket
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       secretEnv: ["GITHUB_TOKEN"]
