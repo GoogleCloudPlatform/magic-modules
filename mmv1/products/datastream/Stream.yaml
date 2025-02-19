@@ -1226,7 +1226,7 @@ properties:
                     immutable: true
           - name: 'blmtConfig'
             type: NestedObject
-            description: 'BLMT Configuration for BigQuery streams.'
+            description: 'BigLake Managed Tables configuration for BigQuery streams.'
             properties:
               - name: 'bucket'
                 type: String
