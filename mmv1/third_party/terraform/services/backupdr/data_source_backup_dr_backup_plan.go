@@ -1,11 +1,10 @@
 package backupdr
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
-    "fmt"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-    "github.com/hashicorp/terraform-provider-google/google/tpgresource"
-    transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func DataSourceGoogleCloudBackupDRBackupPlan() *schema.Resource {
@@ -50,4 +49,3 @@ func dataSourceGoogleCloudBackupDRBackupPlanRead(d *schema.ResourceData, meta in
 
 	return nil
 }
-{{- end }}
