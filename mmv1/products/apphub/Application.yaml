@@ -29,6 +29,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+autogen_status: QXBwbGljYXRpb24=
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -40,6 +41,11 @@ custom_code:
   constants: 'templates/terraform/constants/apphub_application.go.tmpl'
 custom_diff:
   - 'apphubApplicationCustomizeDiff'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "global"
 examples:
   - name: 'apphub_application_basic'
     primary_resource_id: 'example'

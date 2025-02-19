@@ -67,11 +67,15 @@ If you are using Terraform on your workstation we recommend that you install
 as a primary authentication method. You can enable ADCs by running the command
 `gcloud auth application-default login`.
 
+<!-- 
+TODO: quota project is not currently read from ADC file b/360405077#comment8
+
 Google Cloud reads the quota project for requests will be read automatically
 from the `core/project` value. You can override this project by specifying the
 `--project` flag when running `gcloud auth application-default login`. `gcloud`
 should return this message if you have set the correct billing project:
-`Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.`
+`Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.` 
+-->
 
 ### Running Terraform on Google Cloud
 
@@ -177,19 +181,23 @@ variable.
 
 ## Quota Management Configuration
 
-* `user_project_override` - (Optional) Defaults to `false`. Controls the quota
-project used in requests to GCP APIs for the purpose of preconditions, quota,
-and billing. If `false`, the quota project is determined by the API and may be
-the project associated with your credentials, or the resource project. If `true`,
-most resources in the provider will explicitly supply their resource project, as
-described in their documentation. Otherwise, a `billing_project` value must be
-supplied. Alternatively, this can be specified using the `USER_PROJECT_OVERRIDE`
-environment variable.
+* `user_project_override` - (Optional) Defaults to `false`. Controls the
+[quota project](https://cloud.google.com/docs/quotas/quota-project) used
+in requests to GCP APIs for the purpose of preconditions, quota, and
+billing. If `false`, the quota project is determined by the API and may
+be the project associated with your credentials for a
+[client-based API](https://cloud.google.com/docs/quotas/quota-project#project-client-based),
+or the resource project for a
+[resource-based API](https://cloud.google.com/docs/quotas/quota-project#project-resource-based).
+If `true`, most resources in the provider will explicitly supply their resource
+project, as described in their documentation. Otherwise, a `billing_project`
+value must be supplied. Alternatively, this can be specified using the
+`USER_PROJECT_OVERRIDE` environment variable.
 
 Service account credentials are associated with the project the service account
 was created in. Credentials that come from the gcloud tool are associated with a
 project owned by Google. In order to properly use credentials that come from
-gcloud with Terraform, it is recommended to set this property to true.
+gcloud with Terraform, it is recommended to set this property to `true`.
 
 `user_project_override` uses the `X-Goog-User-Project`
 [system parameter](https://cloud.google.com/apis/docs/system-parameters). When
@@ -339,8 +347,8 @@ provider "google" {
 ```
 
 Custom endpoints are an advanced feature. To determine the possible values you
-can set, consult the implementation in [provider.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/provider.go)
-and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/config.go).
+can set, consult the implementation in [provider.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/provider/provider.go)
+and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/transport/config.go).
 
 Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without

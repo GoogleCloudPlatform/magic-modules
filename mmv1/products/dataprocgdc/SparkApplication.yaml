@@ -51,6 +51,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
   - name: "dataprocgdc_sparkapplication"
     primary_resource_id: "spark-application"
     vars:
@@ -59,6 +60,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
   - name: "dataprocgdc_sparkapplication_pyspark"
     primary_resource_id: "spark-application"
     vars:
@@ -66,6 +68,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
   - name: "dataprocgdc_sparkapplication_sparkr"
     primary_resource_id: "spark-application"
     vars:
@@ -73,6 +76,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
   - name: "dataprocgdc_sparkapplication_sparksql"
     primary_resource_id: "spark-application"
     vars:
@@ -80,6 +84,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
   - name: "dataprocgdc_sparkapplication_sparksql_query_file"
     primary_resource_id: "spark-application"
     vars:
@@ -87,6 +92,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20418
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications?sparkApplicationId={{spark_application_id}}
 self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
@@ -94,6 +100,7 @@ id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{servic
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceInstances/{{serviceinstance}}/sparkApplications/{{spark_application_id}}
 autogen_async: true
+autogen_status: U3BhcmtBcHBsaWNhdGlvbg==
 properties:
   - name: pysparkApplicationConfig
     type: NestedObject

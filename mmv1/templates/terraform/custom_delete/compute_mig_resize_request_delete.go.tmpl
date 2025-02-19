@@ -19,8 +19,9 @@ if err != nil {
 	return err
 }
 
-// Get current state (accepted or not) and delete
-if d.Get("state") == "ACCEPTED" {
+// If a resize request is in the CREATING or ACCEPTED state, it must be canceled before it can be
+// deleted. If a resize request is NOT in any of the mentioned state, it can be directly deleted.
+if d.Get("state") == "CREATING" || d.Get("state") == "ACCEPTED" {
 	// cancel resize request
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
@@ -55,7 +56,7 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 })
 
 err = ComputeOperationWaitTime(
-config, res, project, "Cancelling the resize request", userAgent,
+config, res, project, "Deleting the resize request", userAgent,
 d.Timeout(schema.TimeoutDelete))
 
 

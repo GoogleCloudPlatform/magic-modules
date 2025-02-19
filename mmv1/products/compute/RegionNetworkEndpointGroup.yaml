@@ -44,6 +44,11 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "asia-northeast3"
 examples:
   - name: 'region_network_endpoint_group_functions'
     primary_resource_id: 'function_neg'
@@ -167,7 +172,7 @@ properties:
     type: NestedObject
     description: |
       This field is only used for PSC NEGs.
-
+    default_from_api: true
     properties:
       - name: 'producerPort'
         type: String

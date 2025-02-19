@@ -27,6 +27,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us"
+    - region: "eu"
 examples:
   - name: 'documentai_processor'
     primary_resource_id: 'processor'
