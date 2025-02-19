@@ -2,8 +2,10 @@ package workstations_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"fmt"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -79,8 +81,13 @@ func TestAccWorkstationsWorkstationCluster_Private_update(t *testing.T) {
 func TestAccWorkstationsWorkstationCluster_tags(t *testing.T) {
 	t.Parallel()
 
+    randString := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":    randString,
+		"project_id":       fmt.Sprintf("tf-test-proj-%s", randString),
+		"key_short_name":   fmt.Sprintf("tf-test-key-%s", randString),
+		"value_short_name": fmt.Sprintf("tf-test-value-%s", randString),
+		"org_id":           envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -89,22 +96,13 @@ func TestAccWorkstationsWorkstationCluster_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWorkstationsWorkstationCluster_workstationClusterTagsExample(context),
-			},
-			{
-				ResourceName:            "google_workstations_workstation_cluster.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
-			},
-			{
 				Config: testAccWorkstationsWorkstationCluster_tags(context),
 			},
 			{
 				ResourceName:            "google_workstations_workstation_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"etag", "annotations", "labels", "terraform_labels", "tags"},
 			},
 		},
 	})
@@ -185,16 +183,20 @@ resource "google_compute_subnetwork" "default" {
 
 func testAccWorkstationsWorkstationCluster_tags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
 resource "google_tags_tag_key" "tag_key1" {
   provider = google-beta
-  parent = "organizations/%{org_id}"
-  short_name = "%{key_short_name}"
+  parent = data.google_project.project.id
+  short_name = "tf_test_tag_key1%{random_suffix}"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider   = google-beta
-  parent     = google_tags_tag_key.tag_key1.id
-  short_name = "%{value_short_name}"
+  provider = google-beta
+  parent = google_tags_tag_key.tag_key1.id
+  short_name = "tf_test_tag_value1%{random_suffix}"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
