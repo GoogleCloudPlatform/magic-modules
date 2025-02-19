@@ -17,6 +17,7 @@ package provider
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -77,7 +78,9 @@ func (tgc TerraformGoogleConversionV6) CompileTfToCaiCommonFiles(outputFolder st
 	log.Printf("Compiling common files for tgc v6 tfplan2cai.")
 
 	resourceConverters := map[string]string{
-		"tfplan2cai/converters/resource_converters.go": "templates/tgc_v6/tfplan2cai/resource_converters.go.tmpl",
+		"tfplan2cai/converters/resource_converters.go":                       "templates/tgc_v6/tfplan2cai/resource_converters.go.tmpl",
+		"tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 	}
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
@@ -129,6 +132,53 @@ func (tgc TerraformGoogleConversionV6) CopyCommonFiles(outputFolder string, gene
 
 	if err := copy.Copy("third_party/tgc_v6", outputFolder); err != nil {
 		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
+	}
+
+	tgc.CopyTfToCaiCommonFiles(outputFolder)
+	tgc.CopyCaiToHclCommonFiles(outputFolder)
+}
+
+func (tgc TerraformGoogleConversionV6) CopyTfToCaiCommonFiles(outputFolder string) {
+	resourceConverters := map[string]string{
+		"tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
+		"tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+	}
+	tgc.CopyFileList(outputFolder, resourceConverters)
+}
+
+func (tgc TerraformGoogleConversionV6) CopyCaiToHclCommonFiles(outputFolder string) {
+	resourceConverters := map[string]string{}
+	tgc.CopyFileList(outputFolder, resourceConverters)
+}
+
+func (tgc TerraformGoogleConversionV6) CopyFileList(outputFolder string, files map[string]string) {
+	for target, source := range files {
+		targetFile := filepath.Join(outputFolder, target)
+		targetDir := filepath.Dir(targetFile)
+
+		if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating output directory %v: %v", targetDir, err))
+		}
+		// If we've modified a file since starting an MM run, it's a reasonable
+		// assumption that it was this run that modified it.
+		if info, err := os.Stat(targetFile); !errors.Is(err, os.ErrNotExist) && tgc.StartTime.Before(info.ModTime()) {
+			log.Fatalf("%s was already modified during this run at %s", targetFile, info.ModTime().String())
+		}
+
+		sourceByte, err := os.ReadFile(source)
+		if err != nil {
+			log.Fatalf("Cannot read source file %s while copying: %s", source, err)
+		}
+
+		err = os.WriteFile(targetFile, sourceByte, 0644)
+		if err != nil {
+			log.Fatalf("Cannot write target file %s while copying: %s", target, err)
+		}
+
+		// Replace import path based on version (beta/alpha)
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".mod" {
+			tgc.replaceImportPath(outputFolder, target)
+		}
 	}
 }
 
