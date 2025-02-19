@@ -1,0 +1,11 @@
+resource "google_compute_region_ssl_policy" "default" {
+  name            = "{{ ssl_policy_name }}"
+  region          = "us-central1"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_0"
+}
+
+data "google_compute_region_ssl_policy" "my-ssl-policy" {
+  name    = google_compute_region_ssl_policy.default.name
+  region  = google_compute_region_ssl_policy.default.region
+} 
