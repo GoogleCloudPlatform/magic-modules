@@ -1,4 +1,4 @@
-# Copyright 2025 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,32 +12,30 @@
 # limitations under the License.
 
 ---
-name: ReleaseChannelSettingBinding
-api_resource_type_kind: SettingBinding
-description: The resource for managing ReleaseChannel setting bindings for Admin Control.
+name: DataSharingWithGoogleSettingBinding
+description: The resource for managing DataSharingWithGoogle setting bindings for Admin Control.
 references:
   guides:
     'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
-base_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings
-self_link: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings/{{setting_binding_id}}
-create_url: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
-id_format: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings/{{setting_binding_id}}
+min_version: 'beta'
+base_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings
+self_link: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
+create_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
 update_verb: PATCH
 update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}/settingBindings/{{setting_binding_id}}
-mutex: projects/{{project}}/locations/{{location}}/releaseChannelSettings/{{release_channel_setting_id}}
+  - projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}/settingBindings/{{setting_binding_id}}
+mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
 examples:
-  - name: gemini_release_channel_setting_binding_basic
+  - name: gemini_data_sharing_with_google_setting_binding_basic
+    min_version: 'beta'
     primary_resource_id: example
     exclude_test: true
     vars:
-      release_channel_setting_id: ls-tf1
+      data_sharing_with_google_setting_id: ls-tf1
       setting_binding_id: ls-tf1b1
       target: projects/980109375338
-    test_env_vars:
-      org_id: "ORG_ID"
-      billing_account: "BILLING_ACCT"
 autogen_async: true
 async:
   operation:
@@ -54,14 +52,14 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: U2V0dGluZ0JpbmRpbmdCeVByb2plY3RBbmRMb2NhdGlvbkFuZFJlbGVhc2VjaGFubmVsc2V0dGluZw==
+autogen_status: U2V0dGluZ0JpbmRpbmc=
 parameters:
   - name: location
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
-  - name: releaseChannelSettingId
+  - name: dataSharingWithGoogleSettingId
     type: String
     description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
@@ -70,16 +68,23 @@ parameters:
   - name: settingBindingId
     type: String
     description: |-
-      Id of the setting binding.
+      Required. Id of the setting binding.
     immutable: true
     url_param_only: true
     required: true
 properties:
+  - name: product
+    type: Enum
+    description: |-
+      Product type of the setting binding.
+    enum_values:
+      - 'GEMINI_CLOUD_ASSIST'
+      - 'GEMINI_CODE_ASSIST'
   - name: name
     type: String
     description: |-
       Identifier. Name of the resource.
-      Format:projects/{project}/locations/{location}/releaseChannelSettings/{setting}/settingBindings/{setting_binding}
+      Format:projects/{project}/locations/{location}/dataSharingWithGoogleSettings/{setting}/settingBindings/{setting_binding}
     output: true
   - name: createTime
     type: String
@@ -96,10 +101,3 @@ properties:
     type: String
     description: Target of the binding.
     required: true
-  - name: product
-    type: Enum
-    description: |-
-      Product type of the setting binding.
-    enum_values:
-      - 'GEMINI_CLOUD_ASSIST'
-      - 'GEMINI_CODE_ASSIST'
