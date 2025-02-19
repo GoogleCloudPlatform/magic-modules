@@ -1,10 +1,9 @@
 package backupdr_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlan_basic(t *testing.T) {
@@ -15,7 +14,7 @@ func TestAccDataSourceGoogleBackupDRBackupPlan_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckBackupDRBackupPlanDestroyProducer(t),
+		CheckDestroy:             testAccCheckBackupDRBackupPlanDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlan_basic(context),
@@ -79,4 +78,3 @@ data "google_backup_dr_backup_plan" "fetch-bp" {
   }
 `, context)
 }
-{{- end }}
