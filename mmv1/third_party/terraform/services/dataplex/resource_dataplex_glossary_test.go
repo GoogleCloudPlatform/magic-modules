@@ -1,5 +1,7 @@
 package dataplex_test
 
+{{- if ne .TargetVersionName "ga" }}
+
 import (
 	"testing"
 
@@ -67,3 +69,5 @@ resource "google_dataplex_glossary" "glossary_test_id_full" {
 }
 `, context)
 }
+
+{{- end }}
