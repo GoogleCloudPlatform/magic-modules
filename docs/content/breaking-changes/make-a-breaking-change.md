@@ -56,6 +56,11 @@ same and new behavior can be enabled with a flag:
 
 * Major resource-level or field-level behavioural changes
 
+Other types of changes can be made:
+
+* Changing a List to a Set where the field is unordered and the order
+  returned from the API changes unpredictably.
+
 ## In the {{% param "majorVersion" %}} major release
 
 The general process for contributing a breaking change to the

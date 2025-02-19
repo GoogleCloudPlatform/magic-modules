@@ -57,9 +57,7 @@ For more information, see
 * <a name="resource-schema-field-removal-or-rename"></a>Removing or renaming a field 
 * <a name="field-changing-type"></a> Changing field output type
   * Between primitive types, like changing a String to an Integer
-  * Between complex types like changing a List to a Set. Note that List -> Set
-    can be considered non-breaking if the field is unordered and the order
-    returned from the API changes unpredictably.
+  * Between complex types like changing a List to a Set.
   * Changing the field type between primitive and complex data
     types is not possible. For this scenario, field renames are preferred.
 * <a name="field-optional-to-required"></a> Making an optional field required or adding a new required field
