@@ -3600,6 +3600,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredDisableL4LbFirewallReconciliation: enabled,
+				ForceSendFields:                          []string{"DesiredDisableL4LbFirewallReconciliation"},
 			},
 		}
 		updateF := func() error {
