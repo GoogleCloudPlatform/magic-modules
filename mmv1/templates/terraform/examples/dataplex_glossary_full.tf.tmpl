@@ -2,8 +2,12 @@ resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
   glossary_id = "{{index $.Vars "glossary_name"}}"
   location     = "us-central1"
   project      = "{{index $.TestEnvVars "project_name"}}"
-  
+
   labels = { "tag": "test-tf" }
   display_name = "terraform glossary"
   description = "glossary created by Terraform"
+}
+
+data "google_project" "project" {
+
 }
