@@ -14,7 +14,7 @@ if err := d.Set("anywhere_cache_id", anywhereCacheID); err != nil {
 }
 
 // This may have caused the ID to update - update it if so.
-id, err = tpgresource.ReplaceVars(d, config, "{{"b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}"}}")
+id, err = tpgresource.ReplaceVars(d, config, "{{"{{bucket}}/{{anywhere_cache_id}}"}}")
 if err != nil {
     return fmt.Errorf("Error constructing id: %s", err)
 }
