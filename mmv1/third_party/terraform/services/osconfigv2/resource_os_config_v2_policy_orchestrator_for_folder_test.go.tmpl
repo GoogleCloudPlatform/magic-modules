@@ -1,54 +1,61 @@
 package osconfigv2_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccOSConfigV2PolicyOrchestratorForOrganization_basic(t *testing.T) {
+func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckOSConfigV2PolicyOrchestratorForOrganizationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOSConfigV2PolicyOrchestratorForOrganization_basic(context),
+				Config: testAccOSConfigV2PolicyOrchestratorForFolder_basic(context),
 			},
 			{
-				ResourceName:            "google_os_config_v2_policy_orchestrator_for_organization.policy_orchestrator_for_organization",
+				ResourceName:            "google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "organization_id", "policy_orchestrator_id", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"folder_id", "labels", "policy_orchestrator_id", "terraform_labels"},
+			},
+			{
+				Config: testAccOSConfigV2PolicyOrchestratorForFolder_update(context),
+			},
+			{
+				ResourceName:            "google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"folder_id", "labels", "policy_orchestrator_id", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccOSConfigV2PolicyOrchestratorForOrganization_basic(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestratorForFolder_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orchestrator_for_organization" {
+resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrator_for_folder" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po-org%{random_suffix}"
-    organization_id = "%{org_id}"
+    policy_orchestrator_id = "tf-test-test-po-folder%{random_suffix}"
+    folder_id = "1087380508887"
     
     state = "ACTIVE"
     action = "UPSERT"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource-org%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy-org%{random_suffix}"
+                id = "tf-test-test-os-policy-folder%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -78,22 +85,22 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orch
 `, context)
 }
 
-func testAccOSConfigV2PolicyOrchestratorForOrganization_update(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestratorForFolder_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orchestrator_for_organization" {
+resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrator_for_folder" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po-org%{random_suffix}"
-    organization_id = "%{org_id}"
+    policy_orchestrator_id = "tf-test-test-po-folder%{random_suffix}"
+    folder_id = "1087380508887"
     
     state = "STOPPED"
     action = "DELETE"
     description = "Updated description"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource-org%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy-org%{random_suffix}"
+                id = "tf-test-test-os-policy-folder%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -122,3 +129,4 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orch
 }
 `, context)
 }
+{{ end }}

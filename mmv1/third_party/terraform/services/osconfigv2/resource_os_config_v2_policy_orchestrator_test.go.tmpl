@@ -1,4 +1,5 @@
 package osconfigv2_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -7,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
+func TestAccOSConfigV2PolicyOrchestrator_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -19,42 +20,41 @@ func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOSConfigV2PolicyOrchestratorForFolder_basic(context),
+				Config: testAccOSConfigV2PolicyOrchestrator_basic(context),
 			},
 			{
-				ResourceName:            "google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder",
+				ResourceName:            "google_os_config_v2_policy_orchestrator.policy_orchestrator",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder_id", "labels", "policy_orchestrator_id", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "policy_orchestrator_id", "terraform_labels"},
 			},
 			{
-				Config: testAccOSConfigV2PolicyOrchestratorForFolder_update(context),
+				Config: testAccOSConfigV2PolicyOrchestrator_update(context),
 			},
 			{
-				ResourceName:            "google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder",
+				ResourceName:            "google_os_config_v2_policy_orchestrator.policy_orchestrator",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"folder_id", "labels", "policy_orchestrator_id", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "policy_orchestrator_id", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccOSConfigV2PolicyOrchestratorForFolder_basic(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestrator_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrator_for_folder" {
+resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po-folder%{random_suffix}"
-    folder_id = "1087380508887"
+    policy_orchestrator_id = "tf-test-test-po%{random_suffix}"
     
     state = "ACTIVE"
     action = "UPSERT"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy-folder%{random_suffix}"
+                id = "tf-test-test-os-policy%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -84,22 +84,21 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
 `, context)
 }
 
-func testAccOSConfigV2PolicyOrchestratorForFolder_update(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestrator_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrator_for_folder" {
+resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po-folder%{random_suffix}"
-    folder_id = "1087380508887"
+    policy_orchestrator_id = "tf-test-test-po%{random_suffix}"
     
     state = "STOPPED"
     action = "DELETE"
     description = "Updated description"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy-folder%{random_suffix}"
+                id = "tf-test-test-os-policy%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -128,3 +127,4 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
 }
 `, context)
 }
+{{ end }}

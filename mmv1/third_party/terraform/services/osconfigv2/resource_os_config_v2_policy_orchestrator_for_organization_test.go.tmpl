@@ -1,59 +1,55 @@
 package osconfigv2_test
+{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccOSConfigV2PolicyOrchestrator_basic(t *testing.T) {
+func TestAccOSConfigV2PolicyOrchestratorForOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckOSConfigV2PolicyOrchestratorForOrganizationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOSConfigV2PolicyOrchestrator_basic(context),
+				Config: testAccOSConfigV2PolicyOrchestratorForOrganization_basic(context),
 			},
 			{
-				ResourceName:            "google_os_config_v2_policy_orchestrator.policy_orchestrator",
+				ResourceName:            "google_os_config_v2_policy_orchestrator_for_organization.policy_orchestrator_for_organization",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "policy_orchestrator_id", "terraform_labels"},
-			},
-			{
-				Config: testAccOSConfigV2PolicyOrchestrator_update(context),
-			},
-			{
-				ResourceName:            "google_os_config_v2_policy_orchestrator.policy_orchestrator",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "policy_orchestrator_id", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "organization_id", "policy_orchestrator_id", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func testAccOSConfigV2PolicyOrchestrator_basic(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestratorForOrganization_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
+resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orchestrator_for_organization" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po%{random_suffix}"
+    policy_orchestrator_id = "tf-test-test-po-org%{random_suffix}"
+    organization_id = "%{org_id}"
     
     state = "ACTIVE"
     action = "UPSERT"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource-org%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy%{random_suffix}"
+                id = "tf-test-test-os-policy-org%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -83,21 +79,22 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
 `, context)
 }
 
-func testAccOSConfigV2PolicyOrchestrator_update(context map[string]interface{}) string {
+func testAccOSConfigV2PolicyOrchestratorForOrganization_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
+resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orchestrator_for_organization" {
     provider = google-beta
-    policy_orchestrator_id = "tf-test-test-po%{random_suffix}"
+    policy_orchestrator_id = "tf-test-test-po-org%{random_suffix}"
+    organization_id = "%{org_id}"
     
     state = "STOPPED"
     action = "DELETE"
     description = "Updated description"
     
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource%{random_suffix}"
+        id = "tf-test-test-orchestrated-resource-org%{random_suffix}"
         os_policy_assignment_v1_payload {
             os_policies {
-                id = "tf-test-test-os-policy%{random_suffix}"
+                id = "tf-test-test-os-policy-org%{random_suffix}"
                 mode = "VALIDATION"
                 resource_groups {
                     resources {
@@ -126,3 +123,4 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
 }
 `, context)
 }
+{{ end }}
