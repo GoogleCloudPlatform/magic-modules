@@ -49,6 +49,7 @@ resource "google_dataplex_glossary" "glossary_test_id" {
   glossary_id = "tf-test-glossary-basic%{random_suffix}"
   location     = "us-central1"
   project      = "%{project_name}"
+  provider = google-beta
 }
 `, context)
 }
@@ -59,6 +60,7 @@ resource "google_dataplex_glossary" "glossary_test_id_full" {
   glossary_id = "tf-test-glossary-full%{random_suffix}"
   location     = "us-central1"
   project      = "%{project_name}"
+  provider = google-beta
   labels = { "tag": "test-tf" }
   display_name = "terraform glossary"
   description = "glossary created by Terraform"
