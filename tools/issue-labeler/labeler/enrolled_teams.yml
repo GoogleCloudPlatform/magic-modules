@@ -9,7 +9,7 @@ service/accesscontextmanager:
   - google_access_context_manager_.*
 service/aiplatform-colab-enterprise:
   resources:
-  - google_vertex_ai_notebook_.*
+  - google_colab_.*
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
