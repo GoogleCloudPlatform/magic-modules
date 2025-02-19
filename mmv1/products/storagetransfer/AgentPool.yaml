@@ -13,7 +13,6 @@
 
 ---
 name: 'AgentPool'
-api_resource_type_kind: agentPools
 description: 'Represents an On-Premises Agent pool.'
 references:
   guides:
