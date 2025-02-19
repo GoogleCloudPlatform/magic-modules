@@ -1,10 +1,26 @@
+resource "google_tags_tag_key" "tag_key1" {
+  provider   = google-beta
+  parent     = "organizations/{{index $.Vars "org_id"}}"
+  short_name = "{{index $.Vars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  provider   = google-beta
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.Vars "value_short_name"}}"
+}
+
 resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   provider               = google-beta
   workstation_cluster_id = "{{index $.Vars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
   location               = "us-central1"
-  
+
+  tags = {
+    (google_tags_tag_key.tag_key1.id) = google_tags_tag_value.tag_value1.id
+  }
+
   labels = {
     "label" = "key"
   }
