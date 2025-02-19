@@ -4,6 +4,3 @@ resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
   project      = "{{index $.TestEnvVars "project_name"}}"
 }
 
-data "google_project" "project" {
-
-}
