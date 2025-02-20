@@ -641,6 +641,7 @@ resource "google_compute_network" "custom-test" {
 
 resource "google_compute_subnetwork" "network-with-migration-purpose" {
   name          = "%s"
+  ip_cidr_range = "10.4.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.custom-test.self_link
   purpose       = "PRIVATE"
