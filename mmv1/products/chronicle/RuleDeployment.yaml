@@ -33,6 +33,7 @@ autogen_status: UnVsZURlcGxveW1lbnQ=
 
 custom_code:
   custom_create: 'templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
 
 examples:
   - name: 'chronicle_ruledeployment_basic'
