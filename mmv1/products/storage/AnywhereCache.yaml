@@ -41,12 +41,13 @@ custom_code:
 autogen_async: false
 timeouts:
   insert_minutes: 240
-  update_minutes: 20
+  update_minutes: 240
   delete_minutes: 20
 async:
   type: 'OpAsync'
   actions:
     - create
+    - update
   operation:
     full_url: 'selfLink'
   result:

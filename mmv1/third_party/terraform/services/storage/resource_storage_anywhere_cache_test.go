@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAccStorageAnywhereCache_basic(t *testing.T) {
+func TestAccStorageAnywhereCache_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
