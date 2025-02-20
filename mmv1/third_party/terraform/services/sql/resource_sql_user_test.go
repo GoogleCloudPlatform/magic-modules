@@ -56,8 +56,6 @@ func TestAccSqlUser_mysql(t *testing.T) {
 }
 
 func TestAccSqlUser_password_wo(t *testing.T) {
-	// Multiple fine-grained resources
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instance := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
