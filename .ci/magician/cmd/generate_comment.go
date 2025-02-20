@@ -321,7 +321,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueAddedResources[resource] = struct{}{}
 			uniqueAffectedResources[resource] = struct{}{}
 		}
-		for _, resource := range append(simpleDiff.ModifiedResources, simpleDiff.RemovedResources) {
+		for _, resource := range append(simpleDiff.ModifiedResources, simpleDiff.RemovedResources...) {
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
@@ -508,23 +508,23 @@ func computeBreakingChanges(diffProcessorPath string, rnr ExecRunner) ([]Breakin
 
 func computeAffectedResources(diffProcessorPath string, rnr ExecRunner, repo source.Repo) (simpleSchemaDiff, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 
 	output, err := rnr.Run("bin/diff-processor", []string{"schema-diff"}, nil)
 	if err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 
 	fmt.Printf("Schema diff for %q: %s\n", repo.Name, output)
 
 	var simpleDiff simpleSchemaDiff
 	if err = json.Unmarshal([]byte(output), &simpleDiff); err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 
 	if err = rnr.PopDir(); err != nil {
-		return nil, err
+		return simpleSchemaDiff{}, err
 	}
 	return simpleDiff, nil
 }
