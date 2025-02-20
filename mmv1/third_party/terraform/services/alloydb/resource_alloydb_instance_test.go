@@ -864,7 +864,7 @@ resource "google_alloydb_instance" "default" {
   psc_instance_config {
 	allowed_consumer_projects = ["${data.google_project.project.number}"]
 	psc_interface_configs {
-		network_attachment_resource = "projects/1080570509669/regions/us-central1/networkAttachments/%{networkAttachmentName}"
+		network_attachment_resource = "projects/${data.google_project.project.number}/regions/${google_alloydb_cluster.default.location}/networkAttachments/%{networkAttachmentName}"
 	}
   }
 }
@@ -908,3 +908,4 @@ func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) 
 		},
 	})
 }
+
