@@ -60,6 +60,7 @@ func TestAccComputeSubnetwork_basic(t *testing.T) {
 
 	var subnetwork1 compute.Subnetwork
 	var subnetwork2 compute.Subnetwork
+        var subnetwork3 compute.Subnetwork
 
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetwork1Name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -82,7 +83,7 @@ func TestAccComputeSubnetwork_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"google_compute_subnetwork.network-ref-by-name", "subnetwork_id"),
 				        testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-migration-purpose", &subnetwork4),),
+						t, "google_compute_subnetwork.network-with-migration-purpose", &subnetwork3),),
 			},
 			{
 				ResourceName:      "google_compute_subnetwork.network-ref-by-url",
