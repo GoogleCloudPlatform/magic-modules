@@ -5,6 +5,7 @@ if v, ok := res["diskEncryptionKey"]; ok {
   transformed["rawKey"] = d.Get("disk_encryption_key.0.raw_key")
   transformed["rsaEncryptedKey"] = d.Get("disk_encryption_key.0.rsa_encrypted_key")
   transformed["sha256"] = original["sha256"]
+
   if kmsKeyName, ok := original["kmsKeyName"]; ok {
     // The response for crypto keys often includes the version of the key which needs to be removed
     // format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1

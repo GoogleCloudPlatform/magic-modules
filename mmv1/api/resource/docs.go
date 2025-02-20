@@ -32,7 +32,5 @@ type Docs struct {
 
 	OptionalProperties string `yaml:"optional_properties"`
 
-	WriteOnlyProperties string `yaml:"write_only_properties"`
-
 	Attributes string
 }
