@@ -978,6 +978,7 @@ func TestAccComputeDisk_featuresUpdated(t *testing.T) {
 }
 
 func TestAccComputeDisk_createSnapshotBeforeDestroy(t *testing.T) {
+	acctest.SkipIfVcr(t) // Disk cleanup test check 
 	t.Parallel()
 
 	var disk1 compute.Disk
