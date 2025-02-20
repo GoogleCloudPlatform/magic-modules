@@ -6784,10 +6784,17 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 		{
 			"additive_vpc_scope_dns_domain": 	c.AdditiveVpcScopeDnsDomain,
 			"cluster_dns":        				c.ClusterDns,
-			"cluster_dns_scope":  				c.ClusterDnsScope,
+			"cluster_dns_scope":  				flattenClusterDnsScope(c.ClusterDnsScope),
 			"cluster_dns_domain": 				c.ClusterDnsDomain,
 		},
 	}
+}
+
+func flattenClusterDnsScope(s string) string {
+	if s == "" {
+		return "DNS_SCOPE_UNSPECIFIED"
+	}
+	return s
 }
 
 func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interface{} {
