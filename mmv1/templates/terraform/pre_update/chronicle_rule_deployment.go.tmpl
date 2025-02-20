@@ -16,7 +16,7 @@ removeRunFrequencyFromUpdateMask := func(url string) (string) {
     return url
 }
 
-// Remove "runFrequency" and handle commas if run_frequency configured by user
+// Remove "runFrequency" and handle commas if run_frequency not configured by user
 if _, ok := d.GetOk("run_frequency"); !ok {
     url = removeRunFrequencyFromUpdateMask(url)
 }
