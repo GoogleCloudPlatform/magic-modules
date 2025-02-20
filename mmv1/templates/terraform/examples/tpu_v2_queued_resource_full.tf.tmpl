@@ -1,0 +1,44 @@
+resource "google_tpu_v2_queued_resource" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name    = "{{index $.Vars "qr_name"}}"
+  zone    = "us-central1-c"
+  project = "{{index $.TestEnvVars "project"}}"
+
+  tpu {
+    node_spec {
+      parent  = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1-c"
+      node_id = "{{index $.Vars "tpu_name"}}"
+      node {
+        runtime_version  = "tpu-vm-tf-2.13.0"
+        accelerator_type = "v2-8"
+        description      = "Text description of the TPU."
+
+        network_config {
+          can_ip_forward      = true
+          enable_external_ips = true
+          network             = google_compute_network.network.id
+          subnetwork          = google_compute_subnetwork.subnet.id
+	  queue_count         = 32
+        }
+      }
+    }
+  }
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  provider = google-beta
+
+  name          = "{{index $.Vars "subnet_name"}}"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.network.id
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+

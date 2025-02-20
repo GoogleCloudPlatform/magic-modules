@@ -47,8 +47,8 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_services_service_lb_policies_basic'
     primary_resource_id: 'default'
