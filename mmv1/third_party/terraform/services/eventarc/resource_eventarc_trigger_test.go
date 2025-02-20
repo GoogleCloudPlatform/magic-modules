@@ -413,33 +413,33 @@ EOF
 }
 
 func TestAccEventarcTrigger_eventarcTriggerWithFirestoreSourceExample(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "project_id":    envvar.GetTestProjectFromEnv(),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckEventarcTriggerDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccEventarcTrigger_eventarcTriggerWithFirestoreSourceExample(context),
-      },
-      {
-        ResourceName:            "google_eventarc_trigger.primary",
-        ImportState:             true,
-        ImportStateVerify:       true,
-        ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcTriggerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEventarcTrigger_eventarcTriggerWithFirestoreSourceExample(context),
+			},
+			{
+				ResourceName:            "google_eventarc_trigger.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccEventarcTrigger_eventarcTriggerWithFirestoreSourceExample(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_firestore_database" "database" {
   project     = "%{project_id}"
   name        = "tf-test-some-database%{random_suffix}"
