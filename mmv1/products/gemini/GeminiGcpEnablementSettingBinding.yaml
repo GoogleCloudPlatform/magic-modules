@@ -13,6 +13,7 @@
 
 ---
 name: GeminiGcpEnablementSettingBinding
+api_resource_type_kind: SettingBinding
 description: The resource for managing GeminiGcpEnablementSetting setting bindings for Admin Control.
 references:
   guides:
