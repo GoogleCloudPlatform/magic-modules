@@ -14,11 +14,7 @@ if paramMap, ok := res["params"]; ok {
 	params := paramMap.(map[string]interface{})
 	for _, sp := range sensitiveParams {
 		if _, apiOk := params[sp]; apiOk {
-			if _, exists := d.GetOkExists("sensitive_params.0." + sp); exists {
-				delete(params, sp)
-			} else {
-				params[sp] = d.Get("params." + sp)
-			}
+			delete(params, sp)
 		}
 	}
 	for k, v := range params {
