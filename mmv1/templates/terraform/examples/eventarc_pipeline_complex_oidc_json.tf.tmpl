@@ -1,0 +1,44 @@
+resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
+  location    = "us-central1"
+  pipeline_id = "{{index $.Vars "pipeline_name"}}"
+  destinations {
+    http_endpoint {
+      uri                      = "https://10.77.0.0:80/route"
+      message_binding_template = "{\"headers\":{\"new-header-key\": \"new-header-value\"}}"
+    }
+    network_config {
+      network_attachment = "projects/{{index $.TestEnvVars "project_id"}}/regions/us-central1/networkAttachments/{{index $.Vars "network_attachment_name"}}"
+    }
+    authentication_config {
+      google_oidc {
+        service_account = "{{index $.TestEnvVars "service_account"}}"
+        audience        = "http://www.example.com"
+      }
+    }
+    output_payload_format {
+      json {}
+    }
+  }
+  input_payload_format {
+    json {}
+  }
+  retry_policy {
+    max_retry_delay = "50s"
+    max_attempts    = 2
+    min_retry_delay = "40s"
+  }
+  mediations {
+    transformation {
+      transformation_template = <<-EOF
+{
+"id": message.id,
+"datacontenttype": "application/json",
+"data": "{ \"scrubbed\": \"true\" }"
+}
+EOF
+    }
+  }
+  logging_config {
+    log_severity = "DEBUG"
+  }
+}
