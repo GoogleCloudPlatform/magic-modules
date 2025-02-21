@@ -11,9 +11,6 @@ Write-only attributes allow users to access and use data in their configurations
 Write-only attributes are available in Terraform v1.11 and later. For more information, see the [official HashiCorp documentation for Write-only Attributes](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 
 To mark the launch of write-only attributes, the Google Cloud provider has added the following write-only attributes:
-- [`google_compute_disk: disk_encryption_key.raw_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk.html#raw_key_wo)
-- [`google_compute_disk: disk_encryption_key.rsa_encrypted_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk.html#rsa_encryption_key_wo)
-- [`google_compute_region_disk: disk_encryption_key.raw_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_disk.html#raw_key_wo)
 - [`google_sql_user: password_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user#password-1)
 - [`google_secret_manager_secret_version: secret_data_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_version#secret_data_wo)
 - [`google_bigquery_data_transfer_config: sensitive_params.secret_access_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_data_transfer_config#secret_access_key_wo)
