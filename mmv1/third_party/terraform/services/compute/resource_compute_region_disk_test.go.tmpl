@@ -253,6 +253,7 @@ func TestAccComputeRegionDisk_featuresUpdated(t *testing.T) {
 }
 
 func TestAccComputeRegionDisk_createSnapshotBeforeDestroy(t *testing.T) {
+	acctest.SkipIfVcr(t) // Disk cleanup test check
 	t.Parallel()
 
 	var disk1 compute.Disk
