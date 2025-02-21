@@ -153,8 +153,6 @@ properties:
       * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instantSnapshots/instantSnapshot`
       * `projects/project/zones/zone/instantSnapshots/instantSnapshot`
       * `zones/zone/instantSnapshots/instantSnapshot`
-
-    api_name: sourceInstantSnapshot
     resource: 'Snapshot'
     imports: 'selfLink'
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
@@ -280,9 +278,7 @@ properties:
       Valid URIs may start with gs:// or https://storage.googleapis.com/.
       This flag is not optimized for creating multiple disks from a source storage object.
       To create many disks from a source storage object, use gcloud compute images import instead.
-    api_name: sourceStorageObject
     ignore_read: true
-    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |

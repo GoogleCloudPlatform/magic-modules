@@ -117,4 +117,3 @@ properties:
     output: true
     update_url: 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}/setLabels'
     update_verb: 'POST'
-    key_expander: ''
