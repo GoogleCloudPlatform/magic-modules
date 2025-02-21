@@ -50,16 +50,13 @@ example:
 * Removing update support from a field if that field is not actually updatable
   in the API.
 * Marking a field required if omitting the field always causes an API error.
+* Changing a List to a Set where the field is unordered and the order
+  returned from the API changes unpredictably.
 
 The following types of changes can be made if the default behavior stays the
 same and new behavior can be enabled with a flag:
 
 * Major resource-level or field-level behavioural changes
-
-Other types of changes can be made:
-
-* Changing a List to a Set where the field is unordered and the order
-  returned from the API changes unpredictably.
 
 ## In the {{% param "majorVersion" %}} major release
 
