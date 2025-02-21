@@ -30,7 +30,7 @@ examples:
   - name: osconfigv2_policy_orchestrator_basic
     primary_resource_id: policy_orchestrator
     vars:
-      policy_orchestrator_id: test-po
+      policy_orchestrator_id: po
       orchestrated_resource_id: test-orchestrated-resource
       os_policy_id: test-os-policy
 autogen_async: true

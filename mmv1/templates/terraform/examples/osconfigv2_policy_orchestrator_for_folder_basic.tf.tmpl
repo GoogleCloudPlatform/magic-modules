@@ -1,7 +1,7 @@
 resource "google_os_config_v2_policy_orchestrator_for_folder" "{{$.PrimaryResourceId}}" {
     provider = google-beta
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
-    folder_id = "1087380508887"
+    folder_id = google_folder.my_folder.folder_id
     
     state = "ACTIVE"
     action = "UPSERT"
@@ -36,4 +36,11 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "{{$.PrimaryResour
             }
         }
     }
+}
+
+resource "google_folder" "my_folder" {
+    provider = google-beta
+    display_name = "tf-test-po-folder"
+    parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+    deletion_protection = false
 }

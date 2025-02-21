@@ -30,9 +30,11 @@ examples:
   - name: osconfigv2_policy_orchestrator_for_folder_basic
     primary_resource_id: policy_orchestrator_for_folder
     vars:
-      policy_orchestrator_id: test-po-folder
+      policy_orchestrator_id: po-folder
       orchestrated_resource_id: test-orchestrated-resource-folder
       os_policy_id: test-os-policy-folder
+    test_env_vars:
+      org_id: ORG_ID
 autogen_async: true
 async:
   operation:

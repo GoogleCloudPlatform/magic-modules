@@ -30,7 +30,7 @@ examples:
   - name: osconfigv2_policy_orchestrator_for_organization_basic
     primary_resource_id: policy_orchestrator_for_organization
     vars:
-      policy_orchestrator_id: test-po-org
+      policy_orchestrator_id: po-org
       orchestrated_resource_id: test-orchestrated-resource-org
       os_policy_id: test-os-policy-org
     test_env_vars:
