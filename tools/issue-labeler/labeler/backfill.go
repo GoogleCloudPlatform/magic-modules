@@ -79,6 +79,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 		_, terraform := desired["service/terraform"]
 		_, linked := desired["forward/linked"]
 		_, exempt := desired["forward/exempt"]
+		_, testfailure := desired["test-failure"]
 		if terraform || exempt {
 			continue
 		}
@@ -102,7 +103,8 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 		}
 
 		if len(desired) > len(issueUpdate.OldLabels) {
-			if !linked {
+			// Forwarding test failure ticket directly
+			if !linked && !testfailure {
 				issueUpdate.Labels = append(issueUpdate.Labels, "forward/review")
 			}
 			for label := range desired {

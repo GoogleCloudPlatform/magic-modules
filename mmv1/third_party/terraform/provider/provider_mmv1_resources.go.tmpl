@@ -22,6 +22,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_access_approval_project_service_account":   accessapproval.DataSourceAccessApprovalProjectServiceAccount(),
 	"google_access_context_manager_access_policy":   accesscontextmanager.DataSourceAccessContextManagerAccessPolicy(),
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
+	"google_alloydb_cluster":                           alloydb.DataSourceAlloydbDatabaseCluster(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 	"google_alloydb_instance":                          alloydb.DataSourceAlloydbDatabaseInstance(),
@@ -32,11 +33,9 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
 	"google_apphub_application":						apphub.DataSourceGoogleApphubApplication(),
 	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	"google_backup_dr_backup_plan_association":			backupdr.DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
 	"google_backup_dr_backup_plan":						backupdr.DataSourceGoogleCloudBackupDRBackupPlan(),
-	{{- end }}
 	"google_backup_dr_backup":							backupdr.DataSourceGoogleCloudBackupDRBackup(),
 	"google_backup_dr_data_source":						backupdr.DataSourceGoogleCloudBackupDRDataSource(),
 	"google_backup_dr_backup_vault":					backupdr.DataSourceGoogleCloudBackupDRBackupVault(),
@@ -136,10 +135,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 	"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_iam_workload_identity_pool":                iambeta.DataSourceIAMBetaWorkloadIdentityPool(),
 	"google_iam_workload_identity_pool_provider":       iambeta.DataSourceIAMBetaWorkloadIdentityPoolProvider(),
-	{{- end }}
 	"google_iap_client":                                iap.DataSourceGoogleIapClient(),
 	"google_kms_crypto_key":                            kms.DataSourceGoogleKmsCryptoKey(),
 	"google_kms_crypto_keys":                           kms.DataSourceGoogleKmsCryptoKeys(),
@@ -201,6 +198,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
 	"google_project":                                   resourcemanager.DataSourceGoogleProject(),
 	"google_projects":                                  resourcemanager.DataSourceGoogleProjects(),
+	"google_project_ancestry":                          resourcemanager.DataSourceGoogleProjectAncestry(),
 	"google_project_organization_policy":               resourcemanager.DataSourceGoogleProjectOrganizationPolicy(),
 	"google_project_service":                           resourcemanager.DataSourceGoogleProjectService(),
 	"google_pubsub_subscription":                       pubsub.DataSourceGooglePubsubSubscription(),
