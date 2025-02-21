@@ -31,12 +31,12 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
-    base_url: 'https://{{location}}-discoveryengine.googleapis.com/v1/{{op_id}}'
+    base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 60
       update_minutes: 60
