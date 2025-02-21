@@ -35,30 +35,30 @@ type DiscoveryEngineOperationWaiter struct {
 }
 
 func (w *DiscoveryEngineOperationWaiter) QueryOp() (interface{}, error) {
-        if w == nil {
-                return nil, fmt.Errorf("cannot query operation, it's unset or nil")
-        }
+	if w == nil {
+		return nil, fmt.Errorf("cannot query operation, it's unset or nil")
+	}
 
-        opName := w.CommonOperationWaiter.Op.Name
+	opName := w.CommonOperationWaiter.Op.Name
 
-        // Extract location from opName.  Example:
-        // "projects/<project>/locations/<location>/operations/<operation-id>"
-        // Requires error handling if not properly formatted.
-        parts := strings.Split(opName, "/")
-        if len(parts) < 5 || parts[2] != "locations" {
-            return nil, fmt.Errorf("unexpected operation name format: %s", opName)  // Handle invalid format appropriately
-        }
-        location := parts[3]
+	// Extract location from opName.  Example:
+	// "projects/<project>/locations/<location>/operations/<operation-id>"
+	// Requires error handling if not properly formatted.
+	parts := strings.Split(opName, "/")
+	if len(parts) < 5 || parts[2] != "locations" {
+		return nil, fmt.Errorf("unexpected operation name format: %s", opName) // Handle invalid format appropriately
+	}
+	location := parts[3]
 
-        url := fmt.Sprintf("%s/projects/%s/locations/%s/operations/%s", w.Config.DiscoveryEngineBasePath, w.Project, location, parts[5])
+	url := fmt.Sprintf("%s/projects/%s/locations/%s/operations/%s", w.Config.DiscoveryEngineBasePath, w.Project, location, parts[5])
 
-        return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-                Config:    w.Config,
-                Method:    "GET",
-                Project:   w.Project,
-                RawURL: url,
-                UserAgent: w.UserAgent,
-        })
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
+		UserAgent: w.UserAgent,
+	})
 }
 
 func createDiscoveryEngineWaiter(config *transport_tpg.Config, op map[string]interface{}, project, activity, userAgent string) (*DiscoveryEngineOperationWaiter, error) {
