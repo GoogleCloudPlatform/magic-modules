@@ -816,7 +816,7 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
 		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
-		hasTerminationTimeChanged(oScheduling, newScheduling))
+		hasTerminationTimeChanged(oScheduling, newScheduling)
 {{- else }}
 	return (hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
