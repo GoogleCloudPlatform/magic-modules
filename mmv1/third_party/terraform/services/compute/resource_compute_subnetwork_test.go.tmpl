@@ -108,7 +108,8 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 	t.Parallel()
 
 	var subnetwork compute.Subnetwork
-
+        var subnetwork1 compute.Subnetwork
+ 
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetwork2Name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -154,7 +155,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				Config: testAccComputeSubnetwork_update4(cnName, subnetwork2Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-migration-purpose", &subnetwork),
+						t, "google_compute_subnetwork.network-with-migration-purpose", &subnetwork1),
 				),
 			},
 			{
