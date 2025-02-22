@@ -1,0 +1,46 @@
+resource "google_bigquery_connection" "connection" {
+  connection_id = "{{index $.Vars "connection_id"}}"
+  location = "US"
+  friendly_name = "👋"
+  description = "a riveting description"
+
+  alloydb {
+    instance_id = google_alloydb_instance.default.id
+    database = "db"
+    type = "POSTGRES"
+    credential {
+      username = "user"
+      password = "password"
+    }
+  }
+
+  deletion_protection = false
+}
+
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "alloydb-instance"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 2
+  }
+}
+
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "alloydb-cluster"
+  location   = "us-central1"
+  network_config {
+    network = google_compute_network.default.id
+  }
+
+  initial_user {
+    password = "alloydb-cluster"
+  }
+}
+
+data "google_project" "project" {}
+
+resource "google_compute_network" "default" {
+  name = "alloydb-network"
+}

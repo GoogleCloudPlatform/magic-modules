@@ -141,6 +141,23 @@ examples:
     ignore_read_extra:
       # password removed
       - 'cloud_sql.0.credential'
+  - name: 'bigquery_connection_alloydb'
+    primary_resource_id: 'connection'
+    vars:
+      connection_id: 'my-connection'
+      instance_id: 'alloydb-instance'
+      username: 'user'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    oics_vars_overrides:
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      # password removed
+      - 'alloydb.0.credential'
+    external_providers: ["random", "time"]
+    # Random provider
+    skip_vcr: true
 parameters:
 properties:
   - name: 'name'
@@ -260,7 +277,7 @@ properties:
           - name: 'iamRoleId'
             type: String
             description:
-              The user’s AWS IAM Role that trusts the Google-owned AWS IAM user
+              The user's AWS IAM Role that trusts the Google-owned AWS IAM user
               Connection.
             required: true
           - name: 'identity'
@@ -424,3 +441,53 @@ properties:
           - name: 'dataprocCluster'
             type: String
             description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].
+  - name: 'alloydb'
+    type: NestedObject
+    description: Connection properties specific to AlloyDB.
+    exactly_one_of:
+      - 'cloud_sql'
+      - 'aws'
+      - 'azure'
+      - 'cloud_spanner'
+      - 'cloud_resource'
+      - 'spark'
+      - 'alloydb'
+    properties:
+      - name: 'instanceId'
+        type: String
+        description: |
+          AlloyDB instance ID in the form project:location:instance.
+        required: true
+      - name: 'database'
+        type: String
+        description: Database name.
+        required: true
+      - name: 'credential'
+        type: NestedObject
+        description: AlloyDB properties.
+        required: true
+        custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_flatten.go.tmpl'
+        properties:
+          - name: 'username'
+            type: String
+            description: Username for database.
+            required: true
+          - name: 'password'
+            type: String
+            description: Password for database.
+            required: true
+            sensitive: true
+      - name: 'type'
+        type: Enum
+        description: Type of the AlloyDB database.
+        required: true
+        enum_values:
+          - 'DATABASE_TYPE_UNSPECIFIED'
+          - 'POSTGRES'
+      - name: 'serviceAccountId'
+        type: String
+        description: |
+          When the connection is used in the context of an operation in
+          BigQuery, this service account will serve as the identity being used
+          for connecting to the AlloyDB instance specified in this connection.
+        output: true
