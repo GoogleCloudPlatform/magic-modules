@@ -30,6 +30,8 @@ import (
 	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
+
 	_ "embed"
 )
 
@@ -177,9 +179,6 @@ func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 			if err != nil {
 				return fmt.Errorf("error creating test failure ticket: %w", err)
 			}
-			fmt.Println("Yes, should create ticket")
-		} else {
-			fmt.Println("No, should not create ticket")
 		}
 	}
 	return nil
@@ -397,14 +396,24 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		failureRatelabel = testFailure.BetaFailureRateLabel.String()
 	}
 
+	ticketLabels := []string{
+		"size/xs",
+		"test-failure",
+		failureRatelabel,
+	}
+
+	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
+	if err != nil {
+		return fmt.Errorf("error building regex labels: %w", err)
+	}
+
+	labels := labeler.ComputeLabels([]string{testFailure.AffectedResource}, regexpLabels)
+	ticketLabels = append(ticketLabels, labels...)
+
 	issueRquest := &github.IssueRequest{
-		Title: github.String(issueTitle),
-		Body:  github.String(issueBody),
-		Labels: &[]string{
-			"size/xs",
-			"test-failure",
-			failureRatelabel,
-		},
+		Title:  github.String(issueTitle),
+		Body:   github.String(issueBody),
+		Labels: &ticketLabels,
 		// Milestone: Near-Term Goals
 		// https://github.com/hashicorp/terraform-provider-google/milestone/11
 		Milestone: github.Int(11),
