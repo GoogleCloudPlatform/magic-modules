@@ -106,3 +106,19 @@ properties:
       Whether to import the custom routes to the peer network.
     required: true
     send_empty_value: true
+  - name: 'exportSubnetRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      Whether subnet routes with public IP range are exported.
+      IPv4 special-use ranges are always exported to peers and
+      are not controlled by this field.
+    send_empty_value: true
+    default_from_api: true
+  - name: 'importSubnetRoutesWithPublicIp'
+    type: Boolean
+    description: |
+      Whether subnet routes with public IP range are imported.
+      IPv4 special-use ranges are always imported from peers and
+      are not controlled by this field.
+    send_empty_value: true
+    default_from_api: true

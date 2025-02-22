@@ -47,6 +47,7 @@ custom_code:
   constants: 'templates/terraform/constants/iam_workforce_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workforce_pool.go.tmpl'
+exclude_sweeper: true
 examples:
   - name: 'iam_workforce_pool_basic'
     primary_resource_id: 'example'

@@ -53,8 +53,11 @@ examples:
       pubsub_topic: 'dicom-notifications'
       bq_dataset_name: 'dicom_bq_ds'
       bq_table_name: 'dicom_bq_tb'
-    test_vars_overrides:
-      'policyChanged': ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare", []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.jobUser"
 parameters:
   - name: 'dataset'
     type: ResourceRef

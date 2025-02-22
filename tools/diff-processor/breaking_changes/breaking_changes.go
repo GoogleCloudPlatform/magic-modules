@@ -14,7 +14,7 @@ type BreakingChange struct {
 	RuleName               string
 }
 
-const breakingChangesPath = "develop/breaking-changes/breaking-changes"
+const breakingChangesPath = "breaking-changes/breaking-changes"
 
 func NewBreakingChange(message, identifier string) BreakingChange {
 	return BreakingChange{

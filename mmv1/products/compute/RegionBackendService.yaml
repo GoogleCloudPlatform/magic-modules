@@ -52,6 +52,13 @@ custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
@@ -750,7 +757,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:

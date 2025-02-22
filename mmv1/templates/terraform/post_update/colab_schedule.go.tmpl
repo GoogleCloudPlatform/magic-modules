@@ -1,0 +1,24 @@
+name := d.Get("name").(string)
+state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
+
+if desired_state != "" && state != desired_state {
+  var verb string
+
+  switch desired_state {
+    case "PAUSED":
+      verb = "pause"
+    case "ACTIVE":
+      verb = "resume"
+    default:
+      return fmt.Errorf("desired_state has to be ACTIVE or PAUSED")
+  }
+
+  _, err := modifyScheduleState(config, d, project, billingProject, userAgent, verb)
+  if err != nil {
+    return err
+  }
+
+} else {
+  log.Printf("[DEBUG] Colab Schedule %q has state %q.", name, state)
+}

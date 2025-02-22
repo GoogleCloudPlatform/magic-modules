@@ -254,6 +254,31 @@ func TestAccDataprocCluster_withInternalIpOnlyTrueAndShieldedConfig(t *testing.T
 	})
 }
 
+func TestAccDataprocCluster_withShieldedConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withShieldedConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+
+					// Testing behavior for Dataproc to use only internal IP addresses
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_integrity_monitoring", "false"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_secure_boot", "false"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.shielded_instance_config.0.enable_vtpm", "false"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withConfidentialCompute(t *testing.T) {
     t.Parallel()
 
@@ -928,8 +953,8 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds three and goog-dataproc-autozone is added internally, so expect 4.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "4"),
+					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 			{
@@ -939,8 +964,8 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.%", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "labels.key1", "value1"),
-					// We only provide one, but GCP adds three and goog-dataproc-autozone is added internally, so expect 5.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
+					// We only provide one, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 6.
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "6"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.key1", "value1"),
 				),
 			},
@@ -960,8 +985,8 @@ func TestAccDataprocCluster_withLabels(t *testing.T) {
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.with_labels", &cluster),
 
 					resource.TestCheckNoResourceAttr("google_dataproc_cluster.with_labels", "labels.%"),
-					// We don't provide any, but GCP adds three and goog-dataproc-autozone is added internally, so expect 4.
-					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "4"),
+					// We don't provide any, but GCP adds 4 and goog-dataproc-autozone is added internally, so expect 5.
+					resource.TestCheckResourceAttr("google_dataproc_cluster.with_labels", "effective_labels.%", "5"),
 				),
 			},
 		},
@@ -1027,9 +1052,12 @@ func TestAccDataprocCluster_KMS(t *testing.T) {
 	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
-	if acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
+			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	var cluster dataproc.Cluster
 	acctest.VcrTest(t, resource.TestCase{
@@ -1579,6 +1607,25 @@ resource "google_dataproc_cluster" "basic" {
   }
 }
 `, rnd, rnd, rnd, rnd)
+}
+
+func testAccDataprocCluster_withShieldedConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "basic" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      shielded_instance_config {
+        enable_integrity_monitoring = false
+        enable_secure_boot          = false
+        enable_vtpm                 = false
+      }
+    }
+  }
+}
+`, rnd)
 }
 
 func testAccDataprocCluster_withConfidentialCompute(rnd, subnetworkName string, imageUri string) string {

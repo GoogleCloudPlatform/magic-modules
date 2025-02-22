@@ -1,0 +1,7 @@
+resource "google_gemini_logging_setting" "{{$.PrimaryResourceId}}" {
+    logging_setting_id = "{{index $.Vars "logging_setting_id"}}"
+    location = "global"
+    labels = {"my_key": "my_value"}
+    log_prompts_and_responses = true
+    log_metadata = true
+}

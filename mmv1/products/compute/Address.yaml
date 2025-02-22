@@ -51,6 +51,13 @@ async:
 collection_url_key: 'items'
 custom_code:
   post_create: 'templates/terraform/post_create/labels.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'

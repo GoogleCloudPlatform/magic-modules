@@ -1,10 +1,14 @@
 package detector
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/documentparser"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,6 +35,13 @@ type Field struct {
 	Changed bool
 	// Tested is true when a test has been found that includes the field.
 	Tested bool
+}
+
+// MissingDocDetails denotes the doc file path and the fields that are not shown up in the corresponding doc.
+type MissingDocDetails struct {
+	Name     string
+	FilePath string
+	Fields   []string
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -151,4 +162,147 @@ func suggestedTest(resourceName string, untested []string) string {
 		}
 	}
 	return strings.ReplaceAll(string(f.Bytes()), `"VALUE"`, "# value needed")
+}
+
+// DetectMissingDocs detect new fields that are missing docs given the schema diffs.
+// Return a map of resource names to missing doc info.
+func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
+	for resource, resourceDiff := range schemaDiff {
+		fieldsInDoc := make(map[string]bool)
+
+		docFilePath, err := resourceToDocFile(resource, repoPath)
+		if err != nil {
+			fmt.Printf("Warning: %s.\n", err)
+		} else {
+			content, err := os.ReadFile(docFilePath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+			}
+			parser := documentparser.NewParser()
+			err = parser.Parse(content)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
+			}
+
+			argumentsInDoc := listToMap(parser.Arguments())
+			attributesInDoc := listToMap(parser.Attributes())
+			for _, m := range []map[string]bool{argumentsInDoc, attributesInDoc} {
+				for k, v := range m {
+					fieldsInDoc[k] = v
+				}
+			}
+			// for iam resource
+			if v, ok := fieldsInDoc["member/members"]; ok {
+				fieldsInDoc["member"] = v
+				fieldsInDoc["members"] = v
+			}
+		}
+		var newFields []string
+		for field, fieldDiff := range resourceDiff.Fields {
+			if !isNewField(fieldDiff) {
+				continue
+			}
+			if !fieldsInDoc[field] {
+				newFields = append(newFields, field)
+			}
+		}
+		if len(newFields) > 0 {
+			sort.Strings(newFields)
+			ret[resource] = MissingDocDetails{
+				Name:     resource,
+				FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+				Fields:   newFields,
+			}
+
+		}
+	}
+	return ret, nil
+}
+
+func DetectMissingDocsForDatasource(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
+	ret := make(map[string]MissingDocDetails)
+	for resource, resourceDiff := range schemaDiff {
+		docFilePath, err := dataSourceToDocFile(resource, repoPath)
+		if err != nil {
+			var newFields []string
+			for field, fieldDiff := range resourceDiff.Fields {
+				if !isNewField(fieldDiff) {
+					continue
+				}
+				newFields = append(newFields, field)
+			}
+			if len(newFields) > 0 {
+				sort.Strings(newFields)
+				ret[resource] = MissingDocDetails{
+					Name:     resource,
+					FilePath: strings.ReplaceAll(docFilePath, repoPath, ""),
+					Fields:   newFields,
+				}
+			}
+		}
+	}
+	return ret, nil
+}
+
+func isNewField(fieldDiff diff.FieldDiff) bool {
+	return fieldDiff.Old == nil && fieldDiff.New != nil
+}
+
+func resourceToDocFile(resource string, repoPath string) (string, error) {
+	baseNameOptions := []string{
+		strings.TrimPrefix(resource, "google_") + ".html.markdown",
+		resource + ".html.markdown",
+	}
+	suffix := []string{"_policy", "_binding", "_member"}
+	for _, s := range suffix {
+		if strings.HasSuffix(resource, "_iam"+s) {
+			iamName := strings.TrimSuffix(resource, s)
+			baseNameOptions = append(baseNameOptions, iamName+".html.markdown")
+			baseNameOptions = append(baseNameOptions, strings.TrimPrefix(iamName, "google_")+".html.markdown")
+		}
+	}
+	for _, baseName := range baseNameOptions {
+		fullPath := filepath.Join(repoPath, "website", "docs", "r", baseName)
+		_, err := os.ReadFile(fullPath)
+		if !os.IsNotExist(err) {
+			return fullPath, nil
+		}
+	}
+	return filepath.Join(repoPath, "website", "docs", "r", baseNameOptions[0]), fmt.Errorf("no document files found in %s for resource %q", baseNameOptions, resource)
+}
+
+func dataSourceToDocFile(resource string, repoPath string) (string, error) {
+	baseNameOptions := []string{
+		strings.TrimPrefix(resource, "google_"),
+		resource,
+	}
+	// There are only iam_policy files, no iam_binding, iam_member.
+	suffix := []string{"_iam_binding", "_iam_member"}
+	for _, s := range suffix {
+		if strings.HasSuffix(resource, s) {
+			iamName := strings.ReplaceAll(resource, s, "_iam_policy")
+			baseNameOptions = append(baseNameOptions, iamName)
+			baseNameOptions = append(baseNameOptions, strings.TrimPrefix(iamName, "google_"))
+		}
+	}
+	for _, baseName := range baseNameOptions {
+		// some file only has .markdown
+		for _, suffix := range []string{".html.markdown", ".markdown"} {
+			fullPath := filepath.Join(repoPath, "website", "docs", "d", baseName+suffix)
+			_, err := os.ReadFile(fullPath)
+			if !os.IsNotExist(err) {
+				return fullPath, nil
+			}
+		}
+	}
+	return filepath.Join(repoPath, "website", "docs", "d", baseNameOptions[0]+".html.markdown"), fmt.Errorf("no document files found in %s for resource %q", baseNameOptions, resource)
+}
+
+func listToMap(items []string) map[string]bool {
+	m := make(map[string]bool)
+	for _, item := range items {
+		m[item] = true
+	}
+	return m
 }

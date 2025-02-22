@@ -46,6 +46,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Apigee",
         "path" to "./google/services/apigee"
     ),
+    "apihub" to mapOf(
+        "name" to "apihub",
+        "displayName" to "Apihub",
+        "path" to "./google/services/apihub"
+    ),
     "apikeys" to mapOf(
         "name" to "apikeys",
         "displayName" to "Apikeys",
@@ -215,6 +220,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
         "path" to "./google/services/cloudtasks"
+    ),
+    "colab" to mapOf(
+        "name" to "colab",
+        "displayName" to "Colab",
+        "path" to "./google/services/colab"
     ),
     "composer" to mapOf(
         "name" to "composer",
@@ -395,6 +405,11 @@ var ServicesListGa = mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
         "path" to "./google/services/firebasedatabase"
+    ),
+    "firebasedataconnect" to mapOf(
+        "name" to "firebasedataconnect",
+        "displayName" to "Firebasedataconnect",
+        "path" to "./google/services/firebasedataconnect"
     ),
     "firebaseextensions" to mapOf(
         "name" to "firebaseextensions",
@@ -585,6 +600,16 @@ var ServicesListGa = mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
+    ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google/services/parametermanager"
+    ),
+    "parametermanagerregional" to mapOf(
+        "name" to "parametermanagerregional",
+        "displayName" to "Parametermanagerregional",
+        "path" to "./google/services/parametermanagerregional"
     ),
     "privateca" to mapOf(
         "name" to "privateca",
