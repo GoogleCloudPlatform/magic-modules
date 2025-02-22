@@ -145,8 +145,6 @@ examples:
     primary_resource_id: 'connection'
     vars:
       connection_id: 'my-connection'
-      instance_id: 'alloydb-instance'
-      username: 'user'
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'

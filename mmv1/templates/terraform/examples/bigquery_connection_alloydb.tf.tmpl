@@ -14,7 +14,7 @@ resource "google_bigquery_connection" "connection" {
     }
   }
 
-  deletion_protection = false
+  deletion_protection = {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_alloydb_instance" "default" {
