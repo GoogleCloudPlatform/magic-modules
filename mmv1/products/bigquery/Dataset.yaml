@@ -106,6 +106,35 @@ examples:
       tag_key2: 'tag_key2'
       tag_value2: 'tag_value2'
     exclude_docs: true
+  - name: 'bigquery_dataset_cross_region_replication'
+    primary_resource_id: 'dataset'
+    vars:
+      dataset_id: 'example_dataset'
+      location: 'US'
+      replica_region1: 'asia-northeast1'
+      replica_region2: 'europe-west1'
+  - name: 'crossRegionReplication'
+    type: NestedObject
+    description: |
+      Configuration for cross-region replication of the dataset. When enabled, BigQuery will automatically
+      replicate the data in this dataset to the specified regions. This provides higher availability and
+      disaster recovery capabilities. For more information, see [Cross-region replication](https://cloud.google.com/bigquery/docs/cross-region-replication).
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Whether cross-region replication is enabled for this dataset. When enabled, BigQuery will
+          automatically replicate the data in this dataset to the specified regions.
+        required: true
+      - name: 'replicaRegions'
+        type: Array
+        description: |
+          The list of regions where the dataset should be replicated. Each region must be different
+          from the dataset's primary location. For example, if the dataset is in 'US', you might
+          specify ['asia-northeast1', 'europe-west1'] as replica regions.
+        required: true
+        item_type:
+          type: String
 virtual_fields:
   - name: 'delete_contents_on_destroy'
     description: |
