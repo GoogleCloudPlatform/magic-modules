@@ -118,7 +118,7 @@ examples:
     description: |
       Configuration for cross-region replication of the dataset. When enabled, BigQuery will automatically
       replicate the data in this dataset to the specified regions. This provides higher availability and
-      disaster recovery capabilities. For more information, see [Cross-region replication](https://cloud.google.com/bigquery/docs/cross-region-replication).
+      disaster recovery capabilities. For more information, see [Cross-region dataset replication](https://cloud.google.com/bigquery/docs/data-replication).
     properties:
       - name: 'enabled'
         type: Boolean
