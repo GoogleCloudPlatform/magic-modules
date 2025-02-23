@@ -45,6 +45,7 @@ identity:
   - keyId
   - b64MacKey
 custom_code:
+  custom_create: templates/terraform/custom_create/public_ca_external_account_key.go.tmpl
 exclude_tgc: true
 examples:
   - name: 'public_ca_external_account_key'
