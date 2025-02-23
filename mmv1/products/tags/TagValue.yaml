@@ -49,6 +49,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
+exclude_sweeper: true
 examples:
   - name: 'tag_value_basic'
     primary_resource_id: 'value'
