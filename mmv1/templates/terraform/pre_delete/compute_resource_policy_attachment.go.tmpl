@@ -4,18 +4,24 @@ zone, err := tpgresource.GetZone(d, config)
 if err != nil {
 	return err
 }
+if zone == "" {
+	return fmt.Errorf("zone must be non-empty - set in resource or at provider-level")
+}
 
 region := tpgresource.GetRegionFromZone(zone)
 if region == "" {
-	return fmt.Errorf("invalid zone %q", zone)
+	return fmt.Errorf("invalid zone %q, unable to infer region from zone", zone)
 }
 
-name, err := expandNestedComputeDiskResourcePolicyAttachmentName(d.Get("name"), d, config)
+project, err = tpgresource.GetProject(d, config)
 if err != nil {
 	return err
 }
 
-obj["resourcePolicies"] = []interface{}{
-	fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, name),
+if v, ok := d.GetOk("name"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
+	obj["resourcePolicies"] = []interface{}{
+		fmt.Sprintf("projects/%s/regions/%s/resourcePolicies/%s", project, region, v.(string)),
+	}
 }
+
 return nil
