@@ -16,7 +16,7 @@ name: 'ResourcePolicyAttachment'
 api_resource_type_kind: Instance
 description: 'Attaches resource policies to compute instances'
 id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
-base_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
+base_url: 'projects/{{project}}/zones/{{zone}}/instances'
 self_link: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
 create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies'
 delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
@@ -49,27 +49,25 @@ parameters:
     required: true
     resource: 'Instance'
     imports: 'name'
+    immutable: true
+    description: 'The name of the instance to attach the resource policy to.'
   - name: 'zone'
     type: ResourceRef
     required: true
     resource: 'Zone'
     imports: 'name'
+    immutable: true
+    description: 'The zone where the instance resides.'
 properties:
   - name: 'name'
     type: String
     required: true
     immutable: true
+    description: 'The name of the resource policy to attach.'
 examples:
   - name: "compute_resource_policy_attachment_basic"
     primary_resource_id: "policy_attachment"
     vars:
       instance_name: "tf-test-attachment-instance"
       policy_name: "tf-test-attachment-policy"
-      zone: "us-central1-a"
-  - name: "compute_resource_policy_attachment_full"
-    primary_resource_id: "policy_attachment_full"
-    min_version: beta
-    vars:
-      instance_name: "tf-test-attachment-instance-full"
-      policy_name: "tf-test-attachment-policy-full"
       zone: "us-central1-a"
