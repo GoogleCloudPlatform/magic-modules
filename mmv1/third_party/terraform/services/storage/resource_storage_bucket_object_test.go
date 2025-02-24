@@ -83,7 +83,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, updatedName.Name(), updatedDataMd5),
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, updatedName.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
@@ -658,7 +658,7 @@ resource "google_storage_bucket_object" "object" {
 `, bucketName, objectName, sourceFilename)
 }
 
-func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename, md5hash string) string {
+func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
@@ -669,9 +669,9 @@ resource "google_storage_bucket_object" "object" {
   name   = "%s"
   bucket = google_storage_bucket.bucket.name
   source = "%s"
-  source_md5hash = "%s"
+  source_md5hash = filemd5("%s")
 }
-`, bucketName, objectName, sourceFilename, md5hash)
+`, bucketName, objectName, sourceFilename, sourceFilename)
 }
 
 func testGoogleStorageBucketsObjectOptionalContentFields(
