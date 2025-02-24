@@ -128,6 +128,12 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'health-check'
       network_name: 'network'
+  - name: 'backend_service_tls_settings'
+    primary_resource_id: 'default'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
