@@ -34,7 +34,7 @@ func (w *DiscoveryEngineOperationWaiter) QueryOp() (interface{}, error) {
 	}
 	location := parts[3]
 
-    basePath := strings.Replace(w.Config.DiscoveryEngineBasePath, "{{location}}", location, 1)
+	basePath := strings.Replace(w.Config.DiscoveryEngineBasePath, "{{location}}", location, 1)
 	url := fmt.Sprintf("%s%s", basePath, opName)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
