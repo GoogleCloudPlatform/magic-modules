@@ -819,6 +819,14 @@ is set to true. Defaults to ZONAL.`,
 				Description: `The type of the instance. The valid values are:- 'SQL_INSTANCE_TYPE_UNSPECIFIED', 'CLOUD_SQL_INSTANCE', 'ON_PREMISES_INSTANCE' and 'READ_REPLICA_INSTANCE'.`,
 			},
 
+			"tags": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: `Tag keys and tag values that are bound to this instance. You must represent each item in the map as: <tag-key-namespaced-name> : <tag-value-short-name>`,
+			},
+
 			"replica_configuration": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1170,6 +1178,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	if _, ok := d.GetOk("instance_type"); ok {
 		instance.InstanceType = d.Get("instance_type").(string)
+	}
+
+	if _, ok := d.GetOk("tags"); ok {
+		instance.Tags = tpgresource.ConvertStringMap(d.Get("tags").(map[string]interface{}))
 	}
 
 	instance.RootPassword = d.Get("root_password").(string)
@@ -1722,6 +1734,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 	if err := d.Set("instance_type", instance.InstanceType); err != nil {
 		return fmt.Errorf("Error setting instance_type: %s", err)
+	}
+	if err := d.Set("tags", instance.Tags); err != nil {
+		return fmt.Errorf("Error setting tags: %s", err)
 	}
 	if err := d.Set("settings", flattenSettings(instance.Settings, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
