@@ -35,6 +35,17 @@ async:
   type: OpAsync
   result:
     resource_inside_response: true
+examples:
+  - name: eventarc_enrollment_with_pipeline_destination
+    primary_resource_id: primary
+    vars:
+      enrollment_id: some-enrollment
+      pipeline_id: some-pipeline
+      message_bus_id: some-message-bus
+      network_attachment_name: some-network-attachment
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    exclude_test: true
 parameters:
   - name: location
     type: String
