@@ -85,6 +85,7 @@ properties:
       Product type of the setting binding.
     enum_values:
       - 'GEMINI_IN_BIGQUERY'
+    default_from_api: true
   - name: name
     type: String
     description: |-
