@@ -225,6 +225,7 @@ properties:
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
         api_name: sha1Checksum
+        diff_suppress_func: 'tpgresource.Base64DiffSuppress'
       # TODO(alexstephen): Figure out cross-module ResourceRefs
       - name: 'source'
         type: String
@@ -285,6 +286,7 @@ properties:
 
               A base64-encoded string.
             required: true
+            diff_suppress_func: 'tpgresource.Base64DiffSuppress'
           - name: 'fileType'
             type: String
             description: The file type of source file.
@@ -301,6 +303,7 @@ properties:
 
                 A base64-encoded string.
               required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
             - name: 'fileType'
               type: String
               description: The file type of source file.
@@ -317,6 +320,7 @@ properties:
 
                 A base64-encoded string.
               required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
             - name: 'fileType'
               type: String
               description: The file type of source file.
@@ -333,6 +337,7 @@ properties:
 
                 A base64-encoded string.
               required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
             - name: 'fileType'
               type: String
               description: The file type of source file.
