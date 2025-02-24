@@ -54,6 +54,11 @@ examples:
     primary_resource_id: 'primary'
     vars:
       resource_name: 'star'
+  - name: 'network_connectivity_hub_policy_mode'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: 'policy'
+
 parameters:
 properties:
   - name: 'name'
