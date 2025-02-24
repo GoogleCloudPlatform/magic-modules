@@ -1,3 +1,9 @@
+resource "google_project_service" "pubsub" {
+    provider = google-beta
+    service            = "progressiverollout.googleapis.com"
+    disable_on_destroy = false
+}
+
 resource "google_os_config_v2_policy_orchestrator" "{{$.PrimaryResourceId}}" {
     provider = google-beta
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
