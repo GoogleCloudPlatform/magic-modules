@@ -87,14 +87,14 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
 		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
-		rm -rf ./v6/pkg/cai2hcl/*;\
-		rm -rf ./v6/pkg/tfplan2cai/*;\
+		rm -rf ./v7/pkg/cai2hcl/*;\
+		rm -rf ./v7/pkg/tfplan2cai/*;\
 
 tgc:
 	cd mmv1;\
 		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
 		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
-		&& go run . --version beta --provider tgc_v6 --output $(OUTPUT_PATH)/v6/pkg $(mmv1_compile);\
+		&& go run . --version beta --provider tgc_v7 --output $(OUTPUT_PATH)/v7/pkg $(mmv1_compile);\
 
 tf-oics:
 	cd mmv1;\
