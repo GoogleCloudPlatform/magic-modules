@@ -754,6 +754,28 @@ properties:
                           Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
                           inclusive.
                         required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
                   - name: 'urlRewrite'
                     type: NestedObject
                     description: |
@@ -1487,6 +1509,28 @@ properties:
                           Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
                           inclusive.
                         required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
                   - name: 'urlRewrite'
                     type: NestedObject
                     description: |
@@ -1916,6 +1960,27 @@ properties:
                   description: |
                     Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
                     with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+            - name: 'maxStreamDuration'
+              type: NestedObject
+              description: |
+                Specifies the maximum duration (timeout) for streams on the selected route.
+                Unlike the `Timeout` field where the timeout duration starts from the time the request
+                has been fully processed (known as end-of-stream), the duration in this field
+                is computed from the beginning of the stream until the response has been processed,
+                including all retries. A stream that does not complete in this duration is closed.
+              default_from_api: true
+              properties:
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+                    with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+                - name: 'seconds'
+                  type: String
+                  description: |
+                    Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+                  required: true
             - name: 'retryPolicy'
               type: NestedObject
               description: |
@@ -2452,6 +2517,27 @@ properties:
             at_least_one_of:
               - 'default_route_action.0.timeout.0.seconds'
               - 'default_route_action.0.timeout.0.nanos'
+      - name: 'maxStreamDuration'
+        type: NestedObject
+        description: |
+          Specifies the maximum duration (timeout) for streams on the selected route.
+          Unlike the `Timeout` field where the timeout duration starts from the time the request
+          has been fully processed (known as end-of-stream), the duration in this field
+          is computed from the beginning of the stream until the response has been processed,
+          including all retries. A stream that does not complete in this duration is closed.
+        default_from_api: true
+        properties:
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+          - name: 'seconds'
+            type: String
+            description: |
+              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+            required: true
       - name: 'retryPolicy'
         type: NestedObject
         description: |

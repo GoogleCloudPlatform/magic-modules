@@ -14,7 +14,6 @@
 ---
 name: GeminiGcpEnablementSetting
 description: The resource for managing GeminiGcpEnablement settings for Admin Control.
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
@@ -24,9 +23,11 @@ id_format: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettin
 import_format:
   - projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/geminiGcpEnablementSettings/{{gemini_gcp_enablement_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: gemini_gemini_gcp_enablement_setting_basic
-    min_version: 'beta'
     primary_resource_id: example
     vars:
       gemini_gcp_enablement_setting_id: ls1-tf
