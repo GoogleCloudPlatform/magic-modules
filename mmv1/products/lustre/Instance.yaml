@@ -21,15 +21,15 @@ create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{i
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
-- projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+  - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 examples:
-- name: lustre_instance_basic
-  primary_resource_id: 'instance'
-  vars:
-    name: 'instance'
-    network_name: 'projects/{{project}}/networks/network'
-    filesystem_name: 'filesystem'
-    capacity_gib: 21000
+  - name: lustre_instance_basic
+    primary_resource_id: 'instance'
+    vars:
+      name: 'instance'
+      network_name: 'projects/{{project}}/networks/network'
+      filesystem_name: 'filesystem'
+      capacity_gib: 21000
 autogen_async: true
 async:
   operation:
@@ -39,88 +39,88 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: SW5zdGFuY2U=
 parameters:
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: instanceId
-  type: String
-  description: |-
-    Required. Id of the requesting object
-    If auto-generating Id server-side, remove this field and
-    instance_id from the method_signature of Create RPC
-  immutable: true
-  url_param_only: true
-  required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instanceId
+    type: String
+    description: |-
+      Required. Id of the requesting object
+      If auto-generating Id server-side, remove this field and
+      instance_id from the method_signature of Create RPC
+    immutable: true
+    url_param_only: true
+    required: true
 properties:
-- name: name
-  type: String
-  description: Identifier. name of resource
-  output: true
-- name: filesystem
-  type: String
-  description: Required. Immutable. Filesystem Name for Lustre.
-  immutable: true
-  required: true
-- name: network
-  type: String
-  description: |-
-    Required. Immutable. VPC Network full name.
-    Must be in a form 'projects/{project}/global/networks/{network}'.
-    {project} is a project number, as in '12345' {network} is network name.
-  immutable: true
-  required: true
-- name: mountPoint
-  type: String
-  description: |-
-    Output only. Mount point of the instance given by IP address and filesystem name and
-    is in the format of {ip_address}@tcp:/{filesystem}.
-  output: true
-- name: labels
-  type: KeyValueLabels
-  description: Optional. Labels as key value pairs
-- name: perUnitStorageThroughput
-  type: String
-  description: |-
-    Optional. The throughput of the instance in MB/s/TiB.
-    Valid values are 250, 500, 1000.
-    Default value is 1000.
-- name: capacityGib
-  type: String
-  description: Required. Capacity of the instance in GiB
-  required: true
-- name: state
-  type: String
-  description: |-
-    Output only. State of the instance
-    Possible values:
-    STATE_UNSPECIFIED
-    ACTIVE
-    CREATING
-    DELETING
-    UPGRADING
-    REPAIRING
-    STOPPED
-  output: true
-- name: createTime
-  type: String
-  description: Output only. [Output only] Create time stamp
-  output: true
-- name: updateTime
-  type: String
-  description: Output only. [Output only] Update time stamp
-  output: true
-- name: description
-  type: String
-  description: Optional. Description
+  - name: name
+    type: String
+    description: Identifier. name of resource
+    output: true
+  - name: filesystem
+    type: String
+    description: Required. Immutable. Filesystem Name for Lustre.
+    immutable: true
+    required: true
+  - name: network
+    type: String
+    description: |-
+      Required. Immutable. VPC Network full name.
+      Must be in a form 'projects/{project}/global/networks/{network}'.
+      {project} is a project number, as in '12345' {network} is network name.
+    immutable: true
+    required: true
+  - name: mountPoint
+    type: String
+    description: |-
+      Output only. Mount point of the instance given by IP address and filesystem name and
+      is in the format of {ip_address}@tcp:/{filesystem}.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs
+  - name: perUnitStorageThroughput
+    type: String
+    description: |-
+      Optional. The throughput of the instance in MB/s/TiB.
+      Valid values are 250, 500, 1000.
+      Default value is 1000.
+  - name: capacityGib
+    type: String
+    description: Required. Capacity of the instance in GiB
+    required: true
+  - name: state
+    type: String
+    description: |-
+      Output only. State of the instance
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+      UPGRADING
+      REPAIRING
+      STOPPED
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. [Output only] Create time stamp
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. [Output only] Update time stamp
+    output: true
+  - name: description
+    type: String
+    description: Optional. Description

@@ -15,8 +15,8 @@
 name: Lustre
 display_name: Lustre
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-- base_url: https://lustre.googleapis.com/v1/
-  name: ga
+  - base_url: https://lustre.googleapis.com/v1/
+    name: ga
 caibaseurl: ""
