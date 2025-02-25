@@ -105,7 +105,7 @@ properties:
     exactly_one_of:
       - parquet_options
       - csv_options
-    allow_empty_object: true  
+    allow_empty_object: true
     send_empty_value: true
     properties: []
   - name: 'csvOptions'
