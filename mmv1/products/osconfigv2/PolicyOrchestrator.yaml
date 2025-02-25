@@ -33,6 +33,8 @@ examples:
       policy_orchestrator_id: po
       orchestrated_resource_id: test-orchestrated-resource
       os_policy_id: test-os-policy
+    test_env_vars:
+      project: PROJECT_NAME
 autogen_async: true
 async:
   operation:
