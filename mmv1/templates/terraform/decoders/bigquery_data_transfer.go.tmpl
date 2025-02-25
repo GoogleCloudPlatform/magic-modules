@@ -16,7 +16,7 @@ if paramMap, ok := res["params"]; ok {
 		if _, apiOk := params[sp]; apiOk {
 			if _, exists := d.GetOkExists("sensitive_params.0." + sp); exists {
 				delete(params, sp)
-			} else if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_params").IndexInt(0).GetAttr(sp + "_wo")); !auth.IsNull() && auth.Type().Equals(cty.String) {
+			} else if _, exists := d.GetOkExists("sensitive_params.0.secret_access_key_wo_version"); exists {
 				delete(params, sp)
 			} else {
 				params[sp] = d.Get("params." + sp)
