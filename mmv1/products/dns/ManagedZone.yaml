@@ -358,6 +358,7 @@ properties:
             - name: 'domainName'
               type: String
               description: 'Fully qualified domain name for the forwarding target.'
+              min_version: 'beta'
             - name: 'forwardingPath'
               type: Enum
               description: |
