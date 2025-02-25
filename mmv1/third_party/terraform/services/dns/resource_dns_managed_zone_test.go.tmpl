@@ -139,7 +139,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "172.16.1.20", "default", "private"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "172.16.1.20", "dns.infra.foo.com.", "default", "private"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -147,7 +147,7 @@ func TestAccDNSManagedZone_privateForwardingUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "192.168.1.1", "private", "default"),
+				Config: testAccDnsManagedZone_privateForwardingUpdate(zoneSuffix, "172.16.1.10", "192.168.1.1", "dns.infra.foo.com.", "private", "default"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -469,7 +469,7 @@ resource "google_container_cluster" "cluster-1" {
 `, suffix, first_network, second_network, suffix, suffix, suffix, suffix)
 }
 
-func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver, first_forwarding_path, second_forwarding_path string) string {
+func testAccDnsManagedZone_privateForwardingUpdate(suffix, first_nameserver, second_nameserver, domain_name, first_forwarding_path, second_forwarding_path string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
   name        = "private-zone-%s"
@@ -485,6 +485,7 @@ resource "google_dns_managed_zone" "private" {
   forwarding_config {
     target_name_servers {
       ipv4_address = "%s"
+      domain_name = "%s"
       forwarding_path = "%s"
     }
     target_name_servers {
@@ -498,7 +499,7 @@ resource "google_compute_network" "network-1" {
   name                    = "tf-test-net-1-%s"
   auto_create_subnetworks = false
 }
-`, suffix, first_nameserver, first_forwarding_path, second_nameserver, second_forwarding_path, suffix)
+`, suffix, first_nameserver, domain_name, first_forwarding_path, second_nameserver, second_forwarding_path, suffix)
 }
 
 func testAccDnsManagedZone_cloudLoggingConfig_basic(suffix string) string {
