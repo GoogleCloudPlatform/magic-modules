@@ -130,7 +130,7 @@ The following arguments are supported:
 
     Possible values are: `ABANDON`.
 
-* `password_wo_version` - (Optional) The version of the password_wo. For more info see [updating write-only attributes](https://registry.terraform.io/providers/hashicorp/google/6.15.0/docs/guides/using_write_only_attributes#updating-write-only-attributes).
+* `password_wo_version` - (Optional) The version of the password_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
 
 - - -
 

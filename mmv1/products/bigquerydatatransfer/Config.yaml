@@ -227,7 +227,7 @@ properties:
         type: Integer
         immutable: true
         description: |
-          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only attributes](https://registry.terraform.io/providers/hashicorp/google/6.15.0/docs/guides/using_write_only_attributes#updating-write-only-attributes)
+          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
       - name: 'secretAccessKey'
         type: String
         description: |
