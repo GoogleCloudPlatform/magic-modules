@@ -73,6 +73,11 @@ func TestAccSqlUser_password_wo(t *testing.T) {
 			{
 				// Update password
 				Config: testGoogleSqlUser_new_password_wo(instance, "new_password"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_user.user1", plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleSqlUserExists(t, "google_sql_user.user1"),
 				),
