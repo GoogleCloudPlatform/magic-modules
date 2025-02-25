@@ -1,3 +1,24 @@
+resource "google_organization_iam_member" "iam_osconfig_service_agent" {
+    provider = google-beta
+    org_id = "{{index $.TestEnvVars "org_id"}}"
+    role    = "roles/osconfig.serviceAgent"
+    member  = "serviceAccount:service-org-{{index $.TestEnvVars "org_id"}}@gcp-sa-osconfig.iam.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "iam_osconfig_rollout_service_agent" {
+    provider = google-beta
+    org_id = "{{index $.TestEnvVars "org_id"}}"
+    role    = "roles/osconfig.rolloutServiceAgent"
+    member  = "serviceAccount:service-org-{{index $.TestEnvVars "org_id"}}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com
+}
+
+resource "google_organization_iam_member" "iam_progressiverollout_service_agent" {
+    provider = google-beta
+    org_id = "{{index $.TestEnvVars "org_id"}}"
+    role    = "roles/progressiverollout.serviceAgent"
+    member  = "serviceAccount:service-org-{{index $.TestEnvVars "org_id"}}@gcp-sa-progrollout.iam.gserviceaccount.com"
+}
+
 resource "google_os_config_v2_policy_orchestrator_for_organization" "{{$.PrimaryResourceId}}" {
     provider = google-beta
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
