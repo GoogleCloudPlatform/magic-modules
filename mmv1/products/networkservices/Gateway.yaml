@@ -209,7 +209,6 @@ properties:
     enum_values:
       - 'IPV4'
       - 'IPV6'
-    default_value: 'IPV4'
   - name: 'envoyHeaders'
     type: Enum
     description: |
@@ -219,7 +218,6 @@ properties:
     enum_values:
       - 'NONE'
       - 'DEBUG_HEADERS'
-    default_value: 'NONE'
   - name: 'routingMode'
     type: Enum
     description: |
