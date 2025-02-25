@@ -682,7 +682,7 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "172.16.1.10", "dns.infra.goo.com.", "private", "default"),
+				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "172.16.1.10", "dns.infra.goo.com.", "default", "private"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
