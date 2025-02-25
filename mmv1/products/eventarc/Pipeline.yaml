@@ -624,8 +624,8 @@ properties:
           Optional. The minimum severity of logs that will be sent to Stackdriver/Platform
           Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
         default_from_api: true
+        required: true
         enum_values:
-          - LOG_SEVERITY_UNSPECIFIED
           - NONE
           - DEBUG
           - INFO
