@@ -13,25 +13,26 @@
 
 ---
 # API resource name
-name: 'ProjectManagementHub'
-kind: 'storage#managementhub'
+name: 'ProjectIntelligenceConfig'
+kind: 'storage#intelligence'
 # Resource description for the provider documentation.
 description: |
-  The Project Management Hub resource represents GCS Management Hub operating on
-  individual GCP project. Management Hub is a singleton resource and individual
-  instance exists on each GCP project.
+  The Project Storage Intelligence Config resource represents GCS Storage
+  Intelligence operating on individual GCP project. Storage Intelligence Config
+  is a singleton resource and individual instance exists on each GCP project.
 
-  Management Hub is for Storage Admins to manage GCP storage assets at scale for
-  performance, cost, security & compliance.
+  Storage Intelligence is for Storage Admins to manage GCP storage assets at
+  scale for performance, cost, security & compliance.
 
 docs:
   warning: |
-    Management Hub is a singleton resource which cannot be created or
-    deleted. A single instance of Management Hub exist for each GCP Project.
-    Terraform does not create or destroy this resource. Terraform resource
-    creation for this resource is simply an update operation on existing
-    resource with specified properties. Terraform deletion won't have any effect
-    on this resource rather it will only remove it from the state file.
+    Storage Intelligence Config is a singleton resource which cannot be created
+    or deleted. A single instance of Storage Intelligence Config exist
+    for each GCP Project. Terraform does not create or destroy this resource.
+    Terraform resource creation for this resource is simply an update operation
+    on existing resource with specified properties. Terraform deletion won't
+    have any effect on this resource rather it will only remove it from the
+    state file.
 # Marks the resource as beta-only. Ensure a beta version block is present in
 # provider.yaml.
 # min_version: beta
@@ -46,11 +47,7 @@ self_link: 'projects/{{name}}/locations/global/managementHub'
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
 custom_code:
-  pre_create: templates/terraform/constants/storage_management_hub.go.tmpl
-  pre_delete: templates/terraform/constants/storage_management_hub.go.tmpl
-  pre_read: templates/terraform/constants/storage_management_hub.go.tmpl
-  pre_update: templates/terraform/constants/storage_management_hub.go.tmpl
-  custom_create: templates/terraform/custom_create/storage_project_management_hub.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_project_intelligence.go.tmpl
 # Overrides the URL for the resource's standard Update method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/134
 # Terraform field names enclosed in double curly braces are replaced with
@@ -61,9 +58,6 @@ update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
 # fields when updating the resource. If false, it does not.
 update_mask: true
-
-create_url: 'projects/{{name}}/locations/global/managementHub?updateMask=editionConfig,filter'
-create_verb: 'PATCH'
 
 exclude_delete: true
 
@@ -89,25 +83,25 @@ properties:
     required: false
     default_from_api: true
     description: |
-      Edition configuration of the Management Hub resource. Valid values are
+      Edition configuration of the Storage Intelligence resource. Valid values are
       INHERIT, DISABLED and STANDARD.
   - name: 'updateTime'
     type: String
     output: true
     description: |
-      The time at which the Management Hub resource is last updated.
+      The time at which the Storage Intelligence Config resource is last updated.
   - name: 'filter'
     type: NestedObject
     description: |
       Filter over location and bucket using include or exclude semantics.
       Resources that match the include or exclude filter are exclusively
-      included or excluded from the Management Hub plan.
+      included or excluded from the Storage Intelligence plan.
     properties:
       - name: excludedCloudStorageBuckets
         type: NestedObject
         required: false
         description: |
-          Buckets to exclude from the Management Hub plan.
+          Buckets to exclude from the Storage Intelligence plan.
         conflicts:
           - 'filter.0.included_cloud_storage_buckets'
         at_least_one_of:
@@ -138,7 +132,7 @@ properties:
         type: NestedObject
         required: false
         description: |
-          Buckets to include in the Management Hub plan.
+          Buckets to include in the Storage Intelligence plan.
         conflicts:
           - 'filter.0.excluded_cloud_storage_buckets'
         at_least_one_of:
@@ -171,7 +165,7 @@ properties:
         type: NestedObject
         required: false
         description: |
-          Locations to exclude from the Management Hub plan.
+          Locations to exclude from the Storage Intelligence plan.
         conflicts:
           - 'filter.0.included_cloud_storage_locations'
         at_least_one_of:
@@ -191,7 +185,7 @@ properties:
         type: NestedObject
         required: false
         description: |
-          Locations to include in the Management Hub plan.
+          Locations to include in the Storage Intelligence plan.
         conflicts:
           - 'filter.0.excluded_cloud_storage_locations'
         at_least_one_of:
@@ -207,19 +201,19 @@ properties:
               List of locations.
             item_type:
               type: String
-  - name: 'effectiveManagementHubEdition'
+  - name: 'effectiveStorageIntelligenceEdition'
     output: true
     description: |
-      The Management Hub edition that is effective for the resource.
+      The Storage Intelligence edition that is effective for the resource.
     type: NestedObject
     properties:
-      - name: managementHub
+      - name: storageIntelligence
         type: String
         output: true
         description: |
-          The Management Hub resource that is applied for the target resource.
-      - name: managementHubEdition
+          The Storage Intelligence resource that is applied for the target resource.
+      - name: storageIntelligenceEdition
         type: String
         output: true
         description: |
-          The `ManagementHub` edition that is applicable for the resource.
+          The `StorageIntelligence` edition that is applicable for the resource.
