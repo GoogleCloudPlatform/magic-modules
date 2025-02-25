@@ -32,7 +32,9 @@ exclude_delete: true
 autogen_status: UnVsZURlcGxveW1lbnQ=
 
 custom_code:
+  constants: 'templates/terraform/constants/chronicle_rule_deployment.go.tmpl'
   custom_create: 'templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
 
 examples:
   - name: 'chronicle_ruledeployment_basic'
@@ -41,6 +43,11 @@ examples:
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
   - name: 'chronicle_ruledeployment_disabled'
+    primary_resource_id: 'example'
+    min_version: 'beta'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_ruledeployment_run_frequency_missing'
     primary_resource_id: 'example'
     min_version: 'beta'
     test_env_vars:
@@ -101,6 +108,7 @@ properties:
     output: true
   - name: runFrequency
     type: String
+    diff_suppress_func: 'chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc'
     description: |2-
 
       The run frequency of the rule deployment.
