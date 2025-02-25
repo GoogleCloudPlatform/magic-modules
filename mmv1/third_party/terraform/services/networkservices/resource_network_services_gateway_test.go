@@ -184,7 +184,7 @@ func TestAccNetworkServicesGateway_swpUpdate(t *testing.T) {
 	ruleName := fmt.Sprintf("tf-test-gateway-swp-rule-%s", acctest.RandString(t, 10))
 	gatewayScope := fmt.Sprintf("tf-test-gateway-swp-scope-%s", acctest.RandString(t, 10))
 	gatewayName := fmt.Sprintf("tf-test-gateway-swp-%s", acctest.RandString(t, 10))
-  serverTlsName := fmt.Sprintf("tf-test-gateway-swp-servertls-%s", acctest.RandString(t, 10))
+	serverTlsName := fmt.Sprintf("tf-test-gateway-swp-servertls-%s", acctest.RandString(t, 10))
 	// updates
 	newCmName := fmt.Sprintf("tf-test-gateway-swp-newcm-%s", acctest.RandString(t, 10))
 	newPolicyName := fmt.Sprintf("tf-test-gateway-swp-newpolicy-%s", acctest.RandString(t, 10))
