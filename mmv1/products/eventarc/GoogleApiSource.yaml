@@ -13,28 +13,36 @@
 
 ---
 name: GoogleApiSource
-description: |
-  The Eventarc GoogleApiSource resource
 base_url: projects/{{project}}/locations/{{location}}/googleApiSources
-update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/googleApiSources/{{google_api_source_id}}
 create_url: projects/{{project}}/locations/{{location}}/googleApiSources?googleApiSourceId={{google_api_source_id}}
 update_verb: PATCH
+update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/googleApiSources/{{google_api_source_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/googleApiSources/{{google_api_source_id}}
-autogen_async: true
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/publish-events/publish-events-google-sources'
+  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.googleApiSources
+description: |
+  The Eventarc GoogleApiSource resource
 async:
   actions: ['create', 'update', 'delete']
   operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
     base_url: '{{op_id}}'
   type: OpAsync
   result:
     resource_inside_response: true
+autogen_async: true
+examples:
+  - name: eventarc_google_api_source_with_cmek
+    primary_resource_id: primary
+    test_env_vars:
+      project_name: PROJECT_NAME
+    # We don't auto-generate tests since we can't support concurrent tests, as long as
+    # only one GoogleApiSource and MessageBus is supported per project.
+    exclude_test: true
 parameters:
   - name: location
     type: String
@@ -98,8 +106,8 @@ properties:
           Optional. The minimum severity of logs that will be sent to Stackdriver/Platform
           Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
         default_from_api: true
+        required: true
         enum_values:
-          - LOG_SEVERITY_UNSPECIFIED
           - NONE
           - DEBUG
           - INFO
