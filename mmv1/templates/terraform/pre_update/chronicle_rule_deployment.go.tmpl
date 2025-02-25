@@ -1,5 +1,3 @@
-// Remove 'run_frequency' from the update mask if it's not configured. (Optional parameter in Terraform.)
-
 // removeRunFrequencyFromUpdateMask removes 'runFrequency' from the updateMask in a URL.
 removeRunFrequencyFromUpdateMask := func(url string) (string) {
     // Remove "runFrequency" and handle commas.
