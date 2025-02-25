@@ -1,4 +1,4 @@
-package storage
+package storagecontrol
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleStorageProjectManagementHub() *schema.Resource {
+func DataSourceGoogleStorageControlProjectIntelligenceConfig() *schema.Resource {
 
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceStorageProjectManagementHub().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceStorageControlProjectIntelligenceConfig().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
@@ -27,7 +27,7 @@ func dataSourceGoogleStorageManagementHubRead(d *schema.ResourceData, meta inter
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-	err = resourceStorageProjectManagementHubRead(d, meta)
+	err = resourceStorageControlProjectIntelligenceConfigRead(d, meta)
 	if err != nil {
 		return err
 	}
