@@ -113,7 +113,7 @@ resource "google_storage_insights_report_config" "config" {
     delimiter = ","
     header_required = false
   }  
-  parquet_options = ""
+  parquet_options {}
   object_metadata_report_options {
     metadata_fields = ["bucket", "name", "project"]
     storage_filters {
@@ -165,7 +165,7 @@ resource "google_storage_insights_report_config" "config" {
       year = 2050
     }
   }
-  parquet_options = ""
+  parquet_options {}
   object_metadata_report_options {
     metadata_fields = ["bucket", "name", "project"]
     storage_filters {
