@@ -14,7 +14,13 @@ if paramMap, ok := res["params"]; ok {
 	params := paramMap.(map[string]interface{})
 	for _, sp := range sensitiveParams {
 		if _, apiOk := params[sp]; apiOk {
-			delete(params, sp)
+			if _, exists := d.GetOkExists("sensitive_params.0." + sp); exists {
+				delete(params, sp)
+			} else if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_params").IndexInt(0).GetAttr(sp + "_wo")); !auth.IsNull() && auth.Type().Equals(cty.String) {
+				delete(params, sp)
+			} else {
+				params[sp] = d.Get("params." + sp)
+			}
 		}
 	}
 	for k, v := range params {
