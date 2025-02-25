@@ -100,11 +100,21 @@ properties:
             type: Integer
             description: 'The year to stop generating inventory reports'
             required: true
+  - name: 'parquetOptions'
+    type: String
+    exactly_one_of:
+      - parquet_options
+      - csv_options
+    send_empty_value: true
+    custom_flatten: templates/terraform/custom_flatten/stoarge_insights_report_config_custom_flatten.go.tmpl
+    custom_expand: templates/terraform/custom_expand/stoarge_insights_report_config_custom_expand.go.tmpl
   - name: 'csvOptions'
     type: NestedObject
     description: |
       Options for configuring the format of the inventory report CSV file.
-    required: true
+    exactly_one_of:
+      - parquet_options
+      - csv_options
     properties:
       - name: 'recordSeparator'
         type: String
