@@ -192,6 +192,7 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = "%{key1}"
+  display_name    = "message bus"
   logging_config {
     log_severity = "ALERT"
   }
@@ -218,6 +219,7 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = "%{key2}"
+  display_name    = "updated message bus"
   logging_config {
     log_severity = "DEBUG"
   }
@@ -244,6 +246,7 @@ resource "google_eventarc_message_bus" "primary" {
   location        = "%{region}"
   message_bus_id  = "tf-test-messagebus%{random_suffix}"
   crypto_key_name = ""
+  display_name    = "updated message bus"
   logging_config {
     log_severity = "DEBUG"
   }
