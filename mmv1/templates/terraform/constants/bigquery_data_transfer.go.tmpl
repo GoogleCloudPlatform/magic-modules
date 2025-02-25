@@ -18,6 +18,11 @@ func sensitiveParamCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 				return fmt.Errorf("Sensitive param [%s] cannot be set in both `params` and the `sensitive_params` block.", sp)
 			}
 		}
+		if authLabel.AsString() != "" {
+			if _, versionExists := diff.GetOkExists("sensitive_params.0.secret_access_key_wo_version"); !versionExists {
+				return fmt.Errorf("Sensitive param [%s] must be set with %s_version", sp, sp)
+			}
+		}
 	{{- end }}
 	return nil
 }
