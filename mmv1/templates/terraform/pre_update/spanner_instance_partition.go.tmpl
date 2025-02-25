@@ -1,0 +1,24 @@
+delete(obj, "instancePartitionId")
+fieldMask := []string{}
+
+if d.HasChange("display_name") {
+    fieldMask = append(fieldMask, "displayName")
+}
+
+if d.HasChange("config") {
+    fieldMask = append(fieldMask, "config")
+}
+
+if d.HasChange("node_count") {
+    fieldMask = append(fieldMask, "nodeCount")
+}
+
+if d.HasChange("processing_units") {
+    fieldMask = append(fieldMask, "processingUnits")
+}
+
+// Add field_mask as a URL parameter
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"field_mask": strings.Join(fieldMask, ",")})
+if err != nil {
+    return err
+}
