@@ -63,6 +63,10 @@ examples:
   - name: 'workstation_cluster_tags'
     primary_resource_id: 'default'
     min_version: 'beta'
+    vars:
+      workstation_cluster_name: 'workstation-cluster-tags'
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
     test_env_vars:
       org_id: "ORG_ID"
     test_vars_overrides:
