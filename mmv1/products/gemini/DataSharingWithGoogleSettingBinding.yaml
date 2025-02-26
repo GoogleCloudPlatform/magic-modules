@@ -13,6 +13,7 @@
 
 ---
 name: DataSharingWithGoogleSettingBinding
+api_resource_type_kind: SettingBinding
 description: The resource for managing DataSharingWithGoogle setting bindings for Admin Control.
 references:
   guides:

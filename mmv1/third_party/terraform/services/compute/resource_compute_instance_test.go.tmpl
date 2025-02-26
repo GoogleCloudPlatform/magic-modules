@@ -4413,20 +4413,27 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+  envRegion := envvar.GetTestRegionFromEnv()
 	var instance compute.Instance
+
+{{ if eq $.TargetVersionName `ga` }}
+	providerVersion := "v1"
+{{- else }}
+	providerVersion := "beta"
+{{- end }}
 
 	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
-	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), testNetworkAttachmentName)
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
 
 	context := map[string]interface{}{
 		"suffix":                  (acctest.RandString(t, 10)),
 		"network_attachment_name": testNetworkAttachmentName,
+    "region":                  envRegion,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4439,7 +4446,7 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/beta/%s", fullFormNetworkAttachmentName)),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
 				),
 			},
 		},
@@ -4475,7 +4482,6 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
@@ -5203,7 +5209,6 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -5214,7 +5219,6 @@ func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance,
 		return fmt.Errorf("Network Attachment %s, was not found in the instance template", networkAttachmentName)
 	}
 }
-{{- end }}
 
 func testAccCheckComputeInstanceHasMachineType(instance *compute.Instance, machineType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -11228,7 +11232,6 @@ resource "google_compute_instance" "foobar" {
 
 {{ end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -11262,6 +11265,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
 resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
   machine_type = "e2-medium"
+  zone         = "%{region}-a"
 
 	boot_disk {
 		initialize_params {
@@ -11273,7 +11277,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	network_interface{
+	network_interface {
 		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
 	}
 
@@ -11353,7 +11357,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	network_interface{
+	network_interface {
 		network_attachment = %s
 	}
 
@@ -11363,7 +11367,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
 }
-{{- end }}
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
 	return fmt.Sprintf(`
