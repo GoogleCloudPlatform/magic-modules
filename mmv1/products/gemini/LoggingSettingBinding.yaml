@@ -13,6 +13,7 @@
 
 ---
 name: LoggingSettingBinding
+api_resource_type_kind: SettingBinding
 description: The resource for managing Logging setting bindings for Admin Control.
 references:
   guides:

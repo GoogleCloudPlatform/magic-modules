@@ -82,7 +82,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"rileykarson": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 2, 25),
+					endDate:   newDate(2025, 3, 10),
+				},
+			},
 		},
 		"roaks3": {
 			vacations: []Vacation{},

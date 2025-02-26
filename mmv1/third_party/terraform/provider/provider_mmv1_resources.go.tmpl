@@ -22,6 +22,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_access_approval_project_service_account":   accessapproval.DataSourceAccessApprovalProjectServiceAccount(),
 	"google_access_context_manager_access_policy":   accesscontextmanager.DataSourceAccessContextManagerAccessPolicy(),
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
+	"google_alloydb_cluster":                           alloydb.DataSourceAlloydbDatabaseCluster(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
 	"google_alloydb_instance":                          alloydb.DataSourceAlloydbDatabaseInstance(),
@@ -32,11 +33,9 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
 	"google_apphub_application":						apphub.DataSourceGoogleApphubApplication(),
 	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
 	"google_backup_dr_backup_plan_association":			backupdr.DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
 	"google_backup_dr_backup_plan":						backupdr.DataSourceGoogleCloudBackupDRBackupPlan(),
-	{{- end }}
 	"google_backup_dr_backup":							backupdr.DataSourceGoogleCloudBackupDRBackup(),
 	"google_backup_dr_data_source":						backupdr.DataSourceGoogleCloudBackupDRDataSource(),
 	"google_backup_dr_backup_vault":					backupdr.DataSourceGoogleCloudBackupDRBackupVault(),
@@ -253,6 +252,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
 	{{- end }}
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
+	"google_memorystore_instance":						memorystore.DataSourceMemorystoreInstance(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),

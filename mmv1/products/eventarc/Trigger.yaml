@@ -83,6 +83,16 @@ examples:
       service_account_id: trigger-sa
       service_name: some-service
     exclude_docs: true
+  - name: eventarc_trigger_with_firestore_source
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      service_name: some-service
+      database_id: some-database
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    exclude_docs: true
 parameters:
   - name: location
     type: String
@@ -97,6 +107,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/eventarc_trigger_name.go.tmpl
   - name: uid
     type: String
     description: Output only. Server assigned unique identifier for the trigger. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.

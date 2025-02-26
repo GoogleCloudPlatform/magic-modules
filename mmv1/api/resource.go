@@ -561,10 +561,27 @@ func (r Resource) SensitiveProps() []*Type {
 	})
 }
 
+func (r Resource) WriteOnlyProps() []*Type {
+	props := r.AllNestedProperties(r.RootProperties())
+	return google.Select(props, func(p *Type) bool {
+		return p.WriteOnly
+	})
+}
+
 func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
+}
+
+func (r Resource) WriteOnlyPropsToString() string {
+	var props []string
+
+	for _, prop := range r.WriteOnlyProps() {
 		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
 	}
 

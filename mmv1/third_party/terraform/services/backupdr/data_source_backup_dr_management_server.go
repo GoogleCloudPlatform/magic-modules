@@ -1,5 +1,4 @@
 package backupdr
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -18,9 +17,6 @@ func DataSourceGoogleCloudBackupDRService() *schema.Resource {
 		Read:   dataSourceGoogleCloudBackupDRServiceRead,
 		Schema: dsSchema,
 	}
-}
-func flattenBackupDRManagementServerName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return v
 }
 
 func flattenBackupDRManagementServerResourceResp(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) map[string]interface{} {
@@ -49,6 +45,10 @@ func flattenBackupDRManagementServerResource(v interface{}, d *schema.ResourceDa
 	return transformed
 }
 
+func flattenBackupDRManagementServerName(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
 func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -60,7 +60,7 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 		return err
 	}
 	billingProject := project
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BackupDRBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/managementServers")
+	url, err := tpgresource.ReplaceVars(d, config, `{{BackupDRBasePath}}projects/{{project}}/locations/{{location}}/managementServers`)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,8 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	if err != nil {
 		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
-	resourceResponse := flattenBackupDRManagementServerResourceResp(res["managementServers"], d, config)
+	managementServersResponse := res["managementServers"]
+	resourceResponse := flattenBackupDRManagementServerResourceResp(managementServersResponse, d, config)
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading ManagementServer: %s", err)
 	}
@@ -101,4 +102,3 @@ func dataSourceGoogleCloudBackupDRServiceRead(d *schema.ResourceData, meta inter
 	d.Set("name", name)
 	return nil
 }
-{{- end }}

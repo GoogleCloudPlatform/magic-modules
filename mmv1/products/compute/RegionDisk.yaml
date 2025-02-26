@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionDisk'
+api_resource_type_kind: Disk
 kind: 'compute#disk'
 description: |
   Persistent disks are durable storage devices that function similarly to

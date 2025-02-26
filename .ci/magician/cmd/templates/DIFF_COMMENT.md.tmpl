@@ -11,8 +11,7 @@ Your PR generated some diffs in downstreams - here they are.
 {{end -}}
 {{end -}}
 
-{{- $breakingChangesLength := len .BreakingChanges }}
-{{- if gt $breakingChangesLength 0}}
+{{if gt (len .BreakingChanges) 0}}
 ## Breaking Change(s) Detected
 
 The following breaking change(s) were detected within your pull request.
@@ -38,6 +37,18 @@ Please add an acceptance test which includes these fields. The test should inclu
 ```
 
 {{- end }}
+{{end}}
+
+{{if gt (len .MissingServiceLabels) 0}}
+## Missing service labels
+
+The following new resources do not have corresponding service labels:
+
+{{- range .MissingServiceLabels}}
+- {{.}}{{end}}
+
+If you believe this detection to be incorrect please raise the concern with your reviewer.
+An `override-missing-service-label` label can be added to allow merging.
 {{end}}
 
 {{- $errorsLength := len .Errors}}
