@@ -30,7 +30,7 @@ timeouts:
   delete_minutes: 45
 autogen_async: true
 async:
-  actions: ['create', 'delete']
+  actions: ['create']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -40,6 +40,8 @@ async:
       delete_minutes: 45
   result:
     resource_inside_response: true
+sweeper:
+  identifier_field: "organization"
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
