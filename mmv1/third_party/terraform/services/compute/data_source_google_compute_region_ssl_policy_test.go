@@ -31,7 +31,7 @@ func TestAccDataSourceComputeRegionSslPolicy(t *testing.T) {
 func testAccDataSourceComputeRegionSslPolicyConfig(policyName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_ssl_policy" "foobar" {
-  name            = "policy-test-%s"
+  name            = "tf-test-policyds-%s"
   region          = "us-central1"
   profile         = "MODERN"
   min_tls_version = "TLS_1_2"
