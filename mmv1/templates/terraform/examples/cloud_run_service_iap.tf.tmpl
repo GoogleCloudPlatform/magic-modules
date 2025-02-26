@@ -5,7 +5,6 @@ resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
 
   metadata {
     annotations = {
-      "run.googleapis.com/launch-stage" = "BETA"
       "run.googleapis.com/iap-enabled": true
     }
   }
