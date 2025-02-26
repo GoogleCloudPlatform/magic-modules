@@ -35,6 +35,7 @@ examples:
       os_policy_id: test-os-policy
     test_env_vars:
       project_number: PROJECT_NUMBER
+      project: PROJECT_NAME
 autogen_async: true
 async:
   operation:
