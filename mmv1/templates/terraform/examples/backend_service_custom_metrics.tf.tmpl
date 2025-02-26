@@ -8,6 +8,7 @@ resource "google_compute_global_network_endpoint_group" "gce_vm_neg" {
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
   locality_lb_policy    = "WEIGHTED_ROUND_ROBIN"
   custom_metrics {
     name    = "orca.application_utilization"
