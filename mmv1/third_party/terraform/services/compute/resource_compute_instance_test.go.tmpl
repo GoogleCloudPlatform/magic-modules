@@ -6767,9 +6767,6 @@ resource "google_compute_instance" "foobar" {
 
   allow_stopping_for_update = true
 }
-
-data "google_compute_default_service_account" "default" {
-}
 `, diskNames[0], diskNameToEncryptionKey[diskNames[0]].RawKey,
 		diskNames[1], diskNameToEncryptionKey[diskNames[1]].RawKey,
 		diskNames[2], diskNameToEncryptionKey[diskNames[2]].RawKey,
