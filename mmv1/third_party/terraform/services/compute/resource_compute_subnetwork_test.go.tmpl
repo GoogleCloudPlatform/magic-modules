@@ -131,7 +131,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/16", subnetworkName),
                                 ConfigPlanChecks: resource.ConfigPlanChecks{
                                     PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
                                     },
                                 },
 			},
@@ -140,7 +140,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/24", subnetworkName),
                                 ConfigPlanChecks: resource.ConfigPlanChecks{
                                     PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
                                     },
                                 },
 			},
@@ -149,7 +149,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				Config: testAccComputeSubnetwork_update3(cnName, "10.2.0.0/24", subnetworkName),
                                 ConfigPlanChecks: resource.ConfigPlanChecks{
                                     PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
                                     },
                                 },
 			},
@@ -163,7 +163,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				Config: testAccComputeSubnetwork_update4(cnName, subnetwork2Name),
                                 ConfigPlanChecks: resource.ConfigPlanChecks{
                                     PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-migration-purpose", plancheck.ResourceActionUpdate),
                                     },
                                 },
 			},
