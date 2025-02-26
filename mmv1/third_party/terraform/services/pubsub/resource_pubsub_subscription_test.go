@@ -555,7 +555,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
-				ImportStateId: subscriptionShort,
+				ImportStateId:     subscriptionShort,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -585,7 +585,6 @@ resource "google_pubsub_subscription" "foo" {
 }
 `, topic, subscription)
 }
-
 
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
 	return fmt.Sprintf(`
