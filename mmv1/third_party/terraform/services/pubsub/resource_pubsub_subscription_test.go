@@ -539,6 +539,54 @@ func TestAccPubsubSubscription_filter(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_updateWithUpdatedJavascriptUdfSettings(topic, subscriptionShort),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId: subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubSubscription_updateWithUpdatedJavascriptUdfSettings(topic, subscription string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+	name = "%s"
+	message_transforms = [
+		{
+			javascript_udf {
+				function_name = "filter_falsy",
+				code = "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+			}
+			enabled = true
+		}
+	]
+}
+`, topic, subscription)
+}
+
+
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
