@@ -108,6 +108,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 	t.Parallel()
 
 	var subnetwork compute.Subnetwork
+        var sybnetwork1 compute.Subnetwork
  
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -163,7 +164,7 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
+				ResourceName:      "google_compute_subnetwork.network-with-migration-purpose",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
