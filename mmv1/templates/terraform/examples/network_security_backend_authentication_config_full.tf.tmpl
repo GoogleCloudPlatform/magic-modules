@@ -13,26 +13,29 @@ resource "google_network_security_backend_authentication_config" "{{$.PrimaryRes
 
 resource "google_certificate_manager_certificate" "certificate" {
   provider = google-beta
-  labels = {
+  name     = "{{index $.Vars "certificate_name"}}"
+  labels   = {
     foo = "bar"
   }
   location    = "global"
-  certificate = file("test-fixtures/cert.pem")
-  private_key = file("test-fixtures/key.pem")
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/key.pem")
+  }
   scope       = "CLIENT_AUTH"
 }
 
 resource "google_certificate_manager_trust_config" "trust_config" {
-  provider = google-beta
+  provider    = google-beta
   name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample description for the trust config"
   location    = "global"
 
-  trust_stores {
-    trust_anchors { 
+  trust_stores = {
+    trust_anchors = { 
       pem_certificate = file("test-fixtures/cert.pem")
     }
-    intermediate_cas { 
+    intermediate_cas = { 
       pem_certificate = file("test-fixtures/cert.pem")
     }
   }

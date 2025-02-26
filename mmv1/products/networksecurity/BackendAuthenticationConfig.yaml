@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,6 @@ description: |
 references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.backendAuthenticationConfigs'
-
 base_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs?backendAuthenticationConfigId={{name}}'
@@ -45,6 +44,9 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-backend-authentication-config'
+      certificate_name: 'my-certificate'
+      trust_config_name: 'my-trust-config'
+
 parameters:
   - name: 'name'
     type: String
