@@ -97,6 +97,11 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     exclude_test: true
+  - name: 'datastream_connection_profile_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String
