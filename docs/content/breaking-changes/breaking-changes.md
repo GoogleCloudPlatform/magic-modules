@@ -55,7 +55,7 @@ For more information, see
 ## Field-level breaking changes
 
 * <a name="resource-schema-field-removal-or-rename"></a>Removing or renaming a field 
-* <a name="resource-schema-field-addition-of-exactly-one-of"></a>Adding "ExactlyOneOf" to an existing field
+* <a name="resource-schema-field-addition-of-exactly-one-of"></a>Adding an "ExactlyOneOf" constraint that causes one or more previously-optional fields to be required or conflict with each other
 * <a name="field-changing-type"></a> Changing field output type
   * Between primitive types, like changing a String to an Integer
   * Between complex types like changing a List to a Set.

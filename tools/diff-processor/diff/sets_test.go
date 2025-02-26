@@ -92,7 +92,7 @@ func TestDifference(t *testing.T) {
 			expected: FieldSet{},
 		},
 		{
-			name:     "set difference with subset is subset",
+			name:     "set difference with subset is diff",
 			set1:     FieldSet{"a": {}, "b": {}},
 			set2:     FieldSet{"a": {}},
 			expected: FieldSet{"b": {}},

@@ -110,7 +110,7 @@ var resourceSchemaRule_RemovingAField_TestCases = []resourceSchemaTestCase{
 
 var resourceSchemaRule_AddingExactlyOneOf_TestCases = []resourceSchemaTestCase{
 	{
-		name: "control",
+		name: "no changes",
 		resourceDiff: diff.ResourceDiff{
 			FieldSets: diff.ResourceFieldSetsDiff{
 				Old: diff.ResourceFieldSets{
