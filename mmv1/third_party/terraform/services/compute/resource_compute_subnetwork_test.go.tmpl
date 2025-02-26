@@ -162,11 +162,6 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				ResourceName:      "google_compute_subnetwork.network-with-migration-purpose",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 
