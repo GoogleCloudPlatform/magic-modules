@@ -212,6 +212,217 @@ var resourceSchemaRule_AddingExactlyOneOf_TestCases = []resourceSchemaTestCase{
 					Old: &schema.Schema{Description: "boop", Optional: true},
 					New: &schema.Schema{Description: "boop", Optional: true},
 				},
+				"field-c": {
+					Old: nil,
+					New: &schema.Schema{Description: "woop", Optional: true},
+				},
+			},
+		},
+	},
+	{
+		name: "adding a new field to exactly-one-of while removing an existing field",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-b": {"field-a": {}, "field-b": {}},
+					},
+				},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-c": {"field-a": {}, "field-c": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"field-b": {
+					Old: &schema.Schema{Description: "boop", Optional: true},
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+				"field-c": {
+					Old: nil,
+					New: &schema.Schema{Description: "woop", Optional: true},
+				},
+			},
+		},
+		expectedFields: []string{"field-a"},
+	},
+	{
+		name: "switching a field from required to ExactlyOneOf with just that field",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a": {"field-a": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Required: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+			},
+		},
+	},
+	{
+		name: "switching a field from ExactlyOneOf with just that field to required",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a": {"field-a": {}},
+					},
+				},
+				New: diff.ResourceFieldSets{},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Required: true},
+				},
+			},
+		},
+	},
+	{
+		name: "adding ExactlyOneOf to an existing required field (removing required) and also one or more newly-introduced fields",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-b,field-c": {"field-a": {}, "field-b": {}, "field-c": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Required: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"field-b": {
+					Old: nil,
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+				"field-c": {
+					Old: nil,
+					New: &schema.Schema{Description: "woop", Optional: true},
+				},
+			},
+		},
+	},
+	{
+		name: "adding ExactlyOneOf to new fields that are all within a newly-added, optional ancestor",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"parent.field-a,parent.field-b": {"parent.field-a": {}, "parent.field-b": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"parent": {
+					Old: nil,
+					New: &schema.Schema{Description: "parent", Optional: true, Type: schema.TypeList},
+				},
+				"parent.field-a": {
+					Old: nil,
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"parent.field-b": {
+					Old: nil,
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+			},
+		},
+	},
+	{
+		name: "adding ExactlyOneOf to existing fields that are all within an existing, optional ancestor",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"parent.field-a,parent.field-b": {"parent.field-a": {}, "parent.field-b": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"parent": {
+					Old: &schema.Schema{Description: "parent", Optional: true, Type: schema.TypeList},
+					New: &schema.Schema{Description: "parent", Optional: true, Type: schema.TypeList},
+				},
+				"parent.field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"parent.field-b": {
+					Old: &schema.Schema{Description: "boop", Optional: true},
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+			},
+		},
+		expectedFields: []string{"parent.field-a", "parent.field-b"},
+	},
+	{
+		name: "removing some fields from an ExactlyOneOf",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-b,field-c": {"field-a": {}, "field-b": {}, "field-c": {}},
+					},
+				},
+				New: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-b": {"field-a": {}, "field-b": {}},
+					},
+				},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"field-b": {
+					Old: &schema.Schema{Description: "boop", Optional: true},
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
+				"field-c": {
+					Old: &schema.Schema{Description: "woop", Optional: true},
+					New: &schema.Schema{Description: "woop", Optional: true},
+				},
+			},
+		},
+		expectedFields: []string{"field-a", "field-b"},
+	},
+	{
+		name: "removing an entire ExactlyOneOf",
+		resourceDiff: diff.ResourceDiff{
+			FieldSets: diff.ResourceFieldSetsDiff{
+				Old: diff.ResourceFieldSets{
+					ExactlyOneOf: map[string]diff.FieldSet{
+						"field-a,field-b": {"field-a": {}, "field-b": {}},
+					},
+				},
+				New: diff.ResourceFieldSets{},
+			},
+			Fields: map[string]diff.FieldDiff{
+				"field-a": {
+					Old: &schema.Schema{Description: "beep", Optional: true},
+					New: &schema.Schema{Description: "beep", Optional: true},
+				},
+				"field-b": {
+					Old: &schema.Schema{Description: "boop", Optional: true},
+					New: &schema.Schema{Description: "boop", Optional: true},
+				},
 			},
 		},
 	},

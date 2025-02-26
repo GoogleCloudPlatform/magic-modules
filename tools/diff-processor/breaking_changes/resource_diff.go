@@ -71,7 +71,7 @@ func AddingExactlyOneOfMessages(resource string, resourceDiff diff.ResourceDiff)
 			addedFields = newFieldSet
 		}
 		for field := range addedFields {
-			if fieldDiff, ok := resourceDiff.Fields[field]; ok && fieldDiff.Old != nil {
+			if fieldDiff, ok := resourceDiff.Fields[field]; ok && fieldDiff.Old != nil && !fieldDiff.Old.Required {
 				messages = append(messages, fmt.Sprintf("Field `%s` within resource `%s` was added to exactly one of", field, resource))
 			}
 		}
