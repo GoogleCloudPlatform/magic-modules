@@ -1,32 +1,30 @@
-resource "google_compute_global_network_endpoint_group" "external_proxy" {
+resource "google_compute_global_network_endpoint_group" "gce_vm_neg" {
   provider = google-beta
   name                  = "{{index $.Vars "neg_name"}}"
-  network_endpoint_type = "INTERNET_FQDN_PORT"
+  network_endpoint_type = "GCE_VM_IP_PORT"
   default_port          = "443"
-}
-
-resource "google_compute_global_network_endpoint" "proxy" {
-  provider = google-beta
-  global_network_endpoint_group = google_compute_global_network_endpoint_group.external_proxy.id
-  fqdn                          = "test.example.com"
-  port                          = google_compute_global_network_endpoint_group.external_proxy.default_port
 }
 
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  name                            = "{{index $.Vars "backend_service_name"}}"
-  connection_draining_timeout_sec = 10
+  name                  = "{{index $.Vars "backend_service_name"}}"
   locality_lb_policy    = "WEIGHTED_ROUND_ROBIN"
   custom_metrics {
-    name    = "orca.mem_utilization"
+    name    = "orca.application_utilization"
     dry_run = false
   }
   backend {
-    group = google_compute_global_network_endpoint_group.external_proxy.id
+    group = google_compute_global_network_endpoint_group.gce_vm_neg.id
     balancing_mode = "CUSTOM_METRICS"
     custom_metrics {
       name    = "orca.cpu_utilization"
+      max_utilization = 0.9
       dry_run = true
+    }
+    custom_metrics {
+      name    = "orca.named_metrics.foo"
+      max_utilization = 0.9
+      dry_run = false
     }
   }
 
