@@ -87,6 +87,7 @@ func ResourceDataflowJob() *schema.Resource {
 			"template_gcs_path": {
 				Type:        schema.TypeString,
 				Required:    true,
+				DiffSuppressFunc: tpgresource.AlwaysDiffSuppress,
 				Description: `The Google Cloud Storage path to the Dataflow job template.`,
 			},
 
