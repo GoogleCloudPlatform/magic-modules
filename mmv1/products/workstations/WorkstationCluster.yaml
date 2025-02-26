@@ -67,8 +67,6 @@ examples:
       workstation_cluster_name: 'workstation-cluster-tags'
       key_short_name: 'keyname'
       value_short_name: 'valuename'
-    test_env_vars:
-      org_id: "ORG_ID"
     test_vars_overrides:
       'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
