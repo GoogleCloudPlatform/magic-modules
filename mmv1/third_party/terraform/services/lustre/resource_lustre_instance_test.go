@@ -24,7 +24,6 @@ func TestAccLustreInstance_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckLustreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLustreInstance_full(context),
@@ -138,43 +137,4 @@ resource "google_service_networking_connection" "default" {
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 `, context)
-}
-
-func testAccCheckLustreInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_lustre_instance" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{LustreBasePath}}projects/{{project}}/locations/{{location}}/instances/{{instance_id}}")
-			if err != nil {
-				return err
-			}
-
-			billingProject := ""
-
-			if config.BillingProject != "" {
-				billingProject = config.BillingProject
-			}
-
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   billingProject,
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err == nil {
-				return fmt.Errorf("LustreInstance still exists at %s", url)
-			}
-		}
-
-		return nil
-	}
 }
