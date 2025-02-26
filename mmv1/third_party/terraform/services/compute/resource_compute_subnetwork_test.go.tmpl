@@ -159,8 +159,9 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				// update the purpose from PEER_MIGRATION to PRIVATE
 				Config: testAccComputeSubnetwork_update4(cnName, subnetwork2Name),
                                 ConfigPlanChecks: resource.ConfigPlanChecks{
-                                PreApply: []plancheck.PlanCheck{
+                                    PreApply: []plancheck.PlanCheck{
                                             plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                    },
                                 },
 			},
 			{
