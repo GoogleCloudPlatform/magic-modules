@@ -31,7 +31,7 @@ func NewDefaultPreResolver(errorLogger *zap.Logger) *DefaultPreResolver {
 	}
 }
 
-func (r *DefaultPreResolver) Resolve(jsonPlan []byte) map[string][]*models.FakeResourceData {
+func (r *DefaultPreResolver) Resolve(jsonPlan []byte) map[string][]*models.FakeResourceDataWithMeta {
 	// ReadResourceChanges
 	changes, err := tfplan.ReadResourceChanges(jsonPlan)
 	if err != nil {
@@ -47,8 +47,8 @@ func (r *DefaultPreResolver) Resolve(jsonPlan []byte) map[string][]*models.FakeR
 // This will give us a deterministic end result even in cases where for example
 // an IAM Binding and Member conflict with each other, but one is replacing the
 // other.
-func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange) map[string][]*models.FakeResourceData {
-	resourceDataMap := make(map[string][]*models.FakeResourceData, 0)
+func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange) map[string][]*models.FakeResourceDataWithMeta {
+	resourceDataMap := make(map[string][]*models.FakeResourceDataWithMeta, 0)
 
 	for _, rc := range changes {
 		// Silently skip non-google resources
@@ -62,10 +62,10 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 			continue
 		}
 
-		var resourceData *models.FakeResourceData
+		var resourceData *models.FakeResourceDataWithMeta
 		resource := r.schema.ResourcesMap[rc.Type]
 		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc) {
-			resourceData = models.NewFakeResourceData(
+			resourceData = models.NewFakeResourceDataWithMeta(
 				rc.Type,
 				resource.Schema,
 				rc.Change.After.(map[string]interface{}),
@@ -73,7 +73,7 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 				rc.Address,
 			)
 		} else if tfplan.IsDelete(rc) {
-			resourceData = models.NewFakeResourceData(
+			resourceData = models.NewFakeResourceDataWithMeta(
 				rc.Type,
 				resource.Schema,
 				rc.Change.Before.(map[string]interface{}),
@@ -86,7 +86,7 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 
 		// TODO: handle the address of iam resources
 		if exist := resourceDataMap[rc.Address]; exist == nil {
-			resourceDataMap[rc.Address] = make([]*models.FakeResourceData, 0)
+			resourceDataMap[rc.Address] = make([]*models.FakeResourceDataWithMeta, 0)
 		}
 		resourceDataMap[rc.Address] = append(resourceDataMap[rc.Address], resourceData)
 	}

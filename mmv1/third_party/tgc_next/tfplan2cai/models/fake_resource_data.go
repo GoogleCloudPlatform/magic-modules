@@ -41,25 +41,13 @@ type getResult struct {
 
 // Compare to https://github.com/hashicorp/terraform-plugin-sdk/blob/97b4465/helper/schema/resource_data.go#L15
 type FakeResourceData struct {
-	reader     schema.FieldReader
-	kind       string
-	tfplanAddr string
-	isDeleted  bool
-	schema     map[string]*schema.Schema
-}
-
-// Kind returns the type of resource (i.e. "google_storage_bucket").
-func (d *FakeResourceData) Kind() string {
-	return d.kind
+	reader schema.FieldReader
+	schema map[string]*schema.Schema
 }
 
 // Id returns the ID of the resource from state.
 func (d *FakeResourceData) Id() string {
 	return ""
-}
-
-func (d *FakeResourceData) TfplanAddr() string {
-	return d.tfplanAddr
 }
 
 func (d *FakeResourceData) getRaw(key string) getResult {
@@ -132,23 +120,6 @@ func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
 func (d *FakeResourceData) SetId(string)                      {}
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
-
-func NewFakeResourceData(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}, isDeleted bool, tfplanAddr string) *FakeResourceData {
-	state := map[string]string{}
-	var address []string
-	attributes(values, address, state, resourceSchema)
-	reader := &schema.MapFieldReader{
-		Map:    schema.BasicMapReader(state),
-		Schema: resourceSchema,
-	}
-	return &FakeResourceData{
-		kind:       kind,
-		schema:     resourceSchema,
-		reader:     reader,
-		isDeleted:  isDeleted,
-		tfplanAddr: tfplanAddr,
-	}
-}
 
 // addrToSchema finds the final element schema for the given address
 // and the given schema. It returns all the schemas that led to the final

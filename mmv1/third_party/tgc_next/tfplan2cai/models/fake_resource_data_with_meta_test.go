@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFakeResourceData_kind(t *testing.T) {
+func TestFakeResourceDataWithMeta_kind(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -30,7 +30,7 @@ func TestFakeResourceData_kind(t *testing.T) {
 		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -40,7 +40,7 @@ func TestFakeResourceData_kind(t *testing.T) {
 	assert.Equal(t, "google_compute_disk", d.Kind())
 }
 
-func TestFakeResourceData_id(t *testing.T) {
+func TestFakeResourceDataWithMeta_id(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -50,7 +50,7 @@ func TestFakeResourceData_id(t *testing.T) {
 		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -60,7 +60,7 @@ func TestFakeResourceData_id(t *testing.T) {
 	assert.Equal(t, d.Id(), "")
 }
 
-func TestFakeResourceData_get(t *testing.T) {
+func TestFakeResourceDataWithMeta_get(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -70,7 +70,7 @@ func TestFakeResourceData_get(t *testing.T) {
 		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -80,7 +80,7 @@ func TestFakeResourceData_get(t *testing.T) {
 	assert.Equal(t, d.Get("name"), "test-disk")
 }
 
-func TestFakeResourceData_getOkOk(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOkOk(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -90,7 +90,7 @@ func TestFakeResourceData_getOkOk(t *testing.T) {
 		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -102,7 +102,7 @@ func TestFakeResourceData_getOkOk(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestFakeResourceData_getOkNonexistentField(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOkNonexistentField(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -112,7 +112,7 @@ func TestFakeResourceData_getOkNonexistentField(t *testing.T) {
 		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -124,7 +124,7 @@ func TestFakeResourceData_getOkNonexistentField(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestFakeResourceData_getOkEmptyString(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOkEmptyString(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -134,7 +134,7 @@ func TestFakeResourceData_getOkEmptyString(t *testing.T) {
 		"image":                     "",
 		"physical_block_size_bytes": 4096,
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_disk",
 		p.ResourcesMap["google_compute_disk"].Schema,
 		values,
@@ -146,7 +146,7 @@ func TestFakeResourceData_getOkEmptyString(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestFakeResourceData_getOkUnsetString(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOkUnsetString(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -164,7 +164,7 @@ func TestFakeResourceData_getOkUnsetString(t *testing.T) {
 			"preemptible": true,
 		},
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_container_cluster",
 		p.ResourcesMap["google_container_cluster"].Schema,
 		values,
@@ -176,7 +176,7 @@ func TestFakeResourceData_getOkUnsetString(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestFakeResourceData_getOkTypeObject(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOkTypeObject(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -247,7 +247,7 @@ func TestFakeResourceData_getOkTypeObject(t *testing.T) {
 		"timeouts": nil,
 		"zone":     "us-central1-a",
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_instance",
 		p.ResourcesMap["google_compute_instance"].Schema,
 		values,
@@ -266,7 +266,7 @@ func TestFakeResourceData_getOkTypeObject(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestFakeResourceData_getOknsetTypeObject(t *testing.T) {
+func TestFakeResourceDataWithMeta_getOknsetTypeObject(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
@@ -324,7 +324,7 @@ func TestFakeResourceData_getOknsetTypeObject(t *testing.T) {
 		"timeouts": nil,
 		"zone":     "us-central1-a",
 	}
-	d := NewFakeResourceData(
+	d := NewFakeResourceDataWithMeta(
 		"google_compute_instance",
 		p.ResourcesMap["google_compute_instance"].Schema,
 		values,
@@ -341,4 +341,44 @@ func TestFakeResourceData_getOknsetTypeObject(t *testing.T) {
 		"source":                     "",
 	}, res)
 	assert.False(t, ok)
+}
+
+func TestFakeResourceDataWithMeta_isDelelted(t *testing.T) {
+	p := provider.Provider()
+
+	values := map[string]interface{}{
+		"name":                      "test-disk",
+		"type":                      "pd-ssd",
+		"zone":                      "us-central1-a",
+		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
+		"physical_block_size_bytes": 4096,
+	}
+	d := NewFakeResourceDataWithMeta(
+		"google_compute_disk",
+		p.ResourcesMap["google_compute_disk"].Schema,
+		values,
+		true,
+		"google_compute_disk.test-disk",
+	)
+	assert.Equal(t, true, d.IsDeleted())
+}
+
+func TestFakeResourceDataWithMeta_address(t *testing.T) {
+	p := provider.Provider()
+
+	values := map[string]interface{}{
+		"name":                      "test-disk",
+		"type":                      "pd-ssd",
+		"zone":                      "us-central1-a",
+		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
+		"physical_block_size_bytes": 4096,
+	}
+	d := NewFakeResourceDataWithMeta(
+		"google_compute_disk",
+		p.ResourcesMap["google_compute_disk"].Schema,
+		values,
+		true,
+		"google_compute_disk.test-disk",
+	)
+	assert.Equal(t, "google_compute_disk.test-disk", d.Address())
 }
