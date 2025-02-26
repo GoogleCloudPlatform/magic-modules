@@ -38,6 +38,9 @@ error_retry_predicates:
 examples:
   - name: eventarc_channel_with_cmek
     primary_resource_id: primary
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       channel_name: some-channel
       key_name: some-key

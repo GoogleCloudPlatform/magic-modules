@@ -21,6 +21,12 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 		"key2":           acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-channel-key2").CryptoKey.Name,
 		"random_suffix":  acctest.RandString(t, 10),
 	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -49,42 +55,22 @@ func TestAccEventarcChannel_cryptoKeyUpdate(t *testing.T) {
 
 func testAccEventarcChannel_setCryptoKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_crypto_key_iam_member" "key1_member" {
-  crypto_key_id = "%{key1}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-}
-
 resource "google_eventarc_channel" "primary" {
   location             = "%{region}"
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key1}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
-  depends_on           = [google_kms_crypto_key_iam_member.key1_member]
 }
 `, context)
 }
 
 func testAccEventarcChannel_cryptoKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_kms_crypto_key_iam_member" "key1_member" {
-  crypto_key_id = "%{key1}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "key2_member" {
-  crypto_key_id = "%{key2}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-%{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
-}
-
 resource "google_eventarc_channel" "primary" {
   location             = "%{region}"
   name                 = "tf-test-name%{random_suffix}"
   crypto_key_name      = "%{key2}"
   third_party_provider = "projects/%{project_name}/locations/%{region}/providers/datadog"
-  depends_on           = [google_kms_crypto_key_iam_member.key2_member]
 }
 `, context)
 }
