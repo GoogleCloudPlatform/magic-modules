@@ -823,14 +823,14 @@ This block also contains several computed attributes, documented below.
 * `gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
     accessible via Google Compute Engine Public IPs.
 
+* `private_endpoint_enforcement_enabled` - (Optional) Whether authorized networks is enforced on the private endpoint or not.
+
 The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `cidr_block` - (Optional) External network that can access Kubernetes master through HTTPS.
     Must be specified in CIDR notation.
 
 * `display_name` - (Optional) Field for users to identify CIDR blocks.
-
-* `private_endpoint_enforcement_enabled` - (Optional) Whether authorized networks is enforced on the private endpoint or not.
 
 <a name="nested_network_policy"></a>The `network_policy` block supports:
 
@@ -1174,7 +1174,7 @@ notification_config {
 
 <a name="nested_notification_filter"></a> The `filter` block supports:
 
-* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT` and `SECURITY_BULLETIN_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
+* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT`, `SECURITY_BULLETIN_EVENT` and `UPGRADE_INFO_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 

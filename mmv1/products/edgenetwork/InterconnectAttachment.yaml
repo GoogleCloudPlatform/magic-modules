@@ -39,6 +39,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+exclude_sweeper: true
 examples:
   - name: 'edgenetwork_interconnect_attachment'
     primary_resource_id: 'example_interconnect_attachment'
