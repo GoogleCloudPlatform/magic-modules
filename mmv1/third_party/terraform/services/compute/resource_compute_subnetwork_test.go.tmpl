@@ -129,26 +129,29 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 			{
 				// Expand IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/16", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				// Shrink IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/24", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				// Add a secondary range and enable flow logs at once
 				Config: testAccComputeSubnetwork_update3(cnName, "10.2.0.0/24", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+                                ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_pubsub_topic.foo", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
