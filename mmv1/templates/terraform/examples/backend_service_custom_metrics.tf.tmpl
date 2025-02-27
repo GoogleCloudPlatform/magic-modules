@@ -16,10 +16,14 @@ resource "google_compute_network_endpoint_group" "default" {
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
+  health_checks = [google_compute_health_check.default.id]
+
+  # WEIGHTED_ROUND_ROBIN and CUSTOM_METRICS require EXTERNAL_MANAGED.
   load_balancing_scheme = "EXTERNAL_MANAGED"
   locality_lb_policy    = "WEIGHTED_ROUND_ROBIN"
   custom_metrics {
     name    = "orca.application_utilization"
+    # At least one metric should be not dry_run.
     dry_run = false
   }
   backend {
@@ -33,7 +37,19 @@ resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
     custom_metrics {
       name    = "orca.named_metrics.foo"
       max_utilization = 0.9
+      # At least one metric should be not dry_run.
       dry_run = false
     }
+  }
+}
+
+resource "google_compute_health_check" "default" {
+  provider = google-beta
+  name               = "{{index $.Vars "health_check_name"}}"
+  timeout_sec        = 1
+  check_interval_sec = 1
+
+  tcp_health_check {
+    port = "80"
   }
 }
