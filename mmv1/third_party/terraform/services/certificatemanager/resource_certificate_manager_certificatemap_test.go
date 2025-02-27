@@ -51,9 +51,4 @@ tags = {`, name)
 	l += fmt.Sprintf("}\n}")
 	return r + l
 }
-Footer
-© 2025 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
 
