@@ -1,3 +1,18 @@
+/*
+* Copyright 2025 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -15,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
+var changelogExp = regexp.MustCompile("(?s)```release-note:(?P<noteType>[a-zA-Z]+).*```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
@@ -354,8 +369,11 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 		return err
 	}
 	rnr.Mkdir(".changelog")
-	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
-		return err
+	matches := changelogExp.FindStringSubmatch(pullRequest.Body)
+	if matches != nil && matches[1] != "none" {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+			return err
+		}
 	}
 	return rnr.PopDir()
 }
