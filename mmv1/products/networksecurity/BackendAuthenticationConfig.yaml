@@ -16,7 +16,7 @@ name: 'BackendAuthenticationConfig'
 description: |
   BackendAuthenticationConfig groups the TrustConfig together with other settings that control how the load balancer authenticates, and expresses its identity to the backend.
 references:
-  guides: 
+  guides:
     'Backend mTLS': 'https://cloud.google.com/load-balancing/docs/backend-authenticated-tls-backend-mtls#backend-authentication-config'
 base_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs/{{name}}'
@@ -61,7 +61,7 @@ parameters:
       The location of the backend authentication config.
       The default value is `global`.
     url_param_only: true
-    default_value: "global"   
+    default_value: "global"
 
 properties:
   - name: 'createTime'
@@ -84,24 +84,24 @@ properties:
   - name: 'clientCertificate'
     type: String
     description: |
-      Reference to a Certificate resource from the certificatemanager.googleapis.com namespace. 
+      Reference to a Certificate resource from the certificatemanager.googleapis.com namespace.
       Used by a BackendService to negotiate mTLS when the backend connection uses TLS and the backend requests a client certificate. Must have a CLIENT_AUTH scope.
     immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - name: 'trustConfig' 
+  - name: 'trustConfig'
     type: String
-    description: | 
-      Reference to a TrustConfig resource from the certificatemanager.googleapis.com namespace. 
+    description: |
+      Reference to a TrustConfig resource from the certificatemanager.googleapis.com namespace.
       A BackendService uses the chain of trust represented by this TrustConfig, if specified, to validate the server certificates presented by the backend. Required unless wellKnownRoots is set to PUBLIC_ROOTS.
     immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'wellKnownRoots'
     type: Enum
     "description": |
-      Well known roots to use for server certificate validation. If set to NONE, the BackendService will only validate server certificates against roots specified in TrustConfig. 
-      If set to PUBLIC_ROOTS, the BackendService uses a set of well-known public roots, in addition to any roots specified in the trustConfig field, when validating the server certificates presented by the backend. 
+      Well known roots to use for server certificate validation. If set to NONE, the BackendService will only validate server certificates against roots specified in TrustConfig.
+      If set to PUBLIC_ROOTS, the BackendService uses a set of well-known public roots, in addition to any roots specified in the trustConfig field, when validating the server certificates presented by the backend.
       Validation with these roots is only considered when the TlsSettings.sni field in the BackendService is set. The well-known roots are a set of root CAs managed by Google. CAs in this set can be added or removed without notice.
-    enum_values: 
+    enum_values:
       - 'WELL_KNOWN_ROOTS_UNSPECIFIED'
       - 'NONE'
       - 'PUBLIC_ROOTS'
