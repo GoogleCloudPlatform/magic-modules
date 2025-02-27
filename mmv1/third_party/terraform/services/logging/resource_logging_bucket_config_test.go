@@ -272,7 +272,7 @@ resource "time_sleep" "wait_1_minute" {
 }
 
 data "google_logging_folder_settings" "settings" {
-	folder = google_folder.default.name
+	folder = google_folder.default.folder_id
 }
 
 resource "google_logging_folder_bucket_config" "basic" {
