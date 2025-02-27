@@ -6789,13 +6789,6 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 	}
 }
 
-func flattenClusterDnsScope(s string) string {
-	if s == "" {
-		return "DNS_SCOPE_UNSPECIFIED"
-	}
-	return s
-}
-
 func flattenGatewayApiConfig(c *container.GatewayAPIConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
