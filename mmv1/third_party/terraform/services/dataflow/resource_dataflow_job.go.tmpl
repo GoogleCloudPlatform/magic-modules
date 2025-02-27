@@ -51,6 +51,21 @@ func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.Resource
 	return false
 }
 
+func resourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	// GCS path follows the format: "gs://bucket/path/to/file.txt". Split the string on the third "/"
+	// to get the bucket name.
+	splits := strings.SplitAfterN(old, "/", 2)
+
+	// If the only diff is the additional region name in the bucket, then suppress the diff.
+	if splits[0]+d.Get("region").(string)+"/"+splits[1] == new {
+		return true
+	}
+	return false
+}
+
 func ResourceDataflowJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowJobCreate,
@@ -87,7 +102,7 @@ func ResourceDataflowJob() *schema.Resource {
 			"template_gcs_path": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DiffSuppressFunc: tpgresource.AlwaysDiffSuppress,
+				DiffSuppressFunc: resourceDataflowJobTemplateGcsPathDiffSuppress,
 				Description: `The Google Cloud Storage path to the Dataflow job template.`,
 			},
 
