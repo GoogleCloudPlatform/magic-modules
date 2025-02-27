@@ -300,3 +300,13 @@ func flattenResourceNameFieldName(v interface{}, d *schema.ResourceData, config 
 {{< /tabs >}}
 
 For other Array fields, convert the field to a Set – this is a [breaking change]({{< ref "/breaking-changes/breaking-changes" >}}) and can only happen in a major release.
+
+## API is eventually consistent {#eventually-consistent}
+
+Eventually consistent APIs are not compliant with [AIP-121's strong consistency requirement](https://google.aip.dev/121#strong-consistency), but they do happen sometimes, and can lead to diffs.
+
+The fix is to add [post-create custom code]({{< ref "/develop/custom-code/#pre_post_injection" >}}) which adds a sleep after creation completes. There are three premade templates that can be used for this:
+
+- [`templates/terraform/post_create/sleep.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/terraform/post_create/sleep.go.tmpl)
+- [`templates/terraform/post_create/sleep_2_min.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/terraform/post_create/sleep_2_min.go.tmpl)
+- [`templates/terraform/post_create/sleep_5_min.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/terraform/post_create/sleep_5_min.go.tmpl)
