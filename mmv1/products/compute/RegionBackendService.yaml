@@ -127,8 +127,8 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       default_neg_name: 'network-endpoint'
-      health_check_name: 'rbs-health-check'      
-      network_name: 'network'      
+      health_check_name: 'rbs-health-check'
+      network_name: 'network'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -321,7 +321,7 @@ properties:
                 description: |
                   Optional parameter to define a target utilization for the Custom Metrics
                   balancing mode. The valid range is <code>[0.0, 1.0]</code>.
-                default_value: 0.8            
+                default_value: 0.8
   - name: 'circuitBreakers'
     type: NestedObject
     description: |
