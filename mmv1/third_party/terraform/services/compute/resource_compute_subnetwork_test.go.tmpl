@@ -660,7 +660,7 @@ resource "google_compute_network" "custom-test" {
   auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "network-with-private-google-access" {
+resource "google_compute_subnetwork" "network-with-migration-purpose" {
   name          = "%s"
   ip_cidr_range = "10.4.0.0/16"
   region        = "us-central1"
