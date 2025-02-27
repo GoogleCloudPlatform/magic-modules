@@ -255,7 +255,7 @@ properties:
             type: String
             description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
             default_from_api: true
-    - name: 'maintenancePolicy'
+  - name: 'maintenancePolicy'
     type: NestedObject
     description: Maintenance policy for a cluster
     properties:
