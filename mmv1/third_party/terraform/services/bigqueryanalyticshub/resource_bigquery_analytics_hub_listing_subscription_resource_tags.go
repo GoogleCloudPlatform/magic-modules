@@ -84,7 +84,6 @@ resource "google_bigquery_analytics_hub_listing_subscription" "listing" {
     labels = {
       testing = "123"
     }
-    location = "US"
     dataset_reference {
       dataset_id = google_bigquery_dataset.listing.id
       project_id = google_bigquery_dataset.listing.project
