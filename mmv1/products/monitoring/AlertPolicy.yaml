@@ -1068,7 +1068,7 @@ properties:
                 - name: 'column'
                   type: String
                   description: |
-                    The name of the column containing the boolean value. If the value in a row is 
+                    The name of the column containing the boolean value. If the value in a row is
                     NULL, that row is ignored.
                   required: true
               exactly_one_of:
