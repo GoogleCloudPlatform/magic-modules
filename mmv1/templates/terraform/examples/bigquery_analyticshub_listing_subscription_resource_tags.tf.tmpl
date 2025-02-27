@@ -46,7 +46,6 @@ resource "google_bigquery_analytics_hub_listing_subscription" "{{$.PrimaryResour
     labels = {
       testing = "123"
     }
-    location = "US"
     dataset_reference {
       dataset_id = "{{index $.Vars "destination_dataset_id"}}"
       project_id = google_bigquery_dataset.{{$.PrimaryResourceId}}.project
