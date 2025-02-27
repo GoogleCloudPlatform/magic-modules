@@ -274,6 +274,7 @@ properties:
   - name: 'shieldedInstanceInitialState'
     type: NestedObject
     description: Set the secure boot keys of shielded instance.
+    default_from_api: true
     properties:
       - name: 'pk'
         type: NestedObject
