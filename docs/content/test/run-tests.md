@@ -143,10 +143,7 @@ The field called `FIELD_NAME` does not exist; this is either because it has not 
 
 This indicates that after an apply to create or update a resource, the resource was not present in Terraform state. This generally means one of a few things:
 
-- There is a delay after the initial create call before the resource can be read
-  - Potential causes:
-    - Creation returns a long-running operation, and the resource isn't waiting for it. In MMv1 resources, the fix is to set [`autogen_async: true`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#autogen_async) and [`async`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#async).
-    - Creation is eventually consistent. This is not compliant with [AIP-121's strong consistency requirement](https://google.aip.dev/121#strong-consistency), but can happen. See [Fix diffs: API is eventually consistent]({{< ref "/develop/diffs#eventually-consistent" >}}) for more information.
+- [API is eventually consistent or returns an Operation]({{< ref "/develop/diffs#eventually-consistent" >}})
 - The URL for Reads was built incorrectly. The exact fix will depend on why this is happening.
 - There is a call to unset the resource's id (`d.SetId("")`) somewhere it shouldn't be. The fix is to remove that extraneous call. This is rare.
 
