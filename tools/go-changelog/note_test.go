@@ -10,7 +10,7 @@ import (
 
 func TestValidateNote(t *testing.T) {
 	cases := []struct {
-		name string
+		name          string
 		changelogNote Note
 		expectedError *EntryValidationError
 	}{
