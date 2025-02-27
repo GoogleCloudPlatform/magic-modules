@@ -831,10 +831,10 @@ data "google_project" "project" {}
 func TestAccAlloydbInstance_createInstanceWithPscInterfaceConfigs(t *testing.T) {
 	t.Parallel()
 
-	random_suffix := acctest.RandString(t, 10)
 	networkName := acctest.BootstrapSharedTestNetwork(t, "tf-test-alloydb-network")
 	subnetworkName := acctest.BootstrapSubnet(t, "tf-test-alloydb-subnetwork", networkName)
-	
+
+	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix":         random_suffix,
 		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-na", subnetworkName),
@@ -884,11 +884,11 @@ data "google_project" "project" {}
 
 func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) {
 	t.Parallel()
-	
-	random_suffix := acctest.RandString(t, 10)
+
 	networkName := acctest.BootstrapSharedTestNetwork(t, "tf-test-alloydb-network")
 	subnetworkName := acctest.BootstrapSubnet(t, "tf-test-alloydb-subnetwork", networkName)
 
+	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix":         random_suffix,
 		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-na", subnetworkName),
