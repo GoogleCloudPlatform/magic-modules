@@ -138,6 +138,7 @@ properties:
                   - THURSDAY
                   - FRIDAY
                   - SATURDAY
+                  - SUNDAY
             - name: 'daysOfMonth'
               type: 'Array'
               description: 'Specifies days of months like 1, 5, or 14 on which jobs will run.'
