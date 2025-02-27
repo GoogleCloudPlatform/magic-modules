@@ -271,13 +271,9 @@ resource "time_sleep" "wait_1_minute" {
 	]
 }
 
-data "google_logging_folder_settings" "settings" {
-	folder = google_folder.default.folder_id
-}
-
 resource "google_logging_folder_bucket_config" "basic" {
 	folder    = google_folder.default.name
-	location  = data.google_logging_folder_settings.settings.storage_location
+	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
 	bucket_id = "_Default"
