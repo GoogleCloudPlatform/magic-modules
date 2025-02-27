@@ -27,7 +27,8 @@ examples:
     primary_resource_id: 'instance'
     vars:
       name: 'instance'
-      network_name: 'projects/{{project}}/networks/network'
+      network_name: 'network'
+      address_name: 'ipaddress'
       filesystem_name: 'filesystem'
       capacity_gib: 21000
 autogen_async: true
