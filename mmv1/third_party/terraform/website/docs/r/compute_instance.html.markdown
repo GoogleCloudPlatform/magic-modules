@@ -265,7 +265,7 @@ is desired, you will need to modify your state file manually using
 * `mode` - (Optional) The mode in which to attach this disk, either `READ_WRITE`
   or `READ_ONLY`. If not specified, the default is to attach the disk in `READ_WRITE` mode.
 
-* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+* `guest_os_features` - (Optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
 
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
