@@ -27,6 +27,11 @@ resource "google_project_iam_member" "iam_progressiverollout_service_agent" {
 
 resource "google_os_config_v2_policy_orchestrator" "{{$.PrimaryResourceId}}" {
     provider = google-beta
+    depends_on = [
+        google_project_iam_member.iam_osconfig_service_agent,
+        google_project_iam_member.iam_osconfig_rollout_service_agent,
+        google_project_iam_member.iam_progressiverollout_service_agent,
+    ]
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
     
     state = "ACTIVE"
