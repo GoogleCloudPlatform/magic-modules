@@ -2124,6 +2124,7 @@ resource "google_compute_disk" "kms-encrypted-name" {
   }
 
   create_snapshot_before_destroy = true
+}`, context)
 }
 
 func testAccComputeDisk_architecture(context map[string]interface{}) string {
