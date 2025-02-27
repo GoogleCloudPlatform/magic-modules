@@ -27,7 +27,7 @@ func TestAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAut
 				ResourceName:            "google_network_security_backend_authentication_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"terraform_labels", "trust_config", "client_certificate"},
+				ImportStateVerifyIgnore: []string{"terraform_labels", "labels"},
 			},
 			{
 				Config: testAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAuthenticationConfigFullExample_update(context),
@@ -41,7 +41,7 @@ func TestAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAut
 				ResourceName:            "google_network_security_backend_authentication_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "terraform_labels", "trust_config", "client_certificate"},
+				ImportStateVerifyIgnore: []string{"terraform_labels", "labels"},
 			},
 		},
 	})
@@ -49,15 +49,9 @@ func TestAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAut
 
 func testAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAuthenticationConfigFullExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
 resource "google_certificate_manager_certificate" "certificate" {
   provider = google-beta
   name     = "tf-test-my-certificate%{random_suffix}"
-  labels   = {
-    foo = "bar"
-  }
   location    = "global"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
@@ -80,18 +74,11 @@ resource "google_certificate_manager_trust_config" "trust_config" {
       pem_certificate = file("test-fixtures/cert.pem")
     }
   }
-
-  labels = {
-    foo = "bar"
-  }
 }
 
 resource "google_network_security_backend_authentication_config" "default" {
-  provider = google-beta
-  name     = "tf-test-my-backend-authentication-config%{random_suffix}"
-  labels   = {
-    bar = "foo"
-  }
+  provider           = google-beta
+  name               = "tf-test-my-backend-authentication-config%{random_suffix}"
   location           = "global"
   description        = "my description"
   well_known_roots   = "PUBLIC_ROOTS"
@@ -109,9 +96,6 @@ data "google_project" "project" {
 resource "google_certificate_manager_certificate" "certificate" {
   provider = google-beta
   name     = "tf-test-my-certificate%{random_suffix}"
-  labels   = {
-    foo = "bar"
-  }
   location    = "global"
   self_managed {
     pem_certificate = file("test-fixtures/cert.pem")
@@ -134,21 +118,16 @@ resource "google_certificate_manager_trust_config" "trust_config" {
       pem_certificate = file("test-fixtures/cert.pem")
     }
   }
-
-  labels = {
-    foo = "bar"
-  }
 }
 
 resource "google_network_security_backend_authentication_config" "default" {
   provider = google-beta
   name     = "tf-test-my-backend-authentication-config%{random_suffix}"
-  labels   = {
-    bar = "foo"
-  }
   location           = "global"
   description        = "updated description"
   well_known_roots   = "NONE"
+  client_certificate = google_certificate_manager_certificate.certificate.id
+  trust_config       = google_certificate_manager_trust_config.trust_config.id
 }
 `, context)
 }
