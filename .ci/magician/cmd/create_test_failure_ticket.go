@@ -402,6 +402,7 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		failureRatelabel,
 	}
 
+	// Apply service labels to forward test failure ticket automatically
 	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
 		return fmt.Errorf("error building regex labels: %w", err)
