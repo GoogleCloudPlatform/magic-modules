@@ -837,7 +837,7 @@ func TestAccAlloydbInstance_createInstanceWithPscInterfaceConfigs(t *testing.T) 
 	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix":         random_suffix,
-		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-na", subnetworkName),
+		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-create-na", subnetworkName),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -891,7 +891,7 @@ func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) 
 	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
 		"random_suffix":         random_suffix,
-		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-na", subnetworkName),
+		"networkAttachmentName": acctest.BootstrapNetworkAttachment(t, "tf-test-alloydb-update-na", subnetworkName),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
