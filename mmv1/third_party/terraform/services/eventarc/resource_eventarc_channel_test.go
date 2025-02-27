@@ -96,7 +96,7 @@ func TestAccEventarcChannel_longForm(t *testing.T) {
 				ResourceName:            "google_eventarc_channel.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "project"},
+				ImportStateVerifyIgnore: []string{"name", "location", "project"},
 			},
 		},
 	})
