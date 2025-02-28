@@ -144,7 +144,7 @@ The field called `FIELD_NAME` does not exist; this is either because it has not 
 This indicates that after an apply to create or update a resource, the resource was not present in Terraform state. This generally means one of a few things:
 
 - [API is eventually consistent or returns an Operation]({{< ref "/develop/diffs#eventually-consistent" >}})
-- The URL for Reads was built incorrectly. The exact fix will depend on why this is happening.
+- The URL for reads was built incorrectly. The exact fix will depend on why this is happening. Run the test with the `TF_LOG=DEBUG` environment variable and check whether the read URL matches what you expect.
 - There is a call to unset the resource's id (`d.SetId("")`) somewhere it shouldn't be. The fix is to remove that extraneous call. This is rare.
 
 ## Optional: Test with different `terraform` versions
