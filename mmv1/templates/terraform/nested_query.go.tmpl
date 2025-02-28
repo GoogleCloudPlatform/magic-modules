@@ -142,8 +142,8 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
 
   // Override old object with new
   items[idx] = obj
-  // Name is always required and won't be present in obj.
-  obj["name"] = d.Get("name")
+  // Name is always required and won't be present in obj. Grab it from the item.
+  obj["name"] = item["name"]
 
   // Return list with new item added
   res := map[string]interface{}{
