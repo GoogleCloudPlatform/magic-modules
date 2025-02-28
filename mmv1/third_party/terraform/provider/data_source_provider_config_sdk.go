@@ -25,6 +25,26 @@ func DataSourceGoogleProviderConfigSdk() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"external_credentials_hcp_terraform": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"audience": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"service_account_email": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"identity_token": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 			"impersonate_service_account": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -106,6 +126,17 @@ func dataSourceClientConfigRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	if err := d.Set("credentials", config.Credentials); err != nil {
 		return fmt.Errorf("error setting credentials: %s", err)
+	}
+	if config.ExternalCredentialsHcpTerraform != nil {
+		val := map[string]interface{}{}
+		val["audience"] = config.ExternalCredentialsHcpTerraform.Audience
+		val["service_account_email"] = config.ExternalCredentialsHcpTerraform.ServiceAccountEmail
+		val["identity_token"] = config.ExternalCredentialsHcpTerraform.IdentityToken
+
+		v := []interface{}{val}
+		if err := d.Set("external_credentials_hcp_terraform", v); err != nil {
+			return fmt.Errorf("error setting external_credentials_hcp_terraform: %s", err)
+		}
 	}
 	if err := d.Set("impersonate_service_account", config.ImpersonateServiceAccount); err != nil {
 		return fmt.Errorf("error setting impersonate_service_account: %s", err)
