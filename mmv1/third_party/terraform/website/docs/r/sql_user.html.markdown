@@ -130,7 +130,7 @@ The following arguments are supported:
 
     Possible values are: `ABANDON`.
 
-* `password_wo_version` - (Optional) The version of the password_wo.
+* `password_wo_version` - (Optional) The version of the password_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
 
 - - -
 
@@ -161,9 +161,10 @@ The read only `password_policy.status` subblock supports:
 
 The following write-only attributes are supported:
 
-* `password_wo` -
-  (Optional)
-  The password for the user.
+* `password_wo` - (Optional) The password for the user. Can be updated. For Postgres
+    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
+    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
+    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
   **Note**: This property is write-only and will not be read from the API.
 
 ## Attributes Reference
