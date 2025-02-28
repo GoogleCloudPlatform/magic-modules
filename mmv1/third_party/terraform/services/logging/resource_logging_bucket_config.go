@@ -189,8 +189,8 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 			return err
 		}
 
-		if parentType == "project" || parentType == "folder" {
-			//logging bucket can be created only at the project level, in future api may allow for org and other parent resources
+		if parentType == "project" {
+			//logging bucket can be created only at the project level, in future api may allow for folder, org and other parent resources
 
 			log.Printf("[DEBUG] Fetching logging bucket config: %#v", id)
 			url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{LoggingBasePath}}%s", id))
@@ -205,7 +205,7 @@ func resourceLoggingBucketConfigAcquireOrCreate(parentType string, iDFunc loggin
 				UserAgent: userAgent,
 			})
 			if res == nil {
-				log.Printf("[DEGUG] Logging Bucket %q does not exist", id)
+				log.Printf("[DEGUG] Loggin Bucket not exist %s", id)
 				// we need to pass the id in here because we don't want to set it in state
 				// until we know there won't be any errors on create
 				return resourceLoggingBucketConfigCreate(d, meta, id)
