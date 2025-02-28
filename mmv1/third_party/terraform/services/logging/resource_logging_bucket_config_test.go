@@ -260,7 +260,6 @@ resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
 	deletion_protection = false
-	depends_on   = [google_logging_organization_settings.example]
 }
 
 // Give the _Default bucket a chance to be created
