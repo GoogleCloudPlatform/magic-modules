@@ -26,25 +26,21 @@ import_format:
   - "projects/{{project}}/locations/{{location}}/backends/{{backend_id}}"
   - "{{project}}/{{location}}/{{backend_id}}"
   - "{{location}}/{{backend_id}}"
-min_version: beta
 examples:
   - name: firebase_app_hosting_backend_minimal
     primary_resource_id: example
-    min_version: beta
     vars:
       backend_id: "mini"
     test_env_vars:
       project_id: "PROJECT_NAME"
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
-    min_version: beta
     vars:
       backend_id: "full"
     test_env_vars:
       project_id: "PROJECT_NAME"
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
-    min_version: beta
     vars:
       backend_id: "my-backend-gh"
     test_env_vars:

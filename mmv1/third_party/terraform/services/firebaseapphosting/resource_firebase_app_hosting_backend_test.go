@@ -22,7 +22,7 @@ func TestAccFirebaseAppHostingBackend_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFirebaseAppHostingBackendDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -50,8 +50,6 @@ func TestAccFirebaseAppHostingBackend_update(t *testing.T) {
 func testAccFirebaseAppHostingBackend_firebaseAppHostingBackendBefore(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
-  provider = google-beta
-
   project = "%{project_id}"
 
   # Must be firebase-app-hosting-compute
@@ -63,8 +61,6 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_firebase_app_hosting_backend" "example" {
-  provider = google-beta
-
   project          = "%{project_id}"
   # Choose the region closest to your users
   location         = "us-central1"
@@ -89,8 +85,6 @@ resource "google_firebase_app_hosting_backend" "example" {
 func testAccFirebaseAppHostingBackend_firebaseAppHostingBackendAfter(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "service_account" {
-  provider = google-beta
-
   project = "%{project_id}"
 
   # Must be firebase-app-hosting-compute
@@ -102,8 +96,6 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_firebase_app_hosting_backend" "example" {
-  provider = google-beta
-
   project          = "%{project_id}"
   # Choose the region closest to your users
   location         = "us-central1"

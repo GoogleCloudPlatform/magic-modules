@@ -1,6 +1,4 @@
 resource "google_developer_connect_connection" "my-connection" {
-  provider = google-beta
-
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
   connection_id = "tf-test-connection-new"
@@ -11,8 +9,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 
 resource "google_developer_connect_git_repository_link" "my-repository" {
-  provider = google-beta
-
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
 
@@ -36,16 +32,12 @@ resource "google_project_service_identity" "devconnect-p4sa" {
 }
 
 resource "google_project_iam_member" "devconnect-secret" {
-  provider = google-beta
-
   project  = "{{index $.TestEnvVars "project_id"}}"
   role     = "roles/secretmanager.admin"
   member   = google_project_service_identity.devconnect-p4sa.member
 }
 
 resource "google_firebase_app_hosting_backend" "example" {
-  provider = google-beta
-
   project          = "{{index $.TestEnvVars "project_id"}}"
 
   # Choose the region closest to your users

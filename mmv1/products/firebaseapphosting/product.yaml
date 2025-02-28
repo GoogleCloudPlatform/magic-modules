@@ -19,6 +19,5 @@ scopes:
 versions:
   - base_url: https://firebaseapphosting.googleapis.com/v1beta/
     name: beta
-# GA not available yet
-# - base_url: https://firebaseapphosting.googleapis.com/v1main/
-# name: ga
+  - base_url: https://firebaseapphosting.googleapis.com/v1main/
+    name: ga
