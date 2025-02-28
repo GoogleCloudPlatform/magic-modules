@@ -10,7 +10,9 @@ import (
 )
 
 func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
