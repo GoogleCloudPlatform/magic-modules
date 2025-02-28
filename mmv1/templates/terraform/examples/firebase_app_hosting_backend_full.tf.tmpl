@@ -1,4 +1,4 @@
-# Service account setup only required once per project.
+### Include these blocks only once per project if you are starting from scratch ###
 resource "google_service_account" "service_account" {
   provider = google-beta
 
@@ -42,7 +42,6 @@ resource "google_project_iam_member" "app_hosting_sa_runner" {
   member = google_service_account.service_account.member
 }
 
-# Service enablement only required once per project.
 resource "google_project_service" "fah" {
   provider = google-beta
 
@@ -51,16 +50,19 @@ resource "google_project_service" "fah" {
 
   disable_on_destroy = false
 }
+###
 
 resource "google_firebase_app_hosting_backend" "example" {
   provider = google-beta
 
   project          = "{{index $.TestEnvVars "project_id"}}"
-  location         = "{{index $.Vars "location"}}"
+
+  # Choose the region closest to your users
+  location         = "us-central1"
   backend_id       = "{{index $.Vars "backend_id"}}"
-  app_id           = "{{index $.Vars "app_id"}}"
-  display_name     = "{{index $.Vars "display_name"}}"
-  serving_locality = "{{index $.Vars "serving_locality"}}"
+  app_id           = "1:0000000000:web:674cde32020e16fbce9dbd"
+  display_name     = "My Backend"
+  serving_locality = "GLOBAL_ACCESS"
   service_account  = google_service_account.service_account.email
   environment      = "prod"
 
