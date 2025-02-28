@@ -1,0 +1,46 @@
+resource "google_certificate_manager_certificate" "certificate" {
+  provider = google-beta
+  name     = "{{index $.Vars "certificate_name"}}"
+  labels   = {
+    foo = "bar"
+  }
+  location    = "global"
+  self_managed {
+    pem_certificate = file("test-fixtures/cert.pem")
+    pem_private_key = file("test-fixtures/key.pem")
+  }
+  scope       = "CLIENT_AUTH"
+}
+
+resource "google_certificate_manager_trust_config" "trust_config" {
+  provider    = google-beta
+  name        = "{{index $.Vars "trust_config_name"}}"
+  description = "sample description for the trust config"
+  location    = "global"
+
+  trust_stores {
+    trust_anchors { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+    intermediate_cas { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_network_security_backend_authentication_config" "default" {
+  provider = google-beta
+  name     = "{{index $.Vars "resource_name"}}"
+  labels   = {
+    bar = "foo"
+  }
+  location           = "global"
+  description        = "my description"
+  well_known_roots   = "PUBLIC_ROOTS"
+  client_certificate = google_certificate_manager_certificate.certificate.id
+  trust_config       = google_certificate_manager_trust_config.trust_config.id
+}
