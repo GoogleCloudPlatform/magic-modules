@@ -358,7 +358,7 @@ func TestAccProductResource_update(t *testing.T) {
 
 Bootstrapping networks can be useful for two reasons:
 
-1. Resources like service_networking_connection use a consumer network and create a complementing tenant network which we don't control. These tenant networks never get cleaned up and they can accumulate to the point where a limit is reached for the organization. By reusing a consumer network across test runs, we can reduce the number of tenant networks that are needed. (Googlers: See b/146351146 for more context.)
+1. Resources like `google_service_networking_connection` use a consumer network and create a complementing tenant network which we don't control. These tenant networks never get cleaned up and they can accumulate to the point where a limit is reached for the organization. By reusing a consumer network across test runs, we can reduce the number of tenant networks that are needed. (Googlers: See b/146351146 for more context.)
 2. Bootstrap networks used in tests (gke clusters, dataproc clusters...) to limit traffic to the default network (preventing conflicts).
 
 When creating a bootstrapped network in a test, you can specify an identifier. Note that if the network is being used for a `google_service_networking_connection`, you should use an identifier unique to the test to avoid race conditions where multiple tests attempt to modify the connection at once.
