@@ -15,8 +15,8 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
-		"bucket_id":     "_Default",
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"bucket_id":     "tf-test-bucket-" + acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -256,11 +256,6 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 
 func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
-// Reset organization settings which may have been reconfigured by another test
-resource "google_logging_organization_settings" "example" {
-	organization = "%{org_id}"
-}
-
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
@@ -282,7 +277,7 @@ resource "google_logging_folder_bucket_config" "basic" {
 	location  = "global"
 	retention_days = %d
 	description = "retention test %d days"
-	bucket_id = "_Default"
+	bucket_id = "%{bucket_id}"
 
 	depends_on = [time_sleep.wait_1_minute]
 }
