@@ -338,6 +338,20 @@ properties:
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
+      - name: 'pscInterfaceConfigs'
+        type: Array
+        description: |
+          Configurations for setting up PSC interfaces attached to the instance
+          which are used for outbound connectivity. Currently, AlloyDB supports only 0 or 1 PSC interface.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'networkAttachmentResource'
+              type: String
+              description: |
+                The network attachment resource created in the consumer project to which the PSC interface will be linked.
+                This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
+                The network attachment must be in the same region as the instance.
   - name: 'networkConfig'
     type: NestedObject
     description: |
