@@ -15,13 +15,13 @@ name: 'Category'
 description: |
   Represents a collection of categories and terms within a Glossary that are related to each other.
 docs:
-  base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
-  self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
-  create_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories?category_id={{category_id}}'
-  update_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
-  update_verb: 'PATCH'
-  update_mask: true
-  delete_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories?category_id={{category_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
 timeouts:
   insert_minutes: 5
   update_minutes: 5
