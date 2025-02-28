@@ -65,6 +65,18 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+  - name: 'alloydb_cluster_before_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+  - name: 'alloydb_cluster_after_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:

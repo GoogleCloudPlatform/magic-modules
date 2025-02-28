@@ -1,8 +1,8 @@
 package converters
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/cai2hcl/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 )
 
 func ConvertResource(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
