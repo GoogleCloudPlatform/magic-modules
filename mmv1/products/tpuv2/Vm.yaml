@@ -265,6 +265,12 @@ properties:
         min_version: 'beta'
         immutable: true
         send_empty_value: true
+      - name: 'spot'
+        type: Boolean
+        description: |
+          Optional. Defines whether the node is Spot VM.
+        min_version: 'beta'
+        immutable: true
   - name: 'dataDisks'
     type: Array
     description: |
