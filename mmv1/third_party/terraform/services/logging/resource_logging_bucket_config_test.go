@@ -15,7 +15,7 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"bucket_id":     "_Default",
 	}
 
@@ -256,10 +256,16 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 
 func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset organization settings which may have been reconfigured by another test
+resource "google_logging_organization_settings" "example" {
+	organization = "%{org_id}"
+}
+
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
 	deletion_protection = false
+	depends_on   = [google_logging_organization_settings.example]
 }
 
 // Give the _Default bucket a chance to be created
