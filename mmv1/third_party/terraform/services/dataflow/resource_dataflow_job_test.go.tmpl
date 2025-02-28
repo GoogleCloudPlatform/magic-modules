@@ -1384,22 +1384,22 @@ func TestResourceDataflowJobTemplateGcsPathDiffSuppress(t *testing.T) {
 			ExpectDiffSuppress: true,
 		},
 		"different bucket": {
-			Old:                "gs://template-bucket/path/to/file1",
-			New:                "gs://template-bucket-foo/path/to/file1",
+			Old:                "gs://template-bucket-foo/path/to/file1",
+			New:                "gs://template-bucket/path/to/file1",
 			ExpectDiffSuppress: false,
 		},
 		"different object": {
-			Old:                "gs://template-bucket/path/to/file1",
-			New:                "gs://template-bucket-foo/path/to/file2",
+			Old:                "gs://template-bucket-foo/path/to/file2",
+			New:                "gs://template-bucket/path/to/file",
 			ExpectDiffSuppress: false,
 		},
 		"regional bucket name change is okay": {
-			Old:                "gs://template-bucket/path/to/file1",
-			New:                "gs://template-bucket-us-central1/path/to/file1",
+			Old:                "gs://template-bucket-us-central1/path/to/file1",
+			New:                "gs://template-bucket/path/to/file1",
 			ExpectDiffSuppress: true,
 		},
 	}
-	rd := &schema.ResourceData{}
+	rd := schema.TestResourceDataRaw(t, dataflow.ResourceDataflowJob().Schema, nil)
 	rd.Set("region", "us-central1")
 
 	for tn, tc := range cases {
