@@ -4465,6 +4465,8 @@ resource "google_bigquery_table" "replica_mv" {
     %s
   }
 
+  max_staleness = "0-0 0 10:0:0"
+
   depends_on = [google_bigquery_dataset_access.access]
 }
 
