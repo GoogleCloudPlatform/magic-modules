@@ -305,9 +305,9 @@ For other Array fields, convert the field to a Set – this is a [breaking chang
 
 If a resource's creation or update takes a long time before the results will be returned from a Read call, it can lead to diffs.
 
- If the method returns an Operation, the best thing to do is wait for the operation to complete. In MMv1 resources, this can be done by setting [`autogen_async: true`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#autogen_async) and configuring the resource's [`async`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#async) settings.
+If the method returns an Operation, the best thing to do is wait for the operation to complete. In MMv1 resources, this can be done by setting [`autogen_async: true`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#autogen_async) and configuring the resource's [`async`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#async) settings.
 
-Eventually consistent APIs that do not return an  Operation are not compliant with [AIP-121's strong consistency requirement](https://google.aip.dev/121#strong-consistency), but they do exist. The fix in this case is to add [post-create custom code]({{< ref "/develop/custom-code/#pre_post_injection" >}}) which adds a sleep after creation completes. There are three premade templates that can be used for this:
+Eventually consistent APIs that do not return an Operation are not compliant with [AIP-121's strong consistency requirement](https://google.aip.dev/121#strong-consistency), but they do exist. The fix in this case is to add [post-create custom code]({{< ref "/develop/custom-code/#pre_post_injection" >}}) which adds a sleep after creation completes. There are three premade templates that can be used for this:
 
 - [`templates/terraform/post_create/sleep.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/terraform/post_create/sleep.go.tmpl)
 - [`templates/terraform/post_create/sleep_2_min.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/templates/terraform/post_create/sleep_2_min.go.tmpl)
