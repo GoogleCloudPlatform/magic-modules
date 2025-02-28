@@ -30,8 +30,6 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
 sweeper:
   url_substitutions:
     - region: 'global'
