@@ -1,7 +1,5 @@
 ### Include these blocks only once per project if you are starting from scratch ###
 resource "google_service_account" "service_account" {
-  provider = google-beta
-
   project = "{{index $.TestEnvVars "project_id"}}"
 
   # Must be firebase-app-hosting-compute
@@ -13,8 +11,6 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_project_iam_member" "app_hosting_sa_developerconnect" {
-  provider = google-beta
-
   project = "{{index $.TestEnvVars "project_id"}}"
 
   # For reading connected Github repos
@@ -23,8 +19,6 @@ resource "google_project_iam_member" "app_hosting_sa_developerconnect" {
 }
 
 resource "google_project_iam_member" "app_hosting_sa_adminsdk" {
-  provider = google-beta
-
   project = "{{index $.TestEnvVars "project_id"}}"
 
   # For Firebase Admin SDK
@@ -33,8 +27,6 @@ resource "google_project_iam_member" "app_hosting_sa_adminsdk" {
 }
 
 resource "google_project_iam_member" "app_hosting_sa_runner" {
-  provider = google-beta
-
   project = "{{index $.TestEnvVars "project_id"}}"
 
   # For App Hosting
@@ -43,8 +35,6 @@ resource "google_project_iam_member" "app_hosting_sa_runner" {
 }
 
 resource "google_project_service" "fah" {
-  provider = google-beta
-
   project = "{{index $.TestEnvVars "project_id"}}"
   service = "firebaseapphosting.googleapis.com"
 
@@ -53,8 +43,6 @@ resource "google_project_service" "fah" {
 ###
 
 resource "google_firebase_app_hosting_backend" "example" {
-  provider = google-beta
-
   project          = "{{index $.TestEnvVars "project_id"}}"
 
   # Choose the region closest to your users
