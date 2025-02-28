@@ -424,10 +424,9 @@ is set to true. Defaults to ZONAL.`,
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Default:          "PD_SSD",
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of data disk: PD_SSD or PD_HDD. Defaults to PD_SSD.`,
+							Description:      `The type of data disk: PD_SSD or PD_HDD or HyperDisk_Balanced `,
 						},
 						"ip_configuration": {
 							Type:     schema.TypeList,
