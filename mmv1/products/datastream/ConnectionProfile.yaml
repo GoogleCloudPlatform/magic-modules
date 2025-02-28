@@ -97,6 +97,11 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     exclude_test: true
+  - name: 'datastream_connection_profile_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -143,6 +148,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -185,6 +191,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'bucket'
         type: String
@@ -206,6 +213,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -289,6 +297,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       []
   - name: 'postgresqlProfile'
@@ -302,6 +311,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -330,6 +340,73 @@ properties:
         description: |
           Database for the PostgreSQL connection.
         required: true
+  - name: 'salesforceProfile'
+    min_version: beta
+    type: NestedObject
+    description: |
+      Salesforce profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+    properties:
+      - name: 'domain'
+        type: String
+        description: |
+          Domain for the Salesforce Org.
+        required: true
+      - name: 'userCredentials'
+        type: NestedObject
+        description: |
+          User credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - 'user_credentials'
+          - 'oauth2_client_credentials'
+        properties:
+          - name: 'username'
+            type: String
+            description: |
+              Username to use for authentication.
+          - name: 'password'
+            type: String
+            description: |
+              Password of the user.
+          - name: 'security_token'
+            type: String
+            description: |
+              Security token of the user.
+          - name: 'secret_manager_stored_password'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the user's password.
+          - name: 'secret_manager_stored_security_token'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the user's security token.
+      - name: 'oauth2ClientCredentials'
+        type: NestedObject
+        description: |
+          OAuth credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - 'user_credentials'
+          - 'oauth2_client_credentials'
+        properties:
+          - name: 'client_id'
+            type: String
+            description: |
+              Client ID to use for authentication.
+          - name: 'client_secret'
+            type: String
+            description: |
+              Client secret to use for authentication.
+          - name: 'secret_manager_stored_client_secret'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the client secret.
   - name: 'sqlServerProfile'
     type: NestedObject
     description: |
@@ -341,6 +418,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
