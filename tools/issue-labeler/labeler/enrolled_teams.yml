@@ -41,6 +41,9 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apihub:
+  resources:
+  - google_apihub_.*
 service/apikeys:
   resources:
   - google_apikeys_key
@@ -435,6 +438,7 @@ service/iam-wlid:
 service/iam-workforce:
   resources:
   - google_iam_workforce_pool.*
+  - google_iam_oauth_client.*
 service/iap:
   resources:
   - google_iap_.*

@@ -67,6 +67,7 @@ type Property struct {
 	Optional  bool
 	Computed  bool
 	Sensitive bool
+	WriteOnly bool
 
 	ForceNew    bool
 	Description string
