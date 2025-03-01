@@ -127,12 +127,25 @@ aliases:
 
 {{< /tabs >}}
 
-### Common errors
+## Troubleshooting acceptance tests {#troubleshooting}
 
-- `After applying this test step, the plan was not empty.`
-  - See [Fix diffs]({{< ref "/develop/diffs" >}}).
-- `Blocks of type "FIELD_NAME" are not expected here`
-  - The field does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
+### After applying this test step, the plan was not empty.
+
+This indicates that the returned values from the API (which will be displayed on the left) are different than what is in the configuration (displayed on the right). Fields which are listed as "known after apply" are not the cause of the diff and can be ignored in terms of resolving the issue.
+
+See [Fix diffs]({{< ref "/develop/diffs" >}}) for more information on potential causes and fixes.
+
+### Blocks of type "FIELD_NAME" are not expected here
+
+The field called `FIELD_NAME` does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
+
+### Provider produced inconsistent result after apply ... Root object was present, but now absent.
+
+This indicates that after an apply to create or update a resource, the resource was not present in Terraform state. This generally means one of a few things:
+
+- [API is eventually consistent or returns an Operation]({{< ref "/develop/diffs#eventually-consistent" >}})
+- The URL for reads was built incorrectly. The exact fix will depend on why this is happening. Run the test with the `TF_LOG=DEBUG` environment variable and check whether the read URL matches what you expect.
+- There is a call to unset the resource's id (`d.SetId("")`) somewhere it shouldn't be. The fix is to remove that extraneous call. This is rare.
 
 ## Optional: Test with different `terraform` versions
 
