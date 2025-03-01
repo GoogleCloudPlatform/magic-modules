@@ -261,4 +261,3 @@ properties:
     default_value: 'global'
     validation:
       regex: '^global$'
-
