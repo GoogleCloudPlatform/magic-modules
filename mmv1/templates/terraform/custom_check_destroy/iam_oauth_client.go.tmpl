@@ -1,6 +1,6 @@
 config := acctest.GoogleProviderConfig(t)
 
-url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IAMWorkforcePoolBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/global/oauthClients/{{"{{"}}oauth_client_id{{"}}"}}")
+url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IAMWorkforcePoolBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/oauthClients/{{"{{"}}oauth_client_id{{"}}"}}")
 if err != nil {
   return err
 }
@@ -19,4 +19,4 @@ if v := res["state"]; v == "DELETED" {
 	return nil
 }
 
-return fmt.Errorf("IAMOAuthCLient still exists at %s", url)
+return fmt.Errorf("IAMOAuthClient still exists at %s", url)
