@@ -645,3 +645,10 @@ properties:
           from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>`
           or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
         min_version: beta
+virtual_fields:
+  - name: 'table_metadata_view'
+    type: String
+    description: |
+      View sets the optional parameter "view": Specifies the view that determines which table information is
+      returned. By default, basic table information and storage statistics (STORAGE_STATS) are returned.
+      Possible values: TABLE_METADATA_VIEW_UNSPECIFIED, BASIC, STORAGE_STATS, FULL

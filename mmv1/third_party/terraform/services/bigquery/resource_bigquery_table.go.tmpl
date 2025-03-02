@@ -1447,6 +1447,11 @@ func ResourceBigQueryTable() *schema.Resource {
 					},
 				},
 			},
+			"table_metadata_view": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `View sets the optional parameter "view": Specifies the view that determines which table information is returned. By default, basic table information and storage statistics (STORAGE_STATS) are returned. Possible values: TABLE_METADATA_VIEW_UNSPECIFIED, BASIC, STORAGE_STATS, FULL`,
+			},
 			// TableReplicationInfo: [Optional] Replication info of a table created using `AS REPLICA` DDL like: `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
 			"table_replication_info": {
 				Type:        schema.TypeList,
@@ -1834,7 +1839,14 @@ func resourceBigQueryTableRead(d *schema.ResourceData, meta interface{}) error {
 	datasetID := d.Get("dataset_id").(string)
 	tableID := d.Get("table_id").(string)
 
-	res, err := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID).Do()
+	tableMetadataView := d.Get("table_metadata_view").(string)
+
+	client := config.NewBigQueryClient(userAgent).Tables.Get(project, datasetID, tableID)
+	if len(tableMetadataView) > 0 {
+	  client = client.View(tableMetadataView)
+	}
+	res, err := client.Do()
+
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("BigQuery table %q", tableID))
 	}
