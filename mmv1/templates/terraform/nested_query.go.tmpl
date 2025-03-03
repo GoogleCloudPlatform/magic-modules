@@ -140,15 +140,19 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
     return nil, fmt.Errorf("Unable to update {{ $.Name }} %q - not found in list", d.Id())
   }
 
-  // Override old object with new
-  items[idx] = obj
-  // Name is always required and won't be present in obj. Grab it from the item.
-  obj["name"] = item["name"]
+  // Copy over values for immutable fields
+{{- range $prop := $.SettableProperties }}
+{{- if $prop.IsForceNew }}
+  obj["{{$prop.ApiName}}"] = item["{{$prop.ApiName}}"]
+{{- end }}
+{{- end }}
   // Merge any fields in item that aren't managed by this resource into obj
   // This is necessary because item might be managed by multiple resources.
   settableFields := map[string]struct{}{
 {{- range $prop := $.SettableProperties }}
+{{- if not $prop.IsForceNew }}
     "{{$prop.ApiName}}": struct{}{},
+{{- end }}
 {{- end }}
   }
   for k, v := range item {
@@ -156,6 +160,10 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
       obj[k] = v
     }
   }
+
+  // Override old object with new
+  items[idx] = obj
+
   // Return list with new item added
   res := map[string]interface{}{
     "{{ $.LastNestedQueryKey }}": items,
