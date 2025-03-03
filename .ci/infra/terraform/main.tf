@@ -320,6 +320,7 @@ module "project-services" {
     "parametermanager.googleapis.com",
     "privateca.googleapis.com",
     "privilegedaccessmanager.googleapis.com",
+    "progressiverollout.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -477,6 +478,24 @@ resource "google_project_iam_member" "colab_admin_permissions" {
   member  = "user:gterraformtestuser@gmail.com"
 }
 
+resource "google_project_iam_member" "osconfig_service_agent" {
+  project = google_project.proj.project_id
+  role    = "roles/osconfig.serviceAgent"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "osconfig_rollout_service_agent" {
+  project = google_project.proj.project_id
+  role    = "roles/osconfig.rolloutServiceAgent"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "progressiverollout_service_agent" {
+    project = google_project.proj.project_id
+    role    = "roles/progressiverollout.serviceAgent"
+    member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-progrollout.iam.gserviceaccount.com"
+}
+
 data "google_organization" "org2" {
   organization = var.org2_id
 }
@@ -503,6 +522,24 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcesettings.admin"
   member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_org2_osconfig_service_agent" {
+  org_id = data.google_organization.org2.org_id
+  role    = "roles/osconfig.serviceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "sa_org2_osconfig_rollout_service_agent" {
+  org_id = data.google_organization.org2.org_id
+  role    = "roles/osconfig.rolloutServiceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "sa_org2_progressiverollout_service_agent" {
+  org_id = data.google_organization.org2.org_id
+  role    = "roles/progressiverollout.serviceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
 }
 
 output "service_account" {
