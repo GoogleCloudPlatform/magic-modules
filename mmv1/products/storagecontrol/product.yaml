@@ -17,7 +17,5 @@ display_name: 'Cloud Storage Control'
 versions:
   - name: 'ga'
     base_url: 'https://storage.googleapis.com/v2/'
-  - name: 'beta'
-    base_url: 'https://storage.googleapis.com/v2/'
 scopes:
   - 'https://www.googleapis.com/auth/devstorage.full_control'
