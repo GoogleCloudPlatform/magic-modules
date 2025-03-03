@@ -1,5 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storageinsights_test
 
 import (
@@ -261,11 +263,7 @@ resource "google_storage_insights_report_config" "config" {
       year = 2040
     }
   }
-  csv_options {
-    record_separator = "\r\n"
-    delimiter = "."
-    header_required = true
-  }
+  parquet_options {}
   object_metadata_report_options {
     metadata_fields = ["bucket", "name", "project"]
     storage_filters {

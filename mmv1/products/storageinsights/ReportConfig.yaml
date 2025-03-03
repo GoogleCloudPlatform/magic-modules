@@ -102,6 +102,8 @@ properties:
             required: true
   - name: 'parquetOptions'
     type: NestedObject
+    description: |
+      An option for outputting inventory reports as parquet file
     exactly_one_of:
       - parquet_options
       - csv_options
