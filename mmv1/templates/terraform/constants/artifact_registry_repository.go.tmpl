@@ -66,6 +66,31 @@ func parseDurationAsSeconds(v string) (int, bool) {
 	}
 }
 
+// Like tpgresource.DurationDiffSuppress, but supports 'd'
+func durationDiffSuppress(k, oldr, newr string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(k)
+	old, ok := o.(string)
+	if !ok {
+		return false
+	}
+	new, ok := n.(string)
+	if !ok {
+		return false
+	}
+	if old == new {
+		return true
+	}
+	oldSeconds, ok := parseDurationAsSeconds(old)
+	if !ok {
+		return false
+	}
+	newSeconds, ok := parseDurationAsSeconds(new)
+	if !ok {
+		return false
+	}
+	return oldSeconds == newSeconds
+}
+
 func mapHashID(v any) int {
 	replaceNestedValue(v, []string{"condition", "older_than"}, expandDuration)
 	replaceNestedValue(v, []string{"condition", "newer_than"}, expandDuration)
