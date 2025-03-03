@@ -31,7 +31,7 @@ import (
 
 // This proivder is for both tfplan2cai and cai2hcl conversions,
 // and copying other files, such as transport.go
-type TerraformGoogleConversionV6 struct {
+type TerraformGoogleConversionNext struct {
 	TargetVersionName string
 
 	Version product.Version
@@ -41,8 +41,8 @@ type TerraformGoogleConversionV6 struct {
 	StartTime time.Time
 }
 
-func NewTerraformGoogleConversionV6(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionV6 {
-	t := TerraformGoogleConversionV6{
+func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
+	t := TerraformGoogleConversionNext{
 		Product:           product,
 		TargetVersionName: versionName,
 		Version:           *product.VersionObjOrClosest(versionName),
@@ -58,27 +58,27 @@ func NewTerraformGoogleConversionV6(product *api.Product, versionName string, st
 	return t
 }
 
-func (tgc TerraformGoogleConversionV6) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
 	tgc.GenerateTfToCaiObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 	tgc.GenerateCaiToHclObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 }
 
-func (tgc TerraformGoogleConversionV6) GenerateTfToCaiObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) GenerateTfToCaiObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
-func (tgc TerraformGoogleConversionV6) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
-func (tgc TerraformGoogleConversionV6) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	tgc.CompileTfToCaiCommonFiles(outputFolder, products)
 	tgc.CompileCaiToHclCommonFiles(outputFolder, products)
 }
 
-func (tgc TerraformGoogleConversionV6) CompileTfToCaiCommonFiles(outputFolder string, products []*api.Product) {
-	log.Printf("Compiling common files for tgc v6 tfplan2cai.")
+func (tgc TerraformGoogleConversionNext) CompileTfToCaiCommonFiles(outputFolder string, products []*api.Product) {
+	log.Printf("Compiling common files for tgc tfplan2cai.")
 
 	resourceConverters := map[string]string{
-		"tfplan2cai/converters/resource_converters.go":                       "templates/tgc_v6/tfplan2cai/resource_converters.go.tmpl",
+		"tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
 		"tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 	}
@@ -86,17 +86,17 @@ func (tgc TerraformGoogleConversionV6) CompileTfToCaiCommonFiles(outputFolder st
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
-func (tgc TerraformGoogleConversionV6) CompileCaiToHclCommonFiles(outputFolder string, products []*api.Product) {
-	log.Printf("Compiling common files for tgc v6 tfplan2cai.")
+func (tgc TerraformGoogleConversionNext) CompileCaiToHclCommonFiles(outputFolder string, products []*api.Product) {
+	log.Printf("Compiling common files for tgc tfplan2cai.")
 
 	resourceConverters := map[string]string{
-		"cai2hcl/converters/resource_converters.go": "templates/tgc_v6/cai2hcl/resource_converters.go.tmpl",
+		"cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
-func (tgc TerraformGoogleConversionV6) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
+func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
@@ -119,18 +119,18 @@ func (tgc TerraformGoogleConversionV6) CompileFileList(outputFolder string, file
 	}
 }
 
-func (tgc TerraformGoogleConversionV6) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {
 	if !generateCode {
 		return
 	}
 
-	log.Printf("Copying common files for tgc v6.")
+	log.Printf("Copying common files for tgc.")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
-	if err := copy.Copy("third_party/tgc_v6", outputFolder); err != nil {
+	if err := copy.Copy("third_party/tgc_next", outputFolder); err != nil {
 		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 	}
 
@@ -138,7 +138,7 @@ func (tgc TerraformGoogleConversionV6) CopyCommonFiles(outputFolder string, gene
 	tgc.CopyCaiToHclCommonFiles(outputFolder)
 }
 
-func (tgc TerraformGoogleConversionV6) CopyTfToCaiCommonFiles(outputFolder string) {
+func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
 		"tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
 		"tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
@@ -146,12 +146,12 @@ func (tgc TerraformGoogleConversionV6) CopyTfToCaiCommonFiles(outputFolder strin
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
 
-func (tgc TerraformGoogleConversionV6) CopyCaiToHclCommonFiles(outputFolder string) {
+func (tgc TerraformGoogleConversionNext) CopyCaiToHclCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
 
-func (tgc TerraformGoogleConversionV6) CopyFileList(outputFolder string, files map[string]string) {
+func (tgc TerraformGoogleConversionNext) CopyFileList(outputFolder string, files map[string]string) {
 	for target, source := range files {
 		targetFile := filepath.Join(outputFolder, target)
 		targetDir := filepath.Dir(targetFile)
@@ -182,7 +182,7 @@ func (tgc TerraformGoogleConversionV6) CopyFileList(outputFolder string, files m
 	}
 }
 
-func (tgc TerraformGoogleConversionV6) replaceImportPath(outputFolder, target string) {
+func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target string) {
 	// Replace import paths to reference the resources dir instead of the google provider
 	targetFile := filepath.Join(outputFolder, target)
 	sourceByte, err := os.ReadFile(targetFile)

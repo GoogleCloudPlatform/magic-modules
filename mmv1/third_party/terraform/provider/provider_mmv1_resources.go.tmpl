@@ -102,6 +102,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
 	"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 	"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
+	"google_compute_region_ssl_policy":                 compute.DataSourceGoogleRegionComputeSslPolicy(),
 	"google_compute_reservation":                       compute.DataSourceGoogleComputeReservation(),
 	"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
@@ -252,6 +253,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
 	{{- end }}
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
+	"google_memorystore_instance":						memorystore.DataSourceMemorystoreInstance(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
@@ -299,6 +301,7 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	"google_project_iam_policy":                    tpgiamresource.DataSourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater),
 	"google_pubsub_subscription_iam_policy":        tpgiamresource.DataSourceIamPolicy(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater),
 	"google_service_account_iam_policy":            tpgiamresource.DataSourceIamPolicy(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater),
+	"google_storage_bucket_iam_policy":                       tpgiamresource.DataSourceIamPolicy(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer),
 	// ####### END non-generated IAM datasources ###########
 }
 
@@ -472,6 +475,9 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_storage_managed_folder_iam_binding":    tpgiamresource.ResourceIamBinding(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_storage_managed_folder_iam_member":     tpgiamresource.ResourceIamMember(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_storage_managed_folder_iam_policy":     tpgiamresource.ResourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_bucket_iam_binding":            tpgiamresource.ResourceIamBinding(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
+    "google_storage_bucket_iam_member":             tpgiamresource.ResourceIamMember(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
+    "google_storage_bucket_iam_policy":             tpgiamresource.ResourceIamPolicy(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
 	"google_organization_iam_binding":              tpgiamresource.ResourceIamBinding(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_member":               tpgiamresource.ResourceIamMember(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_policy":               tpgiamresource.ResourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),

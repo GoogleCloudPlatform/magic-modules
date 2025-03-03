@@ -43,6 +43,7 @@ import (
     "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/go-cty/cty"
 
     "{{ $.ImportPath }}/tpgresource"
     transport_tpg "{{ $.ImportPath }}/transport"
@@ -121,7 +122,11 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{- end }}
         ),
 {{- end}}
-
+{{- if $.CustomCode.ValidateRawResourceConfigFuncs }}
+		ValidateRawResourceConfigFuncs: []schema.ValidateRawResourceConfigFunc{
+			{{$.CustomTemplate $.CustomCode.ValidateRawResourceConfigFuncs false}},
+		},
+{{- end }}
 {{ if $.DeprecationMessage }}
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
