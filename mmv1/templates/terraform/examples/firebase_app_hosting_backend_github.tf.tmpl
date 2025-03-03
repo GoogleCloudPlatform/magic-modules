@@ -1,42 +1,3 @@
-resource "google_developer_connect_connection" "my-connection" {
-  project  = "{{index $.TestEnvVars "project_id"}}"
-  location = "us-central1"
-  connection_id = "tf-test-connection-new"
-  github_config {
-    github_app = "FIREBASE"
-  }
-  depends_on = [google_project_iam_member.devconnect-secret]
-}
-
-resource "google_developer_connect_git_repository_link" "my-repository" {
-  project  = "{{index $.TestEnvVars "project_id"}}"
-  location = "us-central1"
-
-  git_repository_link_id = "my-repo"
-  parent_connection = google_developer_connect_connection.my-connection.connection_id
-  clone_uri = "https://github.com/myuser/myrepo.git"
-}
-
-output "next_steps" {
-  description = "Follow the action_uri if present to continue setup"
-  value = google_developer_connect_connection.my-connection.installation_state
-}
-
-# Setup permissions. Only needed once per project
-resource "google_project_service_identity" "devconnect-p4sa" {
-  provider = google-beta
-
-  provider = google-beta
-  project  = "{{index $.TestEnvVars "project_id"}}"
-  service  = "developerconnect.googleapis.com"
-}
-
-resource "google_project_iam_member" "devconnect-secret" {
-  project  = "{{index $.TestEnvVars "project_id"}}"
-  role     = "roles/secretmanager.admin"
-  member   = google_project_service_identity.devconnect-p4sa.member
-}
-
 resource "google_firebase_app_hosting_backend" "example" {
   project          = "{{index $.TestEnvVars "project_id"}}"
 
@@ -62,3 +23,45 @@ resource "google_firebase_app_hosting_backend" "example" {
     root_directory = "/"
   }
 }
+
+resource "google_developer_connect_git_repository_link" "my-repository" {
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  location = "us-central1"
+
+  git_repository_link_id = "my-repo"
+  parent_connection = google_developer_connect_connection.my-connection.connection_id
+  clone_uri = "https://github.com/myuser/myrepo.git"
+}
+
+### Include these blocks only once per project if you are starting from scratch ###
+resource "google_project_service_identity" "devconnect-p4sa" {
+  provider = google-beta
+
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  service  = "developerconnect.googleapis.com"
+}
+
+resource "google_project_iam_member" "devconnect-secret" {
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  role     = "roles/secretmanager.admin"
+  member   = google_project_service_identity.devconnect-p4sa.member
+}
+###
+
+### Include these blocks only once per Github account ###
+resource "google_developer_connect_connection" "my-connection" {
+  project  = "{{index $.TestEnvVars "project_id"}}"
+  location = "us-central1"
+  connection_id = "tf-test-connection-new"
+  github_config {
+    github_app = "FIREBASE"
+  }
+  depends_on = [google_project_iam_member.devconnect-secret]
+}
+
+output "next_steps" {
+  description = "Follow the action_uri if present to continue setup"
+  value = google_developer_connect_connection.my-connection.installation_state
+}
+###

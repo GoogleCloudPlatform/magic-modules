@@ -1,3 +1,16 @@
+resource "google_firebase_app_hosting_backend" "example" {
+  project          = "{{index $.TestEnvVars "project_id"}}"
+  # Choose the region closest to your users
+
+  location         = "us-central1"
+  backend_id       = "{{index $.Vars "backend_id"}}"
+  app_id           = "1:0000000000:web:674cde32020e16fbce9dbd"
+  serving_locality = "GLOBAL_ACCESS"
+  service_account  = google_service_account.service_account.email
+
+  depends_on = [google_project_service.fah]
+}
+
 ### Include these blocks only once per project if you are starting from scratch ###
 resource "google_service_account" "service_account" {
   project = "{{index $.TestEnvVars "project_id"}}"
@@ -25,16 +38,3 @@ resource "google_project_service" "fah" {
   disable_on_destroy = false
 }
 ###
-
-resource "google_firebase_app_hosting_backend" "example" {
-  project          = "{{index $.TestEnvVars "project_id"}}"
-  # Choose the region closest to your users
-
-  location         = "us-central1"
-  backend_id       = "{{index $.Vars "backend_id"}}"
-  app_id           = "1:0000000000:web:674cde32020e16fbce9dbd"
-  serving_locality = "GLOBAL_ACCESS"
-  service_account  = google_service_account.service_account.email
-
-  depends_on = [google_project_service.fah]
-}
