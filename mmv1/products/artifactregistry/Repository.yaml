@@ -423,11 +423,13 @@ properties:
               description: |-
                 Match versions older than a duration.
               custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
             - name: 'newerThan'
               type: String
               description: |-
                 Match versions newer than a duration.
               custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
         - name: 'mostRecentVersions'
           type: NestedObject
           description: |-
