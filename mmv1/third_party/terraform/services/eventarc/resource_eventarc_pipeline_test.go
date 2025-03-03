@@ -13,12 +13,11 @@ import (
 func TestAccEventarcPipeline_update(t *testing.T) {
 	t.Parallel()
 
-	region := envvar.GetTestRegionFromEnv()
 	context := map[string]interface{}{
-		"region":                  region,
 		"project_id":              envvar.GetTestProjectFromEnv(),
-		"key1_name":               acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-pipeline-key1").CryptoKey.Name,
-		"key2_name":               acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", region, "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
+		"service_account":         envvar.GetTestServiceAccountFromEnv(t),
+		"key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name,
+		"key2_name":               acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
 		"network_attachment_name": acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network"))),
 		"random_suffix":           acctest.RandString(t, 10),
 	}
@@ -35,7 +34,7 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 		CheckDestroy:             testAccCheckEventarcPipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEventarcPipeline_full(context),
+				Config: testAccEventarcPipeline_eventarcPipelineWithCmekAndAvroFormatExample(context),
 			},
 			{
 				ResourceName:            "google_eventarc_pipeline.primary",
@@ -61,44 +60,51 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 	})
 }
 
-func testAccEventarcPipeline_full(context map[string]interface{}) string {
+func testAccEventarcPipeline_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_eventarc_pipeline" "primary" {
-  location        = "%{region}"
+  location        = "us-central1"
   pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
-  crypto_key_name = "%{key1_name}"
-  display_name    = "some pipeline"
+  crypto_key_name = "%{key2_name}"
+  display_name    = "updated pipeline"
   logging_config {
     log_severity = "ALERT"
   }
   destinations {
     http_endpoint {
-      uri = "https://10.77.0.0:80/route"
+      uri = "https://10.77.0.1:80/route"
+      message_binding_template = "{\"headers\":{\"new-header-key2\": \"new-header-value2\"}}"
     }
     network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
+      network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
+    }
+    authentication_config {
+      google_oidc {
+        service_account = "%{service_account}"
+        audience        = "http://www.example.com"
+      }
+    }
+    output_payload_format {
+      json {}
     }
   }
-}
-`, context)
-}
-
-func testAccEventarcPipeline_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_eventarc_pipeline" "primary" {
-  location        = "%{region}"
-  pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
-  crypto_key_name = "%{key2_name}"
-  display_name    = "updated pipeline"
-  logging_config {
-    log_severity = "DEBUG"
+  input_payload_format {
+    json {}
   }
-  destinations {
-    http_endpoint {
-      uri = "https://10.77.0.0:80/route"
-    }
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
+  retry_policy {
+    max_retry_delay = "55s"
+    max_attempts    = 3
+    min_retry_delay = "45s"
+  }
+  mediations {
+    transformation {
+      transformation_template = <<-EOF
+{
+"id": message.id,
+"datacontenttype": "application/json",
+"data": "{ \"scrubbed\": \"false\" }"
+}
+EOF
     }
   }
 }
