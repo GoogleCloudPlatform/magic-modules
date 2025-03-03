@@ -1,9 +1,3 @@
-resource "google_kms_crypto_key_iam_member" "key_member" {
-  crypto_key_id = "{{index $.Vars "key_name"}}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-eventarc.iam.gserviceaccount.com"
-}
-
 resource "google_eventarc_pipeline" "{{$.PrimaryResourceId}}" {
   location        = "us-central1"
   pipeline_id     = "{{index $.Vars "pipeline_name"}}"
@@ -46,5 +40,4 @@ EOF
   logging_config {
     log_severity = "DEBUG"
   }
-  depends_on = [google_kms_crypto_key_iam_member.key_member]
 }
