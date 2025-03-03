@@ -36,7 +36,6 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
     }
     custom_metrics {
       name    = "orca.named_metrics.foo"
-      max_utilization = 0.9
       # At least one metric should be not dry_run.
       dry_run = false
     }

@@ -274,7 +274,6 @@ properties:
           type: Array
           description: |
             The set of custom metrics that are used for <code>CUSTOM_METRICS</code> BalancingMode.
-          is_set: false
           item_type:
             type: NestedObject
             properties:
