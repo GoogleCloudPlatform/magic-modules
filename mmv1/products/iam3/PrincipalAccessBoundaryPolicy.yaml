@@ -47,6 +47,7 @@ async:
 examples:
   - name: 'iam_principal_access_boundary_policy'
     primary_resource_id: 'pab-policy-for-org'
+    external_providers: ["time"]
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
@@ -54,6 +55,7 @@ examples:
       pab_id: 'pab-policy-for-org'
   - name: 'iam_organizations_policy_binding'
     primary_resource_id: 'my-pab-policy'
+    external_providers: ["time"]
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
