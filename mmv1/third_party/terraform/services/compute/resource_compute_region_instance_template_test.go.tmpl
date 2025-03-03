@@ -4592,7 +4592,6 @@ resource "google_compute_region_instance_template" "foobar" {
 		auto_delete  = true
 		disk_size_gb = 10
 		boot         = true
-		architecture = "X86_64"
 		disk_encryption_key {
 			kms_key_self_link = "%{kms_key_self_link}"
 			kms_key_service_account = data.google_compute_default_service_account.default.email
