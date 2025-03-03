@@ -171,6 +171,24 @@ resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_org_osconfig_service_agent" {
+  org_id = data.google_organization.org.org_id
+  role    = "roles/osconfig.serviceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "sa_org_osconfig_rollout_service_agent" {
+  org_id = data.google_organization.org.org_id
+  role    = "roles/osconfig.rolloutServiceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
+}
+
+resource "google_organization_iam_member" "sa_org_progressiverollout_service_agent" {
+  org_id = data.google_organization.org.org_id
+  role    = "roles/progressiverollout.serviceAgent"
+  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -522,24 +540,6 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcesettings.admin"
   member = google_service_account.sa.member
-}
-
-resource "google_organization_iam_member" "sa_org2_osconfig_service_agent" {
-  org_id = data.google_organization.org2.org_id
-  role    = "roles/osconfig.serviceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-}
-
-resource "google_organization_iam_member" "sa_org2_osconfig_rollout_service_agent" {
-  org_id = data.google_organization.org2.org_id
-  role    = "roles/osconfig.rolloutServiceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-}
-
-resource "google_organization_iam_member" "sa_org2_progressiverollout_service_agent" {
-  org_id = data.google_organization.org2.org_id
-  role    = "roles/progressiverollout.serviceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org2.org_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
 }
 
 output "service_account" {
