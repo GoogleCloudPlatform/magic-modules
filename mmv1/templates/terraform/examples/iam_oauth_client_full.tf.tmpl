@@ -1,0 +1,11 @@
+resource "google_iam_oauth_client" "{{$.PrimaryResourceId}}" {
+  oauth_client_id = "{{index $.Vars "oauth_client_id"}}"
+  display_name              = "Display Name of OAuth client"
+  description               = "A sample OAuth client"
+  location                  = "global"
+  disabled                  = false
+  allowed_grant_types       = ["AUTHORIZATION_CODE_GRANT"]
+  allowed_redirect_uris     = ["https://www.example.com"]
+  allowed_scopes            = ["https://www.googleapis.com/auth/cloud-platform"]
+  client_type               = "CONFIDENTIAL_CLIENT"
+}
