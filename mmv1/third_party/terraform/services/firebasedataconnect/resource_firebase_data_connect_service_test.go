@@ -70,7 +70,7 @@ resource "google_firebase_data_connect_service" "default" {
   location = "us-central1"
   service_id = "tf-fdc-%{random_suffix}"
   display_name = "%{display_name}"
-	deletion_policy = "%{deletion_policy}"
+  deletion_policy = "%{deletion_policy}"
 
   depends_on = [google_project_service.fdc]
 }

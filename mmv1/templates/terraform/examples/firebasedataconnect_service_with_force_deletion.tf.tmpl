@@ -5,7 +5,7 @@ resource "google_project_service" "fdc" {
   disable_on_destroy = false
 }
 
-# Create an FDC service
+# Create a Firebase Data Connect service
 resource "google_firebase_data_connect_service" "default" {
   project = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
