@@ -474,6 +474,40 @@ func testNamesFromIssues(issues []*github.Issue) ([]string, error) {
 	return testNames, nil
 }
 
+func testNamesFromIssue(issue *github.Issue) ([]string, error) {
+	var testNames []string
+	if issue.IsPullRequest() {
+		return testNames, nil
+	}
+
+	affectedTests := strings.ReplaceAll(issue.GetBody(), "<!-- List all impacted tests for searchability. The title of the issue can instead list one or more groups of tests, or describe the overall root cause. -->", "")
+	impactTestRegexp := regexp.MustCompile(`Impacted tests:?[\r?\n]+((?:-? ?TestAcc[^\r\n]*\r?\n)*)`)
+	matches := impactTestRegexp.FindStringSubmatch(affectedTests)
+
+	if len(matches) > 1 {
+		tests := strings.Split(matches[1], "\r\n")
+
+		for _, test := range tests {
+			subtests := strings.Split(test, "\n")
+			for _, subtest := range subtests {
+				if strings.HasPrefix(subtest, "- ") {
+					subtest = strings.TrimSpace(subtest[2:])
+					subtestParts := strings.Fields(subtest)
+					subtest = subtestParts[0]
+					testNames = append(testNames, subtest)
+				} else {
+					singleTestRegexp := regexp.MustCompile(`TestAcc[^\r\n]*`)
+					if singleTestRegexp.MatchString(subtest) {
+						testNames = append(testNames, subtest)
+					}
+				}
+			}
+		}
+
+	}
+	return testNames, nil
+}
+
 func init() {
 	rootCmd.AddCommand(createTestFailureTicketCmd)
 }
