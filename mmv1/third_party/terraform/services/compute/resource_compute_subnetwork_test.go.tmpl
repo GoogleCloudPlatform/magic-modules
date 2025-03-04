@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+        tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/compute/v1"
@@ -118,34 +119,38 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_update1(cnName, "10.2.0.0/24", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				// Expand IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/16", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				// Shrink IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/24", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				// Add a secondary range and enable flow logs at once
 				Config: testAccComputeSubnetwork_update3(cnName, "10.2.0.0/24", subnetworkName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeSubnetworkExists(
-						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
-				),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+                                    PreApply: []plancheck.PlanCheck{
+                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
+                                    },
+                                },
 			},
 			{
 				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
@@ -187,7 +192,7 @@ func TestAccComputeSubnetwork_purposeUpdate(t *testing.T) {
                 },
                 })
 
-       
+
 }
 
 func TestAccComputeSubnetwork_secondaryIpRanges(t *testing.T) {
