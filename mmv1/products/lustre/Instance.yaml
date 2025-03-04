@@ -27,7 +27,6 @@ examples:
     primary_resource_id: 'instance'
     vars:
       name: 'my-instance'
-      network_name: 'default-network'
       address_name: 'ip-address-name'
 autogen_async: true
 async:

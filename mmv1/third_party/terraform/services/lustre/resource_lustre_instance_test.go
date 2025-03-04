@@ -55,13 +55,9 @@ func testAccLustreInstance_full(context map[string]interface{}) string {
 resource "google_lustre_instance" "instance" {
   instance_id = "tf-test-my-instance%{random_suffix}"
   location = "us-central1-a"
-  description = "test instance"
   filesystem = "testfs"
   capacity_gib = 18000
   network = "${data.google_project.project.id}/global/networks/default"
-  labels = {
-    test = "value"
-  }
 	timeouts {
 		create = "180m"
 	}
@@ -89,12 +85,12 @@ func testAccLustreInstance_update(context map[string]interface{}) string {
 resource "google_lustre_instance" "instance" {
   instance_id = "tf-test-my-instance%{random_suffix}"
   location = "us-central1-a"
-  description = "test instance description field has been updated."
+  description = "description updated"
   filesystem = "testfs"
   capacity_gib = 18000
   network = "${data.google_project.project.id}/global/networks/default"
   labels = {
-    test = "value"
+    test = "newLabel"
   }
 	timeouts {
 		create = "180m"
