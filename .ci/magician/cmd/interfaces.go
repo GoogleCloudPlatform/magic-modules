@@ -44,6 +44,7 @@ type CloudbuildClient interface {
 
 type CloudstorageClient interface {
 	WriteToGCSBucket(bucketName, objectName, filePath string) error
+	DownloadFile(bucket, object, filePath string) error
 }
 
 type TeamcityClient interface {

@@ -434,7 +434,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						{{ if ne $.TargetVersionName `ga` -}}
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -443,7 +442,6 @@ func ResourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
-						{{- end }}
 
 						"subnetwork_project": {
 							Type:        schema.TypeString,

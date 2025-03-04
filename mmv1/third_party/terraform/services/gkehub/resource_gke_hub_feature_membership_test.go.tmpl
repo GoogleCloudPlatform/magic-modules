@@ -375,9 +375,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -397,7 +394,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.20.1"
     config_sync {
       enabled = true
       git {
@@ -435,9 +432,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -495,9 +489,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -780,9 +771,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -833,9 +821,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -885,9 +870,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -1168,9 +1150,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -1181,9 +1160,6 @@ resource "google_gke_hub_membership" "membership_second" {
       resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_third" {
@@ -1194,9 +1170,6 @@ resource "google_gke_hub_membership" "membership_third" {
       resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_fourth" {
@@ -1207,9 +1180,6 @@ resource "google_gke_hub_membership" "membership_fourth" {
       resource_link = "//container.googleapis.com/${google_container_cluster.quarternary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 `, context)
 }
@@ -1242,9 +1212,6 @@ resource "google_gke_hub_membership" "membership_acmoci" {
       resource_link = "//container.googleapis.com/${google_container_cluster.container_acmoci.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 `, context)
 }

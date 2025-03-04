@@ -1,9 +1,9 @@
 {{ "" }}
-{{- if $.FlattenObject }}
+{{- if and $.FlattenObject (not $.WriteOnlyProperties) }}
   {{- range $np := $.NestedProperties }}
 {{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $np -}}
   {{- end -}}
-{{- else if $.NestedProperties }}
+{{- else if and $.NestedProperties (not $.WriteOnlyProperties) }}
 <a name="nested_{{$.LineageAsSnakeCase}}"></a>The `{{ underscore $.Name }}` block {{ if $.Output }}contains{{ else }}supports{{ end }}:
 {{ "" }}
   {{- if $.IsA "Map" }}

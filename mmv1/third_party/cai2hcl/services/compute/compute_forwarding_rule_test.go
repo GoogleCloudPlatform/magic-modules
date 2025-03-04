@@ -3,7 +3,7 @@ package compute_test
 import (
 	"testing"
 
-	cai2hcl_testing "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/testing"
+	cai2hcl_testing "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/testing"
 )
 
 func TestComputeForwardingRule(t *testing.T) {
