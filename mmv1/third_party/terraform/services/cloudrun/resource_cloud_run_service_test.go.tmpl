@@ -841,7 +841,16 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
       {
-        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, "10", "10", "1"),
+        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbeHttp(name, project, "10", "10", "1"),
+      },
+      {
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+			},
+      {
+        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbeGrpc(name, project, "10", "10", "1"),
       },
       {
 				ResourceName:            "google_cloud_run_service.default",
@@ -892,9 +901,9 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-func testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, timeout, period, failure_threshold string) string {
+func testAccCloudRunService_cloudRunServiceWithReadinessProbeHttp(name, project, timeout, period, failure_threshold string) string {
 	return fmt.Sprintf(`
-resource "google_cloud_run_service" "default" {
+resource "google_cloud_run_service" "primary" {
   name     = "%s"
   location = "us-central1"
 
@@ -917,8 +926,8 @@ resource "google_cloud_run_service" "default" {
           timeout_seconds = %s
           failure_threshold = %s
           http_get {
-            path: "/"
-            port: 8080
+            path = "/"
+            port = 8080
             http_headers {
               name = "User-Agent"
               value = "magic-modules"
@@ -926,6 +935,48 @@ resource "google_cloud_run_service" "default" {
             http_headers {
               name = "Some-Name"
             }
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project, period, timeout, failure_threshold)
+}
+
+func testAccCloudRunService_cloudRunServiceWithReadinessProbeGrpc(name, project, timeout, period, failure_threshold string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "primary" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+        readiness_probe {
+          period_seconds = %s
+          timeout_seconds = %s
+          failure_threshold = %s
+          grpc {
+            port = 8080
+            service = foobar
           }
         }
       }
