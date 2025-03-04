@@ -62,6 +62,8 @@ examples:
       pab_policy_id: 'my-pab-policy'
       display_name: 'Binding for all principals in the Organization'
       org_binding_id: 'binding-for-all-org-principals'
+    # This example is already used as a test in OrganizationsPolicyBinding
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String
