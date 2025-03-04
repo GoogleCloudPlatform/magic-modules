@@ -9,8 +9,8 @@ Client-side fields are most often used as flags to modify the behavior of a Terr
 
 Common client-side fields include:
 
-- [`deletion_protection`]({{< ref "/best-practices#deletion_protection" >}})
-- [`deletion_policy`]({{< ref "/best-practices#deletion_policy" >}})
+- [`deletion_protection`]({{< ref "/best-practices/deletion-behaviors#deletion_protection" >}})
+- [`deletion_policy`]({{< ref "/best-practices/deletion-behaviors#deletion_policy" >}})
 
 {{< tabs "schema" >}}
 {{< tab "MMv1" >}}
