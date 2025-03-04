@@ -757,7 +757,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:

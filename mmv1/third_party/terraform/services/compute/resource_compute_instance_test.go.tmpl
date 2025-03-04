@@ -587,6 +587,30 @@ func TestAccComputeInstance_internalIPv6(t *testing.T) {
   })
 }
 
+func TestAccComputeInstance_internalIPv6PrefixLength(t *testing.T) {
+  t.Parallel()
+
+  var instance compute.Instance
+  var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeInstance_internalIpv6PrefixLength("96", instanceName),
+        Check: resource.ComposeTestCheckFunc(
+          testAccCheckComputeInstanceExists(
+            t, "google_compute_instance.foobar", &instance),
+          testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(&instance),
+        ),
+      },
+      computeInstanceImportStep("us-west2-a", instanceName, []string{"allow_stopping_for_update"}),
+    },
+  })
+}
+
 func TestAccComputeInstance_PTRRecord(t *testing.T) {
 	t.Parallel()
 
@@ -665,16 +689,12 @@ func TestAccComputeInstance_diskEncryption(t *testing.T) {
 			RawKey: "dGhpcmQ2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
 			Sha256: "b3pvaS7BjDbCKeLPPTx7yXBuQtxyMobCHN1QJR43xeM=",
 		},
-		fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10)): {
-			RsaEncryptedKey: "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-			Sha256:          "rRMQGdop82ArhrmlouYFR0+TJJL96KPCxe2qjorh1KA=",
-		},
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_disks_encryption(bootEncryptionKey, diskNameToEncryptionKey, instanceName, acctest.RandString(t, 10)),
@@ -771,217 +791,6 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 	})
 }
 
-func TestAccComputeInstance_rsaBootDiskEncryption(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	context := map[string]interface{}{
-		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_rsaBootDiskEncryption(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstance_instanceEncryption(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
-
-	context_1 := map[string]interface{}{
-		"instance_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"encryption_key": kms.CryptoKey.Name,
-		"desired_status": "RUNNING",
-	}
-
-	context_2 := map[string]interface{}{
-		"instance_name":  context_1["instance_name"],
-		"encryption_key": context_1["encryption_key"],
-		"desired_status": "TERMINATED",
-	}
-
-	context_3 := map[string]interface{}{
-		"instance_name":  context_1["instance_name"],
-		"encryption_key": context_1["encryption_key"],
-		"desired_status": "RUNNING",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context_3),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	context_1 := map[string]interface{}{
-		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"guest_os_features": `["UEFI_COMPATIBLE", "VIRTIO_SCSI_MULTIQUEUE", "GVNIC", "IDPF"]`,
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_guestOsFeatures(context_1),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.0", "UEFI_COMPATIBLE"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.1", "VIRTIO_SCSI_MULTIQUEUE"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.2", "GVNIC"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.guest_os_features.3", "IDPF"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstance_snapshot(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-
-	context := map[string]interface{}{
-		"instance_name1": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"instance_name2": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"snapshot_name":  fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-	}
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_snapshot_init(context), //set up snapshot
-			},
-			{
-				Config: testAccComputeInstance_snapshot(context), //create from snapshot
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstance_snapshotEncryption(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
-	context := map[string]interface{}{
-		"instance_name1":    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"instance_name2":    fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"snapshot_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"kms_key":           kms.CryptoKey.Name,
-		"raw_key":           "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
-		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_snapshotEncryption_KMS(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_snapshotEncryption_RawKey(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_snapshotEncryption_RsaKey(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstance_imageEncryption(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	kms := acctest.BootstrapKMSKey(t)
-	context := map[string]interface{}{
-		"instance_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"image_name":        fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"disk_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"kms_key":           kms.CryptoKey.Name,
-		"raw_key":           "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
-		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstance_imageEncryption_KMS(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_imageEncryption_RawKey(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-			{
-				Config: testAccComputeInstance_imageEncryption_RsaKey(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-				),
-			},
-		},
-	})
-}
 func TestAccComputeInstance_resourcePolicyUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -4628,20 +4437,27 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
+  envRegion := envvar.GetTestRegionFromEnv()
 	var instance compute.Instance
+
+{{ if eq $.TargetVersionName `ga` }}
+	providerVersion := "v1"
+{{- else }}
+	providerVersion := "beta"
+{{- end }}
 
 	testNetworkAttachmentName := fmt.Sprintf("tf-test-network-attachment-%s", suffix)
 
 	// Need to have the full network attachment name in the format project/{project_id}/regions/{region_id}/networkAttachments/{testNetworkAttachmentName}
-	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), testNetworkAttachmentName)
+	fullFormNetworkAttachmentName := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", envvar.GetTestProjectFromEnv(), envRegion, testNetworkAttachmentName)
 
 	context := map[string]interface{}{
 		"suffix":                  (acctest.RandString(t, 10)),
 		"network_attachment_name": testNetworkAttachmentName,
+    "region":                  envRegion,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4654,7 +4470,7 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/beta/%s", fullFormNetworkAttachmentName)),
+					testAccCheckComputeInstanceHasNetworkAttachment(&instance, fmt.Sprintf("https://www.googleapis.com/compute/%s/%s", providerVersion, fullFormNetworkAttachmentName)),
 				),
 			},
 		},
@@ -4690,7 +4506,6 @@ func TestAccComputeInstance_NetworkAttachmentUpdate(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccComputeInstance_NicStackTypeUpdate(t *testing.T) {
 	t.Parallel()
@@ -5418,7 +5233,6 @@ func testAccCheckComputeInstanceHasMinCpuPlatform(instance *compute.Instance, mi
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance, networkAttachmentName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, networkInterface := range instance.NetworkInterfaces {
@@ -5429,7 +5243,6 @@ func testAccCheckComputeInstanceHasNetworkAttachment(instance *compute.Instance,
 		return fmt.Errorf("Network Attachment %s, was not found in the instance template", networkAttachmentName)
 	}
 }
-{{- end }}
 
 func testAccCheckComputeInstanceHasMachineType(instance *compute.Instance, machineType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -6435,6 +6248,46 @@ func testAccComputeInstance_internalIpv6(ip, instance string) string {
   `, instance, instance, ip, instance)
 }
 
+func testAccComputeInstance_internalIpv6PrefixLength(length, instance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "vpc" {
+  name                     = "%s-network"
+  auto_create_subnetworks  = "false"
+  enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name             = "%s-subnetwork"
+  ip_cidr_range    = "10.0.0.0/22"
+  region           = "us-west2"
+  stack_type       = "IPV4_IPV6"
+  ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.vpc.id
+}
+
+resource "google_compute_instance" "foobar" {
+  name                      = "%s"
+  machine_type              = "e2-micro"
+  allow_stopping_for_update = true
+  zone                      = "us-west2-a"
+  boot_disk {
+    auto_delete = false
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network    = google_compute_network.vpc.self_link
+    subnetwork = google_compute_subnetwork.subnetwork.self_link
+    stack_type = "IPV4_IPV6"
+    access_config {
+      network_tier = "STANDARD"
+    }
+    internal_ipv6_prefix_length = %s
+  }
+}
+`, instance, instance, instance, length)
+}
 func testAccComputeInstance_ipv6ExternalReservation(instance string) string {
 	return fmt.Sprintf(`
 resource "google_compute_address" "ipv6-address" {
@@ -6600,17 +6453,6 @@ resource "google_compute_disk" "foobar3" {
   }
 }
 
-resource "google_compute_disk" "foobar5" {
-  name = "%s"
-  size = 10
-  type = "pd-ssd"
-  zone = "us-central1-a"
-
-  disk_encryption_key {
-	rsa_encrypted_key = "%s"
-  }
-}
-
 resource "google_compute_disk" "foobar4" {
   name = "%s"
   size = 10
@@ -6649,12 +6491,6 @@ resource "google_compute_instance" "foobar" {
     disk_encryption_key_raw = "%s"
   }
 
-  attached_disk {
-	source                  = google_compute_disk.foobar5.self_link
-	disk_encryption_key_rsa = "%s"
-	disk_encryption_service_account = data.google_compute_default_service_account.default.email
-  }
-
   network_interface {
     network = "default"
   }
@@ -6665,16 +6501,12 @@ resource "google_compute_instance" "foobar" {
 
   allow_stopping_for_update = true
 }
-
-data "google_compute_default_service_account" "default" {
-}
 `, diskNames[0], diskNameToEncryptionKey[diskNames[0]].RawKey,
 		diskNames[1], diskNameToEncryptionKey[diskNames[1]].RawKey,
 		diskNames[2], diskNameToEncryptionKey[diskNames[2]].RawKey,
-		diskNames[3], diskNameToEncryptionKey[diskNames[3]].RsaEncryptedKey,
 		"tf-testd-"+suffix,
 		instance, bootEncryptionKey,
-		diskNameToEncryptionKey[diskNames[0]].RawKey, diskNameToEncryptionKey[diskNames[1]].RawKey, diskNameToEncryptionKey[diskNames[2]].RawKey, diskNameToEncryptionKey[diskNames[3]].RsaEncryptedKey)
+		diskNameToEncryptionKey[diskNames[0]].RawKey, diskNameToEncryptionKey[diskNames[1]].RawKey, diskNameToEncryptionKey[diskNames[2]].RawKey)
 }
 
 func testAccComputeInstance_disks_encryption_restart(bootEncryptionKey string, diskNameToEncryptionKey map[string]*compute.CustomerEncryptionKey, instance string) string {
@@ -11464,7 +11296,6 @@ resource "google_compute_instance" "foobar" {
 
 {{ end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_networkAttachment(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -11498,6 +11329,7 @@ resource "google_compute_network_attachment" "test_network_attachment" {
 resource "google_compute_instance" "foobar" {
   name         = "tf-test-instance-%{suffix}"
   machine_type = "e2-medium"
+  zone         = "%{region}-a"
 
 	boot_disk {
 		initialize_params {
@@ -11509,7 +11341,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	network_interface{
+	network_interface {
 		network_attachment = google_compute_network_attachment.test_network_attachment.self_link
 	}
 
@@ -11589,7 +11421,7 @@ resource "google_compute_instance" "foobar" {
 		network = "default"
 	}
 
-	network_interface{
+	network_interface {
 		network_attachment = %s
 	}
 
@@ -11599,7 +11431,6 @@ resource "google_compute_instance" "foobar" {
 }
 `, suffix, suffix, suffix, region, suffix, region, suffix, region, suffix, region, suffix, region, networkAttachment)
 }
-{{- end }}
 
 func testAccComputeInstance_nicStackTypeUpdate(suffix, region, stack_type, instance string) string {
 	return fmt.Sprintf(`
@@ -11892,476 +11723,6 @@ resource "google_compute_instance" "foobar" {
 			network_tier = "PREMIUM"
 	  	}
 	}
-}
-`, context)
-}
-
-func testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-	instance_encryption_key {
-		kms_key_self_link       = "%{encryption_key}"
-		kms_key_service_account = data.google_compute_default_service_account.default.email
-	}
-	desired_status = "%{desired_status}"
-}
-
-data "google_compute_default_service_account" "default" {
-}
-`, context)
-}
-
-func testAccComputeInstance_guestOsFeatures(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		guest_os_features = %{guest_os_features}
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}`, context)
-}
-
-func testAccComputeInstance_snapshot_init(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-resource "google_compute_snapshot" "foobar" {
-	name = "%{snapshot_name}"
-	source_disk = google_compute_instance.foobar.name
-	zone = google_compute_instance.foobar.zone
-}
-`, context)
-}
-
-func testAccComputeInstance_snapshot(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-resource "google_compute_snapshot" "foobar" {
-	name = "%{snapshot_name}"
-	source_disk = google_compute_instance.foobar.name
-	zone = google_compute_instance.foobar.zone
-}
-
-resource "google_compute_instance" "foobar2" {
-	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			snapshot = google_compute_snapshot.foobar.name
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-`, context)
-}
-
-func testAccComputeInstance_snapshotEncryption_KMS(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-resource "google_compute_snapshot" "foobar" {
-	name = "%{snapshot_name}"
-	source_disk = google_compute_instance.foobar.name
-	snapshot_encryption_key {
-		kms_key_self_link = "%{kms_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar2" {
-	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			snapshot = google_compute_snapshot.foobar.name
-			source_snapshot_encryption_key {
-				kms_key_self_link = "%{kms_key}"
-				kms_key_service_account = data.google_compute_default_service_account.default.email
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-data "google_compute_default_service_account" "default" {
-}
-`, context)
-}
-
-func testAccComputeInstance_snapshotEncryption_RawKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		disk_encryption_key_raw = "%{raw_key}"
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-resource "google_compute_snapshot" "foobar" {
-	name = "%{snapshot_name}"
-	source_disk = google_compute_instance.foobar.name
-	source_disk_encryption_key {
-		raw_key = "%{raw_key}"
-	}
-	snapshot_encryption_key {
-		raw_key = "%{raw_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar2" {
-	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			snapshot = google_compute_snapshot.foobar.name
-			source_snapshot_encryption_key {
-				raw_key = "%{raw_key}"
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-`, context)
-}
-
-func testAccComputeInstance_snapshotEncryption_RsaKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name1}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		disk_encryption_key_raw = "%{raw_key}"
-		initialize_params {
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-resource "google_compute_snapshot" "foobar" {
-	name = "%{snapshot_name}"
-	source_disk = google_compute_instance.foobar.name
-	source_disk_encryption_key {
-		raw_key = "%{raw_key}"
-	}
-	snapshot_encryption_key {
-		rsa_encrypted_key = "%{rsa_encrypted_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar2" {
-	name         = "%{instance_name2}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			snapshot = google_compute_snapshot.foobar.name
-			source_snapshot_encryption_key {
-				rsa_encrypted_key = "%{rsa_encrypted_key}"
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-`, context)
-}
-
-func testAccComputeInstance_imageEncryption_KMS(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%{disk_name}"
-  image = data.google_compute_image.my_image.self_link
-  size  = 10
-  type  = "pd-ssd"
-}
-
-resource "google_compute_image" "foobar" {
-	name        = "%{image_name}"
-	source_disk = google_compute_disk.foobar.self_link
-	image_encryption_key {
-		kms_key_self_link = "%{kms_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = google_compute_image.foobar.self_link
-			source_image_encryption_key {
-				kms_key_self_link = "%{kms_key}"
-				kms_key_service_account = data.google_compute_default_service_account.default.email
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-data "google_compute_default_service_account" "default" {
-}
-`, context)
-}
-
-func testAccComputeInstance_imageEncryption_RawKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%{disk_name}"
-  image = data.google_compute_image.my_image.self_link
-  size  = 10
-  type  = "pd-ssd"
-}
-
-resource "google_compute_image" "foobar" {
-	name        = "%{image_name}"
-	source_disk = google_compute_disk.foobar.self_link
-	image_encryption_key {
-		raw_key = "%{raw_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = google_compute_image.foobar.self_link
-			source_image_encryption_key {
-				raw_key = "%{raw_key}"
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-`, context)
-}
-
-func testAccComputeInstance_imageEncryption_RsaKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%{disk_name}"
-  image = data.google_compute_image.my_image.self_link
-  size  = 10
-  type  = "pd-ssd"
-}
-
-resource "google_compute_image" "foobar" {
-	name        = "%{image_name}"
-	source_disk = google_compute_disk.foobar.self_link
-	image_encryption_key {
-		rsa_encrypted_key = "%{rsa_encrypted_key}"
-	}
-}
-
-resource "google_compute_instance" "foobar" {
-	name         = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone         = "us-central1-a"
-
-	boot_disk {
-		initialize_params {
-			image = google_compute_image.foobar.self_link
-			source_image_encryption_key {
-				rsa_encrypted_key = "%{rsa_encrypted_key}"
-			}
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-`, context)
-}
-
-func testAccComputeInstance_rsaBootDiskEncryption(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_image" "my_image" {
-	family  = "debian-11"
-	project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-	name = "%{instance_name}"
-	machine_type = "e2-medium"
-	zone = "us-central1-a"
-
-	boot_disk {
-		device_name = "my-boot-disk"
-		disk_encryption_key_rsa = "%{rsa_encrypted_key}"
-		disk_encryption_service_account = data.google_compute_default_service_account.default.email
-		initialize_params {
-			architecture = "X86_64"
-			image = data.google_compute_image.my_image.self_link
-		}
-	}
-
-	network_interface {
-		network = "default"
-	}
-}
-
-data "google_compute_default_service_account" "default" {
 }
 `, context)
 }

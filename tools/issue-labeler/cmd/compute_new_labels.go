@@ -50,11 +50,7 @@ func execComputeNewLabels() error {
 	// the logic here remains defensive in case that changes.
 	var serviceLabels []string
 	var nonServiceLabels []string
-	testFailureIssue := false
 	for _, l := range labels {
-		if l == "test-failure" {
-			testFailureIssue = true
-		}
 		if strings.HasPrefix(l, "service/") {
 			serviceLabels = append(serviceLabels, l)
 		} else {
@@ -67,10 +63,7 @@ func execComputeNewLabels() error {
 	labels = append(nonServiceLabels, serviceLabels...)
 
 	if len(labels) > 0 {
-		// Forwarding test failure ticket directly
-		if !testFailureIssue {
-			labels = append(labels, "forward/review")
-		}
+		labels = append(labels, "forward/review")
 		sort.Strings(labels)
 		fmt.Println(`["` + strings.Join(labels, `", "`) + `"]`)
 	}
