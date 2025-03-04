@@ -572,7 +572,7 @@ resource "google_pubsub_topic" "foo" {
 resource "google_pubsub_subscription" "foo" {
   name  = "%s"
   topic = google_pubsub_topic.foo.id
-	message_transforms = [
+	message_transforms {
 		{
 			javascript_udf = {
 				function_name = "filter_falsy",
@@ -580,7 +580,7 @@ resource "google_pubsub_subscription" "foo" {
 			}
 			enabled = true
 		}
-	]
+}
 }
 `, topic, subscription)
 }
