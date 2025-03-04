@@ -37,6 +37,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'
 examples:
   - name: 'dataform_repository'
     primary_resource_id: 'dataform_repository'
@@ -78,6 +79,16 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+virtual_fields:
+  - name: 'deletion_policy'
+    type: Enum
+    description: |
+      Policy to control how the specified repository(including child resources) are deleted.
+    default_value: ""
+    enum_values:
+      - 'ABANDON'
+      - 'DELETE'
+      - 'DELETE_INCLUDING_CHILDREN'
 parameters:
   - name: 'region'
     type: String
@@ -160,10 +171,8 @@ properties:
         type: String
         description: The prefix that should be prepended to all table names.
         min_version: 'beta'
-  - name: 'serviceAccount'
-    type: String
-    description: The service account to run workflow invocations under.
-    min_version: 'beta'
+      
+
   - name: 'npmrcEnvironmentVariablesSecretVersion'
     type: String
     description: Optional. The name of the Secret Manager secret version to be used to interpolate variables into the .npmrc file for package installation operations. Must be in the format projects/*/secrets/*/versions/*. The file itself must be in a JSON format.
