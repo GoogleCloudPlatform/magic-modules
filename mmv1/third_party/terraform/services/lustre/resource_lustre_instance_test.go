@@ -53,39 +53,31 @@ func TestAccLustreInstance_update(t *testing.T) {
 func testAccLustreInstance_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id = "instance%{random_suffix}"
+  instance_id = "tf-test-my-instance%{random_suffix}"
   location = "us-central1-a"
   description = "test instance"
   filesystem = "testfs"
-  capacity_gib = 14000
-  network = google_compute_network.network.id
+  capacity_gib = 18000
+  network = "${data.google_project.project.id}/global/networks/default"
   labels = {
     test = "value"
   }
-  depends_on = [google_service_networking_connection.default]
 	timeouts {
 		create = "180m"
 	}
 }
 
-resource "google_compute_network" "network" {
-  name                    = "network%{random_suffix}"
-  auto_create_subnetworks = true
-  mtu = 8896
-}
-
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "ip%{random_suffix}"
+  name          = "tf-test-my-ip-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
-  network       = google_compute_network.network.id
-}
+  network       = "${data.google_project.project.id}/global/networks/default"
 
 # Create a private connection
 resource "google_service_networking_connection" "default" {
-  network                 = google_compute_network.network.id
+  network                 = "${data.google_project.project.id}/global/networks/default"
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
@@ -95,39 +87,33 @@ resource "google_service_networking_connection" "default" {
 func testAccLustreInstance_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id = "instance%{random_suffix}"
+  instance_id = "tf-test-my-instance%{random_suffix}"
   location = "us-central1-a"
   description = "test instance description field has been updated."
   filesystem = "testfs"
-  capacity_gib = 14000
-  network = google_compute_network.network.id
+  capacity_gib = 18000
+  network = "${data.google_project.project.id}/global/networks/default"
   labels = {
     test = "value"
   }
-  depends_on = [google_service_networking_connection.default]
 	timeouts {
 		create = "180m"
-	}
+  }
 }
 
-resource "google_compute_network" "network" {
-  name                    = "network%{random_suffix}"
-  auto_create_subnetworks = true
-  mtu = 8896
-}
 
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "ip%{random_suffix}"
+  name          = "tf-test-my-ip-range%{random_suffix}"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
-  network       = google_compute_network.network.id
+  network       = "${data.google_project.project.id}/global/networks/default"
 }
 
 # Create a private connection
 resource "google_service_networking_connection" "default" {
-  network                 = google_compute_network.network.id
+  network                 = "${data.google_project.project.id}/global/networks/default"
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }

@@ -19,4 +19,3 @@ scopes:
 versions:
   - base_url: https://lustre.googleapis.com/v1/
     name: ga
-caibaseurl: ""
