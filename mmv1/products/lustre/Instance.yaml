@@ -88,12 +88,6 @@ properties:
   - name: labels
     type: KeyValueLabels
     description: Optional. Labels as key value pairs
-  - name: perUnitStorageThroughput
-    type: String
-    description: |-
-      Optional. The throughput of the instance in MB/s/TiB.
-      Valid values are 250, 500, 1000.
-      Default value is 1000.
   - name: capacityGib
     type: String
     description: Required. Capacity of the instance in GiB
