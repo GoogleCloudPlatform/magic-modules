@@ -318,6 +318,7 @@ module "project-services" {
     "ids.googleapis.com",
     "logging.googleapis.com",
     "looker.googleapis.com",
+    "lustre.googleapis.com",
     "managedidentities.googleapis.com",
     "managedkafka.googleapis.com",
     "memcache.googleapis.com",
