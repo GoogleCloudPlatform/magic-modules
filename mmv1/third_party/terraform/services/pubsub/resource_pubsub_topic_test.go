@@ -610,7 +610,7 @@ func testAccPubsubTopic_updateWithUpdatedJavascriptUdfSettings(topic string) str
 resource "google_pubsub_topic" "foo" {
 	name = "%s"
 
-	message_transforms = [
+	message_transforms {
 		{
 			javascript_udf = {
 				function_name = "filter_falsy",
@@ -618,7 +618,7 @@ resource "google_pubsub_topic" "foo" {
 			}
 			enabled = true
 		}
-	]
+	}
 }
 	`, topic)
 }
