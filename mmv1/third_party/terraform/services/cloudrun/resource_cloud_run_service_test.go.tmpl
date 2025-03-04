@@ -841,7 +841,7 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
       {
-        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, "2", "1", "5", "2"),
+        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, "10", "10", "1"),
       },
       {
 				ResourceName:            "google_cloud_run_service.default",
