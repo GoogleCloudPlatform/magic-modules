@@ -53,7 +53,7 @@ parameters:
   - name: googleApiSourceId
     type: String
     description: |-
-      Required. The user-provided ID to be assigned to the GoogleApiSource. It should match
+      The user-provided ID to be assigned to the GoogleApiSource. It should match
       the format `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
     immutable: true
     url_param_only: true
@@ -61,15 +61,15 @@ parameters:
 properties:
   - name: updateTime
     type: String
-    description: Output only. The last-modified time.
+    description: The last-modified time.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Resource labels.
+    description: Resource labels.
   - name: cryptoKeyName
     type: String
     description: |-
-      Optional. Resource name of a KMS crypto key (managed by the user) used to
+      Resource name of a KMS crypto key (managed by the user) used to
       encrypt/decrypt their event data.
 
       It must match the pattern
@@ -77,20 +77,20 @@ properties:
   - name: etag
     type: String
     description: |-
-      Output only. This checksum is computed by the server based on the value of other
+      This checksum is computed by the server based on the value of other
       fields, and might be sent only on update and delete requests to ensure that
       the client has an up-to-date value before proceeding.
     output: true
   - name: annotations
     type: KeyValueAnnotations
-    description: Optional. Resource annotations.
+    description: Resource annotations.
   - name: displayName
     type: String
-    description: Optional. Resource display name.
+    description: Resource display name.
   - name: destination
     type: String
     description: |-
-      Required. Destination is the message bus that the GoogleApiSource is delivering to.
+      Destination is the message bus that the GoogleApiSource is delivering to.
       It must be point to the full resource name of a MessageBus. Format:
       "projects/{PROJECT_ID}/locations/{region}/messagesBuses/{MESSAGE_BUS_ID)
     required: true
@@ -103,10 +103,9 @@ properties:
       - name: logSeverity
         type: Enum
         description: |-
-          Optional. The minimum severity of logs that will be sent to Stackdriver/Platform
+          The minimum severity of logs that will be sent to Stackdriver/Platform
           Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
-        default_from_api: true
-        required: true
+        default_value: NONE
         enum_values:
           - NONE
           - DEBUG
@@ -120,16 +119,16 @@ properties:
   - name: name
     type: String
     description: |-
-      Identifier. Resource name of the form
+      Resource name of the form
       projects/{project}/locations/{location}/googleApiSources/{google_api_source}
     output: true
   - name: uid
     type: String
     description: |-
-      Output only. Server assigned unique identifier for the channel. The value is a UUID4
+      Server assigned unique identifier for the channel. The value is a UUID4
       string and guaranteed to remain unchanged until the resource is deleted.
     output: true
   - name: createTime
     type: String
-    description: Output only. The creation time.
+    description: The creation time.
     output: true

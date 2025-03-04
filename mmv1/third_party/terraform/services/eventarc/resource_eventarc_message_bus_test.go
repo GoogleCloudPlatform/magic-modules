@@ -362,6 +362,20 @@ func testAccEventarcMessageBus_updateGoogleApiSource(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
 			},
+			{
+				Config: testAccEventarcMessageBus_unsetGoogleApiSourceCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_google_api_source.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_eventarc_google_api_source.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
 		},
 	})
 }
@@ -388,6 +402,21 @@ resource "google_eventarc_google_api_source" "primary" {
 resource "google_eventarc_message_bus" "message_bus" {
   location       = "%{region}"
   message_bus_id = "tf-test-messagebus%{random_suffix}"
+}
+`, context)
+}
+
+func testAccEventarcMessageBus_unsetGoogleApiSourceCfg(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_eventarc_google_api_source" "primary" {
+  location             = "%{region}"
+  google_api_source_id = "tf-test-googleapisource%{random_suffix}"
+  display_name         = ""
+  destination          = ""
+  crypto_key_name      = ""
+  labels = {}
+  annotations = {}
+  logging_config {}
 }
 `, context)
 }
