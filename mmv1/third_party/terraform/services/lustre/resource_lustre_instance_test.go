@@ -70,6 +70,7 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   prefix_length = 24
   network       = "${data.google_project.project.id}/global/networks/default"
+}
 
 # Create a private connection
 resource "google_service_networking_connection" "default" {
@@ -77,6 +78,9 @@ resource "google_service_networking_connection" "default" {
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 	update_on_creation_fail = true
+}
+
+data "google_project" "project" {
 }
 `, context)
 }
@@ -98,7 +102,6 @@ resource "google_lustre_instance" "instance" {
   }
 }
 
-
 # Create an IP address
 resource "google_compute_global_address" "private_ip_alloc" {
   name          = "tf-test-my-ip-range%{random_suffix}"
@@ -114,6 +117,9 @@ resource "google_service_networking_connection" "default" {
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 	update_on_creation_fail = true
+}
+
+data "google_project" "project" {
 }
 `, context)
 }
