@@ -46,7 +46,7 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     oics_vars_overrides:
-      'deletion_protection': 'false'    
+      'deletion_protection': 'false'
     # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
 parameters:
