@@ -938,7 +938,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 }
-`, name, project, period, timeout, failure_threshold, delay, period, timeout, failure_threshold)
+`, name, project, period, timeout, failure_threshold)
 }
 
 func testAccCloudRunService_cloudRunServiceUpdateWithTCPStartupProbeAndHTTPLivenessProbe(name, project, delay, timeout, period, failure_threshold string) string {
