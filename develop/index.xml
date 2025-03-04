@@ -181,8 +181,8 @@ provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/c
 &lt;p>Client-side fields are most often used as flags to modify the behavior of a Terraform resource. Because they don&amp;rsquo;t correspond to an API field, there are some additional considerations in terms of how to implement them.&lt;/p>
 &lt;p>Common client-side fields include:&lt;/p>
 &lt;ul>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/#deletion_protection">&lt;code>deletion_protection&lt;/code>&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/#deletion_policy">&lt;code>deletion_policy&lt;/code>&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/#deletion_protection">&lt;code>deletion_protection&lt;/code>&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/best-practices/deletion-behaviors/#deletion_policy">&lt;code>deletion_policy&lt;/code>&lt;/a>&lt;/li>
 &lt;/ul>
 
 
