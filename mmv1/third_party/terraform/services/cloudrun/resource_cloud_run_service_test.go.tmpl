@@ -840,6 +840,15 @@ func TestAccCloudRunService_probes(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
 			},
+      {
+        Config: testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, "2", "1", "5", "2"),
+      },
+      {
+				ResourceName:            "google_cloud_run_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "metadata.0.annotations", "metadata.0.labels", "metadata.0.terraform_labels", "status.0.conditions"},
+			},
 		},
 	})
 }
@@ -883,7 +892,56 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-func testAccCloudRunService_cloudRunServiceUpdateWithTCPStartupProbeAndHTTPLivenessProbe(name, project, delay, timeout, peroid, failure_threshold string) string {
+func testAccCloudRunService_cloudRunServiceWithReadinessProbe(name, project, timeout, period, failure_threshold string) string {
+	return fmt.Sprintf(`
+resource "google_cloud_run_service" "default" {
+  name     = "%s"
+  location = "us-central1"
+
+  metadata {
+    namespace = "%s"
+    annotations = {
+      generated-by = "magic-modules"
+    }
+  }
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        ports {
+          container_port = 8080
+        }
+        readiness_probe {
+          period_seconds = %s
+          timeout_seconds = %s
+          failure_threshold = %s
+          http_get {
+            path: "/"
+            port: 8080
+            http_headers {
+              name = "User-Agent"
+              value = "magic-modules"
+            }
+            http_headers {
+              name = "Some-Name"
+            }
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      metadata.0.annotations,
+    ]
+  }
+}
+`, name, project, period, timeout, failure_threshold, delay, peroid, timeout, failure_threshold)
+}
+
+func testAccCloudRunService_cloudRunServiceUpdateWithTCPStartupProbeAndHTTPLivenessProbe(name, project, delay, timeout, period, failure_threshold string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
   name     = "%s"
@@ -939,7 +997,7 @@ resource "google_cloud_run_service" "default" {
     ]
   }
 }
-`, name, project, delay, peroid, timeout, failure_threshold, delay, peroid, timeout, failure_threshold)
+`, name, project, delay, period, timeout, failure_threshold, delay, peroid, timeout, failure_threshold)
 }
 
 func testAccCloudRunService_cloudRunServiceUpdateWithEmptyHTTPStartupProbe(name, project string) string {
