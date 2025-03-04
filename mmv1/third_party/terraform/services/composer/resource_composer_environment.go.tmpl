@@ -56,9 +56,7 @@ var (
 		"config.0.software_config.0.python_version",
 		"config.0.software_config.0.scheduler_count",
 		"config.0.software_config.0.cloud_data_lineage_integration",
-{{- if ne $.TargetVersionName "ga" }}
 		"config.0.software_config.0.web_server_plugins_mode",
-{{- end }}
 	}
 
 	composerConfigKeys = []string{
@@ -76,10 +74,8 @@ var (
 		"config.0.environment_size",
 		"config.0.master_authorized_networks_config",
 		"config.0.resilience_mode",
-{{- if ne $.TargetVersionName "ga" }}
 		"config.0.enable_private_environment",
 		"config.0.enable_private_builds_only",
-{{- end }}
 		"config.0.data_retention_config",
 	}
 
@@ -92,9 +88,7 @@ var (
 		"config.0.workloads_config.0.triggerer",
 		"config.0.workloads_config.0.web_server",
 		"config.0.workloads_config.0.worker",
-{{- if ne $.TargetVersionName "ga" }}
 		"config.0.workloads_config.0.dag_processor",
-{{- end }}
 	}
 
 	composerPrivateEnvironmentConfig = []string{
@@ -173,10 +167,8 @@ func ResourceComposerEnvironment() *schema.Resource {
 				customdiff.ValidateChange("config.0.software_config.0.image_version", imageVersionChangeValidationFunc),
 				versionValidationCustomizeDiffFunc,
 			),
-{{- if ne $.TargetVersionName "ga" }}
-			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewCustomDiff("config.0.node_config.0.network")),
-			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewCustomDiff("config.0.node_config.0.subnetwork")),
-{{- end }}
+			customdiff.ForceNewIf("config.0.node_config.0.network", forceNewIfNotComposer3CustomDiff("config.0.node_config.0.network")),
+			customdiff.ForceNewIf("config.0.node_config.0.subnetwork", forceNewIfNotComposer3CustomDiff("config.0.node_config.0.subnetwork")),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -246,29 +238,18 @@ func ResourceComposerEnvironment() *schema.Resource {
 										Type:             schema.TypeString,
 										Computed:         true,
 										Optional:         true,
-{{- if eq $.TargetVersionName "ga" }}
-										ForceNew:         true,
-{{- else }}
-										ForceNew:         false,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
-{{- end }}
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine machine type used for cluster instances, specified as a name or relative resource name. For example: "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and region/zone. The network must belong to the environment's project. If unspecified, the "default" network ID in the environment's project is used. If a Custom Subnet Network is provided, subnetwork must also be provided.`,
 									},
 									"subnetwork": {
 										Type:             schema.TypeString,
 										Optional:         true,
-{{- if eq $.TargetVersionName "ga" }}
-										ForceNew:         true,
-{{- else }}
-										ForceNew:         false,
 										Computed:         true,
 										ConflictsWith:    []string{"config.0.node_config.0.composer_network_attachment"},
-{{- end }}
 										DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 										Description:      `The Compute Engine subnetwork to be used for machine communications, specified as a self-link, relative resource name (e.g. "projects/{project}/regions/{region}/subnetworks/{subnetwork}"), or by name. If subnetwork is provided, network must also be provided and the subnetwork must belong to the enclosing environment's project and region.`,
 									},
-{{- if ne $.TargetVersionName "ga" }}
 									"composer_network_attachment": {
 										Type:             schema.TypeString,
 										Computed:         true,
@@ -276,7 +257,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										ForceNew:         false,
 										Description:      `PSC (Private Service Connect) Network entry point. Customers can pre-create the Network Attachment and point Cloud Composer environment to use. It is possible to share network attachment among many environments, provided enough IP addresses are available.`,
 									},
-{{- end }}
 									"disk_size_gb": {
 										Type:        schema.TypeInt,
 										Computed:    true,
@@ -385,7 +365,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-{{- if ne $.TargetVersionName "ga" }}
 									"composer_internal_ipv4_cidr_block": {
 										Type:             schema.TypeString,
 										Computed:         true,
@@ -394,7 +373,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										ValidateFunc:     validateComposerInternalIpv4CidrBlock,
 										Description:      `IPv4 cidr range that will be used by Composer internal components.`,
 									},
-{{- end }}
 								},
 							},
 						},
@@ -513,7 +491,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-{{- if ne $.TargetVersionName "ga" }}
 									"web_server_plugins_mode": {
 										Type:         schema.TypeString,
 										Optional:     true,
@@ -523,7 +500,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 										ValidateFunc: validation.StringInSlice([]string{"ENABLED", "DISABLED"}, false),
 										Description:  `Should be either 'ENABLED' or 'DISABLED'. Defaults to 'ENABLED'. Used in Composer 3.`,
 									},
-{{- end }}
 								},
 							},
 						},
@@ -606,7 +582,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 								},
 							},
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"enable_private_environment": {
 							Type:         schema.TypeBool,
 							Computed:     true,
@@ -623,7 +598,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 							AtLeastOneOf: composerConfigKeys,
 							Description:  `Optional. If true, builds performed during operations that install Python packages have only private connectivity to Google services. If false, the builds also have access to the internet.`,
 						},
-{{- end }}
 						"web_server_network_access_control": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -744,14 +718,38 @@ func ResourceComposerEnvironment() *schema.Resource {
 									"task_logs_retention_config": {
 										Type:         schema.TypeList,
 										Description: `Optional. The configuration setting for Task Logs.`,
-										Required:     true,
+										Optional:     true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"storage_mode": {
 													Type:         schema.TypeString,
 													Optional:     true,
 													ValidateFunc: validation.StringInSlice([]string{"CLOUD_LOGGING_ONLY", "CLOUD_LOGGING_AND_CLOUD_STORAGE"}, false),
-													Description:  `Whether logs in cloud logging only is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4 and newer.`,
+													Description:  `Whether logs in cloud logging only is enabled or not. This field is supported for Cloud Composer environments in versions composer-2.0.32-airflow-2.1.4 and newer but not in composer-3*`,
+												},
+											},
+										},
+									},
+									"airflow_metadata_retention_config": {
+										Type:         schema.TypeList,
+										Description: `Optional. The policy for airflow metadata database retention.`,
+										Optional:     true,
+										Computed:     true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"retention_mode": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Computed:     true,
+													ValidateFunc: validation.StringInSlice([]string{"RETENTION_MODE_ENABLED", "RETENTION_MODE_DISABLED"}, false),
+													Description:  `Whether database retention is enabled or not. This field is supported for Cloud Composer environments in composer 3 and newer.`,
+												},
+												"retention_days": {
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Computed:     true,
+													ValidateFunc: validation.IntBetween(30, 730),
+													Description:  `How many days data should be retained for. This field is supported for Cloud Composer environments in composer 3 and newer.`,
 												},
 											},
 										},
@@ -933,7 +931,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-{{- if ne $.TargetVersionName "ga" }}
 									"dag_processor": {
 										Type:         schema.TypeList,
 										Optional:     true,
@@ -979,7 +976,6 @@ func ResourceComposerEnvironment() *schema.Resource {
 											},
 										},
 									},
-{{- end }}
 								},
 							},
 						},
@@ -1225,7 +1221,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			return err
 		}
 
-{{ if ne $.TargetVersionName `ga` -}}
 		noChangeErrorMessage := "Update request does not result in any change to the environment's configuration"
 		if d.HasChange("config.0.node_config.0.network") || d.HasChange("config.0.node_config.0.subnetwork"){
 			// step 1: update with empty network and subnetwork
@@ -1285,7 +1280,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				}
 			}
 		}
-{{- end }}
 
 		if d.HasChange("config.0.software_config.0.image_version") {
 			patchObj := &composer.Environment{
@@ -1387,7 +1381,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 		}
 
-{{ if ne $.TargetVersionName `ga` -}}
 		if d.HasChange("config.0.enable_private_environment") {
 			patchObj := &composer.Environment{
 				Config: &composer.EnvironmentConfig{
@@ -1429,7 +1422,6 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 				return err
 			}
 		}
-{{- end }}
 
 		if d.HasChange("config.0.node_count") {
 			patchObj := &composer.Environment{Config: &composer.EnvironmentConfig{}}
@@ -1511,6 +1503,22 @@ func resourceComposerEnvironmentUpdate(d *schema.ResourceData, meta interface{})
 			}
 			err = resourceComposerEnvironmentPatchField("config.DataRetentionConfig.TaskLogsRetentionConfig.StorageMode", userAgent, patchObj, d, tfConfig)
 			  if err != nil {
+				return err
+			}
+		}
+		if d.HasChange("config.0.data_retention_config.0.airflow_metadata_retention_config") {
+			patchObj := &composer.Environment{
+				Config: &composer.EnvironmentConfig{
+					DataRetentionConfig: &composer.DataRetentionConfig{
+						AirflowMetadataRetentionConfig: &composer.AirflowMetadataRetentionPolicyConfig{},
+					},
+				},
+			}
+			if config != nil && config.DataRetentionConfig != nil && config.DataRetentionConfig.AirflowMetadataRetentionConfig != nil {
+				patchObj.Config.DataRetentionConfig.AirflowMetadataRetentionConfig = config.DataRetentionConfig.AirflowMetadataRetentionConfig
+			}
+			err = resourceComposerEnvironmentPatchField("config.DataRetentionConfig.AirflowMetadataRetentionConfig", userAgent, patchObj, d, tfConfig)
+			if err != nil {
 				return err
 			}
 		}
@@ -1689,12 +1697,10 @@ func flattenComposerEnvironmentConfig(envCfg *composer.EnvironmentConfig) interf
 	if !isComposer3(imageVersion){
 		transformed["private_environment_config"] = flattenComposerEnvironmentConfigPrivateEnvironmentConfig(envCfg.PrivateEnvironmentConfig)
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if isComposer3(imageVersion) && envCfg.PrivateEnvironmentConfig != nil {
 		transformed["enable_private_environment"] = envCfg.PrivateEnvironmentConfig.EnablePrivateEnvironment
 		transformed["enable_private_builds_only"] = envCfg.PrivateEnvironmentConfig.EnablePrivateBuildsOnly
 	}
-{{- end }}
 	transformed["web_server_network_access_control"] = flattenComposerEnvironmentConfigWebServerNetworkAccessControl(envCfg.WebServerNetworkAccessControl)
 	transformed["database_config"] = flattenComposerEnvironmentConfigDatabaseConfig(envCfg.DatabaseConfig)
 	transformed["web_server_config"] = flattenComposerEnvironmentConfigWebServerConfig(envCfg.WebServerConfig)
@@ -1812,6 +1818,7 @@ func flattenComposerEnvironmentConfigDataRetentionConfig(dataRetentionConfig *co
 
 	transformed := make(map[string]interface{})
 	transformed["task_logs_retention_config"] = flattenComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(dataRetentionConfig.TaskLogsRetentionConfig)
+	transformed["airflow_metadata_retention_config"] = flattenComposerEnvironmentConfigDataRetentionConfigAirflowMetadataRetentionConfig(dataRetentionConfig.AirflowMetadataRetentionConfig)
 
 	return []interface{}{transformed}
 }
@@ -1827,6 +1834,18 @@ func flattenComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(
 	return []interface{}{transformed}
 }
 
+func flattenComposerEnvironmentConfigDataRetentionConfigAirflowMetadataRetentionConfig(airflowMetadataRetentionConfig *composer.AirflowMetadataRetentionPolicyConfig) interface{} {
+	if airflowMetadataRetentionConfig == nil {
+		return nil
+	}
+
+	transformed := make(map[string]interface{})
+	transformed["retention_mode"] = airflowMetadataRetentionConfig.RetentionMode
+	transformed["retention_days"] = airflowMetadataRetentionConfig.RetentionDays
+
+	return []interface{}{transformed}
+}
+
 func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.WorkloadsConfig) interface{} {
 	if workloadsConfig == nil {
 		return nil
@@ -1837,17 +1856,13 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	transformedTriggerer := make(map[string]interface{})
 	transformedWebServer := make(map[string]interface{})
 	transformedWorker := make(map[string]interface{})
-{{- if ne $.TargetVersionName "ga" }}
 	transformedDagProcessor := make(map[string]interface{})
-{{- end }}
 
 	wlCfgScheduler := workloadsConfig.Scheduler
 	wlCfgTriggerer := workloadsConfig.Triggerer
 	wlCfgWebServer := workloadsConfig.WebServer
 	wlCfgWorker := workloadsConfig.Worker
-{{- if ne $.TargetVersionName "ga" }}
 	wlCfgDagProcessor := workloadsConfig.DagProcessor
-{{- end }}
 
 	if wlCfgScheduler == nil {
 		transformedScheduler = nil
@@ -1884,7 +1899,6 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedWorker["max_count"] = wlCfgWorker.MaxCount
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if wlCfgDagProcessor == nil {
 			transformedDagProcessor = nil
 	} else {
@@ -1893,7 +1907,6 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 		transformedDagProcessor["storage_gb"] = wlCfgDagProcessor.StorageGb
 		transformedDagProcessor["count"] = wlCfgDagProcessor.Count
 	}
-{{- end }}
 
 	transformed["scheduler"] = []interface{}{transformedScheduler}
 	if transformedTriggerer != nil {
@@ -1901,12 +1914,9 @@ func flattenComposerEnvironmentConfigWorkloadsConfig(workloadsConfig *composer.W
 	}
 	transformed["web_server"] = []interface{}{transformedWebServer}
 	transformed["worker"] = []interface{}{transformedWorker}
-{{- if ne $.TargetVersionName "ga" }}
 	if transformedDagProcessor != nil {
 		transformed["dag_processor"] = []interface{}{transformedDagProcessor}
 	}
-{{- end }}
-
 
 	return []interface{}{transformed}
 }
@@ -1942,9 +1952,7 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["machine_type"] = nodeCfg.MachineType
 	transformed["network"] = nodeCfg.Network
 	transformed["subnetwork"] = nodeCfg.Subnetwork
-{{- if ne $.TargetVersionName "ga" }}
 	transformed["composer_network_attachment"] = nodeCfg.ComposerNetworkAttachment
-{{- end }}
 	transformed["disk_size_gb"] = nodeCfg.DiskSizeGb
 	transformed["service_account"] = nodeCfg.ServiceAccount
 	transformed["oauth_scopes"] = flattenComposerEnvironmentConfigNodeConfigOauthScopes(nodeCfg.OauthScopes)
@@ -1954,9 +1962,7 @@ func flattenComposerEnvironmentConfigNodeConfig(nodeCfg *composer.NodeConfig) in
 	transformed["enable_ip_masq_agent"] = nodeCfg.EnableIpMasqAgent
 	transformed["tags"] = flattenComposerEnvironmentConfigNodeConfigTags(nodeCfg.Tags)
 	transformed["ip_allocation_policy"] = flattenComposerEnvironmentConfigNodeConfigIPAllocationPolicy(nodeCfg.IpAllocationPolicy)
-{{- if ne $.TargetVersionName "ga" }}
 	transformed["composer_internal_ipv4_cidr_block"] = nodeCfg.ComposerInternalIpv4CidrBlock
-{{- end }}
 	return []interface{}{transformed}
 }
 
@@ -2000,7 +2006,6 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	transformed["env_variables"] = softwareCfg.EnvVariables
 	transformed["scheduler_count"] = softwareCfg.SchedulerCount
 	transformed["cloud_data_lineage_integration"] = flattenComposerEnvironmentConfigSoftwareConfigCloudDataLineageIntegration(softwareCfg.CloudDataLineageIntegration)
-{{- if ne $.TargetVersionName "ga" }}
 	if softwareCfg.WebServerPluginsMode == "PLUGINS_DISABLED"{
 		transformed["web_server_plugins_mode"] = "DISABLED"
 	} else if softwareCfg.WebServerPluginsMode == "PLUGINS_ENABLED"{
@@ -2008,7 +2013,6 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	} else {
 		transformed["web_server_plugins_mode"] = softwareCfg.WebServerPluginsMode
 	}
-{{- end }}
 	return []interface{}{transformed}
 }
 
@@ -2078,7 +2082,6 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 	}
 	transformed.PrivateEnvironmentConfig = transformedPrivateEnvironmentConfig
 
-{{ if ne $.TargetVersionName `ga` -}}
 	/*
 		config.enable_private_environment in terraform maps to
 		composer.PrivateEnvironmentConfig.EnablePrivateEnvironment in API.
@@ -2094,7 +2097,6 @@ func expandComposerEnvironmentConfig(v interface{}, d *schema.ResourceData, conf
 			transformed.PrivateEnvironmentConfig.EnablePrivateBuildsOnly = enablePrivateBuildsOnlyRaw.(bool)
 		}
 	}
-{{- end }}
 
 	transformedWebServerNetworkAccessControl, err := expandComposerEnvironmentConfigWebServerNetworkAccessControl(original["web_server_network_access_control"], d, config)
 	if err != nil {
@@ -2317,6 +2319,13 @@ func expandComposerEnvironmentConfigDataRetentionConfig(v interface{}, d *schema
 		}
 		transformed.TaskLogsRetentionConfig = transformedTaskLogsRetentionConfig
 	}
+	if airflowMetadataRetentionConfig, ok := original["airflow_metadata_retention_config"]; ok {
+		transformedAirflowMetadataRetentionConfig, err := expandComposerEnvironmentConfigDataRetentionConfigAirflowMetadataRetentionConfig(airflowMetadataRetentionConfig, d, config)
+		if err != nil {
+			return nil, err
+		}
+		transformed.AirflowMetadataRetentionConfig = transformedAirflowMetadataRetentionConfig
+	}
 
 	return transformed, nil
 }
@@ -2332,6 +2341,25 @@ func expandComposerEnvironmentConfigDataRetentionConfigTaskLogsRetentionConfig(v
 
 	if v, ok := original["storage_mode"]; ok {
 		transformed.StorageMode = v.(string)
+	}
+
+	return transformed, nil
+}
+
+func expandComposerEnvironmentConfigDataRetentionConfigAirflowMetadataRetentionConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (*composer.AirflowMetadataRetentionPolicyConfig, error) {
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+	transformed := &composer.AirflowMetadataRetentionPolicyConfig{}
+
+	if v, ok := original["retention_mode"]; ok {
+		transformed.RetentionMode = v.(string)
+	}
+	if v, ok := original["retention_days"]; ok {
+		transformed.RetentionDays = int64(v.(int))
 	}
 
 	return transformed, nil
@@ -2393,7 +2421,6 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 		}
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := original["dag_processor"]; ok {
 		if len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 			transformedDagProcessor := &composer.DagProcessorResource{}
@@ -2405,7 +2432,6 @@ func expandComposerEnvironmentConfigWorkloadsConfig(v interface{}, d *schema.Res
 			transformed.DagProcessor = transformedDagProcessor
 		}
 	}
-{{- end }}
 
 	return transformed, nil
 }
@@ -2562,11 +2588,9 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 		transformed.Subnetwork = transformedSubnetwork
 	}
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := original["composer_network_attachment"]; ok {
 		transformed.ComposerNetworkAttachment = v.(string)
 	}
-{{- end }}
 
 	transformedIPAllocationPolicy, err := expandComposerEnvironmentIPAllocationPolicy(original["ip_allocation_policy"], d, config)
 	if err != nil {
@@ -2586,11 +2610,9 @@ func expandComposerEnvironmentConfigNodeConfig(v interface{}, d *schema.Resource
 	}
 	transformed.Tags = transformedTags
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if transformedComposerInternalIpv4CidrBlock, ok := original["composer_internal_ipv4_cidr_block"]; ok {
 		transformed.ComposerInternalIpv4CidrBlock = transformedComposerInternalIpv4CidrBlock.(string)
 	}
-{{- end }}
 
 	return transformed, nil
 }
@@ -2741,7 +2763,6 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	}
 	transformed.CloudDataLineageIntegration = transformedCloudDataLineageIntegration
 
-{{ if ne $.TargetVersionName `ga` -}}
 	if original["web_server_plugins_mode"].(string) == "DISABLED"{
 		transformed.WebServerPluginsMode = "PLUGINS_DISABLED"
 	} else if original["web_server_plugins_mode"].(string) == "ENABLED"{
@@ -2749,7 +2770,6 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	} else {
 		transformed.WebServerPluginsMode = original["web_server_plugins_mode"].(string)
 	}
-{{- end }}
 
 	return transformed, nil
 }
@@ -3047,7 +3067,7 @@ func isComposer3(imageVersion string)	bool {
 	return strings.Contains(imageVersion, "composer-3")
 }
 
-func forceNewCustomDiff(key string) customdiff.ResourceConditionFunc {
+func forceNewIfNotComposer3CustomDiff(key string) customdiff.ResourceConditionFunc {
 	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		old, new := d.GetChange(key)
 		imageVersion := d.Get("config.0.software_config.0.image_version").(string)

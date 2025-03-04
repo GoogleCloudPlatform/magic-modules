@@ -12,8 +12,6 @@ resource "google_managed_kafka_cluster" "cluster" {
       }
     }
   }
-
-  provider = google-beta
 }
 
 resource "google_managed_kafka_topic" "{{$.PrimaryResourceId}}" {
@@ -25,10 +23,7 @@ resource "google_managed_kafka_topic" "{{$.PrimaryResourceId}}" {
   configs = {
     "cleanup.policy" = "compact"
   }
-
-  provider = google-beta
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }

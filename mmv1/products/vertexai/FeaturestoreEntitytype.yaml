@@ -13,6 +13,7 @@
 
 ---
 name: 'FeaturestoreEntitytype'
+api_resource_type_kind: EntityType
 description: |-
   An entity type is a type of object in a system that needs to be modeled and have stored information about. For example, driver is an entity type, and driver0 is an instance of an entity type driver.
 references:
@@ -36,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
   include_project: true
 iam_policy:
   method_name_separator: ':'

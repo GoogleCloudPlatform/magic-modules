@@ -1,0 +1,20 @@
+resource: 'google_compute_network_peering'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'Network'
+fields:
+  - field: 'export_custom_routes'
+  - field: 'export_subnet_routes_with_public_ip'
+  - field: 'import_custom_routes'
+  - field: 'import_subnet_routes_with_public_ip'
+  - field: 'name'
+  - field: 'network'
+  - field: 'peer_network'
+  - field: 'stack_type'
+  - field: 'state'
+  - field: 'state_details'

@@ -37,20 +37,19 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'network_connectivity_policy_basic'
     primary_resource_id: 'default'

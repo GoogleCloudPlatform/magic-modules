@@ -4,8 +4,9 @@ package compute_test
 import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t *testing.T) {
@@ -24,7 +25,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 				Config: testAccComputeRegionSecurityPolicy_basic(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,7 +33,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 				Config: testAccComputeRegionSecurityPolicy_update(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -42,7 +43,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t
 
 func testAccComputeRegionSecurityPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -56,7 +57,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -84,7 +85,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -92,7 +93,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -100,7 +101,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withUserDefinedFieldsUpdate(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -108,7 +109,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 				Config: testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.regionSecPolicy",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -118,7 +119,7 @@ func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyUserDefinedFieldsUpd
 
 func testAccComputeRegionSecurityPolicy_withoutUserDefinedFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -128,7 +129,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_withUserDefinedFields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -145,7 +146,7 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 
 func testAccComputeRegionSecurityPolicy_withUserDefinedFieldsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_region_security_policy" "regionSecPolicy" {
+resource "google_compute_region_security_policy" "policy" {
   name        = "tf-test%{random_suffix}"
   description = "basic update region security policy"
   type        = "CLOUD_ARMOR_NETWORK"
@@ -166,4 +167,779 @@ resource "google_compute_region_security_policy" "regionSecPolicy" {
 }
 `, context)
 }
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesBasicUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRules(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRulesUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withRules(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+		name        = "tf-test%{random_suffix}"
+		description = "region security policy with rules updated"
+		type        = "CLOUD_ARMOR"
+
+		rules {
+			action   = "deny"
+			priority = "1000"
+			match {
+				expr {
+					expression = "request.path.matches(\"/login.html\") && token.recaptcha_session.score < 0.2"
+				}
+			}
+		}
+
+
+		rules {
+			action   = "deny"
+			priority = "2147483647"
+			match {
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
+			}
+			description = "default rule"
+		}
+
+	}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withRulesUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_compute_region_security_policy" "policy" {
+		name        = "tf-test%{random_suffix}"
+		description = "region security policy with rules updated"
+		type        = "CLOUD_ARMOR"
+
+		rules {
+			action   = "allow"
+			priority = "2147483647"
+			match {
+				versioned_expr = "SRC_IPS_V1"
+				config {
+					src_ip_ranges = ["*"]
+				}
+			}
+			description = "default rule updated"
+		}
+	}
+	`, context)
+}
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesPreconfiguredWafConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+
+			rules {
+				action   = "deny"
+				priority = "1000"
+				match {
+					expr {
+						expression = "evaluatePreconfiguredWaf('sqli-stable')"
+					}
+				}
+				preconfigured_waf_config {
+					exclusion {
+						request_cookie {
+							operator = "EQUALS_ANY"
+						}
+						request_header {
+							operator = "EQUALS"
+							value    = "Referer"
+						}
+						request_uri {
+							operator = "STARTS_WITH"
+							value    = "/admin"
+						}
+						request_query_param {
+							operator = "EQUALS"
+							value    = "password"
+						}
+						request_query_param {
+							operator = "STARTS_WITH"
+							value    = "freeform"
+						}
+						target_rule_set = "sqli-stable"
+					}
+					exclusion {
+						request_query_param {
+							operator = "CONTAINS"
+							value    = "password"
+						}
+						request_query_param {
+							operator = "STARTS_WITH"
+							value    = "freeform"
+						}
+						target_rule_set = "xss-stable"
+					}
+				}
+				preview = false
+			}
+	
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withPreconfiguredWafConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+
+			rules {
+				action   = "deny"
+				priority = "1000"
+				match {
+					expr {
+						expression = "evaluatePreconfiguredWaf('rce-stable') || evaluatePreconfiguredWaf('xss-stable')"
+					}
+				}
+				preconfigured_waf_config {
+					exclusion {
+						request_uri {
+							operator = "STARTS_WITH"
+							value    = "/admin"
+						}
+						request_cookie {
+							operator = "EQUALS"
+							value    = "Referer"
+						}
+						target_rule_set = "rce-stable"
+					}
+					exclusion {
+						request_query_param {
+							operator = "CONTAINS"
+							value    = "password"
+						}
+						request_query_param {
+							operator = "STARTS_WITH"
+							value    = "freeform"
+						}
+						request_query_param {
+							operator = "EQUALS"
+							value    = "description"
+						}
+						target_rule_set = "xss-stable"
+						target_rule_ids = [
+							"owasp-crs-v030001-id941330-xss",
+							"owasp-crs-v030001-id941340-xss",
+						]
+					}
+				}
+				preview = false
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+
+		}
+	`, context)
+}
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesRateLimitOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withRateLimitOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				priority = "1000"
+				action          = "rate_based_ban"
+				rate_limit_options {
+					rate_limit_threshold {
+						count = 500
+						interval_sec = 10
+					}
+					conform_action = "allow"
+					exceed_action = "deny(404)"
+					enforce_on_key = "ALL"
+					ban_threshold {
+						count = 750
+						interval_sec = 180
+					}
+					ban_duration_sec = 180
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withRateLimitOptions_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				priority = "100"
+				action          = "rate_based_ban"
+				rate_limit_options {
+					rate_limit_threshold {
+						count = 100
+						interval_sec = 30
+					}
+					conform_action = "allow"
+					exceed_action = "deny(404)"
+					enforce_on_key = "HTTP_HEADER"
+					enforce_on_key_name = "user-agent"
+					ban_threshold {
+						count = 1000
+						interval_sec = 300
+					}
+					ban_duration_sec = 300
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+		}
+	`, context)
+}
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesMultipleEnforceOnKeyConfigs(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				priority = "1000"
+				action          = "throttle"
+				rate_limit_options {
+					conform_action = "allow"
+					exceed_action = "deny(429)"
+
+					rate_limit_threshold {
+						count = 10
+						interval_sec = 60
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "HTTP_PATH"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "HTTP_HEADER"
+						enforce_on_key_name = "user-agent"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "REGION_CODE"
+					}
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+		}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_compute_region_security_policy" "policy" {
+			name	= "tf-test%{random_suffix}"
+			type	= "CLOUD_ARMOR"
+			region  = "us-west2"
+
+			rules {
+				priority = "100"
+				action          = "throttle"
+				rate_limit_options {
+					conform_action = "allow"
+					exceed_action = "deny(429)"
+
+					rate_limit_threshold {
+						count = 10
+						interval_sec = 60
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "USER_IP"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "TLS_JA3_FINGERPRINT"
+					}
+
+					enforce_on_key_configs {
+						enforce_on_key_type = "REGION_CODE"
+					}
+				}
+				match {
+					config {
+						src_ip_ranges = [
+							"*"
+						]
+					}
+					versioned_expr = "SRC_IPS_V1"
+				}
+			}
+
+			rules {
+				action   = "allow"
+				priority = "2147483647"
+				preview 	= false
+				match {
+					versioned_expr = "SRC_IPS_V1"
+					config {
+						src_ip_ranges = ["*"]
+					}
+				}
+				description = "default rule"
+			}
+		}
+	`, context)
+}
+
+func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatch(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org_id": envvar.GetTestOrgFromEnv(t),
+		"billing_id": envvar.GetTestBillingAccountFromEnv(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_security_policy.policy", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withNetworkMatch(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_project" "project" {
+		name = "tf-test-ca-rules-%{random_suffix}"
+		project_id = "tf-test-ca-rules-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_id}"
+		deletion_policy = "DELETE"
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+
+		depends_on = [google_project.project]
+	}
+
+	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
+		project          = google_project.project.project_id  
+		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
+		depends_on       = [google_project_service.compute_api]
+	}
+
+	resource "google_compute_region_security_policy" "policy_ddos_enable" {
+		region      = "us-west1"
+		name        = "tf-test-ddos-enable%{random_suffix}"
+		project = google_project.project.project_id
+		description = "region security policy to pre-enable ddos protection in the region, otherwise network_match throws error ddos not enabled"
+		type        = "CLOUD_ARMOR_NETWORK"
+		ddos_protection_config {
+			ddos_protection = "ADVANCED_PREVIEW"
+		}
+
+		depends_on = [google_compute_project_cloud_armor_tier.cloud_armor_tier_config]
+	}
+
+	resource "google_compute_network_edge_security_service" "edge_security_service" {
+		region          = "us-west1"
+		name            = "tf-test-edge-service%{random_suffix}"
+		description = "edge security service is required to be pre-created when creasting a policy with network_match rules"
+		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
+		project = google_project.project.project_id
+	}
+
+	resource "google_compute_region_security_policy" "policy" {
+		region      = "us-west1"
+		project = google_project.project.project_id
+		name        = "tf-test-policy%{random_suffix}"
+		description = "region security policy for network match test"
+		type        = "CLOUD_ARMOR_NETWORK"
+		user_defined_fields {
+			name = "ipv4_fragment_offset"
+			base = "IPV4"
+			offset = 6
+			size = 2
+			mask = "0x1fff"
+		}
+
+		rules {
+			priority = "1000"
+			network_match {
+				src_ip_ranges    = ["10.10.0.0/16"]
+				src_asns         = [6939]
+				src_ports        = ["443"]
+				src_region_codes = ["US"]
+				ip_protocols     = ["UDP"]
+				dest_ip_ranges   = ["10.0.0.0/8"]
+				dest_ports       = ["80"]
+				user_defined_fields {
+					name = "ipv4_fragment_offset"
+					values = ["0x1fff"]
+				}
+			}
+			action = "allow"
+			preview = false
+		}
+
+		rules {
+			action   = "allow"
+			priority = "2147483647"
+			preview 	= false
+			network_match {
+				src_ip_ranges = ["*"]
+			}
+			description = "default rule"
+		}
+		depends_on  = [google_compute_network_edge_security_service.edge_security_service]
+	}
+	`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+	resource "google_project" "project" {
+		name = "tf-test-ca-rules-%{random_suffix}"
+		project_id = "tf-test-ca-rules-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_id}"
+		deletion_policy = "DELETE"
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+
+		depends_on = [google_project.project]
+	}
+
+	resource "google_compute_project_cloud_armor_tier" "cloud_armor_tier_config" {
+		project          = google_project.project.project_id  
+		cloud_armor_tier = "CA_ENTERPRISE_PAYGO"
+		depends_on       = [google_project_service.compute_api]
+	}
+
+	resource "google_compute_region_security_policy" "policy_ddos_enable" {
+		region      = "us-west1"
+		name        = "tf-test-ddos-enable%{random_suffix}"
+		project = google_project.project.project_id
+		description = "region security policy to pre-enable ddos protection in the region, otherwise network_match throws error ddos not enabled"
+		type        = "CLOUD_ARMOR_NETWORK"
+		ddos_protection_config {
+			ddos_protection = "ADVANCED_PREVIEW"
+		}
+
+		depends_on = [google_compute_project_cloud_armor_tier.cloud_armor_tier_config]
+	}
+	
+	resource "google_compute_network_edge_security_service" "edge_security_service" {
+		region          = "us-west1"
+		name            = "tf-test-edge-service%{random_suffix}"
+		project = google_project.project.project_id
+		security_policy = google_compute_region_security_policy.policy_ddos_enable.self_link
+	}
+
+	resource "google_compute_region_security_policy" "policy" {
+		region      = "us-west1"
+		name        = "tf-test-policy%{random_suffix}"
+		description = "region security policy for network match test"
+		project = google_project.project.project_id
+		type        = "CLOUD_ARMOR_NETWORK"
+		user_defined_fields {
+			name = "ipv4_fragment_offset"
+			base = "IPV4"
+			offset = 6
+			size = 2
+			mask = "0x1fff"
+		}
+
+		rules {
+			priority = "1000"
+			network_match {
+				src_ip_ranges    = ["10.10.0.0/24"]
+				src_asns         = [6939]
+				src_ports        = ["80"]
+				src_region_codes = ["US"]
+				ip_protocols     = ["UDP"]
+				dest_ip_ranges   = ["10.0.0.0/10"]
+				dest_ports       = ["80"]
+				user_defined_fields {
+					name = "ipv4_fragment_offset"
+					values = ["0x1fff"]
+				}
+			}
+			action = "allow"
+			preview = false
+		}
+
+		rules {
+			action   = "allow"
+			priority = "2147483647"
+			preview 	= false
+			network_match {
+				src_ip_ranges = ["*"]
+			}
+			description = "default rule"
+		}
+		depends_on  = [google_compute_network_edge_security_service.edge_security_service]
+	}
+	`, context)
+}
+
 {{- end }}

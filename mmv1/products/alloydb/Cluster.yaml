@@ -39,27 +39,21 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
   - '{{cluster_id}}'
 timeouts:
-  insert_minutes: 30
-  update_minutes: 30
-  delete_minutes: 30
+  insert_minutes: 120
+  update_minutes: 120
+  delete_minutes: 120
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
-      insert_minutes: 30
-      update_minutes: 30
-      delete_minutes: 30
+      insert_minutes: 120
+      update_minutes: 120
+      delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
@@ -71,6 +65,18 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+  - name: 'alloydb_cluster_before_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+  - name: 'alloydb_cluster_after_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -116,6 +122,13 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - name: 'skip_await_major_version_upgrade'
+    type: Boolean
+    default_value: true
+    description: |
+      Set to true to skip awaiting on the major version upgrade of the cluster.
+      Possible values: true, false
+      Default value: "true"
 parameters:
   - name: 'clusterId'
     type: String
@@ -262,7 +275,8 @@ properties:
   - name: 'databaseVersion'
     type: String
     description: |
-      The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+      The database engine major version. This is an optional field and it's populated at the Cluster creation time.
+      Note: Changing this field to a higer version results in upgrading the AlloyDB cluster which is an irreversible change.
     default_from_api: true
   - name: 'pscConfig'
     type: NestedObject

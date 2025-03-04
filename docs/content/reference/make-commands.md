@@ -1,6 +1,6 @@
 ---
 title: "make commands"
-weight: 10
+weight: 30
 ---
 # `make` commands reference
 
@@ -34,7 +34,7 @@ make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform
 
 - `OUTPUT_PATH`: Required. The location you are generating provider code into.
 - `VERSION`: Required. The version of the provider you are building into. Valid values are `ga` and `beta`.
-- `PRODUCT`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existant product name to generate only handwritten code. Required if `RESOURCE` is specified.
+- `PRODUCT`: Limits generations to the specified folder within `mmv1/products` or `tpgtools/api`. Handwritten files from `mmv1/third_party/terraform` are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if `RESOURCE` is specified.
 - `RESOURCE`: Limits generation to the specified resource within a particular product. For `mmv1` resources, matches the resource's `name` field (set in its configuration file).For `tpgtools` resources, matches the terraform resource name.
 - `ENGINE`: Modifies `make provider` to only generate code using the specified engine. Valid values are `mmv1` or `tpgtools`. (Providing `tpgtools` will still generate any prerequisite mmv1 files required for tpgtools.)
 

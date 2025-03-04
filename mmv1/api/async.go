@@ -17,7 +17,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
 
@@ -58,6 +57,7 @@ func NewOperation() *Operation {
 	return op
 }
 
+// It is only used in openapi-generate
 func NewAsync() *Async {
 	oa := &Async{
 		Actions:   []string{"create", "delete", "update"},
@@ -71,52 +71,21 @@ func NewAsync() *Async {
 type OpAsync struct {
 	Result OpAsyncResult
 
-	Status OpAsyncStatus
-
-	Error OpAsyncError
-
 	// If true, include project as an argument to OperationWaitTime.
 	// It is intended for resources that calculate project/region from a selflink field
 	IncludeProject bool `yaml:"include_project"`
 }
 
 type OpAsyncOperation struct {
-	Kind string
-
-	Path string
-
-	BaseUrl string `yaml:"base_url"`
-
-	WaitMs int `yaml:"wait_ms"`
+	BaseUrl string `yaml:"base_url,omitempty"`
 
 	// Use this if the resource includes the full operation url.
-	FullUrl string `yaml:"full_url"`
+	FullUrl string `yaml:"full_url,omitempty"`
 }
 
 // Represents the results of an Operation request
 type OpAsyncResult struct {
-	ResourceInsideResponse bool `yaml:"resource_inside_response"`
-
-	Path string
-}
-
-// Provides information to parse the result response to check operation
-// status
-type OpAsyncStatus struct {
-	Path string
-
-	Complete bool
-
-	Allowed []bool
-}
-
-// Provides information on how to retrieve errors of the executed operations
-type OpAsyncError struct {
-	google.YamlValidator
-
-	Path string
-
-	Message string
+	ResourceInsideResponse bool `yaml:"resource_inside_response,omitempty"`
 }
 
 // Async implementation for polling in Terraform
@@ -125,19 +94,19 @@ type PollAsync struct {
 
 	// Function to call for checking the Poll response for
 	// creating and updating a resource
-	CheckResponseFuncExistence string `yaml:"check_response_func_existence"`
+	CheckResponseFuncExistence string `yaml:"check_response_func_existence,omitempty"`
 
 	// Function to call for checking the Poll response for
 	// deleting a resource
-	CheckResponseFuncAbsence string `yaml:"check_response_func_absence"`
+	CheckResponseFuncAbsence string `yaml:"check_response_func_absence,omitempty"`
 
 	// If true, will suppress errors from polling and default to the
 	// result of the final Read()
-	SuppressError bool `yaml:"suppress_error"`
+	SuppressError bool `yaml:"suppress_error,omitempty"`
 
 	// Number of times the desired state has to occur continuously
 	// during polling before returning a success
-	TargetOccurrences int `yaml:"target_occurrences"`
+	TargetOccurrences int `yaml:"target_occurrences,omitempty"`
 }
 
 func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
@@ -150,6 +119,9 @@ func (a *Async) UnmarshalYAML(unmarshal func(any) error) error {
 		return err
 	}
 
+	if a.Type == "" {
+		a.Type = "OpAsync"
+	}
 	if a.Type == "PollAsync" && a.TargetOccurrences == 0 {
 		a.TargetOccurrences = 1
 	}

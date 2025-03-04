@@ -55,15 +55,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 iam_policy:
   allowed_iam_role: 'roles/compute.networkUser'
@@ -77,6 +70,16 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "southamerica-west1"
+    - region: "us-west1"
+    - region: "us-south1"
 examples:
   - name: 'subnetwork_basic'
     primary_resource_id: 'network-with-private-secondary-ip-ranges'
@@ -129,6 +132,20 @@ examples:
     vars:
       subnetwork_name: 'subnetwork-reserved-secondary-range'
       network_name: 'network-reserved-secondary-range'
+      primary_range_name: 'reserved-primary'
+      secondary_range_name: 'reserved-secondary'
+  - name: 'subnetwork_ipv6_only_internal'
+    primary_resource_id: 'subnetwork-ipv6-only'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-ipv6-only'
+      network_name: 'network-ipv6-only'
+  - name: 'subnetwork_ipv6_only_external'
+    primary_resource_id: 'subnetwork-ipv6-only'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-ipv6-only'
+      network_name: 'network-ipv6-only'
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |
@@ -151,6 +168,12 @@ properties:
       An optional description of this resource. Provide this property when
       you create the resource. This field can be set only at resource
       creation time.
+  - name: 'subnetworkId'
+    type: Integer
+    description: |
+      The unique identifier number for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'gatewayAddress'
     type: String
     description: |
@@ -204,10 +227,11 @@ properties:
   - name: 'purpose'
     type: String
     description: |
-      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
+      A subnetwork with purpose set to `PEER_MIGRATION` is a user created subnetwork that is reserved for migrating resources from one peered network to another.
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE`.
@@ -402,6 +426,7 @@ properties:
     enum_values:
       - 'IPV4_ONLY'
       - 'IPV4_IPV6'
+      - 'IPV6_ONLY'
   - name: 'ipv6AccessType'
     type: Enum
     description: |

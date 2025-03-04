@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionNetworkEndpointGroup'
+api_resource_type_kind: NetworkEndpointGroup
 kind: 'compute#networkEndpointGroup'
 description: |
   A regional NEG that can support Serverless Products, proxying traffic to
@@ -39,17 +40,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "asia-northeast3"
 examples:
   - name: 'region_network_endpoint_group_functions'
     primary_resource_id: 'function_neg'
@@ -99,6 +98,7 @@ examples:
       network_name: 'network'
   - name: 'region_network_endpoint_group_portmap'
     primary_resource_id: 'region_network_endpoint_group_portmap'
+    min_version: 'beta'
     vars:
       network_name: 'network'
       subnetwork_name: 'subnetwork'
@@ -168,6 +168,20 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'
     imports: 'selfLink'
+  - name: 'pscData'
+    type: NestedObject
+    description: |
+      This field is only used for PSC NEGs.
+    default_from_api: true
+    properties:
+      - name: 'producerPort'
+        type: String
+        ignore_read: true
+        description: |
+          The PSC producer port to use when consumer PSC NEG connects to a producer. If
+          this flag isn't specified for a PSC NEG with endpoint type
+          private-service-connect, then PSC NEG will be connected to a first port in the
+          available PSC producer port range.
   - name: 'cloudRun'
     type: NestedObject
     description: |

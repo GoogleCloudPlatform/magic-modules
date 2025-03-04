@@ -1,5 +1,4 @@
 resource "google_filestore_instance" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name     = "{{index $.Vars "instance_name"}}"
   location = "us-central1"
   tier     = "ENTERPRISE"

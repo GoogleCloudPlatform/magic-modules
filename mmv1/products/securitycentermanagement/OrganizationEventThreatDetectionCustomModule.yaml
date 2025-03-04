@@ -13,6 +13,7 @@
 
 ---
 name: 'OrganizationEventThreatDetectionCustomModule'
+api_resource_type_kind: EventThreatDetectionCustomModule
 description: |
   Represents an instance of an Event Threat Detection custom module, including
   its full module name, display name, enablement state, and last updated time.

@@ -1,0 +1,23 @@
+
+resource "google_edgenetwork_interconnect_attachment" "{{$.PrimaryResourceId}}" {
+  interconnect_attachment_id   = "{{index $.Vars "edgenetwork_interconnect_attachment_id"}}"
+  location     = "{{index $.TestEnvVars "location"}}"
+  zone         = "{{index $.TestEnvVars "zone"}}"
+  description  = "Example interconnect attachment."
+  network      = google_edgenetwork_network.example_network.id
+  interconnect = "11111111-2222-3333-4444-555555555555"
+  vlan_id      = 55
+  mtu          = 9000
+  labels       = {
+    "environment" : "dev"
+  }
+}
+
+resource "google_edgenetwork_network" "example_network" {
+  network_id  = "{{index $.Vars "edgenetwork_network_id"}}"
+  location    = "{{index $.TestEnvVars "location"}}"
+  zone        = "{{index $.TestEnvVars "zone"}}"
+  description = "Example network."
+  mtu         = 9000
+}
+

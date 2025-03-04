@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 2000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 exclude_sweeper: true
 examples:

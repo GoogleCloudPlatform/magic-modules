@@ -1,6 +1,6 @@
 ---
 title: "Client-side fields"
-weight: 400
+weight: 150
 ---
 
 # Client-side fields

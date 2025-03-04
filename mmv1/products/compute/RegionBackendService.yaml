@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionBackendService'
+api_resource_type_kind: BackendService
 kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
@@ -33,15 +34,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
@@ -58,6 +52,13 @@ custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
@@ -96,6 +97,12 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ilb_stateful_session_affinity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_balancing_mode'
     primary_resource_id: 'default'
     vars:
@@ -106,6 +113,11 @@ examples:
   - name: 'region_backend_service_connection_tracking'
     primary_resource_id: 'default'
     min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ip_address_selection_policy'
+    primary_resource_id: 'default'
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
@@ -745,7 +757,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:
@@ -753,6 +767,7 @@ properties:
         type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
         required: true
+        send_empty_value: true
       - name: 'oauth2ClientId'
         type: String
         description: |
@@ -770,6 +785,14 @@ properties:
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
         output: true
+  - name: 'ipAddressSelectionPolicy'
+    type: Enum
+    description: |
+      Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
+    enum_values:
+      - 'IPV4_ONLY'
+      - 'PREFER_IPV6'
+      - 'IPV6_ONLY'
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
@@ -1151,6 +1174,50 @@ properties:
       - 'HEADER_FIELD'
       - 'HTTP_COOKIE'
       - 'CLIENT_IP_NO_DESTINATION'
+      - 'STRONG_COOKIE_AFFINITY'
+  - name: 'strongSessionAffinityCookie'
+    type: NestedObject
+    description: |
+      Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
+    properties:
+      - name: 'ttl'
+        type: NestedObject
+        description: |
+          Lifetime of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Span of time at a resolution of a second.
+              Must be from 0 to 315,576,000,000 inclusive.
+            required: true
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond
+              resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must
+              be from 0 to 999,999,999 inclusive.
+      - name: 'name'
+        type: String
+        description: |
+          Name of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+      - name: 'path'
+        type: String
+        description: |
+          Path to set for the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
   - name: 'connectionTrackingPolicy'
     type: NestedObject
     description: |

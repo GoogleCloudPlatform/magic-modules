@@ -13,6 +13,7 @@
 
 ---
 name: 'Cluster'
+api_resource_type_kind: AttachedCluster
 description: |
   An Anthos cluster running on customer owned infrastructure.
 references:
@@ -40,14 +41,8 @@ async:
   type: 'OpAsync'
   operation:
     full_url: 'https://{{location}}-gkemulticloud.googleapis.com/v1/{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/containerattached_cluster_diff.go.tmpl'
   pre_update: 'templates/terraform/pre_update/containerattached_update.go.tmpl'
@@ -359,6 +354,7 @@ properties:
     description: |
       Enable/Disable Security Posture API features for the cluster.
     default_from_api: true
+    deprecation_message: '`security_posture_config` is deprecated and will be removed in a future major release.'
     properties:
       - name: 'vulnerabilityMode'
         type: Enum

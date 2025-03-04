@@ -13,7 +13,7 @@
 
 ---
 name: 'BlockchainNodeEngine'
-display_name: 'Blockchain node engine'
+display_name: 'Blockchain Node Engine'
 versions:
   - name: 'ga'
     base_url: 'https://blockchainnodeengine.googleapis.com/v1/'

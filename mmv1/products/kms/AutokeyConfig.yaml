@@ -51,6 +51,8 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
   pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
@@ -65,9 +67,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
-    # Need the time_sleep resource
-    # Currently failing
-    skip_vcr: true
 parameters:
   - name: 'folder'
     type: String

@@ -36,19 +36,16 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_security_client_tls_policy_basic'
     primary_resource_id: 'default'

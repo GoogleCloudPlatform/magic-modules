@@ -33,18 +33,16 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-east4"
+    - region: "us-central1"
+    - region: "europe-west1"
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
@@ -258,7 +256,7 @@ properties:
             type: Boolean
             description: |
               Whether to perform a 'guest aware' snapshot.
-            send_empty_value: true
+            send_empty_value: false
             at_least_one_of:
               - 'snapshot_schedule_policy.0.snapshot_properties.0.labels'
               - 'snapshot_schedule_policy.0.snapshot_properties.0.storage_locations'

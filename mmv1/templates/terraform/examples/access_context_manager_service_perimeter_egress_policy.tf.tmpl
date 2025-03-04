@@ -6,12 +6,13 @@ resource "google_access_context_manager_service_perimeter" "storage-perimeter" {
     restricted_services = ["storage.googleapis.com"]
   }
   lifecycle {
-    ignore_changes = [status[0].resources]
+    ignore_changes = [status[0].egress_policies] # Allows ingress policies to be managed by google_access_context_manager_service_perimeter_egress_policy resources
   }
 }
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "egress_policy" {
   perimeter = "${google_access_context_manager_service_perimeter.storage-perimeter.name}"
+  title = "{{index $.Vars "egress_policy_title"}}"
   egress_from {
     identity_type = "ANY_IDENTITY"
   }

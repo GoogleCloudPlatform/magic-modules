@@ -1,6 +1,6 @@
 resource "google_org_policy_policy" "primary" {
-  name   = "projects/${google_project.basic.name}/policies/gcp.resourceLocations"
-  parent = "projects/${google_project.basic.name}"
+  name   = "projects/${google_project.basic.project_id}/policies/gcp.resourceLocations"
+  parent = "projects/${google_project.basic.project_id}"
 
   spec {
     rules {

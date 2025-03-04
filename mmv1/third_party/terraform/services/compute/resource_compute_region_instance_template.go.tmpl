@@ -155,7 +155,15 @@ func ResourceComputeRegionInstanceTemplate() *schema.Resource {
 							Optional:    true,
 							ForceNew:    true,
 							Computed:    true,
-							Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. Values must be between 10,000 and 120,000. For more details, see the [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).`,
+							Description: `Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. For more details, see the [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk) or the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks) depending on the selected disk_type.`,
+						},
+
+						"provisioned_throughput": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: `Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. Values must greater than or equal to 1. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).`,
 						},
 
 						"resource_manager_tags": {
@@ -447,8 +455,8 @@ Google Cloud KMS.`,
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
+							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA"}, false),
+							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, and IRDMA`,
 						},
 						"access_config": {
 							Type:        schema.TypeList,
@@ -511,7 +519,7 @@ Google Cloud KMS.`,
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", ""}, false),
+							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6","IPV6_ONLY", ""}, false),
 							Description:  `The stack type for this network interface to identify whether the IPv6 feature is enabled or not. If not specified, IPV4_ONLY will be used.`,
 						},
 
@@ -525,6 +533,7 @@ Google Cloud KMS.`,
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							ForceNew:    true,
 							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
@@ -674,6 +683,13 @@ Google Cloud KMS.`,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
+						"availability_domain": {
+							Type:          schema.TypeInt,
+							Optional:      true,
+							ForceNew:      true,
+							AtLeastOneOf:  schedulingInstTemplateKeys,
+							Description:  `Specifies the availability domain, which this instance should be scheduled on.`,
+						},
 						"max_run_duration" : {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -764,6 +780,53 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+{{ if ne $.TargetVersionName `ga` }}
+						"graceful_shutdown": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Settings for the instance to perform a graceful shutdown.`,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										ForceNew:    true,
+										Description: `Opts-in for graceful shutdown.`,
+									},
+									"max_duration": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Description: `The time allotted for the instance to gracefully shut down.
+										If the graceful shutdown isn't complete after this time, then the instance
+										transitions to the STOPPING state.`,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+													ForceNew: true,
+													Description: `Span of time at a resolution of a second.
+													The value must be between 1 and 3600, which is 3,600 seconds (one hour).`,
+												},
+												"nanos": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													ForceNew: true,
+													Description: `Span of time that's a fraction of a second at nanosecond
+													resolution. Durations less than one second are represented
+													with a 0 seconds field and a positive nanos field. Must
+													be from 0 to 999,999,999 inclusive.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+{{- end }}
 					},
 				},
 			},
@@ -773,6 +836,13 @@ be from 0 to 999,999,999 inclusive.`,
 				Computed:    true,
 				ForceNew:    true,
 				Description: `The URI of the created resource.`,
+			},
+
+			"creation_timestamp": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `The time at which the instance was created in RFC 3339 format.`,
 			},
 
 			"service_account": {
@@ -865,18 +935,6 @@ be from 0 to 999,999,999 inclusive.`,
 							Description: `Defines whether the instance should have confidential compute enabled. Field will be deprecated in a future release.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						{{- if eq $.TargetVersionName "ga" }}
-						"confidential_instance_type": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							ForceNew:    true,
-							Description: `
-								Specifies which confidential computing technology to use.
-								This could be one of the following values: SEV, SEV_SNP.
-								If SEV_SNP, min_cpu_platform = "AMD Milan" is currently required.`,
-							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
-						},
-						{{- else }}
 						"confidential_instance_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -888,7 +946,6 @@ be from 0 to 999,999,999 inclusive.`,
 								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -914,11 +971,30 @@ be from 0 to 999,999,999 inclusive.`,
 							ForceNew:    true,
 							Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 						},
+						"turbo_mode": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Turbo frequency mode to use for the instance. Currently supported modes is "ALL_CORE_MAX".`,
+							ValidateFunc: validation.StringInSlice([]string{"ALL_CORE_MAX"}, false),
+						},
 						"visible_core_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							ForceNew:    true,
 							Description: `The number of physical cores to expose to an instance. Multiply by the number of threads per core to compute the total number of virtual CPUs to expose to the instance. If unset, the number of cores is inferred from the instance\'s nominal CPU count and the underlying platform\'s SMT width.`,
+						},
+						"performance_monitoring_unit": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
+							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
+						},
+						"enable_uefi_networking": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Whether to enable UEFI networking or not.`,
 						},
 					},
 				},
@@ -1054,6 +1130,14 @@ be from 0 to 999,999,999 inclusive.`,
 					},
 				},
 			},
+
+			"key_revocation_action_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"NONE", "STOP", ""}, false),
+				Description:  `Action to be taken when a customer's encryption key is revoked. Supports "STOP" and "NONE", with "NONE" being the default.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1136,6 +1220,7 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 {{- end }}
 		ResourcePolicies:           resourcePolicies,
 		ReservationAffinity:        reservationAffinity,
+		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 	}
 
 	if _, ok := d.GetOk("effective_labels"); ok {
@@ -1311,6 +1396,9 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	if err = d.Set("self_link", instanceTemplate["selfLink"]); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
+	if err := d.Set("creation_timestamp", instanceTemplate["creationTimestamp"]); err != nil {
+		return fmt.Errorf("Error setting creation_timestamp: %s", err)
+	}
 	if err = d.Set("name", instanceTemplate["name"]); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
@@ -1340,6 +1428,9 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	if err = d.Set("instance_description", instanceProperties.Description); err != nil {
 		return fmt.Errorf("Error setting instance_description: %s", err)
 	}
+	if err = d.Set("key_revocation_action_type", instanceProperties.KeyRevocationActionType); err != nil {
+		return fmt.Errorf("Error setting key_revocation_action_type: %s", err)
+	}
 	if err = d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
 	}
@@ -1363,6 +1454,18 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 	if instanceProperties.Scheduling != nil {
 		scheduling := flattenScheduling(instanceProperties.Scheduling)
+{{ if ne $.TargetVersionName `ga` }}
+		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+		// To avoid diff, we need to set the value from the state not from API response.
+		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+			graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+			max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+			max_duration["nanos"] = int64(nanos.(int))
+
+			graceful_shutdown["max_duration"] = []interface{}{max_duration}
+			scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		}
+{{- end }}
 		if err = d.Set("scheduling", scheduling); err != nil {
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}

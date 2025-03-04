@@ -1,0 +1,13 @@
+resource: 'google_compute_shared_vpc_service_project'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'Project'
+fields:
+  - field: 'deletion_policy'
+  - field: 'host_project'
+  - field: 'service_project'
