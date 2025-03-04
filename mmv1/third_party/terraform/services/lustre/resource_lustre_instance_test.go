@@ -76,6 +76,7 @@ resource "google_service_networking_connection" "default" {
   network                 = "${data.google_project.project.id}/global/networks/default"
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+	update_on_creation_fail = true
 }
 `, context)
 }
@@ -112,6 +113,7 @@ resource "google_service_networking_connection" "default" {
   network                 = "${data.google_project.project.id}/global/networks/default"
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+	update_on_creation_fail = true
 }
 `, context)
 }
