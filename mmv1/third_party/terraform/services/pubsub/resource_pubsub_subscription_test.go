@@ -574,7 +574,7 @@ resource "google_pubsub_subscription" "foo" {
   topic = google_pubsub_topic.foo.id
 	message_transforms {
 		{
-			javascript_udf = {
+			javascript_udf {
 				function_name = "filter_falsy",
 				code = "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
 			}
