@@ -1,0 +1,14 @@
+resource "google_compute_subnetwork" "subnetwork-ip-collection" {
+  provider      = google-beta
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.custom-test.id
+  ip_collection = "{{index $.Vars "ip_collection_url"}}"
+}
+
+resource "google_compute_network" "custom-test" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}

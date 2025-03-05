@@ -146,6 +146,15 @@ examples:
     vars:
       subnetwork_name: 'subnet-ipv6-only'
       network_name: 'network-ipv6-only'
+  - name: 'subnetwork_ipcollection'
+    primary_resource_id: 'subnetwork-ip-collection'
+    min_version: 'beta'
+    vars:
+      subnetwork_name: 'subnet-ip-collection'
+      network_name: 'website-net'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |
@@ -467,3 +476,17 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+  - name: ipCollection
+    type: String
+    min_version: 'beta'
+    diff_suppress_func: 'IpCollectionDiffSuppress'
+    description: |
+      Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
+      in EXTERNAL_IPV6_FORWARDING_RULE_CREATION mode.
+      Use one of the following formats to specify a sub-PDP when creating an
+      IPv6 NetLB forwarding rule using BYOIP:
+      Full resource URL, as in:
+        * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
+      Partial URL, as in:
+        * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
+        * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
