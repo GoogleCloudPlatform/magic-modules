@@ -99,6 +99,7 @@ properties:
     description: |-
       The configuration for Platform Telemetry logging for Eventarc Advanced
       resources.
+    default_from_api: true
     properties:
       - name: logSeverity
         type: Enum
@@ -106,7 +107,6 @@ properties:
           The minimum severity of logs that will be sent to Stackdriver/Platform
           Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
         default_from_api: true
-        required: true
         enum_values:
           - NONE
           - DEBUG
