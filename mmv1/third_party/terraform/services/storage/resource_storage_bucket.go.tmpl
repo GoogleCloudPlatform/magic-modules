@@ -133,7 +133,7 @@ func ResourceStorageBucket() *schema.Resource {
 				StateFunc: func(s interface{}) string {
 					return strings.ToUpper(s.(string))
 				},
-				Description: `The Google Cloud Storage location or region`,
+				Description: `The Google Cloud Storage location or region.`,
 			},
 
 			"project": {
