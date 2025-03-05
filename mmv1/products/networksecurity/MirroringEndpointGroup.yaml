@@ -133,3 +133,9 @@ properties:
       See https://google.aip.dev/128.
     min_version: 'beta'
     output: true
+  - name: description
+    type: String
+    description: |-
+      User-provided description of the endpoint group.
+      Used as additional context for the endpoint group.
+    min_version: 'beta'
