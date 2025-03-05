@@ -554,7 +554,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
-      // Initial transform
+			// Initial transform
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1),
 				Check: resource.ComposeTestCheckFunc(
@@ -562,7 +562,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
 				),
 			},
-      // Bare transform
+			// Bare transform
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
 				Check: resource.ComposeTestCheckFunc(
@@ -570,34 +570,34 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", ""),
 				),
 			},
-      // Destroy transform
+			// Destroy transform
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      // Two transforms
+			// Two transforms
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1) + "\n" + testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName2, code2),
 				Check: resource.ComposeTestCheckFunc(
 					// Test schema
-          resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.function_name", functionName2),
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.code", code2),
 				),
 			},
-      {
-        // Remove non-required field
-        Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName1, code1),
+			{
+				// Remove non-required field
+				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName1, code1),
 				Check: resource.ComposeTestCheckFunc(
 					// Test schema
-          resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
 					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
 				),
-      },
-      {
+			},
+			{
 				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
