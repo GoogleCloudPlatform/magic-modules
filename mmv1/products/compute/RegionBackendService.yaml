@@ -757,7 +757,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:
@@ -1324,12 +1326,14 @@ properties:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
           - 'log_config.0.optional_mode'
+        default_from_api: true
       - name: 'optionalFields'
         type: Array
         description: |
           Specifies the fields to include in logging. This field can only be specified if logging is enabled for this backend service.
         item_type:
           type: String
+        default_from_api: true
   - name: 'network'
     type: ResourceRef
     description: |
