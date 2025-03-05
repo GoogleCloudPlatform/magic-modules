@@ -15,6 +15,53 @@ if err != nil {
 	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
 }
 
+// if the create_snapshot_before_destroy is set to true then create a snapshot before deleting the disk
+	if d.Get("create_snapshot_before_destroy").(bool) {
+		instanceName := d.Get("name").(string)
+		nameOrigin := "disk"
+		if d.Get("create_snapshot_before_destroy_prefix").(string) != "" {
+			instanceName = d.Get("create_snapshot_before_destroy_prefix").(string)
+			nameOrigin = "create_snapshot_before_destroy_prefix"
+		}
+
+		if len(instanceName) > 48 {
+			return fmt.Errorf(`Your %s name is too long to perform this action. The max is 48 characters. Please use "create_snapshot_before_destroy_prefix" to set a custom name for the snapshot.`, nameOrigin)
+		}
+
+		snapshotObj := &compute.Snapshot{
+			Name:       fmt.Sprintf("%s-%s", instanceName, time.Now().Format("20060102-150405")),
+			SourceDisk: d.Get("self_link").(string),
+		}
+
+		//Handling encryption
+		if d.Get("disk_encryption_key.0.raw_key").(string) != "" {
+			snapshotObj.SourceDiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RawKey: d.Get("disk_encryption_key.0.raw_key").(string),
+			}
+			snapshotObj.SnapshotEncryptionKey = &compute.CustomerEncryptionKey{
+				RawKey: d.Get("disk_encryption_key.0.raw_key").(string),
+			}
+		}
+
+		if d.Get("disk_encryption_key.0.rsa_encrypted_key").(string) != "" {
+			snapshotObj.SourceDiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: d.Get("disk_encryption_key.0.rsa_encrypted_key").(string),
+			}
+			snapshotObj.SnapshotEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: d.Get("disk_encryption_key.0.rsa_encrypted_key").(string),
+			}
+		}
+
+		snapshot, err := config.NewComputeClient(userAgent).Snapshots.Insert(project, snapshotObj).Do()
+		if err != nil {
+			return fmt.Errorf("Error creating snapshot: %s", err)
+		}
+		err = ComputeOperationWaitTime(config, snapshot, project, "Creating Snapshot", userAgent, d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return err
+		}
+	}
+
 // if disks are attached to instances, they must be detached before the disk can be deleted
 if v, ok := readRes["users"].([]interface{}); ok {
 	type detachArgs struct{ project, zone, instance, deviceName string }
