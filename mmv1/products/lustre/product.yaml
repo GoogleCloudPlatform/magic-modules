@@ -19,3 +19,5 @@ scopes:
 versions:
   - base_url: https://lustre.googleapis.com/v1/
     name: ga
+  - base_url: https://lustre.googleapis.com/v1/
+    name: beta
