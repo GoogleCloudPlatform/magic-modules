@@ -11053,6 +11053,7 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
   network    = "%s"
   subnetwork    = "%s"
+  min_master_version = "1.31.5-gke.1090000"
 }
 `, name, networkName, subnetworkName)
 }
