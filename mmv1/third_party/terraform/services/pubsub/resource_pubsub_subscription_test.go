@@ -544,16 +544,60 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	functionName1 := "filter_falsy"
+	functionName2 := "passthrough"
+	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+	code2 := "function passthrough(message, metadata) {\n    return message;\n}\n"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
+      // Initial transform
 			{
-				Config: testAccPubsubSubscription_updateWithUpdatedJavascriptUdfSettings(topic, subscriptionShort),
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
+				),
 			},
+      // Bare transform
 			{
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", ""),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", ""),
+				),
+			},
+      // Destroy transform
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+      // Two transforms
+			{
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1) + "\n" + testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName2, code2),
+				Check: resource.ComposeTestCheckFunc(
+					// Test schema
+          resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.function_name", functionName2),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.code", code2),
+				),
+			},
+      {
+        // Remove non-required field
+        Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName1, code1),
+				Check: resource.ComposeTestCheckFunc(
+					// Test schema
+          resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
+				),
+      },
+      {
 				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
@@ -563,7 +607,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
-func testAccPubsubSubscription_updateWithUpdatedJavascriptUdfSettings(topic, subscription string) string {
+func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
   name = "%s"
@@ -575,14 +619,35 @@ resource "google_pubsub_subscription" "foo" {
 	message_transforms {
 		{
 			javascript_udf {
-				function_name = "filter_falsy",
-				code = "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+				function_name = %s,
+				code = %s
 			}
 			enabled = true
 		}
+  }
 }
+`, topic, subscription, functionName, code)
 }
-`, topic, subscription)
+
+func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+	message_transforms {
+		{
+			javascript_udf {
+				function_name = %s,
+				code = %s
+			}
+		}
+  }
+}
+`, topic, subscription, functionName, code)
 }
 
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
