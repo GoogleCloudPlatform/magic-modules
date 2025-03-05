@@ -588,37 +588,67 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
+	functionName1 := "filter_falsy"
+	functionName2 := "passthrough"
+	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+	code2 := "function passthrough(message, metadata) {\n    return message;\n}\n"
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// Initial transform
 			{
-				Config: testAccPubsubTopic_updateWithUpdatedJavascriptUdfSettings(topic),
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, function1, code1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", code1),
+				),
 			},
+			// Bare transform
 			{
-				ResourceName:      "google_pubsub_topic.topic",
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", ""),
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", ""),
+				),
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			// Two transforms
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName1, code1) + "\n" + testAccPubsubTopic_javascriptUdfSettings(topic, functionName2, code2),
+				Check: resource.ComposeTestCheckFunc(
+					// Test schema
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", functionName1),
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", code1),
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.1.function_name", functionName2),
+					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.1.code", code2),
+				),
 			},
 		},
 	})
 }
 
-func testAccPubsubTopic_updateWithUpdatedJavascriptUdfSettings(topic string) string {
+func testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
 	name = "%s"
 
 	message_transforms {
 		{
-			javascript_udf {
-				function_name = "filter_falsy",
-				code = "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
+			javascript_udf = {
+				function_name = %s,
+				code = %s
 			}
 			enabled = true
 		}
 	}
 }
-	`, topic)
+	`, topic, functionName, code)
 }

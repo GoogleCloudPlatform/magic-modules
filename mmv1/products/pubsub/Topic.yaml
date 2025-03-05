@@ -439,7 +439,6 @@ properties:
             required: true
   - name: messageTransforms
     type: Array
-    required: false
     description: |
       Transforms to be applied to messages published to the topic. Transforms are applied in the
       order specified.
@@ -448,7 +447,6 @@ properties:
       properties:
         - name: javascriptUdf
           type: NestedObject
-          required: false
           description: |
             Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
             each one must have a unique `function_name`.
@@ -492,7 +490,6 @@ properties:
                 ```
         - name: enabled
           type: Boolean
-          required: false
           default_value: true
           description: |
             If set to `true`, the transform is enabled. If `false` the transform is disabled and will
