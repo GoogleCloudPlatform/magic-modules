@@ -15,6 +15,10 @@
 name: 'Instance'
 description: A Google Cloud Memorystore instance.
 docs:
+references:
+  guides:
+     'Official Documentation': https://cloud.google.com/memorystore/docs/valkey/create-instances 
+  api: 'https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances'
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
@@ -154,6 +158,16 @@ properties:
             description:
               "Output only. Target number of replica nodes per shard for the
               instance. "
+            output: true
+          - name: 'targetEngineVersion'
+            type: String
+            description: 
+              "Output only. Target engine version for the instance."
+            output: true
+          - name: 'targetNodeType'
+            type: String
+            description:
+              "Output only. Target node type for the instance."
             output: true
   - name: 'uid'
     type: String
@@ -373,6 +387,29 @@ properties:
     enum_values:
       - 'CLUSTER'
       - 'CLUSTER_DISABLED'
+  - name: 'pscAttachmentDetail'
+    type: Array
+    description: 
+     "Configuration of a service attachment of the cluster, for creating PSC connections."
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'serviceAttachment'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
+        - name: 'dnsName'
+          type: String
+          description:
+            "Recommended to create a DNS record with the dnsName per client and point to the PSC endpoint IP address."
+          output: true
+        - name: 'connectionType'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
   - name: 'pscAutoConnections'
     type: Array
     description:
