@@ -17,11 +17,11 @@ import (
 // We make sure not to run tests in parallel, since only one MessageBus per project is supported.
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		//"basic":                 testAccEventarcMessageBus_basic,
-		//"cryptoKey":             testAccEventarcMessageBus_cryptoKey,
-		"update": testAccEventarcMessageBus_update,
-		//"googleApiSource":       testAccEventarcMessageBus_googleApiSource,
-		//"updateGoogleApiSource": testAccEventarcMessageBus_updateGoogleApiSource,
+		"basic":                 testAccEventarcMessageBus_basic,
+		"cryptoKey":             testAccEventarcMessageBus_cryptoKey,
+		"update":                testAccEventarcMessageBus_update,
+		"googleApiSource":       testAccEventarcMessageBus_googleApiSource,
+		"updateGoogleApiSource": testAccEventarcMessageBus_updateGoogleApiSource,
 	}
 
 	for name, tc := range testCases {
