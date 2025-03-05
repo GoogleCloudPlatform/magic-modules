@@ -40,7 +40,7 @@ func TestAccEventarcGoogleApiSource_update(t *testing.T) {
 				ResourceName:            "google_eventarc_google_api_source.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"annotations", "google_api_source_id", "labels", "location", "terraform_labels"},
 			},
 			{
 				Config: testAccEventarcGoogleApiSource_update(context),
@@ -54,7 +54,7 @@ func TestAccEventarcGoogleApiSource_update(t *testing.T) {
 				ResourceName:            "google_eventarc_google_api_source.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"annotations", "google_api_source_id", "labels", "location", "terraform_labels"},
 			},
 			{
 				Config: testAccEventarcGoogleApiSource_unset(context),
@@ -68,7 +68,7 @@ func TestAccEventarcGoogleApiSource_update(t *testing.T) {
 				ResourceName:            "google_eventarc_google_api_source.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"annotations", "google_api_source_id", "labels", "location", "terraform_labels"},
 			},
 		},
 	})
