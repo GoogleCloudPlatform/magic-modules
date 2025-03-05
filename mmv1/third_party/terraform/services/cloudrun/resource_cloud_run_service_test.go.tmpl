@@ -903,7 +903,7 @@ resource "google_cloud_run_service" "default" {
 
 func testAccCloudRunService_cloudRunServiceWithReadinessProbeHttp(name, project, timeout, period, failure_threshold string) string {
 	return fmt.Sprintf(`
-resource "google_cloud_run_service" "primary" {
+resource "google_cloud_run_service" "default" {
   name     = "%s"
   location = "us-central1"
 
@@ -911,6 +911,7 @@ resource "google_cloud_run_service" "primary" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
+      "run.googleapis.com/minScale": "1"
     }
   }
 
@@ -940,19 +941,13 @@ resource "google_cloud_run_service" "primary" {
       }
     }
   }
-
-  lifecycle {
-    ignore_changes = [
-      metadata.0.annotations,
-    ]
-  }
 }
 `, name, project, period, timeout, failure_threshold)
 }
 
 func testAccCloudRunService_cloudRunServiceWithReadinessProbeGrpc(name, project, timeout, period, failure_threshold string) string {
 	return fmt.Sprintf(`
-resource "google_cloud_run_service" "primary" {
+resource "google_cloud_run_service" "default" {
   name     = "%s"
   location = "us-central1"
 
@@ -960,6 +955,7 @@ resource "google_cloud_run_service" "primary" {
     namespace = "%s"
     annotations = {
       generated-by = "magic-modules"
+      "run.googleapis.com/minScale": "1"
     }
   }
 
@@ -976,17 +972,11 @@ resource "google_cloud_run_service" "primary" {
           failure_threshold = %s
           grpc {
             port = 8080
-            service = foobar
+            service = "foobar"
           }
         }
       }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      metadata.0.annotations,
-    ]
   }
 }
 `, name, project, period, timeout, failure_threshold)
