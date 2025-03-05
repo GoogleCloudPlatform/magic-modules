@@ -412,11 +412,16 @@ resource "google_eventarc_google_api_source" "primary" {
   location             = "%{region}"
   google_api_source_id = "tf-test-googleapisource%{random_suffix}"
   display_name         = ""
-  destination          = ""
+  destination          = google_eventarc_message_bus.message_bus.id
   crypto_key_name      = ""
-  labels = {}
-  annotations = {}
+  labels               = {}
+  annotations          = {}
   logging_config {}
+}
+
+resource "google_eventarc_message_bus" "message_bus" {
+  location       = "%{region}"
+  message_bus_id = "tf-test-messagebus%{random_suffix}"
 }
 `, context)
 }
