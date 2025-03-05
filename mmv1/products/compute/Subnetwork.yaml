@@ -476,10 +476,13 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
-  - name: ipCollection
+  - name: 'ipCollection'
     type: String
     min_version: 'beta'
     diff_suppress_func: 'IpCollectionDiffSuppress'
+    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
+    update_verb: 'PATCH'
+    fingerprint_name: 'fingerprint'
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
       in EXTERNAL_IPV6_FORWARDING_RULE_CREATION mode.
