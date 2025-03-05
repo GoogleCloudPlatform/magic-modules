@@ -46,7 +46,23 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 				Config: testAccEventarcPipeline_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionUpdate),
+						// TODO(tommyreddad): Replace with plancheck.ResourceActionUpdate once pipeline update API is working.
+						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_eventarc_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "pipeline_id", "terraform_labels"},
+			},
+			{
+				Config: testAccEventarcPipeline_unset(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						// TODO(tommyreddad): Replace with plancheck.ResourceActionUpdate once pipeline update API is working.
+						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionDestroyBeforeCreate),
 					},
 				},
 			},
@@ -105,6 +121,23 @@ resource "google_eventarc_pipeline" "primary" {
 "data": "{ \"scrubbed\": \"false\" }"
 }
 EOF
+    }
+  }
+}
+`, context)
+}
+
+func testAccEventarcPipeline_unset(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_eventarc_pipeline" "primary" {
+  location        = "us-central1"
+  pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
+  destinations {
+    http_endpoint {
+      uri = "https://10.77.0.1:80/route"
+    }
+    network_config {
+      network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
     }
   }
 }
