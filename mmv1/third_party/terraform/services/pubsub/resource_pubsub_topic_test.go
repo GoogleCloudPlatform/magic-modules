@@ -600,7 +600,7 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Initial transform
 			{
-				Config: testAccPubsubTopic_javascriptUdfSettings(topic, function1, code1),
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName1, code1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", functionName1),
 					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", code1),
