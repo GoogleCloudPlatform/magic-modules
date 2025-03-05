@@ -56,7 +56,7 @@ parameters:
   - name: enrollmentId
     type: String
     description: |-
-      Required. The user-provided ID to be assigned to the Enrollment. It should match the
+      The user-provided ID to be assigned to the Enrollment. It should match the
       format `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
     immutable: true
     url_param_only: true
@@ -64,55 +64,55 @@ parameters:
 properties:
   - name: displayName
     type: String
-    description: Optional. Resource display name.
+    description: Resource display name.
   - name: messageBus
     type: String
     description: |-
-      Required. Resource name of the message bus identifying the source of the messages. It
+      Resource name of the message bus identifying the source of the messages. It
       matches the form
       projects/{project}/locations/{location}/messageBuses/{messageBus}.
     required: true
   - name: name
     type: String
     description: |-
-      Identifier. Resource name of the form
+      Resource name of the form
       projects/{project}/locations/{location}/enrollments/{enrollment}
     output: true
   - name: etag
     type: String
     description: |-
-      Output only. This checksum is computed by the server based on the value of other
+      This checksum is computed by the server based on the value of other
       fields, and might be sent only on update and delete requests to ensure that
       the client has an up-to-date value before proceeding.
     output: true
   - name: createTime
     type: String
-    description: Output only. The creation time.
+    description: The creation time.
     output: true
   - name: updateTime
     type: String
-    description: Output only. The last-modified time.
+    description: The last-modified time.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Resource labels.
+    description: Resource labels.
   - name: celMatch
     type: String
-    description: Required. A CEL expression identifying which messages this enrollment applies to.
+    description: A CEL expression identifying which messages this enrollment applies to.
     required: true
   - name: destination
     type: String
     description: |-
-      Required. Destination is the Pipeline that the Enrollment is delivering to. It must
+      Destination is the Pipeline that the Enrollment is delivering to. It must
       point to the full resource name of a Pipeline. Format:
       "projects/{PROJECT_ID}/locations/{region}/pipelines/{PIPELINE_ID)"
     required: true
   - name: uid
     type: String
     description: |-
-      Output only. Server assigned unique identifier for the channel. The value is a UUID4
+      Server assigned unique identifier for the channel. The value is a UUID4
       string and guaranteed to remain unchanged until the resource is deleted.
     output: true
   - name: annotations
     type: KeyValueAnnotations
-    description: Optional. Resource annotations.
+    description: Resource annotations.
