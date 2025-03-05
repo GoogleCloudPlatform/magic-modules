@@ -144,3 +144,9 @@ properties:
       See https://google.aip.dev/128.
     min_version: 'beta'
     output: true
+  - name: 'description'
+    type: String
+    description: |-
+      User-provided description of the deployment group.
+      Used as additional context for the deployment group.
+    min_version: 'beta'
