@@ -1261,9 +1261,9 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 {{- if eq $.TargetVersionName "ga" }}
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, KUBELET, CADVISOR and DCGM.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, KUBELET, CADVISOR, DCGM and JOBSET.`,
 {{- else }}
-							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, WORKLOADS, KUBELET, CADVISOR and DCGM.`,
+							Description: `GKE components exposing metrics. Valid values include SYSTEM_COMPONENTS, APISERVER, SCHEDULER, CONTROLLER_MANAGER, STORAGE, HPA, POD, DAEMONSET, DEPLOYMENT, STATEFULSET, WORKLOADS, KUBELET, CADVISOR, DCGM and JOBSET.`,
 {{- end }}
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -2206,8 +2206,7 @@ func ResourceContainerCluster() *schema.Resource {
 						},
 						"cluster_dns_scope": {
 							Type:         schema.TypeString,
-							Default:      "DNS_SCOPE_UNSPECIFIED",
-							ValidateFunc: validation.StringInSlice([]string{"DNS_SCOPE_UNSPECIFIED", "CLUSTER_SCOPE", "VPC_SCOPE"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_SCOPE", "VPC_SCOPE"}, false),
 							Description:  `The scope of access to cluster DNS records.`,
 							Optional:     true,
 						},
