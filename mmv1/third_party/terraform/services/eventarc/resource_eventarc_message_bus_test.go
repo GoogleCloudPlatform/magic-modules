@@ -388,12 +388,10 @@ func testAccEventarcMessageBus_unsetGoogleApiSourceCfg(context map[string]interf
 resource "google_eventarc_google_api_source" "primary" {
   location             = "%{region}"
   google_api_source_id = "tf-test-googleapisource%{random_suffix}"
-  display_name         = ""
   destination          = google_eventarc_message_bus.message_bus.id
-  crypto_key_name      = ""
-  labels               = {}
-  annotations          = {}
-  logging_config {}
+  logging_config {
+    log_severity = "NONE"
+  }
 }
 
 resource "google_eventarc_message_bus" "message_bus" {
