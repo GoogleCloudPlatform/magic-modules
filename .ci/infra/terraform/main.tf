@@ -414,6 +414,22 @@ resource "google_project_service_identity" "sqladmin_sa" {
   service = "sqladmin.googleapis.com"
 }
 
+resource "google_project_service_identity" "osconfig_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "osconfig.googleapis.com"
+}
+
+resource "google_project_service_identity" "progressiverollout_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "progressiverollout.googleapis.com"
+}
+
 # TestAccComposerEnvironment_fixPyPiPackages
 # TestAccComposerEnvironmentComposer2_private
 # TestAccComposerEnvironment_withEncryptionConfigComposer1
@@ -501,6 +517,7 @@ resource "google_project_iam_member" "colab_admin_permissions" {
 
 # TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "osconfig_service_agent" {
+  depends_on = [google_project_service_identity.osconfig_sa]
   project = google_project.proj.project_id
   role    = "roles/osconfig.serviceAgent"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig.iam.gserviceaccount.com"
@@ -508,6 +525,7 @@ resource "google_project_iam_member" "osconfig_service_agent" {
 
 # TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "osconfig_rollout_service_agent" {
+  depends_on = [google_project_service_identity.osconfig_sa]
   project = google_project.proj.project_id
   role    = "roles/osconfig.rolloutServiceAgent"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
@@ -515,9 +533,10 @@ resource "google_project_iam_member" "osconfig_rollout_service_agent" {
 
 # TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "progressiverollout_service_agent" {
-    project = google_project.proj.project_id
-    role    = "roles/progressiverollout.serviceAgent"
-    member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-progrollout.iam.gserviceaccount.com"
+  depends_on = [google_project_service_identity.progressiverollout_sa]
+  project = google_project.proj.project_id
+  role    = "roles/progressiverollout.serviceAgent"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-progrollout.iam.gserviceaccount.com"
 }
 
 data "google_organization" "org2" {
