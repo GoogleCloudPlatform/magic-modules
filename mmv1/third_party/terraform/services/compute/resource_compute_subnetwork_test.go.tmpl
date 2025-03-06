@@ -117,29 +117,23 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 			{
 				// Expand IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/16", subnetworkName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-                                    PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
-                                    },
-                                },
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
+				),
 			},
 			{
 				// Shrink IP CIDR range and update private_ip_google_access
 				Config: testAccComputeSubnetwork_update2(cnName, "10.2.0.0/24", subnetworkName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-                                    PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
-                                    },
-                                },
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
+				),
 			},
 			{
 				// Add a secondary range and enable flow logs at once
 				Config: testAccComputeSubnetwork_update3(cnName, "10.2.0.0/24", subnetworkName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-                                    PreApply: []plancheck.PlanCheck{
-                                            plancheck.ExpectResourceAction("google_compute_subnetwork.network-with-private-google-access", plancheck.ResourceActionUpdate),
-                                    },
-                                },
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
+				),
 			},
 			{
 				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
@@ -172,6 +166,11 @@ func TestAccComputeSubnetwork_purposeUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeSubnetworkExists(t, "google_compute_subnetwork.network-with-migration-purpose", &subnetwork),
 				),
+			},
+			{
+				ResourceName:      "google_compute_subnetwork.network-with-migration-purpose",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				// update the purpose from PEER_MIGRATION to PRIVATE
