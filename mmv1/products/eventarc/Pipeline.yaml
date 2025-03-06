@@ -123,7 +123,6 @@ properties:
     description: Display name of resource.
   - name: cryptoKeyName
     type: String
-    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     description: |-
       Resource name of a KMS crypto key (managed by the user) used to
       encrypt/decrypt the event data. If not set, an internal Google-owned key
