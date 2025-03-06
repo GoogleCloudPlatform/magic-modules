@@ -622,7 +622,7 @@ resource "google_pubsub_subscription" "foo" {
 				function_name = %s,
 				code = %s
 			}
-			enabled = true
+			disabled = false
 		}
   }
 }
