@@ -13,7 +13,7 @@
 
 ---
 name: Lustre
-display_name: Lustre
+display_name: Google Cloud Managed Lustre
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:
