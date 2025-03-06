@@ -11,7 +11,7 @@ resource "google_bigtable_instance" "instance" {
 }
 
 resource "google_bigtable_table" "table" {
-  name          = {{index $.Vars "table_name"}}
+  name          = "{{index $.Vars "table_name"}}"
   instance_name = google_bigtable_instance.instance.name
 
   column_family {
