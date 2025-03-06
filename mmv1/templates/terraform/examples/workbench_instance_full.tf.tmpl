@@ -75,12 +75,6 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     enable_ip_forwarding = true
 
     tags = ["abc", "def"]
-
-    confidential_instance_config {
-      enable_confidential_compute = true
-      confidential_instance_type = 'SEV'
-    }
-
   }
 
   disable_proxy_access = "true"
