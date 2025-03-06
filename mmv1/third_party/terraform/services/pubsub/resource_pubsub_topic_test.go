@@ -590,8 +590,8 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 
 	functionName1 := "filter_falsy"
 	functionName2 := "passthrough"
-	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null;\n}\n"
-	code2 := "function passthrough(message, metadata) {\n    return message;\n}\n"
+	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
+	code2 := "function passthrough(message, metadata) {\n    return message\n}\n"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
