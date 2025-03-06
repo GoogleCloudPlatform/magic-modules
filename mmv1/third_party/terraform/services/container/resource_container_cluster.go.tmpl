@@ -5919,7 +5919,6 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 		mc.ManagedPrometheusConfig = &container.ManagedPrometheusConfig{
 			Enabled: managed_prometheus["enabled"].(bool),
 		}
-		{{- if ne $.TargetVersionName "ga" }}
 		if autoMonitoring, ok := managed_prometheus["auto_monitoring_config"]; ok {
 		    if autoMonitoringList, ok := autoMonitoring.([]interface{}); ok {
 		        if len(autoMonitoringList) > 0 {
@@ -5932,7 +5931,6 @@ func expandMonitoringConfig(configured interface{}) *container.MonitoringConfig 
 		        }
 		    }
 		}
-		{{- end }}
 	}
 
 	if v, ok := config["advanced_datapath_observability_config"]; ok && len(v.([]interface{})) > 0 {
@@ -6917,7 +6915,6 @@ func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[
     result := make(map[string]interface{})
     result["enabled"] = c.Enabled
 
-    {{- if ne $.TargetVersionName "ga" }}
     autoMonitoringList := []map[string]interface{}{}
     if c.AutoMonitoringConfig != nil && c.AutoMonitoringConfig.Scope != "" {
         autoMonitoringMap := map[string]interface{}{
@@ -6927,7 +6924,6 @@ func flattenManagedPrometheusConfig(c *container.ManagedPrometheusConfig) []map[
     }
 
     result["auto_monitoring_config"] = autoMonitoringList
-    {{- end }}
 
     return []map[string]interface{}{result}
 }
