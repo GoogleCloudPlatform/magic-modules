@@ -63,7 +63,6 @@ resource "google_bigtable_materialized_view" "materialized_view" {
 SELECT _key, CF 
 FROM %s
 EOT  
-}
 
   depends_on = [
     google_bigtable_table.table
