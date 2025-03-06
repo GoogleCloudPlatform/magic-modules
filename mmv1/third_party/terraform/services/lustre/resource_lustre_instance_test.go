@@ -167,7 +167,7 @@ func TestAccLustreInstanceBeta_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-    "network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-network"),
+		"network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-network"),
 		"subnetwork_name": acctest.BootstrapSubnet(t, "lustre-subnetwork", acctest.BootstrapSharedTestNetwork(t, "lustre-subnetwork")),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
