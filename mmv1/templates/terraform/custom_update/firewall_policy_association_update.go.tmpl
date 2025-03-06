@@ -48,9 +48,10 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		Timeout:   d.Timeout(schema.TimeoutUpdate),
 		Headers:   headers,
 	})
-
+	//following section is the area of the `custom_update` function for this resource that is different
+	//`custom_update` was necessary over a `post_update"` because of the change to the error handler
 	if err != nil {
-		//before failing an update, restores the old firewall_policy value to prevent resource bricking
+		//before failing an update, restores the old firewall_policy value to prevent terraform state becoming broken
 		parts := strings.Split(d.Id(), "/")
 		oldPolicyPath := "locations/global/firewallPolicies/" + parts[len(parts)-3]
 		d.Set("firewall_policy", oldPolicyPath)
@@ -59,7 +60,7 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		log.Printf("[DEBUG] Finished updating FirewallPolicyAssociation %q: %#v", d.Id(), res)
 	}
 
-	// Store the ID now
+	// store the ID now, needed because this update function is changing a normally immutable URL parameter field
 	id, err := tpgresource.ReplaceVars(d, config, "locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/associations/{{"{{"}}name{{"}}"}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
@@ -67,5 +68,7 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	d.SetId(id)
 
 	//following the swapover briefly both associations exist and this can cause operations to fail
-	time.Sleep(30 * time.Second)
+	time.Sleep(60 * time.Second)
+	//end `custom_update` changed zone
+
 	return resourceComputeFirewallPolicyAssociationRead(d, meta)
