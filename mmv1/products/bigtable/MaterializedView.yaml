@@ -37,7 +37,7 @@ timeouts:
 exclude_sweeper: true
 examples:
   - name: 'bigtable_materialized_view'
-    primary_resource_id: 'ap'
+    primary_resource_id: 'materialized_view'
     vars:
       instance_name: 'bt-instance'
       table_name: 'bt-table'
