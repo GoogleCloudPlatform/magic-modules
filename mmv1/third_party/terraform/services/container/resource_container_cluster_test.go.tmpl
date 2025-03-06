@@ -6304,6 +6304,7 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   network            = "%s"
   subnetwork         = "%s"
+  min_master_version = "1.31.5-gke.1090000"
 
   deletion_protection = false
 }
