@@ -34,7 +34,7 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 		CheckDestroy:             testAccCheckEventarcPipelineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEventarcPipeline_eventarcPipelineWithCmekAndAvroFormatExample(context),
+				Config: testAccEventarcPipeline_eventarcPipelineWithTopicDestinationExample(context),
 			},
 			{
 				ResourceName:            "google_eventarc_pipeline.primary",
@@ -46,8 +46,7 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 				Config: testAccEventarcPipeline_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						// TODO(tommyreddad): Replace with plancheck.ResourceActionUpdate once pipeline update API is working.
-						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionDestroyBeforeCreate),
+						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -61,8 +60,7 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 				Config: testAccEventarcPipeline_unset(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						// TODO(tommyreddad): Replace with plancheck.ResourceActionUpdate once pipeline update API is working.
-						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionDestroyBeforeCreate),
+						plancheck.ExpectResourceAction("google_eventarc_pipeline.primary", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -78,6 +76,10 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 
 func testAccEventarcPipeline_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_pubsub_topic" "topic_update" {
+  name = "tf-test-topic2%{random_suffix}"
+}
+
 resource "google_eventarc_pipeline" "primary" {
   location        = "us-central1"
   pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
@@ -87,10 +89,7 @@ resource "google_eventarc_pipeline" "primary" {
     log_severity = "ALERT"
   }
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.1:80/route"
-      message_binding_template = "{\"headers\":{\"new-header-key2\": \"new-header-value2\"}}"
-    }
+    topic = google_pubsub_topic.topic_update.id
     network_config {
       network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
     }
@@ -101,11 +100,27 @@ resource "google_eventarc_pipeline" "primary" {
       }
     }
     output_payload_format {
-      json {}
+      protobuf {
+        schema_definition = <<-EOF
+syntax = "proto3";
+message schema {
+string name = 1;
+string severity = 2;
+}
+EOF
+      }
     }
   }
   input_payload_format {
-    json {}
+    protobuf {
+      schema_definition = <<-EOF
+syntax = "proto3";
+message schema {
+string name = 1;
+string severity = 2;
+}
+EOF
+    }
   }
   retry_policy {
     max_retry_delay = "55s"
@@ -129,13 +144,15 @@ EOF
 
 func testAccEventarcPipeline_unset(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_pubsub_topic" "topic_update" {
+  name = "tf-test-topic2%{random_suffix}"
+}
+
 resource "google_eventarc_pipeline" "primary" {
   location        = "us-central1"
   pipeline_id     = "tf-test-some-pipeline%{random_suffix}"
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.1:80/route"
-    }
+    topic = google_pubsub_topic.topic_update.id
     network_config {
       network_attachment = "projects/%{project_id}/regions/us-central1/networkAttachments/%{network_attachment_name}"
     }

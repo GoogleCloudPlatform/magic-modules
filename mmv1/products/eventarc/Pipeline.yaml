@@ -18,10 +18,6 @@ self_link: projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}
 create_url: projects/{{project}}/locations/{{location}}/pipelines?pipelineId={{pipeline_id}}
 update_verb: PATCH
 update_mask: true
-# TODO(tommyreddad): Although Pipeline does support an update API, its
-# implementation is currently bugged for use by Terraform. This "immutable"
-# field can be unset after that bug is fixed.
-immutable: true
 id_format: projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/pipelines/{{pipeline_id}}
