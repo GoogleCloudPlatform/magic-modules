@@ -6,14 +6,11 @@ description: |-
 
 # Write-only attributes in the Google Cloud provider
 
-Write-only attributes allow users to access and use data in their configurations without that data being stored in Terraform state.
+The Google Cloud provider has introduced new write-only attributes for a more secure way to manage data. The new `WriteOnly` attribute accepts values from configuration and will not be stored in plan or state providing an additional layer of security and control over data access.
 
-Write-only attributes are available in Terraform v1.11 and later. For more information, see the [official HashiCorp documentation for Write-only Attributes](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
+For more information, see the [official HashiCorp documentation for Write-only Attributes](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 
-To mark the launch of write-only attributes, the Google Cloud provider has added the following write-only attributes:
-- [`google_compute_disk: disk_encryption_key.raw_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk.html#raw_key_wo)
-- [`google_compute_disk: disk_encryption_key.rsa_encrypted_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_disk.html#rsa_encryption_key_wo)
-- [`google_compute_region_disk: disk_encryption_key.raw_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_disk.html#raw_key_wo)
+The Google Cloud provider has added the following write-only attributes:
 - [`google_sql_user: password_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user#password-1)
 - [`google_secret_manager_secret_version: secret_data_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_version#secret_data_wo)
 - [`google_bigquery_data_transfer_config: sensitive_params.secret_access_key_wo`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/bigquery_data_transfer_config#secret_access_key_wo)
@@ -26,46 +23,40 @@ The following sections show how to use the new write-only attributes in the Goog
 
 ### Applying a write-only attribute
 
-The following example shows how to apply a write-only attribute. All write-only attributes are marked with the `wo` suffix and can not be used with the `sensitive` attribute.
+The following example shows how to apply a write-only attribute. All write-only attributes are marked with the `wo` suffix and can not be used with the attribute that it's mirroring. For example, `secret_data_wo` can not be used with `secret_data`.
 
 ```hcl
-resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "secret-version"
-
-  labels = {
-    label = "my-label"
-  }
-
-  replication {
-    auto {}
+resource "google_sql_database_instance" "instance" {
+  name                = "main-instance"
+  region              = "us-central1"
+  database_version    = "MYSQL_5_7"
+  deletion_protection = false
+  settings {
+    tier = "db-f1-micro"
   }
 }
-
-
-resource "google_secret_manager_secret_version" "secret-version-basic" {
-  secret = google_secret_manager_secret.secret-basic.id
-  secret_data_wo = "secret-data"
-  secret_data_wo_version = 1
-  enabled = true
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "gmail.com"
+  password_wo = "test_password"
+  password_wo_version = 1
 }
 ```
 
 During `terraform plan` you will see that the write-only attribute is marked appropriately:
 
 ```
-  # google_secret_manager_secret_version.secret-version-basic will be created
-  + resource "google_secret_manager_secret_version" "secret-version-basic" {
-      + create_time            = (known after apply)
-      + deletion_policy        = "DELETE"
-      + destroy_time           = (known after apply)
-      + enabled                = true
-      + id                     = (known after apply)
-      + is_secret_data_base64  = false
-      + name                   = (known after apply)
-      + secret                 = (known after apply)
-      + secret_data_wo         = (write-only attribute)
-      + secret_data_wo_version = 1
-      + version                = (known after apply)
+  # google_sql_user.user1 will be created
+  + resource "google_sql_user" "user1" {
+      + host                    = "gmail.com"
+      + id                      = (known after apply)
+      + instance                = "main-instance"
+      + name                    = "admin"
+      + password_wo             = (write-only attribute)
+      + password_wo_version     = 1
+      + project                 = "hc-terraform-testing"
+      + sql_server_user_details = (known after apply)
     }
 ```
 
@@ -73,33 +64,28 @@ Upon `terrform apply` you will see in `terraform.tfstate` that the write-only at
 
 ```hcl
 ...
-    {
       "mode": "managed",
-      "type": "google_secret_manager_secret_version",
-      "name": "secret-version-basic",
+      "type": "google_sql_user",
+      "name": "user1",
       "provider": "provider[\"registry.terraform.io/hashicorp/google\"]",
       "instances": [
         {
-          "schema_version": 0,
+          "schema_version": 1,
           "attributes": {
-            "create_time": "2025-02-19T05:56:20.942452Z",
-            "deletion_policy": "DELETE",
-            "destroy_time": "",
-            "enabled": true,
-            "id": "projects/871647908372/secrets/secret-version/versions/1",
-            "is_secret_data_base64": false,
-            "name": "projects/871647908372/secrets/secret-version/versions/1",
-            "secret": "projects/hc-terraform-testing/secrets/secret-version",
-            "secret_data": null,
-            "secret_data_wo": null,
-            "secret_data_wo_version": 1,
+            "deletion_policy": null,
+            "host": "gmail.com",
+            "id": "admin/gmail.com/main-instance",
+            "instance": "main-instance",
+            "name": "admin",
+            "password": null,
+            "password_policy": [],
+            "password_wo": null, // write-only attribute is not stored in state
+            "password_wo_version": 1,
+            "project": "hc-terraform-testing",
+            "sql_server_user_details": [],
             "timeouts": null,
-            "version": "1"
+            "type": ""
           },
-          ...
-        }
-      ]
-    }
 ```
 
 Any value that is set for a write-only attribute is nulled out before the RPC response is sent to Terraform.
@@ -111,46 +97,30 @@ Since write-only attributes are not stored in the Terraform state, they cannot b
 In order to update a write-only attribute we must change the write-only attribute's version.
 
 ```hcl
-resource "google_secret_manager_secret" "secret-basic" {
-  secret_id = "secret-version"
-
-  labels = {
-    label = "my-label"
-  }
-
-  replication {
-    auto {}
-  }
-}
-
-
-resource "google_secret_manager_secret_version" "secret-version-basic" {
-  secret = google_secret_manager_secret.secret-basic.id
-  secret_data_wo = "new-secret-data"
-  secret_data_wo_version = 2
-  enabled = true
+resource "google_sql_user" "user1" {
+  name     = "admin"
+  instance = google_sql_database_instance.instance.name
+  host     = "gmail.com"
+  password_wo = "updated_password" // updated password
+  password_wo_version = 2 // updated version
 }
 ```
 
-A `terraform apply` of this configuration will allow you to update the write-only attribute as it will destroy and recreate the resource.
+A `terraform apply` of this configuration will allow you to update the write-only attribute despite the new value not being shown in the plan.
 
 ```hcl
-Terraform used the selected providers to generate the following execution plan. Resource actions
-are indicated with the following symbols:
--/+ destroy and then create replacement
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
 
 Terraform will perform the following actions:
 
-  # google_secret_manager_secret_version.secret-version-basic must be replaced
--/+ resource "google_secret_manager_secret_version" "secret-version-basic" {
-      ~ create_time            = "2025-02-19T05:56:20.942452Z" -> (known after apply)
-      + destroy_time           = (known after apply)
-      ~ id                     = "projects/871647908372/secrets/secret-version/versions/1" -> (known after apply)
-      ~ name                   = "projects/871647908372/secrets/secret-version/versions/1" -> (known after apply)
-      ~ secret_data_wo_version = 1 -> 2 # forces replacement
-      ~ version                = "1" -> (known after apply)
-        # (5 unchanged attributes hidden)
+  # google_sql_user.user1 will be updated in-place
+  ~ resource "google_sql_user" "user1" {
+        id                      = "admin/gmail.com/main-instance"
+        name                    = "admin"
+      ~ password_wo_version     = 1 -> 2
+        # (6 unchanged attributes hidden)
     }
 
-Plan: 1 to add, 0 to change, 1 to destroy.
+Plan: 0 to add, 1 to change, 0 to destroy.
 ```
