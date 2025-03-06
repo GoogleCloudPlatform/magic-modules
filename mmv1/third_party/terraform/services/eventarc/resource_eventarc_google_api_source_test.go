@@ -237,6 +237,7 @@ resource "google_kms_crypto_key" "key_update" {
 resource "google_project_service_identity" "eventarc_sa" {
   service    = "eventarc.googleapis.com"
   project    = google_project.project.project_id
+  depends_on = [google_project_service.eventarc]
 }
 
 resource "google_kms_crypto_key_iam_member" "eventarc_sa_keyuser" {
@@ -374,6 +375,7 @@ resource "google_kms_crypto_key" "key_update" {
 resource "google_project_service_identity" "eventarc_sa" {
   service    = "eventarc.googleapis.com"
   project    = google_project.project.project_id
+  depends_on = [google_project_service.eventarc]
 }
 
 resource "google_kms_crypto_key_iam_member" "eventarc_sa_keyuser" {
@@ -404,12 +406,14 @@ resource "google_project_service" "eventarc_update" {
 resource "google_project_service_identity" "eventarc_sa_update" {
   project    = google_project.project_update.project_id
   service    = "eventarc.googleapis.com"
+  depends_on = [google_project_service.eventarc_update]
 }
 
 resource "google_eventarc_message_bus" "message_bus_update" {
   location       = "%{region}"
   message_bus_id = "tf-test-messagebus2%{random_suffix}"
   project        = google_project.project_update.project_id
+  depends_on     = [google_project_service_identity.eventarc_sa_update]
 }
 
 resource "google_eventarc_google_api_source" "primary" {
@@ -417,6 +421,7 @@ resource "google_eventarc_google_api_source" "primary" {
   google_api_source_id = "tf-test-googleapisource%{random_suffix}"
   project              = google_project.project.project_id
   destination          = google_eventarc_message_bus.message_bus_update.id
+  depends_on           = [google_project_service_identity.eventarc_sa]
 }
 `, context)
 }
