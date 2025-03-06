@@ -81,5 +81,3 @@ properties:
     type: Bool
     description:
       'Set to true to make the MaterializedView protected against deletion.'
-    required: false
-    immutable: false
