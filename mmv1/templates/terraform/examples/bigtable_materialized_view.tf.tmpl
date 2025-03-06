@@ -19,7 +19,7 @@ resource "google_bigtable_table" "table" {
   }
 }
 
-resource "google_bigtable_materialized_view" "materialized_view" {
+resource "google_bigtable_materialized_view" "{{$.PrimaryResourceId}}" {
   name          = {{index $.Vars "materialized_view_name"}}
   instance_name = google_bigtable_instance.instance.id
   deletion_protection = false
