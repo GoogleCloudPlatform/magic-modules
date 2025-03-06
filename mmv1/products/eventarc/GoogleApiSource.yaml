@@ -43,8 +43,6 @@ examples:
     # We don't auto-generate tests since we can't support concurrent tests, as long as
     # only one GoogleApiSource and MessageBus is supported per project.
     exclude_test: true
-custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 parameters:
   - name: location
     type: String
