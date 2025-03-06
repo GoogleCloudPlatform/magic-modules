@@ -1,11 +1,11 @@
 resource "google_compute_network" "default" {
-  provider = google-beta
+  provider = google
   name                    = "{{index $.Vars "network_name"}}"
 }
 
 // Zonal NEG with GCE_VM_IP_PORT
 resource "google_compute_network_endpoint_group" "default" {
-  provider = google-beta
+  provider = google
   name                  = "{{index $.Vars "default_neg_name"}}"
   network               = google_compute_network.default.id
   default_port          = "90"
@@ -14,7 +14,7 @@ resource "google_compute_network_endpoint_group" "default" {
 }
 
 resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
+  provider = google
 
   region = "us-central1"
   name = "{{index $.Vars "region_backend_service_name"}}"
@@ -43,7 +43,7 @@ resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_health_check" "health_check" {
-  provider = google-beta
+  provider = google
   name               = "{{index $.Vars "health_check_name"}}"
   http_health_check {
     port = 80
