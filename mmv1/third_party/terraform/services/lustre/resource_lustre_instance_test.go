@@ -39,6 +39,14 @@ func TestAccLustreInstance_update(t *testing.T) {
 							"google_lustre_instance.description",
 							plancheck.ResourceActionUpdate,
 						),
+						plancheck.ExpectResourceAction(
+							"google_lustre_instance.labels",
+							plancheck.ResourceActionUpdate,
+						),
+						plancheck.ExpectResourceAction(
+							"google_lustre_instance.gke_support_enabled",
+							plancheck.ResourceActionUpdate,
+						),
 					},
 				},
 			},
@@ -159,7 +167,9 @@ func TestAccLustreInstanceBeta_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+    "network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-network"),
+		"subnetwork_name": acctest.BootstrapSubnet(t, "lustre-subnetwork", acctest.BootstrapSharedTestNetwork(t, "lustre-subnetwork")),
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -212,7 +222,7 @@ resource "google_lustre_instance" "instance" {
   location     = "us-central1-a"
   filesystem   = "testfs"
   capacity_gib = 18000
-  network      = "${data.google_project.project.id}/global/networks/default"
+  network      = data.google_compute_network.lustre-network.id
 	timeouts {
 		create = "180m"
 	}
@@ -225,19 +235,33 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
-  network       = "${data.google_project.project.id}/global/networks/default"
+  network       = data.google_compute_network.lustre-network.id
 }
 
 # Create a private connection
 resource "google_service_networking_connection" "default" {
   provider                = google-beta
-  network                 = "${data.google_project.project.id}/global/networks/default"
+  network                 = data.google_compute_network.lustre-network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 	update_on_creation_fail = true
 }
 
-data "google_project" "project" {
+// This example assumes this network already exists.
+// The API creates a tenant network per network authorized for a
+// Lustre instance and that network is not deleted when the user-created
+// network (authorized_network) is deleted, so this prevents issues
+// with tenant network quota.
+// If this network hasn't been created and you are using this example in your
+// config, add an additional network resource or change
+// this from "data"to "resource"
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+
+data "google_compute_subnetwork" "lustre-subnetwork" {
+  name   = "%{subnetwork_name}"
+  region = "us-central1"
 }
 `, context)
 }
@@ -251,7 +275,7 @@ resource "google_lustre_instance" "instance" {
   description  = "description updated"
   filesystem   = "testfs"
   capacity_gib = 18000
-  network      = "${data.google_project.project.id}/global/networks/default"
+  network      = data.google_compute_network.lustre-network.id
   labels       = {
     test = "newLabel"
   }
@@ -267,19 +291,33 @@ resource "google_compute_global_address" "private_ip_alloc" {
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
   prefix_length = 24
-  network       = "${data.google_project.project.id}/global/networks/default"
+  network       = data.google_compute_network.lustre-network.id
 }
 
 # Create a private connection
 resource "google_service_networking_connection" "default" {
   provider                = google-beta
-  network                 = "${data.google_project.project.id}/global/networks/default"
+  network                 = data.google_compute_network.lustre-network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 	update_on_creation_fail = true
 }
 
-data "google_project" "project" {
+// This example assumes this network already exists.
+// The API creates a tenant network per network authorized for a
+// Lustre instance and that network is not deleted when the user-created
+// network (authorized_network) is deleted, so this prevents issues
+// with tenant network quota.
+// If this network hasn't been created and you are using this example in your
+// config, add an additional network resource or change
+// this from "data"to "resource"
+data "google_compute_network" "lustre-network" {
+  name = "%{network_name}"
+}
+
+data "google_compute_subnetwork" "lustre-subnetwork" {
+  name   = "%{subnetwork_name}"
+  region = "us-central1"
 }
 `, context)
 }
