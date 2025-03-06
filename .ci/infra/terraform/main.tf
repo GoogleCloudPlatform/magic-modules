@@ -171,18 +171,21 @@ resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
+# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
 resource "google_organization_iam_member" "sa_org_osconfig_service_agent" {
   org_id = data.google_organization.org.org_id
   role    = "roles/osconfig.serviceAgent"
   member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
 }
 
+# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
 resource "google_organization_iam_member" "sa_org_osconfig_rollout_service_agent" {
   org_id = data.google_organization.org.org_id
   role    = "roles/osconfig.rolloutServiceAgent"
   member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
 }
 
+# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
 resource "google_organization_iam_member" "sa_org_progressiverollout_service_agent" {
   org_id = data.google_organization.org.org_id
   role    = "roles/progressiverollout.serviceAgent"
@@ -496,18 +499,21 @@ resource "google_project_iam_member" "colab_admin_permissions" {
   member  = "user:gterraformtestuser@gmail.com"
 }
 
+# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "osconfig_service_agent" {
   project = google_project.proj.project_id
   role    = "roles/osconfig.serviceAgent"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig.iam.gserviceaccount.com"
 }
 
+# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "osconfig_rollout_service_agent" {
   project = google_project.proj.project_id
   role    = "roles/osconfig.rolloutServiceAgent"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
 }
 
+# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
 resource "google_project_iam_member" "progressiverollout_service_agent" {
     project = google_project.proj.project_id
     role    = "roles/progressiverollout.serviceAgent"
