@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccBigtableMaterializedView_basic(t *testing.T) {
+func TestAccBigtableMaterializedView_deletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -23,7 +23,15 @@ func TestAccBigtableMaterializedView_basic(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableMaterializedView(instanceName, tableName, mvName),
+				Config: testAccBigtableMaterializedView_deletionProtection(instanceName, tableName, mvName, true),
+			},
+			{
+				ResourceName:      "google_bigtable_materialized_view.materialized_view",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBigtableMaterializedView_deletionProtection(instanceName, tableName, mvName, false),
 			},
 			{
 				ResourceName:      "google_bigtable_materialized_view.materialized_view",
@@ -34,7 +42,7 @@ func TestAccBigtableMaterializedView_basic(t *testing.T) {
 	})
 }
 
-func testAccBigtableMaterializedView(instanceName, tableName, mvName string) string {
+func testAccBigtableMaterializedView_deletionProtection(instanceName, tableName, mvName string, deletion_protection bool) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name          = "%s"
@@ -58,7 +66,7 @@ resource "google_bigtable_table" "table" {
 resource "google_bigtable_materialized_view" "materialized_view" {
   name          = "%s"
   instance_name = google_bigtable_instance.instance.id
-  deletion_protection = false
+  deletion_protection = %v
   query = <<EOT
 SELECT _key, CF 
 FROM %s
@@ -67,5 +75,5 @@ EOT
   depends_on = [
     google_bigtable_table.table
   ]
-`, instanceName, instanceName, tableName, mvName, tableName)
+`, instanceName, instanceName, tableName, mvName, deletion_protection, tableName)
 }
