@@ -116,7 +116,7 @@ resource "google_project_service" "eventarc_1" {
 }
 
 resource "time_sleep" "wait_enable_service_1" {
-  create_duration = "20s"
+  create_duration = "60s"
   depends_on      = [google_project_service.eventarc_1]
 }
 
@@ -145,7 +145,7 @@ resource "google_kms_crypto_key_iam_member" "eventarc_sa_keyuser_1" {
 }
 
 resource "time_sleep" "wait_create_sa_1" {
-  create_duration = "20s"
+  create_duration = "60s"
   depends_on      = [google_project_service_identity.eventarc_sa_1, google_kms_crypto_key_iam_member.eventarc_sa_keyuser_1]
 }
 
@@ -246,7 +246,7 @@ resource "google_kms_crypto_key_iam_member" "eventarc_sa_keyuser_2" {
 }
 
 resource "time_sleep" "wait_cmek_2" {
-  create_duration = "20s"
+  create_duration = "60s"
   depends_on      = [google_kms_crypto_key_iam_member.eventarc_sa_keyuser_2]
 }
 
@@ -271,7 +271,7 @@ resource "google_project_service" "eventarc_2" {
 }
 
 resource "time_sleep" "wait_enable_service_2" {
-  create_duration = "20s"
+  create_duration = "60s"
   depends_on      = [google_project_service.eventarc_2]
 }
 
@@ -282,7 +282,7 @@ resource "google_project_service_identity" "eventarc_sa_2" {
 }
 
 resource "time_sleep" "wait_create_sa_2" {
-  create_duration = "20s"
+  create_duration = "60s"
   depends_on      = [google_project_service_identity.eventarc_sa_2]
 }
 
