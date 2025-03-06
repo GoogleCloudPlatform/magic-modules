@@ -32,6 +32,7 @@ resource "google_tpu_v2_vm" "{{$.PrimaryResourceId}}" {
   
   scheduling_config {
     preemptible = true
+    spot = true
   }
 
   shielded_instance_config {
