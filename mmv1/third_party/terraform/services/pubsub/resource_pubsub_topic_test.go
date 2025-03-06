@@ -642,7 +642,7 @@ resource "google_pubsub_topic" "foo" {
 
 	message_transforms {
 		{
-			javascript_udf = {
+			javascript_udf {
 				function_name = %s,
 				code = %s
 			}
