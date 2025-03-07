@@ -544,10 +544,8 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	functionName1 := "filter_falsy"
-	functionName2 := "passthrough"
-	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
-	code2 := "function passthrough(message, metadata) {\n    return message\n}\n"
+	functionName := "filter_falsy"
+	code := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -556,7 +554,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Initial transform
 			{
-				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1),
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName, code),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -581,11 +579,11 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 			},
 			{
 				// Remove non-required field
-				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName1, code1),
+				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName, code),
 				Check: resource.ComposeTestCheckFunc(
 					// Test schema
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code),
 				),
 			},
 			{
