@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagebatchoperations_test
 
 import (
@@ -109,6 +111,27 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixObjectHold(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageBatchOperationsJobWithPrefixObjectHold(bucketName, jobID),
+			},
+			{
+				ResourceName:            "google_storage_batch_operations_job.job",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBatchOperationsJobs_jobWithPrefixObjectTemporaryHold(t *testing.T) {
+	t.Parallel()
+	bucketName := acctest.TestBucketName(t)
+	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBatchOperationsJobWithPrefixObjectTemporaryHold(bucketName, jobID),
 			},
 			{
 				ResourceName:            "google_storage_batch_operations_job.job",
@@ -279,6 +302,36 @@ resource "google_storage_batch_operations_job" "job" {
 	}
 	put_object_hold {
 		event_based_hold = "SET"
+		temporary_hold =  "SET"
+	}
+
+	delete_protection = false
+}
+`, bucketName, jobID)
+}
+
+func testAccStorageBatchOperationsJobWithPrefixObjectTemporaryHold(bucketName, jobID string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy = true
+}
+resource "google_storage_batch_operations_job" "job" {
+	job_id     = "%s"
+	location = "global"
+	bucket_list {
+		buckets  {
+			bucket = google_storage_bucket.bucket.name
+			prefix_list {
+				included_object_prefixes = [
+					"objprefix", "prefix2"
+				]
+			}
+		}
+	}
+	put_object_hold {
 		temporary_hold =  "SET"
 	}
 
