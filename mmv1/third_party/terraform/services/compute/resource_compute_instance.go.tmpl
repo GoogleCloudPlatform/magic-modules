@@ -3379,11 +3379,6 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		{{"}}"}}
 	}
 
-	//nil until set by the user not to cause any diffs and force a new VM
-	if d.Get("boot_disk.0.guest_os_features") == "" || d.Get("boot_disk.0.guest_os_features") == nil {
-		diskDetails.GuestOsFeatures = nil
-	}
-
 	if disk.DiskEncryptionKey != nil {
 		if disk.DiskEncryptionKey.Sha256 != "" {
 			result["disk_encryption_key_sha256"] = disk.DiskEncryptionKey.Sha256
