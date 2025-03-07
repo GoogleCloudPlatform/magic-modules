@@ -9,7 +9,7 @@ resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
     test = "value"
   }
 	timeouts {
-		create = "240m"
+		create = "10m"
 	}
 }
 
@@ -23,9 +23,4 @@ resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
 // this from "data"to "resource"
 data "google_compute_network" "lustre-network" {
   name = "{{index $.Vars "network_name"}}"
-}
-
-data "google_compute_subnetwork" "lustre-subnetwork" {
-  name   = "{{index $.Vars "subnetwork_name"}}"
-  region = "us-central1"
 }

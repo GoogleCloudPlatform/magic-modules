@@ -13,9 +13,8 @@ func TestAccLustreInstance_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-vpc"),
-		"subnetwork_name": acctest.BootstrapSubnet(t, "lustre-subnet", acctest.BootstrapSharedTestNetwork(t, "lustre-vpc")),
-		"random_suffix":   acctest.RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -69,7 +68,7 @@ resource "google_lustre_instance" "instance" {
   capacity_gib = 18000
   network      = data.google_compute_network.lustre-network.id
 	timeouts {
-		create = "240m"
+		create = "10m"
 	}
 }
 
@@ -83,11 +82,6 @@ resource "google_lustre_instance" "instance" {
 // this from "data"to "resource"
 data "google_compute_network" "lustre-network" {
   name = "%{network_name}"
-}
-
-data "google_compute_subnetwork" "lustre-subnetwork" {
-  name   = "%{subnetwork_name}"
-  region = "us-central1"
 }
 `, context)
 }
@@ -106,7 +100,7 @@ resource "google_lustre_instance" "instance" {
     test = "newLabel"
   }
 	timeouts {
-		create = "240m"
+		create = "10m"
   }
 }
 
@@ -120,11 +114,6 @@ resource "google_lustre_instance" "instance" {
 // this from "data"to "resource"
 data "google_compute_network" "lustre-network" {
   name = "%{network_name}"
-}
-
-data "google_compute_subnetwork" "lustre-subnetwork" {
-  name   = "%{subnetwork_name}"
-  region = "us-central1"
 }
 `, context)
 }
