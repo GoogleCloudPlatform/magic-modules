@@ -68,7 +68,7 @@ resource "google_lustre_instance" "instance" {
   capacity_gib = 18000
   network      = data.google_compute_network.lustre-network.id
 	timeouts {
-		create = "10m"
+		create = "120m"
 	}
 }
 
@@ -100,7 +100,7 @@ resource "google_lustre_instance" "instance" {
     test = "newLabel"
   }
 	timeouts {
-		create = "10m"
+		create = "120m"
   }
 }
 
