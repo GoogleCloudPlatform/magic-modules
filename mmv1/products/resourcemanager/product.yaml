@@ -17,5 +17,11 @@ display_name: 'Resource Manager'
 versions:
   - name: 'ga'
     base_url: 'https://cloudresourcemanager.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://cloudresourcemanager.googleapis.com/v3/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
+    base_url: '{{op_id}}'

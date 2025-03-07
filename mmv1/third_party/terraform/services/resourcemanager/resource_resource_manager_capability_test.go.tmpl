@@ -1,0 +1,46 @@
+package resourcemanager_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context),
+			},
+			{
+				ResourceName:      "google_resource_manager_capability.capability",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_resource_manager_capability" "capability" {
+  provider         = google-beta
+  value            = true
+  name             = "folders/395566339940/capabilities/app-management"
+}
+provider "google-beta" {
+  user_project_override = true
+  billing_project     = "test-vishessh-demo2"
+}
+`, context)
+}
