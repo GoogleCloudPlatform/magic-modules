@@ -272,4 +272,4 @@ properties:
         immutable: true
         description: 'set/unset to update temporary based hold for objects'
         validation:
-            function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
+          function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
