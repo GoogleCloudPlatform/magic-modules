@@ -64,13 +64,13 @@ resource "google_compute_router" "router" {
 resource "google_compute_router_route_policy" "rp-export" {
   router = google_compute_router.router.name
   region = google_compute_router.router.region
-	name = "tf-test-my-rp1%{random_suffix}"
-	type = "ROUTE_POLICY_TYPE_EXPORT"
-	terms {
+  name = "tf-test-my-rp1%{random_suffix}"
+  type = "ROUTE_POLICY_TYPE_EXPORT"
+  terms {
     priority = 1
     match {
       expression = "destination == '10.0.0.0/12'"
-	  }
+	}
     actions {
       expression = "accept()"
     }
@@ -102,13 +102,13 @@ resource "google_compute_router" "router" {
 resource "google_compute_router_route_policy" "rp-export" {
   router = google_compute_router.router.name
   region = google_compute_router.router.region
-	name = "tf-test-my-rp1%{random_suffix}"
-	type = "ROUTE_POLICY_TYPE_EXPORT"
-	terms {
+  name = "tf-test-my-rp1%{random_suffix}"
+  type = "ROUTE_POLICY_TYPE_EXPORT"
+  terms {
     priority = 2
     match {
       expression = "destination == '10.0.0.1/12'"
-	  }
+	}
     actions {
       expression = "accept()"
     }
@@ -174,12 +174,12 @@ resource "google_compute_router_route_policy" "rp-import" {
   name = "tf-test-my-rp2%{random_suffix}"
   router = google_compute_router.router.name
   region = google_compute_router.router.region
-	type = "ROUTE_POLICY_TYPE_IMPORT"
-	terms {
+  type = "ROUTE_POLICY_TYPE_IMPORT"
+  terms {
     priority = 2
     match {
       expression = "destination == '10.0.0.0/12'"
-	  }
+	}
     actions {
       expression = "accept()"
     }
@@ -212,12 +212,12 @@ resource "google_compute_router_route_policy" "rp-import" {
   name = "tf-test-my-rp2%{random_suffix}"
   router = google_compute_router.router.name
   region = google_compute_router.router.region
-	type = "ROUTE_POLICY_TYPE_IMPORT"
-	terms {
+  type = "ROUTE_POLICY_TYPE_IMPORT"
+  terms {
     priority = 3
     match {
       expression = "destination == '10.0.0.1/12'"
-	  }
+	}
     actions {
       expression = "accept()"
     }
