@@ -11,7 +11,7 @@ var (
 	fieldNameRegex      = regexp.MustCompile("[\\*|-]\\s+`([a-z0-9_\\./]+)`") // * `xxx`
 	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`)     // <a name="xxx">
 	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)      // #(nested_xxx)
-	horizontalLineRegex = regexp.MustCompile("- - -|-{4,}")                   // - - - or ----
+	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")                   // - - - or ---
 
 	sectionSeparator = "## "
 )
