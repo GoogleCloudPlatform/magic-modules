@@ -278,7 +278,8 @@ resource "google_storage_batch_operations_job" "job" {
 		}
 	}
 	put_object_hold {
-		event_based_hold= "SET"
+		event_based_hold = "SET"
+		temporary_hold =  "SET"
 	}
 
 	delete_protection = false
