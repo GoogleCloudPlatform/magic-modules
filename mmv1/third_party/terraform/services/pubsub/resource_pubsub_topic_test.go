@@ -630,13 +630,11 @@ resource "google_pubsub_topic" "foo" {
 	name = "%s"
 
 	message_transforms {
-		{
-			javascript_udf {
-				function_name = %s
-				code = %s
-			}
-			disabled = false
+		javascript_udf {
+			function_name = %s
+			code = %s
 		}
+		disabled = false
 	}
 }
 	`, topic, functionName, code)
