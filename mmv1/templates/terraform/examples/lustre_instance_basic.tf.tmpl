@@ -1,7 +1,7 @@
 resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
   instance_id  = "{{index $.Vars "name"}}"
   location     = "us-central1-a"
-  description  = "test instance"
+  description  = "test lustre instance"
   filesystem   = "testfs"
   capacity_gib = 18000
   network      = data.google_compute_network.lustre-network.id
@@ -9,7 +9,7 @@ resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
     test = "value"
   }
 	timeouts {
-		create = "120m"
+		create = "240m"
 	}
 }
 
