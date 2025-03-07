@@ -52,9 +52,18 @@ resource "google_logging_folder_settings" "example" {
   folder               = google_folder.my_folder.folder_id
   kms_key_name         = "%{original_key}"
   storage_location     = "us-central1"
-  depends_on           = [ google_kms_crypto_key_iam_member.iam ]
 }
 
+resource "google_folder" "my_folder" {
+  display_name = "tf-test-folder-%{random_suffix}"
+  parent       = "organizations/%{org_id}"
+  deletion_protection = false
+}
+`, context)
+}
+
+func testAccLoggingFolderSettings_onlyRequired(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_folder" "my_folder" {
   display_name = "tf-test-folder-%{random_suffix}"
   parent       = "organizations/%{org_id}"
@@ -70,19 +79,10 @@ resource "google_kms_crypto_key_iam_member" "iam" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
 }
-`, context)
-}
 
-func testAccLoggingFolderSettings_onlyRequired(context map[string]interface{}) string {
-	return acctest.Nprintf(`
 resource "google_logging_folder_settings" "example" {
-  folder = google_folder.my_folder.folder_id
-}
-
-resource "google_folder" "my_folder" {
-  display_name = "tf-test-folder-%{random_suffix}"
-  parent       = "organizations/%{org_id}"
-  deletion_protection = false
+  folder       = google_folder.my_folder.folder_id
+  depends_on   = [ google_kms_crypto_key_iam_member.iam ]
 }
 `, context)
 }
