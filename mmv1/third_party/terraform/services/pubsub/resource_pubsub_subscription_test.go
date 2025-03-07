@@ -605,14 +605,12 @@ resource "google_pubsub_topic" "foo" {
 resource "google_pubsub_subscription" "foo" {
   name  = "%s"
   topic = google_pubsub_topic.foo.id
-	message_transforms {
-		{
-			javascript_udf {
-				function_name = %s,
-				code = %s
-			}
-			disabled = true
-		}
+  message_transforms {
+    javascript_udf {
+      function_name = %s
+      code = %s
+    }
+    disabled = true
   }
 }
 `, topic, subscription, functionName, code)
@@ -628,12 +626,10 @@ resource "google_pubsub_subscription" "foo" {
   name  = "%s"
   topic = google_pubsub_topic.foo.id
 	message_transforms {
-		{
-			javascript_udf {
-				function_name = %s
-				code = %s
-			}
-		}
+    javascript_udf {
+      function_name = %s
+      code = %s
+    }
   }
 }
 `, topic, subscription, functionName, code)
