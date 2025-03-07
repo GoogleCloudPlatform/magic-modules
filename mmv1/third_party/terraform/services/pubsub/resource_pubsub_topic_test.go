@@ -588,8 +588,8 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
-	functionName := "filter_falsy"
-	code := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
+	functionName := "some_function_name"
+	code := "some_code_here"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
