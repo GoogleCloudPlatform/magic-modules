@@ -1,4 +1,3 @@
-
 # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +46,7 @@ examples:
       - 'delete_protection'
 custom_code:
    custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
-   custom_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'  
+   custom_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'
 virtual_fields:
   - name: 'delete_protection'
     description: |
@@ -92,7 +91,7 @@ parameters:
     type: String
     description: |
       State of the job.
-    output: true      
+    output: true 
 properties:
   - name: 'bucketList'
     type: NestedObject
@@ -122,8 +121,8 @@ properties:
             max_size: 1
             description: 'bucket on which operations performed'
             exactly_one_of:
-            - 'bucket_list.0.buckets.0.prefix_list'
-            - 'bucket_list.0.buckets.0.manifest'
+              - 'bucket_list.0.buckets.0.prefix_list'
+              - 'bucket_list.0.buckets.0.manifest'
             properties:
               - name: 'includedObjectPrefixes'
                 type: Array
@@ -136,8 +135,8 @@ properties:
             immutable: true
             required: false
             exactly_one_of:
-            - 'bucket_list.0.buckets.0.prefix_list'
-            - 'bucket_list.0.buckets.0.manifest'
+              - 'bucket_list.0.buckets.0.prefix_list'
+              - 'bucket_list.0.buckets.0.manifest'
             description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket'
             properties:
               - name: 'manifestLocation'
@@ -267,7 +266,7 @@ properties:
       immutable: true
       description: 'set/unset to update event based hold for objects'
       validation:
-        function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'  
+        function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
     - name: 'temporaryHold'
       type: TypeString
       immutable: true
