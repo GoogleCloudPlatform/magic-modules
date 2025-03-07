@@ -95,10 +95,16 @@ resource "google_project_service" "compute" {
   depends_on = [time_sleep.wait_create_project]
 }
 
+resource "google_project_service" "pubsub" {
+  project    = google_project.project.project_id
+  service    = "pubsub.googleapis.com"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_project_service" "eventarc" {
   project    = google_project.project.project_id
   service    = "eventarc.googleapis.com"
-  depends_on = [google_project_service.compute]
+  depends_on = [google_project_service.pubsub]
 }
 
 resource "time_sleep" "wait_enable_service" {
@@ -159,19 +165,27 @@ resource "google_compute_network_attachment" "psc" {
   ]
 }
 
+resource "time_sleep" "wait_create_na" {
+  create_duration = "60s"
+  depends_on      = [google_compute_network_attachment.psc]
+}
+
+resource "google_pubsub_topic" "pipeline_topic" {
+  name       = "tf-test-topic%{random_suffix}"
+  depends_on = [time_sleep.wait_enable_service]
+}
+
 resource "google_eventarc_pipeline" "pipeline" {
   location    = "%{region}"
   pipeline_id = "tf-test-pipeline%{random_suffix}"
   project     = google_project.project.project_id
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.0:80/route"
-    }
+    topic = google_pubsub_topic.pipeline_topic.id
     network_config {
       network_attachment = google_compute_network_attachment.psc.id
     }
   }
-  depends_on = [time_sleep.wait_create_sa]
+  depends_on = [time_sleep.wait_create_sa, time_sleep.wait_create_na]
 }
 
 resource "google_eventarc_message_bus" "message_bus" {
@@ -198,10 +212,16 @@ resource "google_project_service" "compute" {
   service    = "compute.googleapis.com"
 }
 
+resource "google_project_service" "pubsub" {
+  project    = google_project.project.project_id
+  service    = "pubsub.googleapis.com"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_project_service" "eventarc" {
   project    = google_project.project.project_id
   service    = "eventarc.googleapis.com"
-  depends_on = [google_project_service.compute]
+  depends_on = [google_project_service.pubsub]
 }
 
 resource "google_project_service_identity" "eventarc_sa" {
@@ -254,14 +274,17 @@ resource "google_compute_network_attachment" "psc" {
   ]
 }
 
+resource "google_pubsub_topic" "pipeline_topic" {
+  name       = "tf-test-topic%{random_suffix}"
+  depends_on = [google_project_service.pubsub]
+}
+
 resource "google_eventarc_pipeline" "pipeline" {
   location    = "%{region}"
   pipeline_id = "tf-test-pipeline%{random_suffix}"
   project     = google_project.project.project_id
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.0:80/route"
-    }
+    topic = google_pubsub_topic.pipeline_topic.id
     network_config {
       network_attachment = google_compute_network_attachment.psc.id
     }
@@ -269,14 +292,17 @@ resource "google_eventarc_pipeline" "pipeline" {
   depends_on = [google_project_service_identity.eventarc_sa]
 }
 
+resource "google_pubsub_topic" "pipeline_update_topic" {
+  name       = "tf-test-topic2%{random_suffix}"
+  depends_on = [google_project_service.pubsub]
+}
+
 resource "google_eventarc_pipeline" "pipeline_update" {
   location    = "%{region}"
   pipeline_id = "tf-test-pipeline2%{random_suffix}"
   project     = google_project.project.project_id
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.1:80/route"
-    }
+    topic = google_pubsub_topic.pipeline_update_topic.id
     network_config {
       network_attachment = google_compute_network_attachment.psc.id
     }
@@ -343,10 +369,16 @@ resource "google_project_service" "compute" {
   service    = "compute.googleapis.com"
 }
 
+resource "google_project_service" "pubsub" {
+  project    = google_project.project.project_id
+  service    = "pubsub.googleapis.com"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_project_service" "eventarc" {
   project    = google_project.project.project_id
   service    = "eventarc.googleapis.com"
-  depends_on = [google_project_service.compute]
+  depends_on = [google_project_service.pubsub]
 }
 
 resource "google_project_service_identity" "eventarc_sa" {
@@ -390,14 +422,17 @@ resource "google_compute_network_attachment" "psc" {
   ]
 }
 
+resource "google_pubsub_topic" "pipeline_update_topic" {
+  name       = "tf-test-topic2%{random_suffix}"
+  depends_on = [google_project_service.pubsub]
+}
+
 resource "google_eventarc_pipeline" "pipeline_update" {
   location    = "%{region}"
   pipeline_id = "tf-test-pipeline2%{random_suffix}"
   project     = google_project.project.project_id
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.1:80/route"
-    }
+    topic = google_pubsub_topic.pipeline_update_topic.id
     network_config {
       network_attachment = google_compute_network_attachment.psc.id
     }
