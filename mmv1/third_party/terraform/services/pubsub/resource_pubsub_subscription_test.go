@@ -630,7 +630,7 @@ resource "google_pubsub_subscription" "foo" {
 	message_transforms {
 		{
 			javascript_udf {
-				function_name = %s,
+				function_name = %s
 				code = %s
 			}
 		}
