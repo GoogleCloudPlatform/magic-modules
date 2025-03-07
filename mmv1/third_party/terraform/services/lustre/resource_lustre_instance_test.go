@@ -13,8 +13,8 @@ func TestAccLustreInstance_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-network"),
-		"subnetwork_name": acctest.BootstrapSubnet(t, "lustre-subnetwork", acctest.BootstrapSharedTestNetwork(t, "lustre-subnetwork")),
+		"network_name":    acctest.BootstrapSharedTestNetwork(t, "lustre-vpc"),
+		"subnetwork_name": acctest.BootstrapSubnet(t, "lustre-subnet", acctest.BootstrapSharedTestNetwork(t, "lustre-vpc")),
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -73,23 +73,6 @@ resource "google_lustre_instance" "instance" {
 	}
 }
 
-# Create an IP address
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "tf-test-my-ip-range%{random_suffix}"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 24
-  network       = data.google_compute_network.lustre-network.id
-}
-
-# Create a private connection
-resource "google_service_networking_connection" "default" {
-  network                 = data.google_compute_network.lustre-network.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-	update_on_creation_fail = true
-}
-
 // This example assumes this network already exists.
 // The API creates a tenant network per network authorized for a
 // Lustre instance and that network is not deleted when the user-created
@@ -125,23 +108,6 @@ resource "google_lustre_instance" "instance" {
 	timeouts {
 		create = "240m"
   }
-}
-
-# Create an IP address
-resource "google_compute_global_address" "private_ip_alloc" {
-  name          = "tf-test-my-ip-range%{random_suffix}"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 24
-  network       = data.google_compute_network.lustre-network.id
-}
-
-# Create a private connection
-resource "google_service_networking_connection" "default" {
-  network                 = data.google_compute_network.lustre-network.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-	update_on_creation_fail = true
 }
 
 // This example assumes this network already exists.

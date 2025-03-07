@@ -31,8 +31,8 @@ examples:
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "lustre-network")'
-      'subnetwork_name': 'acctest.BootstrapSubnet(t, "lustre-subnetwork", acctest.BootstrapSharedTestNetwork(t, "lustre-subnetwork"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "lustre-vpc")'
+      'subnetwork_name': 'acctest.BootstrapSubnet(t, "lustre-vpc", acctest.BootstrapSharedTestNetwork(t, "lustre-vpc"))'
 autogen_async: true
 async:
   operation:
