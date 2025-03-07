@@ -558,12 +558,12 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1),
 			},
-      {
-        ResourceName:      "google_pubsub_subscription.foo",
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
 				ImportStateVerify: true,
-      },
+			},
 			// Bare transform
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
