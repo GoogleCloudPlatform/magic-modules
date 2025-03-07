@@ -609,8 +609,9 @@ func schemaNodeConfig() *schema.Schema {
 								Description:  `Control the CPU management policy on the node.`,
 							},
 							"cpu_cfs_quota": {
-								Type:     schema.TypeBool,
-								Optional: true,
+								Type:        schema.TypeBool,
+								Optional:    true,
+								Default:     true,
 								Description: `Enable CPU CFS quota enforcement for containers that specify CPU limits.`,
 							},
 							"cpu_cfs_quota_period": {
