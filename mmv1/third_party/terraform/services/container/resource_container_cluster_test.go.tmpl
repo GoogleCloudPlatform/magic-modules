@@ -6311,7 +6311,7 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_basicWithMinGKEVersion(name, networkName, subnetworkName string, min_version string) string {
+func testAccContainerCluster_basicWithMinGKEVersion(name, networkName, subnetworkName string, minVersion string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -6323,7 +6323,7 @@ resource "google_container_cluster" "primary" {
 
   deletion_protection = false
 }
-`, name, networkName, subnetworkName, min_version)
+`, name, networkName, subnetworkName, minVersion)
 }
 
 func testAccContainerCluster_forSecretManagerConfig(projectID, name, networkName, subnetworkName string) string {
@@ -11019,7 +11019,7 @@ resource "google_container_cluster" "primary" {
 `, projectID, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string, min_version string) string {
+func testAccContainerCluster_withLoggingConfigEnabled(name, networkName, subnetworkName string, minVersion string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -11038,7 +11038,7 @@ resource "google_container_cluster" "primary" {
 `, name, networkName, subnetworkName)
 }
 
-func testAccContainerCluster_withLoggingConfigDisabled(name, networkName, subnetworkName string, min_version string) string {
+func testAccContainerCluster_withLoggingConfigDisabled(name, networkName, subnetworkName string, minVersion string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -11052,10 +11052,10 @@ resource "google_container_cluster" "primary" {
   subnetwork    = "%s"
   min_master_version = "%s"
 }
-`, name, networkName, subnetworkName, min_version)
+`, name, networkName, subnetworkName, minVersion)
 }
 
-func testAccContainerCluster_withLoggingConfigUpdated(name, networkName, subnetworkName string, min_version string) string {
+func testAccContainerCluster_withLoggingConfigUpdated(name, networkName, subnetworkName string, minVersion string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
   name               = "%s"
@@ -11072,10 +11072,10 @@ resource "google_container_cluster" "primary" {
   subnetwork    = "%s"
   min_master_version = "%s"
 }
-`, name, networkName, subnetworkName, min_version)
+`, name, networkName, subnetworkName, minVersion)
 }
 
-func testAccContainerCluster_withMonitoringConfigEnabled(name, networkName, subnetworkName string, min_version string) string {
+func testAccContainerCluster_withMonitoringConfigEnabled(name, networkName, subnetworkName string, minVersion string) string {
        return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
   location = "us-central1-a"
