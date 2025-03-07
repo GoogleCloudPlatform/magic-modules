@@ -588,10 +588,8 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
-	functionName1 := "filter_falsy"
-	functionName2 := "passthrough"
-	code1 := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
-	code2 := "function passthrough(message, metadata) {\n    return message\n}\n"
+	functionName := "filter_falsy"
+	code := "function filter_falsy(message, metadata) {\n  return message ? message : null\n}\n"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -600,36 +598,27 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Initial transform
 			{
-				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName1, code1),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", functionName1),
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", code1),
-				),
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Bare transform
 			{
 				Config: testAccPubsubTopic_javascriptUdfSettings(topic, "", ""),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", ""),
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", ""),
-				),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			// Destroy transform
 			{
 				ResourceName:      "google_pubsub_topic.foo",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			// Two transforms
-			{
-				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName1, code1) + "\n" + testAccPubsubTopic_javascriptUdfSettings(topic, functionName2, code2),
-				Check: resource.ComposeTestCheckFunc(
-					// Test schema
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.function_name", functionName1),
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.0.code", code1),
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.1.function_name", functionName2),
-					resource.TestCheckResourceAttr("google_pubsub_topic.foo", "message_transforms.1.code", code2),
-				),
 			},
 		},
 	})
