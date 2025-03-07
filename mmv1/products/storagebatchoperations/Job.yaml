@@ -45,8 +45,8 @@ examples:
     ignore_read_extra:
       - 'delete_protection'
 custom_code:
-   custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
-   custom_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'
 virtual_fields:
   - name: 'delete_protection'
     description: |
@@ -91,7 +91,7 @@ parameters:
     type: String
     description: |
       State of the job.
-    output: true 
+    output: true
 properties:
   - name: 'bucketList'
     type: NestedObject
@@ -100,49 +100,49 @@ properties:
     min_size: 1
     max_size: 1
     properties:
-    - name: 'buckets'
-      type: Array
-      min_size: 1
-      max_size: 1
-      description: contains object_prefix and bucket
-      immutable: true
-      item_type:
-        type: NestedObject
-        properties:
-          - name: 'bucket'
-            type: string
-            required: true
-            immutable: true
-            description: 'bucket on which operations performed'
-          - name: 'prefixList'
-            type: NestedObject
-            immutable: true
-            min_size: 1
-            max_size: 1
-            description: 'bucket on which operations performed'
-            exactly_one_of:
-              - 'bucket_list.0.buckets.0.prefix_list'
-              - 'bucket_list.0.buckets.0.manifest'
-            properties:
-              - name: 'includedObjectPrefixes'
-                type: Array
-                immutable: true
-                min_size: 1
-                item_type:
+      - name: 'buckets'
+        type: Array
+        min_size: 1
+        max_size: 1
+        description: contains object_prefix and bucket
+        immutable: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'bucket'
+              type: string
+              required: true
+              immutable: true
+              description: 'bucket on which operations performed'
+            - name: 'prefixList'
+              type: NestedObject
+              immutable: true
+              min_size: 1
+              max_size: 1
+              description: 'bucket on which operations performed'
+              exactly_one_of:
+                - 'bucket_list.0.buckets.0.prefix_list'
+                - 'bucket_list.0.buckets.0.manifest'
+              properties:
+                - name: 'includedObjectPrefixes'
+                  type: Array
+                  immutable: true
+                  min_size: 1
+                  item_type:
+                    type: String
+            - name: 'manifest'
+              type: NestedObject
+              immutable: true
+              required: false
+              exactly_one_of:
+                - 'bucket_list.0.buckets.0.prefix_list'
+                - 'bucket_list.0.buckets.0.manifest'
+              description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket'
+              properties:
+                - name: 'manifestLocation'
                   type: String
-          - name: 'manifest'
-            type: NestedObject
-            immutable: true
-            required: false
-            exactly_one_of:
-              - 'bucket_list.0.buckets.0.prefix_list'
-              - 'bucket_list.0.buckets.0.manifest'
-            description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket'
-            properties:
-              - name: 'manifestLocation'
-                type: String
-                immutable: true
-                description: 'list of objects to perform operations in csv format on storage bucket'
+                  immutable: true
+                  description: 'list of objects to perform operations in csv format on storage bucket'
   - name: 'deleteObject'
     type: NestedObject
     description: 'allows batch operations to delete objects in bucket'
@@ -261,15 +261,15 @@ properties:
       - 'rewrite_object'
       - 'put_object_hold'
     properties:
-    - name: 'eventBasedHold'
-      type: TypeString
-      immutable: true
-      description: 'set/unset to update event based hold for objects'
-      validation:
-        function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
-    - name: 'temporaryHold'
-      type: TypeString
-      immutable: true
-      description: 'set/unset to update temporary based hold for objects'
-      validation:
+      - name: 'eventBasedHold'
+        type: TypeString
+        immutable: true
+        description: 'set/unset to update event based hold for objects'
+        validation:
           function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
+      - name: 'temporaryHold'
+        type: TypeString
+        immutable: true
+        description: 'set/unset to update temporary based hold for objects'
+        validation:
+            function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
