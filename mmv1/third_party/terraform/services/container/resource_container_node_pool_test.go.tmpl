@@ -3333,11 +3333,12 @@ data "google_container_engine_versions" "central1a" {
 }
 
 resource "google_container_cluster" "cluster" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
-  networking_mode = "VPC_NATIVE"
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  min_master_version  = data.google_container_engine_versions.central1a.latest_master_version
+  deletion_protection = false
+  networking_mode     = "VPC_NATIVE"
   ip_allocation_policy {}
 }
 

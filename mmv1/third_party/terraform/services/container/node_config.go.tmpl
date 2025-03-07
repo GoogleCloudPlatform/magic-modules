@@ -710,6 +710,7 @@ func schemaNodeConfig() *schema.Schema {
 				"windows_node_config": {
 					Type:        schema.TypeList,
 					Optional:    true,
+					Computed:    true,
 					MaxItems:    1,
 					Description: `Parameters that can be configured on Windows nodes.`,
 					Elem: &schema.Resource{
