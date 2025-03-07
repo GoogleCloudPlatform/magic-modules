@@ -45,7 +45,13 @@ examples:
     primary_resource_id: 'example'
     vars:
       key_ring_name: 'my-keyring'
+      crypto_key_name: 'my-crypto-key'
+      crypto_key_version: 1'
       service_account_id: 'service-acc'
+    test_vars_overrides:
+      key_ring_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1").KeyRing.Name'
+      crypto_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name'
+      crypto_key_version: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKeyVersions[0].Name'
     skip_vcr: true
 parameters:
   - name: 'location'

@@ -1,19 +1,4 @@
-data "google_project" "test_project" {
-}
-
-resource "google_kms_key_ring" "keyring" {
-  name     = "{{index $.Vars "key_ring_name"}}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "cryptokey" {
-  name = "crypto-key-example"
-  key_ring = google_kms_key_ring.keyring.id
-  rotation_period = "7776000s"
-}
-
-resource "google_kms_crypto_key_version" "test_key" {
-  crypto_key = google_kms_crypto_key.cryptokey.id
+data "google_project" "default" {
 }
 
 resource "google_service_account" "service_account" {
@@ -27,9 +12,9 @@ resource "google_integrations_client" "{{$.PrimaryResourceId}}" {
   run_as_service_account = google_service_account.service_account.email
   cloud_kms_config {
     kms_location = "us-east1"
-    kms_ring = basename(google_kms_key_ring.keyring.id)
-    key = basename(google_kms_crypto_key.cryptokey.id)
-    key_version = basename(google_kms_crypto_key_version.test_key.id)
-    kms_project_id = data.google_project.test_project.project_id
+    kms_ring = basename("{{index $.Vars "key_ring_name"}}")
+    key = basename("{{index $.Vars "crypto_key_name"}}")
+    key_version = basename("{{index $.Vars "crypto_key_version"}}")
+    kms_project_id = data.google_project.default.project_id
   }
 }
