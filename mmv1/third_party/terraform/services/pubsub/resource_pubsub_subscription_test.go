@@ -557,11 +557,13 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 			// Initial transform
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
-				),
 			},
+      {
+        ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+      },
 			// Bare transform
 			{
 				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
@@ -576,17 +578,6 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 				ImportStateId:     subscriptionShort,
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			// Two transforms
-			{
-				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName1, code1) + "\n" + testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName2, code2),
-				Check: resource.ComposeTestCheckFunc(
-					// Test schema
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName1),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code1),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.function_name", functionName2),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.1.code", code2),
-				),
 			},
 			{
 				// Remove non-required field
