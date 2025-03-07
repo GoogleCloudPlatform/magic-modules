@@ -1,10 +1,12 @@
 resource "google_compute_subnetwork" "subnetwork-ip-collection" {
-  provider      = google-beta
-  name          = "{{index $.Vars "subnetwork_name"}}"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.custom-test.id
-  ip_collection = "{{index $.Vars "ip_collection_url"}}"
+  provider          = google-beta
+  name              = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range     = "10.2.0.0/16"
+  region            = "us-central1"
+  network           = google_compute_network.custom-test.id
+  ipv6_access_type  = "EXTERNAL"
+  stack_type        = "IPV4_IPV6"
+  ip_collection     = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
 }
 
 resource "google_compute_network" "custom-test" {

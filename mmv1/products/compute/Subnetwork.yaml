@@ -152,9 +152,6 @@ examples:
     vars:
       subnetwork_name: 'subnet-ip-collection'
       network_name: 'website-net'
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
-    test_vars_overrides:
-      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
 virtual_fields:
   - name: 'send_secondary_ip_range_if_empty'
     description: |

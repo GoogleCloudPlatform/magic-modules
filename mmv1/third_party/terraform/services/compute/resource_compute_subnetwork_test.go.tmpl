@@ -140,6 +140,14 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 				),
 			},
 			{
+				// Add a ip_collection and related fields
+				Config: testAccComputeSubnetwork_update4(cnName, "10.2.0.0/24", subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeSubnetworkExists(
+						t, "google_compute_subnetwork.network-with-private-google-access", &subnetwork),
+				),
+			},
+			{
 				ResourceName:      "google_compute_subnetwork.network-with-private-google-access",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -456,6 +464,31 @@ func TestAccComputeSubnetwork_internal_ipv6(t *testing.T) {
 	})
 }
 
+func TestAccComputeSubnetwork_subnetworkIpcollectionExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeSubnetwork_subnetworkIpcollectionExample(context),
+			},
+			{
+				ResourceName:            "google_compute_subnetwork.subnetwork-ip-collection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"network", "region", "reserved_internal_range"},
+			},
+		},
+	})
+}
+
 func testAccCheckComputeSubnetworkExists(t *testing.T, n string, subnetwork *compute.Subnetwork) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -597,6 +630,31 @@ resource "google_compute_subnetwork" "network-with-private-google-access" {
     range_name    = "tf-test-secondary-range-update"
     ip_cidr_range = "192.168.10.0/24"
   }
+}
+`, cnName, subnetworkName, cidrRange)
+}
+
+func testAccComputeSubnetwork_update4(cnName, cidrRange, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "custom-test" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "network-with-private-google-access" {
+  name          = "%s"
+  ip_cidr_range = "%s"
+  region        = "us-central1"
+  network       = google_compute_network.custom-test.self_link
+
+  secondary_ip_range {
+    range_name    = "tf-test-secondary-range-update"
+    ip_cidr_range = "192.168.10.0/24"
+  }
+
+  ipv6_access_type = "EXTERNAL"
+  stack_type    = "IPV4_IPV6"
+  ip_collection = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
 }
 `, cnName, subnetworkName, cidrRange)
 }
@@ -955,4 +1013,25 @@ resource "google_compute_subnetwork" "subnetwork" {
   ipv6_access_type = "INTERNAL"
 }
 `, cnName, subnetworkName)
+}
+
+func testAccComputeSubnetwork_subnetworkIpcollectionExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_subnetwork" "subnetwork-ip-collection" {
+  provider      = google-beta
+  name          = "tf-test-subnet-ip-collection%{random_suffix}"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.custom-test.id
+  ipv6_access_type = "EXTERNAL"
+  stack_type    = "IPV4_IPV6"
+  ip_collection = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
+}
+
+resource "google_compute_network" "custom-test" {
+  provider                = google-beta
+  name                    = "tf-test-website-net%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
 }
