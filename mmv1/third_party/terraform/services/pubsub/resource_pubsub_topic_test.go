@@ -632,7 +632,7 @@ resource "google_pubsub_topic" "foo" {
 	message_transforms {
 		{
 			javascript_udf {
-				function_name = %s,
+				function_name = %s
 				code = %s
 			}
 			disabled = false
