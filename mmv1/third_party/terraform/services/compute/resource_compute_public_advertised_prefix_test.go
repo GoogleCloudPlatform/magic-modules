@@ -214,9 +214,8 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
 
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest(t *testing.T) {
 	context := map[string]interface{}{
-		"ip_cidr_range":  fmt.Sprintf("2600:1901:4500:%d00::/56", acctest.RandIntRange(t, 0, 99)),
-		"parent_pdp_url": "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-delegation-mode-sub-pdp",
-		"random_suffix":  acctest.RandString(t, 10),
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -239,13 +238,30 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest
 
 func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name = "tf-test-ipv6-pap%{random_suffix}"
+  description = "%{description}"
+  dns_verification_ip = "2001:db8::"
+  ip_cidr_range = "2001:db8::/32"
+  pdp_scope = "REGIONAL"
+}
+
 resource "google_compute_public_delegated_prefix" "prefix" {
-  name                      = "tf-test-byoipv6-subnet-mode-pdp%{random_suffix}"
-  description               = "test-subnet-mode-pdp"
-  region                    = "us-central1"
-  mode                      = "EXTERNAL_IPV6_SUBNETWORK_CREATION"
-  ip_cidr_range             = "%{ip_cidr_range}"
-  parent_prefix             = "%{parent_pdp_url}"
+  name = "tf-test-root-pdp%{random_suffix}"
+  description = "test-delegation-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/40"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+  mode = "DELEGATION"
+}
+
+resource "google_compute_public_delegated_prefix" "subprefix" {
+  name = "tf-test-sub-pdp%{random_suffix}"
+  description = "test-subnet-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/48"
+  parent_prefix = google_compute_public_delegated_prefix.prefix.id
+  mode = "EXTERNAL_IPV6_SUBNETWORK_CREATION"
 }
 `, context)
 }

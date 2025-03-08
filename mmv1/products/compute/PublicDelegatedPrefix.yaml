@@ -39,6 +39,7 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-west1"
+    - region: "us-east1"
 examples:
   - name: 'public_delegated_prefixes_basic'
     primary_resource_id: 'prefixes'
@@ -60,14 +61,12 @@ examples:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
   - name: 'public_delegated_prefix_ipv6_subnet_mode'
-    primary_resource_id: 'prefix'
     vars:
-      pdp_name: 'byoipv6-subnet-mode-pdp'
-      ip_cidr_range: '"2600:1901:4500::/56"'
-      parent_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-delegation-mode-sub-pdp"'
-    test_vars_overrides:
-      ip_cidr_range: 'fmt.Sprintf("2600:1901:4500:%d00::/56", acctest.RandIntRange(t, 0, 99))'
-      parent_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-delegation-mode-sub-pdp"'
+      pap_name: "ipv6-pap"
+      root_pdp_name: "ipv6-root-pdp"
+      sub_pdp_name: "ipv6-sub-pdp"
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
