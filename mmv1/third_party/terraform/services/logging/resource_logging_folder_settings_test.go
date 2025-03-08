@@ -13,7 +13,7 @@ func TestAccLoggingFolderSettings_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
 		"random_suffix": acctest.RandString(t, 10),
 		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"updated_key":   acctest.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name,
@@ -70,14 +70,14 @@ resource "google_folder" "my_folder" {
   deletion_protection = false
 }
 
-data "google_logging_folder_settings" "settings" {
-  folder = google_folder.my_folder.folder_id
+data "google_logging_organization_settings" "settings" {
+  organization = "%{org_id}"
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
   crypto_key_id = "%{original_key}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
+  member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
 }
 
 resource "google_logging_folder_settings" "example" {
