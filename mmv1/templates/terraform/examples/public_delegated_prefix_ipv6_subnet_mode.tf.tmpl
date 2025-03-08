@@ -1,0 +1,8 @@
+resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
+  name                      = "{{index $.Vars "pdp_name"}}"
+  description               = "test-subnet-mode-pdp"
+  region                    = "us-central1"
+  mode                      = "EXTERNAL_IPV6_SUBNETWORK_CREATION"
+  ip_cidr_range             = "{{index $.Vars "ip_cidr_range"}}"
+  parent_prefix             = "{{index $.Vars "parent_pdp_url"}}"
+}
