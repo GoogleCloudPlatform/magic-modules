@@ -5,6 +5,7 @@ import (
 
     sdk_schema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+    "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
     "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/ephemeral"
@@ -21,7 +22,7 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/version"
+    "github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
     {{- end }}
@@ -82,6 +83,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Validators: []validator.String{
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("access_token"),
+                        path.MatchRoot("external_credentials_hcp_terraform"),
                     }...),
                     fwvalidators.CredentialsValidator(),
                     fwvalidators.NonEmptyStringValidator(),
@@ -92,6 +94,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Validators: []validator.String{
                     stringvalidator.ConflictsWith(path.Expressions{
                         path.MatchRoot("credentials"),
+                        path.MatchRoot("external_credentials_hcp_terraform"),
                     }...),
                     fwvalidators.NonEmptyStringValidator(),
                 },
@@ -252,6 +255,36 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                     },
                 },
             },
+            "external_credentials_hcp_terraform": schema.ListNestedBlock{
+                Validators: []validator.List{
+                    listvalidator.ConflictsWith(path.Expressions{
+                        path.MatchRoot("access_token"),
+                        path.MatchRoot("credentials"),
+                    }...),
+                },
+                NestedObject: schema.NestedBlockObject{
+                    Attributes: map[string]schema.Attribute{
+                        "audience": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                NonEmptyStringValidator(),
+                            },
+                        },
+                        "service_account_email": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                NonEmptyStringValidator(),
+                            },
+                        },
+                        "identity_token": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                NonEmptyStringValidator(),
+                            },
+                        },
+                    },
+                },
+            },
         },
     }
 
@@ -271,14 +304,13 @@ func (p *FrameworkProvider) Configure(ctx context.Context, req provider.Configur
         return
     }
 
-	// Configuration values are now available.
+    // Configuration values are now available.
     // However we don't use them; for the plugin-framework implementation of the provider
-	// we take the configuration values from the SDK implementation of the provider. This avoids duplicated logic and inconsistencies in implementation.
-	// The trade off is that we don't benefit from the new type system that differentiates Null and Unknown values, which is especially useful for strings.
-	// This makes it necessary to write code that stops empty strings (etc) being passed from the Config struct to PF-implemented resources/datasources.
-	//    E.g. GetProjectFramework treats Null and "" the same way : https://github.com/hashicorp/terraform-provider-google/blob/74c815ee4ad059453e06b84448af244d80490ec1/google/fwresource/field_helpers.go#L21-L36
-	//    See also, new approaches to handle this: https://github.com/GoogleCloudPlatform/magic-modules/pull/11925
-
+    // we take the configuration values from the SDK implementation of the provider. This avoids duplicated logic and inconsistencies in implementation.
+    // The trade off is that we don't benefit from the new type system that differentiates Null and Unknown values, which is especially useful for strings.
+    // This makes it necessary to write code that stops empty strings (etc) being passed from the Config struct to PF-implemented resources/datasources.
+    //    E.g. GetProjectFramework treats Null and "" the same way : https://github.com/hashicorp/terraform-provider-google/blob/74c815ee4ad059453e06b84448af244d80490ec1/google/fwresource/field_helpers.go#L21-L36
+    //    See also, new approaches to handle this: https://github.com/GoogleCloudPlatform/magic-modules/pull/11925
 
 	// This is how we make provider configuration info (configured clients, default project, etc) available to resources and data sources
 	// implemented using the plugin-framework. The resources' Configure functions receive this data in the ConfigureRequest argument.
@@ -304,19 +336,19 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
 
 // Resources defines the resources implemented in the provider.
 func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+    return nil
 }
 
 // Functions defines the provider functions implemented in the provider.
 func (p *FrameworkProvider) Functions(_ context.Context) []func() function.Function {
-	return []func() function.Function{
-		functions.NewLocationFromIdFunction,
-		functions.NewNameFromIdFunction,
-		functions.NewProjectFromIdFunction,
-		functions.NewRegionFromIdFunction,
-		functions.NewRegionFromZoneFunction,
-		functions.NewZoneFromIdFunction,
-	}
+    return []func() function.Function{
+        functions.NewLocationFromIdFunction,
+        functions.NewNameFromIdFunction,
+        functions.NewProjectFromIdFunction,
+        functions.NewRegionFromIdFunction,
+        functions.NewRegionFromZoneFunction,
+        functions.NewZoneFromIdFunction,
+    }
 }
 
 // EphemeralResources defines the resources that are of ephemeral type implemented in the provider.
