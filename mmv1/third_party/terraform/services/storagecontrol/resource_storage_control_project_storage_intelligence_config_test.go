@@ -33,13 +33,9 @@ func TestAccStorageControlProjectIntelligenceConfig_update(t *testing.T) {
 				Config: testAccStorageControlProjectIntelligenceConfig_update_with_filter(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.cloud_storage_buckets.0.bucket_id", "random-test1"),
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.bucket_id_regexes.0", "random-test-*"),
 					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.cloud_storage_buckets.1.bucket_id_regex", "random-test-*"),
-					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.cloud_storage_buckets.2.bucket_id", "random-test2"),
-					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.cloud_storage_buckets.3.bucket_id_regex", "random-test2-*"),
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.0.bucket_id_regexes.1", "random-test2-*"),
 					resource.TestCheckResourceAttr(
 						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_locations.0.locations.0", "us-east-1"),
 					resource.TestCheckResourceAttr(
@@ -56,13 +52,9 @@ func TestAccStorageControlProjectIntelligenceConfig_update(t *testing.T) {
 				Config: testAccStorageControlProjectIntelligenceConfig_update_with_filter2(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.cloud_storage_buckets.0.bucket_id", "random-test1"),
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.bucket_id_regexes.0", "random-test-*"),
 					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.cloud_storage_buckets.1.bucket_id_regex", "random-test-*"),
-					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.cloud_storage_buckets.2.bucket_id", "random-test2"),
-					resource.TestCheckResourceAttr(
-						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.cloud_storage_buckets.3.bucket_id_regex", "random-test2-*"),
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_buckets.0.bucket_id_regexes.1", "random-test2-*"),
 					resource.TestCheckResourceAttr(
 						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_locations.0.locations.0", "us-east-1"),
 					resource.TestCheckResourceAttr(
@@ -121,18 +113,7 @@ resource "google_storage_control_project_intelligence_config" "project_storage_i
   edition_config = "STANDARD"
   filter {
     excluded_cloud_storage_buckets{
-      cloud_storage_buckets {
-        bucket_id = "random-test1"
-      }
-      cloud_storage_buckets {
-        bucket_id_regex = "random-test-*"
-      }
-			cloud_storage_buckets {
-        bucket_id = "random-test2"
-      }
-      cloud_storage_buckets {
-        bucket_id_regex = "random-test2-*"
-      }
+			bucket_id_regexes = ["random-test-*", "random-test2-*"]
     }
     included_cloud_storage_locations{
       locations = ["us-east-1", "us-east-2"]
@@ -149,18 +130,7 @@ resource "google_storage_control_project_intelligence_config" "project_storage_i
   edition_config = "STANDARD"
   filter {
     included_cloud_storage_buckets{
-      cloud_storage_buckets {
-        bucket_id = "random-test1"
-      }
-      cloud_storage_buckets {
-        bucket_id_regex = "random-test-*"
-      }
-			cloud_storage_buckets {
-        bucket_id = "random-test2"
-      }
-      cloud_storage_buckets {
-        bucket_id_regex = "random-test2-*"
-      }
+			bucket_id_regexes = ["random-test-*", "random-test2-*"]
     }
     excluded_cloud_storage_locations{
       locations = ["us-east-1", "us-east-2"]

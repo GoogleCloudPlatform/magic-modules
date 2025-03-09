@@ -40,14 +40,14 @@ docs:
 # URL for the resource's standard Get method. https://google.aip.dev/131
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-self_link: 'projects/{{name}}/locations/global/managementHub'
+self_link: 'projects/{{name}}/locations/global/intelligenceConfig'
 
 # URL for the resource's standard Create method, including query parameters.
 # https://google.aip.dev/133
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
 custom_code:
-  custom_create: templates/terraform/custom_create/storage_project_intelligence.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl
 # Overrides the URL for the resource's standard Update method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/134
 # Terraform field names enclosed in double curly braces are replaced with
@@ -62,7 +62,7 @@ update_mask: true
 exclude_delete: true
 
 import_format:
-  - 'projects/{{name}}/locations/global/managementHub'
+  - 'projects/{{name}}/locations/global/intelligenceConfig'
 
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
@@ -110,24 +110,14 @@ properties:
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
         properties:
-          - name: cloudStorageBuckets
+          - name: bucketIdRegexes
             required: true
             type: Array
             item_type:
-              type: NestedObject
-              properties:
-                - name: bucketId
-                  type: String
-                  description: |
-                    Id of the bucket.
-                    Only one of the bucket_id and bucket_id_regex should be
-                    specified.
-                - name: bucketIdRegex
-                  type: String
-                  description: |
-                    ID regex of the bucket.
-                    Only one of the bucket_id and bucket_id_regex should be
-                    specified.
+              type: String
+            description: |
+              List of bucket id regexes to exclude in the storage intelligence
+              plan.
       - name: includedCloudStorageBuckets
         type: NestedObject
         required: false
@@ -141,26 +131,14 @@ properties:
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
         properties:
-          - name: cloudStorageBuckets
+          - name: bucketIdRegexes
             required: true
             type: Array
             item_type:
-              type: NestedObject
-              properties:
-                - name: bucketId
-                  type: String
-                  required: false
-                  description: |
-                    Id of the bucket.
-                    Only one of the bucket_id and bucket_id_regex should be
-                    specified.
-                - name: bucketIdRegex
-                  type: String
-                  required: false
-                  description: |
-                    ID regex of the bucket.
-                    Only one of the bucket_id and bucket_id_regex should be
-                    specified.
+              type: String
+            description: |
+              List of bucket id regexes to exclude in the storage intelligence
+              plan.
       - name: excludedCloudStorageLocations
         type: NestedObject
         required: false
