@@ -122,7 +122,6 @@ examples:
       backend_service_name: 'backend-service'
   - name: 'backend_service_custom_metrics'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       default_neg_name: 'network-endpoint'
