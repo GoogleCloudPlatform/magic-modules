@@ -21,9 +21,11 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+    
 	"github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
     {{- end }}
 
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -295,6 +297,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
         resourcemanager.NewGoogleClientConfigDataSource,
         resourcemanager.NewGoogleClientOpenIDUserinfoDataSource,
         {{- if ne $.TargetVersionName "ga" }}
+        compute.NewComputeNetworkFWDataSource,
         firebase.NewGoogleFirebaseAndroidAppConfigDataSource,
         firebase.NewGoogleFirebaseAppleAppConfigDataSource,
         firebase.NewGoogleFirebaseWebAppConfigDataSource,
