@@ -38,7 +38,7 @@ var (
 // on the left in
 var ImageMap = map[string]string{
 	"centos":      "centos-cloud",
-	"coreos":      "coreos-cloud",
+	"coreos":      "fedora-coreos-cloud",
 	"debian":      "debian-cloud",
 	"opensuse":    "opensuse-cloud",
 	"rhel":        "rhel-cloud",
