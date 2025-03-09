@@ -18,12 +18,12 @@
 		obj["filter"] = filterProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}StorageControlBasePath{{"}}"}}projects/{{"{{"}}name{{"}}"}}/locations/global/managementHub")
+	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}StorageControlBasePath{{"}}"}}projects/{{"{{"}}name{{"}}"}}/locations/global/intelligenceConfig")
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Patching ManagementHub: %#v", obj)
+	log.Printf("[DEBUG] Patching IntelligenceConfig: %#v", obj)
 	billingProject := ""
 
 	// err == nil indicates that the billing_project value was found
@@ -55,16 +55,16 @@
 		Headers:   headers,
 	})
 	if err != nil {
-		return fmt.Errorf("Error patching ManagementHub: %s", err)
+		return fmt.Errorf("Error patching IntelligenceConfig: %s", err)
 	}
 
 	// Store the ID now
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}name{{"}}"}}/locations/global/managementHub")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}name{{"}}"}}/locations/global/intelligenceConfig")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
-	log.Printf("[DEBUG] Finished patching ManagementHub %q: %#v", d.Id(), res)
+	log.Printf("[DEBUG] Finished patching intelligence config %q: %#v", d.Id(), res)
 
 	return resourceStorageControlProjectIntelligenceConfigRead(d, meta)
