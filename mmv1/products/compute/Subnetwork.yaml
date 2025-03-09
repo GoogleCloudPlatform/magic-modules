@@ -140,6 +140,15 @@ examples:
     vars:
       subnetwork_name: 'subnet-ipv6-only'
       network_name: 'network-ipv6-only'
+  - name: 'subnetwork_with_subnet_mode_pdp'
+    primary_resource_id: 'subnetwork-with-subnet-mode-pdp'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-mode-pdp-subnet'
+      network_name: 'network-byoipv6-external'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -235,8 +244,11 @@ properties:
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE`.
-    immutable: true
     default_from_api: true
+    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'purpose'
+    fingerprint_name: 'fingerprint'
   - name: 'role'
     type: Enum
     description: |
@@ -454,6 +466,31 @@ properties:
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
     default_from_api: true
+  - name: 'ipCollection'
+    type: String
+    ignore_read: true
+    description: |
+      Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
+      in EXTERNAL_IPV6_SUBNETWORK_CREATION mode.
+      Use one of the following formats to specify a sub-PDP when creating an
+      IPv6 NetLB forwarding rule using BYOIP:
+      Full resource URL, as in:
+        * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
+      Partial URL, as in:
+        * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
+        * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
+  - name: 'ipv6GceEndpoint'
+    type: Enum
+    description: |
+      Possible endpoints of this subnetwork. It can be one of the following:
+        * VM_ONLY: The subnetwork can be used for creating instances and IPv6 addresses with VM endpoint type. Such a subnetwork
+        gets external IPv6 ranges from a public delegated prefix and cannot be used to create NetLb.
+        * VM_AND_FR: The subnetwork can be used for creating both VM instances and Forwarding Rules. It can also be used to reserve
+        IPv6 addresses with both VM and FR endpoint types. Such a subnetwork gets its IPv6 range from Google IP Pool directly.
+    output: true
+    enum_values:
+      - 'VM_AND_FR'
+      - 'VM_ONLY'
   - name: 'allowSubnetCidrRoutesOverlap'
     type: Boolean
     description: |
