@@ -169,7 +169,6 @@ properties:
         type: String
         description: |
           Password for the Oracle connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
       - name: 'secret_manager_stored_password'
@@ -238,7 +237,6 @@ properties:
         type: String
         description: |
           Password for the MySQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
       - name: 'secret_manager_stored_password'
@@ -340,7 +338,6 @@ properties:
         type: String
         description: |
           Password for the PostgreSQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
       - name: 'secret_manager_stored_password'
@@ -451,7 +448,6 @@ properties:
         type: String
         description: |
           Password for the SQL Server connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
       - name: 'secret_manager_stored_password'
