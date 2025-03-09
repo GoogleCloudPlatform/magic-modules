@@ -166,6 +166,10 @@ properties:
         required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
+      - name: 'secret_manager_stored_password'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'databaseService'
         type: String
         description: |
@@ -229,6 +233,10 @@ properties:
         required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
+      - name: 'secret_manager_stored_password'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'sslConfig'
         type: NestedObject
         description: |
@@ -325,6 +333,10 @@ properties:
         required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+      - name: 'secret_manager_stored_password'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
@@ -364,6 +376,10 @@ properties:
         required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+      - name: 'secret_manager_stored_password'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
