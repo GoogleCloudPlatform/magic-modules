@@ -71,4 +71,3 @@ properties:
     description:
       'The logical view''s select query.'
     required: true
-    immutable: true
