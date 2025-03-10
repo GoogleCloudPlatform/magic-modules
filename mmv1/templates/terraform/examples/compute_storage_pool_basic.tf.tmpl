@@ -1,0 +1,13 @@
+resource "google_compute_storage_pool" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "storage_pool_name"}}"
+
+  pool_provisioned_capacity_gb = "10240"
+
+  pool_provisioned_throughput = 100
+
+  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+
+  deletion_protection = false
+}
+
+data "google_project" "project" {}
