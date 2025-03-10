@@ -1495,11 +1495,10 @@ properties:
           subjectAltNames.
         item_type:
           type: NestedObject
-          
           properties:
             - name: 'dnsName'
               type: String
-              desctiption: The SAN specified as a DNS Name.
+              description: The SAN specified as a DNS Name.
               exactly_one_of:
                 - tlsSettings.0.uniform_resource_identifier
                 - tlsSettings.0.dns_name
