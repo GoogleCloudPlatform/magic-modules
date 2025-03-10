@@ -34,6 +34,7 @@ var ccRequiredEnvironmentVariables = [...]string{
 
 var ccOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 var checkCassettesCmd = &cobra.Command{

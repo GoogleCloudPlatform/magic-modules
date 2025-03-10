@@ -43,6 +43,9 @@ async:
 collection_url_key: 'items'
 custom_code:
   post_create: 'templates/terraform/post_create/compute_target_instance_security_policy.go.tmpl'
+sweeper:
+  url_substitutions:
+    - zone: "southamerica-west1-a"
 examples:
   - name: 'target_instance_basic'
     primary_resource_id: 'default'

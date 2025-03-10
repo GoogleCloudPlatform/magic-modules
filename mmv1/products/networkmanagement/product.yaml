@@ -13,7 +13,7 @@
 
 ---
 name: 'NetworkManagement'
-display_name: 'NetworkManagement'
+display_name: 'Network Management'
 versions:
   - name: 'ga'
     base_url: 'https://networkmanagement.googleapis.com/v1/'

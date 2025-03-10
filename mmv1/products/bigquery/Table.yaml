@@ -270,6 +270,28 @@ properties:
                 - 'TIME'
                 - 'DATETIME'
                 - 'RECORD'
+                - 'FOREIGN'
+            - name: 'foreignTypeDefinition'
+              type: String
+              description: |
+                Definition of the foreign data type.
+                Only valid for top-level schema fields (not nested fields).
+                If the type is FOREIGN, this field is required.
+              min_version: beta
+  - name: 'schemaForeignTypeInfo'
+    type: NestedObject
+    description: |
+      Specifies metadata of the foreign data type definition in field schema.
+    min_version: beta
+    properties:
+      - name: 'typeSystem'
+        type: Enum
+        description: |
+          The foreign type of the table.
+        required: true
+        enum_values:
+          - 'HIVE'
+        min_version: beta
   - name: 'encryptionConfiguration'
     type: NestedObject
     description: Custom encryption configuration
@@ -549,7 +571,8 @@ properties:
       The tags attached to this table. Tag keys are globally unique. Tag key is expected to be
       in the namespaced format, for example "123456789012/environment" where 123456789012 is the
       ID of the parent organization or project resource for this tag key. Tag value is expected
-      to be the short name, for example "Production".
+      to be the short name, for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
+      for more details.
   - name: externalCatalogTableOptions
     type: NestedObject
     description: |

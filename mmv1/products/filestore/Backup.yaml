@@ -46,8 +46,8 @@ examples:
   - name: 'filestore_backup_basic'
     primary_resource_id: 'backup'
     vars:
-      backup_name: 'tf-fs-bkup'
-      instance_name: 'tf-fs-inst'
+      backup_name: 'fs-bkup'
+      instance_name: 'fs-inst'
 parameters:
   - name: 'location'
     type: String

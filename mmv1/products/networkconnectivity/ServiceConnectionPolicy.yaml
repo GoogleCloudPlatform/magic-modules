@@ -45,6 +45,11 @@ async:
     resource_inside_response: false
 custom_code:
   update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'network_connectivity_policy_basic'
     primary_resource_id: 'default'

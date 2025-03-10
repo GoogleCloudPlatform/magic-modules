@@ -13,7 +13,7 @@
 
 ---
 name: 'NetworkSecurity'
-display_name: 'Network security'
+display_name: 'Network Security'
 versions:
   - name: 'beta'
     base_url: 'https://networksecurity.googleapis.com/v1beta1/'

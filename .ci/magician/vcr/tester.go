@@ -92,6 +92,7 @@ var safeToLog = map[string]bool{
 	"GOOGLE_REGION":                              true,
 	"GOOGLE_SERVICE_ACCOUNT":                     true,
 	"GOOGLE_TEST_DIRECTORY":                      true,
+	"GOOGLE_VMWAREENGINE_PROJECT":                true,
 	"GOOGLE_ZONE":                                true,
 	"GOPATH":                                     true,
 	"HOME":                                       true,

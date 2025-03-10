@@ -120,8 +120,8 @@ properties:
   # This field is present in the schema but as of 2019 Sep 23 attempting to set it fails with
   # a 400 "QUIC override is supported only with global TargetHttpsProxy". jamessynge@ said in an
   # email sent on 2019 Sep 20 that support for this "is probably far in the future."
-  # - !ruby/object:Api::Type::Enum
   #   name: 'quicOverride'
+  #   type: Enum
   #   description: |
   #     Specifies the QUIC override policy for this resource. This determines
   #     whether the load balancer will attempt to negotiate QUIC with clients
@@ -129,10 +129,10 @@ properties:
   #     specified, uses the QUIC policy with no user overrides, which is
   #     equivalent to DISABLE. Not specifying this field is equivalent to
   #     specifying NONE.
-  #   values:
-  #     - :NONE
-  #     - :ENABLE
-  #     - :DISABLE
+  #   enum_values:
+  #     - 'NONE'
+  #     - 'ENABLE'
+  #     - 'DISABLE'
   #   update_verb: :POST
   #   update_url:
   #     'projects/{{project}}/regions/{{region}}/targetHttpsProxies/{{name}}/setQuicOverride'

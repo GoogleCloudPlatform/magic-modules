@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"net/http"
+
 {{ if ne $.TargetVersionName `ga` -}}
 	// For beta tests only
-	"net/http"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-
 {{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -93,6 +93,7 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 {{ if ne $.TargetVersionName `ga` -}}
 
 type BootstrappedKMSAutokey struct {
+    *cloudkms.AutokeyConfig
 	*cloudkms.KeyHandle
 }
 
@@ -104,6 +105,7 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 	config := BootstrapConfig(t)
 	if config == nil {
 		return BootstrappedKMSAutokey{
+			&cloudkms.AutokeyConfig{},
 			&cloudkms.KeyHandle{},
 		}
 	}
@@ -113,7 +115,7 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 	// Enable autokey on autokey test folder
 	kmsClient := config.NewKmsClient(config.UserAgent)
 	autokeyConfigID := fmt.Sprintf("%s/autokeyConfig", autokeyFolder.Name)
-	_, err := kmsClient.Folders.UpdateAutokeyConfig(autokeyConfigID, &cloudkms.AutokeyConfig{
+	autokeyConfig, err := kmsClient.Folders.UpdateAutokeyConfig(autokeyConfigID, &cloudkms.AutokeyConfig{
 		KeyProject: fmt.Sprintf("projects/%s", kmsProject.ProjectId),
 	}).UpdateMask("keyProject").Do()
 	if err != nil {
@@ -162,6 +164,7 @@ func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) B
 	}
 
 	return BootstrappedKMSAutokey{
+	    autokeyConfig,
 		keyHandle,
 	}
 }
@@ -1744,7 +1747,6 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	return accessToken, nil
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 // For bootstrapping Developer Connect git repository link
 const SharedGitRepositoryLinkIdPrefix = "tf-bootstrap-git-repository-"
 
@@ -2054,8 +2056,6 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 
 	return codeRepositoryIndexId
 }
-
-{{- end }}
 
 const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
 

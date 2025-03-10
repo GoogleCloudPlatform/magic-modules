@@ -57,6 +57,7 @@ var ttvRequiredEnvironmentVariables = [...]string{
 
 var ttvOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 type analytics struct {

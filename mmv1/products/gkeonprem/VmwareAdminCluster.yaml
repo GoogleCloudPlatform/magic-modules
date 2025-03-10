@@ -24,7 +24,7 @@ description: "A Google VMware Admin Cluster."
 exclude_delete: true
 id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
-timeouts: !ruby/object:Api::Timeouts
+timeouts:
   insert_minutes: 60
   delete_minutes: 60
   update_minutes: 60
@@ -33,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkeonprem#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 taint_resource_on_failed_create: true
 examples:
@@ -527,20 +520,15 @@ properties:
                         description: |
                           Human-readable message indicating details about last transition.
                         output: true
-                      - !ruby/object:Api::Type::Time
-                        name: 'lastTransitionTime'
+                      - name: 'lastTransitionTime'
+                        type: Time
                         description: |
                           Last time the condition transit from one status to another.
                         output: true
-                      - !ruby/object:Api::Type::Enum
-                        name: 'state'
+                      - name: 'state'
+                        type: String
                         description: The lifecycle state of the condition.
                         output: true
-                        enum_values:
-                          - STATE_UNSPECIFIED
-                          - STATE_TRUE
-                          - STATE_FALSE
-                          - STATE_UNKNOWN
       - type: NestedObject
         name: status
         description: ResourceStatus representing detailed cluster state.
@@ -579,37 +567,24 @@ properties:
                   description: |
                     Human-readable message indicating details about last transition.
                   output: true
-                - !ruby/object:Api::Type::Time
-                  name: 'lastTransitionTime'
+                - name: 'lastTransitionTime'
+                  type: Time
                   description: |
                     Last time the condition transit from one status to another.
                   output: true
-                - !ruby/object:Api::Type::Enum
-                  name: 'state'
+                - name: 'state'
+                  type: String
                   description: The lifecycle state of the condition.
                   output: true
-                  enum_values:
-                    - STATE_UNSPECIFIED
-                    - STATE_TRUE
-                    - STATE_FALSE
-                    - STATE_UNKNOWN
   - type: String
     name: "uid"
     description: |
       The unique identifier of the VMware Admin Cluster.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: "state"
+  - name: "state"
+    type: String
     description: The lifecycle state of the VMware admin cluster.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
   - type: String
     name: "endpoint"
     description: |
@@ -620,13 +595,13 @@ properties:
     description: |
       If set, there are currently changes in flight to the VMware admin cluster.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "createTime"
+  - name: "createTime"
+    type: Time
     description: |
       The time the cluster was created, in RFC3339 text format.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: "updateTime"
+  - name: "updateTime"
+    type: Time
     description: |
       The time the cluster was last updated, in RFC3339 text format.
     output: true
@@ -703,17 +678,12 @@ properties:
               description: |
                 Human-readable message indicating details about last transition.
               output: true
-            - !ruby/object:Api::Type::Time
-              name: 'lastTransitionTime'
+            - name: 'lastTransitionTime'
+              type: Time
               description: |
                 Last time the condition transit from one status to another.
               output: true
-            - !ruby/object:Api::Type::Enum
-              name: 'state'
+            - name: 'state'
+              type: String
               description: The lifecycle state of the condition.
               output: true
-              enum_values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN

@@ -40,6 +40,7 @@ var vcuRequiredEnvironmentVariables = [...]string{
 
 var vcuOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 var (

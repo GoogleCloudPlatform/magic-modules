@@ -52,7 +52,7 @@ VCR test failures that do not immediately seem related to your PR are most likel
    git checkout modular-magician/auto-pr-PR_NUMBER
    make test
    make lint
-   make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+   make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
    ```
    Replace PR_NUMBER with your PR's ID.
    {{< /tab >}}
@@ -65,7 +65,7 @@ VCR test failures that do not immediately seem related to your PR are most likel
    git checkout modular-magician/auto-pr-PR_NUMBER
    make test
    make lint
-   make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
+   make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
    ```
    Replace PR_NUMBER with your PR's ID.
    {{< /tab >}}
