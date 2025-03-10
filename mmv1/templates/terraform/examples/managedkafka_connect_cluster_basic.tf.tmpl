@@ -1,0 +1,51 @@
+provider "google-beta" {
+  managed_kafka_custom_endpoint = "https://staging-managedkafka.sandbox.googleapis.com/v1/"
+}
+
+# create GMK cluster instance
+resource "google_managed_kafka_cluster" "gmk_cluster" {
+  cluster_id = "{{index $.Vars "cluster_id"}}"
+  location = "us-central1"
+  capacity_config {
+    vcpu_count = 3
+    memory_bytes = 3221225472
+  }
+  gcp_config {
+    access_config {
+      network_configs {
+        subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+      }
+    }
+  }
+
+  provider = google-beta
+}
+
+resource "google_managed_kafka_connect_cluster" "{{$.PrimaryResourceId}}" {
+  connect_cluster_id = "{{index $.Vars "connect_cluster_id"}}"
+  kafka_cluster = "projects/${data.google_project.project.project_id}/locations/us-central1/clusters/${google_managed_kafka_cluster.gmk_cluster.cluster_id}"
+  location =  "us-central1"
+  capacity_config {
+    vcpu_count = 12
+    memory_bytes = 21474836480
+  }
+  gcp_config {
+    access_config {
+      network_configs {
+        primary_subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+      }
+    }
+  }
+  labels = {
+    key = "value"
+  }
+
+  # Add the depends_on attribute here
+  depends_on = [google_managed_kafka_cluster.gmk_cluster]
+
+  provider = google-beta
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
