@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"google.golang.org/api/googleapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -139,6 +140,15 @@ func dataSourceGoogleComputeImageRead(d *schema.ResourceData, meta interface{}) 
 	if v, ok := d.GetOk("name"); ok {
 		log.Printf("[DEBUG] Fetching image %s", v.(string))
 		image, err = config.NewComputeClient(userAgent).Images.Get(project, v.(string)).Do()
+		if err != nil {
+			if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+				// If the image is not found, we should log a warning and return nil
+				// so that the state is not marked as tainted.
+				log.Printf("[WARN] Google Compute Image (%s) not found", v.(string))
+				return nil
+			}
+			return err
+		}
 		log.Printf("[DEBUG] Fetched image %s", v.(string))
 	} else if v, ok := d.GetOk("family"); ok {
 		log.Printf("[DEBUG] Fetching latest non-deprecated image from family %s", v.(string))
