@@ -12,7 +12,7 @@ There are four downstreams, each of which has a corresponding "sync branch" in `
 - Downstream: [GoogleCloudPlatform/terraform-google-conversion](https://github.com/GoogleCloudPlatform/terraform-google-conversion)  
   Sync branch: [`tgc-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tgc-sync)
 - Downstream: [terraform-google-modules/docs-examples](https://github.com/terraform-google-modules/docs-examples)  
-  Sync branch: [`tf-oics-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tpg-sync)  
+  Sync branch: [`tf-oics-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tf-oics-sync)  
   Note: `oics` refers to "Open in Cloud Shell".
 
 The goal of this system is that each downstream commit will have exactly one MM commit that it corresponds to, and each MM commit will correspond to at most one commit in a downstream. If an MM commit had no changes in a downstream, no commit will be created.
@@ -40,7 +40,7 @@ Magician or generation bugs are extremely rare. They cause generation itself to 
 
 Be sure that you understand the mechanism for how the commit is causing a failure before proceeding. Skipping commits will cause multiple MM commits to be squashed into a single downstream commit, which breaks commit linking expectations and release notes.
 
-1. Lock the magic-modules main branch
+1. Lock the magic-modules main branch (or ask the team to)
 2. Create a PR to fix the bug
 3. Unlock the main branch, submit the PR, and re-lock the main branch
 4. Update the sync branches to point to the bad commit
@@ -56,7 +56,8 @@ In general, this should not be necessary because this situation shouldn't come u
 
 In this case, skipping just the initial commit would not work (because the following commit doesn't contain a fix) and skipping all the commits is not desirable (because we don't want to squash them.) You would need to instead locally apply the CI fix and then "manually" replicate the work of downstream generation.
 
-When this happened the first time, Cameron and Nathan wrote this little shell snippet, which should do most of the work for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
+Legacy fix (may no longer work):
+When this happened the first time, the team wrote this little shell snippet, which might do most of the work for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
 
 ```
 SYNC_TAG=tpgb-sync
