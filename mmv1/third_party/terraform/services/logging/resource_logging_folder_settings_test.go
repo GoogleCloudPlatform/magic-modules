@@ -70,11 +70,21 @@ resource "google_folder" "my_folder" {
   deletion_protection = false
 }
 
+data "google_logging_folder_settings" "settings" {
+  folder = google_folder.my_folder.folder_id
+}
+
+resource "google_kms_crypto_key_iam_member" "iam_folder" {
+  crypto_key_id = "%{original_key}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_logging_folder_settings.settings.kms_service_account_id}"
+}
+
 data "google_logging_organization_settings" "settings" {
   organization = "%{org_id}"
 }
 
-resource "google_kms_crypto_key_iam_member" "iam" {
+resource "google_kms_crypto_key_iam_member" "iam_org" {
   crypto_key_id = "%{original_key}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_logging_organization_settings.settings.kms_service_account_id}"
@@ -82,7 +92,10 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 
 resource "google_logging_folder_settings" "example" {
   folder       = google_folder.my_folder.folder_id
-  depends_on   = [ google_kms_crypto_key_iam_member.iam ]
+  depends_on   = [
+    google_kms_crypto_key_iam_member.iam_folder,
+	google_kms_crypto_key_iam_member.iam_org
+  ]
 }
 `, context)
 }
