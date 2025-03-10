@@ -27,7 +27,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   location = "us-central1-a"
 
   gce_setup {
-    machine_type = "n2d-standard-2" // cant be e2 because of accelerator
+    machine_type = "n1-standard-4" // cant be e2 because of accelerator
     accelerator_configs {
       type         = "NVIDIA_TESLA_T4"
       core_count   = 1
@@ -75,11 +75,6 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     enable_ip_forwarding = true
 
     tags = ["abc", "def"]
-
-    confidential_instance_config {
-      enable_confidential_compute = true
-      confidential_instance_type = "SEV"
-    }
 
   }
 
