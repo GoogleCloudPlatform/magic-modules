@@ -13,6 +13,7 @@
 
 ---
 name: 'DenyPolicy'
+api_resource_type_kind: Policy
 description: |
   Represents a collection of denial policies to apply to a given resource.
 references:

@@ -33,6 +33,10 @@ async:
 autogen_async: true
 description: |
  The Eventarc Trigger resource
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
 examples:
   - name: eventarc_trigger_with_cloud_run_destination
     primary_resource_id: primary
@@ -52,6 +56,9 @@ examples:
     exclude_docs: true
   - name: eventarc_trigger_with_channel_cmek
     primary_resource_id: primary
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       trigger_name: some-trigger
       service_name: some-service
@@ -59,7 +66,6 @@ examples:
       key_name: some-key
     test_env_vars:
       project_id: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
       'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'
@@ -79,6 +85,16 @@ examples:
       service_account_id: trigger-sa
       service_name: some-service
     exclude_docs: true
+  - name: eventarc_trigger_with_firestore_source
+    primary_resource_id: primary
+    vars:
+      trigger_name: some-trigger
+      service_account_id: trigger-sa
+      service_name: some-service
+      database_id: some-database
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    exclude_docs: true
 parameters:
   - name: location
     type: String
@@ -93,6 +109,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    custom_expand: templates/terraform/custom_expand/eventarc_trigger_name.go.tmpl
   - name: uid
     type: String
     description: Output only. Server assigned unique identifier for the trigger. The value is a UUID4 string and guaranteed to remain unchanged until the resource is deleted.

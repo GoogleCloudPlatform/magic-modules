@@ -14,7 +14,6 @@
 ---
 name: DataSharingWithGoogleSetting
 description: The resource for managing DataSharingWithGoogle settings for Admin Control.
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
@@ -24,9 +23,11 @@ id_format: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSett
 import_format:
   - projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/dataSharingWithGoogleSettings/{{data_sharing_with_google_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: gemini_data_sharing_with_google_setting_basic
-    min_version: 'beta'
     primary_resource_id: example
     exclude_test: true
     vars:
@@ -42,9 +43,7 @@ parameters:
   - name: dataSharingWithGoogleSettingId
     type: String
     description: |-
-      Required. Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      data_sharing_with_google_setting_id from the method_signature of Create RPC
+      Id of the Data Sharing With Google Setting.
     immutable: true
     url_param_only: true
     required: true
@@ -57,15 +56,15 @@ properties:
     output: true
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: enablePreviewDataSharing
     type: Boolean
-    description: Optional. Whether preview data sharing should be enabled.
+    description: Whether preview data sharing should be enabled.

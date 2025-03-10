@@ -38,8 +38,8 @@ async:
 autogen_status: SW5zdGFuY2U=
 custom_code:
 sweeper:
-  regions:
-    - "us-central1-a"
+  url_substitutions:
+    - region: "us-central1-a"
 examples:
   - name: 'parallelstore_instance_basic_beta'
     primary_resource_id: 'instance'

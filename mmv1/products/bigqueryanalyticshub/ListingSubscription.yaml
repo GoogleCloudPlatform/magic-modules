@@ -28,6 +28,9 @@ import_format:
 custom_code:
   post_create: templates/terraform/post_create/analytics_hub_subscription.go.tmpl
   post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
+sweeper:
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_analyticshub_listing_subscription_basic'
     primary_resource_id: 'subscription'

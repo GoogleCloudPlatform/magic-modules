@@ -36,8 +36,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'scc_v2_project_mute_config_basic'
     primary_resource_id: 'default'

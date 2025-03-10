@@ -39,8 +39,8 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "us-west1"
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'network_services_lb_route_extension_basic'
     primary_resource_id: 'default'

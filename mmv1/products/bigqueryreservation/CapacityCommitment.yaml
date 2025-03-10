@@ -38,8 +38,8 @@ custom_code:
   constants: 'templates/terraform/constants/bigquery_reservation_capacity_commitment.go.tmpl'
   custom_import: 'templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.tmpl'
 sweeper:
-  regions:
-    - "us-west2"
+  url_substitutions:
+    - region: "us-west2"
 examples:
   - name: 'bigquery_reservation_capacity_commitment_basic'
     primary_resource_id: 'commitment'

@@ -399,7 +399,7 @@ is desired, you will need to modify your state file manually using
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF, MRDMA, IRDMA.
 
-* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+* `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
@@ -492,6 +492,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
+
+* `termination_time` - (Optional) Specifies the timestamp, when the instance will be terminated, in RFC3339 text format. If specified, the instance termination action will be performed at the termination time.
 
 * `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
 
