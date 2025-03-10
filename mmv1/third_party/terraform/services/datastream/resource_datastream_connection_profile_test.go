@@ -83,8 +83,8 @@ func TestAccDatastreamConnectionProfile_sshKey_update(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	random_pubkey_1 := []byte(`ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjXhptfWIrtflLZ1WeOsjCfHSEKvui0fdNXTqpqIA+2NNlFjwKS4mV3bDJIRlC5FdWG/D5LW4kvSmcTx1eSLUcvqw3i3F73Ii35AR1Rid1bY0LCBYUUgkDKyvZgDzrM7g+MwBtthoud8Axt9/bh28qtzSVNvWfxIYsa2CwtqlkZr5c6Qb6N2B9kxW8WFsCnoAeBaZDMq+LVBRsRJvBBrJm/qhMNPd07Al7wGLEnNPWmwjFT7B12sMjNr7ZNLfI9VckEyUSx3AGBFH7RImeYiWb6vZA9v5DE7kBrCoHtJK5IN9dvqEWXrrDT7RTFXd55xQqT70eZiIDNz1nexDw8ZCn user`)
-	random_privkey_1 := []byte(`-----BEGIN OPENSSH PRIVATE KEY-----
+	random_pubkey_1 := `ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjXhptfWIrtflLZ1WeOsjCfHSEKvui0fdNXTqpqIA+2NNlFjwKS4mV3bDJIRlC5FdWG/D5LW4kvSmcTx1eSLUcvqw3i3F73Ii35AR1Rid1bY0LCBYUUgkDKyvZgDzrM7g+MwBtthoud8Axt9/bh28qtzSVNvWfxIYsa2CwtqlkZr5c6Qb6N2B9kxW8WFsCnoAeBaZDMq+LVBRsRJvBBrJm/qhMNPd07Al7wGLEnNPWmwjFT7B12sMjNr7ZNLfI9VckEyUSx3AGBFH7RImeYiWb6vZA9v5DE7kBrCoHtJK5IN9dvqEWXrrDT7RTFXd55xQqT70eZiIDNz1nexDw8ZCn user`
+	random_privkey_1 := `-----BEGIN OPENSSH PRIVATE KEY-----
 		b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
 		NhAAAAAwEAAQAAAQEAo14abX1iK7X5S2dVnjrIwnx0hCr7otH3TV06qaiAPtjTZRY8CkuJ
 		ld2wySEZQuRXVhvw+S1uJL0pnE8dXki1HL6sN4txe9yIt+QEdUYndW2NCwgWFFIJAysr2Y
@@ -110,10 +110,10 @@ func TestAccDatastreamConnectionProfile_sshKey_update(t *testing.T) {
 		TQ8PoTvkH7fwugXuG7ACLCTl3PpOSGPQAPI8rCaGOMd+uU1Jyjt3TcdPYlNAtiFQCxWLMH
 		RNFfeqviC85H6WzQNezNj45QqKTf5gRdHVu2NMRwn2pJjRgdIvsUaL1AY4sC0AivoEMlpx
 		rQYvdaDG7KsYXfUAAAAEdXNlcgECAwQFBgc=
-		-----END OPENSSH PRIVATE KEY-----`)
+		-----END OPENSSH PRIVATE KEY-----`
 
-	random_pubkey_2 := []byte(`ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmc1i/FqnVtYsTzb6LmoUGom8ISnfRCPTIFf3LLIyRFgO+qD6Dnqn5p2lLE8ksdooAGJ+EyJtV5c+3kYGnjzzH4TlB2pkt562BntrggvJ98sELQbHEDiemiLnJqqIESk5FcSXdcJ/UX/AdkbXLjSR5M8+cGGqKSb0HSnKfOWkjWwZwp/JwbvyWPIJ6IQNKzAS5HVU/J+u8ezhPd1iBdezvAuPlihpjMGQg1KW3APZoELS6/BSMpXcvDy+TwuggEPPZ0Up09BJRtqesHiZur6CnqUIzJcCWCfi5C8IfHzlhawry+iA1V5Lh06Mz7OaySXpf902RITfh+KcLxcSSMmPl user`)
-	random_privkey_2 := []byte(`-----BEGIN OPENSSH PRIVATE KEY-----
+	random_pubkey_2 := `ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmc1i/FqnVtYsTzb6LmoUGom8ISnfRCPTIFf3LLIyRFgO+qD6Dnqn5p2lLE8ksdooAGJ+EyJtV5c+3kYGnjzzH4TlB2pkt562BntrggvJ98sELQbHEDiemiLnJqqIESk5FcSXdcJ/UX/AdkbXLjSR5M8+cGGqKSb0HSnKfOWkjWwZwp/JwbvyWPIJ6IQNKzAS5HVU/J+u8ezhPd1iBdezvAuPlihpjMGQg1KW3APZoELS6/BSMpXcvDy+TwuggEPPZ0Up09BJRtqesHiZur6CnqUIzJcCWCfi5C8IfHzlhawry+iA1V5Lh06Mz7OaySXpf902RITfh+KcLxcSSMmPl user`
+	random_privkey_2 := `-----BEGIN OPENSSH PRIVATE KEY-----
 		b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
 		NhAAAAAwEAAQAAAQEA5nNYvxap1bWLE82+i5qFBqJvCEp30Qj0yBX9yyyMkRYDvqg+g56p
 		+adpSxPJLHaKABifhMibVeXPt5GBp488x+E5QdqZLeetgZ7a4ILyffLBC0GxxA4npoi5ya
@@ -139,7 +139,7 @@ func TestAccDatastreamConnectionProfile_sshKey_update(t *testing.T) {
 		UJqEmni0YE8PD3PuPGRWLmZeOcxshHR1nQIeUoXWAhCS9G7Rl5Kdr1IXzSln22OvUXMPmE
 		gZLd7QJVyRQ0bXhYf8nIs/UGhjq83OSoS4iSwHeZ1CrKWmVP74/+Na6fDdfJ65Z8+I4ktM
 		QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
-		-----END OPENSSH PRIVATE KEY-----`)
+		-----END OPENSSH PRIVATE KEY-----`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
