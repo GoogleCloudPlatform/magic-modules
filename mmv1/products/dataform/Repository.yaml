@@ -171,8 +171,10 @@ properties:
         type: String
         description: The prefix that should be prepended to all table names.
         min_version: 'beta'
-      
-
+  - name: 'serviceAccount'
+    type: String
+    description: The service account to run workflow invocations under.
+    min_version: 'beta'
   - name: 'npmrcEnvironmentVariablesSecretVersion'
     type: String
     description: Optional. The name of the Secret Manager secret version to be used to interpolate variables into the .npmrc file for package installation operations. Must be in the format projects/*/secrets/*/versions/*. The file itself must be in a JSON format.
