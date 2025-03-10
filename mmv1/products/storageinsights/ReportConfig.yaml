@@ -100,11 +100,23 @@ properties:
             type: Integer
             description: 'The year to stop generating inventory reports'
             required: true
+  - name: 'parquetOptions'
+    type: NestedObject
+    description: |
+      An option for outputting inventory reports as parquet files.
+    exactly_one_of:
+      - parquet_options
+      - csv_options
+    allow_empty_object: true
+    send_empty_value: true
+    properties: []
   - name: 'csvOptions'
     type: NestedObject
     description: |
       Options for configuring the format of the inventory report CSV file.
-    required: true
+    exactly_one_of:
+      - parquet_options
+      - csv_options
     properties:
       - name: 'recordSeparator'
         type: String
