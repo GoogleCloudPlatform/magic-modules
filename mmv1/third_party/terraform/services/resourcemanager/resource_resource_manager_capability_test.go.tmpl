@@ -26,6 +26,7 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 				ResourceName:      "google_resource_manager_capability.capability",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"capability_name", "parent"},
 			},
 		},
 	})
@@ -36,11 +37,12 @@ func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(con
 resource "google_resource_manager_capability" "capability" {
   provider         = google-beta
   value            = true
-  name             = "folders/395566339940/capabilities/app-management"
+  parent           = "folders/395566339940"
+  capability_name  = "app-management"
 }
 provider "google-beta" {
   user_project_override = true
-  billing_project     = "test-vishessh-demo2"
+  billing_project     = "terraform-dev-govardhanit"
 }
 `, context)
 }

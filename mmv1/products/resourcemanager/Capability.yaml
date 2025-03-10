@@ -23,9 +23,12 @@
     api: ''
   min_version: beta
 
-  self_link: '{{name}}'
-  create_url: '{{name}}?updateMask=value'
-  update_url: '{{name}}'
+  import_format:
+    - '{{parent}}/capabilities/{{capability_name}}'
+
+  self_link: '{{parent}}/capabilities/{{capability_name}}'
+  create_url: '{{parent}}/capabilities/{{capability_name}}?updateMask=value'
+  update_url: '{{parent}}/capabilities/{{capability_name}}'
   
   create_verb: 'PATCH'
   update_verb: 'PATCH'
@@ -43,22 +46,30 @@
     operation:
       base_url: '{{op_id}}'
   custom_code:
-    custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
+    custom_import: 'templates/terraform/custom_import/resource_manager_capability.go.tmpl'
   examples:
     - name: 'resource_manager_capability'
       primary_resource_id: 'capability'
       vars:
-        name: 'folders/395566339940/capabilities/app-management'
+        parent: 'folders/395566339940'
+        capability_name: 'app-management'
       min_version: beta
 
   parameters:
 
   properties:
-    - name: 'name'
+    - name: 'parent'
       type: String
       description: |
-        Capability name with folder details.
+        Folder on which Capability needs to be updated in the format folders/folder_id.
       required: true
+      url_param_only: true
+    - name: 'capability_name'
+      type: String
+      description: |
+        Capability name that should be updated on the folder.
+      required: true
+      url_param_only: true
     - name: 'value'
       type: Boolean
       description: |
