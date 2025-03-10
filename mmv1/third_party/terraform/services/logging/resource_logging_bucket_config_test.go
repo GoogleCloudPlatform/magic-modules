@@ -448,7 +448,9 @@ resource "google_logging_project_bucket_config" "basic" {
 }
 
 func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix":        acctest.RandString(t, 10),
@@ -481,7 +483,6 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 
 func testAccLoggingBucketConfigBillingAccount_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
-
 data "google_billing_account" "default" {
 	billing_account = "%{billing_account_name}"
 }
@@ -498,6 +499,11 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 
 func testAccLoggingBucketConfigOrganization_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
+
 data "google_organization" "default" {
 	organization = "%{org_id}"
 }
@@ -595,7 +601,9 @@ resource "google_logging_organization_bucket_config" "basic" {
 }
 
 func TestAccLoggingBucketConfigProject_indexConfigs(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
@@ -632,6 +640,10 @@ func TestAccLoggingBucketConfigProject_indexConfigs(t *testing.T) {
 
 func testAccLoggingBucketConfigProject_indexConfigs(context map[string]interface{}, urlIndexType, statusIndexType string) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
 
 resource "google_project" "default" {
 	project_id      = "%{project_name}"
