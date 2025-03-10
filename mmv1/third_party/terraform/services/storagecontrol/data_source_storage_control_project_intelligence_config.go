@@ -14,15 +14,15 @@ func DataSourceGoogleStorageControlProjectIntelligenceConfig() *schema.Resource 
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleStorageManagementHubRead,
+		Read:   dataSourceGoogleStorageControlProjectIntelligenceConfigRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceGoogleStorageManagementHubRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleStorageControlProjectIntelligenceConfigRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{name}}/locations/global/managementHub")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{name}}/locations/global/intelligenceConfig")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

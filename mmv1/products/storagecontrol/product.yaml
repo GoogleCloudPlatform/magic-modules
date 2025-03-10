@@ -13,7 +13,7 @@
 
 ---
 name: 'StorageControl'
-display_name: 'Cloud Storage'
+display_name: 'Cloud Storage Control'
 versions:
   - name: 'ga'
     base_url: 'https://storage.googleapis.com/v2/'
