@@ -53,7 +53,7 @@
 			log.Printf("[DEBUG] Finished updating InstanceDesiredUserCreatedConnections %q: %#v", d.Id(), res)
 		}
 
-		err = RedisOperationWaitTime(
+		err = MemorystoreOperationWaitTime(
 			config, res, project, "Updating InstanceDesiredUserCreatedConnections", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 
@@ -61,5 +61,4 @@
 			return err
 		}
 	}
-resourceMemorystoreInstanceRead
 	return resourceMemorystoreInstanceDesiredUserCreatedConnectionsRead(d, meta)

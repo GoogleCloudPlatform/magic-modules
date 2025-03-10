@@ -15,7 +15,7 @@
 name: 'InstanceDesiredUserCreatedConnections'
 api_resource_type_kind: Cluster
 description: |
-  Manages user created connections for Redis cluster
+  Manages user created connections for Memorystore instance
 docs:
   note: |
     Please ensure your connections meet the requirements outlined at
@@ -94,7 +94,7 @@ parameters:
 properties:
   - name: 'instanceEndpoints'
     type: Array
-    description: "A list of cluster endpoints"
+    description: "A list of instance endpoints"
     item_type:
       type: NestedObject
       description: |

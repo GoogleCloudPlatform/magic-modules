@@ -387,7 +387,7 @@ properties:
     enum_values:
       - 'CLUSTER'
       - 'CLUSTER_DISABLED'
-  - name: 'pscAttachmentDetail'
+  - name: 'pscAttachmentDetails'
     type: Array
     description: 
      "Configuration of a service attachment of the cluster, for creating PSC connections."
