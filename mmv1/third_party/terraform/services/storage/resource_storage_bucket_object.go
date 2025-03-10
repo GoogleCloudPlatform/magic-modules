@@ -619,6 +619,8 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 		d.SetNewComputed("crc32")
 		d.SetNewComputed("md5hash")
 		d.SetNewComputed("generation")
+		// if any change in source_md5hash, override change of detect_md5hash
+		d.ForceNew("detect_md5hash")
 	}
 
 	return nil
