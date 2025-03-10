@@ -158,8 +158,9 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			var errorMessage string
 			// Get test debug log gcs link
 			logLink := fmt.Sprintf("https://storage.cloud.google.com/teamcity-logs/nightly/%s/%s/%s/debug-%s-%s-%s-%s.txt", pVersion.TeamCityNightlyProjectName(), date, build.Number, pVersion.ProviderName(), build.Number, strconv.Itoa(build.Id), testResult.Name)
-			// Get concise error message
-			if testResult.Status == "FAILURE" {
+			// Get concise error message for failed and skipped tests
+			// Skipped tests have a status of "UNKNOWN" on TC
+			if testResult.Status == "FAILURE" || testResult.Status == "UNKNOWN" {
 				errorMessage = convertErrorMessage(testResult.ErrorMessage)
 			}
 			testInfoList = append(testInfoList, TestInfo{

@@ -414,6 +414,8 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"ancestrymanager/ancestryutil_test.go":                                                  "third_party/tgc/ancestrymanager/ancestryutil_test.go",
 		"converters/google/convert.go":                                                          "third_party/tgc/convert.go",
 		"converters/google/convert_test.go":                                                     "third_party/tgc/convert_test.go",
+		"tfdata/fake_resource_data.go":                                                          "third_party/tgc/tfdata/fake_resource_data.go",
+		"tfdata/fake_resource_data_test.go":                                                     "third_party/tgc/tfdata/fake_resource_data_test.go",
 		"converters/google/resources/services/compute/compute_instance_group.go":                "third_party/tgc/services/compute/compute_instance_group.go",
 		"converters/google/resources/services/dataflow/job.go":                                  "third_party/tgc/services/dataflow/job.go",
 		"converters/google/resources/services/resourcemanager/service_account_key.go":           "third_party/tgc/services/resourcemanager/service_account_key.go",
