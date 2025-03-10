@@ -2606,20 +2606,6 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccStorageBucket_maxRetentionPeriod(bucketName string) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name          = "%s"
-  location      = "US"
-  force_destroy = true
-
-  retention_policy {
-    retention_period = 3155760000
-  }
-}
-`, bucketName)
-}
-
 func testAccStorageBucket_lockedRetentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
