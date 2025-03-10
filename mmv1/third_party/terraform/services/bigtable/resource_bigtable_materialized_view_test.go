@@ -64,9 +64,9 @@ resource "google_bigtable_table" "table" {
 }
 
 resource "google_bigtable_materialized_view" "materialized_view" {
-  name          = "%s"
-  instance      = google_bigtable_instance.instance.id
-  deletion_protection = %v
+  materialized_view_id = "%s"
+  instance             = google_bigtable_instance.instance.id
+  deletion_protection  = %v
   query = <<EOT
 SELECT _key, CF 
 FROM %s
