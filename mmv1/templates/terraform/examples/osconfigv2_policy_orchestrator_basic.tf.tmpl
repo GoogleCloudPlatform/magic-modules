@@ -1,37 +1,5 @@
-resource "google_project_service" "progressiverollout" {
-    provider = google-beta
-    service            = "progressiverollout.googleapis.com"
-    disable_on_destroy = false
-}
-
-resource "google_project_iam_member" "iam_osconfig_service_agent" {
-    provider = google-beta
-    project = "{{index $.TestEnvVars "project_number"}}"
-    role    = "roles/osconfig.serviceAgent"
-    member  = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-osconfig.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "iam_osconfig_rollout_service_agent" {
-    provider = google-beta
-    project = "{{index $.TestEnvVars "project_number"}}"
-    role    = "roles/osconfig.rolloutServiceAgent"
-    member  = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "iam_progressiverollout_service_agent" {
-    provider = google-beta
-    project = "{{index $.TestEnvVars "project_number"}}"
-    role    = "roles/progressiverollout.serviceAgent"
-    member  = "serviceAccount:service-{{index $.TestEnvVars "project_number"}}@gcp-sa-progrollout.iam.gserviceaccount.com"
-}
-
 resource "google_os_config_v2_policy_orchestrator" "{{$.PrimaryResourceId}}" {
     provider = google-beta
-    depends_on = [
-        google_project_iam_member.iam_osconfig_service_agent,
-        google_project_iam_member.iam_osconfig_rollout_service_agent,
-        google_project_iam_member.iam_progressiverollout_service_agent,
-    ]
     policy_orchestrator_id = "{{index $.Vars "policy_orchestrator_id"}}"
     
     state = "ACTIVE"

@@ -29,6 +29,13 @@ min_version: beta
 examples:
   - name: osconfigv2_policy_orchestrator_basic
     primary_resource_id: policy_orchestrator
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/osconfig.serviceAgent"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
+        role: "roles/osconfig.rolloutServiceAgent"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-progrollout.iam.gserviceaccount.com"
+        role: "roles/progressiverollout.serviceAgent"
     vars:
       policy_orchestrator_id: po
       orchestrated_resource_id: test-orchestrated-resource
