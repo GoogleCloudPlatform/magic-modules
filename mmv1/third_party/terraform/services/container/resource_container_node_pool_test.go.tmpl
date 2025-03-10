@@ -5287,3 +5287,45 @@ resource "google_container_node_pool" "np" {
 `, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
 }
 
+func TestAccContainerNodePool_withoutCpuCfsQuota(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withoutCpuCfsQuota(cluster, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					// resource.TestCheckResourceAttr("google_container_node_pool.with_kubelet_config",
+					// 	"node_config.0.kubelet_config.0.cpu_cfs_quota", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.primary",
+						"node_config.0.kubelet_config.0.cpu_cfs_quota", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_withoutCpuCfsQuota(cluster, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  deletion_protection = false
+  network    = "%s"
+  subnetwork    = "%s"
+  node_config {
+    kubelet_config {
+      pod_pids_limit = 8192
+    }
+  }
+}
+`, cluster, networkName, subnetworkName)
+}
