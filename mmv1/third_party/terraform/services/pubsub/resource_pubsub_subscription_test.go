@@ -607,8 +607,8 @@ resource "google_pubsub_subscription" "foo" {
   topic = google_pubsub_topic.foo.id
   message_transforms {
     javascript_udf {
-      function_name = %s
-      code = %s
+      function_name = "%s"
+      code = "%s"
     }
     disabled = true
   }
@@ -627,8 +627,8 @@ resource "google_pubsub_subscription" "foo" {
   topic = google_pubsub_topic.foo.id
 	message_transforms {
     javascript_udf {
-      function_name = %s
-      code = %s
+      function_name = "%s"
+      code = "%s"
     }
   }
 }
