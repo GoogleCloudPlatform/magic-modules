@@ -567,3 +567,15 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
+virtual_fields:
+  - name: 'create_snapshot_before_destroy'
+    type: Boolean
+    default_value: false
+    description: |
+      If set to true, a snapshot of the disk will be created before it is destroyed.
+      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
+      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
+  - name: 'create_snapshot_before_destroy_prefix'
+    type: String
+    description: |
+      This will set a custom name prefix for the snapshot that's created when the disk is deleted.
