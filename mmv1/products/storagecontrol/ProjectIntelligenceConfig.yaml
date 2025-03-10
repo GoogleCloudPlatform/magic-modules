@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,45 +14,24 @@
 ---
 # API resource name
 name: 'ProjectIntelligenceConfig'
-kind: 'storage#intelligence'
+kind: 'storagecontrol#intelligence'
 # Resource description for the provider documentation.
 description: |
-  The Project Storage Intelligence Config resource represents GCS Storage
-  Intelligence operating on individual GCP project. Storage Intelligence Config
-  is a singleton resource and individual instance exists on each GCP project.
+  The Project Storage Intelligence Config resource represents GCS Storage Intelligence operating on individual GCP project. Storage Intelligence Config is a singleton resource and individual instance exists on each GCP project.
 
-  Storage Intelligence is for Storage Admins to manage GCP storage assets at
-  scale for performance, cost, security & compliance.
+  Storage Intelligence is for Storage Admins to manage GCP storage assets at scale for performance, cost, security & compliance.
 
 docs:
   warning: |
-    Storage Intelligence Config is a singleton resource which cannot be created
-    or deleted. A single instance of Storage Intelligence Config exist
-    for each GCP Project. Terraform does not create or destroy this resource.
-    Terraform resource creation for this resource is simply an update operation
-    on existing resource with specified properties. Terraform deletion won't
-    have any effect on this resource rather it will only remove it from the
-    state file.
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-# min_version: beta
+    Storage Intelligence Config is a singleton resource which cannot be created or deleted. A single instance of Storage Intelligence Config exist for each GCP Project. Terraform does not create or destroy this resource.
+    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
 
 # URL for the resource's standard Get method. https://google.aip.dev/131
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 self_link: 'projects/{{name}}/locations/global/intelligenceConfig'
 
-# URL for the resource's standard Create method, including query parameters.
-# https://google.aip.dev/133
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 custom_code:
   custom_create: templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
+
 # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
@@ -69,22 +48,19 @@ import_format:
 autogen_async: false
 
 properties:
-  # Fields go here
   - name: 'name'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      Identifier of the GCP project. For GCP project, this field can be project
-      name or project number.
+      Identifier of the GCP project. For GCP project, this field can be project name or project number.
   - name: 'editionConfig'
     type: String
     required: false
     default_from_api: true
     description: |
-      Edition configuration of the Storage Intelligence resource. Valid values are
-      INHERIT, DISABLED and STANDARD.
+      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, DISABLED and STANDARD.
   - name: 'updateTime'
     type: String
     output: true
@@ -93,9 +69,7 @@ properties:
   - name: 'filter'
     type: NestedObject
     description: |
-      Filter over location and bucket using include or exclude semantics.
-      Resources that match the include or exclude filter are exclusively
-      included or excluded from the Storage Intelligence plan.
+      Filter over location and bucket using include or exclude semantics. Resources that match the include or exclude filter are exclusively included or excluded from the Storage Intelligence plan.
     properties:
       - name: excludedCloudStorageBuckets
         type: NestedObject
@@ -116,8 +90,7 @@ properties:
             item_type:
               type: String
             description: |
-              List of bucket id regexes to exclude in the storage intelligence
-              plan.
+              List of bucket id regexes to exclude in the storage intelligence plan.
       - name: includedCloudStorageBuckets
         type: NestedObject
         required: false
@@ -137,8 +110,7 @@ properties:
             item_type:
               type: String
             description: |
-              List of bucket id regexes to exclude in the storage intelligence
-              plan.
+              List of bucket id regexes to exclude in the storage intelligence plan.
       - name: excludedCloudStorageLocations
         type: NestedObject
         required: false
@@ -179,18 +151,18 @@ properties:
               List of locations.
             item_type:
               type: String
-  - name: 'effectiveStorageIntelligenceEdition'
+  - name: 'effectiveIntelligenceConfig'
     output: true
     description: |
-      The Storage Intelligence edition that is effective for the resource.
+      The Intelligence config that is effective for the resource.
     type: NestedObject
     properties:
-      - name: storageIntelligence
+      - name: intelligenceConfig
         type: String
         output: true
         description: |
-          The Storage Intelligence resource that is applied for the target resource.
-      - name: storageIntelligenceEdition
+          The Intelligence config resource that is applied for the target resource.
+      - name: effectiveEdition
         type: String
         output: true
         description: |
