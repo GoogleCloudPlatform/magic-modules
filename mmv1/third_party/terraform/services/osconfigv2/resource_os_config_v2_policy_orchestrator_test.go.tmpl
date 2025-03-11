@@ -6,14 +6,33 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccOSConfigV2PolicyOrchestrator_basic(t *testing.T) {
 	t.Parallel()
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-osconfig.iam.gserviceaccount.com",
+			Role:   "roles/osconfig.serviceAgent",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com",
+			Role:   "roles/osconfig.rolloutServiceAgent",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-progrollout.iam.gserviceaccount.com",
+			Role:   "roles/progressiverollout.serviceAgent",
+		},
+	})
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
+		"project":        envvar.GetTestProjectFromEnv(),
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
+
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -80,6 +99,7 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
             }
         }
     }
+    labels = {"state" : "active"}
 }
 `, context)
 }
@@ -104,8 +124,8 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
                     resources {
                         id = "resource-tf"
                         file {
-                            content = "file-content-tf"
-                            path = "file-path-tf-1"
+                            content = "file-content-tf-2"
+                            path = "file-path-tf-2"
                             state = "PRESENT"
                         }
                     }
@@ -124,6 +144,7 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
             }
         }
     }
+    labels = {"state" : "active"}
 }
 `, context)
 }

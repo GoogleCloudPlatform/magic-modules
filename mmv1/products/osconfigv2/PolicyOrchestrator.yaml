@@ -88,13 +88,6 @@ properties:
   - name: description
     type: String
     description: Optional. Freeform text describing the purpose of the resource.
-  - name: etag
-    type: String
-    description: |-
-      Output only. This checksum is computed by the server based on the value of other
-      fields, and may be sent on update and delete requests to ensure the
-      client has an up-to-date value before proceeding.
-    output: true
   - name: reconciling
     type: Boolean
     description: |-
@@ -981,11 +974,6 @@ properties:
             type: String
             description: Output only. The timestamp that the revision was created.
             output: true
-          - name: etag
-            type: String
-            description: |-
-              The etag for this OS policy assignment.
-              If this is provided on update, it must match the server's etag.
           - name: rolloutState
             type: String
             description: |-
