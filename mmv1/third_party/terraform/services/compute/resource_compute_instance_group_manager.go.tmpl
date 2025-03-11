@@ -355,7 +355,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							Default:      "REPAIR",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"REPAIR", "DO_NOTHING"}, true),
-{{ if $.TargetVersionName `ga` -}}
+{{ if eq $.TargetVersionName `ga` -}}
 							Description:  `Default behavior for all instance or health check failures.`,
 {{- end }}
 {{ if ne $.TargetVersionName `ga` -}}
