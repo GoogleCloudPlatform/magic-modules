@@ -593,10 +593,12 @@ properties:
                   type: Integer
                   description: |
                     Month of a year. Must be from 1 to 12.
+                  required: true
                 - name: 'day'
                   type: Integer
                   description: |
                     Day of a month. Must be from 1 to 31 and valid for the year and month.
+                  required: true
             - name: 'endDate'
               type: NestedObject
               description: |
@@ -613,10 +615,12 @@ properties:
                   type: Integer
                   description: |
                     Month of a year. Must be from 1 to 12.
+                  required: true
                 - name: 'day'
                   type: Integer
                   description: |
                     Day of a month. Must be from 1 to 31 and valid for the year and month.
+                  required: true
             - name: 'time'
               type: NestedObject
               description: |
@@ -633,6 +637,7 @@ properties:
                   type: Integer
                   description: |
                     Minutes of hour of day.
+                  required: true
   - name: 'subscriptionType'
     type: Enum
     description: |
