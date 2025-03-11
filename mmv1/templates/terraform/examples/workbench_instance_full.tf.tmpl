@@ -39,6 +39,10 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
       enable_integrity_monitoring = true
     }
 
+    confidential_instance_config {
+      confidential_instance_type = "SEV"
+    }
+
     disable_public_ip = false
 
     service_accounts {
