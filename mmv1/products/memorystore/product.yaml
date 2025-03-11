@@ -18,6 +18,6 @@ versions:
   - name: "beta"
     base_url: "https://memorystore.googleapis.com/v1beta/"
   - name: "ga"
-    base_url: "https://autopush-memorystore.sandbox.googleapis.com/v1/"
+    base_url: "https://memorystore.googleapis.com/v1/"
 scopes:
   - "https://www.googleapis.com/auth/cloud-platform"

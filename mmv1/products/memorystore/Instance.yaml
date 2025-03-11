@@ -17,7 +17,7 @@ description: A Google Cloud Memorystore instance.
 docs:
 references:
   guides:
-     'Official Documentation': https://cloud.google.com/memorystore/docs/valkey/create-instances 
+    'Official Documentation': 'https://cloud.google.com/memorystore/docs/valkey/create-instances'
   api: 'https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances'
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -161,7 +161,7 @@ properties:
             output: true
           - name: 'targetEngineVersion'
             type: String
-            description: 
+            description:
               "Output only. Target engine version for the instance."
             output: true
           - name: 'targetNodeType'
@@ -389,8 +389,8 @@ properties:
       - 'CLUSTER_DISABLED'
   - name: 'pscAttachmentDetails'
     type: Array
-    description: 
-     "Configuration of a service attachment of the cluster, for creating PSC connections."
+    description:
+      "Configuration of a service attachment of the cluster, for creating PSC connections."
     output: true
     item_type:
       type: NestedObject
