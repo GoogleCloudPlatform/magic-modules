@@ -311,6 +311,13 @@ resource "google_eventarc_pipeline" "pipeline_update" {
   depends_on = [google_project_service_identity.eventarc_sa]
 }
 
+resource "google_eventarc_message_bus" "message_bus" {
+  location       = "%{region}"
+  message_bus_id = "tf-test-messagebus%{random_suffix}"
+  project        = google_project.project.project_id
+  depends_on     = [google_project_service_identity.eventarc_sa]
+}
+
 resource "google_project" "project_update" {
   project_id      = "tf-test2%{random_suffix}"
   name            = "tf-test2%{random_suffix}"
