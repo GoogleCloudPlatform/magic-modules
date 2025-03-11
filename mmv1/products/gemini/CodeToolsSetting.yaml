@@ -69,7 +69,7 @@ properties:
     description: Labels as key value pairs.
   - name: enabledTool
     type: Array
-    description: Required. Represents the full set of enabled tools.
+    description: Represents the full set of enabled tools.
     required: true
     item_type:
       type: NestedObject
@@ -77,30 +77,30 @@ properties:
         - name: accountConnector
           type: String
           description: |-
-            Optional. Link to the Dev Connect Account Connector that holds the user credentials.
+            Link to the Dev Connect Account Connector that holds the user credentials.
             projects/{project}/locations/{location}/accountConnectors/{account_connector_id}
         - name: handle
           type: String
-          description: Required. Handle used to invoke the tool.
+          description: Handle used to invoke the tool.
           required: true
         - name: tool
           type: String
-          description: Required. Link to the Tool
+          description: Link to the Tool
           required: true
         - name: config
           type: Array
-          description: Optional. Configuration parameters for the tool.
+          description: Configuration parameters for the tool.
           item_type:
             type: NestedObject
             properties:
               - name: key
                 type: String
-                description: Required. Key of the configuration item.
+                description: Key of the configuration item.
                 required: true
               - name: value
                 type: String
-                description: Required. Value of the configuration item.
+                description: Value of the configuration item.
                 required: true
         - name: uriOverride
           type: String
-          description: Optional. Overridden URI, if allowed by Tool.
+          description: Overridden URI, if allowed by Tool.
