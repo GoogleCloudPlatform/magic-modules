@@ -126,7 +126,7 @@ resource "time_sleep" "wait_create_sa" {
 resource "google_eventarc_enrollment" "primary" {
   location      = "%{region}"
   enrollment_id = "tf-test-enrollment%{random_suffix}"
-  project       = google_project.project.id
+  project       = google_project.project.project_id
   display_name  = "basic enrollment"
   message_bus   = google_eventarc_message_bus.message_bus.id
   destination   = google_eventarc_pipeline.pipeline.id
