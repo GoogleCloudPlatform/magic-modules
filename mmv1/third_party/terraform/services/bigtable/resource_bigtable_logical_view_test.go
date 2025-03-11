@@ -64,8 +64,8 @@ resource "google_bigtable_table" "table" {
 }
 
 resource "google_bigtable_logical_view" "logical_view" {
-  name          = "%s"
-  instance      = google_bigtable_instance.instance.id
+  logical_view_id = "%s"
+  instance        = google_bigtable_instance.instance.name
   query = <<EOT
 SELECT _key, CF['%s'] 
 FROM %s
