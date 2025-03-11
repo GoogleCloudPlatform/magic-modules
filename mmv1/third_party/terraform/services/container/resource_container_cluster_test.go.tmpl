@@ -3940,7 +3940,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.primary",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_withLoggingConfigEnabled(clusterName, networkName, subnetworkName, minVersion),
@@ -3949,7 +3949,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.primary",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_withLoggingConfigDisabled(clusterName, networkName, subnetworkName, minVersion),
@@ -3958,7 +3958,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.primary",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_withLoggingConfigUpdated(clusterName, networkName, subnetworkName, minVersion),
@@ -3967,7 +3967,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.primary",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
 				Config: testAccContainerCluster_basicWithMinGKEVersion(clusterName, networkName, subnetworkName, minVersion),
@@ -3976,7 +3976,7 @@ func TestAccContainerCluster_withLoggingConfig(t *testing.T) {
 				ResourceName:        "google_container_cluster.primary",
 				ImportState:         true,
 				ImportStateVerify:   true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 		},
 	})
