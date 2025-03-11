@@ -28,22 +28,14 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "labels", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "location", "terraform_labels"},
 			},
 			{
 				Config: testAccLustreInstance_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
-							"google_lustre_instance.description",
-							plancheck.ResourceActionUpdate,
-						),
-						plancheck.ExpectResourceAction(
-							"google_lustre_instance.labels",
-							plancheck.ResourceActionUpdate,
-						),
-						plancheck.ExpectResourceAction(
-							"google_lustre_instance.gke_support_enabled",
+							"google_lustre_instance.instance",
 							plancheck.ResourceActionUpdate,
 						),
 					},
@@ -53,7 +45,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "labels", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "location", "terraform_labels"},
 			},
 		},
 	})
@@ -65,6 +57,10 @@ resource "google_lustre_instance" "instance" {
   instance_id  = "tf-test-my-instance%{random_suffix}"
   location     = "us-central1-a"
   filesystem   = "testfs"
+	description  = original
+	labels       = {
+    test = "original"
+  }
   capacity_gib = 18000
   network      = data.google_compute_network.lustre-network.id
 	timeouts {
@@ -97,7 +93,7 @@ resource "google_lustre_instance" "instance" {
   network             = data.google_compute_network.lustre-network.id
   gke_support_enabled = true
   labels              = {
-    test = "newLabel"
+    test = "updated"
   }
 	timeouts {
 		create = "250m"
