@@ -21,7 +21,7 @@ resource "google_bigtable_table" "table" {
 
 resource "google_bigtable_materialized_view" "{{$.PrimaryResourceId}}" {
   materialized_view_id = "{{index $.Vars "materialized_view_name"}}"
-  instance             = google_bigtable_instance.instance.id
+  instance             = google_bigtable_instance.instance.name
   deletion_protection  = false
   query = <<EOT
 SELECT _key, CF 
