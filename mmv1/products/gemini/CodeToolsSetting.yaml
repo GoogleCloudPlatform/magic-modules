@@ -93,14 +93,14 @@ properties:
           item_type:
             type: NestedObject
             properties:
-            - name: key
-              type: String
-              description: Required. Key of the configuration item.
-              required: true
-            - name: value
-              type: String
-              description: Required. Value of the configuration item.
-              required: true
+              - name: key
+                type: String
+                description: Required. Key of the configuration item.
+                required: true
+              - name: value
+                type: String
+                description: Required. Value of the configuration item.
+                required: true
         - name: uriOverride
           type: String
           description: Optional. Overridden URI, if allowed by Tool.
