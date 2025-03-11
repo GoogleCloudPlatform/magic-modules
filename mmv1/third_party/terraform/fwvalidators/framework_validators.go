@@ -2,9 +2,11 @@ package fwvalidators
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
