@@ -1605,3 +1605,100 @@ func TestAccAlloydbCluster_standardClusterUpdateFailure(t *testing.T) {
 		},
 	})
 }
+
+// Ensures cluster creation works with deny periods.
+func TestAccAlloydbCluster_withDenyPeriods(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withDenyPeriods(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withUpdateToDenyPeriods(context),
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withDenyPeriods(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  maintenance_update_policy {
+   deny_maintenance_periods {
+    start_date {
+     year = 2025
+     month = 2
+     day = 10
+    }
+    end_date {
+     year = 2025
+     month = 2
+     day = 15
+    }
+    time {
+     hours = 12
+     minutes = 0
+    }
+   }
+  }
+}
+data "google_project" "project" {}
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_withUpdateToDenyPeriods(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+  maintenance_update_policy {
+   deny_maintenance_periods {
+    start_date {
+     year = 2025
+     month = 2
+     day = 15
+    }
+    end_date {
+     year = 2025
+     month = 2
+     day = 25
+    }
+    time {
+     hours = 12
+     minutes = 0
+    }
+   }
+  }
+}
+data "google_project" "project" {}
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
