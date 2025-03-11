@@ -244,8 +244,9 @@ resource "google_eventarc_enrollment" "primary" {
   annotations = {
     updated_test_annotation = "updated-test-eventarc-annotation"
   }
-  # As of time of writing, enrollments can't be updated if their pipeline has been deleted.
-  # So use this workaround until the underlying issue in the Eventarc API is fixed.
+  # TODO(tommyreddad) As of time of writing, enrollments can't be updated
+  # if their pipeline has been deleted. So use this workaround until the
+  # underlying issue in the Eventarc API is fixed.
   depends_on    = [google_eventarc_pipeline.pipeline, google_project_service_identity.eventarc_sa]
 }
 
