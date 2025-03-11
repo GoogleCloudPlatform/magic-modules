@@ -133,14 +133,14 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
             }
             instance_filter {
                 inventories {
-                    os_short_name = "windows-10"
+                    os_short_name = "ubuntu"
                 }
             }
             rollout {
                 disruption_budget {
-                    percent = 100
+                    percent = 50
                 }
-                min_wait_duration = "60s"
+                min_wait_duration = "120s"
             }
         }
     }
