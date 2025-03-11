@@ -122,6 +122,21 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status"},
 			},
+{{- if ne $.TargetVersionName "ga" }}
+			{
+				Config: testAccRegionInstanceGroupManager_update4(template1, target1, target2, template2, igm),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health", "DO_NOTHING"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+{{- end }}
 		},
 	})
 }
@@ -513,6 +528,42 @@ func TestAccRegionInstanceGroupManager_resourceManagerTags(t *testing.T) {
 			},
 			{
 				ResourceName:            "google_compute_region_instance_group_manager.rigm-tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status", "params"},
+			},
+		},
+	})
+}
+
+func TestAccRegionInstanceGroupManager_failoverAction(t *testing.T) {
+	t.Parallel()
+
+	template_name := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+	igm_name := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRegionInstanceGroupManager_failoverAction(template_name, igm_name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-failover-action", "failover_action", "NO_FAILOVER"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-failover-action",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status", "params"},
+			},
+			{
+				Config: testAccRegionInstanceGroupManager_failoverAction2(template_name, igm_name),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-failover-action",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status", "params"},
@@ -959,6 +1010,98 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
 }
 `, tag, igm)
 }
+
+
+{{- if ne $.TargetVersionName "ga" }}
+func testAccRegionInstanceGroupManager_update4(template1, target1, target2, template2, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-update" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_target_pool" "igm-update" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  session_affinity = "CLIENT_IP_PROTO"
+}
+
+resource "google_compute_target_pool" "igm-update2" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  session_affinity = "CLIENT_IP_PROTO"
+}
+
+resource "google_compute_instance_template" "igm-update2" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm-update" {
+  description = "Terraform test instance group manager"
+  name        = "%s"
+
+  version {
+    instance_template = google_compute_instance_template.igm-update2.self_link
+    name              = "primary"
+  }
+
+  base_instance_name             = "tf-test-igm-update"
+  region                         = "us-central1"
+  target_size                    = 3
+  list_managed_instances_results = "PAGINATED"
+  named_port {
+    name = "customhttp"
+    port = 8080
+  }
+  named_port {
+    name = "customhttps"
+    port = 8443
+  }
+  instance_lifecycle_policy {
+    on_failed_health = "DO_NOTHING"
+  }
+}
+`, template1, target1, target2, template2, igm)
+}
+{{- end }}
 
 func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string {
 	return fmt.Sprintf(`
@@ -2189,5 +2332,100 @@ resource "google_compute_region_instance_group_manager" "rigm-tags" {
   }
 }
 `, template_name, project_id, tag_name, tag_name, igm_name)
+}
+
+func testAccRegionInstanceGroupManager_failoverAction(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider = google-beta
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm-failover-action" {
+  provider = google-beta
+  description = "Terraform test instance group manager"
+  name        = "%s"
+  failover_action = "NO_FAILOVER"
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name             = "tf-test-igm-no-tp"
+  region                         = "us-central1"
+  target_size                    = 2
+}
+`, template, igm)
+}
+
+func testAccRegionInstanceGroupManager_failoverAction2(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider = google-beta
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm-failover-action" {
+  provider = google-beta
+  description = "Terraform test instance group manager"
+  name        = "%s"
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name             = "tf-test-igm-no-tp"
+  region                         = "us-central1"
+  target_size                    = 2
+}
+`, template, igm)
 }
 {{- end }}

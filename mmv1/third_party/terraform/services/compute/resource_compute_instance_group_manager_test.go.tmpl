@@ -155,6 +155,19 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status"},
 			},
+			{
+				Config: testAccInstanceGroupManager_update4(template1, target1, target2, template2, description2, igm),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health", "DO_NOTHING"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
 		},
 	})
 }
@@ -940,6 +953,98 @@ resource "google_compute_instance_group_manager" "igm-update" {
   named_port {
     name = "customhttps"
     port = 8443
+  }
+}
+`, template1, target1, target2, template2, description2, igm)
+}
+
+func testAccInstanceGroupManager_update4(template1, target1, target2, template2, description2, igm string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-update" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_target_pool" "igm-update" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  session_affinity = "CLIENT_IP_PROTO"
+}
+
+resource "google_compute_target_pool" "igm-update2" {
+  description      = "Resource created for Terraform acceptance testing"
+  name             = "%s"
+  session_affinity = "CLIENT_IP_PROTO"
+}
+
+resource "google_compute_instance_template" "igm-update2" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-update" {
+  description = "%s"
+  name        = "%s"
+
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-update2.self_link
+  }
+
+  base_instance_name             = "tf-test-igm-update"
+  zone                           = "us-central1-c"
+  target_size                    = 3
+  list_managed_instances_results = "PAGINATED"
+  named_port {
+    name = "customhttp"
+    port = 8080
+  }
+  named_port {
+    name = "customhttps"
+    port = 8443
+  }
+
+  instance_lifecycle_policy {
+    force_update_on_repair = "NO"
+    default_action_on_failure = "REPAIR"
+    on_failed_health = "DO_NOTHING"
   }
 }
 `, template1, target1, target2, template2, description2, igm)
