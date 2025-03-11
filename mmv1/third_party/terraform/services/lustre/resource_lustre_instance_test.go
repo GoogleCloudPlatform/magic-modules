@@ -57,7 +57,7 @@ resource "google_lustre_instance" "instance" {
   instance_id  = "tf-test-my-instance%{random_suffix}"
   location     = "us-central1-a"
   filesystem   = "testfs"
-	description  = original
+	description  = "original"
 	labels       = {
     test = "original"
   }
@@ -87,8 +87,8 @@ func testAccLustreInstance_update(context map[string]interface{}) string {
 resource "google_lustre_instance" "instance" {
   instance_id         = "tf-test-my-instance%{random_suffix}"
   location            = "us-central1-a"
-  description         = "description updated"
   filesystem          = "testfs"
+  description         = "description updated"
   capacity_gib        = 18000
   network             = data.google_compute_network.lustre-network.id
   gke_support_enabled = true
