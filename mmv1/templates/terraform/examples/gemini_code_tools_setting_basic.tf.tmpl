@@ -4,7 +4,11 @@ resource "google_gemini_code_tools_setting" "{{$.PrimaryResourceId}}" {
     location = "global"
     labels = {"my_key": "my_value"}
     enabled_tool = {
-        {handle = "my_handle1", tool = "my_tool1"},
-        {handle = "my_handle2", tool = "my_tool2"},
+        handle = "my_handle1"
+        tool = "my_tool1"
+    }
+    enabled_tool = {
+        handle = "my_handle2"
+        tool = "my_tool2"
     }
 }
