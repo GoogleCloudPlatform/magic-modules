@@ -15,7 +15,6 @@ import (
 )
 
 // We make sure not to run tests in parallel, since only one MessageBus per project is supported.
-// For this same reason, we must also include any Enrollment and Pipeline tests which depend on a MessageBus here.
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"basic":           testAccEventarcMessageBus_basic,
@@ -334,6 +333,7 @@ resource "google_eventarc_pipeline" "primary" {
     }
   }
 }
+
 resource "google_eventarc_message_bus" "primary" {
   location       = "%{region}"
   message_bus_id = "tf-test-messagebus%{random_suffix}"
