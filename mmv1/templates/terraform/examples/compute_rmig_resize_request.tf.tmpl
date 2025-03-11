@@ -50,9 +50,6 @@ resource "google_compute_region_instance_group_manager" "a3_dws" {
   }
   instance_lifecycle_policy {
     default_action_on_failure = "DO_NOTHING"
-{{- if ne $.TargetVersionName "ga" }}
-    on_failed_health_check = "DEFAULT_ACTION"
-{{- end }}
   }
   distribution_policy_target_shape = "ANY_SINGLE_ZONE"
   distribution_policy_zones        = ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"]
