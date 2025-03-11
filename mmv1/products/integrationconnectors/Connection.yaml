@@ -486,6 +486,7 @@ properties:
     properties:
       - name: 'locked'
         type: Boolean
+        default_from_api: false
         description: |
           Indicates whether or not the connection is locked.
         required: true
@@ -565,6 +566,7 @@ properties:
       Log configuration for the connection.
     properties:
       - name: 'enabled'
+        default_from_api: false
         type: Boolean
         description: |
           Enabled represents whether logging is enabled or not for a connection.
