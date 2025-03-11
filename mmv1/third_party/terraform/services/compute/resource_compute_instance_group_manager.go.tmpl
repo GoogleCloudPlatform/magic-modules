@@ -355,8 +355,22 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 							Default:      "REPAIR",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"REPAIR", "DO_NOTHING"}, true),
+{{ if $.TargetVersionName `ga` -}}
 							Description:  `Default behavior for all instance or health check failures.`,
+{{- end }}
+{{ if ne $.TargetVersionName `ga` -}}
+							Description:  `Specifies the action that a MIG performs on a failed VM. If the value of the onFailedHealthCheck field is `DEFAULT_ACTION`, then the same action also applies to the VMs on which your application fails a health check.`,
+{{- end }}
 						},
+{{ if ne $.TargetVersionName `ga` -}}
+						"on_failed_health_check": {
+							Type:		  schema.TypeString,
+							Default:      "DEFAULT_ACTION",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"DEFAULT_ACTION", "REPAIR", "DO_NOTHING"}, true),
+							Description:  `Specifies the action that a MIG performs on an unhealthy VM. A VM is marked as unhealthy when the application running on that VM fails a health check.`,
+						},
+{{- end }}
 						"force_update_on_repair": {
 							Type:         schema.TypeString,
 							Default:      "NO",
@@ -1303,6 +1317,9 @@ func expandInstanceLifecyclePolicy(configured []interface{}) *compute.InstanceGr
 		data := raw.(map[string]interface{})
 		instanceLifecyclePolicy.ForceUpdateOnRepair = data["force_update_on_repair"].(string)
 		instanceLifecyclePolicy.DefaultActionOnFailure = data["default_action_on_failure"].(string)
+{{ if ne $.TargetVersionName `ga` -}}
+		instanceLifecyclePolicy.OnFailedHealthCheck = data["on_failed_health_check"].(string)
+{{- end }}
 	}
 	return instanceLifecyclePolicy
 }
@@ -1501,6 +1518,9 @@ func flattenInstanceLifecyclePolicy(instanceLifecyclePolicy *compute.InstanceGro
 		ilp := map[string]interface{}{}
 		ilp["force_update_on_repair"] = instanceLifecyclePolicy.ForceUpdateOnRepair
 		ilp["default_action_on_failure"] = instanceLifecyclePolicy.DefaultActionOnFailure
+{{ if ne $.TargetVersionName `ga` -}}
+		ilp["on_failed_health_check"] = instanceLifecyclePolicy.OnFailedHealthCheck
+{{- end }}
 		results = append(results, ilp)
 	}
 	return results

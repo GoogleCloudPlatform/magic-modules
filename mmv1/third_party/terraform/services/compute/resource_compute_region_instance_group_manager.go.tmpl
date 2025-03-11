@@ -308,6 +308,7 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Description: `The instance lifecycle policy for this managed instance group.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+{{ if $.TargetVersionName `ga` -}}
 						"default_action_on_failure": {
 							Type:         schema.TypeString,
 							Default:      "REPAIR",
@@ -315,6 +316,23 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{"REPAIR", "DO_NOTHING"}, true),
 							Description:  `Default behavior for all instance or health check failures.`,
 						},
+{{- end }}
+{{ if ne $.TargetVersionName `ga` -}}
+						"default_action_on_failure": {
+							Type:         schema.TypeString,
+							Default:      "REPAIR",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"REPAIR", "DO_NOTHING"}, true),
+							Description:  `Specifies the action that a MIG performs on a failed VM. If the value of the onFailedHealthCheck field is `DEFAULT_ACTION`, then the same action also applies to the VMs on which your application fails a health check.`,
+						},
+						"on_failed_health_check": {
+							Type:		   schema.TypeString,
+							Default:       "DEFAULT_ACTION",
+							Optional:      true,
+							ValidateFunc:  validation.StringInSlice([]string{"DEFAULT_ACTION", "REPAIR", "DO_NOTHING"}, true),
+							Description:   `Specifies the action that a MIG performs on an unhealthy VM. A VM is marked as unhealthy when the application running on that VM fails a health check.`,
+						},
+{{- end }}
 						"force_update_on_repair": {
 							Type:         schema.TypeString,
 							Default:      "NO",
