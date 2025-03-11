@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccProjectIamMemberRemove_basic(t *testing.T) {
@@ -94,6 +94,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {
@@ -122,6 +123,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {
@@ -150,6 +152,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {
@@ -178,6 +181,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {
@@ -206,6 +210,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {
@@ -240,6 +245,7 @@ resource "google_project" "project" {
   project_id = "tf-test-%s"
   name       = "tf-test-%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_binding" "bar" {

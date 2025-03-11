@@ -1,8 +1,0 @@
-# [START vpc_auto_create]
-resource "google_compute_network" "<%= ctx[:primary_resource_id] %>" {
-  project                 = "<%= ctx[:test_env_vars]["project"] %>"
-  name                    = "<%= ctx[:vars]['network_name'] %>"
-  auto_create_subnetworks = true
-  mtu                     = 1460
-}
-# [END vpc_auto_create]

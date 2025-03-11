@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,133 +11,133 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Hl7V2Store'
 kind: 'healthcare#hl7V2Store'
-base_url: '{{dataset}}/hl7V2Stores?hl7V2StoreId={{name}}'
-self_link: '{{dataset}}/hl7V2Stores/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A Hl7V2Store is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/hl7V2/STU3/)
   standard for Healthcare information exchange
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a HL7v2 Store': 'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.hl7V2Stores'
+docs:
 id_format: '{{dataset}}/hl7V2Stores/{{name}}'
-import_format: ['{{dataset}}/hl7V2Stores/{{name}}']
-skip_sweeper: true
+base_url: '{{dataset}}/hl7V2Stores?hl7V2StoreId={{name}}'
+self_link: '{{dataset}}/hl7V2Stores/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{dataset}}/hl7V2Stores/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/healthcare_hl7_v2_store.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_hl7_v2_store_basic'
+  - name: 'healthcare_hl7_v2_store_basic'
     primary_resource_id: 'store'
     vars:
       dataset_name: 'example-dataset'
       hl7_v2_store_name: 'example-hl7-v2-store'
       pubsub_topic: 'hl7-v2-notifications'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_hl7_v2_store_parser_config'
-    min_version: 'beta'
+  - name: 'healthcare_hl7_v2_store_parser_config'
     primary_resource_id: 'store'
+    min_version: 'beta'
     vars:
       dataset_name: 'example-dataset'
       hl7_v2_store_name: 'example-hl7-v2-store'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_hl7_v2_store_unschematized'
-    min_version: 'beta'
+  - name: 'healthcare_hl7_v2_store_unschematized'
     primary_resource_id: 'store'
+    min_version: 'beta'
     vars:
       dataset_name: 'example-dataset'
       hl7_v2_store_name: 'example-hl7-v2-store'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
-  custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'dataset'
+  - name: 'dataset'
+    type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The resource name for the Hl7V2Store.
 
       ** Changing this property may recreate the Hl7v2 store (removing all data) **
     required: true
     immutable: true
-  - !ruby/object:Api::Type::Boolean
-    name: rejectDuplicateMessage
-    required: false
-    default_value: false
+  - name: 'rejectDuplicateMessage'
+    type: Boolean
     description: |
       Determines whether duplicate messages are allowed.
-  - !ruby/object:Api::Type::NestedObject
-    name: parserConfig
     required: false
+    default_value: false
+  - name: 'parserConfig'
+    type: NestedObject
+    required: false
+    default_from_api: true
     update_mask_fields:
       - 'parser_config.allow_null_header'
       - 'parser_config.segment_terminator'
       - 'parser_config.schema'
-    default_from_api: true
     properties:
-      - !ruby/object:Api::Type::Boolean
-        name: allowNullHeader
-        at_least_one_of:
-          - parser_config.0.allow_null_header
-          - parser_config.0.segment_terminator
-          - parser_config.0.schema
+      - name: 'allowNullHeader'
+        type: Boolean
         description: |
           Determines whether messages with no header are allowed.
-      - !ruby/object:Api::Type::String
-        name: segmentTerminator
         at_least_one_of:
-          - parser_config.0.allow_null_header
-          - parser_config.0.segment_terminator
-          - parser_config.0.schema
+          - 'parser_config.0.allow_null_header'
+          - 'parser_config.0.segment_terminator'
+          - 'parser_config.0.schema'
+      - name: 'segmentTerminator'
+        type: String
         description: |
           Byte(s) to be used as the segment terminator. If this is unset, '\r' will be used as segment terminator.
 
           A base64-encoded string.
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: 'verify.ValidateBase64String'
-      - !ruby/object:Api::Type::String
-        name: schema
         at_least_one_of:
-          - parser_config.0.allow_null_header
-          - parser_config.0.segment_terminator
-          - parser_config.0.schema
-          - parser_config.0.version
+          - 'parser_config.0.allow_null_header'
+          - 'parser_config.0.segment_terminator'
+          - 'parser_config.0.schema'
+        validation:
+          function: 'verify.ValidateBase64String'
+      - name: 'schema'
+        type: String
         description: |
           JSON encoded string for schemas used to parse messages in this
           store if schematized parsing is desired.
-        custom_expand: 'templates/terraform/custom_expand/json_schema.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.erb'
-        state_func:
-          'func(v interface{}) string { s, _ :=
-          structure.NormalizeJsonString(v); return s }'
-        validation: !ruby/object:Provider::Terraform::Validation
+        at_least_one_of:
+          - 'parser_config.0.allow_null_header'
+          - 'parser_config.0.segment_terminator'
+          - 'parser_config.0.schema'
+          - 'parser_config.0.version'
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
           function: 'validation.StringIsJSON'
-      - !ruby/object:Api::Type::Enum
-        name: version
+      - name: 'version'
+        type: Enum
         description: |
           The version of the unschematized parser to be used when a custom `schema` is not set.
         immutable: true
-        default_value: :V1
-        values:
-          - :V1
-          - :V2
-          - :V3
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
-    required: false
+        default_value: "V1"
+        enum_values:
+          - 'V1'
+          - 'V2'
+          - 'V3'
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize HL7v2 stores.
 
@@ -151,16 +151,18 @@ properties:
 
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
-  - !ruby/object:Api::Type::Array
-    name: notificationConfigs
+    required: false
+  - name: 'notificationConfigs'
+    type: Array
     description: |-
       A list of notification configs. Each configuration uses a filter to determine whether to publish a
       message (both Ingest & Create) on the corresponding notification destination. Only the message name
       is sent as part of the notification. Supplied by the client.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: pubsubTopic
+        - name: 'pubsubTopic'
+          type: String
           description: |
             The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
             PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -171,8 +173,8 @@ properties:
 
             If a notification cannot be published to Cloud Pub/Sub, errors will be logged to Stackdriver
           required: true
-        - !ruby/object:Api::Type::String
-          name: filter
+        - name: 'filter'
+          type: String
           description: |
             Restricts notifications sent for messages matching a filter. If this is empty, all messages
             are matched. Syntax: https://cloud.google.com/appengine/docs/standard/python/search/query_strings
@@ -185,14 +187,14 @@ properties:
             * sendFacility, the care center that the message came from, from the MSH-4 segment. For example, sendFacility = "ABC".
             * PatientId(value, type), which matches if the message lists a patient having an ID of the given value and type in the PID-2, PID-3, or PID-4 segments. For example, PatientId("123456", "MRN").
             * labels.x, a string value of the label with key x as set using the Message.labels map. For example, labels."priority"="high". The operator :* can be used to assert the existence of a label. For example, labels."priority":*.
-  - !ruby/object:Api::Type::NestedObject
-    name: notificationConfig
+  - name: 'notificationConfig'
+    type: NestedObject
     removed_message: This field has been replaced by notificationConfigs
     exact_version: ga
     required: false
     properties:
-      - !ruby/object:Api::Type::String
-        name: pubsubTopic
+      - name: 'pubsubTopic'
+        type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
           PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -201,16 +203,14 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: notificationConfig
-    # This field is duplicated because beta and ga have different behaviors.
-    deprecation_message: >-
-      `notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.
-    exact_version: beta
+  - name: 'notificationConfig'
+    type: NestedObject
+    exact_version: 'beta'
     required: false
+    deprecation_message: '`notification_config` is deprecated and will be removed in a future major release. Use `notification_configs` instead.'
     properties:
-      - !ruby/object:Api::Type::String
-        name: pubsubTopic
+      - name: 'pubsubTopic'
+        type: String
         description: |
           The Cloud Pub/Sub topic that notifications of changes are published on. Supplied by the client.
           PubsubMessage.Data will contain the resource name. PubsubMessage.MessageId is the ID of this message.
@@ -219,9 +219,9 @@ properties:
           project. service-PROJECT_NUMBER@gcp-sa-healthcare.iam.gserviceaccount.com must have publisher permissions on the given
           Cloud Pub/Sub topic. Not having adequate permissions will cause the calls that send notifications to fail.
         required: true
-  - !ruby/object:Api::Type::String
-    name: 'selfLink'
+  - name: 'selfLink'
+    type: String
     description: |
       The fully qualified name of this dataset
-    output: true
     ignore_read: true
+    output: true

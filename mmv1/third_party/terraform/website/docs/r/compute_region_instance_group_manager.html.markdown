@@ -91,10 +91,9 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   }
 }
 ```
-## Example Usage with standby policy (`google-beta` provider)
+## Example Usage with standby policy (`google` provider)
 ```hcl
 resource "google_compute_region_instance_group_manager" "igm-sr" {
-  provider = google-beta
   name = "tf-sr-igm"
 
   base_instance_name        = "tf-sr-igm-instance"
@@ -184,11 +183,11 @@ group. You can specify only one value. Structure is documented below. For more i
   allInstancesConfig on the group, you must update the group's instances to
   apply the configuration.
 
-* `standby_policy` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
+* `standby_policy` - (Optional) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig).
 
-* `target_suspended_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of suspended instances for this managed instance group.
+* `target_suspended_size` - (Optional) The target number of suspended instances for this managed instance group.
 
-* `target_stopped_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of stopped instances for this managed instance group.
+* `target_stopped_size` - (Optional) The target number of stopped instances for this managed instance group.
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
 
@@ -205,6 +204,7 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Input only additional params for instance group manager creation. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
 
+* `instance_flexibility_policy` - (Optional) The flexibility policy for managed instance group. Instance flexibility allows managed instance group to create VMs from multiple types of machines. Instance flexibility configuration on managed instance group overrides instance template configuration. Structure is [documented below](#nested_instance_flexibility_policy).
 - - -
 
 The `standby_policy` block supports:
@@ -236,13 +236,13 @@ update_policy {
 
 * `instance_redistribution_type` - (Optional) - The instance redistribution policy for regional managed instance groups. Valid values are: `"PROACTIVE"`, `"NONE"`. If `PROACTIVE` (default), the group attempts to maintain an even distribution of VM instances across zones in the region. If `NONE`, proactive redistribution is disabled.
 
-* `max_surge_fixed` - (Optional), The maximum number of instances that can be created above the specified targetSize during the update process. Conflicts with `max_surge_percent`. It has to be either 0 or at least equal to the number of zones.  If fixed values are used, at least one of `max_unavailable_fixed` or `max_surge_fixed` must be greater than 0.
+* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with `max_surge_percent`. Both cannot be 0.
 
-* `max_surge_percent` - (Optional), The maximum number of instances(calculated as percentage) that can be created above the specified targetSize during the update process. Conflicts with `max_surge_fixed`. Percent value is only allowed for regional managed instance groups with size at least 10.
+* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%. Conflicts with `max_surge_fixed`.
 
-* `max_unavailable_fixed` - (Optional), The maximum number of instances that can be unavailable during the update process. Conflicts with `max_unavailable_percent`. It has to be either 0 or at least equal to the number of zones. If fixed values are used, at least one of `max_unavailable_fixed` or `max_surge_fixed` must be greater than 0.
+* `max_unavailable_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer.
 
-* `max_unavailable_percent` - (Optional), The maximum number of instances(calculated as percentage) that can be unavailable during the update process. Conflicts with `max_unavailable_fixed`. Percent value is only allowed for regional managed instance groups with size at least 10.
+* `max_unavailable_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%..
 
 * `min_ready_sec` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600]
 
@@ -262,7 +262,35 @@ instance_lifecycle_policy {
 * `default_action_on_failure` - (Optional), Default behavior for all instance or health check failures. Valid options are: `REPAIR`, `DO_NOTHING`. If `DO_NOTHING` then instances will not be repaired. If `REPAIR` (default), then failed instances will be repaired.
 
 - - -
+<a name="nested_instance_flexibility_policy"></a>The `instance_flexibility_policy` block supports:
 
+```hcl
+instance_flexibility_policy {
+  instance_selections {
+    name = "instance_selection_name"
+    rank = 1
+    machine_types = ["n1-standard-16"]
+  }
+}
+```
+
+* `instance_selections` - (Optional), Named instance selections configuring properties that the group will use when creating new VMs. One can specify multiple instance selection to allow managed instance group to create VMs from multiple types of machines, based on preference and availability. Structure is [documented below](#nested_instance_selections).
+- - -
+<a name="nested_instance_selections"></a>The `instance_selections` block supports:
+
+```hcl
+instance_selections {
+  name = "instance_selection_name"
+  rank = 1
+  machine_types = ["n1-standard-1", "n1-standard-16"]
+}
+```
+
+* `name` - (Required), Name of the instance selection, e.g. instance_selection_with_n1_machines_types. Instance selection names must be unique within the flexibility policy.
+* `rank` - (Optional), Preference of this instance selection. Lower number means higher preference. Managed instance group will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.
+* `machine_types` - (Required), A list of full machine-type names, e.g. "n1-standard-16".
+
+- - -
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
 
 ```hcl
@@ -320,9 +348,9 @@ version {
 }
 ```
 
-* `name` - (Required) - Version name.
-
 * `instance_template` - (Required) - The full URL to an instance template from which all new instances of this version will be created.
+
+* `name` - (Optional) - Version name.
 
 * `target_size` - (Optional) - The number of instances calculated as a fixed number or a percentage depending on the settings. Structure is [documented below](#nested_target_size).
 

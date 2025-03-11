@@ -1,0 +1,51 @@
+func regionNetworkFirewallPolicyWithRulesConvertPriorityToInt(v interface {}) (int64, error) {
+  if strVal, ok := v.(string); ok {
+    if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+      return intVal, nil
+    }
+  }
+
+  if intVal, ok := v.(int64); ok {
+    return intVal, nil
+  }
+
+  if floatVal, ok := v.(float64); ok {
+    intVal := int64(floatVal)
+    return intVal, nil
+  }
+  return 0, fmt.Errorf("Incorrect rule priority: %s. Priority must be a number", v)
+}
+
+func regionNetworkFirewallPolicyWithRulesIsPredefinedRule(rule map[string]interface{}) (bool, error) {
+  // Priorities from 2147483548 to 2147483647 are reserved and cannot be modified by the user.
+  const ReservedPriorityStart = 2147483548
+
+  priority := rule["priority"]
+  priorityInt, err :=  regionNetworkFirewallPolicyWithRulesConvertPriorityToInt(priority)
+
+  if err != nil {
+    return false, err
+  }
+
+  return priorityInt >= ReservedPriorityStart, nil
+}
+
+func regionNetworkFirewallPolicyWithRulesSplitPredefinedRules(allRules []interface{}) ([]interface{}, []interface{}, error) {
+  predefinedRules := make([]interface{}, 0)
+  rules := make([]interface{}, 0)
+
+  for _, rule := range allRules {
+    isPredefined, err :=  regionNetworkFirewallPolicyWithRulesIsPredefinedRule(rule.(map[string]interface{}))
+    if err != nil {
+      return nil, nil, err
+    }
+
+    if isPredefined {
+      predefinedRules = append(predefinedRules, rule)
+    } else {
+      rules = append(rules, rule)
+    }
+  }
+
+  return rules, predefinedRules, nil
+}

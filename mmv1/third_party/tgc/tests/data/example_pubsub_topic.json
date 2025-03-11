@@ -11,6 +11,7 @@
             "data": {
                 "kmsKeyName": "projects/{{.Provider.project}}/locations/australia-southeast1/keyRings/default_kms_keyring_name/cryptoKeys/default_kms_key_name",
                 "labels": {
+                    "goog-terraform-provisioned": "true",
                     "test-key": "test-value"
                 },
                 "messageStoragePolicy": {

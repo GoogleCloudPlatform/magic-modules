@@ -14,7 +14,8 @@
           "datasetId": "test_dataset"
         },
         "labels": {
-          "env": "dev"
+          "env": "dev",
+          "goog-terraform-provisioned": "true"
         },
         "location": "EU",
         "defaultTableExpirationMs": 3.6e+06

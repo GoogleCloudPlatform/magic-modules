@@ -1,0 +1,18 @@
+[
+  {
+    "name": "//appengine.googleapis.com/v1/placeholder-GWJVsru5",
+    "asset_type": "appengine.googleapis.com/Application",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/appengine/v1beta/rest",
+      "discovery_name": "Application",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "location_id": "us-central"
+      }
+    },
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "ancestors": ["organizations/{{.OrgID}}"]
+
+  }
+]

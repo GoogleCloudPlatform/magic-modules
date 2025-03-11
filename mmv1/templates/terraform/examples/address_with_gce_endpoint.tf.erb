@@ -1,5 +1,0 @@
-resource "google_compute_address" "<%= ctx[:primary_resource_id] %>" {
-  name         = "<%= ctx[:vars]['address_name'] %>"
-  address_type = "INTERNAL"
-  purpose      = "GCE_ENDPOINT"
-}

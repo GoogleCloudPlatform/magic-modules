@@ -16,7 +16,8 @@ const val DefaultStartHour = 4
 const val DefaultParallelism = 6
 
 // specifies the default version of Terraform Core which should be used for testing
-const val DefaultTerraformCoreVersion = "1.8.3"
+// this is updated semi-regularly
+const val DefaultTerraformCoreVersion = "1.10.0"
 
 // This represents a cron view of days of the week
 const val DefaultDaysOfWeek = "*"
@@ -25,7 +26,7 @@ const val DefaultDaysOfWeek = "*"
 const val DefaultDaysOfMonth = "*"
 
 // This represents the default branch to be used for testing
-const val DefaultBranchName = "refs/heads/main"
+const val DefaultBranchName = "refs/heads/nightly-test"
 
 // Value used to make long-running builds fail due to a timeout
 const val DefaultBuildTimeoutDuration = 60 * 12 // 12 hours in minutes
@@ -43,3 +44,8 @@ const val ProjectSweeperName = "Project Sweeper"
 const val NightlyTestsProjectId = "NightlyTests"
 const val MMUpstreamProjectId = "MMUpstreamTests"
 const val VcrRecordingProjectId = "VCRRecording"
+
+// Artifact rules controls which artifacts are uploaded to S3
+// https://www.jetbrains.com/help/teamcity/2024.07/configuring-general-settings.html#Artifact+Paths
+// The value below lacks a file extension, to allow upload of individual .txt files or a single .tar.gz file
+const val ArtifactRules = "%teamcity.build.checkoutDir%/debug*"

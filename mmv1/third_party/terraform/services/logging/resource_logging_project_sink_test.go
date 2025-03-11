@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -376,7 +376,8 @@ resource "google_project" "project" {
 	project_id = "%s"
 	name       = "%s"
 	org_id     = "%s"
-  billing_account = "%s"
+	billing_account = "%s"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "logging_service" {
@@ -517,6 +518,7 @@ resource "google_project" "destination-project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }	
 
 resource "google_logging_project_bucket_config" "destination-bucket" {
@@ -579,6 +581,7 @@ resource "google_project" "destination-project" {
   name            = "%s"
   org_id          = "%s"
   billing_account = "%s"
+  deletion_policy = "DELETE"
 }	
 
 resource "google_logging_project_bucket_config" "destination-bucket" {

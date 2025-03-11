@@ -5,7 +5,9 @@ ignore_read:
   - "billing_account"
   - "kms_settings"
   - "resource_settings"
+  - "workload_options"
   - "provisioned_resources_parent"
+  - "partner_services_billing_account"
 doc_hide:
   - basic.tf.tmpl # basic_update.tf.tmpl auto hides
   - full.tf.tmpl

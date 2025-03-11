@@ -89,10 +89,9 @@ resource "google_compute_instance_group_manager" "appserver" {
 }
 ```
 
-## Example Usage with standby policy (`google-beta` provider)
+## Example Usage with standby policy (`google` provider)
 ```hcl
 resource "google_compute_instance_group_manager" "igm-sr" {
-  provider = google-beta
   name = "tf-sr-igm"
 
   base_instance_name        = "tf-sr-igm-instance"
@@ -183,11 +182,11 @@ group. You can specify only one value. Structure is [documented below](#nested_a
   allInstancesConfig on the group, you must update the group's instances to
   apply the configuration.
 
-* `standby_policy` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
+* `standby_policy` - (Optional) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig).
 
-* `target_suspended_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of suspended instances for this managed instance group.
+* `target_suspended_size` - (Optional) The target number of suspended instances for this managed instance group.
 
-* `target_stopped_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of stopped instances for this managed instance group.
+* `target_stopped_size` - (Optional) The target number of stopped instances for this managed instance group.
 
 * `stateful_disk` - (Optional) Disks created on the instances that will be preserved on instance delete, update, etc. Structure is [documented below](#nested_stateful_disk). For more information see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/configuring-stateful-disks-in-migs).
 
@@ -227,13 +226,13 @@ update_policy {
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
-* `max_surge_fixed` - (Optional), The maximum number of instances that can be created above the specified targetSize during the update process. Conflicts with `max_surge_percent`. If neither is set, defaults to 1
+* `max_surge_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer. Conflicts with `max_surge_percent`. Both cannot be 0.
 
-* `max_surge_percent` - (Optional), The maximum number of instances(calculated as percentage) that can be created above the specified targetSize during the update process. Conflicts with `max_surge_fixed`.
+* `max_surge_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%. Conflicts with `max_surge_fixed`.
 
-* `max_unavailable_fixed` - (Optional), The maximum number of instances that can be unavailable during the update process. Conflicts with `max_unavailable_percent`. If neither is set, defaults to 1
+* `max_unavailable_fixed` - (Optional), Specifies a fixed number of VM instances. This must be a positive integer.
 
-* `max_unavailable_percent` - (Optional), The maximum number of instances(calculated as percentage) that can be unavailable during the update process. Conflicts with `max_unavailable_fixed`.
+* `max_unavailable_percent` - (Optional), Specifies a percentage of instances between 0 to 100%, inclusive. For example, specify 80 for 80%..
 
 * `min_ready_sec` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)), Minimum number of seconds to wait for after a newly created instance becomes available. This value must be from range [0, 3600]
 
@@ -310,9 +309,9 @@ version {
 }
 ```
 
-* `name` - (Required) - Version name.
-
 * `instance_template` - (Required) - The full URL to an instance template from which all new instances of this version will be created. It is recommended to reference instance templates through their unique id (`self_link_unique` attribute).
+
+* `name` - (Optional) - Version name.
 
 * `target_size` - (Optional) - The number of instances calculated as a fixed number or a percentage depending on the settings. Structure is [documented below](#nested_target_size).
 

@@ -1,5 +1,5 @@
-# Copyright 2023 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the License);
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -11,111 +11,115 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ReportConfig'
-base_url: projects/{{project}}/locations/{{location}}/reportConfigs
-create_url: projects/{{project}}/locations/{{location}}/reportConfigs
-self_link: projects/{{project}}/locations/{{location}}/reportConfigs/{{name}}
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+description: |
+  Represents an inventory report configuration.
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/insights/using-storage-insights'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/reportConfig'
-description: |
-  Represents an inventory report configuration.
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/reportConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/reportConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/reportConfigs'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "storage_insights_report_config"
-    primary_resource_id: "config"
+  - name: 'storage_insights_report_config'
+    primary_resource_id: 'config'
     vars:
-      bucket_name: "my-bucket"
-    config_path: "templates/terraform/examples/storage_insights_report_config.tf.erb"
+      bucket_name: 'my-bucket'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'location'
+  - name: 'location'
+    type: String
     description: |
       The location of the ReportConfig. The source and destination buckets specified in the ReportConfig
       must be in the same location.
-    immutable: true
-    required: true
     url_param_only: true
+    required: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The UUID of the inventory report configuration.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::NestedObject
-    name: 'frequencyOptions'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'frequencyOptions'
+    type: NestedObject
     description: |
       Options for configuring how inventory reports are generated.
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: 'frequency'
+      - name: 'frequency'
+        type: Enum
         description: |
           The frequency in which inventory reports are generated. Values are DAILY or WEEKLY.
         required: true
-        values:
-          - :DAILY
-          - :WEEKLY
-      - !ruby/object:Api::Type::NestedObject
-        name: 'startDate'
+        enum_values:
+          - 'DAILY'
+          - 'WEEKLY'
+      - name: 'startDate'
+        type: NestedObject
         description: |
           The date to start generating inventory reports. For example, {"day": 15, "month": 8, "year": 2022}.
         required: true
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'day'
+          - name: 'day'
+            type: Integer
             description: 'The day of the month to start generating inventory reports.'
             required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'month'
+          - name: 'month'
+            type: Integer
             description: 'The month to start generating inventory reports.'
             required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'year'
+          - name: 'year'
+            type: Integer
             description: 'The year to start generating inventory reports'
             required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'endDate'
+      - name: 'endDate'
+        type: NestedObject
         description: |
           The date to stop generating inventory reports. For example, {"day": 15, "month": 9, "year": 2022}.
         required: true
         properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'day'
+          - name: 'day'
+            type: Integer
             description: 'The day of the month to stop generating inventory reports.'
             required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'month'
+          - name: 'month'
+            type: Integer
             description: 'The month to stop generating inventory reports.'
             required: true
-          - !ruby/object:Api::Type::Integer
-            name: 'year'
+          - name: 'year'
+            type: Integer
             description: 'The year to stop generating inventory reports'
             required: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'csvOptions'
+  - name: 'csvOptions'
+    type: NestedObject
     description: |
       Options for configuring the format of the inventory report CSV file.
     required: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'recordSeparator'
+      - name: 'recordSeparator'
+        type: String
         description: |
           The character used to separate the records in the inventory report CSV file.
-      - !ruby/object:Api::Type::String
-        name: 'delimiter'
+      - name: 'delimiter'
+        type: String
         description: |
           The delimiter used to separate the fields in the inventory report CSV file.
-      - !ruby/object:Api::Type::Boolean
-        name: 'headerRequired'
+      - name: 'headerRequired'
+        type: Boolean
         description: |
           The boolean that indicates whether or not headers are included in the inventory report CSV file.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'objectMetadataReportOptions'
+  - name: 'objectMetadataReportOptions'
+    type: NestedObject
     description: |
       Options for including metadata in an inventory report.
     update_mask_fields:
@@ -123,36 +127,37 @@ properties:
       - 'objectMetadataReportOptions.storageDestinationOptions.bucket'
       - 'objectMetadataReportOptions.storageDestinationOptions.destinationPath'
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'metadataFields'
+      - name: 'metadataFields'
+        type: Array
         description: |
           The metadata fields included in an inventory report.
         required: true
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::NestedObject
-        name: 'storageFilters'
+        item_type:
+          type: String
+      - name: 'storageFilters'
+        type: NestedObject
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'bucket'
+          - name: 'bucket'
+            type: String
             description: |
               The filter to use when specifying which bucket to generate inventory reports for.
             immutable: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'storageDestinationOptions'
+      - name: 'storageDestinationOptions'
+        type: NestedObject
         description: |
           Options for where the inventory reports are stored.
         required: true
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'bucket'
+          - name: 'bucket'
+            type: String
             description: |
               The destination bucket that stores the generated inventory reports.
             required: true
-          - !ruby/object:Api::Type::String
-            name: 'destinationPath'
+          - name: 'destinationPath'
+            type: String
             description: |
               The path within the destination bucket to store generated inventory reports.
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+  - name: 'displayName'
+    type: String
     description: |
       The editable display name of the inventory report configuration. Has a limit of 256 characters. Can be empty.

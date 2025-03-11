@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -39,7 +39,7 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels", "deletion_protection"},
 			},
 			{
 				Config: testAccADDomainUpdate(context),
@@ -48,7 +48,7 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels", "deletion_protection"},
 			},
 			{
 				Config: testAccADDomainBasic(context),
@@ -57,7 +57,7 @@ func TestAccActiveDirectoryDomain_update(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"domain_name", "labels", "terraform_labels", "deletion_protection"},
 			},
 		},
 	})
@@ -70,6 +70,7 @@ func testAccADDomainBasic(context map[string]interface{}) string {
 	  domain_name       = "%{domain}"
 	  locations         = ["us-central1"]
 	  reserved_ip_range = "192.168.255.0/24" 
+	  deletion_protection = false
 	}
 	`, context)
 }
@@ -80,6 +81,7 @@ func testAccADDomainUpdate(context map[string]interface{}) string {
 	  domain_name       = "%{domain}"	
 	  locations         = ["us-central1", "us-west1"]
 	  reserved_ip_range = "192.168.255.0/24" 
+	  deletion_protection = false
 	  labels = {
 		  env = "test"
 	  }

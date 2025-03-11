@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
@@ -109,6 +109,7 @@ func testAccFolderIamPolicy_basic(folder, parent, role, member string) string {
 resource "google_folder" "permissiontest" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 data "google_iam_policy" "test" {
@@ -134,6 +135,7 @@ func testAccFolderIamPolicy_basic2(folder, parent, role, member, role2, member2 
 resource "google_folder" "permissiontest" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 data "google_iam_policy" "test" {
@@ -160,6 +162,7 @@ func testAccFolderIamPolicy_auditConfigs(folder, parent, role, member string) st
 resource "google_folder" "permissiontest" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 data "google_iam_policy" "test" {

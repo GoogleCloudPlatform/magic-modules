@@ -12,76 +12,77 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "AppAttestConfig"
-base_url: projects/{{project}}/apps/{{app_id}}/appAttestConfig
-self_link: projects/{{project}}/apps/{{app_id}}/appAttestConfig
-create_url: projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=tokenTtl
-create_verb: :PATCH
-update_verb: :PATCH
-update_mask: true
-skip_delete: true
+name: 'AppAttestConfig'
 description: |
   An app's App Attest configuration object. Note that the Team ID registered with your
   app is used as part of the validation process. Make sure your `google_firebase_apple_app` has a team_id present.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/app-check"
-  api: "https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.appAttestConfig"
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.appAttestConfig'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/appAttestConfig'
+self_link: 'projects/{{project}}/apps/{{app_id}}/appAttestConfig'
+create_url: 'projects/{{project}}/apps/{{app_id}}/appAttestConfig?updateMask=tokenTtl'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
 import_format:
-  [
-    "projects/{{project}}/apps/{{app_id}}/appAttestConfig",
-    "{{project}}/{{app_id}}",
-    "{{app_id}}",
-  ]
+  - 'projects/{{project}}/apps/{{app_id}}/appAttestConfig'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_app_attest_config_minimal"
+  - name: 'firebase_app_check_app_attest_config_minimal'
+    primary_resource_id: 'default'
     min_version: 'beta'
+    vars:
+      # Don't add random suffix
+      team_id: '9987654321'
+      bundle_id: 'bundle.id.appattest'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'team_id': '"9987654321"'
     # Need the time_sleep resource
     external_providers: ["random", "time"]
-    primary_resource_id: "default"
-    vars:
-      team_id: "9987654321"
-      bundle_id: "bundle.id.appattest"
-    test_vars_overrides:
-      # Don't add random suffix
-      team_id: '"9987654321"'
-    test_env_vars:
-      project_id: :PROJECT_NAME
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_app_attest_config_full"
+  - name: 'firebase_app_check_app_attest_config_full'
+    primary_resource_id: 'default'
     min_version: 'beta'
+    vars:
+      # Don't add random suffix
+      team_id: '9987654321'
+      bundle_id: 'bundle.id.appattest'
+      token_ttl: '7200s'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'team_id': '"9987654321"'
+      'token_ttl': '"7200s"'
     # Need the time_sleep resource
     external_providers: ["random", "time"]
-    primary_resource_id: "default"
-    vars:
-      team_id: "9987654321"
-      bundle_id: "bundle.id.appattest"
-      token_ttl: "7200s"
-    test_vars_overrides:
-      # Don't add random suffix
-      team_id: '"9987654321"'
-      token_ttl: '"7200s"'
-    test_env_vars:
-      project_id: :PROJECT_NAME
 parameters:
-  - !ruby/object:Api::Type::String
-    name: app_id
+  - name: 'app_id'
+    type: String
     description: |
       The ID of an
       [Apple App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps#IosApp.FIELDS.app_id).
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the App Attest configuration object
     output: true
-  - !ruby/object:Api::Type::String
-    name: tokenTtl
+  - name: 'tokenTtl'
+    type: String
     description: |
       Specifies the duration for which App Check tokens exchanged from App Attest artifacts will be valid.
       If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.

@@ -13,12 +13,14 @@
         "deadLetterPolicy": null,
         "expirationPolicy": null,
         "labels": {
+          "goog-terraform-provisioned": "true",
           "test-label1": "test-value1"
         },
         "messageRetentionDuration": "604800s",
         "pushConfig": {
           "pushEndpoint": "https://example.com/push"
         },
+        "retryPolicy": null,
         "topic": "projects/{{.Provider.project}}/topics/example-pubsub-topic"
       }
     },

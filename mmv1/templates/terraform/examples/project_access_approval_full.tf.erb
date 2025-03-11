@@ -1,9 +1,0 @@
-resource "google_project_access_approval_settings" "<%= ctx[:primary_resource_id] %>" {
-  project_id          = "<%= ctx[:test_env_vars]['project'] %>"
-  notification_emails = ["testuser@example.com", "example.user@example.com"]
-
-  enrolled_services {
-  	cloud_product = "all"
-  	enrollment_level = "BLOCK_ALL"
-  }
-}

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ResponsePolicyRule'
 kind: 'dns#responsePolicyRule'
 description: |
@@ -19,19 +19,22 @@ description: |
   Selectors are DNS names, which may be wildcards or exact matches.
   Each DNS query subject to a Response Policy matches at most one ResponsePolicyRule,
   as identified by the dns_name field with the longest matching suffix.
+docs:
+id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
 base_url: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules'
 self_link: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 identity:
   - ruleName
-id_format: 'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}'
-import_format:
-  [
-    'projects/{{project}}/responsePolicies/{{response_policy}}/rules/{{rule_name}}',
-  ]
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dns_response_policy_rule_basic'
+  - name: 'dns_response_policy_rule_basic'
     primary_resource_id: 'example-response-policy-rule'
     vars:
       response_policy_name: 'example-response-policy'
@@ -40,90 +43,88 @@ examples:
       cluster_1_name: 'cluster-1'
       response_policy_rule_name: 'example-rule'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'response_policy'
-    required: true
-    url_param_only: true
-    resource: 'ResponsePolicy'
-    imports: 'responsePolicyName'
+  - name: 'response_policy'
+    type: ResourceRef
     description: |
       Identifies the response policy addressed by this request.
+    url_param_only: true
+    required: true
+    resource: 'ResponsePolicy'
+    imports: 'responsePolicyName'
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'ruleName'
+  - name: 'ruleName'
+    type: String
     description:
       An identifier for this rule. Must be unique with the ResponsePolicy.
-    immutable: true
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'dnsName'
+    immutable: true
+  - name: 'dnsName'
+    type: String
     description:
       The DNS name (wildcard or exact) to apply this rule to. Must be unique
       within the Response Policy Rule.
     required: true
-    update_verb: :PATCH
-  - !ruby/object:Api::Type::NestedObject
-    name: 'localData'
-    conflicts:
-      - behavior
+  - name: 'localData'
+    type: NestedObject
     description: |
       Answer this query directly with DNS data. These ResourceRecordSets override any other DNS behavior for the matched name;
       in particular they override private zones, the public internet, and GCP internal DNS. No SOA nor NS types are allowed.
-    update_verb: :PATCH
+    conflicts:
+      - behavior
     properties:
-      - !ruby/object:Api::Type::Array
-        name: 'localDatas'
+      - name: 'localDatas'
+        type: Array
         description:
           All resource record sets for this selector, one per resource record
           type. The name must match the dns_name.
-        update_verb: :PATCH
         required: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'name'
+            - name: 'name'
+              type: String
               description: For example, www.example.com.
               required: true
-            - !ruby/object:Api::Type::Enum
-              name: 'type'
-              values:
-                - :A
-                - :AAAA
-                - :CAA
-                - :CNAME
-                - :DNSKEY
-                - :DS
-                - :HTTPS
-                - :IPSECVPNKEY
-                - :MX
-                - :NAPTR
-                - :NS
-                - :PTR
-                - :SOA
-                - :SPF
-                - :SRV
-                - :SSHFP
-                - :SVCB
-                - :TLSA
-                - :TXT
+            - name: 'type'
+              type: Enum
               description: One of valid DNS resource types.
               required: true
-            - !ruby/object:Api::Type::Integer
-              name: 'ttl'
+              enum_values:
+                - 'A'
+                - 'AAAA'
+                - 'CAA'
+                - 'CNAME'
+                - 'DNSKEY'
+                - 'DS'
+                - 'HTTPS'
+                - 'IPSECVPNKEY'
+                - 'MX'
+                - 'NAPTR'
+                - 'NS'
+                - 'PTR'
+                - 'SOA'
+                - 'SPF'
+                - 'SRV'
+                - 'SSHFP'
+                - 'SVCB'
+                - 'TLSA'
+                - 'TXT'
+            - name: 'ttl'
+              type: Integer
               description: |
                 Number of seconds that this ResourceRecordSet can be cached by
                 resolvers.
-            - !ruby/object:Api::Type::Array
-              item_type: Api::Type::String
-              name: 'rrdatas'
+            - name: 'rrdatas'
+              type: Array
               description: |
                 As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
-  - !ruby/object:Api::Type::String
-    name: 'behavior'
-    conflicts:
-      - local_data
-    min_version: beta
+              item_type:
+                type: String
+  - name: 'behavior'
+    type: String
     description:
       Answer this query with a behavior rather than DNS data. Acceptable values
       are 'behaviorUnspecified', and 'bypassResponsePolicy'
-    update_verb: :PATCH
+    min_version: 'beta'
+    conflicts:
+      - local_data

@@ -9,14 +9,13 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/}}
-{{- define "UpdateMask" }}
+*/ -}}
 updateMask := []string{}
 {{- $maskGroups := $.GetPropertyUpdateMasksGroups $.UpdateBodyProperties "" }}
 {{- range $key := $.GetPropertyUpdateMasksGroupKeys $.UpdateBodyProperties }}
 
 if d.HasChange("{{ $key }}") {
-  updateMask = append(updateMask, "{{ join (index $maskGroups $key) "\",\""}}")
+  updateMask = append(updateMask, "{{ join (index $maskGroups $key) "\",\n\""}}")
 }
 {{- end }}
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
@@ -25,4 +24,3 @@ url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": str
 if err != nil {
   return err
 }
-{{- end }}{{/* define */}}

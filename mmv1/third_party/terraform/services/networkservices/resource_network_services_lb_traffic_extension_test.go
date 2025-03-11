@@ -3,7 +3,7 @@ package networkservices_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -135,7 +135,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }
@@ -451,7 +451,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-12"
     auto_delete  = true
     boot         = true
   }

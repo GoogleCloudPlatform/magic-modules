@@ -14,18 +14,23 @@
 package api
 
 import (
+	"bytes"
 	"log"
 	"os"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
-func Compile(yamlPath string, obj interface{}) {
+func Compile(yamlPath string, obj interface{}, overrideDir string) {
 	objYaml, err := os.ReadFile(yamlPath)
 	if err != nil {
 		log.Fatalf("Cannot open the file: %v", objYaml)
 	}
 
+	if overrideDir != "" {
+		objYaml = bytes.ReplaceAll(objYaml, []byte("{{override_path}}"), []byte(overrideDir))
+	}
+
 	yamlValidator := google.YamlValidator{}
-	yamlValidator.Parse(objYaml, obj)
+	yamlValidator.Parse(objYaml, obj, yamlPath)
 }

@@ -13,6 +13,10 @@ Creates a new object inside an existing bucket in Google cloud storage service (
 and 
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
 
+A datasource can be used to retrieve the data of the stored object:
+
+* `google_storage_bucket_object_content`: Retrieves the content within a specified bucket object in Google Cloud Storage Service (GCS)
+
 
 ## Example Usage
 
@@ -103,6 +107,8 @@ One of the following is required:
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `generation` - (Computed) The content generation of this object. Used for object [versioning](https://cloud.google.com/storage/docs/object-versioning) and [soft delete](https://cloud.google.com/storage/docs/soft-delete).
 
 * `crc32c` - (Computed) Base 64 CRC32 hash of the uploaded data.
 

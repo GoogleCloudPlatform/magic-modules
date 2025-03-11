@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -24,7 +24,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccUniverseDomain_bucket(universeDomain, bucketName),
 			},
 		},

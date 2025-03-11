@@ -1,0 +1,35 @@
+resource "google_cloud_run_service" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name     = "{{index $.Vars "cloud_run_service_name"}}"
+  location = "us-central1"
+
+  metadata {
+    annotations = {
+      "run.googleapis.com/launch-stage" = "BETA"
+    }
+  }
+
+  template {
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/maxScale": "1"
+        "run.googleapis.com/cpu-throttling": "false"
+      }
+    }
+    spec {
+      containers {
+        image = "gcr.io/cloudrun/hello"
+        resources {
+          limits = {
+            "cpu" = "4"
+            "memory" = "16Gi"
+            "nvidia.com/gpu" = "1"
+          }
+        }
+      }
+      node_selector = {
+        "run.googleapis.com/accelerator" = "nvidia-l4"
+      }
+    }
+  }
+}

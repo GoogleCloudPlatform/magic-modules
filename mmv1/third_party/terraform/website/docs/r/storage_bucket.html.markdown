@@ -69,8 +69,8 @@ resource "google_storage_bucket" "auto-expire" {
 }
 ```
 
-## Example Usage - Life cycle settings for storage bucket objects with `no_age` enabled
-When creating a life cycle condition that does not also include an `age` field, a default `age` of 0 will be set. Set the `no_age` flag to `true` to prevent this and avoid any potentially unintended interactions.
+## Example Usage - Life cycle settings for storage bucket objects with `send_age_if_zero` disabled
+When creating a life cycle condition that does not also include an `age` field, a default `age` of 0 will be set. Set the `send_age_if_zero` flag to `false` to prevent this and avoid any potentially unintended interactions.
 
 ```hcl
 resource "google_storage_bucket" "no-age-enabled" {
@@ -85,7 +85,7 @@ resource "google_storage_bucket" "no-age-enabled" {
     }
     condition {
       days_since_noncurrent_time = 3
-      no_age = true
+      send_age_if_zero = false
     }
   }
 }
@@ -100,6 +100,20 @@ resource "google_storage_bucket" "auto-expire" {
   force_destroy = true
 
   public_access_prevention = "enforced"
+}
+```
+
+## Example Usage - Enabling hierarchical namespace
+
+```hcl
+resource "google_storage_bucket" "auto-expire" {
+  name          = "hns-enabled-bucket"
+  location      = "US"
+  force_destroy = true
+
+  hierarchical_namespace {
+    enabled = true
+  }
 }
 ```
 
@@ -157,6 +171,8 @@ The following arguments are supported:
 
 * `soft_delete_policy` -  (Optional, Computed) The bucket's soft delete policy, which defines the period of time that soft-deleted objects will be retained, and cannot be permanently deleted. If the block is not provided, Server side value will be kept which means removal of block won't generate any terraform change. Structure is [documented below](#nested_soft_delete_policy).
 
+* `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace). To use this configuration, `uniform_bucket_level_access` must be enabled on bucket.
+
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
@@ -171,9 +187,7 @@ The following arguments are supported:
 
 <a name="nested_condition"></a>The `condition` block supports the following elements, and requires at least one to be defined. If you specify multiple conditions in a rule, an object has to match all of the conditions for the action to be taken:
 
-* `age` - (Optional) Minimum age of an object in days to satisfy this condition. If not supplied alongside another condition and without setting `no_age` to `true`, a default `age` of 0 will be set.
-
-* `no_age` - (Optional) While set `true`, `age` value will be omitted from requests. This prevents a default age of `0` from being applied, and if you do not have an `age` value set, setting this to `true` is strongly recommended. When unset and other conditions are set to zero values, this can result in a rule that applies your action to all files in the bucket.
+* `age` - (Optional) Minimum age of an object in days to satisfy this condition. **Note** To set `0` value of `age`, `send_age_if_zero` should be set `true` otherwise `0` value of `age` field will be ignored.
 
 * `created_before` - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when an object is created before midnight of the specified date in UTC.
 
@@ -192,6 +206,8 @@ The following arguments are supported:
 * `custom_time_before` - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when the customTime metadata for the object is set to an earlier date than the date used in this lifecycle condition.
 
 * `days_since_custom_time` - (Optional)	Days since the date set in the `customTime` metadata for the object. This condition is satisfied when the current date and time is at least the specified number of days after the `customTime`. Due to a current bug you are unable to set this value to `0` within Terraform. When set to `0` it will be ignored, and your state will treat it as though you supplied no `days_since_custom_time` condition.
+
+* `send_age_if_zero` - (Optional) While set true, `age` value will be sent in the request even for zero value of the field. This field is only useful and required for setting 0 value to the `age` field. It can be used alone or together with `age` attribute. **NOTE** `age` attibute with `0` value will be ommitted from the API request if `send_age_if_zero` field is having `false` value.
 
 * `send_days_since_custom_time_if_zero` - (Optional) While set true, `days_since_custom_time` value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the `days_since_custom_time` field. It can be used alone or together with `days_since_custom_time`.
 
@@ -268,6 +284,11 @@ The following arguments are supported:
 * `retention_duration_seconds` - (Optional, Default: 604800) The duration in seconds that soft-deleted objects in the bucket will be retained and cannot be permanently deleted. Default value is 604800. The value must be in between 604800(7 days) and 7776000(90 days). **Note**: To disable the soft delete policy on a bucket, This field must be set to 0.
 
 * `effective_time` - (Computed) Server-determined value that indicates the time from which the policy, or one with a greater retention, was effective. This value is in RFC 3339 format.
+
+<a name="nested_hierarchical_namespace"></a>The `hierarchical_namespace` block supports:
+
+* `enabled` - (Required) Enables hierarchical namespace for the bucket.
+
 
 ## Attributes Reference
 

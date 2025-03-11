@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -46,4 +46,60 @@ resource "google_storage_bucket" "contenttest" {
 	location      = "US"
 	force_destroy = true
 }`, content, bucket)
+}
+
+func TestAccDataSourceStorageBucketObjectContent_Issue15717(t *testing.T) {
+
+	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	content := "qwertyuioasdfghjk1234567!!@#$*"
+
+	config := fmt.Sprintf(`
+%s
+
+output "output" {
+	value = replace(data.google_storage_bucket_object_content.default.content, "q", "Q")
+}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.default", "content"),
+					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.default", "content", content),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceStorageBucketObjectContent_Issue15717BackwardCompatibility(t *testing.T) {
+
+	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	content := "qwertyuioasdfghjk1234567!!@#$*"
+
+	config := fmt.Sprintf(`
+%s
+
+data "google_storage_bucket_object_content" "new" {
+	bucket  = google_storage_bucket.contenttest.name
+	content = "%s"
+	name    = google_storage_bucket_object.object.name
+}`, testAccDataSourceStorageBucketObjectContent_Basic(content, bucket), content)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.new", "content"),
+					resource.TestCheckResourceAttr("data.google_storage_bucket_object_content.new", "content", content),
+				),
+			},
+		},
+	})
 }

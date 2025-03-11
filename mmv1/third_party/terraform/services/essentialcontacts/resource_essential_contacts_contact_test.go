@@ -3,7 +3,7 @@ package essentialcontacts_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -27,10 +27,9 @@ func TestAccEssentialContactsContact_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_essential_contacts_contact.contact",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ResourceName:      "google_essential_contacts_contact.contact",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccEssentialContactsContact_v2(context),
@@ -40,10 +39,9 @@ func TestAccEssentialContactsContact_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_essential_contacts_contact.contact",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent"},
+				ResourceName:      "google_essential_contacts_contact.contact",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

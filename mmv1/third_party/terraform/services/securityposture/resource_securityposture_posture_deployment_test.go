@@ -3,7 +3,7 @@ package securityposture_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -13,7 +13,7 @@ func TestAccSecurityPosturePostureDeployment_securityposturePostureDeployment_up
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":         envvar.GetTestOrgFromEnv(t),
+		"org_id":         envvar.GetTestOrgTargetFromEnv(t),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
 		"random_suffix":  acctest.RandString(t, 10),
 	}

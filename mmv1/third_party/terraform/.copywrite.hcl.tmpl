@@ -16,11 +16,11 @@ project {
     ".changelog/**",
     "examples/**",
     "scripts/**",
-{{- if or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga")}}
+{{- if or (eq $.TargetVersionName "") (eq $.TargetVersionName "ga") }}
     "google/**/test-fixtures/**",
-{{- else}}
-    "google-{{$.TargetVersionName}}/**/test-fixtures/**",
-{{- end}}
+{{- else }}
+    "google-{{ $.TargetVersionName }}/**/test-fixtures/**",
+{{- end }}
     "META.d/*.yml",
     "META.d/*.yaml",
     ".golangci.yml",

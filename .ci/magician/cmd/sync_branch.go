@@ -58,6 +58,11 @@ func execSyncBranchCmd(syncBranchPrefix, baseBranch, sha, githubToken string, ru
 	syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
 	fmt.Println("SYNC_BRANCH: ", syncBranch)
 
+	if syncBranchHasCommit(sha, syncBranch, runner) {
+		fmt.Printf("Commit %s already in sync branch %s, skipping sync\n", sha, syncBranch)
+		return nil
+	}
+
 	_, err := runner.Run("git", []string{"push", fmt.Sprintf("https://modular-magician:%s@github.com/GoogleCloudPlatform/magic-modules", githubToken), fmt.Sprintf("%s:%s", sha, syncBranch)}, nil)
 	return err
 }

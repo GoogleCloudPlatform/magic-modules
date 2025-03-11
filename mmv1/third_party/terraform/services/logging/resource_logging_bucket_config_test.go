@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -22,6 +22,9 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigFolder_basic(context, 30),
@@ -256,6 +259,16 @@ func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, rete
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
+	deletion_protection = false
+}
+
+// Give the _Default bucket a chance to be created
+resource "time_sleep" "wait_1_minute" {
+	create_duration = "1m"
+
+	depends_on = [
+	  google_folder.default,
+	]
 }
 
 resource "google_logging_folder_bucket_config" "basic" {
@@ -264,6 +277,8 @@ resource "google_logging_folder_bucket_config" "basic" {
 	retention_days = %d
 	description = "retention test %d days"
 	bucket_id = "_Default"
+
+	depends_on = [time_sleep.wait_1_minute]
 }
 `, context), retention, retention)
 }
@@ -275,6 +290,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "basic" {
@@ -294,6 +310,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 // time_sleep would allow for permissions to be granted before creating log bucket
@@ -323,6 +340,7 @@ resource "google_project" "default" {
 	name       = "%{project_name}"
 	org_id     = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "fixed_locked" {
@@ -349,6 +367,7 @@ resource "google_project" "default" {
 	name            = "%{project_name}"
 	org_id          = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_project_service" "logging_service" {
@@ -503,6 +522,7 @@ func getLoggingBucketConfigs(context map[string]interface{}) map[string]string {
 				name       = "%{project_name}"
 				org_id     = "%{org_id}"
 				billing_account = "%{billing_account_name}"
+				deletion_policy = "DELETE"
 			}
 			
 			resource "google_logging_project_bucket_config" "basic" {
@@ -621,6 +641,7 @@ resource "google_project" "default" {
 	name            = "%{project_name}"
 	org_id          = "%{org_id}"
 	billing_account = "%{billing_account}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_logging_project_bucket_config" "basic" {

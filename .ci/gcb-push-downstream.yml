@@ -35,7 +35,7 @@ steps:
       id: tpg-sync
       waitFor: ["build-magician-binary"]
       args:
-          - wait-for-commit
+          - 'wait-for-commit'
           - 'tpg-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
@@ -46,7 +46,7 @@ steps:
       id: tpgb-sync
       waitFor: ["build-magician-binary"]
       args:
-          - wait-for-commit
+          - 'wait-for-commit'
           - 'tpgb-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
@@ -57,7 +57,7 @@ steps:
       id: tgc-sync
       waitFor: ["build-magician-binary"]
       args:
-          - wait-for-commit
+          - 'wait-for-commit'
           - 'tgc-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
@@ -68,7 +68,7 @@ steps:
       id: tf-oics-sync
       waitFor: ["build-magician-binary"]
       args:
-          - wait-for-commit
+          - 'wait-for-commit'
           - 'tf-oics-sync'
           - $BRANCH_NAME
           - $COMMIT_SHA
@@ -191,8 +191,8 @@ steps:
       secretEnv:
         - "GITHUB_TOKEN_DOWNSTREAMS"
         - "GOOGLE_BILLING_ACCOUNT"
+        - "GOOGLE_CHRONICLE_INSTANCE_ID"
         - "GOOGLE_CUST_ID"
-        - "GOOGLE_FIRESTORE_PROJECT"
         - "GOOGLE_IDENTITY_USER"
         - "GOOGLE_MASTER_BILLING_ACCOUNT"
         - "GOOGLE_ORG"
@@ -203,6 +203,7 @@ steps:
         - "GOOGLE_SERVICE_ACCOUNT"
         - "SA_KEY"
         - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
+        - "GOOGLE_VMWAREENGINE_PROJECT"
       env:
         - "COMMIT_SHA=$COMMIT_SHA"
         - "GOOGLE_REGION=us-central1"
@@ -225,10 +226,10 @@ availableSecrets:
       env: GITHUB_TOKEN_DOWNSTREAMS
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-chronicle-instance-id/versions/latest
+      env: GOOGLE_CHRONICLE_INSTANCE_ID
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
-    - versionName: projects/673497134629/secrets/ci-test-firestore-project/versions/latest
-      env: GOOGLE_FIRESTORE_PROJECT
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
       env: GOOGLE_IDENTITY_USER
     - versionName: projects/673497134629/secrets/ci-test-master-billing-account/versions/latest
@@ -249,3 +250,5 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/ci-test-vmwareengine-project/versions/latest
+      env: GOOGLE_VMWAREENGINE_PROJECT

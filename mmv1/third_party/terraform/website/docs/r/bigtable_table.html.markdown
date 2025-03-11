@@ -49,9 +49,33 @@ resource "google_bigtable_table" "table" {
 
   column_family {
     family = "family-second"
+    type   = "intsum"
+  }
+
+  column_family {
+    family = "family-third"
+    type   = <<EOF
+        {
+					"aggregateType": {
+						"max": {},
+						"inputType": {
+							"int64Type": {
+								"encoding": {
+									"bigEndianBytes": {}
+								}
+							}
+						}
+					}
+				}
+        EOF
   }
 
   change_stream_retention = "24h0m0s"
+
+  automated_backup_policy {
+    retention_period = "72h0m0s"
+    frequency = "24h0m0s"
+  }
 }
 ```
 
@@ -76,11 +100,14 @@ to delete/recreate the entire `google_bigtable_table` resource.
 
 * `change_stream_retention` - (Optional) Duration to retain change stream data for the table. Set to 0 to disable. Must be between 1 and 7 days.
 
+* `automated_backup_policy` - (Optional) Defines an automated backup policy for a table, specified by Retention Period and Frequency. To disable, set both Retention Period and Frequency to 0.
+
 -----
 
 `column_family` supports the following arguments:
 
 * `family` - (Optional) The name of the column family.
+* `type`   - (Optional) The type of the column family.
 
 ## Attributes Reference
 

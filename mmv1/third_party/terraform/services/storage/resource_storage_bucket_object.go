@@ -3,6 +3,7 @@ package storage
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -24,10 +25,11 @@ import (
 
 func ResourceStorageBucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceStorageBucketObjectCreate,
-		Read:   resourceStorageBucketObjectRead,
-		Update: resourceStorageBucketObjectUpdate,
-		Delete: resourceStorageBucketObjectDelete,
+		Create:        resourceStorageBucketObjectCreate,
+		Read:          resourceStorageBucketObjectRead,
+		Update:        resourceStorageBucketObjectUpdate,
+		Delete:        resourceStorageBucketObjectDelete,
+		CustomizeDiff: resourceStorageBucketObjectCustomizeDiff,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(4 * time.Minute),
@@ -93,6 +95,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Sensitive:    true,
 				Computed:     true,
 				Description:  `Data as string to be uploaded. Must be defined if source is not. Note: The content field is marked as sensitive. To view the raw contents of the object, please define an output.`,
+			},
+
+			"generation": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: `The content generation of this object. Used for object versioning and soft delete.`,
 			},
 
 			"crc32c": {
@@ -454,6 +462,9 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting detect_md5hash: %s", err)
 	}
+	if err := d.Set("generation", res.Generation); err != nil {
+		return fmt.Errorf("Error setting generation: %s", err)
+	}
 	if err := d.Set("crc32c", res.Crc32c); err != nil {
 		return fmt.Errorf("Error setting crc32c: %s", err)
 	}
@@ -593,4 +604,36 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 	retentions = append(retentions, retention)
 	return retentions
+}
+
+func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	localMd5Hash := ""
+	if source, ok := d.GetOkExists("source"); ok {
+		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
+	}
+	if content, ok := d.GetOkExists("content"); ok {
+		localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+	}
+	if localMd5Hash == "" {
+		return nil
+	}
+
+	oldMd5Hash, ok := d.GetOkExists("md5hash")
+	if ok && oldMd5Hash == localMd5Hash {
+		return nil
+	}
+
+	err := d.SetNewComputed("md5hash")
+	if err != nil {
+		return fmt.Errorf("Error re-setting md5hash: %s", err)
+	}
+	err = d.SetNewComputed("crc32c")
+	if err != nil {
+		return fmt.Errorf("Error re-setting crc32c: %s", err)
+	}
+	err = d.SetNewComputed("generation")
+	if err != nil {
+		return fmt.Errorf("Error re-setting generation: %s", err)
+	}
+	return nil
 }

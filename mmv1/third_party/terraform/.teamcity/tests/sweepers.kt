@@ -8,9 +8,9 @@
 package tests
 
 import ProjectSweeperName
-import ServiceSweeperName
 import ServiceSweeperCronName
 import ServiceSweeperManualName
+import ServiceSweeperName
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.triggers.ScheduleTrigger
@@ -136,7 +136,7 @@ class SweeperTests {
 
         // Find Project sweeper project's build
         val projectSweeperProject = getSubProject(root, projectSweeperProjectName)
-        val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject!!, ProjectSweeperName)
+        val projectSweeper: BuildType = getBuildFromProject(projectSweeperProject, ProjectSweeperName)
         
         // Check only one schedule trigger is on the builds in question
         assertTrue(sweeperGa.triggers.items.size == 1)
@@ -151,7 +151,7 @@ class SweeperTests {
         val cronBeta = stBeta.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
         val stProject = projectSweeper.triggers.items[0] as ScheduleTrigger
         val cronProject = stProject.schedulingPolicy as ScheduleTrigger.SchedulingPolicy.Cron
-        assertTrue("Service sweeper for the GA Nightly Test project should be triggered at an earlier hour than the project sweeper", cronGa.hours.toString() < cronProject.hours.toString()) // Values are strings like "11", "12"
-        assertTrue("Service sweeper for the Beta Nightly Test project should be triggered at an earlier hour than the project sweeper", cronBeta.hours.toString() < cronProject.hours.toString() )
+        assertTrue("Service sweeper for the GA Nightly Test project should be triggered at an earlier hour than the project sweeper", cronGa.hours.toString().toInt() < cronProject.hours.toString().toInt()) // Converting nullable strings to ints
+        assertTrue("Service sweeper for the Beta Nightly Test project should be triggered at an earlier hour than the project sweeper", cronBeta.hours.toString().toInt() < cronProject.hours.toString().toInt() )
     }
 }

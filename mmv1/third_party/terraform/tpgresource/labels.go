@@ -31,7 +31,7 @@ func SetLabels(labels map[string]string, d *schema.ResourceData, lineage string)
 
 // Sets the "labels" field and "terraform_labels" with the value of the field "effective_labels" for data sources.
 // When reading data source, as the labels field is unavailable in the configuration of the data source,
-// the "labels" field will be empty. With this funciton, the labels "field" will have all of labels in the resource.
+// the "labels" field will be empty. With this function, the labels "field" will have all of labels in the resource.
 func SetDataSourceLabels(d *schema.ResourceData) error {
 	effectiveLabels := d.Get("effective_labels")
 	if effectiveLabels == nil {
@@ -55,8 +55,9 @@ func SetDataSourceLabels(d *schema.ResourceData) error {
 	return nil
 }
 
-func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	raw := d.Get("labels")
+// Sets the values of terraform_labels and effective_labels fields when labels field is in root level
+func setLabelsFields(labelsField string, d *schema.ResourceDiff, meta interface{}, skipAttribution bool) error {
+	raw := d.Get(labelsField)
 	if raw == nil {
 		return nil
 	}
@@ -71,7 +72,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 
 	// If "labels" field is computed, set "terraform_labels" and "effective_labels" to computed.
 	// https://github.com/hashicorp/terraform-provider-google/issues/16217
-	if !d.GetRawPlan().GetAttr("labels").IsWhollyKnown() {
+	if !d.GetRawPlan().GetAttr(labelsField).IsWhollyKnown() {
 		if err := d.SetNewComputed("terraform_labels"); err != nil {
 			return fmt.Errorf("error setting terraform_labels to computed: %w", err)
 		}
@@ -91,7 +92,7 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	}
 
 	// Append optional label indicating the resource was provisioned using Terraform
-	if config.AddTerraformAttributionLabel {
+	if !skipAttribution && config.AddTerraformAttributionLabel {
 		if el, ok := d.Get("effective_labels").(map[string]any); ok {
 			_, hasExistingLabel := el[transport_tpg.AttributionKey]
 			if hasExistingLabel ||
@@ -129,6 +130,24 @@ func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) 
 	}
 
 	return nil
+}
+
+func SetLabelsDiffWithoutAttributionLabel(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta, true)
+}
+
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and named "labels".
+func SetLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return setLabelsFields("labels", d, meta, false)
+}
+
+// The CustomizeDiff func to set the values of terraform_labels and effective_labels fields
+// when labels field is at the root level and has a diffent name (e.g. resource_labels) than "labels"
+func SetDiffForLabelsWithCustomizedName(labelsField string) func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return func(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		return setLabelsFields(labelsField, d, meta, false)
+	}
 }
 
 func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {

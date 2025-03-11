@@ -1,0 +1,30 @@
+[
+  {
+    "name": "//apikeys.googleapis.com/v2/projects/{{.Provider.project}}/locations/global/keys/placeholder-JHfWqOQi",
+    "asset_type": "apikeys.googleapis.com/Key",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://apikeys.googleapis.com/$discovery/rest?version=v2",
+      "discovery_name": "Apikeyskey",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "restrictions": {
+          "android_key_restrictions": {
+            "allowed_applications": {
+              "package_name": "com.example.app123",
+              "sha1_fingerprint": "1699466a142d4682a5f91b50fdf400f2358e2b0b"
+            }
+          },
+          "api_targets": {
+            "methods": [
+              "GET"
+            ],
+            "service": "translate.googleapis.com"
+          }
+        }
+      }
+    },
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "ancestors": ["organizations/{{.OrgID}}"]    
+  }
+]

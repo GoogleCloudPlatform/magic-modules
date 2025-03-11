@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -235,8 +235,8 @@ resource "google_tags_tag_key" "key" {
 
 resource "google_tags_tag_value" "value" {
 
-  parent = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "foo%{random_suffix}"
+  parent      = google_tags_tag_key.key.id
+  short_name  = "foo%{random_suffix}"
   description = "For foo resources."
 }
 `, context)
@@ -284,8 +284,8 @@ resource "google_tags_tag_key" "key" {
 
 resource "google_tags_tag_value" "value" {
 
-  parent = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "foo%{random_suffix}"
+  parent      = google_tags_tag_key.key.id
+  short_name  = "foo%{random_suffix}"
   description = "For foo resources."
 }
 `, context)
@@ -302,8 +302,8 @@ resource "google_tags_tag_key" "key" {
 
 resource "google_tags_tag_value" "value" {
 
-  parent = "tagKeys/${google_tags_tag_key.key.name}"
-  short_name = "foo%{random_suffix}"
+  parent      = google_tags_tag_key.key.id
+  short_name  = "foo%{random_suffix}"
   description = "For any foo resources."
 }
 `, context)
@@ -378,6 +378,7 @@ resource "google_project" "project" {
 	project_id = "%{project_id}"
 	name       = "%{project_id}"
 	org_id     = "%{org_id}"
+	deletion_policy = "DELETE"
 }
 
 resource "google_tags_tag_key" "key" {
@@ -387,14 +388,14 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo%{random_suffix}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
 
 resource "google_tags_tag_binding" "binding" {
-	parent = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
+	parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+	tag_value = google_tags_tag_value.value.id
 }
 `, context)
 }
@@ -691,8 +692,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "%{value_short_name}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "%{value_short_name}"
 	description = "For %{value_short_name} resources."
 }
 
@@ -713,8 +714,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "%{value_short_name}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "%{value_short_name}"
 	description = "For %{value_short_name} resources."
 }
 
@@ -741,8 +742,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "%{value_short_name}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "%{value_short_name}"
 	description = "For %{value_short_name} resources."
 }
 
@@ -765,8 +766,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "%{value_short_name}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "%{value_short_name}"
 	description = "For %{value_short_name} resources."
 }
 
@@ -787,8 +788,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "%{value_short_name}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "%{value_short_name}"
 	description = "For %{value_short_name} resources."
 }
 
@@ -841,8 +842,8 @@ resource "google_tags_tag_key" "key" {
 }
 
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo%{random_suffix}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
 
@@ -865,9 +866,9 @@ resource "google_cloud_run_service" "default" {
 }
   
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-	location = "us-central1"
+	parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+	tag_value = google_tags_tag_value.value.id
+	location  = "us-central1"
 }
 `, context)
 }
@@ -948,27 +949,27 @@ resource "google_tags_tag_key" "key" {
 	description = "For a certain set of resources."
 }
 resource "google_tags_tag_value" "value" {
-	parent = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name = "foo%{random_suffix}"
+	parent      = google_tags_tag_key.key.id
+	short_name  = "foo%{random_suffix}"
 	description = "For foo%{random_suffix} resources."
 }
 resource "google_compute_instance" "default" {
 	name         = "test-%{random_suffix}"
 	machine_type = "e2-medium"
 	zone         = "us-central1-a"
-	boot_disk {
-		initialize_params {
-			image = "debian-cloud/debian-11"
-		}
-	}
-	network_interface {
-		 network = "default"
-	}
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  network_interface {
+    network = "default"
+  }
 }
 resource "google_tags_location_tag_binding" "binding" {
-	parent = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.default.instance_id}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-	location = "us-central1-a"
+	parent    = "//compute.googleapis.com/projects/${data.google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.default.instance_id}"
+	tag_value = google_tags_tag_value.value.id
+	location  = "us-central1-a"
 }
 `, context)
 }

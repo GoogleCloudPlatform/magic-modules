@@ -1,0 +1,13 @@
+resource "google_bigquery_reservation" "basic" {
+  name  = "{{index $.Vars "reservation_name"}}"
+  project = "{{index $.TestEnvVars "project"}}"
+  location = "us-central1"
+  slot_capacity = 0
+  ignore_idle_slots = false
+}
+
+resource "google_bigquery_reservation_assignment" "{{$.PrimaryResourceId}}" {
+  assignee  = "projects/{{index $.TestEnvVars "project"}}"
+  job_type = "PIPELINE"
+  reservation = google_bigquery_reservation.basic.id
+}

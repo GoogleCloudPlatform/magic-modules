@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,47 +11,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'AppEngineVersion'
-base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
-self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+description: |
+  Only used to generate IAM resources
 # This resource is only used to generate IAM resources. They do not correspond to real
 # GCP resources, and should not be used to generate anything other than IAM support.
 exclude_resource: true
-description: |
-  Only used to generate IAM resources
-exclude_tgc: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+docs:
+id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+base_url: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+self_link: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+import_format:
+  - 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
+  - '{{version}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
   parent_resource_type: 'google_app_engine_standard_app_version'
-  parent_resource_attribute: 'version_id'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/iap.httpsResourceAccessor'
-  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.erb'
-  iam_conditions_request_type: :REQUEST_BODY
-id_format: 'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}'
-import_format:
-  [
-    'projects/{{project}}/iap_web/appengine-{{appId}}/services/{{service}}/versions/{{versionId}}',
-    '{{version}}',
-  ]
+  parent_resource_attribute: 'version_id'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/example_config_body/app_engine_version.tf.tmpl'
+custom_code:
+exclude_tgc: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iap_app_engine_version'
+  - name: 'iap_app_engine_version'
     primary_resource_id: 'version'
-    primary_resource_name: "envvar.GetTestProjectFromEnv(), \"default\",
-      context[\"random_suffix\"\
-      ]"
+    primary_resource_name: 'envvar.GetTestProjectFromEnv(), "default", context["random_suffix"]'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'appId'
+  - name: 'appId'
+    type: String
     description: Id of the App Engine application.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'service'
+  - name: 'service'
+    type: String
     description: Service id of the App Engine application
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'versionId'
+  - name: 'versionId'
+    type: String
     description: Version id of the App Engine application
     required: true

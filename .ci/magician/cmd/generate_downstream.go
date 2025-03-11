@@ -97,6 +97,25 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 	if baseBranch == "" {
 		baseBranch = "main"
 	}
+	if command == "downstream" {
+		var syncBranchPrefix string
+		if repo == "terraform" {
+			if version == "beta" {
+				syncBranchPrefix = "tpgb-sync"
+			} else if version == "ga" {
+				syncBranchPrefix = "tpg-sync"
+			}
+		} else if repo == "terraform-google-conversion" {
+			syncBranchPrefix = "tgc-sync"
+		} else if repo == "tf-oics" {
+			syncBranchPrefix = "tf-oics-sync"
+		}
+		syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
+		if syncBranchHasCommit(ref, syncBranch, rnr) {
+			fmt.Printf("Sync branch %s already has commit %s, skipping generation\n", syncBranch, ref)
+			os.Exit(0)
+		}
+	}
 
 	mmLocalPath := filepath.Join(rnr.GetCWD(), "..", "..")
 	mmCopyPath := filepath.Join(mmLocalPath, "..", fmt.Sprintf("mm-%s-%s-%s", repo, version, command))
@@ -132,7 +151,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 			return fmt.Errorf("error getting pull request: %w", err)
 		}
 		if repo == "terraform" {
-			if err := addChangelogEntry(pullRequest, rnr); err != nil {
+			if err := addChangelogEntry(scratchRepo, pullRequest, rnr); err != nil {
 				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
@@ -316,15 +335,29 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	commitSha = strings.TrimSpace(commitSha)
 	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
 
+	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
+	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
+	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") && !strings.HasSuffix(scratchRepo.Branch, "-old") {
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+		fmt.Println("variablePath: ", variablePath)
+		err = rnr.WriteFile(variablePath, commitSha)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	}
+
 	return commitSha, err
 }
 
-func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
+		return err
+	}
 	rnr.Mkdir(".changelog")
 	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
 		return err
 	}
-	return nil
+	return rnr.PopDir()
 }
 
 func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {

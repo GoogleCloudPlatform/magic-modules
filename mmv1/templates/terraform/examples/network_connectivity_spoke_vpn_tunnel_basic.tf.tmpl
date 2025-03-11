@@ -1,0 +1,131 @@
+resource "google_network_connectivity_hub" "basic_hub" {
+  name        = "{{index $.Vars "hub_name"}}"
+  description = "A sample hub"
+  labels = {
+    label-two = "value-one"
+  }
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{index $.Vars "subnetwork_name"}}"
+  ip_cidr_range = "10.0.0.0/28"
+  region        = "us-central1"
+  network       = google_compute_network.network.self_link
+}
+
+resource "google_compute_ha_vpn_gateway" "gateway" {
+  name    = "{{index $.Vars "gateway_name"}}"
+  network = google_compute_network.network.id
+}
+
+resource "google_compute_external_vpn_gateway" "external_vpn_gw" {
+  name            = "{{index $.Vars "external_gateway_name"}}"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "router" {
+  name    = "{{index $.Vars "router_name"}}"
+  region  = "us-central1"
+  network = google_compute_network.network.name
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "tunnel1" {
+  name                            = "{{index $.Vars "vpn_tunnel_1_name"}}"
+  region                          = "us-central1"
+  vpn_gateway                     = google_compute_ha_vpn_gateway.gateway.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_vpn_gw.id
+  peer_external_gateway_interface = 0
+  shared_secret                   = "a secret message"
+  router                          = google_compute_router.router.id
+  vpn_gateway_interface           = 0
+}
+
+resource "google_compute_vpn_tunnel" "tunnel2" {
+  name                            = "{{index $.Vars "vpn_tunnel_2_name"}}"
+  region                          = "us-central1"
+  vpn_gateway                     = google_compute_ha_vpn_gateway.gateway.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_vpn_gw.id
+  peer_external_gateway_interface = 0
+  shared_secret                   = "a secret message"
+  router                          = " ${google_compute_router.router.id}"
+  vpn_gateway_interface           = 1
+}
+
+resource "google_compute_router_interface" "router_interface1" {
+  name       = "{{index $.Vars "router_interface_1_name"}}"
+  router     = google_compute_router.router.name
+  region     = "us-central1"
+  ip_range   = "169.254.0.1/30"
+  vpn_tunnel = google_compute_vpn_tunnel.tunnel1.name
+}
+
+resource "google_compute_router_peer" "router_peer1" {
+  name                      = "{{index $.Vars "router_peer_1_name"}}"
+  router                    = google_compute_router.router.name
+  region                    = "us-central1"
+  peer_ip_address           = "169.254.0.2"
+  peer_asn                  = 64515
+  advertised_route_priority = 100
+  interface                 = google_compute_router_interface.router_interface1.name
+}
+
+resource "google_compute_router_interface" "router_interface2" {
+  name       = "{{index $.Vars "router_interface_2_name"}}"
+  router     = google_compute_router.router.name
+  region     = "us-central1"
+  ip_range   = "169.254.1.1/30"
+  vpn_tunnel = google_compute_vpn_tunnel.tunnel2.name
+}
+
+resource "google_compute_router_peer" "router_peer2" {
+  name                      = "{{index $.Vars "router_peer_2_name"}}"
+  router                    = google_compute_router.router.name
+  region                    = "us-central1"
+  peer_ip_address           = "169.254.1.2"
+  peer_asn                  = 64515
+  advertised_route_priority = 100
+  interface                 = google_compute_router_interface.router_interface2.name
+}
+
+resource "google_network_connectivity_spoke" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "vpn_tunnel_1_spoke_name"}}"
+  location    = "us-central1"
+  description = "A sample spoke with a linked VPN Tunnel"
+  labels = {
+    label-one = "value-one"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_vpn_tunnels {
+    uris                       = [google_compute_vpn_tunnel.tunnel1.self_link]
+    site_to_site_data_transfer = true
+    include_import_ranges      = ["ALL_IPV4_RANGES"]
+  }
+}
+
+resource "google_network_connectivity_spoke" "tunnel2" {
+  name        = "{{index $.Vars "vpn_tunnel_2_spoke_name"}}"
+  location    = "us-central1"
+  description = "A sample spoke with a linked VPN Tunnel"
+  labels = {
+    label-one = "value-one"
+  }
+  hub = google_network_connectivity_hub.basic_hub.id
+  linked_vpn_tunnels {
+    uris                       = [google_compute_vpn_tunnel.tunnel2.self_link]
+    site_to_site_data_transfer = true
+    include_import_ranges      = ["ALL_IPV4_RANGES"]
+  }
+}
