@@ -17,12 +17,13 @@ import (
 // We make sure not to run tests in parallel, since only one MessageBus per project is supported.
 func TestAccEventarcMessageBus(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":           testAccEventarcMessageBus_basic,
-		"cryptoKey":       testAccEventarcMessageBus_cryptoKey,
-		"update":          testAccEventarcMessageBus_update,
-		"googleApiSource": testAccEventarcMessageBus_googleApiSource,
-		"pipeline":        testAccEventarcMessageBus_pipeline,
-		"enrollment":      testAccEventarcMessageBus_enrollment,
+		"basic":            testAccEventarcMessageBus_basic,
+		"cryptoKey":        testAccEventarcMessageBus_cryptoKey,
+		"update":           testAccEventarcMessageBus_update,
+		"googleApiSource":  testAccEventarcMessageBus_googleApiSource,
+		"pipeline":         testAccEventarcMessageBus_pipeline,
+		"enrollment":       testAccEventarcMessageBus_enrollment,
+		"updateEnrollment": testAccEventarcMessageBus_updateEnrollment,
 	}
 
 	for name, tc := range testCases {
@@ -386,13 +387,161 @@ resource "google_eventarc_enrollment" "primary" {
   }
 }
 
+resource "google_pubsub_topic" "pipeline_topic" {
+  name = "tf-test-topic%{random_suffix}"
+}
+
 resource "google_eventarc_pipeline" "pipeline" {
   location    = "%{region}"
   pipeline_id = "tf-test-pipeline%{random_suffix}"
   destinations {
-    http_endpoint {
-      uri = "https://10.77.0.0:80/route"
+    topic = google_pubsub_topic.pipeline_topic.id
+    network_config {
+      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
     }
+  }
+}
+
+resource "google_eventarc_message_bus" "message_bus" {
+  location       = "%{region}"
+  message_bus_id = "tf-test-messagebus%{random_suffix}"
+}
+`, context)
+}
+
+// Although this test is defined in resource_eventarc_message_bus_test, it is primarily
+// concerned with testing the Enrollment resource, which depends on a singleton MessageBus.
+func testAccEventarcMessageBus_updateEnrollment(t *testing.T) {
+	context := map[string]interface{}{
+		"project_id":              envvar.GetTestProjectFromEnv(),
+		"region":                  envvar.GetTestRegionFromEnv(),
+		"random_suffix":           acctest.RandString(t, 10),
+		"network_attachment_name": acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-messagebus-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-messagebus-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-messagebus-network"))),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckEventarcEnrollmentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEventarcMessageBus_enrollmentCfg(context),
+			},
+			{
+				ResourceName:            "google_eventarc_enrollment.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+			{
+				Config: testAccEventarcMessageBus_updateEnrollmentCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_enrollment.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_eventarc_enrollment.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+			{
+				Config: testAccEventarcMessageBus_unsetEnrollmentCfg(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_eventarc_enrollment.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_eventarc_enrollment.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccEventarcMessageBus_updateEnrollmentCfg(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_eventarc_enrollment" "primary" {
+  location      = "%{region}"
+  enrollment_id = "tf-test-enrollment%{random_suffix}"
+  display_name  = "updated enrollment"
+  message_bus   = google_eventarc_message_bus.message_bus.id
+  destination   = google_eventarc_pipeline.pipeline_update.id
+  cel_match     = "true"
+  labels = {
+    updated_label = "updated-test-eventarc-label"
+  }
+  annotations = {
+    updated_test_annotation = "updated-test-eventarc-annotation"
+  }
+  # TODO(tommyreddad) As of time of writing, enrollments can't be updated
+  # if their pipeline has been deleted. So use this workaround until the
+  # underlying issue in the Eventarc API is fixed.
+  depends_on = [google_eventarc_pipeline.pipeline]
+}
+
+resource "google_pubsub_topic" "pipeline_update_topic" {
+  name = "tf-test-topic2%{random_suffix}"
+}
+
+resource "google_eventarc_pipeline" "pipeline_update" {
+  location    = "%{region}"
+  pipeline_id = "tf-test-pipeline2%{random_suffix}"
+  destinations {
+    topic = google_pubsub_topic.pipeline_update_topic.id
+    network_config {
+      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
+    }
+  }
+}
+
+resource "google_pubsub_topic" "pipeline_topic" {
+  name = "tf-test-topic%{random_suffix}"
+}
+
+resource "google_eventarc_pipeline" "pipeline" {
+  location    = "%{region}"
+  pipeline_id = "tf-test-pipeline%{random_suffix}"
+  destinations {
+    topic = google_pubsub_topic.pipeline_topic.id
+    network_config {
+      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
+    }
+  }
+}
+
+resource "google_eventarc_message_bus" "message_bus" {
+  location       = "%{region}"
+  message_bus_id = "tf-test-messagebus%{random_suffix}"
+}
+`, context)
+}
+
+func testAccEventarcMessageBus_unsetEnrollmentCfg(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_eventarc_enrollment" "primary" {
+  location      = "%{region}"
+  enrollment_id = "tf-test-enrollment%{random_suffix}"
+  message_bus   = google_eventarc_message_bus.message_bus.id
+  destination   = google_eventarc_pipeline.pipeline_update.id
+  cel_match     = "true"
+}
+
+resource "google_pubsub_topic" "pipeline_update_topic" {
+  name = "tf-test-topic2%{random_suffix}"
+}
+
+resource "google_eventarc_pipeline" "pipeline_update" {
+  location    = "%{region}"
+  pipeline_id = "tf-test-pipeline2%{random_suffix}"
+  destinations {
+    topic = google_pubsub_topic.pipeline_update_topic.id
     network_config {
       network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
     }
