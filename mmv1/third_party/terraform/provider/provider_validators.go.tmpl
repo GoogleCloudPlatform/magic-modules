@@ -2,8 +2,11 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	googleoauth "golang.org/x/oauth2/google"
 )

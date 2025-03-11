@@ -21,7 +21,7 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/version"
+    "github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
     {{- end }}
@@ -264,7 +264,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                         "service_account_email": schema.StringAttribute{
                             Required: true,
                             Validators: []validator.String{
-                                fwvalidators.ServiceAccountEmailValidator(),
+                                fwvalidators.ServiceAccountEmailValidator{},
                             },
                         },
                         "identity_token_file": schema.StringAttribute{
