@@ -568,6 +568,71 @@ properties:
                   type: Integer
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
+      - name: 'denyMaintenancePeriods'
+        type: Array
+        description: |
+          Periods to deny maintenance. Currently limited to 1.
+        item_type:
+          description: |
+            Maintenance will not be scheduled to start within this deny period. The startDate must be less than the endDate.
+          type: NestedObject
+          properties:
+            - name: 'startDate'
+              type: NestedObject
+              description: |
+                Deny period start date. This can be either a full date, with non-zero year, month and day values OR
+                a month and day value, with a zero year for recurring.
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: |
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                  required: true
+                - name: 'month'
+                  type: Integer
+                  description: |
+                    Month of a year. Must be from 1 to 12.
+                - name: 'day'
+                  type: Integer
+                  description: |
+                    Day of a month. Must be from 1 to 31 and valid for the year and month.
+            - name: 'endDate'
+              type: NestedObject
+              description: |
+                Deny period end date. This can be either a full date, with non-zero year, month and day values OR
+                a month and day value, with a zero year for recurring.
+              required: true
+              properties:
+                - name: 'year'
+                  type: Integer
+                  description: |
+                    Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.
+                  required: true
+                - name: 'month'
+                  type: Integer
+                  description: |
+                    Month of a year. Must be from 1 to 12.
+                - name: 'day'
+                  type: Integer
+                  description: |
+                    Day of a month. Must be from 1 to 31 and valid for the year and month.
+            - name: 'time'
+              type: NestedObject
+              description: |
+                Time in UTC when the deny period starts on start date and ends on end date. This can be: full time OR
+                all zeros for 00:00:00 UTC
+              required: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                  required: true
+                - name: 'minutes'
+                  type: Integer
+                  description: |
+                    Minutes of hour of day.
   - name: 'subscriptionType'
     type: Enum
     description: |
