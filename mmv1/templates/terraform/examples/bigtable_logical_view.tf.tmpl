@@ -1,5 +1,4 @@
 resource "google_bigtable_instance" "instance" {
-resource "google_bigtable_instance" "instance" {
   name = "{{index $.Vars "instance_name"}}"
   cluster {
     cluster_id   = "cluster-1"
@@ -8,7 +7,7 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "HDD"
   }
 
-  deletion_protection  = {{index $.Vars "deletion_protection"}}
+  deletion_protection  = false
 }
 
 resource "google_bigtable_table" "table" {
