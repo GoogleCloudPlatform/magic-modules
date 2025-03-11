@@ -75,6 +75,7 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+      reservation_name: 'wbi-reservation'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
   - name: 'workbench_instance_labels_stopped'
@@ -95,6 +96,7 @@ examples:
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
+      reservation_name: 'wbi-reservation'
       key_name: 'my-crypto-key'
     test_env_vars:
       project_id: 'PROJECT_NAME'
