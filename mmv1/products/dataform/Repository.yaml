@@ -52,6 +52,9 @@ examples:
     # This example is used in the docs to address this issue
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     exclude_test: true
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
@@ -67,6 +70,9 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
     min_version: 'beta'
