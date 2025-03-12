@@ -52,24 +52,27 @@ func TestAccDataSourceComputeRegionBackendService_basic(t *testing.T) {
 func testAccDataSourceComputeRegionBackendService_basic(serviceName, checkName, region string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
-  name          = "%s"
-  description   = "foobar backend service"
-  region        = "%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "%s"
+  description           = "foobar backend service"
+  region                = "%s"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks        = [google_compute_region_health_check.zero.self_link]
 }
 
-resource "google_compute_http_health_check" "zero" {
+resource "google_compute_region_health_check" "zero" {
   name               = "%s"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
+  region            = "%s"
+  http_health_check {
+    port = 80
+  }
 }
 
 data "google_compute_region_backend_service" "baz" {
   name   = google_compute_region_backend_service.foobar.name
   region = google_compute_region_backend_service.foobar.region
 }
-`, serviceName, region, checkName)
+`, serviceName, region, checkName, region)
 }
 
 func TestAccDataSourceComputeRegionBackendService_withProject(t *testing.T) {
@@ -98,17 +101,20 @@ func TestAccDataSourceComputeRegionBackendService_withProject(t *testing.T) {
 func testAccDataSourceComputeRegionBackendService_withProject(serviceName, checkName, region string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
-  name          = "%s"
-  description   = "foobar backend service"
-  region        = "%s"
-  health_checks = [google_compute_http_health_check.zero.self_link]
+  name                  = "%s"
+  description           = "foobar backend service"
+  region                = "%s"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks        = [google_compute_region_health_check.zero.self_link]
 }
 
-resource "google_compute_http_health_check" "zero" {
+resource "google_compute_region_health_check" "zero" {
   name               = "%s"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
+  region            = "%s"
+  http_health_check {
+    port = 80
+  }
 }
 
 data "google_compute_region_backend_service" "baz" {
@@ -116,5 +122,5 @@ data "google_compute_region_backend_service" "baz" {
   name    = google_compute_region_backend_service.foobar.name
   region  = google_compute_region_backend_service.foobar.region
 }
-`, serviceName, region, checkName)
+`, serviceName, region, checkName, region)
 }
