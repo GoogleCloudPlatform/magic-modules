@@ -143,6 +143,10 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
+					if _, ok := d.GetOk("source_md5hash"); ok {
+						return true
+					}
+
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
@@ -562,14 +566,6 @@ func setEncryptionHeaders(customerEncryption map[string]string, headers http.Hea
 	headers.Set("x-goog-encryption-key-sha256", base64.StdEncoding.EncodeToString(keyHash[:]))
 }
 
-func getFileMd5Hash(filename string) string {
-	return tpgresource.GetFileMd5Hash(filename)
-}
-
-func getContentMd5Hash(content []byte) string {
-	return tpgresource.GetContentMd5Hash(content)
-}
-
 func expandCustomerEncryption(input []interface{}) map[string]string {
 	expanded := make(map[string]string)
 	if input == nil {
@@ -619,8 +615,6 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 		d.SetNewComputed("crc32")
 		d.SetNewComputed("md5hash")
 		d.SetNewComputed("generation")
-		// if any change in source_md5hash, override change of detect_md5hash
-		d.ForceNew("detect_md5hash")
 	}
 
 	return nil
