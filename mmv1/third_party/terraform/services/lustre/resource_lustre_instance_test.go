@@ -57,11 +57,8 @@ resource "google_lustre_instance" "instance" {
   instance_id         = "tf-test-my-instance%{random_suffix}"
   location            = "us-central1-a"
   filesystem          = "testfs"
-	description         = "test-description"
 	network             = data.google_compute_network.lustre-network.id
-	labels              = {
-    test = "test-label"
-  }
+  gke_support_enabled = false
   capacity_gib        = 18000
 	timeouts {
 		create = "250m"
@@ -88,7 +85,6 @@ resource "google_lustre_instance" "instance" {
   instance_id         = "tf-test-my-instance%{random_suffix}"
   location            = "us-central1-a"
   filesystem          = "testfs"
-  description         = "description updated"
   capacity_gib        = 18000
   network             = data.google_compute_network.lustre-network.id
 	description         = "test-description"
