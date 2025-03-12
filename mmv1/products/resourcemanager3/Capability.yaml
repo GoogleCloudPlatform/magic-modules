@@ -40,7 +40,7 @@
     insert_minutes: 20
     update_minutes: 20
   
-  autogen_async: false
+  autogen_async: true
   async:
     actions: ['create', 'update']
     operation:
@@ -51,7 +51,7 @@
     - name: 'resource_manager_capability'
       primary_resource_id: 'capability'
       vars:
-        parent: 'folders/395566339940'
+        display_name: 'folder'
         capability_name: 'app-management'
       min_version: beta
 

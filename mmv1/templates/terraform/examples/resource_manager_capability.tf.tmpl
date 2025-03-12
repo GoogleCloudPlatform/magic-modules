@@ -1,6 +1,12 @@
 resource "google_resource_manager_capability" "{{$.PrimaryResourceId}}" {
   provider         = google-beta
   value            = true
-  parent           = "{{index $.Vars "parent"}}"
+  parent           = "${google_folder.folder.name}"
   capability_name  = "{{index $.Vars "capability_name"}}"
+}
+
+resource "google_folder" "folder" {
+  provider         = google-beta
+  display_name     = "{{index $.Vars "display_name"}}"
+  parent           = "organizations/1036545057225"
 }

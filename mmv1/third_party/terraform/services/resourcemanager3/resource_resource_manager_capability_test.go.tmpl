@@ -1,4 +1,4 @@
-package resourcemanager_test
+package resourcemanager3_test
 
 import (
 	"testing"
@@ -37,8 +37,14 @@ func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(con
 resource "google_resource_manager_capability" "capability" {
   provider         = google-beta
   value            = true
-  parent           = "folders/395566339940"
+  parent           = "${google_folder.folder.name}"
   capability_name  = "app-management"
+}
+resource "google_folder" "folder" {
+  provider         = google-beta
+  display_name     = "folder%{random_suffix}"
+  parent           = "organizations/1036545057225"
+  deletion_protection = false
 }
 provider "google-beta" {
   user_project_override = true
