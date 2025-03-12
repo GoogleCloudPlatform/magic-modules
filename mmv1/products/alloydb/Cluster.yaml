@@ -285,6 +285,10 @@ properties:
       - name: 'pscEnabled'
         type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+      - name: 'serviceOwnedProjectNumber'
+        type: Integer
+        description: 'The project number that needs to be allowlisted on the network attachment to enable outbound connectivity.'
+        output: true
   - name: 'initialUser'
     type: NestedObject
     description: |
