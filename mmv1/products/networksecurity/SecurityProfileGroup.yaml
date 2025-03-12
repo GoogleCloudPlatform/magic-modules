@@ -71,7 +71,7 @@ examples:
       security_profile_group_name: 'sec-profile-group'
     test_env_vars:
       org_id: 'ORG_ID'
-  - name: 'network_security_security_profile_group_url_monitoring'
+  - name: 'network_security_security_profile_group_url_filtering'
     primary_resource_id: 'default'
     vars:
       security_profile_group_name: 'sec-profile-group'
