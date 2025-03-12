@@ -455,8 +455,8 @@ resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
         	username = google_sql_user.user.name
         	port     = 5432
         	private_key = <<EOT
-		    %{private_key}
-            EOT
+		%{private_key}
+        	EOT
     	}
     	%{lifecycle_block}
 }
