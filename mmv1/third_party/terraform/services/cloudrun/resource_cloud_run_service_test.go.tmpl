@@ -1482,7 +1482,6 @@ resource "google_cloud_run_service" "default" {
 `, name, project)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunService_resourcesRequirements(t *testing.T) {
        t.Parallel()
 
@@ -1527,7 +1526,6 @@ func TestAccCloudRunService_resourcesRequirements(t *testing.T) {
 func testAccCloudRunV2Service_cloudrunServiceWithoutGpu(name, project string) string {
        return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "%s"
   location = "us-central1"
 
@@ -1561,7 +1559,6 @@ resource "google_cloud_run_service" "default" {
 func testAccCloudRunV2Service_cloudrunServiceWithGpu(name, project string) string {
        return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
-  provider = google-beta
   name     = "%s"
   location = "us-central1"
 
@@ -1569,6 +1566,7 @@ resource "google_cloud_run_service" "default" {
     namespace = "%s"
     annotations = {
       "run.googleapis.com/launch-stage" = "BETA"
+      "run.googleapis.com/gpu-zonal-redundancy-disabled" = "true"
     }
   }
 
@@ -1598,4 +1596,3 @@ resource "google_cloud_run_service" "default" {
 }
 `, name, project)
 }
-{{- end }}
