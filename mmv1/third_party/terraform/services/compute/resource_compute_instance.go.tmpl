@@ -3639,7 +3639,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
 			"image":  diskDetails.SourceImage,
 			"source_image_encryption_key":    d.Get("boot_disk.0.initialize_params.0.source_image_encryption_key"),
-			"snapshot":                       diskDetails.SourceSnapshot,
+			"snapshot":                       d.Get("boot_disk.0.initialize_params.0.snapshot"),
 			"source_snapshot_encryption_key": d.Get("boot_disk.0.initialize_params.0.source_snapshot_encryption_key"),
 			"architecture": diskDetails.Architecture,
 			"size":   diskDetails.SizeGb,
