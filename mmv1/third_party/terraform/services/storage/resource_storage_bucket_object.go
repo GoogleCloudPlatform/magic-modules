@@ -143,9 +143,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
-					if _, ok := d.GetOk("source_md5hash"); ok {
-						return true
-					}
 
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
