@@ -67,7 +67,7 @@ resource "google_compute_storage_pool" "test-storage-pool-full" {
   pool_provisioned_iops         = "20000"
   pool_provisioned_throughput   = "2048"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+    storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
 	deletion_protection = false
 
@@ -75,6 +75,11 @@ resource "google_compute_storage_pool" "test-storage-pool-full" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 `, context)
 }
 
@@ -112,12 +117,17 @@ resource "google_compute_storage_pool" "test-storage-pool-basic" {
 
   pool_provisioned_throughput = 100
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 `, context)
 }
 
@@ -160,7 +170,7 @@ resource "google_compute_storage_pool" "test-storage-pool-full" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -168,6 +178,11 @@ resource "google_compute_storage_pool" "test-storage-pool-full" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 `, context)
 }
 

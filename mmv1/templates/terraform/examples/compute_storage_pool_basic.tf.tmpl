@@ -5,9 +5,14 @@ resource "google_compute_storage_pool" "{{$.PrimaryResourceId}}" {
 
   pool_provisioned_throughput = 100
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
