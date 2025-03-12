@@ -16,6 +16,7 @@ resource "google_network_security_intercept_endpoint_group" "{{$.PrimaryResource
   intercept_endpoint_group_id   = "{{index $.Vars "endpoint_group_id"}}"
   location                      = "global"
   intercept_deployment_group    = google_network_security_intercept_deployment_group.deployment_group.id
+  description                   = "some description"
   labels = {
     foo = "bar"
   }
