@@ -83,12 +83,11 @@ virtual_fields:
   - name: 'deletion_policy'
     type: Enum
     description: |
-      Policy to control how the specified repository(including child resources) are deleted.
-    default_value: ""
+      Policy to control how the specified repository(including child resources) are deleted. When 'FORCE', all nested resources will be deleted.
+    default_value: 'DELETE'
     enum_values:
-      - 'ABANDON'
       - 'DELETE'
-      - 'DELETE_INCLUDING_CHILDREN'
+      - 'FORCE'
 parameters:
   - name: 'region'
     type: String
