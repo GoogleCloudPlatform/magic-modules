@@ -381,6 +381,10 @@ properties:
     properties:
       - name: 'type'
         type: Enum
+        description: |
+          The type of workload policy.
+        immutable: true
+        required: true
         enum_values:
           - 'HIGH_AVAILABILITY'
           - 'HIGH_THROUGHPUT'
