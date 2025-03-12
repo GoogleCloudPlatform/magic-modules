@@ -257,7 +257,7 @@ properties:
     enum_values:
       - "STANDARD"
       - "ADVANCED"
-    default_value: "ADVANCED"
+    default_from_api: true
   - name: "performanceProvisioningType"
     type: Enum
     description: |
@@ -267,7 +267,7 @@ properties:
     enum_values:
       - "STANDARD"
       - "ADVANCED"
-    default_value: "ADVANCED"
+    default_from_api: true
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
