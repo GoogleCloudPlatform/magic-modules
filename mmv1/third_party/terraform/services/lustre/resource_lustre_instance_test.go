@@ -28,7 +28,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
 			},
 			{
 				Config: testAccLustreInstance_update(context),
@@ -45,7 +45,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
 			},
 		},
 	})
@@ -54,15 +54,15 @@ func TestAccLustreInstance_update(t *testing.T) {
 func testAccLustreInstance_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id  = "tf-test-my-instance%{random_suffix}"
-  location     = "us-central1-a"
-  filesystem   = "testfs"
-	description  = "original"
-	labels       = {
-    test = "original"
+  instance_id         = "tf-test-my-instance%{random_suffix}"
+  location            = "us-central1-a"
+  filesystem          = "testfs"
+	description         = "test-description"
+	network             = data.google_compute_network.lustre-network.id
+	labels              = {
+    test = "test-label"
   }
-  capacity_gib = 18000
-  network      = data.google_compute_network.lustre-network.id
+  capacity_gib        = 18000
 	timeouts {
 		create = "250m"
 	}
@@ -91,9 +91,9 @@ resource "google_lustre_instance" "instance" {
   description         = "description updated"
   capacity_gib        = 18000
   network             = data.google_compute_network.lustre-network.id
-  gke_support_enabled = true
-  labels              = {
-    test = "updated"
+	description         = "test-description"
+	labels              = {
+    test = "test-label"
   }
 	timeouts {
 		create = "250m"
