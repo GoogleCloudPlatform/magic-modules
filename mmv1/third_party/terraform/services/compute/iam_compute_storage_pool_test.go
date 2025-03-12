@@ -226,7 +226,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -234,6 +234,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 `, context)
 }
 
@@ -250,7 +255,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -258,6 +263,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 `, context)
 }
 
@@ -275,7 +285,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -283,6 +293,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 
 resource "google_compute_storage_pool_iam_member" "foo" {
   project = google_compute_storage_pool.test-storage-pool-balanced.project
@@ -308,7 +323,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -316,6 +331,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 
 data "google_iam_policy" "foo" {
   binding {
@@ -356,7 +376,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -364,6 +384,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 
 data "google_iam_policy" "foo" {
 }
@@ -391,7 +416,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -399,6 +424,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 
 resource "google_compute_storage_pool_iam_binding" "foo" {
   project = google_compute_storage_pool.test-storage-pool-balanced.project
@@ -424,7 +454,7 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
   pool_provisioned_iops         = "10000"
   pool_provisioned_throughput   = "1024"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-balanced"
+  storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
   deletion_protection = false
 
@@ -432,6 +462,11 @@ resource "google_compute_storage_pool" "test-storage-pool-balanced" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "balanced" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-balanced"
+}
 
 resource "google_compute_storage_pool_iam_binding" "foo" {
   project = google_compute_storage_pool.test-storage-pool-balanced.project
@@ -456,7 +491,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -464,6 +499,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 
 resource "google_compute_storage_pool_iam_binding" "foo" {
   project = google_compute_storage_pool.test-storage-pool-throughput.project
@@ -493,7 +533,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -501,6 +541,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 
 resource "google_compute_storage_pool_iam_binding" "foo" {
   project = google_compute_storage_pool.test-storage-pool-throughput.project
@@ -552,7 +597,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+  storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -560,6 +605,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 
 resource "google_compute_storage_pool_iam_member" "foo" {
   project = google_compute_storage_pool.test-storage-pool-throughput.project
@@ -589,7 +639,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+    storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -597,6 +647,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 
 resource "google_compute_storage_pool_iam_member" "foo" {
   project = google_compute_storage_pool.test-storage-pool-throughput.project
@@ -648,7 +703,7 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
   performance_provisioning_type = "STANDARD"
   pool_provisioned_throughput   = "100"
 
-  storage_pool_type = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/zones/us-central1-a/storagePoolTypes/hyperdisk-throughput"
+    storage_pool_type = data.google_compute_storage_pool_types.throughput.self_link
 
   deletion_protection = false
 
@@ -656,6 +711,11 @@ resource "google_compute_storage_pool" "test-storage-pool-throughput" {
 }
 
 data "google_project" "project" {}
+
+data "google_compute_storage_pool_types" "throughput" {
+  zone = "us-central1-a"
+	storage_pool_type = "hyperdisk-throughput"
+}
 
 data "google_iam_policy" "foo" {
   binding {
