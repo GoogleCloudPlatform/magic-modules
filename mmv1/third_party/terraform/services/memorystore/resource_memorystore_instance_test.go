@@ -650,7 +650,6 @@ resource "google_memorystore_instance" "test" {
 	}
     deletion_protection_enabled = %t
 	engine_version = "%s"
-	engine_version = "%s"
 	engine_configs = {
 		%s
 	}
