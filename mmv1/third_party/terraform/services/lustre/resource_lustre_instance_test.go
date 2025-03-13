@@ -61,7 +61,7 @@ resource "google_lustre_instance" "instance" {
   gke_support_enabled = false
   capacity_gib        = 18000
 	timeouts {
-		create = "250m"
+		create = "120m"
 	}
 }
 
@@ -92,7 +92,7 @@ resource "google_lustre_instance" "instance" {
     test = "test-label"
   }
 	timeouts {
-		create = "250m"
+		create = "120m"
   }
 }
 
