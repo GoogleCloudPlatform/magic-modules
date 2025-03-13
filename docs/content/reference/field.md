@@ -100,7 +100,7 @@ sensitive: true
 
 ### `write_only`
 If true, the field is considered "write-only", which means that its value will
-be obscured in Terraform output as we all as not be stored in state. This field is meant to replace `sensitive` as it doesn't store the value in state.
+be obscured in Terraform output as well as not be stored in state. This field is meant to replace `sensitive` as it doesn't store the value in state.
 See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
 for more information.
 
