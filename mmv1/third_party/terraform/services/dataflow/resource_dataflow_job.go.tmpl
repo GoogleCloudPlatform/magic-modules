@@ -68,7 +68,7 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 		return false
 	}
 
-	return isRegionSuffixDiff(old, new, d.Get("region").(string))
+	return isRegionSuffixedPathMatch(old, new, d.Get("region").(string))
 }
 
 func isRegionSuffixedPathMatch(old, new, region string) bool {
@@ -303,7 +303,7 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 				if field == "template_gcs_path" {
 					old, new := d.GetChange("template_gcs_path")
 
-					if d.Get("region") != nil && isRegionSuffixDiff(old.(string), new.(string), d.Get("region").(string)) {
+					if d.Get("region") != nil && isRegionSuffixedPathMatch(old.(string), new.(string), d.Get("region").(string)) {
 						continue
 					}
 				}
