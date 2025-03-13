@@ -63,6 +63,15 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 	if old == new {
 		return true
 	}
+
+	if d.Get("region") == nil {
+		return false
+	}
+
+	return isRegionSuffixedPathMatch(old, new, d.Get("region").(string))
+}
+
+func isRegionSuffixedPathMatch(old, new, region string) bool {
 	// GCS path follows the format: "gs://bucket/path/to/file.txt". Split the string on the third "/"
 	// to get the bucket name.
 	counter, idx := 0, 0
@@ -75,11 +84,9 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 			break
 		}
 	}
-	splits := []string{new[0:idx], new[idx:len(new)]}
-	if d.Get("region") != nil && splits[0]+"-"+d.Get("region").(string)+splits[1] == old {
-		return true
-	}
-	return false
+	splits := []string{new[0:idx], new[idx:]}
+
+	return splits[0]+"-"+region+splits[1] == old
 }
 
 func ResourceDataflowJob() *schema.Resource {
@@ -292,7 +299,14 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 			if field == "on_delete" {
 				continue
 			}
-
+			// If the region is provided, the template_gcs_path will be updated to use the regional
+			// template bucket.
+			if field == "template_gcs_path" {
+				old, new := d.GetChange("template_gcs_path")
+				if d.Get("region") != nil && isRegionSuffixedPathMatch(old.(string), new.(string), d.Get("region").(string)) {
+					continue
+				}
+			}
 			if field != "terraform_labels" && d.HasChange(field) {
 				if err := d.ForceNew(field); err != nil {
 					return err
