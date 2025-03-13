@@ -594,7 +594,11 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		`, params.persistenceMode)
 	}
 
-	endpointBlock := createMemorystoreInstanceEndpoints(params)
+	if params.userEndpointCount == 2 {
+		createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params)
+	} else if params.userEndpointCount == 1 {
+		createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params)
+	}
 
 	return fmt.Sprintf(`
 resource "google_memorystore_instance" "test" {
@@ -645,5 +649,5 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, endpointBlock, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
 }

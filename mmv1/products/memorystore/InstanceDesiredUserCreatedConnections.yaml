@@ -92,9 +92,11 @@ parameters:
     url_param_only: true
     required: true
 properties:
-  - name: 'instanceEndpoints'
+  - name: 'desiredUserEndpoints'
+    api_name: 'endpoints'
     type: Array
     description: "A list of instance endpoints"
+    custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_desired_user_created_connections_desired_endpoints.go.tmpl'
     item_type:
       type: NestedObject
       description: |
@@ -120,7 +122,7 @@ properties:
                       "The PSC connection id of the forwarding rule connected
                       to the\nservice attachment."
                     required: true
-                  - name: 'address'
+                  - name: 'ipAddress'
                     type: String
                     description:
                       "The IP allocated on the consumer network for the
