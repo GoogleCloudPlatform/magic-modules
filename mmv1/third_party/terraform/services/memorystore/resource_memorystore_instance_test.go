@@ -104,11 +104,11 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 						"maxmemory-policy": "volatile-ttl",
 					},
 					deletionProtectionEnabled: false,
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0}),
+					maintenanceDay:            "MONDAY",
+					maintenanceHours:          1,
+					maintenanceMinutes:        0,
+					maintenanceSeconds:        0,
+					maintenanceNanos:          0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -126,11 +126,11 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 						"maxmemory-clients": "90%",
 					},
 					deletionProtectionEnabled: false,
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0}),
+					maintenanceDay:            "MONDAY",
+					maintenanceHours:          1,
+					maintenanceMinutes:        0,
+					maintenanceSeconds:        0,
+					maintenanceNanos:          0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -148,11 +148,11 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 						"maxmemory-clients": "90%",
 					},
 					deletionProtectionEnabled: false,
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0}),
+					maintenanceDay:            "MONDAY",
+					maintenanceHours:          1,
+					maintenanceMinutes:        0,
+					maintenanceSeconds:        0,
+					maintenanceNanos:          0}),
 			},
 		},
 	})
@@ -177,11 +177,11 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: true,
 					deletionProtectionEnabled: false,
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0}),
+					maintenanceDay:            "MONDAY",
+					maintenanceHours:          1,
+					maintenanceMinutes:        0,
+					maintenanceSeconds:        0,
+					maintenanceNanos:          0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -196,11 +196,11 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 					zoneDistributionMode:      "MULTI_ZONE",
 					deletionProtectionEnabled: false,
 					deletionProtectionEnabled: false,
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0}),
+					maintenanceDay:            "MONDAY",
+					maintenanceHours:          1,
+					maintenanceMinutes:        0,
+					maintenanceSeconds:        0,
+					maintenanceNanos:          0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -267,7 +267,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create instance with AOF enabled
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "AOF", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -276,7 +276,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// update persitence to RDB
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
@@ -285,7 +285,7 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			},
 			{
 				// clean up the resource
-				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false,  maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
@@ -302,6 +302,11 @@ type InstanceParams struct {
 	zone                      string
 	deletionProtectionEnabled bool
 	persistenceMode           string
+	maintenanceDay            string
+	maintenanceHours          int
+	maintenanceMinutes        int
+	maintenanceSeconds        int
+	maintenanceNanos          int
 	engineVersion             string
 }
 
