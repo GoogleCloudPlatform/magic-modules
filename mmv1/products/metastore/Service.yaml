@@ -177,6 +177,16 @@ properties:
     description: |
       The relative resource name of the metastore service.
     output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was last updated.
+    output: true
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the metastore service.'

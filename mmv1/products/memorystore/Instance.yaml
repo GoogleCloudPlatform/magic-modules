@@ -376,8 +376,7 @@ properties:
         output: true
   - name: 'engineVersion'
     type: String
-    description: "Optional. Immutable. Engine version of the instance. "
-    immutable: true
+    description: "Optional. Engine version of the instance."
     default_from_api: true
   - name: 'engineConfigs'
     type: KeyValuePairs

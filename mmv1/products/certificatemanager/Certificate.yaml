@@ -92,6 +92,10 @@ examples:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
+  - name: 'certificate_manager_client_auth_certificate'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'client-auth-cert'
 parameters:
   - name: 'name'
     type: String
@@ -129,7 +133,10 @@ properties:
       See https://cloud.google.com/vpc/docs/edge-locations.
 
       ALL_REGIONS: Certificates with ALL_REGIONS scope are served from all GCP regions (You can only use ALL_REGIONS with global certs).
-      See https://cloud.google.com/compute/docs/regions-zones
+      See https://cloud.google.com/compute/docs/regions-zones.
+
+      CLIENT_AUTH: Certificates with CLIENT_AUTH scope are used by a load balancer (TLS client) to be presented to the backend (TLS server) when backend mTLS is configured.
+      See https://cloud.google.com/load-balancing/docs/backend-authenticated-tls-backend-mtls#client-certificate.
     immutable: true
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     default_value: "DEFAULT"

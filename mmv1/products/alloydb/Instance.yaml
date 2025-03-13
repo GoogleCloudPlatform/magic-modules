@@ -191,10 +191,10 @@ properties:
     description: |
       'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
       Note that primary and read instances can have different availability types.
-      Only READ_POOL instance supports ZONAL type. Users can't specify the zone for READ_POOL instance.
-      Zone is automatically chosen from the list of zones in the region specified.
-      Read pool of size 1 can only have zonal availability. Read pools with node count of 2 or more
-      can have regional availability (nodes are present in 2 or more zones in a region).'
+      Primary instances can be either ZONAL or REGIONAL. Read Pool instances can also be either ZONAL or REGIONAL.
+      Read pools of size 1 can only have zonal availability. Read pools with a node count of 2 or more
+      can have regional availability (nodes are present in 2 or more zones in a region).
+      Possible values are: `AVAILABILITY_TYPE_UNSPECIFIED`, `ZONAL`, `REGIONAL`.'
     default_from_api: true
     enum_values:
       - 'AVAILABILITY_TYPE_UNSPECIFIED'
@@ -338,6 +338,20 @@ properties:
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
+      - name: 'pscInterfaceConfigs'
+        type: Array
+        description: |
+          Configurations for setting up PSC interfaces attached to the instance
+          which are used for outbound connectivity. Currently, AlloyDB supports only 0 or 1 PSC interface.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'networkAttachmentResource'
+              type: String
+              description: |
+                The network attachment resource created in the consumer project to which the PSC interface will be linked.
+                This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
+                The network attachment must be in the same region as the instance.
   - name: 'networkConfig'
     type: NestedObject
     description: |

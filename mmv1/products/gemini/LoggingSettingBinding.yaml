@@ -13,6 +13,7 @@
 
 ---
 name: LoggingSettingBinding
+api_resource_type_kind: SettingBinding
 description: The resource for managing Logging setting bindings for Admin Control.
 references:
   guides:
@@ -87,7 +88,6 @@ properties:
     description: |-
       Product type of the setting binding.
     enum_values:
-      - 'GEMINI_CLOUD_ASSIST'
       - 'GEMINI_CODE_ASSIST'
   - name: name
     type: String
