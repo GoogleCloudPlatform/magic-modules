@@ -51,6 +51,44 @@ func resourceDataflowJobLabelDiffSuppress(k, old, new string, d *schema.Resource
 	return false
 }
 
+// ResourceDataflowJobTemplateGcsPathDiffSuppress suppresses diffs on the template_gcs_path field
+// when the only diff is the region name in the bucket.
+// `old` is the value set by service and `new` is what is stored in the config. When using a public
+// template bucket, it will be automatically turned to use a regional bucket path. In this case,
+// we want to supress the diff.
+// Example:
+//   - old: gs://template-bucket-us-central1/path/to/file.txt
+//   - new: gs://template-bucket/path/to/file.txt
+func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	
+	if d.Get("region") == nil {
+		return false
+	}
+
+	return isRegionSuffixDiff(old, new, d.Get("region").(string))
+}
+
+func isRegionSuffixedPathMatch(old, new, region string) bool {
+	// GCS path follows the format: "gs://bucket/path/to/file.txt". Split the string on the third "/"
+	// to get the bucket name.
+	counter, idx := 0, 0
+	for i := 0; i < len(new); i++ {
+		if new[i] == '/' {
+			counter++
+		}
+		if counter == 3 {
+			idx = i
+			break
+		}
+	}
+	splits := []string{new[0:idx], new[idx:]}
+
+	return splits[0]+"-"+region+splits[1] == old
+}
+
 func ResourceDataflowJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataflowJobCreate,
@@ -262,6 +300,14 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 			}
 
 			if field != "terraform_labels" && d.HasChange(field) {
+				if field == "template_gcs_path" {
+					old, new := d.GetChange("template_gcs_path")
+
+					if d.Get("region") != nil && isRegionSuffixDiff(old.(string), new.(string), d.Get("region").(string)) {
+						continue
+					}
+				}
+				
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}
