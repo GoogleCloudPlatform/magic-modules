@@ -5206,40 +5206,6 @@ func TestAccContainerCluster_withDNSConfig(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withDNSConfigWithUnspecifiedScope(t *testing.T) {
-	t.Parallel()
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	domainName := fmt.Sprintf("tf-test-domain-%s", acctest.RandString(t, 10))
-	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_basic(clusterName, networkName, subnetworkName),
-			},
-			{
-				ResourceName:            "google_container_cluster.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-			{
-				Config: testAccContainerCluster_withDNSConfig(clusterName, "CLOUD_DNS", domainName, "DNS_SCOPE_UNSPECIFIED", networkName, subnetworkName),
-			},
-			{
-				ResourceName:            "google_container_cluster.primary",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -6099,7 +6065,21 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withAdvancedDNSConfig(clusterName, false, true, true, false, ""),
+				Config: testAccContainerCluster_withDNSConfigWithoutScope(clusterName),
+			},
+			{
+				ResourceName:            "google_container_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withDNSConfigWithUnspecifiedScope(clusterName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_container_cluster.primary",
@@ -6109,6 +6089,37 @@ func TestAccContainerCluster_cloudDns_nil_scope(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccContainerCluster_withDNSConfigWithoutScope(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 2
+  dns_config {
+    cluster_dns      = "CLOUD_DNS"
+  }
+
+  deletion_protection = false
+}
+`, clusterName)
+}
+
+func testAccContainerCluster_withDNSConfigWithUnspecifiedScope(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 2
+  dns_config {
+    cluster_dns       = "CLOUD_DNS"
+    cluster_dns_scope = "DNS_SCOPE_UNSPECIFIED"
+  }
+
+  deletion_protection = false
+}
+`, clusterName)
 }
 
 func TestAccContainerCluster_autopilot_withAdditiveVPCMutation(t *testing.T) {
