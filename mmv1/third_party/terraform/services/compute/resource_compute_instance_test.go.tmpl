@@ -12113,6 +12113,22 @@ resource "google_compute_instance" "foobar" {
 
 func testAccComputeInstance_instanceEncryption_SelfLinkServiceAccount(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_compute_default_service_account" "default" {}
+
+data "google_project" "default" {}
+
+resource "google_project_iam_member" "default-service-agent" {
+	project = data.google_project.default.project_id
+	role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+}
+
+resource "google_project_iam_member" "default-service-account" {
+	project = data.google_project.default.project_id
+	role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+	member  = "serviceAccount:${data.google_project.default.number}-compute@developer.gserviceaccount.com"
+}
+
 data "google_compute_image" "my_image" {
 	family  = "debian-11"
 	project = "debian-cloud"
@@ -12137,9 +12153,8 @@ resource "google_compute_instance" "foobar" {
 		kms_key_service_account = data.google_compute_default_service_account.default.email
 	}
 	desired_status = "%{desired_status}"
-}
 
-data "google_compute_default_service_account" "default" {
+	depends_on = [google_project_iam_member.default-service-agent, google_project_iam_member.default-service-account]
 }
 `, context)
 }
