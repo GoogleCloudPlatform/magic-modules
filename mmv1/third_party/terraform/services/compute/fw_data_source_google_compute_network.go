@@ -1,5 +1,4 @@
 package compute
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"context"
@@ -51,7 +50,7 @@ type ComputeNetworkModel struct {
 
 // Metadata returns the data source type name.
 func (d *ComputeNetworkFWDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_fwcompute_network"
+	resp.TypeName = req.ProviderTypeName + "_fw_compute_network"
 }
 
 func (d *ComputeNetworkFWDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -170,7 +169,8 @@ func (d *ComputeNetworkFWDataSource) Read(ctx context.Context, req datasource.Re
 	tflog.Trace(ctx, "read compute network data source")
 
 	// Put data in model
-	data.Id = types.StringValue(clientResp.Name)
+	id := fmt.Sprintf("projects/%s/global/networks/%s", project.ValueString(), clientResp.Name)
+	data.Id = types.StringValue(id)
 	data.Description = types.StringValue(clientResp.Description)
 	data.NetworkId = types.Int64Value(int64(clientResp.Id))
 	data.NumericId = types.StringValue(strconv.Itoa(int(clientResp.Id)))
@@ -181,4 +181,3 @@ func (d *ComputeNetworkFWDataSource) Read(ctx context.Context, req datasource.Re
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-{{- end }}
