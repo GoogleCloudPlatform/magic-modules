@@ -372,6 +372,7 @@ resource "google_memorystore_instance" "test" {
 	}
   %s
   %s
+  %s
 	depends_on = [
 			google_network_connectivity_service_connection_policy.default
 		]
