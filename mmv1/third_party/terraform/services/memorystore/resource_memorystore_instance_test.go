@@ -350,14 +350,6 @@ type InstanceParams struct {
 	userEndpointCount         int
 }
 
-func createMemorystoreInstanceEndpoints(params *InstanceParams) string {
-	if params.userEndpointCount == 2 {
-		return createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params)
-	} else if params.userEndpointCount == 1 {
-		return createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params)
-	}
-	return ``
-}
 func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *InstanceParams) string {
 	return fmt.Sprintf(`
 		resource "google_memorystore_instance_desired_user_created_connections" "default" {

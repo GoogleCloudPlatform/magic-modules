@@ -80,7 +80,6 @@ virtual_fields:
       PSC connections. "
     type: Array
     immutable: true
-    required: true
     item_type:
       type: NestedObject
       properties:
