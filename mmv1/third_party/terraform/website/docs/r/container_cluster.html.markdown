@@ -356,6 +356,10 @@ subnetwork in which the cluster's instances are launched.
     Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
     Structure is [documented below](#nested_vertical_pod_autoscaling).
 
+* `pod_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+    The config for pod autoscaling.
+    Structure is [documented below](#nested_pod_autoscaling).
+
 * `workload_identity_config` - (Optional)
     Workload Identity allows Kubernetes service accounts to act as a user-managed
     [Google IAM Service Account](https://cloud.google.com/iam/docs/service-accounts#user-managed_service_accounts).
@@ -1420,6 +1424,10 @@ linux_node_config {
 <a name="nested_vertical_pod_autoscaling"></a>The `vertical_pod_autoscaling` block supports:
 
 * `enabled` (Required) - Enables vertical pod autoscaling
+
+<a name="nested_pod_autoscaling"></a>The `pod_autoscaling` block supports:
+
+* `hpa_profile` - Horizontal Pod Autoscaling profile. See [HPAProfile](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#hpaprofile) for allowed values.
 
 <a name="nested_dns_config"></a>The `dns_config` block supports:
 

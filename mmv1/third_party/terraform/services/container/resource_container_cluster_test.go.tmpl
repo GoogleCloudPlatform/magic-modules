@@ -6297,6 +6297,83 @@ func testAccCheckContainerClusterDestroyProducer(t *testing.T) func(s *terraform
 	}
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccContainerCluster_withPodAutoscalingConfig(t *testing.T) {
+	t.Parallel()
+
+	networkName := "gke-cluster-pod-hpa"
+	subnetworkName := "gke-cluster-pod-hpa"
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	pid := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withPodAutoscalingConfig(pid, networkName, subnetworkName, clusterName, true),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_pod_autoscaling_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.with_pod_autoscaling_config", "pod_autoscaling.hpa_profile", "HPA_PROFILE_UNSPECIFIED"),
+			},
+			{
+				Config: testAccContainerCluster_withPodAutoscalingConfig(pid, networkName, subnetworkName, clusterName, false),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_pod_autoscaling_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.with_pod_autoscaling_config", "pod_autoscaling.hpa_profile", "NONE"),
+			},
+						{
+				Config: testAccContainerCluster_withPodAutoscalingConfig(pid, networkName, subnetworkName, clusterName, true),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_pod_autoscaling_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				Check: resource.TestCheckResourceAttr(
+					"google_container_cluster.with_pod_autoscaling_config", "pod_autoscaling.hpa_profile", "HPA_PROFILE_UNSPECIFIED"),
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withPodAutoscalingConfigAutopilot(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	pid := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withPodAutoscalingConfigAutopilot(pid, clusterName),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_pod_autoscaling_config_autopilot",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_pod_autoscaling_config_autopilot", "pod_autoscaling.hpa_profile", "PERFORMANCE")),
+			},
+		},
+	})
+}
+{{- end }}
+
 func testAccContainerCluster_basic(name, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "primary" {
@@ -13278,3 +13355,63 @@ resource "google_container_cluster" "with_enterprise_config" {
 }
 `, projectID, clusterName, networkName, subnetworkName)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccContainerCluster_withPodAutoscalingConfig(projectID, name, networkName, subnetworkName string, enable bool) string {
+
+  podAutoscalingBlock := ""
+  if enable { 
+    podAutoscalingBlock=`
+    pod_autoscaling {
+      hpa_profile = "NONE"
+    }
+  `
+  }
+
+  return fmt.Sprintf(`
+data "google_project" "project" {
+  provider   = google-beta
+  project_id = "%s"
+}
+resource "google_compute_network" "network" {
+  provider                 = google-beta
+  name                     = "%s"
+  auto_create_subnetworks  = false
+}
+resource "google_compute_subnetwork" "subnet" {
+  provider      = google-beta
+  name          = "%s"
+  network       = google_compute_network.network.id
+  ip_cidr_range = "10.12.22.0/24"
+  region        = "us-central1"
+}
+resource "google_container_cluster" "with_pod_autoscaling_config" {
+  provider           = google-beta
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network            = google_compute_network.network.name
+  subnetwork         = google_compute_subnetwork.subnet.name
+  deletion_protection = false
+  %v
+}
+`, projectID, networkName, subnetworkName, name, podAutoscalingBlock)
+}
+
+func testAccContainerCluster_withPodAutoscalingConfigAutopilot(projectID, name string) string {
+  return fmt.Sprintf(`
+  data "google_project" "project" {
+    provider = google-beta
+    project_id = "%s"
+  }
+  resource "google_container_cluster" "with_pod_autoscaling_config_autopilot" {
+    provider = google-beta
+    name               = "%s"
+    location           = "us-central1"
+    enable_autopilot = true
+    min_master_version = "1.32.1-gke.1729000"
+    deletion_protection = false
+  }
+`, projectID, name)
+}
+{{ end }}

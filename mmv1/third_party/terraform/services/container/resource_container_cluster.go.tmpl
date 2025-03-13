@@ -2370,6 +2370,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+{{ if ne $.TargetVersionName `ga` -}}
+			"pod_autoscaling": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: `The config for pod autoscaling.`,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"hpa_profile": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: `Horizontal Pod Autoscaling profile. See [HPAProfile](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#hpaprofile) for allowed values.`,
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("HPA_PROFILE_UNSPECIFIED"),
+						},
+					},
+				},
+			},
+{{- end }}
 		},
 	}
 }
@@ -2544,6 +2564,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 {{- end }}
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 		EnableK8sBetaApis:   expandEnableK8sBetaApis(d.Get("enable_k8s_beta_apis"), nil),
+{{- if ne $.TargetVersionName "ga" }}
+		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
+{{- end }}
 	}
 
 	v:= d.Get("enable_shielded_nodes")
@@ -3258,6 +3281,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster.EnterpriseConfig)); err != nil {
 		return err
 	}
+
+{{ if ne $.TargetVersionName `ga` -}}
+	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
+		return err
+	}
+{{- end }}
 
 	return nil
 }
@@ -4670,6 +4699,22 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's WorkloadALTSConfig has been updated", d.Id())
 	}
 {{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("pod_autoscaling") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
+			},
+		}
+
+		updateF := updateFunc(req, "updating GKE cluster PodAutoscaling")
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's PodAutoscaling has been updated", d.Id())
+	}
+{{- end }}
 	return resourceContainerClusterRead(d, meta)
 }
 
@@ -6062,6 +6107,21 @@ func expandWorkloadAltsConfig(configured interface{}) *container.WorkloadALTSCon
 }
 {{- end }}
 
+{{ if ne $.TargetVersionName `ga` -}}
+func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.PodAutoscaling{
+		HpaProfile:      config["hpa_profile"].(string),
+		ForceSendFields: []string{"HpaProfile"},
+	}
+}
+{{- end }}
+
 func flattenNotificationConfig(c *container.NotificationConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -6978,6 +7038,19 @@ func flattenWorkloadAltsConfig(c *container.WorkloadALTSConfig) []map[string]int
 	return []map[string]interface{}{
 		{
 			"enable_alts":        c.EnableAlts,
+		},
+	}
+}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"hpa_profile": c.HpaProfile,
 		},
 	}
 }
