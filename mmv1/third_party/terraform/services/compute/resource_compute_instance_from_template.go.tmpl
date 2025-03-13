@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-  "regexp"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -231,7 +231,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 // ensures that overriding one of these properties does not override the others.
 func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_tpg.Config, it *compute.InstanceTemplate, zone *compute.Zone, project string, isFromRegionalTemplate bool) ([]*compute.AttachedDisk, error) {
 	disks := []*compute.AttachedDisk{}
-  re := regexp.MustCompile(`projects/[^/]+/regions/[^/]+/disks/[^/]+$`)
+	re := regexp.MustCompile(`projects/[^/]+/regions/[^/]+/disks/[^/]+$`)
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
 		if err != nil {
