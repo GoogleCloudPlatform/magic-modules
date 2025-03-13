@@ -265,9 +265,3 @@ properties:
           type: String
           description: Output only. Link to documentation that describes a diagnostic in more detail.
           output: true
-  - name: dataTables
-    type: Array
-    description: Output only. Resource names of the data tables used in this rule.
-    output: true
-    item_type:
-      type: String
