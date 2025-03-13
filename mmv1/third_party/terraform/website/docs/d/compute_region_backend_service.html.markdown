@@ -1,18 +1,19 @@
 ---
 subcategory: "Compute Engine"
 description: |-
-  Get information about a Google Compute Engine Region Backend Service.
+  Get information about a Regional Backend Service.
 ---
 
-# google\_compute\_region\_backend\_service
+# google_compute_region_backend_service
 
-Get information about a Google Compute Engine Region Backend Service. For more information see
-[the official documentation](https://cloud.google.com/compute/docs/load-balancing/internal/regional-backend-service).
+Get information about a Regional Backend Service. For more information see
+[the official documentation](https://cloud.google.com/compute/docs/load-balancing/internal/backend-service) and
+[API](https://cloud.google.com/compute/docs/reference/rest/beta/regionBackendServices).
 
 ## Example Usage
 
 ```hcl
-data "google_compute_region_backend_service" "default" {
+data "google_compute_region_backend_service" "my_backend" {
   name   = "my-backend-service"
   region = "us-central1"
 }
@@ -22,65 +23,31 @@ data "google_compute_region_backend_service" "default" {
 
 The following arguments are supported:
 
-* `name` - (Required) Name of the resource.
+* `name` - (Required) The name of the regional backend service.
 
-* `region` - (Required) The region where the regional backend service resides.
+* `region` - (Required) The region where the backend service resides.
 
-- - -
-
-* `project` - (Optional) The ID of the project in which the resource belongs.
-  If it is not provided, the provider project is used.
+* `project` - (Optional) The ID of the project in which the resource belongs. If it
+    is not provided, the provider project is used.
 
 ## Attributes Reference
 
-In addition to the arguments listed above, the following computed attributes are exported:
+In addition to the arguments listed above, the following attributes are exported:
 
-* `description` - Description of the resource.
-
-* `backend` - The list of backends that serve this backend service. Structure is documented below.
-
-* `fingerprint` - The fingerprint of this resource.
-
-* `health_checks` - The list of URLs to the health checks used to verify traffic to backends.
-
-* `load_balancing_scheme` - The load balancing scheme.
-
-* `protocol` - The protocol used to communicate with backends.
-
-* `session_affinity` - The session affinity setting.
-
-* `timeout_sec` - The backend service timeout.
-
-* `connection_draining_timeout_sec` - Time for which instance will be drained.
-
-* `port_name` - Name of backend port.
+* `id` - An identifier for the resource with format `projects/{{project}}/regions/{{region}}/backendServices/{{name}}`
 
 * `self_link` - The URI of the created resource.
 
-* `creation_timestamp` - Creation timestamp in RFC3339 text format.
+* `description` - An optional description of this resource.
 
-The `backend` block supports:
+* `protocol` - The protocol this backend service uses to communicate with backends.
 
-* `group` - The fully-qualified URL of an instance group or network endpoint group.
+* `session_affinity` - The session affinity setting for this backend service.
 
-* `balancing_mode` - The balancing mode for this backend.
+* `timeout_sec` - How many seconds to wait for the backend before considering it a failed request.
 
-* `capacity_scaler` - A multiplier applied to the group's maximum servicing capacity.
+* `load_balancing_scheme` - The load balancing scheme. Possible values are: `INTERNAL`, `EXTERNAL`, `INTERNAL_MANAGED`, or `INTERNAL_SELF_MANAGED`.
 
-* `description` - An optional description.
+* `health_checks` - The list of URLs to the health checks associated with this backend service.
 
-* `failover` - If this backend is a failover backend.
-
-* `max_connections` - Maximum number of connections for the group.
-
-* `max_connections_per_instance` - Maximum number of connections per instance.
-
-* `max_connections_per_endpoint` - Maximum number of connections per endpoint.
-
-* `max_rate` - Maximum requests per second (RPS) for the group.
-
-* `max_rate_per_instance` - Maximum RPS per instance.
-
-* `max_rate_per_endpoint` - Maximum RPS per endpoint.
-
-* `max_utilization` - The target CPU utilization for the group. 
+* `backend` - The list of backends that serve this backend service.
