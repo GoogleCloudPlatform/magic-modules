@@ -259,6 +259,11 @@ type InstanceParams struct {
 	zone                      string
 	deletionProtectionEnabled bool
 	persistenceMode           string
+	maintenanceDay            string
+	maintenanceHours          int
+	maintenanceMinutes        int
+	maintenanceSeconds        int
+	maintenanceNanos          int
 }
 
 func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
