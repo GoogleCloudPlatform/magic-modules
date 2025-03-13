@@ -20,7 +20,7 @@ references:
   guides:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.siteSearchEngine.sitemaps'
 docs:
-base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/sitemaps'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/sitemaps:fetch'
 self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/sitemaps'
 delete_url: '{{name}}'
@@ -29,7 +29,6 @@ import_format:
 - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/sitemaps/{{sitemap_id}}'
 timeouts:
   insert_minutes: 60
-  update_minutes: 60
   delete_minutes: 60
 autogen_async: false
 async:
@@ -39,7 +38,6 @@ async:
     base_url: '{{op_id}}'
     timeouts:
       insert_minutes: 60
-      update_minutes: 60
       delete_minutes: 60
   result:
     resource_inside_response: true

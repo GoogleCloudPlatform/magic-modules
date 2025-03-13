@@ -1,7 +1,7 @@
 resource "google_discovery_engine_sitemap" "basic" {
   location                    = google_discovery_engine_data_store.advanced.location
   data_store_id               = google_discovery_engine_data_store.advanced.data_store_id
-  uri                         = "cloud.google.com/docs/sitemap.xml"
+  uri                         = "https://www.test.com/sitemap.xml"
 }
 
 resource "google_discovery_engine_data_store" "advanced" {
