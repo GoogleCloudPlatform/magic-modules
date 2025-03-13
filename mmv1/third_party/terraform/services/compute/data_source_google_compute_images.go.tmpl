@@ -102,7 +102,7 @@ func dataSourceGoogleComputeImagesRead(d *schema.ResourceData, meta interface{})
 
 	imageList, err := config.NewComputeClient(userAgent).Images.List(project).Filter(filter).Do()
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Images : %s", project))
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Images : %s", project))
 	}
 
 	for _, image := range imageList.Items {
