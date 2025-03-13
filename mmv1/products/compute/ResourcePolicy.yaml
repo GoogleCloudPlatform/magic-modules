@@ -83,6 +83,16 @@ examples:
     min_version: 'beta'
     vars:
       name: 'gce-policy'
+  - name: 'resource_policy_workload_policy_accelerator_topology'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_workload_policy_max_topology_distance'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -388,3 +398,23 @@ properties:
         enum_values:
           - 'HIGH_AVAILABILITY'
           - 'HIGH_THROUGHPUT'
+      - name: 'maxTopologyDistance'
+        type: Enum
+        description: |
+          The maximum topology distance. This field can be set only when the workload policy type is HIGH_THROUGHPUT
+          and cannot be set if accelerator topology is set.
+        immutable: true
+        enum_values:
+          - 'BLOCK'
+          - 'CLUSTER'
+          - 'SUBBLOCK'
+        conflicts:
+          - 'workload_policy.0.accelerator_topology'
+      - name: 'acceleratorTopology'
+        type: String
+        description: |
+          The accelerator topology. This field can be set only when the workload policy type is HIGH_THROUGHPUT
+          and cannot be set if max topology distance is set.
+        immutable: true
+        conflicts:
+          - 'workload_policy.0.max_topology_distance'
