@@ -104,7 +104,7 @@ be obscured in Terraform output as we all as not be stored in state. This field 
 See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
 for more information.
 
-This field cannnot be used in conjuction with `immutable` or `sensitive`.
+This field cannot be used in conjuction with `immutable` or `sensitive`.
 
 **Note**: Due to write-only not being read from the API, it is not possible to update the field directly unless a sidecar field is used. (e.g. `password` as a write-only field and `password_wo_version` as an immutable field meant for updating).
 
