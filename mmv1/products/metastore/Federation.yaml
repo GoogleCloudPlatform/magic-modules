@@ -79,6 +79,16 @@ properties:
     description: |
       The relative resource name of the metastore federation.
     output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore federation was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore federation was last updated.
+    output: true
   - name: 'labels'
     type: KeyValueLabels
     description: 'User-defined labels for the metastore federation.'
