@@ -38,7 +38,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_bigtable_logical_view.materialized_view", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_bigtable_logical_view.logical_view", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
