@@ -1191,9 +1191,8 @@ notification_config {
 
 <a name="nested_pod_autoscaling"></a>The `pod_autoscaling` block supports:
 
-* `hpa_profile` (Optional) - Enable the Horizontal Pod Autoscaling profile for this cluster.
+* `hpa_profile` (Required) - Enable the Horizontal Pod Autoscaling profile for this cluster.
     Acceptable values are:
-    * `"HPA_PROFILE_UNSPECIFIED"`: HPA_PROFILE_UNSPECIFIED is used when no custom HPA profile is set.
     * `"NONE"`: Customers explicitly opt-out of HPA profiles.
     * `"PERFORMANCE"`: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
     See [HPAProfile](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#hpaprofile) for more details.
