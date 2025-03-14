@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -299,7 +300,7 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 				if field == "template_gcs_path" {
 					old, new := d.GetChange("template_gcs_path")
 
-					if d.Get("region") != nil && isRegionSuffixedPathMatch(old.(string), new.(string), d.Get("region").(string)) {
+					if d.Get("region") != nil && isRegionSuffixedPathMatch(old.(string), new.(string))) {
 						continue
 					}
 				}
