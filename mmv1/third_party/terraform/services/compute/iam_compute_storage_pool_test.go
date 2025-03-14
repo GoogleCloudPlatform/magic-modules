@@ -37,7 +37,7 @@ func TestAccComputeStoragePoolIam(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-balanced%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-balanced-%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -47,7 +47,7 @@ func TestAccComputeStoragePoolIam(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-balanced%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-balanced-%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -61,7 +61,7 @@ func TestAccComputeStoragePoolIam(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer user:admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-balanced%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-balanced-%s roles/compute.viewer user:admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -75,7 +75,7 @@ func TestAccComputeStoragePoolIam(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-balanced%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-balanced-%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -84,7 +84,7 @@ func TestAccComputeStoragePoolIam(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-balanced%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-balanced-%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -101,12 +101,12 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 		"condition_desc":          "Expiring at midnight of 2019-12-31",
-		"condition_title_no_desc": "expires_after_2019_12_31-no-description",
-		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
+		"condition_title_no_desc": "expires_after_2020_12_31-no-description",
+		"condition_expr_no_desc":  `request.time < timestamp(\"2021-01-01T00:00:00Z\")`,
 	}
 
 	// Test should have 2 bindings: one with a description and one without. Any < chars are converted to a unicode character by the API.
-	expectedPolicyData := acctest.Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
+	expectedPolicyData := acctest.Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr_no_desc}","title":"%{condition_title_no_desc}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -122,7 +122,7 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -135,19 +135,19 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo2",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_binding.foo3",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -160,7 +160,7 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -173,38 +173,36 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer user:admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer user:admin@hashicorptest.com", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_member.foo2",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_member.foo3",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s roles/compute.viewer user:admin@hashicorptest.com %s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"], context["condition_title_no_desc"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				// remove Iam Binding
+				// remove Iam Member
 				Config: testAccComputeStoragePoolWithoutIamThroughput(context),
 			},
 			{
 				Config: testAccComputeStoragePoolIamPolicy_withCondition(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					// TODO(SarahFrench) - uncomment once https://github.com/GoogleCloudPlatform/magic-modules/pull/6466 merged
-					// resource.TestCheckResourceAttr("data.google_iam_policy.foo", "policy_data", expectedPolicyData),
 					resource.TestCheckResourceAttr("google_compute_storage_pool_iam_policy.foo", "policy_data", expectedPolicyData),
 					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", tpgresource.CheckGoogleIamPolicy),
 				),
 			},
 			{
 				ResourceName:      "google_compute_storage_pool_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), fmt.Sprintf("tf-test-storage-pool-throughput%s", context["random_suffix"])),
+				ImportStateId:     fmt.Sprintf("projects/%s/zones/%s/storagePools/tf-test-storage-pool-throughput-%s", envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), context["random_suffix"]),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -215,7 +213,7 @@ func TestAccComputeStoragePoolIam_withCondition(t *testing.T) {
 func testAccComputeStoragePoolWithoutIamBalanced(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -245,7 +243,7 @@ data "google_compute_storage_pool_types" "balanced" {
 func testAccComputeStoragePoolWithoutIamThroughput(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
@@ -274,7 +272,7 @@ data "google_compute_storage_pool_types" "throughput" {
 func testAccComputeStoragePoolIamMember_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -312,7 +310,7 @@ resource "google_compute_storage_pool_iam_member" "foo" {
 func testAccComputeStoragePoolIamPolicy_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -365,7 +363,7 @@ data "google_compute_storage_pool_iam_policy" "foo" {
 func testAccComputeStoragePoolIamPolicy_emptyBinding(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -405,7 +403,7 @@ resource "google_compute_storage_pool_iam_policy" "foo" {
 func testAccComputeStoragePoolIamBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -443,7 +441,7 @@ resource "google_compute_storage_pool_iam_binding" "foo" {
 func testAccComputeStoragePoolIamBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-balanced" {
-  name = "tf-test-storage-pool-balanced%{random_suffix}"
+  name = "tf-test-storage-pool-balanced-%{random_suffix}"
 
   description = "Hyperdisk Balanced storage pool"
 
@@ -481,7 +479,7 @@ resource "google_compute_storage_pool_iam_binding" "foo" {
 func testAccComputeStoragePoolIamBinding_withCondition(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
@@ -523,7 +521,7 @@ resource "google_compute_storage_pool_iam_binding" "foo" {
 func testAccComputeStoragePoolIamBinding_withAndWithoutCondition(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
@@ -566,6 +564,9 @@ resource "google_compute_storage_pool_iam_binding" "foo2" {
     description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
+
+  # Fixes flakiness in VCR replay test by ordering create/destroy.
+  depends_on = [google_compute_storage_pool_iam_binding.foo]
 }
 
 resource "google_compute_storage_pool_iam_binding" "foo3" {
@@ -580,6 +581,8 @@ resource "google_compute_storage_pool_iam_binding" "foo3" {
     title       = "%{condition_title_no_desc}"
     expression  = "%{condition_expr_no_desc}"
   }
+
+  depends_on = [google_compute_storage_pool_iam_binding.foo2]
 }
 `, context)
 }
@@ -587,7 +590,7 @@ resource "google_compute_storage_pool_iam_binding" "foo3" {
 func testAccComputeStoragePoolIamMember_withCondition(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
@@ -629,7 +632,7 @@ resource "google_compute_storage_pool_iam_member" "foo" {
 func testAccComputeStoragePoolIamMember_withAndWithoutCondition(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
@@ -672,6 +675,8 @@ resource "google_compute_storage_pool_iam_member" "foo2" {
     description = "%{condition_desc}"
     expression  = "%{condition_expr}"
   }
+
+  depends_on = [google_compute_storage_pool_iam_member.foo]
 }
 
 resource "google_compute_storage_pool_iam_member" "foo3" {
@@ -686,6 +691,7 @@ resource "google_compute_storage_pool_iam_member" "foo3" {
     title       = "%{condition_title_no_desc}"
     expression  = "%{condition_expr_no_desc}"
   }
+  depends_on = [google_compute_storage_pool_iam_member.foo2]
 }
 `, context)
 }
@@ -693,7 +699,7 @@ resource "google_compute_storage_pool_iam_member" "foo3" {
 func testAccComputeStoragePoolIamPolicy_withCondition(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_storage_pool" "test-storage-pool-throughput" {
-  name = "tf-test-storage-pool-throughput%{random_suffix}"
+  name = "tf-test-storage-pool-throughput-%{random_suffix}"
 
   description = "Hyperdisk Throughput storage pool"
 
