@@ -14,7 +14,7 @@
 ---
 # API resource name
 name: 'ProjectIntelligenceConfig'
-kind: 'storagecontrol#intelligence'
+kind: 'storagecontrol#intelligenceconfig'
 # Resource description for the provider documentation.
 description: |
   The Project Storage Intelligence Config resource represents GCS Storage Intelligence operating on individual GCP project. Storage Intelligence Config is a singleton resource and individual instance exists on each GCP project.
@@ -73,6 +73,7 @@ properties:
     properties:
       - name: excludedCloudStorageBuckets
         type: NestedObject
+        send_empty_value: true
         required: false
         description: |
           Buckets to exclude from the Storage Intelligence plan.
@@ -94,6 +95,7 @@ properties:
       - name: includedCloudStorageBuckets
         type: NestedObject
         required: false
+        send_empty_value: true
         description: |
           Buckets to include in the Storage Intelligence plan.
         conflicts:
@@ -114,6 +116,7 @@ properties:
       - name: excludedCloudStorageLocations
         type: NestedObject
         required: false
+        send_empty_value: true
         description: |
           Locations to exclude from the Storage Intelligence plan.
         conflicts:
@@ -134,6 +137,7 @@ properties:
       - name: includedCloudStorageLocations
         type: NestedObject
         required: false
+        send_empty_value: true
         description: |
           Locations to include in the Storage Intelligence plan.
         conflicts:
