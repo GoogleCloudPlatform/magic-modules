@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
+func TestAccRedisCluster_createUpdateClusterWithNodeType(t *testing.T) {
 
 	t.Parallel()
 
@@ -22,7 +22,7 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with replica count 1
+				// create cluster with node type "REDIS_STANDARD_SMALL"
 				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
@@ -32,8 +32,18 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
+				// update cluster with node type "REDIS_HIGHMEM_MEDIUM"
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, nodeType: "REDIS_HIGHMEM_MEDIUM", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE",  maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: false, nodeType: "REDIS_HIGHMEM_MEDIUM", zoneDistributionMode: "MULTI_ZONE",  maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
