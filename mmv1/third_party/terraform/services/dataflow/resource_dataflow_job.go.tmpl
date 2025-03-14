@@ -65,10 +65,6 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 		return true
 	}
 
-	if d.Get("region") == nil {
-		return false
-	}
-
 	return isRegionSuffixedPathMatch(old, new)
 }
 
