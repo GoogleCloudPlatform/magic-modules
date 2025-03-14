@@ -27,6 +27,8 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 custom_code:
   post_create: templates/terraform/post_create/analytics_hub_subscription.go.tmpl
+  pre_read: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
+  pre_delete: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
   post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
 sweeper:
   url_substitutions:
