@@ -457,6 +457,7 @@ resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
 		private_key 	= <<EOT
      %{private_key}
      EOT
+		}
     	%{lifecycle_block}
 }
 `, context)
