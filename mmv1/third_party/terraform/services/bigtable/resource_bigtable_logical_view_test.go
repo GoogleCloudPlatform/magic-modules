@@ -2,7 +2,10 @@ package bigtable_test
 
 import (
 	"fmt"
+
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
@@ -32,6 +35,12 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 			},
 			{
 				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col2"),
+
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigtable_logical_view.materialized_view", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_bigtable_logical_view.logical_view",
