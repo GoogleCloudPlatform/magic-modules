@@ -71,22 +71,10 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 	return isRegionSuffixedPathMatch(old, new, d.Get("region").(string))
 }
 
-func isRegionSuffixedPathMatch(old, new, region string) bool {
-	// GCS path follows the format: "gs://bucket/path/to/file.txt". Split the string on the third "/"
-	// to get the bucket name.
-	counter, idx := 0, 0
-	for i := 0; i < len(new); i++ {
-		if new[i] == '/' {
-			counter++
-		}
-		if counter == 3 {
-			idx = i
-			break
-		}
-	}
-	splits := []string{new[0:idx], new[idx:]}
 
-	return splits[0]+"-"+region+splits[1] == old
+func isRegionSuffixedPathMatch(old, new, region string) bool {
+	old = strings.Replace(old, "-"+region, "", 1)
+	return old == new
 }
 
 func ResourceDataflowJob() *schema.Resource {
