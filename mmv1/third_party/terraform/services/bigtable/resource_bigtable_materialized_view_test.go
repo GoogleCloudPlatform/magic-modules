@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -32,6 +34,11 @@ func TestAccBigtableMaterializedView_deletionProtection(t *testing.T) {
 			},
 			{
 				Config: testAccBigtableMaterializedView_deletionProtection(instanceName, tableName, mvName, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigtable_materialized_view.materialized_view", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_bigtable_materialized_view.materialized_view",
