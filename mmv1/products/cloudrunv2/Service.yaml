@@ -481,6 +481,7 @@ properties:
                     required: true
                   - name: 'value'
                     type: String
+                    default_value: ""
                     description: |-
                       Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:
