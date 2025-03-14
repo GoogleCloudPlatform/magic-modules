@@ -76,7 +76,7 @@ examples:
       'prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "Required. Immutable. User inputs for the auto-created
+    description: "Immutable. User inputs for the auto-created
       PSC connections. "
     type: Array
     immutable: true
@@ -401,7 +401,7 @@ properties:
         - name: 'dnsName'
           type: String
           description:
-            "Recommended to create a DNS record with the dnsName per client and point to the PSC endpoint IP address."
+            "The PSC endpoint IP address"
           output: true
         - name: 'connectionType'
           type: String
