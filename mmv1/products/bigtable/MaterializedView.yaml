@@ -77,7 +77,7 @@ properties:
       'The materialized view''s select query.'
     required: true
     immutable: true
-  - name: 'deletion_protection'
-    type: Bool
+  - name: 'deletionProtection'
+    type: Boolean
     description:
       'Set to true to make the MaterializedView protected against deletion.'

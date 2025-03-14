@@ -55,7 +55,7 @@ resource "google_bigtable_instance" "instance" {
   name          = "%s"
   cluster {
     cluster_id = "%s-c"
-    zone       = "us-central1-b"
+    zone       = "us-east1-b"
   }
 
   deletion_protection = false
@@ -75,13 +75,14 @@ resource "google_bigtable_materialized_view" "materialized_view" {
   instance             = google_bigtable_instance.instance.name
   deletion_protection  = %v
   query = <<EOT
-SELECT _key, CF 
+SELECT _key, COUNT(CF['col']) as Count
 FROM %s
+GROUP BY _key
 EOT  
 
   depends_on = [
     google_bigtable_table.table
   ]
 }
-`, instanceName, instanceName, tableName, mvName, deletion_protection, tableName)
+`, instanceName, instanceName, tableName, mvName, deletion_protection, fmt.Sprintf("`%s`", tableName))
 }
