@@ -291,32 +291,25 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 	if d.Get("type") == "JOB_TYPE_BATCH" {
 		resourceSchema := ResourceDataflowJob().Schema
 		for field := range resourceSchema {
-			// allow `on_delete` field to be changed
 			if field == "on_delete" {
 				continue
 			}
-			if field == "terraform_labels" {
-				continue
-			}
-			if d.HasChange(field) {
-				// allow a regional bucket name change.  
+
+			if field != "terraform_labels" && d.HasChange(field) {
 				if field == "template_gcs_path" {
 					old, new := d.GetChange("template_gcs_path")
-					region := d.Get("region").(string)
-					if region == "" {
-						region = zoneToRegion(d.Get("zone").(string))
-					}
-					if region != "" && isRegionSuffixedPathMatch(old.(string), new.(string),region) {
+
+					if d.Get("region") != nil && isRegionSuffixedPathMatch(old.(string), new.(string), d.Get("region").(string)) {
 						continue
 					}
 				}
+
 				if err := d.ForceNew(field); err != nil {
 					return err
 				}
 			}
 		}
 	}
-
 	return nil
 }
 
