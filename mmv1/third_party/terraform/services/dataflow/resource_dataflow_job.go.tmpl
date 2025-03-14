@@ -296,7 +296,7 @@ func resourceDataflowJobTypeCustomizeDiff(_ context.Context, d *schema.ResourceD
 				if field == "template_gcs_path" {
 					old, new := d.GetChange("template_gcs_path")
 
-					isRegionSuffixedPathMatch(old.(string), new.(string)) {
+					if isRegionSuffixedPathMatch(old.(string), new.(string)) {
 						continue
 					}
 				}
