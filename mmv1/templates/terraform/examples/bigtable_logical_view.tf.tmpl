@@ -2,7 +2,7 @@ resource "google_bigtable_instance" "instance" {
   name = "{{index $.Vars "instance_name"}}"
   cluster {
     cluster_id   = "cluster-1"
-    zone         = "us-central1-a"
+    zone         = "us-east1-b"
     num_nodes    = 3
     storage_type = "HDD"
   }
@@ -24,7 +24,7 @@ resource "google_bigtable_logical_view" "{{$.PrimaryResourceId}}" {
   instance        = google_bigtable_instance.instance.name
   query = <<EOT
 SELECT _key, CF 
-FROM `{{index $.Vars "table_name"}}`
+FROM ` + "`{{index $.Vars "table_name"}}`" + `
 EOT
 
   depends_on = [

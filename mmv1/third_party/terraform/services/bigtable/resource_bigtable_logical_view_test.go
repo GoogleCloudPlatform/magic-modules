@@ -57,7 +57,7 @@ resource "google_bigtable_instance" "instance" {
   name          = "%s"
   cluster {
     cluster_id = "%s-c"
-    zone       = "us-central1-b"
+    zone       = "us-east1-b"
   }
 
   deletion_protection = false
@@ -77,12 +77,12 @@ resource "google_bigtable_logical_view" "logical_view" {
   instance        = google_bigtable_instance.instance.name
   query = <<EOT
 SELECT _key, CF['%s'] 
-FROM %s%s%s
+FROM %s
 EOT  
 
   depends_on = [
     google_bigtable_table.table
   ]
 }
-`, instanceName, instanceName, tableName, mvName, colName, "`", tableName, "`")
+`, instanceName, instanceName, tableName, mvName, colName, fmt.Sprintf("`%s`", tableName))
 }
