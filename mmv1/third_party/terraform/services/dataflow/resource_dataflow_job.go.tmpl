@@ -72,9 +72,16 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 }
 
 
-func isRegionSuffixedPathMatch(old, new, region string) bool {
-	old = strings.Replace(old, "-"+region, "", 1)
-	return old == new
+func isRegionSuffixedPathMatch(old, new string) bool {
+    re := regexp.MustCompile(`gs://([a-z0-9\-]+)-[a-z0-9]+-[a-z0-9]+(/.*)?`)
+    matches := re.FindStringSubmatch(old)
+    
+    if len(matches) == 3 && matches[2] != "" {
+        modifiedOld := "gs://" + matches[1] + matches[2]
+        return modifiedOld == new
+    }
+
+    return false
 }
 
 func ResourceDataflowJob() *schema.Resource {
