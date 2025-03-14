@@ -1586,6 +1586,7 @@ func ResourceContainerCluster() *schema.Resource {
 			"pod_autoscaling": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Description: `PodAutoscaling is used for configuration of parameters for workload autoscaling`,
 				Elem: &schema.Resource{
@@ -1593,6 +1594,7 @@ func ResourceContainerCluster() *schema.Resource {
 						"hpa_profile": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Default:		  "HPA_PROFILE_UNSPECIFIED",
 							ValidateFunc:     validation.StringInSlice([]string{"HPA_PROFILE_UNSPECIFIED", "NONE", "PERFORMANCE"}, false),
 							Description:      `
 								HPA Profile is used to configure the Horizontal Pod Autoscaler (HPA) profile for the cluster.
@@ -1601,7 +1603,6 @@ func ResourceContainerCluster() *schema.Resource {
 								- NONE: Customers explicitly opt-out of HPA profiles.
 								- PERFORMANCE: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
 							`,
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("HPA_PROFILE_UNSPECIFIED"),
 						},
 					},
 				},
@@ -5787,16 +5788,25 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 }
 
 func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
-	l := configured.([]interface{})
-	if len(l) == 0 || l[0] == nil {
+	if configured == nil {
 		return nil
 	}
 
-	config := l[0].(map[string]interface{})
-	return &container.PodAutoscaling{
-		HpaProfile:      config["hpa_profile"].(string),
-		ForceSendFields: []string{"HpaProfile"},
+	podAutoscaling := &container.PodAutoscaling{}
+
+	configs := configured.([]interface{})
+
+	if len(configs) == 0 || configs[0] == nil {
+		return nil
 	}
+
+	config := configs[0].(map[string]interface{})
+
+	if v, ok := config["hpa_profile"]; ok {
+		podAutoscaling.HpaProfile = v.(string)
+	}
+
+	return podAutoscaling
 }
 {{- end }}
 
@@ -6762,18 +6772,16 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 }
 
 func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
+	config := make([]map[string]interface{}, 0, 1)
+
 	if c == nil {
-		return []map[string]interface{}{
-			{
-				"hpaProfile": "HPA_PROFILE_UNSPECIFIED",
-			},
-		}
+		return config
 	}
-	return []map[string]interface{}{
-		{
-			"hpaProfile": c.HpaProfile,
-		},
-	}
+
+	config = append(config, map[string]interface{}{
+		"hpa_profile": c.HpaProfile,
+	})
+	return config
 }
 
 {{ end }}
