@@ -77,7 +77,7 @@ resource "google_bigtable_logical_view" "logical_view" {
   instance        = google_bigtable_instance.instance.name
   query = <<EOT
 SELECT _key, CF['%s'] 
-FROM %s
+FROM `+"`%s`"+`
 EOT  
 
   depends_on = [
