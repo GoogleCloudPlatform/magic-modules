@@ -146,7 +146,7 @@ func FieldGrowingMinMessages(resource, field string, fieldDiff diff.FieldDiff) [
 		return nil
 	}
 	tmpl := "Field `%s` MinItems went from %s to %s on `%s`"
-	if fieldDiff.Old.MinItems < fieldDiff.New.MinItems || fieldDiff.Old.MinItems == 0 && fieldDiff.New.MinItems > 0 {
+	if fieldDiff.Old.MinItems < fieldDiff.New.MinItems {
 		oldMin := strconv.Itoa(fieldDiff.Old.MinItems)
 		if fieldDiff.Old.MinItems == 0 {
 			oldMin = "unset"
@@ -167,13 +167,16 @@ func FieldShrinkingMaxMessages(resource, field string, fieldDiff diff.FieldDiff)
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
 	}
-	tmpl := "Field `%s` MinItems went from %s to %s on `%s`"
-	if fieldDiff.Old.MaxItems > fieldDiff.New.MaxItems || fieldDiff.Old.MaxItems == 0 && fieldDiff.New.MaxItems > 0 {
-		oldMax := strconv.Itoa(fieldDiff.Old.MaxItems)
-		if fieldDiff.Old.MaxItems == 0 {
-			oldMax = "unset"
-		}
-		newMax := strconv.Itoa(fieldDiff.New.MaxItems)
+	tmpl := "Field `%s` MaxItems went from %s to %s on `%s`"
+	if fieldDiff.New.MaxItems == 0 {
+		return nil
+	}
+	newMax := strconv.Itoa(fieldDiff.New.MaxItems)
+	if fieldDiff.Old.MaxItems == 0 {
+		return []string{fmt.Sprintf(tmpl, field, "unset", newMax, resource)}
+	}
+	oldMax := strconv.Itoa(fieldDiff.Old.MaxItems)
+	if fieldDiff.Old.MaxItems > fieldDiff.New.MaxItems {
 		return []string{fmt.Sprintf(tmpl, field, oldMax, newMax, resource)}
 	}
 	return nil
