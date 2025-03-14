@@ -24,7 +24,7 @@ resource "google_bigtable_logical_view" "{{$.PrimaryResourceId}}" {
   instance        = google_bigtable_instance.instance.name
   query = <<EOT
 SELECT _key, CF 
-FROM {{index $.Vars "table_name"}}
+FROM `{{index $.Vars "table_name"}}`
 EOT
 
   depends_on = [
