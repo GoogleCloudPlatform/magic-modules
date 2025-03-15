@@ -42,4 +42,4 @@ jobs:
           go build .
       - name: Run command
         if: steps.read-comment.outputs.match != ''
-        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ steps.read-comment.outputs.group1 }}
+        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ github.event.comment.user.login }} ${{ steps.read-comment.outputs.group1 }}
