@@ -451,6 +451,7 @@ properties:
                             description: Name of the environment variable.
                           - name: 'value'
                             type: String
+                            default_value: ""
                             description: |-
                               Defaults to "".
                           - name: 'valueFrom'
