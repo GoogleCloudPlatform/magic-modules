@@ -164,11 +164,6 @@ properties:
             OUT_OF_SYNC
             DELETE_FAILED
           output: true
-  - name: description
-    type: String
-    description: |-
-      User-provided description of the endpoint group.
-      Used as additional context for the endpoint group.
   - name: connectedDeploymentGroups
     type: Array
     is_set: true
