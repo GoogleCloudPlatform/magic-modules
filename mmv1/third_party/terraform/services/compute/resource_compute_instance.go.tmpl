@@ -53,13 +53,6 @@ func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
-func KmsKeyNameDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if tpgresource.CompareCryptoKeyVersions(k, old, new, d) || tpgresource.CompareSelfLinkRelativePaths(k, old, new, d) {
-		return true
-	}
-	return false
-}
-
 var (
 	advancedMachineFeaturesKeys = []string{
 		"advanced_machine_features.0.enable_nested_virtualization",
@@ -391,7 +384,7 @@ func ResourceComputeInstance() *schema.Resource {
 													Optional:         true,
 													ForceNew:         true,
 													Computed:         true,
-													DiffSuppressFunc: KmsKeyNameDiffSuppress,
+													DiffSuppressFunc: tpgresource.CompareCryptoKeyVersions,
 													Description:      `The self link of the encryption key that is stored in Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
@@ -450,7 +443,7 @@ func ResourceComputeInstance() *schema.Resource {
 													Optional:         true,
 													ForceNew:         true,
 													Computed:         true,
-													DiffSuppressFunc: KmsKeyNameDiffSuppress,
+													DiffSuppressFunc: tpgresource.CompareCryptoKeyVersions,
 													Description:      `The self link of the encryption key that is stored in Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 												},
 
@@ -1565,7 +1558,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							DiffSuppressFunc: KmsKeyNameDiffSuppress,
+							DiffSuppressFunc: tpgresource.CompareCryptoKeyVersions,
 							Computed:    true,
 							Description: `The self link of the encryption key that is stored in Google Cloud KMS.`,
 						},
