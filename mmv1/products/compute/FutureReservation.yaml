@@ -48,21 +48,21 @@ collection_url_key: 'items'
 custom_code:
   # update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
   # pre_update: 'templates/terraform/pre_update/shared_future_reservation_update.go.tmpl'
-# examples:
-#   - name: 'future_reservation_basic'
-#     primary_resource_id: 'gce_future_reservation'
-#     vars:
-#       future_reservation_name: 'gce-future-reservation'
-#   - name: 'shared_future_reservation'
-#     primary_resource_id: 'gce_future_reservation'
-#     vars:
-#       future_reservation_name: 'gce-shared-future-reservation'
-#     test_env_vars:
-#       project: 'PROJECT_NAME'
-#       org_id: 'ORG_ID'
-#       billing_account: 'BILLING_ACCT'
-#     exclude_docs: true
-#     skip_vcr: true
+examples:
+  - name: 'future_reservation_basic'
+    primary_resource_id: 'gce_future_reservation'
+    vars:
+      future_reservation_name: 'gce-future-reservation'
+  - name: 'shared_future_reservation'
+    primary_resource_id: 'gce_future_reservation'
+    vars:
+      future_reservation_name: 'gce-shared-future-reservation'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    skip_vcr: true
 
 parameters:
   - name: 'zone'
@@ -74,18 +74,18 @@ parameters:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
 
 properties:
-  - name: 'creationTimeStamp'
+  - name: 'creationTimestamp'
     type: Time
     description: |
       The creation timestamp for this future reservation in RFC3339 text format.
     output: true
   - name: 'selfLink'
-    type: string
+    type: String
     description: |
       Server-defined fully-qualified URL for this resource.
     output: true
   - name: 'selfLinkWithId'
-    type: string
+    type: String
     description: |
       Server-defined URL for this resource with the resource id.
     output: true
@@ -150,10 +150,10 @@ properties:
           - 'LOCAL'
           - 'SPECIFIC_PROJECTS'
       - name: 'projects'
-        type: String
+        type: Array
         description: | 
           list of Project names to specify consumer projects for this shared-reservation. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-        item_type: string
+        item_type: String
       - name: 'projectMap'
         type: Map
         description: |
@@ -169,6 +169,11 @@ properties:
               type: String
               description: |
                 The project ID, should be same as the key of this project config in the parent map.
+  - name: 'namePrefix'
+    type: String
+    description: |
+      Name prefix for the reservations to be created at the time of delivery. The name prefix must comply with RFC1035. Maximum allowed length for name prefix is 20. Automatically created reservations name format will be -date-####.
+    #Look into maximum length
   - name: 'status'
     type: NestedObject
     description: | 
@@ -207,8 +212,9 @@ properties:
             description: |
               ID of the instance template used to populate the Future Reservation properties.
             output: true
+      #Enum values are listed in docs, TODO
       - name: 'amendmentStatus'
-        type: enum
+        type: Enum
         description: | 
           The current status of the requested amendment.
         output: true
@@ -323,6 +329,7 @@ properties:
                     description: |
                       Start time of the Future Reservation. The startTime is an RFC3339 string.
                     output: true
+                    # // Union field time can be only one of the following:TODO
                   - name: 'endTime'
                     type: String
                     description: |
@@ -343,6 +350,39 @@ properties:
                         description: |
                           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
                         output: true
+              #
+              - name: 'shareSettings'
+                type: NestedObject
+                description: |
+                  The previous share settings of the Future Reservation.
+                output: true
+                properties:
+                #Might need a enum value. TODO
+                  - name: 'shareType'
+                    type: Enum
+                    description: |
+                      Type of sharing for this shared-reservation
+                    output: true
+                  - name: 'projects'
+                    type: Array
+                    description: |
+                      A futureReservations.list of Project names to specify consumer projects for this shared-reservation. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+                    item_type: String
+                    output: true
+                  - name: 'projectMap'
+                    type: Map
+                    description: |
+                      A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
+                    output: true
+                    value_type:
+                      name: 'projectConfig'
+                      type: NestedObject
+                      properties:
+                        - name: 'projectId'
+                          type: String
+                          description: |
+                            The project ID, should be same as the key of this project config in the parent map.
+                          output: true
           - name: 'procurementStatus'    
             type: Enum
             description: |
@@ -424,7 +464,6 @@ properties:
         type: Enum
         description: |
           Only applicable if FR is delivering to the same reservation. If set, all parent commitments will be extended to match the end date of the plan for this commitment.
-        output: true
   - name: 'schedulingType'
     type: Enum
     description: |
@@ -483,7 +522,51 @@ properties:
                     - 'SCSI'
                     - 'NVME'
             - name: 'maintenanceFreezeDurationHours'
-              
+              type: Integer
+              description: |
+                Specifies the number of hours after reservation creation where instances using the reservation won't be scheduled for maintenance.
+            - name: 'locationHint'
+              type: String
+              description: |
+                An opaque location hint used to place the allocation close to other resources. This field is for use by internal tools that use the public API.
+            - name: 'maintenanceInterval'
+              type: Enum
+              description: |
+                Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC
+              enum_values:
+                - 'PERIODIC'
+      - name: 'totalCount'
+        type: String
+        description: |
+          Total number of instances for which capacity assurance is requested at a future time period.
+      - name: 'sourceInstanceTemplate'
+        type: String
+        description: |
+          The instance template that will be used to populate the ReservedInstanceProperties of the future reservation
+  - name: 'autoCreatedReservationsDeleteTime'
+    type: String
+    description: |
+      Future timestamp when the FR auto-created reservations will be deleted by Compute Engine.
+    #Double check
+    conflicts_with: ['autoCreatedReservationsDuration']
+    output: true
+  - name: 'autoCreatedReservationsDuration'
+    type: NestedObject
+    description: |
+      Specifies the duration of auto-created reservations. It represents relative time to future reservation startTime when auto-created reservations will be automatically deleted by Compute Engine. Duration time unit is represented as a count of seconds and fractions of seconds at nanosecond resolution.
+    #Double check
+    conflicts_with: ['autoCreatedReservationsDeleteTime']
+    output: true
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+
 
 
 
