@@ -184,19 +184,19 @@ properties:
     item_type:
       type: NestedObject
       properties:
-      - name: location
-        type: String
-        description: |-
-          The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
-        min_version: 'beta'
-        output: true
-      - name: state
-        type: String
-        description: |-
-          The current state of the association in this location.
-          Possible values:
-          STATE_UNSPECIFIED
-          ACTIVE
-          OUT_OF_SYNC
-        min_version: 'beta'
-        output: true
+        - name: location
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          min_version: 'beta'
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          min_version: 'beta'
+          output: true
