@@ -282,6 +282,11 @@ resource "google_logging_folder_bucket_config" "basic" {
 
 func testAccLoggingBucketConfigProject_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
+
 resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
