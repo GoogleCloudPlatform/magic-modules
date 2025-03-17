@@ -133,6 +133,12 @@ examples:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+  - name: 'backend_service_log_config'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-backend-service%s", context["random_suffix"])'
+    vars:
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
