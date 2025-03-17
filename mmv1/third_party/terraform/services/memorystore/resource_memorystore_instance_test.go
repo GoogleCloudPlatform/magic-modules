@@ -352,11 +352,11 @@ type InstanceParams struct {
 
 func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *InstanceParams) string {
 	return fmt.Sprintf(`
-		resource "google_memorystore_instance_desired_user_created_connections" "default" {
+		resource "google_memorystore_instance_desired_user_created_endpoints" "default" {
 
 		name                           = "%s"
 		region                         = "europe-west1"
-		desired_user_endpoints {
+		desired_user_created_endpoints {
 			connections {
 				psc_connection {
 					psc_connection_id  = google_compute_forwarding_rule.forwarding_rule1_network1.psc_connection_id
@@ -367,7 +367,7 @@ func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *Ins
 					service_attachment = google_memorystore_instance.test.psc_attachment_details[0].service_attachment
 				}
 			}
-		desired_user_endpoints {
+		desired_user_created_endpoints {
 				psc_connection {
 					psc_connection_id  = google_compute_forwarding_rule.forwarding_rule2_network1.psc_connection_id
 					ip_address         = google_compute_address.ip2_network1.address
@@ -388,10 +388,10 @@ func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *Ins
 
 func createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params *InstanceParams) string {
 	return fmt.Sprintf(`
-		resource "google_memorystore_instance_desired_user_created_connections" "default" {
+		resource "google_memorystore_instance_desired_user_created_endpoints" "default" {
 		name                           = "%s"
 		region                         = "europe-west1"
-		desired_user_endpoints {
+		desired_user_created_endpoints {
 			connections {
 				psc_connection {
 					psc_connection_id  = google_compute_forwarding_rule.forwarding_rule1_network1.psc_connection_id
@@ -412,7 +412,7 @@ func createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params *Ins
 				}
 			}
 		}
-		desired_user_endpoints {
+		desired_user_created_endpoints {
 			connections {
 				psc_connection {
 					psc_connection_id  = google_compute_forwarding_rule.forwarding_rule1_network2.psc_connection_id

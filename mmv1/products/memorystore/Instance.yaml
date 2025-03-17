@@ -398,11 +398,6 @@ properties:
           description:
             "Service attachment URI which your self-created PscConnection should use as target."
           output: true
-        - name: 'dnsName'
-          type: String
-          description:
-            "The PSC endpoint IP address"
-          output: true
         - name: 'connectionType'
           type: String
           description:

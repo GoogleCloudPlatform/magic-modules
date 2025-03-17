@@ -1,7 +1,7 @@
-resource "google_memorystore_instance_desired_user_created_connections" "{{$.PrimaryResourceId}}" {
+resource "google_memorystore_instance_desired_user_created_endpoints" "{{$.PrimaryResourceId}}" {
   name                        = "{{index $.Vars "instance_name"}}"
   region                      = "us-central1"
-  desired_user_endpoints {
+  desired_user_created_endpoints {
     connections {
       psc_connection {
         psc_connection_id     = google_compute_forwarding_rule.forwarding_rule1_network2.psc_connection_id
@@ -21,7 +21,7 @@ resource "google_memorystore_instance_desired_user_created_connections" "{{$.Pri
       }
     }
   }
-  desired_user_endpoints {
+  desired_user_created_endpoints {
     connections {
       psc_connection {
         psc_connection_id     = google_compute_forwarding_rule.forwarding_rule1_network2.psc_connection_id
