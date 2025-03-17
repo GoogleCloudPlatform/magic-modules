@@ -80,7 +80,7 @@ resource "google_securityposture_posture_deployment" "postureDeployment_one" {
     parent = "organizations/%{org_id}"
     location = "global"
     description = "a new posture deployment"
-    target_resource = "projects/%{google_project.posture_project.number}"
+    target_resource = "projects/${google_project.posture_project.number}"
     posture_id = google_securityposture_posture.posture_one.name
     posture_revision_id = google_securityposture_posture.posture_one.revision_id
 }
@@ -123,7 +123,7 @@ resource "google_securityposture_posture_deployment" "postureDeployment_one" {
     parent = "organizations/%{org_id}"
     location = "global"
     description = "an updated posture deployment"
-    target_resource = "projects/%{google_project.posture_project.number}"
+    target_resource = "projects/${google_project.posture_project.number}"
     posture_id = google_securityposture_posture.posture_one.name
     posture_revision_id = google_securityposture_posture.posture_one.revision_id
 }
