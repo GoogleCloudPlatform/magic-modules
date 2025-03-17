@@ -1487,7 +1487,7 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 		DeleteObjectsUniqueInSink:             option["delete_objects_unique_in_sink"].(bool),
 		OverwriteObjectsAlreadyExistingInSink: option["overwrite_objects_already_existing_in_sink"].(bool),
 		OverwriteWhen:                         option["overwrite_when"].(string),
-		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{}))
+		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{})),
 	}
 }
 
