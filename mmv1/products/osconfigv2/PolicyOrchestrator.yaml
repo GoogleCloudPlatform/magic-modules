@@ -57,7 +57,7 @@ async:
     - update
   type: OpAsync
   result:
-    resource_inside_response: false
+    resource_inside_response: true
   include_project: false
 autogen_status: UG9saWN5T3JjaGVzdHJhdG9y
 parameters:
