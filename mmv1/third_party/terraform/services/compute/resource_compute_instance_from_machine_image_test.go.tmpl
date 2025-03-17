@@ -315,125 +315,30 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 	})
 }
 
-func TestAccComputeInstanceFromMachineImage_encryptionKeyKMS(t *testing.T) {
+func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-	kmsKey := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
-
-	context := map[string]interface{}{
-		"instance_name": instanceName,
-		"image_name": machineImageName,
-		"kms_key_name": kmsKey.CryptoKey.Name,
-		"kms_key_service_account": "service-compute@compute.iam.gserviceaccount.com",
-	}
-
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var resourceName = "google_compute_instance_from_machine_image.foobar"
+	var machineImageName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	bootDiskID := "tf-instance-from-mi-test-disk"
+	serviceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", "tf-test-sa", envvar.GetTestProjectFromEnv())
+	keyRingSuffix := acctest.RandString(t, 10)
+	keyNameSuffix := acctest.RandString(t, 10)
+	
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceFromMachineImage_encryptionKeyKMS(context),
+				Config: testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar", 
-						"source_machine_image_encryption_key.0.kms_key_name", context["kms_key_name"].(string)),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-						"source_machine_image_encryption_key.0.kms_key_service_account", 
-						context["kms_key_service_account"].(string)),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstanceFromMachineImage_encryptionKeyRaw(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-
-	context := map[string]interface{}{
-		"instance_name": instanceName,
-		"image_name": machineImageName,
-		"raw_key": "SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstanceFromMachineImage_encryptionKeyRaw(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-						"source_machine_image_encryption_key.0.raw_key", context["raw_key"].(string)),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstanceFromMachineImage_encryptionKeySha(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-
-	context := map[string]interface{}{
-		"instance_name": instanceName,
-		"image_name": machineImageName,
-		"sha256": "LKV0jGTF7BXTrQqiwcN4kKBZZiYHcQBX1Pg4gNPvVs8=",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstanceFromMachineImage_encryptionKeySha(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-						"source_machine_image_encryption_key.0.sha256", context["sha256"].(string)),
-				),
-			},
-		},
-	})
-}
-
-func TestAccComputeInstanceFromMachineImage_encryptionKeyRSA(t *testing.T) {
-	t.Parallel()
-
-	var instance compute.Instance
-	instanceName := fmt.Sprintf("tf-encinst-%s", acctest.RandString(t, 10))
-	machineImageName := fmt.Sprintf("tf-encimg-%s", acctest.RandString(t, 10))
-
-	context := map[string]interface{}{
-		"instance_name": instanceName,
-		"image_name": machineImageName,
-		"rsa_encrypted_key": "ieCx/NcW06PcT7Ep1X6LUTc/hLvUDYyzSZPPVCVPTVEohpeHASqC8uw5TzyO9U+Fka9JFHz0mBibXUInrC/jEk014kCK/NPjYgEMOyssZ4ZINPKxlUh2zn1bV+MCaTICrdmuSBTWlUUiFoDD6PYznLwh8ZNdaheCeZ8ewEXgFQ8V+sDroLaN3Xs3MDTXQEMMoNUXMCZEIpg9Vtp9x2oeQ5lAbtt7bYAAHf5l+gJWw3sUfs0/Glw5fpdjT8Uggrr+RMZezGrltJEF293rvTIjWOEB3z5OHyHwQkvdrPDFcTqsLfh+8Hr8g+mf+7zVPEC8nEbqpdl3GPv3A7AwpFp7MA==",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeInstanceFromMachineImage_encryptionKeyRSA(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance_from_machine_image.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance_from_machine_image.foobar",
-						"source_machine_image_encryption_key.0.rsa_encrypted_key", context["rsa_encrypted_key"].(string)),
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, 
+						"source_machine_image_encryption_key.0.kms_key_name",
+						fmt.Sprintf("projects/%s/locations/global/keyRings/tf-test-keyring-%s/cryptoKeys/tf-test-key-%s", envvar.GetTestProjectFromEnv(), keyRingSuffix, keyNameSuffix)),
 				),
 			},
 		},
@@ -1245,61 +1150,90 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 `, projectID, projectID, org, billingId, instance, instance, newInstance)
 }
 
-func testAccComputeInstanceFromMachineImage_encryptionKeyKMS(context map[string]interface{}) string {
+func testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix string) string {
 	return fmt.Sprintf(`
-resource "google_compute_instance_from_machine_image" "foobar" {
-		provider = google-beta
-		name = "%s"
-		zone = "us-central1-a"
-		source_machine_image = google_compute_machine_image.foobar.self_link
-		source_machine_image_encryption_key {
-			kms_key_name = "%s"
-			kms_key_service_account = "%s"
-		}
-	}
-`, context["instance_name"].(string), context["kms_key_name"].(string), context["kms_key_service_account"].(string))
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
 }
 
-func testAccComputeInstanceFromMachineImage_encryptionKeyRaw(context map[string]interface{}) string {
-	return fmt.Sprintf(`
-resource "google_compute_instance_from_machine_image" "foobar" {
-		provider = google-beta
-		name = "%s"
-		zone = "us-central1-a"
-		source_machine_image = google_compute_machine_image.foobar.self_link
-		source_machine_image_encryption_key {
-			raw_key = "%s"
-		}
-	}
-`, context["instance_name"].(string), context["raw_key"].(string))
+resource "google_service_account" "test_service_account" {
+  account_id   = "tf-test-sa"
+  display_name = "Test Service Account"
 }
 
-func testAccComputeInstanceFromMachineImage_encryptionKeySha(context map[string]interface{}) string {
-	return fmt.Sprintf(`
-resource "google_compute_instance_from_machine_image" "foobar" {
-		provider = google-beta
-		name = "%s"
-		zone = "us-central1-a"
-		source_machine_image = google_compute_machine_image.foobar.self_link
-		source_machine_image_encryption_key {
-			sha256 = "%s"
-		}
-	}
-`, context["instance_name"].(string), context["sha256"].(string))
+resource "google_kms_key_ring" "keyring" {
+  name     = "tf-test-keyring-%s"
+  location = "global"
 }
 
-func testAccComputeInstanceFromMachineImage_encryptionKeyRSA(context map[string]interface{}) string {
-	return fmt.Sprintf(`
+resource "google_kms_crypto_key" "key" {
+  name            = "tf-test-key-%s"
+  key_ring        = google_kms_key_ring.keyring.id
+  rotation_period = "86400s"
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.test_service_account.email}"
+}
+
+resource "google_compute_machine_image" "foobar" {
+  name                   = "%s"
+  source_instance        = google_compute_instance.mi-source.id
+  machine_image_encryption_key {
+    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test_service_account.email
+  }
+}
+
+resource "google_compute_instance" "mi-source" {
+  name           = "%s-source"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email  = google_service_account.test_service_account.email
+    scopes = ["cloud-platform"]
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+}
+
 resource "google_compute_instance_from_machine_image" "foobar" {
-		provider = google-beta
-		name = "%s"
-		zone = "us-central1-a"
-		source_machine_image = google_compute_machine_image.foobar.self_link
-		source_machine_image_encryption_key {
-			rsa_encrypted_key = "%s"
-		}
-	}
-`, context["instance_name"].(string), context["rsa_encrypted_key"].(string))
+  name = "%s"
+  zone = "us-central1-a"
+  
+  source_machine_image = google_compute_machine_image.foobar.self_link
+  
+  source_machine_image_encryption_key {
+    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test_service_account.email
+  }
+  
+  service_account {
+    email  = google_service_account.test_service_account.email
+    scopes = ["cloud-platform"]
+  }
+}
+`, keyRingSuffix, keyNameSuffix, machineImageName, instanceName, instanceName)
 }
 
 {{- else }}
