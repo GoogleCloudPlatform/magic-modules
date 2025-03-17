@@ -20,7 +20,6 @@ description: |
   This resource should be generally be used with `google_compute_firewall_policy_association` and `google_compute_firewall_policy_rule`
 
   For more information see the [official documentation](https://cloud.google.com/vpc/docs/firewall-policies)
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies'
