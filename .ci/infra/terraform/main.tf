@@ -171,27 +171,6 @@ resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
   member = google_service_account.sa.member
 }
 
-# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
-resource "google_organization_iam_member" "sa_org_osconfig_service_agent" {
-  org_id = data.google_organization.org.org_id
-  role    = "roles/osconfig.serviceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
-}
-
-# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
-resource "google_organization_iam_member" "sa_org_osconfig_rollout_service_agent" {
-  org_id = data.google_organization.org.org_id
-  role    = "roles/osconfig.rolloutServiceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-}
-
-# TestAccOSConfigV2PolicyOrchestratorForOrganization_osconfigv2PolicyOrchestratorForOrganizationBasicExample
-resource "google_organization_iam_member" "sa_org_progressiverollout_service_agent" {
-  org_id = data.google_organization.org.org_id
-  role    = "roles/progressiverollout.serviceAgent"
-  member  = "serviceAccount:service-org-${data.google_organization.org.org_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
-}
-
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -514,30 +493,6 @@ resource "google_project_iam_member" "colab_admin_permissions" {
   project = google_project.proj.project_id
   role    = "roles/aiplatform.colabEnterpriseAdmin"
   member  = "user:gterraformtestuser@gmail.com"
-}
-
-# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
-resource "google_project_iam_member" "osconfig_service_agent" {
-  depends_on = [google_project_service_identity.osconfig_sa]
-  project = google_project.proj.project_id
-  role    = "roles/osconfig.serviceAgent"
-  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig.iam.gserviceaccount.com"
-}
-
-# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
-resource "google_project_iam_member" "osconfig_rollout_service_agent" {
-  depends_on = [google_project_service_identity.osconfig_sa]
-  project = google_project.proj.project_id
-  role    = "roles/osconfig.rolloutServiceAgent"
-  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
-}
-
-# TestAccOSConfigV2PolicyOrchestrator_osconfigv2PolicyOrchestratorBasicExample
-resource "google_project_iam_member" "progressiverollout_service_agent" {
-  depends_on = [google_project_service_identity.progressiverollout_sa]
-  project = google_project.proj.project_id
-  role    = "roles/progressiverollout.serviceAgent"
-  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-progrollout.iam.gserviceaccount.com"
 }
 
 data "google_organization" "org2" {
