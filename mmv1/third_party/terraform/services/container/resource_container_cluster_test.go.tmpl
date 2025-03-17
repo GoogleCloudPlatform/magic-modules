@@ -764,16 +764,6 @@ func TestAccContainerCluster_withPodAutoscaling(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_podAutoscalingConfig(clusterName, networkName, subnetworkName, "HPA_PROFILE_UNSPECIFIED"),
-			},
-			{
-				ResourceName:      "google_container_cluster.pod_autoscaling_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-				Check: resource.TestCheckResourceAttr("google_container_cluster.pod_autoscaling_config", "pod_autoscaling.hpa_profile", "HPA_PROFILE_UNSPECIFIED"),
-			},
-			{
 				Config: testAccContainerCluster_podAutoscalingConfig(clusterName, networkName, subnetworkName, "NONE"),
 			},
 			{

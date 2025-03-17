@@ -1594,14 +1594,13 @@ func ResourceContainerCluster() *schema.Resource {
 						"hpa_profile": {
 							Type:             schema.TypeString,
 							Required:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"HPA_PROFILE_UNSPECIFIED", "NONE", "PERFORMANCE"}, false),
+							ValidateFunc:     validation.StringInSlice([]string{"NONE", "PERFORMANCE"}, false),
 							Description:      `
 								HPA Profile is used to configure the Horizontal Pod Autoscaler (HPA) profile for the cluster.
 								Available options include:
 								- NONE: Customers explicitly opt-out of HPA profiles.
 								- PERFORMANCE: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
 							`,
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("HPA_PROFILE_UNSPECIFIED"),
 						},
 					},
 				},
