@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagecontrol_test
 
 import (
@@ -40,6 +42,36 @@ func TestAccStorageControlProjectIntelligenceConfig_update(t *testing.T) {
 						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_locations.0.locations.0", "us-east-1"),
 					resource.TestCheckResourceAttr(
 						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_locations.0.locations.1", "us-east-2"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_control_project_intelligence_config.project_storage_intelligence",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name"},
+			},
+			{
+				Config: testAccStorageControlProjectIntelligenceConfig_update_with_empty_filter_fields(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.#", "0"),
+					resource.TestCheckResourceAttr(
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_locations.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_storage_control_project_intelligence_config.project_storage_intelligence",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name"},
+			},
+			{
+				Config: testAccStorageControlProjectIntelligenceConfig_update_with_empty_filter_fields2(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.#", "0"),
+					resource.TestCheckResourceAttr(
+						"google_storage_control_project_intelligence_config.project_storage_intelligence", "filter.0.included_cloud_storage_locations.#", "0"),
 				),
 			},
 			{
@@ -123,6 +155,23 @@ resource "google_storage_control_project_intelligence_config" "project_storage_i
 `, context)
 }
 
+func testAccStorageControlProjectIntelligenceConfig_update_with_empty_filter_fields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_control_project_intelligence_config" "project_storage_intelligence" {
+  name = "%{project}"
+  edition_config = "STANDARD"
+  filter {
+    excluded_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    included_cloud_storage_locations{
+      locations = []
+    }
+  }
+}
+`, context)
+}
+
 func testAccStorageControlProjectIntelligenceConfig_update_with_filter2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_control_project_intelligence_config" "project_storage_intelligence" {
@@ -134,6 +183,23 @@ resource "google_storage_control_project_intelligence_config" "project_storage_i
     }
     excluded_cloud_storage_locations{
       locations = ["us-east-1", "us-east-2"]
+    }
+  }
+}
+`, context)
+}
+
+func testAccStorageControlProjectIntelligenceConfig_update_with_empty_filter_fields2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_control_project_intelligence_config" "project_storage_intelligence" {
+  name = "%{project}"
+  edition_config = "STANDARD"
+  filter {
+    included_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    excluded_cloud_storage_locations{
+      locations = []
     }
   }
 }

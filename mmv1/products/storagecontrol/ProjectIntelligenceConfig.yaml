@@ -30,7 +30,8 @@ docs:
 self_link: 'projects/{{name}}/locations/global/intelligenceConfig'
 
 custom_code:
-  custom_create: templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl
+  custom_create: 'templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl'
+  constants: 'templates/terraform/constants/storage_control_intelligence.go.tmpl'
 
 # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
@@ -68,12 +69,12 @@ properties:
       The time at which the Storage Intelligence Config resource is last updated.
   - name: 'filter'
     type: NestedObject
+    diff_suppress_func: 'intelligenceFilterDiffSuppress'
     description: |
       Filter over location and bucket using include or exclude semantics. Resources that match the include or exclude filter are exclusively included or excluded from the Storage Intelligence plan.
     properties:
       - name: excludedCloudStorageBuckets
         type: NestedObject
-        send_empty_value: true
         required: false
         description: |
           Buckets to exclude from the Storage Intelligence plan.
@@ -84,10 +85,12 @@ properties:
           - 'filter.0.excluded_cloud_storage_buckets'
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterExcludedCloudStorageBucketsDiffSuppress'
         properties:
           - name: bucketIdRegexes
             required: true
             type: Array
+            send_empty_value: true
             item_type:
               type: String
             description: |
@@ -95,7 +98,6 @@ properties:
       - name: includedCloudStorageBuckets
         type: NestedObject
         required: false
-        send_empty_value: true
         description: |
           Buckets to include in the Storage Intelligence plan.
         conflicts:
@@ -105,9 +107,11 @@ properties:
           - 'filter.0.excluded_cloud_storage_buckets'
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterincludedCloudStorageBucketsDiffSuppress'
         properties:
           - name: bucketIdRegexes
             required: true
+            send_empty_value: true
             type: Array
             item_type:
               type: String
@@ -116,7 +120,6 @@ properties:
       - name: excludedCloudStorageLocations
         type: NestedObject
         required: false
-        send_empty_value: true
         description: |
           Locations to exclude from the Storage Intelligence plan.
         conflicts:
@@ -126,10 +129,12 @@ properties:
           - 'filter.0.excluded_cloud_storage_buckets'
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterExcludedCloudStorageLocationsDiffSuppress'
         properties:
           - name: locations
             type: Array
             required: true
+            send_empty_value: true
             description: |
               List of locations.
             item_type:
@@ -137,7 +142,6 @@ properties:
       - name: includedCloudStorageLocations
         type: NestedObject
         required: false
-        send_empty_value: true
         description: |
           Locations to include in the Storage Intelligence plan.
         conflicts:
@@ -147,10 +151,12 @@ properties:
           - 'filter.0.excluded_cloud_storage_buckets'
           - 'filter.0.included_cloud_storage_locations'
           - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterincludedCloudStorageLocationsDiffSuppress'
         properties:
           - name: locations
             type: Array
             required: true
+            send_empty_value: true
             description: |
               List of locations.
             item_type:
