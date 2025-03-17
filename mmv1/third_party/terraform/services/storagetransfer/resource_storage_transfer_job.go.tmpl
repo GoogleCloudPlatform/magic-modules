@@ -1516,23 +1516,26 @@ func flattenTransferOption(option *storagetransfer.TransferOptions) []map[string
 		"delete_objects_unique_in_sink":              option.DeleteObjectsUniqueInSink,
 		"overwrite_objects_already_existing_in_sink": option.OverwriteObjectsAlreadyExistingInSink,
 		"overwrite_when":                             option.OverwriteWhen,
-		"metadata_options":                           flattenMetadataOption(option.MetadataOptions),
+		"metadata_options":                           flattenMetadataOptions(option.MetadataOptions),
 	}
 
 	return []map[string]interface{}{data}
 }
 
-func flattenMetadataOption(option *storagetransfer.MetadataOptions) []map[string]interface{} {
+func flattenMetadataOptions(options *storagetransfer.MetadataOptions) []map[string]interface{} {
+	if options == nil {
+		return nil
+	}
 	data := map[string]interface{}{
-		"symlink":        option.Symlink,
-		"uid":            option.Uid,
-		"mode":           option.Mode,
-		"gid":            option.Gid,
-		"acl":            option.Acl,
-		"storage_class":  option.StorageClass,
-		"temporary_hold": option.TemporaryHold,
-		"kms_key":        option.KmsKey,
-		"time_created":   option.TimeCreated,
+		"symlink":        options.Symlink,
+		"uid":            options.Uid,
+		"mode":           options.Mode,
+		"gid":            options.Gid,
+		"acl":            options.Acl,
+		"storage_class":  options.StorageClass,
+		"temporary_hold": options.TemporaryHold,
+		"kms_key":        options.KmsKey,
+		"time_created":   options.TimeCreated,
 	}
 	return []map[string]interface{}{data}
 }

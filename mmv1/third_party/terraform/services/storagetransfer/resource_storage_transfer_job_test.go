@@ -2358,7 +2358,6 @@ resource "google_storage_transfer_job" "transfer_job" {
       path  = "foo/bar/"
     }
     transfer_options {
-      delete_objects_from_source_after_transfer = false
       metadata_options {
         symlink = "SYMLINK_SKIP"
         uid = "UID_NUMBER"
