@@ -415,6 +415,27 @@ func TestAccBigtableTable_automated_backups(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
 			},
+			// Creating a table with automated backup explicitly disabled
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use CustomizeDiff function
+			},
+			// it is possible to delete the table when automated backup is disabled
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
 			// Creating a table with automated backups enabled
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
