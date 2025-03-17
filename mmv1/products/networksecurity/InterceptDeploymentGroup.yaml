@@ -150,3 +150,29 @@ properties:
       User-provided description of the deployment group.
       Used as additional context for the deployment group.
     min_version: 'beta'
+  - name: 'locations'
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the deployment group is present.
+    min_version: 'beta'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'state'
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          min_version: 'beta'
+          output: true
+        - name: 'location'
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          min_version: 'beta'
+          output: true
