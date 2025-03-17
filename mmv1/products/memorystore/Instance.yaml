@@ -211,9 +211,8 @@ properties:
   - name: 'nodeType'
     type: String
     description:
-      "Optional. Immutable. Machine type for individual nodes of the instance.
+      "Optional. Machine type for individual nodes of the instance.
       \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
-    immutable: true
     default_from_api: true
   - name: 'persistenceConfig'
     type: NestedObject
