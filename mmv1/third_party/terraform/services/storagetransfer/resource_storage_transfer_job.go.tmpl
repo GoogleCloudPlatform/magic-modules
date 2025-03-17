@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storagetransfer
 
 import (
@@ -101,6 +99,12 @@ var (
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	azureOptionCredentials = []string{
+		"transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials",
+		"transfer_spec.0.azure_blob_storage_data_source.0.credentials_secret",
+	}
+	{{- end }}
 )
 
 func ResourceStorageTransferJob() *schema.Resource {
@@ -138,10 +142,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 			"event_stream": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				MaxItems:         1,
-				ConflictsWith:    []string{"schedule"},
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"schedule"},
 				DiffSuppressFunc: diffSuppressEventStream,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -170,7 +174,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 				MaxItems:      1,
 				Optional:      true,
 				ConflictsWith: []string{"transfer_spec", "schedule"},
-				ExactlyOneOf:  []string{"transfer_spec", "replication_spec"},
+				ExactlyOneOf: []string{"transfer_spec", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(replicationSpecObjectConditionsKeys),
@@ -196,11 +200,11 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `Replication specification.`,
 			},
 			"transfer_spec": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				ConflictsWith: []string{"replication_spec"},
-				ExactlyOneOf:  []string{"transfer_spec", "replication_spec"},
+				ExactlyOneOf: []string{"transfer_spec", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(transferSpecObjectConditionsKeys),
@@ -324,8 +328,8 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"log_actions": {
-							Type:         schema.TypeList,
-							Optional:     true,
+							Type:     schema.TypeList,
+							Optional: true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
@@ -334,8 +338,8 @@ func ResourceStorageTransferJob() *schema.Resource {
 							Description: `Specifies the actions to be logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
 						},
 						"log_action_states": {
-							Type:         schema.TypeList,
-							Optional:     true,
+							Type:     schema.TypeList,
+							Optional: true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
@@ -344,10 +348,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 							Description: `States in which logActions are logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
 						},
 						"enable_on_prem_gcs_transfer_logs": {
-							Type:         schema.TypeBool,
-							Optional:     true,
+							Type:     schema.TypeBool,
+							Optional: true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
-							Description:  `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
+							Description:   `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
 						},
 					},
 				},
@@ -801,9 +805,14 @@ func azureBlobStorageDataSchema() *schema.Resource {
 				Description: `Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.`,
 			},
 			"azure_credentials": {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:         schema.TypeList,
+				{{- if ne $.TargetVersionName "ga" }}
+				Optional:     true,
+				ExactlyOneOf: azureOptionCredentials,
+				{{- else }}
+				Required:     true,
+				{{- end }}
+				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"sas_token": {
@@ -816,6 +825,14 @@ func azureBlobStorageDataSchema() *schema.Resource {
 				},
 				Description: ` Credentials used to authenticate API requests to Azure.`,
 			},
+			{{- if ne $.TargetVersionName "ga" }}
+			"credentials_secret": {
+				Optional:     true,
+				Type:         schema.TypeString,
+				Description:  `The Resource name of a secret in Secret Manager containing SAS Credentials in JSON form. Service Agent must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+				ExactlyOneOf: azureOptionCredentials,
+			},
+			{{- end }}
 		},
 	}
 }
@@ -1312,7 +1329,7 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 		"path":        awsS3Data.Path,
 		"role_arn":    awsS3Data.RoleArn,
 	}
-	if _, exist := d.GetOk("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist {
+	if _, exist := d.GetOk("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist{
 		data["aws_access_key"] = flattenAwsAccessKeys(d)
 	}
 	return []map[string]interface{}{data}
@@ -1387,6 +1404,11 @@ func expandAzureCredentials(azureCredentials []interface{}) *storagetransfer.Azu
 }
 
 func flattenAzureCredentials(d *schema.ResourceData) []map[string]interface{} {
+	{{- if ne $.TargetVersionName "ga" }}
+	if d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token") == "" {
+		return []map[string]interface{}{}
+	}
+	{{- end }}
 	data := map[string]interface{}{
 		"sas_token": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token"),
 	}
@@ -1402,19 +1424,25 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
 
 	return &storagetransfer.AzureBlobStorageData{
-		Container:        azureBlobStorageData["container"].(string),
-		Path:             azureBlobStorageData["path"].(string),
-		StorageAccount:   azureBlobStorageData["storage_account"].(string),
-		AzureCredentials: expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
+		Container:         azureBlobStorageData["container"].(string),
+		Path:              azureBlobStorageData["path"].(string),
+		StorageAccount:    azureBlobStorageData["storage_account"].(string),
+		AzureCredentials:  expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
+		{{- if ne $.TargetVersionName "ga" }}
+		CredentialsSecret: azureBlobStorageData["credentials_secret"].(string),
+		{{- end }}
 	}
 }
 
 func flattenAzureBlobStorageData(azureBlobStorageData *storagetransfer.AzureBlobStorageData, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
-		"container":         azureBlobStorageData.Container,
-		"path":              azureBlobStorageData.Path,
-		"storage_account":   azureBlobStorageData.StorageAccount,
-		"azure_credentials": flattenAzureCredentials(d),
+		"container":          azureBlobStorageData.Container,
+		"path":               azureBlobStorageData.Path,
+		"storage_account":    azureBlobStorageData.StorageAccount,
+		"azure_credentials":  flattenAzureCredentials(d),
+		{{- if ne $.TargetVersionName "ga" }}
+		"credentials_secret": azureBlobStorageData.CredentialsSecret,
+		{{- end }}
 	}
 
 	return []map[string]interface{}{data}
@@ -1459,7 +1487,7 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 		DeleteObjectsUniqueInSink:             option["delete_objects_unique_in_sink"].(bool),
 		OverwriteObjectsAlreadyExistingInSink: option["overwrite_objects_already_existing_in_sink"].(bool),
 		OverwriteWhen:                         option["overwrite_when"].(string),
-		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{})),
+		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{}))
 	}
 }
 
@@ -1508,7 +1536,6 @@ func flattenMetadataOption(option *storagetransfer.MetadataOptions) []map[string
 		"kms_key":        option.KmsKey,
 		"time_created":   option.TimeCreated,
 	}
-
 	return []map[string]interface{}{data}
 }
 
