@@ -1492,8 +1492,6 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 }
 
 func expandMetadataOptions(options []interface{}) *storagetransfer.MetadataOptions {
-	fmt.Printf("all options %v", options...)
-	fmt.Printf("length all options %v", len(options))
 	if len(options) == 0 || options == nil {
 		return nil
 	}
