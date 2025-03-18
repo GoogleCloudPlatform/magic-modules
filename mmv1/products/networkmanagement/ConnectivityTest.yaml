@@ -56,6 +56,10 @@ examples:
       network: 'connectivity-vpc'
       source_addr: 'src-addr'
       dest_addr: 'dest-addr'
+  - name: 'network_management_connectivity_test_endpoints'
+    primary_resource_id: 'endpoints-test'
+    vars:
+      primary_resource_name: 'conn-test-endpoints'
 parameters:
 properties:
   - name: 'name'
