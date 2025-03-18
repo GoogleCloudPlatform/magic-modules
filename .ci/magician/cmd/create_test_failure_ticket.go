@@ -422,7 +422,7 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 
 	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)
 	if err != nil {
-		return fmt.Errorf("error creating issue: %w", err)
+		fmt.Printf("error creating issue: %w. \n", err)
 	}
 	return nil
 }
