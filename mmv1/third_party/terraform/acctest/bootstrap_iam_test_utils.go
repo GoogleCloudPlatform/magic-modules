@@ -42,7 +42,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	var orgBindings []*cloudresourcemanager.Binding
 
 	for _, member := range members {
-	        // Replace {project_number} and {organization_id} if present
+		// Replace {project_number} and {organization_id} if present
 		replacedMember := strings.ReplaceAll(member.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
 		replacedMember = strings.ReplaceAll(replacedMember, "{organization_id}", orgIdFromEnv)
 
