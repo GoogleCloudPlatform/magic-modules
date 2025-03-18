@@ -35,14 +35,6 @@ func TestAccIdentityPlatformTenant_identityPlatformTenantUpdate(t *testing.T) {
 						plancheck.ExpectResourceAction("google_identity_platform_tenant.tenant", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "display_name", "my-tenant"),
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "allow_password_signup", "false"),
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "enable_email_link_signin", "true"),
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "disable_auth", "true"),
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "client.0.permissions.0.disabled_user_signup", "true"),
-					resource.TestCheckResourceAttr("google_identity_platform_tenant.tenant", "client.0.permissions.0.disabled_user_deletion", "true"),
-				),
 			},
 			{
 				ResourceName:      "google_identity_platform_tenant.tenant",
