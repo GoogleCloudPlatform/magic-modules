@@ -50,14 +50,13 @@ func ValidateEmptyStrings(v interface{}, k string) (warnings []string, errors []
 }
 
 func ValidateJWT(v interface{}, k string) (warnings []string, errors []error) {
-	value := v.(string)
-	if value == "" {
+	if v == nil || v.(string) == "" {
 		errors = append(errors, fmt.Errorf("%q cannot be empty", k))
 		return
 	}
 
 	// JWT consists of 3 parts separated by dots: header.payload.signature
-	parts := strings.Split(value, ".")
+	parts := strings.Split(v.(string), ".")
 	if len(parts) != 3 {
 		errors = append(errors, fmt.Errorf("%q is not a valid JWT format", k))
 		return
