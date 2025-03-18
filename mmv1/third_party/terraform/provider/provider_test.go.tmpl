@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -164,6 +165,109 @@ func TestAccProviderEmptyStrings(t *testing.T) {
 			},
 		},
 	})
+}
+
+// TestAccProvider_external_credentials_upgrade verifies that credentials and access_token
+// continue to function properly when upgrading to a version with external_credentials
+func TestAccProvider_external_credentials_upgrade(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
+
+	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
+	credentials := envvar.GetTestCredsFromEnv()
+
+	// Define old version (without external_credentials)
+	oldVersion := map[string]resource.ExternalProvider{
+		"google": {
+			VersionConstraint: "6.10.0", // a version before external_credentials was added
+			Source:            "registry.terraform.io/hashicorp/google",
+		},
+	}
+
+	// Test cases
+	testCases := map[string]struct {
+		Config    string
+		context   map[string]interface{}
+		preConfig func(*testing.T)
+	}{
+		"access_token still works after upgrade": {
+			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(),
+			context: map[string]interface{}{
+				"access_token":  accessToken,
+				"random_suffix": acctest.RandString(t, 10),
+			},
+			preConfig: func(t *testing.T) {
+				for _, env := range envvar.CredsEnvVars {
+					t.Setenv(env, "")
+				}
+			},
+		},
+		"credentials still works after upgrade": {
+			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(),
+			context: map[string]interface{}{
+				"credentials":   credentials,
+				"random_suffix": acctest.RandString(t, 10),
+			},
+			preConfig: func(t *testing.T) {
+				// Clear environment variables to ensure only config values are used
+				for _, env := range envvar.CredsEnvVars {
+					t.Setenv(env, "")
+				}
+			},
+		},
+	}
+
+	for name, tc := range testCases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			acctest.VcrTest(t, resource.TestCase{
+				Steps: []resource.TestStep{
+					{
+						PreConfig:         func() { tc.preConfig(t) },
+						ExternalProviders: oldVersion,
+						Config:            acctest.Nprintf(tc.Config, tc.context),
+						Check: resource.ComposeTestCheckFunc(
+							resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
+						),
+					},
+					{
+						// Step 2: Upgrade to new provider version
+						PreConfig:                func() { tc.preConfig(t) },
+						ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+						Config:                   acctest.Nprintf(tc.Config, tc.context),
+						Check: resource.ComposeTestCheckFunc(
+							resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
+						),
+					},
+				},
+			})
+		})
+	}
+}
+
+func testAccProviderExternalCredentialsUpgrade_AccessTokenConfig() string {
+	return `
+provider "google" {
+  access_token = "%{access_token}"
+}
+
+resource "google_service_account" "default" {
+  account_id   = "tf-test-%{random_suffix}"
+  display_name = "Test Service Account"
+}
+`
+}
+
+func testAccProviderExternalCredentialsUpgrade_CredentialsConfig() string {
+	return `
+provider "google" {
+  credentials = "%{credentials}"
+}
+
+resource "google_service_account" "default" {
+  account_id   = "tf-test-%{random_suffix}"
+  display_name = "Test Service Account"
+}
+`
 }
 
 func testAccProviderBasePath_setBasePath(endpoint, name string) string {
