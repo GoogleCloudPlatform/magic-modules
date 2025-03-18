@@ -1,0 +1,1264 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PolicyOrchestratorForOrganization
+description: |
+  PolicyOrchestrator helps managing project+zone level policy resources (e.g.
+  OS Policy Assignments), by providing tools to create, update and delete them
+  across projects and locations, at scale.
+base_url: organizations/{{organization_id}}/locations/global/policyOrchestrators
+update_mask: true
+self_link: organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
+create_url: organizations/{{organization_id}}/locations/global/policyOrchestrators?policyOrchestratorId={{policy_orchestrator_id}}
+update_verb: PATCH
+id_format: organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
+import_format:
+  - organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
+min_version: beta
+examples:
+  - name: osconfigv2_policy_orchestrator_for_organization_basic
+    primary_resource_id: policy_orchestrator_for_organization
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/osconfig.serviceAgent"
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
+        role: "roles/osconfig.rolloutServiceAgent"
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-progrollout.iam.gserviceaccount.com"
+        role: "roles/progressiverollout.serviceAgent"
+    vars:
+      policy_orchestrator_id: po-org
+      orchestrated_resource_id: test-orchestrated-resource-org
+      os_policy_id: test-os-policy-org
+    test_env_vars:
+      org_id: ORG_ID
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: true
+autogen_status: UG9saWN5T3JjaGVzdHJhdG9yRm9yT3JnYW5pemF0aW9u
+parameters:
+  - name: organizationId
+    type: String
+    description: |-
+      Part of `parent`. Required. The parent resource name in the form of:
+      * `organizations/{organization_id}/locations/global`
+      * `folders/{folder_id}/locations/global`
+      * `projects/{project_id_or_number}/locations/global`
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: policyOrchestratorId
+    type: String
+    description: |-
+      Required. The logical identifier of the policy orchestrator, with the following
+      restrictions:
+
+      * Must contain only lowercase letters, numbers, and hyphens.
+      * Must start with a letter.
+      * Must be between 1-63 characters.
+      * Must end with a number or a letter.
+      * Must be unique within the parent.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: orchestrationState
+    type: NestedObject
+    description: Describes the state of the orchestration process.
+    output: true
+    properties:
+      - name: currentIterationState
+        type: NestedObject
+        description: Describes the state of a single iteration of the orchestrator.
+        output: true
+        properties:
+          - name: error
+            type: NestedObject
+            description: |-
+              The `Status` type defines a logical error model that is suitable for
+              different programming environments, including REST APIs and RPC APIs. It is
+              used by [gRPC](https://github.com/grpc). Each `Status` message contains
+              three pieces of data: error code, error message, and error details.
+
+              You can find out more about this error model and how to work with it in the
+              [API Design Guide](https://cloud.google.com/apis/design/errors).
+            properties:
+              - name: code
+                type: Integer
+                description: The status code, which should be an enum value of google.rpc.Code.
+              - name: message
+                type: String
+                description: |-
+                  A developer-facing error message, which should be in English. Any
+                  user-facing error message should be localized and sent in the
+                  google.rpc.Status.details field, or localized by the client.
+              - name: details
+                type: Array
+                description: |-
+                  A list of messages that carry the error details.  There is a common set of
+                  message types for APIs to use.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: type_url
+                      type: String
+                      description: |-
+                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                    - name: value
+                      type: String
+          - name: state
+            type: String
+            description: |-
+              Output only. State of the iteration.
+              Possible values:
+              STATE_UNSPECIFIED
+              PROCESSING
+              COMPLETED
+              FAILED
+              CANCELLED
+              UNKNOWN
+            output: true
+          - name: rolloutResource
+            type: String
+            description: |-
+              Output only. Handle to the Progressive Rollouts API rollout resource, which contains
+              detailed information about a particular orchestration iteration.
+            output: true
+          - name: progress
+            type: Double
+            description: Output only. An estimated percentage of the progress. Number between 0 and 100.
+            output: true
+          - name: performedActions
+            type: String
+            description: Output only. Overall number of actions done by the orchestrator so far.
+            output: true
+          - name: failedActions
+            type: String
+            description: |-
+              Output only. Number of orchestration actions which failed so far. For more details,
+              query the Cloud Logs.
+            output: true
+          - name: startTime
+            type: String
+            description: Output only. Start time of the wave iteration.
+            output: true
+          - name: finishTime
+            type: String
+            description: Output only. Finish time of the wave iteration.
+            output: true
+      - name: previousIterationState
+        type: NestedObject
+        description: Describes the state of a single iteration of the orchestrator.
+        properties:
+          - name: startTime
+            type: String
+            description: Output only. Start time of the wave iteration.
+            output: true
+          - name: finishTime
+            type: String
+            description: Output only. Finish time of the wave iteration.
+            output: true
+          - name: error
+            type: NestedObject
+            description: |-
+              The `Status` type defines a logical error model that is suitable for
+              different programming environments, including REST APIs and RPC APIs. It is
+              used by [gRPC](https://github.com/grpc). Each `Status` message contains
+              three pieces of data: error code, error message, and error details.
+
+              You can find out more about this error model and how to work with it in the
+              [API Design Guide](https://cloud.google.com/apis/design/errors).
+            properties:
+              - name: code
+                type: Integer
+                description: The status code, which should be an enum value of google.rpc.Code.
+              - name: message
+                type: String
+                description: |-
+                  A developer-facing error message, which should be in English. Any
+                  user-facing error message should be localized and sent in the
+                  google.rpc.Status.details field, or localized by the client.
+              - name: details
+                type: Array
+                description: |-
+                  A list of messages that carry the error details.  There is a common set of
+                  message types for APIs to use.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: type_url
+                      type: String
+                      description: |-
+                        A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                    - name: value
+                      type: String
+          - name: state
+            type: String
+            description: |-
+              Output only. State of the iteration.
+              Possible values:
+              STATE_UNSPECIFIED
+              PROCESSING
+              COMPLETED
+              FAILED
+              CANCELLED
+              UNKNOWN
+            output: true
+          - name: rolloutResource
+            type: String
+            description: |-
+              Output only. Handle to the Progressive Rollouts API rollout resource, which contains
+              detailed information about a particular orchestration iteration.
+            output: true
+          - name: progress
+            type: Double
+            description: Output only. An estimated percentage of the progress. Number between 0 and 100.
+            output: true
+          - name: performedActions
+            type: String
+            description: Output only. Overall number of actions done by the orchestrator so far.
+            output: true
+          - name: failedActions
+            type: String
+            description: |-
+              Output only. Number of orchestration actions which failed so far. For more details,
+              query the Cloud Logs.
+            output: true
+  - name: updateTime
+    type: String
+    description: Output only. Timestamp when the policy orchestrator resource was last modified.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      Optional. State of the orchestrator. Can be updated to change orchestrator behaviour.
+      Allowed values:
+      - `ACTIVE` - orchestrator is actively looking for actions to be taken.
+      - `STOPPED` - orchestrator won't make any changes.
+
+      Note: There might be more states added in the future. We use string here
+      instead of an enum, to avoid the need of propagating new states to all the
+      client code.
+  - name: orchestrationScope
+    type: NestedObject
+    description: |-
+      Defines a set of selectors which drive which resources are in scope of policy
+      orchestration.
+    properties:
+      - name: selectors
+        type: Array
+        description: |-
+          Optional. Selectors of the orchestration scope. There is a logical AND between each
+          selector defined.
+
+          When there is no explicit `ResourceHierarchySelector` selector specified,
+          the scope is by default bounded to the parent of the policy orchestrator
+          resource.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: resourceHierarchySelector
+              type: NestedObject
+              description: Selector containing Cloud Resource Manager resource hierarchy nodes.
+              properties:
+                - name: includedProjects
+                  type: Array
+                  description: |-
+                    Optional. Names of the projects in scope.
+                    Format: `projects/{project_number}`
+                  item_type:
+                    type: String
+                - name: includedFolders
+                  type: Array
+                  description: |-
+                    Optional. Names of the folders in scope.
+                    Format: `folders/{folder_id}`
+                  item_type:
+                    type: String
+            - name: locationSelector
+              type: NestedObject
+              description: Selector containing locations in scope.
+              properties:
+                - name: includedLocations
+                  type: Array
+                  description: |-
+                    Optional. Names of the locations in scope.
+                    Format: `us-central1-a`
+                  item_type:
+                    type: String
+  - name: createTime
+    type: String
+    description: Output only. Timestamp when the policy orchestrator resource was created.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs
+  - name: name
+    type: String
+    description: |-
+      Immutable. Identifier. In form of
+      * `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`
+      * `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`
+      * `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`
+    output: true
+    immutable: true
+  - name: description
+    type: String
+    description: Optional. Freeform text describing the purpose of the resource.
+  - name: etag
+    type: String
+    description: |-
+      Output only. This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+    output: true
+  - name: reconciling
+    type: Boolean
+    description: |-
+      Output only. Set to true, if the there are ongoing changes being applied by the
+      orchestrator.
+    output: true
+  - name: action
+    type: String
+    description: |-
+      Required. Action to be done by the orchestrator in
+      `projects/{project_id}/zones/{zone_id}` locations defined by the
+      `orchestration_scope`. Allowed values:
+      - `UPSERT` - Orchestrator will create or update target resources.
+      - `DELETE` - Orchestrator will delete target resources, if they exist
+    required: true
+  - name: orchestratedResource
+    type: NestedObject
+    description: Represents a resource that is being orchestrated by the policy orchestrator.
+    required: true
+    properties:
+      - name: osPolicyAssignmentV1Payload
+        type: NestedObject
+        description: |-
+          OS policy assignment is an API resource that is used to
+          apply a set of OS policies to a dynamically targeted group of Compute Engine
+          VM instances.
+
+          An OS policy is used to define the desired state configuration for a
+          Compute Engine VM instance through a set of configuration resources that
+          provide capabilities such as installing or removing software packages, or
+          executing a script.
+
+          For more information about the OS policy resource definitions and examples,
+          see
+          [OS policy and OS policy
+          assignment](https://cloud.google.com/compute/docs/os-configuration-management/working-with-os-policies).
+        properties:
+          - name: etag
+            type: String
+            description: |-
+              The etag for this OS policy assignment.
+              If this is provided on update, it must match the server's etag.
+          - name: rolloutState
+            type: String
+            description: |-
+              Output only. OS policy assignment rollout state
+              Possible values:
+              ROLLOUT_STATE_UNSPECIFIED
+              IN_PROGRESS
+              CANCELLING
+              CANCELLED
+              SUCCEEDED
+            output: true
+          - name: reconciling
+            type: Boolean
+            description: |-
+              Output only. Indicates that reconciliation is in progress for the revision.
+              This value is `true` when the `rollout_state` is one of:
+              * IN_PROGRESS
+              * CANCELLING
+            output: true
+          - name: uid
+            type: String
+            description: Output only. Server generated unique id for the OS policy assignment resource.
+            output: true
+          - name: name
+            type: String
+            description: |-
+              Resource name.
+
+              Format:
+              `projects/{project_number}/locations/{location}/osPolicyAssignments/{os_policy_assignment_id}`
+
+              This field is ignored when you create an OS policy assignment.
+          - name: description
+            type: String
+            description: |-
+              OS policy assignment description.
+              Length of the description is limited to 1024 characters.
+          - name: osPolicies
+            type: Array
+            description: Required. List of OS policies to be applied to the VMs.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: id
+                  type: String
+                  description: |-
+                    Required. The id of the OS policy with the following restrictions:
+
+                    * Must contain only lowercase letters, numbers, and hyphens.
+                    * Must start with a letter.
+                    * Must be between 1-63 characters.
+                    * Must end with a number or a letter.
+                    * Must be unique within the assignment.
+                  required: true
+                - name: description
+                  type: String
+                  description: |-
+                    Policy description.
+                    Length of the description is limited to 1024 characters.
+                - name: mode
+                  type: String
+                  description: |-
+                    Required. Policy mode
+                    Possible values:
+                    MODE_UNSPECIFIED
+                    VALIDATION
+                    ENFORCEMENT
+                  required: true
+                - name: resourceGroups
+                  type: Array
+                  description: |-
+                    Required. List of resource groups for the policy.
+                    For a particular VM, resource groups are evaluated in the order specified
+                    and the first resource group that is applicable is selected and the rest
+                    are ignored.
+
+                    If none of the resource groups are applicable for a VM, the VM is
+                    considered to be non-compliant w.r.t this policy. This behavior can be
+                    toggled by the flag `allow_no_resource_group_match`
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: inventoryFilters
+                        type: Array
+                        description: |-
+                          List of inventory filters for the resource group.
+
+                          The resources in this resource group are applied to the target VM if it
+                          satisfies at least one of the following inventory filters.
+
+                          For example, to apply this resource group to VMs running either `RHEL` or
+                          `CentOS` operating systems, specify 2 items for the list with following
+                          values:
+                          inventory_filters[0].os_short_name='rhel' and
+                          inventory_filters[1].os_short_name='centos'
+
+                          If the list is empty, this resource group will be applied to the target
+                          VM unconditionally.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: osShortName
+                              type: String
+                              description: Required. The OS short name
+                              required: true
+                            - name: osVersion
+                              type: String
+                              description: |-
+                                The OS version
+
+                                Prefix matches are supported if asterisk(*) is provided as the
+                                last character. For example, to match all versions with a major
+                                version of `7`, specify the following value for this field `7.*`
+
+                                An empty string matches all OS versions.
+                      - name: resources
+                        type: Array
+                        description: |-
+                          Required. List of resources configured for this resource group.
+                          The resources are executed in the exact order specified here.
+                        required: true
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: exec
+                              type: NestedObject
+                              description: |-
+                                A resource that allows executing scripts on the VM.
+
+                                The `ExecResource` has 2 stages: `validate` and `enforce` and both stages
+                                accept a script as an argument to execute.
+
+                                When the `ExecResource` is applied by the agent, it first executes the
+                                script in the `validate` stage. The `validate` stage can signal that the
+                                `ExecResource` is already in the desired state by returning an exit code
+                                of `100`. If the `ExecResource` is not in the desired state, it should
+                                return an exit code of `101`. Any other exit code returned by this stage
+                                is considered an error.
+
+                                If the `ExecResource` is not in the desired state based on the exit code
+                                from the `validate` stage, the agent proceeds to execute the script from
+                                the `enforce` stage. If the `ExecResource` is already in the desired
+                                state, the `enforce` stage will not be run.
+                                Similar to `validate` stage, the `enforce` stage should return an exit
+                                code of `100` to indicate that the resource in now in its desired state.
+                                Any other exit code is considered an error.
+
+                                NOTE: An exit code of `100` was chosen over `0` (and `101` vs `1`) to
+                                have an explicit indicator of `in desired state`, `not in desired state`
+                                and errors. Because, for example, Powershell will always return an exit
+                                code of `0` unless an `exit` statement is provided in the script. So, for
+                                reasons of consistency and being explicit, exit codes `100` and `101`
+                                were chosen.
+                              properties:
+                                - name: validate
+                                  type: NestedObject
+                                  description: A file or script to execute.
+                                  required: true
+                                  properties:
+                                    - name: file
+                                      type: NestedObject
+                                      description: A remote or local file.
+                                      properties:
+                                        - name: gcs
+                                          type: NestedObject
+                                          description: Specifies a file available as a Cloud Storage Object.
+                                          properties:
+                                            - name: bucket
+                                              type: String
+                                              description: Required. Bucket of the Cloud Storage object.
+                                              required: true
+                                            - name: object
+                                              type: String
+                                              description: Required. Name of the Cloud Storage object.
+                                              required: true
+                                            - name: generation
+                                              type: String
+                                              description: Generation number of the Cloud Storage object.
+                                        - name: localPath
+                                          type: String
+                                          description: A local path within the VM to use.
+                                        - name: allowInsecure
+                                          type: Boolean
+                                          description: |-
+                                            Defaults to false. When false, files are subject to validations
+                                            based on the file type:
+
+                                            Remote: A checksum must be specified.
+                                            Cloud Storage: An object generation number must be specified.
+                                        - name: remote
+                                          type: NestedObject
+                                          description: Specifies a file available via some URI.
+                                          properties:
+                                            - name: uri
+                                              type: String
+                                              description: |-
+                                                Required. URI from which to fetch the object. It should contain both the
+                                                protocol and path following the format `{protocol}://{location}`.
+                                              required: true
+                                            - name: sha256Checksum
+                                              type: String
+                                              description: SHA256 checksum of the remote file.
+                                    - name: script
+                                      type: String
+                                      description: |-
+                                        An inline script.
+                                        The size of the script is limited to 32KiB.
+                                    - name: args
+                                      type: Array
+                                      description: Optional arguments to pass to the source during execution.
+                                      item_type:
+                                        type: String
+                                    - name: interpreter
+                                      type: String
+                                      description: |-
+                                        Required. The script interpreter to use.
+                                        Possible values:
+                                        INTERPRETER_UNSPECIFIED
+                                        NONE
+                                        SHELL
+                                        POWERSHELL
+                                      required: true
+                                    - name: outputFilePath
+                                      type: String
+                                      description: |-
+                                        Only recorded for enforce Exec.
+                                        Path to an output file (that is created by this Exec) whose
+                                        content will be recorded in OSPolicyResourceCompliance after a
+                                        successful run. Absence or failure to read this file will result in
+                                        this ExecResource being non-compliant. Output file size is limited to
+                                        500K bytes.
+                                - name: enforce
+                                  type: NestedObject
+                                  description: A file or script to execute.
+                                  properties:
+                                    - name: file
+                                      type: NestedObject
+                                      description: A remote or local file.
+                                      properties:
+                                        - name: remote
+                                          type: NestedObject
+                                          description: Specifies a file available via some URI.
+                                          properties:
+                                            - name: uri
+                                              type: String
+                                              description: |-
+                                                Required. URI from which to fetch the object. It should contain both the
+                                                protocol and path following the format `{protocol}://{location}`.
+                                              required: true
+                                            - name: sha256Checksum
+                                              type: String
+                                              description: SHA256 checksum of the remote file.
+                                        - name: gcs
+                                          type: NestedObject
+                                          description: Specifies a file available as a Cloud Storage Object.
+                                          properties:
+                                            - name: generation
+                                              type: String
+                                              description: Generation number of the Cloud Storage object.
+                                            - name: bucket
+                                              type: String
+                                              description: Required. Bucket of the Cloud Storage object.
+                                              required: true
+                                            - name: object
+                                              type: String
+                                              description: Required. Name of the Cloud Storage object.
+                                              required: true
+                                        - name: localPath
+                                          type: String
+                                          description: A local path within the VM to use.
+                                        - name: allowInsecure
+                                          type: Boolean
+                                          description: |-
+                                            Defaults to false. When false, files are subject to validations
+                                            based on the file type:
+
+                                            Remote: A checksum must be specified.
+                                            Cloud Storage: An object generation number must be specified.
+                                    - name: script
+                                      type: String
+                                      description: |-
+                                        An inline script.
+                                        The size of the script is limited to 32KiB.
+                                    - name: args
+                                      type: Array
+                                      description: Optional arguments to pass to the source during execution.
+                                      item_type:
+                                        type: String
+                                    - name: interpreter
+                                      type: String
+                                      description: |-
+                                        Required. The script interpreter to use.
+                                        Possible values:
+                                        INTERPRETER_UNSPECIFIED
+                                        NONE
+                                        SHELL
+                                        POWERSHELL
+                                      required: true
+                                    - name: outputFilePath
+                                      type: String
+                                      description: |-
+                                        Only recorded for enforce Exec.
+                                        Path to an output file (that is created by this Exec) whose
+                                        content will be recorded in OSPolicyResourceCompliance after a
+                                        successful run. Absence or failure to read this file will result in
+                                        this ExecResource being non-compliant. Output file size is limited to
+                                        500K bytes.
+                            - name: file
+                              type: NestedObject
+                              description: A resource that manages the state of a file.
+                              properties:
+                                - name: file
+                                  type: NestedObject
+                                  description: A remote or local file.
+                                  properties:
+                                    - name: gcs
+                                      type: NestedObject
+                                      description: Specifies a file available as a Cloud Storage Object.
+                                      properties:
+                                        - name: object
+                                          type: String
+                                          description: Required. Name of the Cloud Storage object.
+                                          required: true
+                                        - name: generation
+                                          type: String
+                                          description: Generation number of the Cloud Storage object.
+                                        - name: bucket
+                                          type: String
+                                          description: Required. Bucket of the Cloud Storage object.
+                                          required: true
+                                    - name: localPath
+                                      type: String
+                                      description: A local path within the VM to use.
+                                    - name: allowInsecure
+                                      type: Boolean
+                                      description: |-
+                                        Defaults to false. When false, files are subject to validations
+                                        based on the file type:
+
+                                        Remote: A checksum must be specified.
+                                        Cloud Storage: An object generation number must be specified.
+                                    - name: remote
+                                      type: NestedObject
+                                      description: Specifies a file available via some URI.
+                                      properties:
+                                        - name: uri
+                                          type: String
+                                          description: |-
+                                            Required. URI from which to fetch the object. It should contain both the
+                                            protocol and path following the format `{protocol}://{location}`.
+                                          required: true
+                                        - name: sha256Checksum
+                                          type: String
+                                          description: SHA256 checksum of the remote file.
+                                - name: content
+                                  type: String
+                                  description: |-
+                                    A a file with this content.
+                                    The size of the content is limited to 32KiB.
+                                - name: path
+                                  type: String
+                                  description: Required. The absolute path of the file within the VM.
+                                  required: true
+                                - name: state
+                                  type: String
+                                  description: |-
+                                    Required. Desired state of the file.
+                                    Possible values:
+                                    DESIRED_STATE_UNSPECIFIED
+                                    PRESENT
+                                    ABSENT
+                                    CONTENTS_MATCH
+                                  required: true
+                                - name: permissions
+                                  type: String
+                                  description: |-
+                                    Consists of three octal digits which represent, in
+                                    order, the permissions of the owner, group, and other users for the
+                                    file (similarly to the numeric mode used in the linux chmod
+                                    utility). Each digit represents a three bit number with the 4 bit
+                                    corresponding to the read permissions, the 2 bit corresponds to the
+                                    write bit, and the one bit corresponds to the execute permission.
+                                    Default behavior is 755.
+
+                                    Below are some examples of permissions and their associated values:
+                                    read, write, and execute: 7
+                                    read and execute: 5
+                                    read and write: 6
+                                    read only: 4
+                            - name: id
+                              type: String
+                              description: |-
+                                Required. The id of the resource with the following restrictions:
+
+                                * Must contain only lowercase letters, numbers, and hyphens.
+                                * Must start with a letter.
+                                * Must be between 1-63 characters.
+                                * Must end with a number or a letter.
+                                * Must be unique within the OS policy.
+                              required: true
+                            - name: pkg
+                              type: NestedObject
+                              description: A resource that manages a system package.
+                              properties:
+                                - name: msi
+                                  type: NestedObject
+                                  description: An MSI package. MSI packages only support INSTALLED state.
+                                  properties:
+                                    - name: source
+                                      type: NestedObject
+                                      description: A remote or local file.
+                                      required: true
+                                      properties:
+                                        - name: localPath
+                                          type: String
+                                          description: A local path within the VM to use.
+                                        - name: allowInsecure
+                                          type: Boolean
+                                          description: |-
+                                            Defaults to false. When false, files are subject to validations
+                                            based on the file type:
+
+                                            Remote: A checksum must be specified.
+                                            Cloud Storage: An object generation number must be specified.
+                                        - name: remote
+                                          type: NestedObject
+                                          description: Specifies a file available via some URI.
+                                          properties:
+                                            - name: uri
+                                              type: String
+                                              description: |-
+                                                Required. URI from which to fetch the object. It should contain both the
+                                                protocol and path following the format `{protocol}://{location}`.
+                                              required: true
+                                            - name: sha256Checksum
+                                              type: String
+                                              description: SHA256 checksum of the remote file.
+                                        - name: gcs
+                                          type: NestedObject
+                                          description: Specifies a file available as a Cloud Storage Object.
+                                          properties:
+                                            - name: bucket
+                                              type: String
+                                              description: Required. Bucket of the Cloud Storage object.
+                                              required: true
+                                            - name: object
+                                              type: String
+                                              description: Required. Name of the Cloud Storage object.
+                                              required: true
+                                            - name: generation
+                                              type: String
+                                              description: Generation number of the Cloud Storage object.
+                                    - name: properties
+                                      type: Array
+                                      description: |-
+                                        Additional properties to use during installation.
+                                        This should be in the format of Property=Setting.
+                                        Appended to the defaults of `ACTION=INSTALL
+                                        REBOOT=ReallySuppress`.
+                                      item_type:
+                                        type: String
+                                - name: desiredState
+                                  type: String
+                                  description: |-
+                                    Required. The desired state the agent should maintain for this package.
+                                    Possible values:
+                                    DESIRED_STATE_UNSPECIFIED
+                                    INSTALLED
+                                    REMOVED
+                                  required: true
+                                - name: apt
+                                  type: NestedObject
+                                  description: |-
+                                    A package managed by APT.
+                                    - install: `apt-get update && apt-get -y install [name]`
+                                    - remove: `apt-get -y remove [name]`
+                                  properties:
+                                    - name: name
+                                      type: String
+                                      description: Required. Package name.
+                                      required: true
+                                - name: deb
+                                  type: NestedObject
+                                  description: A deb package file. dpkg packages only support INSTALLED state.
+                                  properties:
+                                    - name: source
+                                      type: NestedObject
+                                      description: A remote or local file.
+                                      required: true
+                                      properties:
+                                        - name: allowInsecure
+                                          type: Boolean
+                                          description: |-
+                                            Defaults to false. When false, files are subject to validations
+                                            based on the file type:
+
+                                            Remote: A checksum must be specified.
+                                            Cloud Storage: An object generation number must be specified.
+                                        - name: remote
+                                          type: NestedObject
+                                          description: Specifies a file available via some URI.
+                                          properties:
+                                            - name: uri
+                                              type: String
+                                              description: |-
+                                                Required. URI from which to fetch the object. It should contain both the
+                                                protocol and path following the format `{protocol}://{location}`.
+                                              required: true
+                                            - name: sha256Checksum
+                                              type: String
+                                              description: SHA256 checksum of the remote file.
+                                        - name: gcs
+                                          type: NestedObject
+                                          description: Specifies a file available as a Cloud Storage Object.
+                                          properties:
+                                            - name: bucket
+                                              type: String
+                                              description: Required. Bucket of the Cloud Storage object.
+                                              required: true
+                                            - name: object
+                                              type: String
+                                              description: Required. Name of the Cloud Storage object.
+                                              required: true
+                                            - name: generation
+                                              type: String
+                                              description: Generation number of the Cloud Storage object.
+                                        - name: localPath
+                                          type: String
+                                          description: A local path within the VM to use.
+                                    - name: pullDeps
+                                      type: Boolean
+                                      description: |-
+                                        Whether dependencies should also be installed.
+                                        - install when false: `dpkg -i package`
+                                        - install when true: `apt-get update && apt-get -y install
+                                        package.deb`
+                                - name: yum
+                                  type: NestedObject
+                                  description: |-
+                                    A package managed by YUM.
+                                    - install: `yum -y install package`
+                                    - remove: `yum -y remove package`
+                                  properties:
+                                    - name: name
+                                      type: String
+                                      description: Required. Package name.
+                                      required: true
+                                - name: zypper
+                                  type: NestedObject
+                                  description: |-
+                                    A package managed by Zypper.
+                                    - install: `zypper -y install package`
+                                    - remove: `zypper -y rm package`
+                                  properties:
+                                    - name: name
+                                      type: String
+                                      description: Required. Package name.
+                                      required: true
+                                - name: rpm
+                                  type: NestedObject
+                                  description: An RPM package file. RPM packages only support INSTALLED state.
+                                  properties:
+                                    - name: source
+                                      type: NestedObject
+                                      description: A remote or local file.
+                                      required: true
+                                      properties:
+                                        - name: remote
+                                          type: NestedObject
+                                          description: Specifies a file available via some URI.
+                                          properties:
+                                            - name: uri
+                                              type: String
+                                              description: |-
+                                                Required. URI from which to fetch the object. It should contain both the
+                                                protocol and path following the format `{protocol}://{location}`.
+                                              required: true
+                                            - name: sha256Checksum
+                                              type: String
+                                              description: SHA256 checksum of the remote file.
+                                        - name: gcs
+                                          type: NestedObject
+                                          description: Specifies a file available as a Cloud Storage Object.
+                                          properties:
+                                            - name: bucket
+                                              type: String
+                                              description: Required. Bucket of the Cloud Storage object.
+                                              required: true
+                                            - name: object
+                                              type: String
+                                              description: Required. Name of the Cloud Storage object.
+                                              required: true
+                                            - name: generation
+                                              type: String
+                                              description: Generation number of the Cloud Storage object.
+                                        - name: localPath
+                                          type: String
+                                          description: A local path within the VM to use.
+                                        - name: allowInsecure
+                                          type: Boolean
+                                          description: |-
+                                            Defaults to false. When false, files are subject to validations
+                                            based on the file type:
+
+                                            Remote: A checksum must be specified.
+                                            Cloud Storage: An object generation number must be specified.
+                                    - name: pullDeps
+                                      type: Boolean
+                                      description: |-
+                                        Whether dependencies should also be installed.
+                                        - install when false: `rpm --upgrade --replacepkgs package.rpm`
+                                        - install when true: `yum -y install package.rpm` or
+                                        `zypper -y install package.rpm`
+                                - name: googet
+                                  type: NestedObject
+                                  description: |-
+                                    A package managed by GooGet.
+                                    - install: `googet -noconfirm install package`
+                                    - remove: `googet -noconfirm remove package`
+                                  properties:
+                                    - name: name
+                                      type: String
+                                      description: Required. Package name.
+                                      required: true
+                            - name: repository
+                              type: NestedObject
+                              description: A resource that manages a package repository.
+                              properties:
+                                - name: yum
+                                  type: NestedObject
+                                  description: |-
+                                    Represents a single yum package repository. These are added to a
+                                    repo file that is managed at
+                                    `/etc/yum.repos.d/google_osconfig.repo`.
+                                  properties:
+                                    - name: displayName
+                                      type: String
+                                      description: The display name of the repository.
+                                    - name: baseUrl
+                                      type: String
+                                      description: Required. The location of the repository directory.
+                                      required: true
+                                    - name: gpgKeys
+                                      type: Array
+                                      description: URIs of GPG keys.
+                                      item_type:
+                                        type: String
+                                    - name: id
+                                      type: String
+                                      description: |-
+                                        Required. A one word, unique name for this repository. This is  the `repo
+                                        id` in the yum config file and also the `display_name` if
+                                        `display_name` is omitted. This id is also used as the unique
+                                        identifier when checking for resource conflicts.
+                                      required: true
+                                - name: zypper
+                                  type: NestedObject
+                                  description: |-
+                                    Represents a single zypper package repository. These are added to a
+                                    repo file that is managed at
+                                    `/etc/zypp/repos.d/google_osconfig.repo`.
+                                  properties:
+                                    - name: id
+                                      type: String
+                                      description: |-
+                                        Required. A one word, unique name for this repository. This is the `repo
+                                        id` in the zypper config file and also the `display_name` if
+                                        `display_name` is omitted. This id is also used as the unique
+                                        identifier when checking for GuestPolicy conflicts.
+                                      required: true
+                                    - name: displayName
+                                      type: String
+                                      description: The display name of the repository.
+                                    - name: baseUrl
+                                      type: String
+                                      description: Required. The location of the repository directory.
+                                      required: true
+                                    - name: gpgKeys
+                                      type: Array
+                                      description: URIs of GPG keys.
+                                      item_type:
+                                        type: String
+                                - name: goo
+                                  type: NestedObject
+                                  description: |-
+                                    Represents a Goo package repository. These are added to a repo file
+                                    that is managed at
+                                    `C:/ProgramData/GooGet/repos/google_osconfig.repo`.
+                                  properties:
+                                    - name: url
+                                      type: String
+                                      description: Required. The url of the repository.
+                                      required: true
+                                    - name: name
+                                      type: String
+                                      description: Required. The name of the repository.
+                                      required: true
+                                - name: apt
+                                  type: NestedObject
+                                  description: |-
+                                    Represents a single apt package repository. These will be added to
+                                    a repo file that will be managed at
+                                    `/etc/apt/sources.list.d/google_osconfig.list`.
+                                  properties:
+                                    - name: archiveType
+                                      type: String
+                                      description: |-
+                                        Required. Type of archive files in this repository.
+                                        Possible values:
+                                        ARCHIVE_TYPE_UNSPECIFIED
+                                        DEB
+                                        DEB_SRC
+                                      required: true
+                                    - name: uri
+                                      type: String
+                                      description: Required. URI for this repository.
+                                      required: true
+                                    - name: distribution
+                                      type: String
+                                      description: Required. Distribution of this repository.
+                                      required: true
+                                    - name: components
+                                      type: Array
+                                      description: |-
+                                        Required. List of components for this repository. Must contain at least one
+                                        item.
+                                      required: true
+                                      item_type:
+                                        type: String
+                                    - name: gpgKey
+                                      type: String
+                                      description: |-
+                                        URI of the key file for this repository. The agent maintains a
+                                        keyring at `/etc/apt/trusted.gpg.d/osconfig_agent_managed.gpg`.
+                - name: allowNoResourceGroupMatch
+                  type: Boolean
+                  description: |-
+                    This flag determines the OS policy compliance status when none of the
+                    resource groups within the policy are applicable for a VM. Set this value
+                    to `true` if the policy needs to be reported as compliant even if the
+                    policy has nothing to validate or enforce.
+          - name: revisionId
+            type: String
+            description: |-
+              Output only. The assignment revision ID
+              A new revision is committed whenever a rollout is triggered for a OS policy
+              assignment
+            output: true
+          - name: baseline
+            type: Boolean
+            description: |-
+              Output only. Indicates that this revision has been successfully rolled out in this zone
+              and new VMs will be assigned OS policies from this revision.
+
+              For a given OS policy assignment, there is only one revision with a value
+              of `true` for this field.
+            output: true
+          - name: deleted
+            type: Boolean
+            description: Output only. Indicates that this revision deletes the OS policy assignment.
+            output: true
+          - name: instanceFilter
+            type: NestedObject
+            description: |-
+              Filters to select target VMs for an assignment.
+
+              If more than one filter criteria is specified below, a VM will be selected
+              if and only if it satisfies all of them.
+            required: true
+            properties:
+              - name: all
+                type: Boolean
+                description: |-
+                  Target all VMs in the project. If true, no other criteria is
+                  permitted.
+              - name: inclusionLabels
+                type: Array
+                description: |-
+                  List of label sets used for VM inclusion.
+
+                  If the list has more than one `LabelSet`, the VM is included if any
+                  of the label sets are applicable for the VM.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: labels
+                      type: KeyValuePairs
+                      description: |-
+                        Labels are identified by key/value pairs in this map.
+                        A VM should contain all the key/value pairs specified in this
+                        map to be selected.
+              - name: exclusionLabels
+                type: Array
+                description: |-
+                  List of label sets used for VM exclusion.
+
+                  If the list has more than one label set, the VM is excluded if any
+                  of the label sets are applicable for the VM.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: labels
+                      type: KeyValuePairs
+                      description: |-
+                        Labels are identified by key/value pairs in this map.
+                        A VM should contain all the key/value pairs specified in this
+                        map to be selected.
+              - name: inventories
+                type: Array
+                description: |-
+                  List of inventories to select VMs.
+
+                  A VM is selected if its inventory data matches at least one of the
+                  following inventories.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: osShortName
+                      type: String
+                      description: Required. The OS short name
+                      required: true
+                    - name: osVersion
+                      type: String
+                      description: |-
+                        The OS version
+
+                        Prefix matches are supported if asterisk(*) is provided as the
+                        last character. For example, to match all versions with a major
+                        version of `7`, specify the following value for this field `7.*`
+
+                        An empty string matches all OS versions.
+          - name: rollout
+            type: NestedObject
+            description: |-
+              Message to configure the rollout at the zonal level for the OS policy
+              assignment.
+            required: true
+            properties:
+              - name: disruptionBudget
+                type: NestedObject
+                description: |-
+                  Message encapsulating a value that can be either absolute ("fixed") or
+                  relative ("percent") to a value.
+                required: true
+                properties:
+                  - name: fixed
+                    type: Integer
+                    description: Specifies a fixed value.
+                  - name: percent
+                    type: Integer
+                    description: |-
+                      Specifies the relative value defined as a percentage, which will be
+                      multiplied by a reference value.
+              - name: minWaitDuration
+                type: String
+                description: |-
+                  Required. This determines the minimum duration of time to wait after the
+                  configuration changes are applied through the current rollout. A
+                  VM continues to count towards the `disruption_budget` at least
+                  until this duration of time has passed after configuration changes are
+                  applied.
+                required: true
+          - name: revisionCreateTime
+            type: String
+            description: Output only. The timestamp that the revision was created.
+            output: true
+      - name: id
+        type: String
+        description: |-
+          Optional. ID of the resource to be used while generating set of affected resources.
+
+          For UPSERT action the value is auto-generated during PolicyOrchestrator
+          creation when not set. When the value is set it should following next
+          restrictions:
+
+          * Must contain only lowercase letters, numbers, and hyphens.
+          * Must start with a letter.
+          * Must be between 1-63 characters.
+          * Must end with a number or a letter.
+          * Must be unique within the project.
+
+          For DELETE action, ID must be specified explicitly during
+          PolicyOrchestrator creation.
