@@ -52,7 +52,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		for _, pm := range projectMembers {
 			replacedMember := strings.ReplaceAll(pm.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
 			projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
-				Role:    member.Role,
+				Role:    pm.Role,
 				Members: []string{replacedMember},
 			})
 		}
@@ -70,7 +70,7 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		for _, om := range orgMembers {
 			replacedMember := strings.ReplaceAll(om.Member, "{organization_id}", orgId)
 			orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
-				Role:    member.Role,
+				Role:    om.Role,
 				Members: []string{replacedMember},
 			})
 		}
