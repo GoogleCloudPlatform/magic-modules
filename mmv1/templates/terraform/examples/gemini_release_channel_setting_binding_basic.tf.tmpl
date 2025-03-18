@@ -1,5 +1,4 @@
 resource "google_gemini_release_channel_setting" "basic" {
-    provider = google-beta
     release_channel_setting_id = "{{index $.Vars "release_channel_setting_id"}}"
     location = "global"
     labels = {"my_key": "my_value"}
@@ -7,7 +6,6 @@ resource "google_gemini_release_channel_setting" "basic" {
 }
 
 resource "google_gemini_release_channel_setting_binding" "{{$.PrimaryResourceId}}" {
-    provider = google-beta
     release_channel_setting_id = google_gemini_release_channel_setting.basic.release_channel_setting_id
     setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
     location = "global"

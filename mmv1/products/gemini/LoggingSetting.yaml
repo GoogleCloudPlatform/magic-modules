@@ -14,7 +14,6 @@
 ---
 name: LoggingSetting
 description: The resource for managing Logging settings for Admin Control.
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/loggingSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
@@ -29,7 +28,6 @@ sweeper:
     - region: "global"
 examples:
   - name: gemini_logging_setting_basic
-    min_version: 'beta'
     primary_resource_id: "example"
     vars:
       logging_setting_id: ls1-tf
