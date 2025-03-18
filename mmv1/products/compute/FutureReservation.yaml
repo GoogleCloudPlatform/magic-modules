@@ -63,16 +63,14 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     skip_vcr: true
-parameters:
+#TODO
+#parameters:
+properties:
   - name: 'zone'
     type: String
     description: |
       URL of the Zone where this future reservation resides.
-    required: true
-    immutable: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-
-properties:
+    output: true
   - name: 'creationTimestamp'
     type: Time
     description: |
