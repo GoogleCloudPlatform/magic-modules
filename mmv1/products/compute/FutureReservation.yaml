@@ -63,8 +63,6 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     skip_vcr: true
-#TODO
-#parameters:
 properties:
   - name: 'zone'
     type: String
@@ -75,11 +73,6 @@ properties:
     type: Time
     description: |
       The creation timestamp for this future reservation in RFC3339 text format.
-    output: true
-  - name: 'selfLink'
-    type: String
-    description: |
-      Server-defined fully-qualified URL for this resource.
     output: true
   - name: 'selfLinkWithId'
     type: String
