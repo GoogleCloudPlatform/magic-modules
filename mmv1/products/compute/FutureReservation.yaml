@@ -63,7 +63,6 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     skip_vcr: true
-
 parameters:
   - name: 'zone'
     type: String
