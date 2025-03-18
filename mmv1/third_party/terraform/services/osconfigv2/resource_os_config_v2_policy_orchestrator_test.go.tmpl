@@ -99,7 +99,9 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
             }
         }
     }
-    labels = {"state" : "active"}
+    labels = {
+        state = "active"
+    }
 }
 `, context)
 }
@@ -144,7 +146,9 @@ resource "google_os_config_v2_policy_orchestrator" "policy_orchestrator" {
             }
         }
     }
-    labels = {"state" : "active"}
+    labels = {
+        state = "active"
+    }
 }
 `, context)
 }
