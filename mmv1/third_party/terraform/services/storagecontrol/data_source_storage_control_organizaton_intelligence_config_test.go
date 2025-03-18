@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagecontrol_test
 
 import (
@@ -13,7 +15,7 @@ func TestAccDataSourceGoogleStorageControlOrganizationIntelligenceConfig_basic(t
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"org_id": envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
