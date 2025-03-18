@@ -290,7 +290,6 @@ properties:
                               enum_values:
                                 - 'SCSI'
                                 - 'NVME'
-                                #Check the default stuff out in the docs
                       - name: 'maintenanceFreezeDurationHours'
                         type: Integer
                         description: |
@@ -329,7 +328,6 @@ properties:
                     description: |
                       Start time of the Future Reservation. The startTime is an RFC3339 string.
                     output: true
-                    # // Union field time can be only one of the following:TODO
                   - name: 'endTime'
                     type: String
                     description: |
@@ -521,20 +519,20 @@ properties:
                   enum_values:
                     - 'SCSI'
                     - 'NVME'
-            - name: 'maintenanceFreezeDurationHours'
-              type: Integer
-              description: |
-                Specifies the number of hours after reservation creation where instances using the reservation won't be scheduled for maintenance.
-            - name: 'locationHint'
-              type: String
-              description: |
-                An opaque location hint used to place the allocation close to other resources. This field is for use by internal tools that use the public API.
-            - name: 'maintenanceInterval'
-              type: Enum
-              description: |
-                Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC
-              enum_values:
-                - 'PERIODIC'
+          - name: 'maintenanceFreezeDurationHours'
+            type: Integer
+            description: |
+              Specifies the number of hours after reservation creation where instances using the reservation won't be scheduled for maintenance.
+          - name: 'locationHint'
+            type: String
+            description: |
+              An opaque location hint used to place the allocation close to other resources. This field is for use by internal tools that use the public API.
+          - name: 'maintenanceInterval'
+            type: Enum
+            description: |
+              Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC
+            enum_values:
+              - 'PERIODIC'
       - name: 'totalCount'
         type: String
         description: |
@@ -566,14 +564,3 @@ properties:
         type: Integer
         description: |
           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
-
-
-
-
-                        
-
-
-
-
-
-
