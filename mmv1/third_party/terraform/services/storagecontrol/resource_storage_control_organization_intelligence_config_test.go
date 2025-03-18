@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagecontrol_test
 
 import (
@@ -44,7 +46,7 @@ func TestAccStorageControlOrganizationIntelligenceConfig_update(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_storage_control_organization_intelligence_config.organization_storage_intelligence",
+				ResourceName:            "google_storage_control_organization_intelligence_config.organization_intelligence_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name"},
@@ -53,9 +55,9 @@ func TestAccStorageControlOrganizationIntelligenceConfig_update(t *testing.T) {
 				Config: testAccStorageControlOrganizationIntelligenceConfig_update_with_empty_filter_fields(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_storage_control_organization_intelligence_config.organization_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.#", "0"),
+						"google_storage_control_organization_intelligence_config.organization_intelligence_config", "filter.0.excluded_cloud_storage_buckets.#", "0"),
 					resource.TestCheckResourceAttr(
-						"google_storage_control_organization_intelligence_config.organization_storage_intelligence", "filter.0.included_cloud_storage_locations.#", "0"),
+						"google_storage_control_organization_intelligence_config.organization_intelligence_config", "filter.0.included_cloud_storage_locations.#", "0"),
 				),
 			},
 			{
@@ -87,13 +89,13 @@ func TestAccStorageControlOrganizationIntelligenceConfig_update(t *testing.T) {
 				Config: testAccStorageControlOrganizationIntelligenceConfig_update_with_empty_filter_fields2(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_storage_control_organization_intelligence_config.organization_storage_intelligence", "filter.0.excluded_cloud_storage_buckets.#", "0"),
+						"google_storage_control_organization_intelligence_config.organization_intelligence_config", "filter.0.excluded_cloud_storage_buckets.#", "0"),
 					resource.TestCheckResourceAttr(
-						"google_storage_control_organization_intelligence_config.organization_storage_intelligence", "filter.0.included_cloud_storage_locations.#", "0"),
+						"google_storage_control_organization_intelligence_config.organization_intelligence_config", "filter.0.included_cloud_storage_locations.#", "0"),
 				),
 			},
 			{
-				ResourceName:            "google_storage_control_organization_intelligence_config.organization_storage_intelligence",
+				ResourceName:            "google_storage_control_organization_intelligence_config.organization_intelligence_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name"},
@@ -156,7 +158,7 @@ resource "google_storage_control_organization_intelligence_config" "organization
 
 func testAccStorageControlOrganizationIntelligenceConfig_update_with_empty_filter_fields(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_storage_control_organization_intelligence_config" "organization_storage_intelligence" {
+resource "google_storage_control_organization_intelligence_config" "organization_intelligence_config" {
   name = "%{org_id}"
   edition_config = "STANDARD"
   filter {
@@ -190,7 +192,7 @@ resource "google_storage_control_organization_intelligence_config" "organization
 
 func testAccStorageControlOrganizationIntelligenceConfig_update_with_empty_filter_fields2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_storage_control_organization_intelligence_config" "organization_storage_intelligence" {
+resource "google_storage_control_organization_intelligence_config" "organization_intelligence_config" {
   name = "%{org_id}"
   edition_config = "STANDARD"
   filter {
