@@ -51,11 +51,11 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		var projectBindings []*cloudresourcemanager.Binding
 		for _, pm := range projectMembers {
 			replacedMember := strings.ReplaceAll(pm.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
+			projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
+				Role:    member.Role,
+				Members: []string{replacedMember},
+			})
 		}
-		projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
-			Role:    member.Role,
-			Members: []string{replacedMember},
-		})
 		applyProjectIamBindings(t, client, project.ProjectId, projectBindings)
 	}
 
@@ -69,11 +69,11 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		var orgBindings []*cloudresourcemanager.Binding
 		for _, om := range orgMembers {
 			replacedMember := strings.ReplaceAll(om.Member, "{organization_id}", orgId)
+			orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
+				Role:    member.Role,
+				Members: []string{replacedMember},
+			})
 		}
-		orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
-			Role:    member.Role,
-			Members: []string{replacedMember},
-		})
 		orgName := "organizations/" + orgId
 		applyOrgIamBindings(t, client, orgName, orgBindings)
 	}
