@@ -34,20 +34,4 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following attributes are exported:
 
-* `id` - An identifier for the resource with format `projects/{{project}}/regions/{{region}}/backendServices/{{name}}`
-
-* `self_link` - The URI of the created resource.
-
-* `description` - An optional description of this resource.
-
-* `protocol` - The protocol this backend service uses to communicate with backends.
-
-* `session_affinity` - The session affinity setting for this backend service.
-
-* `timeout_sec` - How many seconds to wait for the backend before considering it a failed request.
-
-* `load_balancing_scheme` - The load balancing scheme. Possible values are: `INTERNAL`, `EXTERNAL`, `INTERNAL_MANAGED`, or `INTERNAL_SELF_MANAGED`.
-
-* `health_checks` - The list of URLs to the health checks associated with this backend service.
-
-* `backend` - The list of backends that serve this backend service.
+See [google_compute_region_backend_service](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service) resource for details of the available attributes.
