@@ -1259,6 +1259,37 @@ func TestAccComputeRegionInstanceTemplate_maxRunDuration_onInstanceStopAction(t 
 	})
 }
 
+func TestAccComputeRegionInstanceTemplate_instanceTerminationAction_terminationTime(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	now := time.Now().UTC()
+	terminationTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 9999, now.Location()).Format(time.RFC3339)
+	var instanceTerminationAction = "STOP"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceTemplate_onInstanceStopAction_terminationTime(acctest.RandString(t, 10), terminationTime),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(
+						t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(&instanceTemplate, instanceTerminationAction),
+					testAccCheckComputeRegionInstanceTemplateInstanceTerminationTime(&instanceTemplate, terminationTime),
+				),
+			},
+			{
+				ResourceName:      "google_compute_region_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(t *testing.T) {
 	t.Parallel()
 
@@ -1470,6 +1501,79 @@ func TestAccComputeRegionInstanceTemplate_keyRevocationActionType(t *testing.T) 
 		},
 	})
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+
+	acceptableByApi_1 := map[string]interface{}{
+		"instance_name": instanceName,
+		"enabled":       fmt.Sprintf("enabled = %t", true),
+		"seconds":       fmt.Sprintf("seconds = %d", 1),
+		"nanos":         fmt.Sprintf("nanos = %d", 1000000),
+	}
+	invalid_1 := map[string]interface{}{
+		"instance_name": instanceName,
+		"enabled":       fmt.Sprintf("enabled = %t", true),
+		"seconds":       "",
+		"nanos":         "",
+	}
+	invalid_2 := map[string]interface{}{
+		"instance_name": instanceName,
+		"enabled":       "",
+		"seconds":       "",
+		"nanos":         "",
+	}
+	invalid_3 := map[string]interface{}{
+		"instance_name": instanceName,
+		"enabled":       fmt.Sprintf("enabled = %t", true),
+		"seconds":       fmt.Sprintf("seconds = %d", 3601),
+		"nanos":         fmt.Sprintf("nanos = %d", 1000000),
+	}
+	invalid_4 := map[string]interface{}{
+		"instance_name": instanceName,
+		"enabled":       fmt.Sprintf("enabled = %t", true),
+		"seconds":       fmt.Sprintf("seconds = %d", 0),
+		"nanos":         fmt.Sprintf("nanos = %d", 1000000000),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_1),
+				ExpectError: regexp.MustCompile("The argument \"seconds\" is required, but no definition was found."),
+			},
+			{
+				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_2),
+				ExpectError: regexp.MustCompile("The argument \"enabled\" is required, but no definition was found."),
+			},
+			{
+				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_3),
+				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 1 hour., invalid"),
+			},
+			{
+				Config:      testAccComputeRegionInstanceTemplate_gracefulShutdown(invalid_4),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 999999999, invalid"),
+			},
+			{
+				Config: testAccComputeRegionInstanceTemplate_gracefulShutdown(acceptableByApi_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRegionInstanceTemplateExists(t, "google_compute_region_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.graceful_shutdown.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "1"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_template.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.nanos", "1000000"),
+				),
+			},
+		},
+	})
+}
+{{- end }}
 
 func testAccCheckComputeRegionInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -1694,6 +1798,15 @@ func testAccCheckComputeRegionInstanceTemplateInstanceTerminationAction(instance
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.InstanceTerminationAction != instance_termination_action {
 			return fmt.Errorf("Expected instance_termination_action  %v, got %v", instance_termination_action, instanceTemplate.Properties.Scheduling.InstanceTerminationAction)
+		}
+		return nil
+	}
+}
+
+func testAccCheckComputeRegionInstanceTemplateInstanceTerminationTime(instanceTemplate *compute.InstanceTemplate, termination_time string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.TerminationTime != termination_time {
+			return fmt.Errorf("Expected instance_termination_time  %v, got %v", termination_time, instanceTemplate.Properties.Scheduling.TerminationTime)
 		}
 		return nil
 	}
@@ -3837,6 +3950,46 @@ resource "google_compute_region_instance_template" "foobar" {
 `, suffix)
 }
 
+func testAccComputeRegionInstanceTemplate_onInstanceStopAction_terminationTime(suffix string, terminationTime string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    automatic_restart = false
+    instance_termination_action = "STOP"
+    termination_time = "%s"
+  }
+
+  metadata = {
+	foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+`, suffix, terminationTime)
+}
+
 func testAccComputeRegionInstanceTemplate_localSsdRecoveryTimeout(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -4141,3 +4294,44 @@ resource "google_compute_region_instance_template" "foobar" {
 }
 `, context)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeRegionInstanceTemplate_gracefulShutdown(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_instance_template" "foobar" {
+  name         = "%{instance_name}"
+  machine_type = "e2-medium"
+  region       = "us-central1"
+
+  disk {
+	source_image = data.google_compute_image.my_image.self_link
+	auto_delete  = true
+	boot         = true
+  }
+
+  network_interface {
+	network = "default"
+  }
+
+  scheduling {
+	automatic_restart = true
+	preemptible = false
+
+	graceful_shutdown {
+	  %{enabled}
+
+	  max_duration {
+		%{seconds}
+		%{nanos}
+	  }
+	}
+  }
+}
+`, context)
+}
+{{- end }}

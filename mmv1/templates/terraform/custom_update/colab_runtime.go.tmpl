@@ -1,0 +1,61 @@
+name := d.Get("name").(string)
+state := d.Get("state").(string)
+desired_state := d.Get("desired_state").(string)
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+ 	return err
+}
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+  return err
+}
+
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+  billingProject = bp
+}
+
+if desired_state != "" && state != desired_state {
+  var verb string
+
+  switch desired_state {
+    case "STOPPED":
+      verb = "stop"
+    case "RUNNING":
+      verb = "start"
+    default:
+      return fmt.Errorf("desired_state has to be RUNNING or STOPPED")
+  }
+
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, verb); err != nil {
+    return err
+  }
+
+} else {
+  log.Printf("[DEBUG] Colab runtime %q has state %q.", name, state)
+}
+
+var upgrade_runtime bool
+if d.Get("auto_upgrade").(bool) && d.Get("is_upgradable").(bool) {
+  upgrade_runtime = true
+}
+
+expiration_time_string := d.Get("expiration_time").(string)
+expiration_time, err := time.Parse(time.RFC3339Nano, expiration_time_string)
+if err != nil {
+  return err
+}
+
+if expiration_time.Before(time.Now()) && d.Get("notebook_runtime_type").(string) == "USER_DEFINED" {
+  upgrade_runtime = true
+}
+
+if upgrade_runtime {
+  if err := ModifyColabRuntime(config, d, project, billingProject, userAgent, "upgrade"); err != nil {
+    return err
+  }
+}
+
+return nil

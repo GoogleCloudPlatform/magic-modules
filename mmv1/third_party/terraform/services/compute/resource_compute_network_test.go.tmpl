@@ -6,6 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+        "github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -214,7 +215,6 @@ func TestAccComputeNetwork_bgpInterRegionCostAndUpdate(t *testing.T) {
    })
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeNetwork_networkProfile(t *testing.T) {
    t.Parallel()
 
@@ -222,11 +222,15 @@ func TestAccComputeNetwork_networkProfile(t *testing.T) {
    suffixName := acctest.RandString(t, 10)
    networkName := fmt.Sprintf("tf-test-network-profile-%s", suffixName)
    projectId := envvar.GetTestProjectFromEnv()
+   {{ if eq $.TargetVersionName `ga` }}
+   profileURL := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
+   {{- else }}
    profileURL := fmt.Sprintf("https://www.googleapis.com/compute/beta/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
+   {{- end }}
 
    acctest.VcrTest(t, resource.TestCase{
        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-       ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
        CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
        Steps: []resource.TestStep{
            {
@@ -241,7 +245,6 @@ func TestAccComputeNetwork_networkProfile(t *testing.T) {
        },
    })
 }
-{{- end }}
 
 func TestAccComputeNetwork_numericId(t *testing.T) {
 	t.Parallel()
@@ -324,7 +327,6 @@ func TestAccComputeNetwork_default_bgp_best_path_selection_mode(t *testing.T) {
 		},
 	})
 }
-
 
 func TestAccComputeNetwork_default_bgp_always_compare_med(t *testing.T) {
    t.Parallel()
@@ -557,8 +559,6 @@ func testAccCheckComputeNetworkHasRoutingMode(t *testing.T, n string, network *c
 	}
 }
 
-
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccCheckComputeNetworkHasNetworkProfile(t *testing.T, n string, network *compute.Network, networkProfile string) resource.TestCheckFunc {
    return func(s *terraform.State) error {
        config := acctest.GoogleProviderConfig(t)
@@ -580,14 +580,13 @@ func testAccCheckComputeNetworkHasNetworkProfile(t *testing.T, n string, network
 
        foundNetworkProfile := found.NetworkProfile
 
-       if foundNetworkProfile != networkProfile {
+       if tpgresource.CompareSelfLinkOrResourceName("", foundNetworkProfile, networkProfile, nil) != true {
            return fmt.Errorf("Expected Network Profile always compare med %s to match actual Network Profile always compare med %s", networkProfile, foundNetworkProfile)
        }
 
        return nil
    }
 }
-{{- end }}
 
 func testAccCheckComputeNetworkHasNetworkFirewallPolicyEnforcementOrder(t *testing.T, n string, network *compute.Network, order string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -687,11 +686,9 @@ resource "google_compute_network" "acc_network_bgp_inter_region_cost" {
 `, networkName, bgpInterRegionCost)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeNetwork_network_profile(networkName, networkProfile string) string {
    return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_network_profile" {
- provider                = google-beta
  name                    = "%s"
  routing_mode            = "REGIONAL"
  network_profile         = "%s"
@@ -699,7 +696,6 @@ resource "google_compute_network" "acc_network_network_profile" {
 }
 `, networkName, networkProfile)
 }
-{{- end }}
 
 func testAccComputeNetwork_deleteDefaultRoute(networkName string) string {
 	return fmt.Sprintf(`

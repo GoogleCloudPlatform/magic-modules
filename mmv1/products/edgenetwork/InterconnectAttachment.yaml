@@ -37,14 +37,9 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
+exclude_sweeper: true
 examples:
   - name: 'edgenetwork_interconnect_attachment'
     primary_resource_id: 'example_interconnect_attachment'

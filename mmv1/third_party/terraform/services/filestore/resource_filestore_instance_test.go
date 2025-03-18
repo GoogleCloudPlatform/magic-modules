@@ -6,10 +6,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/filestore"
 )
 
 func testResourceFilestoreInstanceStateDataV0() map[string]interface{} {
@@ -408,4 +408,126 @@ resource "google_filestore_instance" "instance" {
   }
 }
 `, name, location, tier)
+}
+
+func TestAccFilestoreInstance_tags(t *testing.T) {
+	t.Parallel()
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "location", "networks.0.reserved_ip_range", "tags"},
+			},
+		},
+	})
+}
+
+func testAccFileInstanceTags(name string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name = "tf-test-instance-%s"
+  zone = "us-central1-b"
+  tier = "BASIC_HDD"
+  file_shares {
+    capacity_gb = 1024
+    name        = "share1"
+  }
+  networks {
+    network           = "default"
+    modes             = ["MODE_IPV4"]
+    reserved_ip_range = "172.19.31.8/29"
+  }
+tags = {`, name)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func TestAccFilestoreInstance_replication(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"location_1":    "us-east1",
+		"location_2":    "us-west1",
+		"tier":          "ENTERPRISE",
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_replication(context),
+			},
+			{
+				ResourceName:            "google_filestore_instance.replica-instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "initial_replication"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_replication(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_filestore_instance" "instance" {
+  name             = "tf-test-instance-%{random_suffix}"
+  location         = "%{location_1}"
+  tier             = "%{tier}"
+  description      = "An instance created during testing."
+
+  file_shares {
+    capacity_gb    = 1024
+    name           = "share"
+  }
+
+  networks {
+    network        = "default"
+    modes          = ["MODE_IPV4"]
+  }
+}
+
+resource "google_filestore_instance" "replica-instance" {
+  name          	= "tf-test-instance-%{random_suffix}"
+  location      	= "%{location_2}"
+  tier          	= "%{tier}"
+  description   	= "An replica instance created during testing."
+
+  file_shares {	
+    capacity_gb 	= 1024
+    name            = "share"
+  }
+
+  networks {
+    network         = "default"
+    modes           = ["MODE_IPV4"]
+  }
+
+  initial_replication {
+    replicas {
+      peer_instance = google_filestore_instance.instance.id
+    }
+  }
+}
+`, context)
 }

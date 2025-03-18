@@ -55,6 +55,7 @@ resource "google_network_security_intercept_deployment" "{{$.PrimaryResourceId}}
   location                   = "us-central1-a"
   forwarding_rule            = google_compute_forwarding_rule.forwarding_rule.id
   intercept_deployment_group = google_network_security_intercept_deployment_group.deployment_group.id
+  description                = "some description"
   labels = {
     foo = "bar"
   }

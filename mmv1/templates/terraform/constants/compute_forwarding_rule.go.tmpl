@@ -22,6 +22,24 @@ func PortRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return old == new+"-"+new
 }
 
+// Compare only the relative path from 'regions' of two IP collection links
+func IpCollectionDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
+	oldStripped, err := GetRelativePathFromRegions(old)
+	if err != nil {
+		return false
+	}
+
+	newStripped, err := GetRelativePathFromRegions(new)
+	if err != nil {
+		return false
+	}
+
+	if oldStripped == newStripped {
+		return true
+	}
+	return false
+}
+
 // Suppresses diff for IPv4 and IPv6 different formats.
 // It also suppresses diffs if an IP is changing to a reference.
 func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
@@ -64,4 +82,13 @@ func InternalIpDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	}
 
 	return addr_equality && netmask_equality
+}
+
+func GetRelativePathFromRegions(resourceLink string) (string, error) {
+	stringParts := strings.SplitAfterN(resourceLink, "regions/", 2)
+	if len(stringParts) != 2 {
+		return "", fmt.Errorf("String is not a valid link: %s", resourceLink)
+	}
+
+	return "regions/" + stringParts[1], nil
 }

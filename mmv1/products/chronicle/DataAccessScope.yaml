@@ -27,6 +27,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessScopes/{{data_access_scope_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: RGF0YUFjY2Vzc1Njb3Bl
 
 examples:
   - name: 'chronicle_dataaccessscope_with_logtype'

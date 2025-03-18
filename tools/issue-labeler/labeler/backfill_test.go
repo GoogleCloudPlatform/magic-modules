@@ -185,6 +185,30 @@ func TestComputeIssueUpdates(t *testing.T) {
 			regexpLabels:         defaultRegexpLabels,
 			expectedIssueUpdates: []IssueUpdate{},
 		},
+		{
+			name:        "test failure",
+			description: "add service labels if missed but don't add forward/review label for test failure ticket",
+			issues: []*github.Issue{
+				{
+					Number: github.Int(1),
+					Body:   testIssueBodyWithResources([]string{"google_service1_resource1"}),
+					Labels: []*github.Label{{Name: github.String("test-failure")}, {Name: github.String("test-failure-100")}},
+				},
+				{
+					Number: github.Int(2),
+					Body:   testIssueBodyWithResources([]string{"google_service2_resource1"}),
+					Labels: []*github.Label{{Name: github.String("test-failure")}, {Name: github.String("test-failure-50")}, {Name: github.String("service/service2-subteam1")}},
+				},
+			},
+			regexpLabels: defaultRegexpLabels,
+			expectedIssueUpdates: []IssueUpdate{
+				{
+					Number:    1,
+					Labels:    []string{"service/service1", "test-failure", "test-failure-100"},
+					OldLabels: []string{"test-failure", "test-failure-100"},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

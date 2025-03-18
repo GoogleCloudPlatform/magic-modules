@@ -9,5 +9,8 @@ resource "google_parameter_manager_regional_parameter_version" "{{$.PrimaryResou
   provider = google-beta
   parameter = google_parameter_manager_regional_parameter.regional-parameter-basic.id
   parameter_version_id = "{{index $.Vars "parameter_version_id"}}"
-  parameter_data = file("{{index $.Vars "data"}}")
+  parameter_data = yamlencode({
+    "key1": "val1",
+    "key2": "val2"
+  })
 }
