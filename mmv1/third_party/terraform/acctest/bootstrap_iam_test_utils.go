@@ -28,50 +28,53 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	}
 	client := config.NewResourceManagerClient(config.UserAgent)
 
-	// Get the project since we need its number, id, and policy.
-	project, err := client.Projects.Get(envvar.GetTestProjectFromEnv()).Do()
-	if err != nil {
-		t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
-	}
-
-	// Get the organization ID from environment if any
-	orgIdFromEnv := envvar.GetTestOrgFromEnv(t)
-
-	// Separate bindings into project-level vs. org-level
-	var projectBindings []*cloudresourcemanager.Binding
-	var orgBindings []*cloudresourcemanager.Binding
-
+	// Separate the given members into two groups: project-level vs. org-level
+	var projectMembers []IamMember
+	var orgMembers []IamMember
 	for _, member := range members {
-		// Replace {project_number} and {organization_id} if present
-		replacedMember := strings.ReplaceAll(member.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
-		replacedMember = strings.ReplaceAll(replacedMember, "{organization_id}", orgIdFromEnv)
-
-		// If the original member string indicates organization usage, store it as org binding
+		// If the member has an {organization_id} token, we'll handle it as an org binding
 		if strings.Contains(member.Member, "{organization_id}") {
-			orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
-				Role:    member.Role,
-				Members: []string{replacedMember},
-			})
+			orgMembers = append(orgMembers, member)
 		} else {
-			// Otherwise, treat it as a project binding
-			projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
-				Role:    member.Role,
-				Members: []string{replacedMember},
-			})
+			// Otherwise, treat as project-level (this also covers {project_number} or none)
+			projectMembers = append(projectMembers, member)
 		}
 	}
 
-	// Apply project-level bindings if any
-	if len(projectBindings) > 0 {
+	if len(projectMembers) > 0 {
+		// Get the project since we need its number, id, and policy.
+		project, err := client.Projects.Get(envvar.GetTestProjectFromEnv()).Do()
+		if err != nil {
+			t.Fatalf("Error getting project with id %q: %s", project.ProjectId, err)
+		}
+
+		var projectBindings []*cloudresourcemanager.Binding
+		for _, pm := range projectMembers {
+			replacedMember := strings.ReplaceAll(pm.Member, "{project_number}", strconv.FormatInt(project.ProjectNumber, 10))
+		}
+		projectBindings = append(projectBindings, &cloudresourcemanager.Binding{
+			Role:    member.Role,
+			Members: []string{replacedMember},
+		})
 		applyProjectIamBindings(t, client, project.ProjectId, projectBindings)
 	}
 
-	// Apply org-level bindings if any
-	if len(orgBindings) > 0 {
-		if orgIdFromEnv == "" {
+	if len(orgMembers) > 0 {
+		// Get the organization ID from environment if any
+		orgId := envvar.GetTestOrgFromEnv(t)
+		if orgId == "" {
 			t.Fatal("Error: Org-level IAM was requested, but no organization ID was set in the environment.")
 		}
-		orgName := "organizations/" + orgIdFromEnv
+
+		var orgBindings []*cloudresourcemanager.Binding
+		for _, om := range orgMembers {
+			replacedMember := strings.ReplaceAll(om.Member, "{organization_id}", orgId)
+		}
+		orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
+			Role:    member.Role,
+			Members: []string{replacedMember},
+		})
+		orgName := "organizations/" + orgId
 		applyOrgIamBindings(t, client, orgName, orgBindings)
 	}
 }
