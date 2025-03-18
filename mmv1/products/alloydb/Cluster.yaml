@@ -65,6 +65,18 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+  - name: 'alloydb_cluster_before_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+  - name: 'alloydb_cluster_after_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -273,6 +285,12 @@ properties:
       - name: 'pscEnabled'
         type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+      - name: 'serviceOwnedProjectNumber'
+        type: Integer
+        description: |
+          The project number that needs to be allowlisted on the network attachment to enable outbound connectivity, if the network attachment is configured to ACCEPT_MANUAL connections.
+          In case the network attachment is configured to ACCEPT_AUTOMATIC, this project number does not need to be allowlisted explicitly.
+        output: true
   - name: 'initialUser'
     type: NestedObject
     description: |

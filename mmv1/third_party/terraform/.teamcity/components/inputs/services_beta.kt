@@ -401,6 +401,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google-beta/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google-beta/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
@@ -750,6 +755,11 @@ var ServicesListBeta = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google-beta/services/storage"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google-beta/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

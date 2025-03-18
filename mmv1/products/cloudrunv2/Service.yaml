@@ -481,6 +481,10 @@ properties:
                     required: true
                   - name: 'value'
                     type: String
+                    # env is a set.
+                    # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                    # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                    default_value: ""
                     description: |-
                       Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:

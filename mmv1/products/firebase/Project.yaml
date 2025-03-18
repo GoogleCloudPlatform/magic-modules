@@ -13,6 +13,7 @@
 
 ---
 name: 'Project'
+api_resource_type_kind: FirebaseProject
 description: |
   A Google Cloud Firebase instance. This enables Firebase resources on a given Google Project.
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
