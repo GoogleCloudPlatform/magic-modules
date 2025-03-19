@@ -31,14 +31,22 @@ examples:
     primary_resource_id: example
     vars:
       backend_id: "mini"
+      service_act_id: "firebase-app-hosting-compute"
     test_env_vars:
       project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-fah-minimal"'
   - name: firebase_app_hosting_backend_full
     primary_resource_id: example
     vars:
       backend_id: "full"
+      service_act_id: "firebase-app-hosting-compute"
     test_env_vars:
       project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-fah-full"'
   - name: firebase_app_hosting_backend_github
     primary_resource_id: example
     vars:
