@@ -1589,6 +1589,29 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+			"pod_autoscaling": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `PodAutoscaling is used for configuration of parameters for workload autoscaling`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"hpa_profile": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"NONE", "PERFORMANCE"}, false),
+							Description:      `
+								HPA Profile is used to configure the Horizontal Pod Autoscaler (HPA) profile for the cluster.
+								Available options include:
+								- NONE: Customers explicitly opt-out of HPA profiles.
+								- PERFORMANCE: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
+							`,
+						},
+					},
+				},
+			},
 {{- end }}
 			"secret_manager_config": {
 				Type:        schema.TypeList,
@@ -2515,6 +2538,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
+		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 {{- end }}
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
@@ -3192,6 +3216,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
+		return err
+	}
+
+	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
 		return err
 	}
 {{- end }}
@@ -4156,6 +4184,34 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
+
+	if d.HasChange("pod_autoscaling") {
+		c := d.Get("pod_autoscaling")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPodAutoscaling: expandPodAutoscaling(c),
+			},
+		}
+
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+			// Wait until it's updated
+			return ContainerOperationWait(config, op, project, location, "updating Horizontal pod Autoscaling profile", userAgent, d.Timeout(schema.TimeoutUpdate))
+		}
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] GKE cluster %s horizontal pod autoscaling profile has been updated", d.Id())
+	}
+
 {{- end }}
 
 	if d.HasChange("secret_manager_config") {
@@ -5736,6 +5792,28 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 		ForceSendFields: []string{"Enabled"},
 	}
 }
+
+func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
+	if configured == nil {
+		return nil
+	}
+
+	podAutoscaling := &container.PodAutoscaling{}
+
+	configs := configured.([]interface{})
+
+	if len(configs) == 0 || configs[0] == nil {
+		return nil
+	}
+
+	config := configs[0].(map[string]interface{})
+
+	if v, ok := config["hpa_profile"]; ok {
+		podAutoscaling.HpaProfile = v.(string)
+	}
+
+	return podAutoscaling
+}
 {{- end }}
 
 func expandSecretManagerConfig(configured interface{}) *container.SecretManagerConfig {
@@ -6697,6 +6775,19 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 			"enabled": c.Enabled,
 		},
 	}
+}
+
+func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
+	config := make([]map[string]interface{}, 0, 1)
+
+	if c == nil {
+		return config
+	}
+
+	config = append(config, map[string]interface{}{
+		"hpa_profile": c.HpaProfile,
+	})
+	return config
 }
 
 {{ end }}

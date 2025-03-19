@@ -186,6 +186,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_oracle_database_cloud_vm_cluster":          oracledatabase.DataSourceOracleDatabaseCloudVmCluster(),
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
 	"google_organizations":                             resourcemanager.DataSourceGoogleOrganizations(),
+	"google_organization_iam_custom_role":              resourcemanager.DataSourceGoogleOrganizationIamCustomRole(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_parameter_manager_parameter":               parametermanager.DataSourceParameterManagerParameter(),
 	"google_parameter_manager_parameters":              parametermanager.DataSourceParameterManagerParameters(),
@@ -245,6 +246,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_storage_bucket_object_content":             storage.DataSourceGoogleStorageBucketObjectContent(),
 	"google_storage_object_signed_url":                 storage.DataSourceGoogleSignedUrl(),
 	"google_storage_project_service_account":           storage.DataSourceGoogleStorageProjectServiceAccount(),
+  "google_storage_control_project_intelligence_config":  storagecontrol.DataSourceGoogleStorageControlProjectIntelligenceConfig(),
 	"google_storage_transfer_project_service_account":  storagetransfer.DataSourceGoogleStorageTransferProjectServiceAccount(),
 	"google_tags_tag_key":                              tags.DataSourceGoogleTagsTagKey(),
 	"google_tags_tag_keys":                             tags.DataSourceGoogleTagsTagKeys(),
