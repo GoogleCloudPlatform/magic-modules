@@ -60,7 +60,7 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/api_config.tmpl'
   encoder: 'templates/terraform/encoders/api_config.go.tmpl'
 sweeper:
-  parent: 
+  parent:
     resource_type: "google_api_gateway_api"
     parent_field: "name"
     parent_field_extract_name: true

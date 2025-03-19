@@ -50,8 +50,8 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/instantSnapshots/{{name}}'
 sweeper:
-    url_substitutions:
-      - zone: "us-central1-a"
+  url_substitutions:
+    - zone: "us-central1-a"
 examples:
   - name: 'instant_snapshot_basic'
     primary_resource_id: 'default'
