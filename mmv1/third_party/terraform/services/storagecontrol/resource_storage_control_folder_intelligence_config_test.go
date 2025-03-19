@@ -124,7 +124,7 @@ func testAccStorageControlFolderIntelligenceConfig_basic(context map[string]inte
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -135,7 +135,7 @@ resource "time_sleep" "wait_120_seconds" {
 resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
   name = google_folder.folder.folder_id
   edition_config = "STANDARD"
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
@@ -145,7 +145,7 @@ func testAccStorageControlFolderIntelligenceConfig_update_with_filter(context ma
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -157,14 +157,43 @@ resource "google_storage_control_folder_intelligence_config" "folder_intelligenc
   name = google_folder.folder.folder_id
   edition_config = "STANDARD"
   filter {
-		excluded_cloud_storage_buckets{
+    excluded_cloud_storage_buckets{
       bucket_id_regexes = ["random-test-*", "random-test2-*"]
     }
     included_cloud_storage_locations{
       locations = ["us-east-1", "us-east-2"]
     }
   }
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
+}
+`, context)
+}
+
+func testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+  deletion_protection=false
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_folder.folder]
+  create_duration = "120s"
+}
+
+resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
+  name = google_folder.folder.folder_id
+  edition_config = "STANDARD"
+  filter {
+    excluded_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    included_cloud_storage_locations{
+      locations = []
+    }
+  }
+  depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
@@ -203,7 +232,7 @@ func testAccStorageControlFolderIntelligenceConfig_update_with_filter2(context m
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -222,7 +251,36 @@ resource "google_storage_control_folder_intelligence_config" "folder_intelligenc
       locations = ["us-east-1", "us-east-2"]
     }
   }
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
+}
+`, context)
+}
+
+func testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+  deletion_protection=false
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_folder.folder]
+  create_duration = "120s"
+}
+
+resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
+  name = google_folder.folder.folder_id
+  edition_config = "STANDARD"
+  filter {
+    included_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    excluded_cloud_storage_locations{
+      locations = []
+    }
+  }
+  depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
@@ -261,7 +319,7 @@ func testAccStorageControlFolderIntelligenceConfig_update_mode_disable(context m
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -272,7 +330,7 @@ resource "time_sleep" "wait_120_seconds" {
 resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
   name = google_folder.folder.folder_id
   edition_config = "DISABLED"
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
@@ -282,7 +340,7 @@ func testAccStorageControlFolderIntelligenceConfig_update_mode_inherit(context m
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -293,7 +351,7 @@ resource "time_sleep" "wait_120_seconds" {
 resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
   name = google_folder.folder.folder_id
   edition_config = "INHERIT"
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
