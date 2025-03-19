@@ -1,9 +1,11 @@
 package bigqueryanalyticshub_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -25,13 +27,28 @@ func TestAccBigqueryAnalyticsHubListingSubscription_differentProject(t *testing.
 				Config: testAccBigqueryAnalyticsHubListingSubscription_differentProject(context),
 			},
 			{
-				ResourceName:            "google_bigquery_analytics_hub_listing_subscription.subscription",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"data_exchange_id", "destination_dataset", "listing_id", "location", "subscription_id"},
+				ResourceName:      "google_bigquery_analytics_hub_listing_subscription.subscription",
+				ImportStateIdFunc: testAccBigqueryAnalyticsHubListingSubscription_stateId,
+				ImportState:       true,
+				// skipping ImportStateVerify as the resource ID won't match original
+				// since the user cannot input the project and destination projects simultaneously
 			},
 		},
 	})
+}
+
+func testAccBigqueryAnalyticsHubListingSubscription_stateId(state *terraform.State) (string, error) {
+	resourceName := "google_bigquery_analytics_hub_listing_subscription.subscription"
+	var rawState map[string]string
+	for _, m := range state.Modules {
+		if len(m.Resources) > 0 {
+			if v, ok := m.Resources[resourceName]; ok {
+				rawState = v.Primary.Attributes
+			}
+		}
+	}
+
+	return fmt.Sprintf("projects/%s/locations/US/subscriptions/%s", envvar.GetTestProjectFromEnv(), rawState["subscription_id"]), nil
 }
 
 func testAccBigqueryAnalyticsHubListingSubscription_differentProject(context map[string]interface{}) string {

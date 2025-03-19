@@ -21,6 +21,7 @@
 		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 			billingProject = bp
 		}
-		projectToReplace := regexp.MustCompile(`projects\/.*\/locations`)
-		url = projectToReplace.ReplaceAllString(url, fmt.Sprintf("projects/%s/locations", destinationProject))
-	}
+		destinationLocation := d.Get("destination_dataset.0.location")
+		partToReplace := regexp.MustCompile(`projects\/.*\/locations\/.*\/subscriptions`)
+		url = partToReplace.ReplaceAllString(url, fmt.Sprintf("projects/%s/locations/%s/subscriptions", destinationProject, destinationLocation))
+	}	
