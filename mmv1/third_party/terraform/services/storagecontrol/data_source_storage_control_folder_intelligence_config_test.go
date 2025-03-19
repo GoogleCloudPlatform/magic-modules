@@ -40,7 +40,7 @@ func testAccDataSourceGoogleStorageControlFolderIntelligenceConfig_basic(context
 resource "google_folder" "folder" {
   parent       = "organizations/%{org_id}"
   display_name = "tf-test-folder-name%{random_suffix}"
-	deletion_protection=false
+  deletion_protection=false
 }
 
 resource "time_sleep" "wait_120_seconds" {
@@ -51,7 +51,7 @@ resource "time_sleep" "wait_120_seconds" {
 resource "google_storage_control_folder_intelligence_config" "folder_storage_intelligence" {
   name = google_folder.folder.folder_id
   edition_config = "STANDARD"
-	depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds]
 }
 
 data "google_storage_control_folder_intelligence_config" "folder_storage_intelligence" {

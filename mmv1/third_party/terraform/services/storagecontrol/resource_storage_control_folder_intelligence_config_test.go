@@ -53,6 +53,15 @@ func TestAccStorageControlFolderIntelligenceConfig_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name"},
 			},
 			{
+				Config: testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields(context),
+			},
+			{
+				ResourceName:            "google_storage_control_folder_intelligence_config.folder_intelligence_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name"},
+			},
+			{
 				Config: testAccStorageControlFolderIntelligenceConfig_update_with_filter2(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -64,6 +73,15 @@ func TestAccStorageControlFolderIntelligenceConfig_update(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"google_storage_control_folder_intelligence_config.folder_intelligence_config", "filter.0.excluded_cloud_storage_locations.0.locations.1", "us-east-2"),
 				),
+			},
+			{
+				ResourceName:            "google_storage_control_folder_intelligence_config.folder_intelligence_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name"},
+			},
+			{
+				Config: testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields2(context),
 			},
 			{
 				ResourceName:            "google_storage_control_folder_intelligence_config.folder_intelligence_config",
@@ -151,6 +169,35 @@ resource "google_storage_control_folder_intelligence_config" "folder_intelligenc
 `, context)
 }
 
+func testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+	deletion_protection=false
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_folder.folder]
+  create_duration = "120s"
+}
+
+resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
+  name = google_folder.folder.folder_id
+  edition_config = "STANDARD"
+  filter {
+		excluded_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    included_cloud_storage_locations{
+      locations = []
+    }
+  }
+	depends_on = [time_sleep.wait_120_seconds]
+}
+`, context)
+}
+
 func testAccStorageControlFolderIntelligenceConfig_update_with_filter2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_folder" "folder" {
@@ -173,6 +220,35 @@ resource "google_storage_control_folder_intelligence_config" "folder_intelligenc
     }
     excluded_cloud_storage_locations{
       locations = ["us-east-1", "us-east-2"]
+    }
+  }
+	depends_on = [time_sleep.wait_120_seconds]
+}
+`, context)
+}
+
+func testAccStorageControlFolderIntelligenceConfig_update_with_empty_filter_fields2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  parent       = "organizations/%{org_id}"
+  display_name = "tf-test-folder-name%{random_suffix}"
+	deletion_protection=false
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_folder.folder]
+  create_duration = "120s"
+}
+
+resource "google_storage_control_folder_intelligence_config" "folder_intelligence_config" {
+  name = google_folder.folder.folder_id
+  edition_config = "STANDARD"
+  filter {
+    included_cloud_storage_buckets{
+      bucket_id_regexes = []
+    }
+    excluded_cloud_storage_locations{
+      locations = []
     }
   }
 	depends_on = [time_sleep.wait_120_seconds]

@@ -61,7 +61,7 @@ properties:
     required: false
     default_from_api: true
     description: |
-      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, DISABLED and STANDARD.
+      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, TRIAL, DISABLED and STANDARD.
   - name: 'updateTime'
     type: String
     output: true
