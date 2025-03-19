@@ -46,6 +46,62 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 	})
 }
 
+func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
+	t.Parallel()
+
+	context_enabled := map[string]interface{}{
+		"random_suffix":         acctest.RandString(t, 10),
+		"automated_backup_mode": "ENABLED",
+	}
+
+	context_diabled := map[string]interface{}{
+		"random_suffix":         acctest.RandString(t, 10),
+		"automated_backup_mode": "DISABLED",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemorystoreInstance_automatedBackupConfig(context_enabled),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccMemorystoreInstance_automatedBackupConfig(context_diabled),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMemorystoreInstance_automatedBackupConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Primary instance
+resource "google_memorystore_instance" "primary_instance" {
+  instance_id                    = "tf-instance-%{random_suffix}"
+  shard_count                    = 1
+  location                       = "us-central1"
+  replica_count                  = 1
+  node_type                      = "SHARED_CORE_NANO"
+  deletion_protection_enabled    = false
+  automated_backup_config {
+   automated_backup_mode         = "%{automated_backup_mode}"
+  }
+
+}
+`, context)
+}
+
 // Validate that shard count is updated for the cluster
 func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 	t.Parallel()
