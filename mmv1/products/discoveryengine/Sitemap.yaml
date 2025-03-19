@@ -86,8 +86,6 @@ properties:
     type: String
     description: |
       Public URI for the sitemap, e.g. "www.example.com/sitemap.xml".
-    exactly_one_of:
-      - 'uri'
   - name: 'createTime'
     type: Time
     description: |
