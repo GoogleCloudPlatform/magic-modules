@@ -219,6 +219,7 @@ func processServicesDirectory(dirPath string, logger *debugLogger) (map[string]*
 			logger.Printf("shouldgen: %v", resourceModel.ShouldGenerateSweepers())
 
 			if !resourceModel.ShouldGenerateSweepers() {
+				fmt.Printf("%s : %s\n", resourceModel.TerraformName(), resourceModel.ListUrlTemplate())
 				logger.Printf("Resource %s should not generate sweepers, skipping", metadata.Resource)
 				return nil
 			}
