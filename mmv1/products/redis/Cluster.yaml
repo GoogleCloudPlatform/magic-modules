@@ -252,15 +252,14 @@ properties:
     output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
+    default_from_api: true
     description: "The automated backup config for a instance."
     properties:
       - name: 'automatedBackupMode'
         type: Enum
         description: |
           "Optional. The automated backup mode. If the mode is disabled, the other fields will be ignored."
-          1. `AUTOMATED_BACKUP_MODE_UNSPECIFIED`: Default value. Automated backup config is not specified.
-          2. `DISABLED`: Automated backup config disabled.
-          3. `ENABLED`: Automated backup config enabled.
+        default_value: "DISABLED"
         enum_values:
           - 'AUTOMATED_BACKUP_MODE_UNSPECIFIED'
           - 'DISABLED'
@@ -277,21 +276,21 @@ properties:
             required: true
             properties:
               - name: 'hours'
-                type: Interger
+                type: Integer
                 description: |
                   Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
                   An API may choose to allow the value "24:00:00" for scenarios like business closing time.
               - name: 'minutes'
-                type: Interger
+                type: Integer
                 description: |
                   Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.
               - name: 'seconds'
-                type: Interger
+                type: Integer
                 description: |
                   Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59.
                   An API may allow the value 60 if it allows leap-seconds.
               - name: 'nanos'
-                type: Interger
+                type: Integer
                 description: |
                   Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999.
       - name: 'retention'
