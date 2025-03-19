@@ -451,6 +451,10 @@ properties:
                             description: Name of the environment variable.
                           - name: 'value'
                             type: String
+                            # env is a set.
+                            # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                            # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                            default_value: ""
                             description: |-
                               Defaults to "".
                           - name: 'valueFrom'
