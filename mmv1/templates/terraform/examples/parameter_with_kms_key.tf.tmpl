@@ -1,0 +1,19 @@
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_kms_crypto_key_iam_member" "kms-parameter-binding" {
+  provider = google-beta
+  crypto_key_id = "{{index $.Vars "kms_key"}}"
+  role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
+}
+
+resource "google_parameter_manager_parameter" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  parameter_id = "{{index $.Vars "parameter_id"}}"
+
+  kms_key = "{{index $.Vars "kms_key"}}"
+
+  depends_on = [ google_kms_crypto_key_iam_member.kms-parameter-binding ]
+}

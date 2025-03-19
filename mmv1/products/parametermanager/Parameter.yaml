@@ -47,6 +47,13 @@ examples:
     min_version: 'beta'
     vars:
       parameter_id: 'parameter'
+  - name: 'parameter_with_kms_key'
+    primary_resource_id: 'parameter-with-kms-key'
+    vars:
+      parameter_id: 'parameter'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
 parameters:
   - name: 'parameterId'
     type: String
@@ -119,3 +126,8 @@ properties:
       - 'UNFORMATTED'
       - 'YAML'
       - 'JSON'
+  - name: 'kmsKey'
+    type: String
+    description: |
+      The resource name of the Cloud KMS CryptoKey used to encrypt parameter version payload. Format
+      `projects/{{project}}/locations/global/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`
