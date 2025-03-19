@@ -262,14 +262,14 @@ properties:
       - name: 'createTime'
         type: String
         description: |
-          Output only. The time when the policy was created.
+          The time when the policy was created.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
       - name: 'updateTime'
         type: String
         description: |
-          Output only. The time when the policy was last updated.
+          The time when the policy was last updated.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
@@ -285,7 +285,7 @@ properties:
             - name: 'day'
               type: Enum
               description: |
-                Required. The day of week that maintenance updates occur.
+                The day of week that maintenance updates occur.
 
                 - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
                 - MONDAY: Monday
@@ -308,7 +308,7 @@ properties:
             - name: 'duration'
               type: String
               description: |
-                Output only. Duration of the maintenance window.
+                Duration of the maintenance window.
                 The current window is fixed at 1 hour.
                 A duration in seconds with up to nine fractional digits,
                 terminated by 's'. Example: "3.5s".
@@ -316,7 +316,7 @@ properties:
             - name: 'startTime'
               type: NestedObject
               description: |
-                Required. Start time of the window in UTC time.
+                Start time of the window in UTC time.
               required: true
               send_empty_value: true
               allow_empty_object: true
@@ -355,21 +355,21 @@ properties:
       - name: 'startTime'
         type: String
         description: |
-          Output only. The start time of any upcoming scheduled maintenance for this cluster.
+          The start time of any upcoming scheduled maintenance for this cluster.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
       - name: 'endTime'
         type: String
         description: |
-          Output only. The end time of any upcoming scheduled maintenance for this cluster.
+          The end time of any upcoming scheduled maintenance for this cluster.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
         output: true
       - name: 'scheduleDeadlineTime'
         type: String
         description: |
-          Output only. The deadline that the maintenance schedule start time
+          The deadline that the maintenance schedule start time
           can not go beyond, including reschedule.
           A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
           resolution and up to nine fractional digits.
