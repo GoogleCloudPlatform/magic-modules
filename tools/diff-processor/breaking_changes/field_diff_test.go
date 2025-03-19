@@ -558,6 +558,14 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 		},
 		expectedViolation: true,
 	},
+	{
+		name: "max defined to unset",
+		oldField: &schema.Schema{
+			MaxItems: 2,
+		},
+		newField:          &schema.Schema{},
+		expectedViolation: false,
+	},
 }
 
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {

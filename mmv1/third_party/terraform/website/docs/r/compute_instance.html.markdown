@@ -267,6 +267,8 @@ is desired, you will need to modify your state file manually using
 * `mode` - (Optional) The mode in which to attach this disk, either `READ_WRITE`
   or `READ_ONLY`. If not specified, the default is to attach the disk in `READ_WRITE` mode.
 
+* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
     encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
@@ -316,6 +318,8 @@ is desired, you will need to modify your state file manually using
 * `snapshot` - (Optional) The snapshot from which to initialize this disk. To create a disk with a snapshot that you created, specify the snapshot name in the following format: `global/snapshots/my-backup`
 
 * `source_snapshot_encryption_key` - (Optional) Encryption key used to decrypt the given snapshot. Structure is [documented below](#nested_source_snapshot_ecryption_key).
+
+* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 

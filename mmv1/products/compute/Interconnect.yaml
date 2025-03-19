@@ -92,11 +92,13 @@ properties:
       bundle, not the speed of the entire bundle. Can take one of the following values:
         - LINK_TYPE_ETHERNET_10G_LR: A 10G Ethernet with LR optics.
         - LINK_TYPE_ETHERNET_100G_LR: A 100G Ethernet with LR optics.
+        - LINK_TYPE_ETHERNET_400G_LR4: A 400G Ethernet with LR4 optics
     required: true
     immutable: true
     enum_values:
       - 'LINK_TYPE_ETHERNET_10G_LR'
       - 'LINK_TYPE_ETHERNET_100G_LR'
+      - 'LINK_TYPE_ETHERNET_400G_LR4'
   - name: 'requestedLinkCount'
     type: Integer
     description: |
