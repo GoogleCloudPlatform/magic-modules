@@ -183,6 +183,7 @@ properties:
     description: |-
       The endpoint group's view of a connected deployment group.
     min_version: 'beta'
+    output: true
     properties:
       - name: name
         type: String
