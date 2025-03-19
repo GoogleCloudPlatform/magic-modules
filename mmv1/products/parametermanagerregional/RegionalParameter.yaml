@@ -48,6 +48,13 @@ examples:
     min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
+  - name: 'regional_parameter_with_kms_key'
+    primary_resource_id: 'regional-parameter-with-kms-key'
+    vars:
+      parameter_id: 'regional_parameter'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: 'location'
     type: String
@@ -126,3 +133,8 @@ properties:
       - 'UNFORMATTED'
       - 'YAML'
       - 'JSON'
+  - name: 'kmsKey'
+    type: String
+    description: |
+      The resource name of the Cloud KMS CryptoKey used to encrypt regional parameter version payload. Format
+      `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`
