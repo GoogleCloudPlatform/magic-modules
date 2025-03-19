@@ -46,7 +46,7 @@ async:
 custom_code:
   update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
 sweeper:
-  prefixes: 
+  prefixes:
     - "gcp-memorystore"
   url_substitutions:
     - region: "us-central1"
