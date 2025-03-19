@@ -52,11 +52,11 @@ examples:
   - name: 'future_reservation_basic'
     primary_resource_id: 'gce_future_reservation'
     vars:
-      future_reservation_name: 'gce-future-reservation'
+      future_reservation_name: 'gce_future_reservation'
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
-      future_reservation_name: 'gce-shared-future-reservation'
+      future_reservation_name: 'gce_shared_future_reservation'
     test_env_vars:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
