@@ -102,7 +102,6 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 	    }
 	  }
 	}
-
 }
 
 resource "google_access_context_manager_access_level" "test-access" {
@@ -126,6 +125,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 			access_level = google_access_context_manager_access_level.test-access.name
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
+	}
+	egress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
 	}
 }
 

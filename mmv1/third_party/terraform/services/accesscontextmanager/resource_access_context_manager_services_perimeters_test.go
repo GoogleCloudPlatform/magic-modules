@@ -260,6 +260,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     		}
     		ingress_to {
     			resources = ["*"]
+          roles = ["roles/bigquery.admin"]
     		}
     	}
     
@@ -283,6 +284,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     		}
     		egress_to {
     			resources = ["*"]
+          roles = ["roles/bigquery.admin"]
     		}
     	}
     }
@@ -336,6 +338,7 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
         }
         ingress_to {
           resources = ["*"]
+          roles = ["roles/bigquery.admin"]
         }
       }
 
@@ -359,6 +362,15 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
         }
         egress_to {
           resources = ["*"]
+        }
+      }
+      egress_policies {
+        egress_from {
+          identity_type = "ANY_IDENTITY"
+        }
+        egress_to {
+          resources = ["*"]
+          roles = ["roles/bigquery.admin"]
         }
       }
     }

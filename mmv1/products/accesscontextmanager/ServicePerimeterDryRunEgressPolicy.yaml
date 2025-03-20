@@ -157,6 +157,14 @@ properties:
           s3://bucket/path). Currently '*' is not allowed.
         item_type:
           type: String
+      - name: 'roles'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          A list of IAM roles that represent the set of operations that the sources
+          specified in the corresponding `EgressFrom`
+          are allowed to perform.
       - name: 'operations'
         type: Array
         description: |
