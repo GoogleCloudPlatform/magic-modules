@@ -36,5 +36,7 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "{{$.Primary
             }
         }
     }
-    labels = {"state" : "active"}
+    labels = {
+        state = "active"
+    }
 }
