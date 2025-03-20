@@ -320,7 +320,7 @@ func TestAccProductResource_update(t *testing.T) {
 
 ### IAM resources
 
-Specify member/role pairs that should always exist in the default test project. `{project_number}` will be replaced with the default project's project number.
+Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number, and `{organization_id}` will be replaced with the test organization's ID.
 
 Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 
@@ -335,6 +335,8 @@ examples:
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/osconfig.serviceAgent"
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
@@ -346,6 +348,10 @@ func TestAccProductResource_update(t *testing.T) {
       {
          Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
          Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+      },
+      {
+         Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
+         Role:   "roles/osconfig.serviceAgent",
       },
    })
    // rest of test

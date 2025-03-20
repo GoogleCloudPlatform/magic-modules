@@ -401,6 +401,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
@@ -591,6 +596,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Osconfig",
         "path" to "./google/services/osconfig"
     ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google/services/osconfigv2"
+    ),
     "oslogin" to mapOf(
         "name" to "oslogin",
         "displayName" to "Oslogin",
@@ -745,6 +755,11 @@ var ServicesListGa = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google/services/storage"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",
