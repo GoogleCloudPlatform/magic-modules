@@ -8,7 +8,7 @@ resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
   labels       = {
     test = "value"
   }
-	timeouts {
+  timeouts {
 		create = "120m"
 	}
 }

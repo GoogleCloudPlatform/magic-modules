@@ -524,7 +524,7 @@ var ServicesListGa = mapOf(
     "lustre" to mapOf(
         "name" to "lustre",
         "displayName" to "GoogleCloudManagedLustre",
-        "path" to "./google-beta/services/lustre"
+        "path" to "./google/services/lustre"
     ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",

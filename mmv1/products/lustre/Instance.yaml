@@ -13,7 +13,7 @@
 
 ---
 name: Instance
-description: Description
+description: A Managed Lustre instance
 base_url: projects/{{project}}/locations/{{location}}/instances
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
