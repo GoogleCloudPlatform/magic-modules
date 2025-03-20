@@ -29,7 +29,7 @@ func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha s
 		"target_url": targetURL,
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
+	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, postBody)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (gh *Client) PostComment(prNumber, comment string) error {
 		"body": comment,
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (gh *Client) UpdateComment(prNumber, comment string, id int) error {
 		"body": comment,
 	}
 
-	err := utils.RequestCall(url, "PATCH", gh.token, nil, body)
+	err := utils.RequestCallWithRetry(url, "PATCH", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []strin
 		"team_reviewers": {},
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (gh *Client) AddLabels(prNumber string, labels []string) error {
 	body := map[string][]string{
 		"labels": labels,
 	}
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
 
 	if err != nil {
 		return fmt.Errorf("failed to add %q labels: %s", labels, err)
@@ -109,7 +109,7 @@ func (gh *Client) AddLabels(prNumber string, labels []string) error {
 
 func (gh *Client) RemoveLabel(prNumber, label string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
+	err := utils.RequestCallWithRetry(url, "DELETE", gh.token, nil, nil)
 
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
@@ -120,7 +120,7 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 
 func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
-	err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
+	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, map[string]any{
 		"ref":    "main",
 		"inputs": inputs,
 	})
@@ -136,7 +136,7 @@ func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 
 func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
-	err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
+	err := utils.RequestCallWithRetry(url, "PUT", gh.token, nil, map[string]any{
 		"merge_method": "squash",
 		"sha":          commitSha,
 	})
