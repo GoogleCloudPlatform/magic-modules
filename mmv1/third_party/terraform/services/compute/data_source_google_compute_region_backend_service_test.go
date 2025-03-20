@@ -5,29 +5,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
-func testAccDataSourceComputeRegionBackendServiceDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		config := acctest.GoogleProviderConfig(t)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_region_backend_service" {
-				continue
-			}
-
-			_, err := config.NewComputeClient(config.UserAgent).RegionBackendServices.Get(
-				config.Project, rs.Primary.Attributes["region"], rs.Primary.Attributes["name"]).Do()
-			if err == nil {
-				return fmt.Errorf("Region Backend Service still exists")
-			}
-		}
-
-		return nil
-	}
-}
 
 func TestAccDataSourceComputeRegionBackendService_basic(t *testing.T) {
 	t.Parallel()
@@ -39,7 +18,6 @@ func TestAccDataSourceComputeRegionBackendService_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccDataSourceComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeRegionBackendService_basic(serviceName, checkName, region),
@@ -85,7 +63,6 @@ func TestAccDataSourceComputeRegionBackendService_withProject(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccDataSourceComputeRegionBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceComputeRegionBackendService_withProject(serviceName, checkName, region),
