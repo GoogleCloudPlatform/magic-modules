@@ -216,7 +216,7 @@ properties:
         type: String
         description: |-
           Forwarding rule URI. Forwarding rules are frontends for load balancers,
-          PSC endpoints, and Protocol Forwarding. 
+          PSC endpoints, and Protocol Forwarding.
       - name: 'gkeMasterCluster'
         type: String
         description: |-
