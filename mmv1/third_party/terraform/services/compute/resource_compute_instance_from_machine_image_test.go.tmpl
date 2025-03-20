@@ -1170,7 +1170,6 @@ resource "google_kms_key_ring" "keyring" {
 resource "google_kms_crypto_key" "key" {
   name            = "tf-test-key-%s"
   key_ring        = google_kms_key_ring.keyring.id
-  rotation_period = "86400s"
 
   lifecycle {
     prevent_destroy = false
