@@ -632,7 +632,7 @@ func (c *Config) synchronousTimeout() time.Duration {
 func (c *Config) logGoogleIdentities(ctx context.Context) error {
 	if c.ImpersonateServiceAccount == "" {
 
-	tokenSource, err := c.getTokenSource(ctx, c.Scopes, false)
+	tokenSource, err := c.getTokenSource(ctx, c.Scopes, true)
 		if err != nil {
 			return err
 		}
