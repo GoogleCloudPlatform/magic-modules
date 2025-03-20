@@ -18,6 +18,7 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
+	"strings"
 )
 
 func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
@@ -136,16 +137,22 @@ func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs ma
 
 func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
+
 	err := utils.RequestCallWithRetry(url, "PUT", gh.token, nil, map[string]any{
 		"merge_method": "squash",
 		"sha":          commitSha,
 	})
 
+	// Check if the error is "Merge already in progress" (405)
 	if err != nil {
+		if strings.Contains(err.Error(), "Merge already in progress") {
+			// Consider this a success case
+			fmt.Printf("Pull request %s is already being merged\n", prNumber)
+			return nil
+		}
 		return fmt.Errorf("failed to merge pull request: %s", err)
 	}
 
 	fmt.Printf("Successfully merged pull request %s\n", prNumber)
-
 	return nil
 }
