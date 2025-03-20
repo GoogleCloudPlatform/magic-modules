@@ -270,6 +270,70 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 	})
 }
 
+func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
+	t.Parallel()
+
+	context_enabled := map[string]interface{}{
+		"random_suffix":         acctest.RandString(t, 10),
+		"automated_backup_mode": "ENABLED",
+	}
+
+	context_diabled := map[string]interface{}{
+		"random_suffix":         context_enabled["random_suffix"],
+		"automated_backup_mode": "DISABLED",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_automatedBackupConfig(context_enabled),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.cluster_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisCluster_automatedBackupConfig(context_diabled),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.cluster_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func testAccRedisCluster_automatedBackupConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_redis_cluster" "cluster_abc" {
+  name                           = "tf-test-redis-abc%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+  automated_backup_config {
+   automated_backup_mode         = "ENABLED"
+   retention                     = "259200s"
+   fixed_frequency_schedule {
+    start_time {
+      hours                      = 20
+      minutes                    = 0
+      seconds                    = 0
+      nanos                      = 0
+    }
+   }
+  }
+
+}	
+`, context)
+}
+
 
 // Validate that persistence is updated for the cluster
 func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
@@ -836,62 +900,5 @@ func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster 
 		crossClusterReplicationConfigBlock,
 		dependsOnBlock)
 }
-
-
-func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
-	t.Parallel()
-
-	context_enabled := map[string]interface{}{
-		"random_suffix":         acctest.RandString(t, 10),
-		"automated_backup_mode": "ENABLED",
-	}
-
-	context_diabled := map[string]interface{}{
-		"random_suffix":         acctest.RandString(t, 10),
-		"automated_backup_mode": "DISABLED",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRedisCluster_automatedBackupConfig(context_enabled),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccRedisCluster_automatedBackupConfig(context_diabled),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-
-func testAccRedisCluster_automatedBackupConfig(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-
-
-resource "google_redis_instance" "abc" {
-  name                           = "tf-test-redis-abc%{random_suffix}"
-  memory_size_gb                 = 1
-  auth_enabled                   = true
-  automated_backup_config {
-   automated_backup_mode         = "%{automated_backup_mode}"
-  }
-
-}
-`, context)
-}
-
 
 {{ end }}
