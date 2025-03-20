@@ -91,7 +91,6 @@ properties:
     type: Boolean
     description: |
       The default CmekConfig for the Customer.
-    default_value: false
     output: true
   - name: 'lastRotationTimestampMicros'
     type: Integer
