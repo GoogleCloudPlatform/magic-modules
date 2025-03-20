@@ -584,7 +584,7 @@ func (c *Config) getExternalAccountConfig(clientScopes []string) externalaccount
 		SubjectTokenSupplier: c.ExternalCredentials,
 	}
 	// If UniverseDomain is set, the externalaccount package will use it to set the TokenURL (https://sts.UNIVERSE_DOMAIN/v1/token). Otherwise TokenURL defaults to https://sts.googleapis.com/v1/token
-	if c.UniverseDomain != "" {
+	if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
 		eaConfig.UniverseDomain = c.UniverseDomain
 	}
 	return eaConfig
