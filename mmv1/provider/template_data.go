@@ -119,21 +119,23 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 		templatePath,
 	}
 	tmplInput := TestInput{
-		Res:                 resource,
-		ImportPath:          td.ImportPath(),
-		PROJECT_NAME:        "my-project-name",
-		CREDENTIALS:         "my/credentials/filename.json",
-		REGION:              "us-west1",
-		ORG_ID:              "123456789",
-		ORG_DOMAIN:          "example.com",
-		ORG_TARGET:          "123456789",
-		PROJECT_NUMBER:      "1111111111111",
-		BILLING_ACCT:        "000000-0000000-0000000-000000",
-		MASTER_BILLING_ACCT: "000000-0000000-0000000-000000",
-		SERVICE_ACCT:        "my@service-account.com",
-		CUST_ID:             "A01b123xz",
-		IDENTITY_USER:       "cloud_identity_user",
-		PAP_DESCRIPTION:     "description",
+		Res:                  resource,
+		ImportPath:           td.ImportPath(),
+		PROJECT_NAME:         "my-project-name",
+		CREDENTIALS:          "my/credentials/filename.json",
+		REGION:               "us-west1",
+		ORG_ID:               "123456789",
+		ORG_DOMAIN:           "example.com",
+		ORG_TARGET:           "123456789",
+		PROJECT_NUMBER:       "1111111111111",
+		BILLING_ACCT:         "000000-0000000-0000000-000000",
+		MASTER_BILLING_ACCT:  "000000-0000000-0000000-000000",
+		SERVICE_ACCT:         "my@service-account.com",
+		CUST_ID:              "A01b123xz",
+		IDENTITY_USER:        "cloud_identity_user",
+		PAP_DESCRIPTION:      "description",
+		CHRONICLE_ID:         "00000000-0000-0000-0000-000000000000",
+		VMWAREENGINE_PROJECT: "my-vmwareengine-project",
 	}
 
 	td.GenerateFile(filePath, templatePath, tmplInput, true, templates...)
@@ -168,7 +170,7 @@ func (td *TemplateData) GenerateIamPolicyTestFile(filePath string, resource api.
 	templates := []string{
 		templatePath,
 		"templates/terraform/env_var_context.go.tmpl",
-		"templates/terraform/iam/iam_context.go.tmpl",
+		"templates/terraform/iam/iam_test_setup.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -201,7 +203,14 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	funcMap := template.FuncMap{
+		"TemplatePath": func() string { return templatePath },
+	}
+	for k, v := range google.TemplateFunctions {
+		funcMap[k] = v
+	}
+
+	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
@@ -282,19 +291,21 @@ func FixImports(outputPath string, dumpDiffs bool) {
 }
 
 type TestInput struct {
-	Res                 api.Resource
-	ImportPath          string
-	PROJECT_NAME        string
-	CREDENTIALS         string
-	REGION              string
-	ORG_ID              string
-	ORG_DOMAIN          string
-	ORG_TARGET          string
-	PROJECT_NUMBER      string
-	BILLING_ACCT        string
-	MASTER_BILLING_ACCT string
-	SERVICE_ACCT        string
-	CUST_ID             string
-	IDENTITY_USER       string
-	PAP_DESCRIPTION     string
+	Res                  api.Resource
+	ImportPath           string
+	PROJECT_NAME         string
+	CREDENTIALS          string
+	REGION               string
+	ORG_ID               string
+	ORG_DOMAIN           string
+	ORG_TARGET           string
+	PROJECT_NUMBER       string
+	BILLING_ACCT         string
+	MASTER_BILLING_ACCT  string
+	SERVICE_ACCT         string
+	CUST_ID              string
+	IDENTITY_USER        string
+	PAP_DESCRIPTION      string
+	CHRONICLE_ID         string
+	VMWAREENGINE_PROJECT string
 }

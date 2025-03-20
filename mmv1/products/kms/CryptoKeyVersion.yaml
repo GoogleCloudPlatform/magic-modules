@@ -63,7 +63,8 @@ properties:
   - name: 'state'
     type: Enum
     description: |
-      The current state of the CryptoKeyVersion.
+      The current state of the CryptoKeyVersion. Note: you can only specify this field to manually `ENABLE` or `DISABLE` the CryptoKeyVersion,
+      otherwise the value of this field is always retrieved automatically.
     default_from_api: true
     enum_values:
       - 'PENDING_GENERATION'

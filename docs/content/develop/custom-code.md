@@ -32,8 +32,8 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as [diff suppress functions]({{<ref "/reference/field-reference#diff_suppress_func" >}}),
-  [validation functions]({{<ref "/reference/field-reference#validation" >}}),
+- Functions, such as [diff suppress functions]({{<ref "/reference/field#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/reference/field#validation" >}}),
   CustomizeDiff functions, and so on.
 - Methods
 

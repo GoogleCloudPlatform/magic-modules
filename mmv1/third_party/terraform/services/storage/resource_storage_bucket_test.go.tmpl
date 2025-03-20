@@ -38,6 +38,8 @@ func TestAccStorageBucket_basic(t *testing.T) {
 						"google_storage_bucket.bucket", "project", envvar.GetTestProjectFromEnv()),
 					resource.TestCheckResourceAttrSet(
 						"google_storage_bucket.bucket", "project_number"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
 				),
 			},
 			{
@@ -361,46 +363,6 @@ func TestAccStorageBucket_dualLocation_rpo(t *testing.T) {
 			},
 			{
 				Config: testAccStorageBucket_dualLocation_rpo(bucketName,"DEFAULT"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-		},
-	})
-}
-
-func TestAccStorageBucket_multiLocation_rpo(t *testing.T) {
-	t.Parallel()
-
-	bucketName := acctest.TestBucketName(t)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccStorageBucket_basic(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
-				Config: testAccStorageBucket_multiLocation_rpo(bucketName,"DEFAULT"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "rpo", "DEFAULT"),
@@ -795,7 +757,6 @@ func TestAccStorageBucket_update(t *testing.T) {
 	t.Parallel()
 
 	var bucket storage.Bucket
-	var recreated storage.Bucket
 	var updated storage.Bucket
 	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
 
@@ -805,26 +766,10 @@ func TestAccStorageBucket_update(t *testing.T) {
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_basic(bucketName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &bucket),
-					resource.TestCheckResourceAttr(
-						"google_storage_bucket.bucket", "force_destroy", "false"),
-				),
-			},
-			{
-				ResourceName:            "google_storage_bucket.bucket",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
-			},
-			{
 				Config: testAccStorageBucket_customAttributes(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
-						t, "google_storage_bucket.bucket", bucketName, &recreated),
-					testAccCheckStorageBucketWasRecreated(&recreated, &bucket),
+						t, "google_storage_bucket.bucket", bucketName, &bucket),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "true"),
 				),
@@ -840,7 +785,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
-					testAccCheckStorageBucketWasUpdated(&updated, &recreated),
+					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "true"),
 				),
@@ -856,7 +801,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
-					testAccCheckStorageBucketWasUpdated(&updated, &recreated),
+					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "true"),
 				),
@@ -872,7 +817,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
-					testAccCheckStorageBucketWasUpdated(&updated, &recreated),
+					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "true"),
 				),
@@ -888,7 +833,7 @@ func TestAccStorageBucket_update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &updated),
-					testAccCheckStorageBucketWasUpdated(&updated, &recreated),
+					testAccCheckStorageBucketWasUpdated(&updated, &bucket),
 					resource.TestCheckResourceAttr(
 						"google_storage_bucket.bucket", "force_destroy", "true"),
 				),
@@ -1954,17 +1899,6 @@ resource "google_storage_bucket" "bucket" {
   custom_placement_config {
     data_locations = ["ASIA-EAST1", "ASIA-SOUTHEAST1"]
   }
-  rpo = "%s"
-}
-`, bucketName,rpo)
-}
-
-func testAccStorageBucket_multiLocation_rpo(bucketName string,rpo string) string {
-	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name          = "%s"
-  location      = "ASIA"
-  force_destroy = true
   rpo = "%s"
 }
 `, bucketName,rpo)

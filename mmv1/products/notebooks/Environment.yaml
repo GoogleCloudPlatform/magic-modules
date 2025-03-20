@@ -35,6 +35,9 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-west1-a"
 examples:
   - name: 'notebook_environment_basic'
     primary_resource_id: 'environment'

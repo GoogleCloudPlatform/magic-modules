@@ -2,6 +2,7 @@ package vmwareengine_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -18,10 +19,11 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":          "me-west1", // region with allocated quota
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"region":               "me-west1", // region with allocated quota
+		"random_suffix":        acctest.RandString(t, 10),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -39,7 +41,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -51,7 +52,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -61,7 +62,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -71,7 +71,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -81,7 +81,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -91,7 +90,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -111,7 +110,6 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 						"data.google_vmwareengine_private_cloud.ds",
 						"google_vmwareengine_private_cloud.vmw-engine-pc",
 						map[string]struct{}{
-							"type":                              {},
 							"deletion_delay_hours":              {},
 							"send_deletion_delay_hours_if_zero": {},
 						}),
@@ -121,7 +119,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 				ResourceName:            "google_vmwareengine_private_cloud.vmw-engine-pc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "type", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
+				ImportStateVerifyIgnore: []string{"location", "name", "update_time", "deletion_delay_hours", "send_deletion_delay_hours_if_zero"},
 			},
 
 			{
@@ -151,7 +149,7 @@ func TestAccVmwareenginePrivateCloud_vmwareEnginePrivateCloudUpdate(t *testing.T
 }
 
 func testVmwareenginePrivateCloudCreateConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudConfig(context, "sample description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudConfig(context, "sample description", "TIME_LIMITED", 1, 0) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}) string {
@@ -159,7 +157,7 @@ func testVmwareenginePrivateCloudUpdateNodeConfig(context map[string]interface{}
 }
 
 func testVmwareenginePrivateCloudUpdateAutoscaleConfig(context map[string]interface{}) string {
-	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "STANDARD", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
+	return testVmwareenginePrivateCloudAutoscaleConfig(context, "sample updated description", "", 3, 8) + testVmwareengineVcenterNSXCredentailsConfig(context)
 }
 
 func testVmwareenginePrivateCloudDelayedDeleteConfig(context map[string]interface{}) string {
@@ -185,6 +183,7 @@ func testVmwareenginePrivateCloudConfig(context map[string]interface{}, descript
 	context["type"] = pcType
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
@@ -192,6 +191,7 @@ resource "google_vmwareengine_network" "vmw-engine-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
   location = "%{region}-b"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "%{description}"
@@ -209,24 +209,11 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
       node_count = "%{node_count}"
       custom_core_count = 32
     }
-		autoscaling_settings {
-      autoscaling_policies {
-        autoscale_policy_id = "autoscaling-policy"
-        node_type_id = "standard-72"
-        scale_out_size = 1
-        storage_thresholds {
-          scale_out = 60
-          scale_in  = 20
-        }
-      }
-      min_cluster_node_count = 3
-      max_cluster_node_count = 8
-      cool_down_period = "1800s"
-    }
   }
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
+    project = "%{vmwareengine_project}"
 	location = "%{region}-b"
 	name = "tf-test-sample-pc%{random_suffix}"
 	depends_on = [
@@ -243,6 +230,7 @@ func testVmwareenginePrivateCloudAutoscaleConfig(context map[string]interface{},
 	context["type"] = pcType
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"
@@ -250,6 +238,7 @@ resource "google_vmwareengine_network" "vmw-engine-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
+  project = "%{vmwareengine_project}"
   location = "%{region}-b"
   name = "tf-test-sample-pc%{random_suffix}"
   description = "%{description}"
@@ -293,6 +282,7 @@ resource "google_vmwareengine_private_cloud" "vmw-engine-pc" {
 }
 
 data "google_vmwareengine_private_cloud" "ds" {
+    project = "%{vmwareengine_project}"
 	location = "%{region}-b"
 	name = "tf-test-sample-pc%{random_suffix}"
 	depends_on = [
@@ -305,6 +295,7 @@ data "google_vmwareengine_private_cloud" "ds" {
 func testVmwareenginePrivateCloudDeletedConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "vmw-engine-nw" {
+  project = "%{vmwareengine_project}"
   name              = "tf-test-pc-nw-%{random_suffix}"
   location          = "global"
   type              = "STANDARD"

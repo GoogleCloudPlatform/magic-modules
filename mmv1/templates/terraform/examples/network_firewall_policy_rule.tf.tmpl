@@ -1,5 +1,5 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
-  name        = "{{index $.Vars "address"}}"
+  name        = "{{index $.Vars "address_group"}}"
   parent      = "projects/{{index $.TestEnvVars "project_name"}}"
   description = "Sample global networksecurity_address_group"
   location    = "global"
@@ -26,9 +26,10 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
   target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
-    src_ip_ranges = ["10.100.0.1/32"]
-    src_fqdns = ["google.com"]
-    src_region_codes = ["US"]
+    src_address_groups       = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
+    src_ip_ranges            = ["10.100.0.1/32"]
+    src_fqdns                = ["google.com"]
+    src_region_codes         = ["US"]
     src_threat_intelligences = ["iplist-known-malicious-ips"]
 
     src_secure_tags {
@@ -38,8 +39,6 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
     layer4_configs {
       ip_protocol = "all"
     }
-
-    src_address_groups = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
   }
 }
 
@@ -52,6 +51,7 @@ resource "google_tags_tag_key" "basic_key" {
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   purpose     = "GCE_FIREWALL"
   short_name  = "{{index $.Vars "tag_key"}}"
+
   purpose_data = {
     network = "{{index $.TestEnvVars "project_name"}}/${google_compute_network.basic_network.name}"
   }
@@ -60,5 +60,5 @@ resource "google_tags_tag_key" "basic_key" {
 resource "google_tags_tag_value" "basic_value" {
   description = "For valuename resources."
   parent      = google_tags_tag_key.basic_key.id
-  short_name  = "tagvalue"
+  short_name  = "{{index $.Vars "tag_value"}}"
 }

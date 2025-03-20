@@ -11,7 +11,7 @@ on:
 jobs:
   reassign-reviewer:
     if: ${{ github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     env:
@@ -22,7 +22,7 @@ jobs:
         uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
         with:
           text: ${{ github.event.comment.body }}
-          regex: '^@modular-magician reassign-reviewer ?@?([a-zA-Z0-9-]+)?$'
+          regex: '(?:^|\n|\r)@modular-magician reassign-reviewer ?@?([a-zA-Z0-9-]+)?(?:$|\n|\r)'
       - name: Checkout Repository
         if: steps.read-comment.outputs.match != ''
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -42,4 +42,4 @@ jobs:
           go build .
       - name: Run command
         if: steps.read-comment.outputs.match != ''
-        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ steps.read-comment.outputs.match.group1 }}
+        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ github.event.comment.user.login }} ${{ steps.read-comment.outputs.group1 }}

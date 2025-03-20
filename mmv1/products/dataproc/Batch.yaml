@@ -65,13 +65,13 @@ examples:
     vars:
       dataproc_batch: 'dataproc-batch'
       prevent_destroy: 'true'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+      kms_key_name: 'example-key'
       bucket_name: 'dataproc-bucket'
     test_env_vars:
       project_name: 'PROJECT_NAME'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name'
     ignore_read_extra:
       - 'runtime_config.0.properties'
   - name: 'dataproc_batch_sparksql'

@@ -43,7 +43,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter_name}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter_name}}/{{resource}}'
 timeouts:
@@ -67,10 +67,15 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
+# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
 examples:
   - name: 'access_context_manager_service_perimeter_resource_basic'
     primary_resource_id: 'service-perimeter-resource'
@@ -96,3 +101,14 @@ properties:
       Format: projects/{project_number}
     required: true
     immutable: true
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of perimeter resources on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of resources. The resource to add or remove is merged into that list and then this etag is sent with the PATCH call along with the updated resource list.

@@ -67,6 +67,53 @@ func TestDurationDiffSuppress(t *testing.T) {
 	}
 }
 
+func TestProjectNumberDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"different project identifiers": {
+			Old:                "projects/1234/locations/abc/serviceAttachments/xyz",
+			New:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			ExpectDiffSuppress: true,
+		},
+		"different resources": {
+			Old:                "projects/1234/locations/abc/serviceAttachments/jkl",
+			New:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if ProjectNumberDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestProjectIDDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"different project identifiers": {
+			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			New:                "projects/1234/locations/abc/serviceAttachments/xyz",
+			ExpectDiffSuppress: true,
+		},
+		"different resources": {
+			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			New:                "projects/1234/locations/abc/serviceAttachments/jkl",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if ProjectIDDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
 func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Key, Old, New      string
@@ -163,6 +210,45 @@ func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 		}
 		if EmptyOrUnsetBlockDiffSuppressLogic(tc.Key, tc.New, tc.Old, tc.NewVal, tc.OldVal) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s (reverse check), '%s' => '%s' expect %t", tn, tc.New, tc.Old, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestBase64DiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"identical strings": {
+			Old:                "aGVsbG8=",
+			New:                "aGVsbG8=",
+			ExpectDiffSuppress: true,
+		},
+		"standard vs url safe": {
+			Old:                "hello+world/123==",
+			New:                "hello-world_123",
+			ExpectDiffSuppress: true,
+		},
+		"with line endings": {
+			Old:                "aGVs\nbG8=\r\n",
+			New:                "aGVsbG8=",
+			ExpectDiffSuppress: true,
+		},
+		"different content": {
+			Old:                "aGVsbG8=",
+			New:                "d29ybGQ=",
+			ExpectDiffSuppress: false,
+		},
+		"empty strings": {
+			Old:                "",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if Base64DiffSuppress("key", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
 }

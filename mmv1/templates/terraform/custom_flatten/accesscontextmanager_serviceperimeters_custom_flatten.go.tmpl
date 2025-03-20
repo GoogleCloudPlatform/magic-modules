@@ -154,6 +154,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressP
 		transformed.Add(map[string]interface{}{
 			"ingress_from": flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressFrom(original["ingressFrom"], d, config),
 			"ingress_to":   flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesIngressTo(original["ingressTo"], d, config),
+			"title": flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesTitle(original["title"], d, config),
 		})
 	}
 	return transformed
@@ -287,6 +288,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressP
 	return v
 }
 
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusIngressPoliciesTitle(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v;
+}
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPolicies(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
@@ -302,6 +307,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPo
 		transformed = append(transformed, map[string]interface{}{
 			"egress_from": flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFrom(original["egressFrom"], d, config),
 			"egress_to":   flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressTo(original["egressTo"], d, config),
+			"title": flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesTitle(original["title"], d, config),
 		})
 	}
 	return transformed
@@ -350,11 +356,16 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPo
 		}
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesAccessLevel(original["accessLevel"], d, config),
+			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesResource(original["resource"], d, config),
 		})
 	}
 	return transformed
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesAccessLevel(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesEgressFromSourcesResource(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
@@ -446,6 +457,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPo
 	return v
 }
 
+func flattenAccessContextManagerServicePerimetersServicePerimetersStatusEgressPoliciesTitle(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v;
+}
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpec(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
@@ -531,6 +546,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPol
 		transformed = append(transformed, map[string]interface{}{
 			"ingress_from": flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressFrom(original["ingressFrom"], d, config),
 			"ingress_to":   flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesIngressTo(original["ingressTo"], d, config),
+			"title": flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesTitle(original["title"], d, config),
 		})
 	}
 	return transformed
@@ -664,6 +680,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPol
 	return v
 }
 
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecIngressPoliciesTitle(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPolicies(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
@@ -679,6 +699,7 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 		transformed = append(transformed, map[string]interface{}{
 			"egress_from": flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFrom(original["egressFrom"], d, config),
 			"egress_to":   flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressTo(original["egressTo"], d, config),
+			"title": flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesTitle(original["title"], d, config),
 		})
 	}
 	return transformed
@@ -727,11 +748,16 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 		}
 		transformed = append(transformed, map[string]interface{}{
 			"access_level": flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesAccessLevel(original["accessLevel"], d, config),
+			"resource":     flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesResource(original["resource"], d, config),
 		})
 	}
 	return transformed
 }
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesAccessLevel(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressFromSourcesResource(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 
@@ -820,6 +846,10 @@ func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoli
 }
 
 func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesEgressToOperationsMethodSelectorsPermission(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flattenAccessContextManagerServicePerimetersServicePerimetersSpecEgressPoliciesTitle(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
 

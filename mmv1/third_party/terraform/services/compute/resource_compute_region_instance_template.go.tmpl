@@ -455,13 +455,8 @@ Google Cloud KMS.`,
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							{{- if eq $.TargetVersionName `ga` }}
-							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET"}, false),
-							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET`,
-							{{- else }}
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "MRDMA", "IRDMA"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, MRDMA, and IRDMA`,
-							{{- end }}
 						},
 						"access_config": {
 							Type:        schema.TypeList,
@@ -524,7 +519,7 @@ Google Cloud KMS.`,
 							Optional:     true,
 							Computed:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6", ""}, false),
+							ValidateFunc: validation.StringInSlice([]string{"IPV4_ONLY", "IPV4_IPV6","IPV6_ONLY", ""}, false),
 							Description:  `The stack type for this network interface to identify whether the IPv6 feature is enabled or not. If not specified, IPV4_ONLY will be used.`,
 						},
 
@@ -538,6 +533,7 @@ Google Cloud KMS.`,
 						"ipv6_access_config": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							ForceNew:    true,
 							Description: `An array of IPv6 access configurations for this interface. Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig specified, then this instance will have no external IPv6 Internet access.`,
 							Elem: &schema.Resource{
@@ -687,6 +683,15 @@ Google Cloud KMS.`,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
+						"termination_time": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description: `Specifies the timestamp, when the instance will be terminated,
+in RFC3339 text format. If specified, the instance termination action
+will be performed at the termination time.`,
+						},
 						"availability_domain": {
 							Type:          schema.TypeInt,
 							Optional:      true,
@@ -784,6 +789,53 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+{{ if ne $.TargetVersionName `ga` }}
+						"graceful_shutdown": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Settings for the instance to perform a graceful shutdown.`,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										ForceNew:    true,
+										Description: `Opts-in for graceful shutdown.`,
+									},
+									"max_duration": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Description: `The time allotted for the instance to gracefully shut down.
+										If the graceful shutdown isn't complete after this time, then the instance
+										transitions to the STOPPING state.`,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+													ForceNew: true,
+													Description: `Span of time at a resolution of a second.
+													The value must be between 1 and 3600, which is 3,600 seconds (one hour).`,
+												},
+												"nanos": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													ForceNew: true,
+													Description: `Span of time that's a fraction of a second at nanosecond
+													resolution. Durations less than one second are represented
+													with a 0 seconds field and a positive nanos field. Must
+													be from 0 to 999,999,999 inclusive.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+{{- end }}
 					},
 				},
 			},
@@ -1411,6 +1463,18 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 	}
 	if instanceProperties.Scheduling != nil {
 		scheduling := flattenScheduling(instanceProperties.Scheduling)
+{{ if ne $.TargetVersionName `ga` }}
+		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+		// To avoid diff, we need to set the value from the state not from API response.
+		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+			graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+			max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+			max_duration["nanos"] = int64(nanos.(int))
+
+			graceful_shutdown["max_duration"] = []interface{}{max_duration}
+			scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		}
+{{- end }}
 		if err = d.Set("scheduling", scheduling); err != nil {
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}
