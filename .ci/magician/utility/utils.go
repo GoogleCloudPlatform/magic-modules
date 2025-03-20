@@ -87,15 +87,32 @@ func makeHTTPRequest(url, method, credentials string, body any) (*http.Response,
 
 // processResponse handles the response and unmarshals it to the result if provided
 func processResponse(resp *http.Response, respBodyBytes []byte, result any) error {
-	// Decode the response, if needed
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var errorResponse struct {
+			Message string `json:"message"`
+			Error   string `json:"error"`
+		}
+
+		if err := json.Unmarshal(respBodyBytes, &errorResponse); err == nil {
+			errorMsg := errorResponse.Message
+			if errorMsg == "" {
+				errorMsg = errorResponse.Error
+			}
+
+			if errorMsg != "" {
+				return fmt.Errorf("got code %d from server: %s", resp.StatusCode, errorMsg)
+			}
+		}
+
+		// Fall back to generic error if we couldn't parse the error message
+		return fmt.Errorf("got code %d from server", resp.StatusCode)
+	}
+
+	// If no error status code, decode the response if needed
 	if result != nil {
 		if err := json.Unmarshal(respBodyBytes, &result); err != nil {
 			return err
 		}
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("got code %d from server", resp.StatusCode)
 	}
 
 	return nil
