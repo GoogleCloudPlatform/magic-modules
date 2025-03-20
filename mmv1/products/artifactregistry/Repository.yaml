@@ -54,6 +54,10 @@ custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
   pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us"
 examples:
   - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
@@ -207,6 +211,12 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_vulnerability_scanning'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository with vulnerability scanning config'
 parameters:
   - name: 'repository_id'
     type: String
@@ -294,6 +304,7 @@ properties:
       Provides additional configuration details for repositories of the maven
       format type.
     allow_empty_object: true
+    diff_suppress_func: 'emptyMavenConfigDiffSuppress'
     properties:
       # Maven properties.
       - name: 'allowSnapshotOverwrites'
@@ -362,6 +373,7 @@ properties:
     key_name: 'id'
     key_description: |-
       The policy ID. Must be unique within a repository.
+    set_hash_func: 'mapHashID'
     value_type:
       name: cleanupPolicies
       type: NestedObject
@@ -410,12 +422,14 @@ properties:
               type: String
               description: |-
                 Match versions older than a duration.
-              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
             - name: 'newerThan'
               type: String
               description: |-
                 Match versions newer than a duration.
-              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
         - name: 'mostRecentVersions'
           type: NestedObject
           description: |-
@@ -736,3 +750,30 @@ properties:
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.
+  - name: 'vulnerabilityScanningConfig'
+    type: NestedObject
+    description: |-
+      Configuration for vulnerability scanning of artifacts stored in this repository.
+    default_from_api: true
+    properties:
+      - name: 'enablementConfig'
+        type: Enum
+        description: |-
+          This configures whether vulnerability scanning is automatically performed for artifacts pushed to this repository.
+        enum_values:
+          - 'INHERITED'
+          - 'DISABLED'
+      - name: 'enablementState'
+        type: Enum
+        description: |-
+          This field returns whether scanning is active for this repository.
+        output: true
+        enum_values:
+          - 'SCANNING_UNSUPPORTED'
+          - 'SCANNING_DISABLED'
+          - 'SCANNING_ACTIVE'
+      - name: 'enablementStateReason'
+        type: String
+        description: |-
+          This provides an explanation for the state of scanning on this repository.
+        output: true

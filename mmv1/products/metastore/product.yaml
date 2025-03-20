@@ -13,7 +13,7 @@
 
 ---
 name: 'DataprocMetastore'
-display_name: 'Dataproc metastore'
+display_name: 'Dataproc Metastore'
 versions:
   - name: 'beta'
     base_url: 'https://metastore.googleapis.com/v1beta/'

@@ -1,0 +1,39 @@
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_security_intercept_deployment_group" "default" {
+  provider                      = google-beta
+  intercept_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
+  location                      = "global"
+  network                       = google_compute_network.default.id
+}
+
+resource "google_network_security_intercept_endpoint_group" "default" {
+  provider                      = google-beta
+  intercept_endpoint_group_id   = "{{index $.Vars "endpoint_group_id"}}"
+  location                      = "global"
+  intercept_deployment_group    = google_network_security_intercept_deployment_group.default.id
+}
+
+resource "google_network_security_security_profile" "default" {
+  provider    = google-beta
+  name        = "{{index $.Vars "security_profile_name"}}"
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description = "my description"
+  type        = "CUSTOM_INTERCEPT"
+
+  custom_intercept_profile {
+    intercept_endpoint_group = google_network_security_intercept_endpoint_group.default.id
+  }
+}
+
+resource "google_network_security_security_profile_group" "{{$.PrimaryResourceId}}" {
+  provider                 = google-beta
+  name                     = "{{index $.Vars "security_profile_group_name"}}"
+  parent                   = "organizations/{{index $.TestEnvVars "org_id"}}"
+  description              = "my description"
+  custom_intercept_profile = google_network_security_security_profile.default.id
+}

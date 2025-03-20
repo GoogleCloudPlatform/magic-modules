@@ -44,8 +44,10 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_standard'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network'
   - name: 'vmware_engine_network_legacy'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network'
     vars:
       proj_id: 'vmw-proj'

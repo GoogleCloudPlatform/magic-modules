@@ -154,6 +154,7 @@ resource "google_data_fusion_instance" "foobar" {
 }
 
 func TestAccDataFusionInstanceVersion_dataFusionInstanceUpdate(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/20574")
 	t.Parallel()
 
 	context := map[string]interface{}{

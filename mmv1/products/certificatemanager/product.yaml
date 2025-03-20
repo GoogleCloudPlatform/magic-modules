@@ -13,7 +13,7 @@
 
 ---
 name: 'CertificateManager'
-display_name: 'Certificate manager'
+display_name: 'Certificate Manager'
 versions:
   - name: 'beta'
     base_url: 'https://certificatemanager.googleapis.com/v1/'

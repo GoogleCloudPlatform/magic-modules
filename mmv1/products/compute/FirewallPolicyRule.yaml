@@ -29,6 +29,7 @@ update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?pri
 update_verb: 'POST'
 delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
 delete_verb: 'POST'
+legacy_long_form_project: true
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
   - '{{firewall_policy}}/{{priority}}'
@@ -44,14 +45,23 @@ custom_code:
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
 examples:
   - name: 'firewall_policy_rule'
-    primary_resource_id: 'policy_rule'
+    primary_resource_id: 'primary'
     vars:
-      fw_policy: 'policy'
-      address: 'address'
+      address_group: 'address-group'
       folder: 'folder'
+      fw_policy: 'fw-policy'
     test_env_vars:
       org_id: 'ORG_ID'
-      service_account: 'SERVICE_ACCT'
+      service_acct: 'SERVICE_ACCT'
+  - name: 'firewall_policy_rule_network_scope'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      network: 'network'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -106,6 +116,33 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
+      - name: 'srcNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic source.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+      - name: 'srcNetworks'
+        type: Array
+        description: |
+          Networks of the traffic source. It can be either a full or partial url.
+        min_version: beta
+        item_type:
+          type: String
+      - name: 'destNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic destination.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

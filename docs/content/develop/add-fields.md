@@ -186,7 +186,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 
 2. Modify the field configuration according to the API documentation and behavior.
 
-> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field-reference" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
+> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Add the field to the handwritten resource's schema.

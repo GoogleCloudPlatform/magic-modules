@@ -61,9 +61,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
-    # Need the time_sleep resource
-    # Currently failing
-    skip_vcr: true
 parameters:
   - name: 'location'
     type: String

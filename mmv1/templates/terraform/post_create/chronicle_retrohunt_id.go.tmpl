@@ -1,0 +1,12 @@
+metadata := res["metadata"].(map[string]interface{})
+retrohunt := metadata["retrohunt"].(string)
+parts := strings.Split(retrohunt, "/")
+retrohunt_id := parts[len(parts)-1]
+
+log.Printf("[DEBUG] Setting retrohunt id to %s", retrohunt_id) 
+
+// retrohunt value is set by API response and required to GET the connection
+// it is set by extracting id from the "retrohunt" field in the response metadata rather than a field in the response
+if err := d.Set("retrohunt", retrohunt_id); err != nil {
+	return fmt.Errorf("Error reading Retrohunt ID: %s", err)
+}

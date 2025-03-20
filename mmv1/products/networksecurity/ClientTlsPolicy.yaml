@@ -43,6 +43,9 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_security_client_tls_policy_basic'
     primary_resource_id: 'default'
