@@ -352,6 +352,33 @@ func TestAccDataprocCluster_withMetadataAndTags(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	randString := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withResourceManagerTags(randString, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.name", "wrench"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.mass", "1.3kg"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.count", "3"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withMinNumInstances(t *testing.T) {
 	t.Parallel()
 
@@ -1676,6 +1703,28 @@ resource "google_dataproc_cluster" "basic" {
   }
 }
 `, rnd, subnetworkName)
+}
+
+func testAccDataprocCluster_withResourceManagerTags(randString, subnetworkName string) string {
+	return fmt.Sprintf(`
+	resource "google_dataproc_cluster" "basic" {
+	name   = "tf-test-dataproc-%s"
+	region = "us-central1"
+
+	cluster_config {
+		gce_cluster_config {
+		subnetwork = "%s"
+		zone = "us-central1-a"
+
+		resource_manager_tags = {
+			name  = "wrench"
+			mass  = "1.3kg"
+			count = "3"
+		}
+		}
+	}
+	}
+	`, randString, subnetworkName)
 }
 
 func testAccDataprocCluster_withMinNumInstances(rnd, subnetworkName string) string {
