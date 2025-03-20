@@ -81,16 +81,19 @@ properties:
     type: String
     description: |
       URL of the Zone where this future reservation resides.
+    #Good
     output: true
   - name: 'creationTimestamp'
     type: Time
     description: |
       The creation timestamp for this future reservation in RFC3339 text format.
+    #Good
     output: true
   - name: 'selfLinkWithId'
     type: String
     description: |
       Server-defined URL for this resource with the resource id.
+    #Good
     output: true
   - name: 'description'
     type: String
@@ -176,35 +179,29 @@ properties:
         type: Enum
         description: |
           Current state of this Future Reservation
-        output: true
       - name: 'lockTime'
         type: String
         description: |
           Time when Future Reservation would become LOCKED, after which no modifications to Future Reservation will be allowed. Applicable only after the Future Reservation is in the APPROVED state. The lockTime is an RFC3339 string. The procurementStatus will transition to PROCURING state at this time.
-        output: true #check
       - name: 'autoCreatedReservations'
         type: Array
         description: |
           Fully qualified urls of the automatically created reservations at startTime.
         item_type: 
           type: String
-        output: true
       - name: 'fulfilledCount'
         type: String
         description: | 
           This count indicates the fulfilled capacity so far. This is set during "PROVISIONING" state. This count also includes capacity delivered as part of existing matching reservations.
-        output: true
       - name: 'specificSkuProperties'
         type: NestedObject
         description: | 
           Instance properties related to the Future Reservation.
-        output: true
         properties:
           - name: 'sourceInstanceTemplateId'
             type: String
             description: |
               ID of the instance template used to populate the Future Reservation properties.
-            output: true
       #Enum values are listed in docs, TODO
       - name: 'amendmentStatus'
         type: Enum
@@ -221,7 +218,6 @@ properties:
             type: NestedObject
             description: |
               The previous instance-related properties of the Future Reservation.
-            output: true
             properties:
               - name: 'specificSkuProperties'
                 type: NestedObject
@@ -233,18 +229,15 @@ properties:
                     type: NestedObject
                     description: |
                       Properties of the SKU instances being reserved.
-                    output: true
                     properties:
                       - name: 'machineType'
                         type: String
                         description: |
                           Specifies type of machine (name only) which has fixed number of vCPUs and fixed amount of memory. This also includes specifying custom machine type following custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY pattern.
-                        output: true
                       - name: 'guestAccelerators'
                         type: Array
                         description: |
                           Specifies accelerator type and count.
-                        output: true
                         item_type:
                           type: NestedObject
                           properties:
@@ -256,17 +249,14 @@ properties:
                               type: Integer
                               description: |
                                 The number of the guest accelerator cards exposed to this instance.
-                              output: true
                       - name: 'minCpuPlatform'
                         type: String
                         description: | 
                           Minimum CPU platform for the reservation.
-                        output: true
                       - name: 'localSsds'
                         type: Array
                         description: |
                           Specifies amount of local ssd to reserve with each instance. The type of disk is local-ssd.
-                        output: true
                         item_type:
                           type: NestedObject
                           properties:
@@ -274,12 +264,10 @@ properties:
                               type: String
                               description: |
                                 Specifies the size of the disk in base-2 GB.
-                              output: true
                             - name: 'interface'
                               type: Enum
                               description: |
                                 Specifies the disk interface to use for attaching this disk, which is either SCSI or NVME. The default is SCSI.
-                              output: true
                               enum_values:
                                 - 'SCSI'
                                 - 'NVME'
@@ -287,29 +275,24 @@ properties:
                         type: Integer
                         description: |
                           Specifies the number of hours after reservation creation where instances using the reservation won't be scheduled for maintenance.
-                        output: true
                       - name: 'locationHint'
                         type: String
                         description: |
                           An opaque location hint used to place the allocation close to other resources. This field is for use by internal tools that use the public API.
-                        output: true
                       - name: 'maintenanceInterval'
                         type: Enum
                         description: |
                           Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC.
-                        output: true
                         enum_values:
                           - 'PERIODIC'
                   - name: 'totalCount'
                     type: String
                     description: |
                       Total number of instances for which capacity assurance is requested at a future time period.
-                    output: true
                   - name: 'sourceInstanceTemplate'
                     type: String
                     description: |
                       The instance template that will be used to populate the ReservedInstanceProperties of the future reservation
-                    output: true
               - name: 'timeWindow'
                 type: NestedObject
                 description: |
@@ -325,12 +308,10 @@ properties:
                     type: String
                     description: |
                       End time of the Future Reservation in RFC3339 format.
-                    output: true
                   - name: 'duration'
                     type: NestedObject
                     description: |
                       Specifies the duration of the reservation.
-                    output: true
                     properties:
                       - name: 'seconds'
                         type: String
@@ -340,7 +321,6 @@ properties:
                         type: Integer
                         description: |
                           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
-                        output: true
               - name: 'shareSettings'
                 type: NestedObject
                 description: |
@@ -352,19 +332,16 @@ properties:
                     type: Enum
                     description: |
                       Type of sharing for this shared-reservation
-                    output: true
                   - name: 'projects'
                     type: Array
                     description: |
                       A futureReservations.list of Project names to specify consumer projects for this shared-reservation. This is only valid when shareType's value is SPECIFIC_PROJECTS.
                     item_type: 
                       type: String
-                    output: true
                   - name: 'projectMap'
                     type: Map
                     description: |
                       A map of project id and project config. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-                    output: true
                     value_type:
                       name: 'projectConfig'
                       type: NestedObject
@@ -373,7 +350,6 @@ properties:
                           type: String
                           description: |
                             The project ID, should be same as the key of this project config in the parent map.
-                          output: true
           - name: 'procurementStatus'    
             type: Enum
             description: |
@@ -404,53 +380,43 @@ properties:
                 type: String
                 description: |
                   Count representing minimum(FR totalCount, matching_reserved_capacity+matching_unreserved_instances).
-                output: true
               - name: 'timeStamp'
                 type: String
                 description: |
                   Timestamp when the matching usage was calculated.
-                output: true
   - name: 'planningStatus'
     type: Enum
     description: |
       Planning state before being submitted for evaluation
-    output: true
   - name: 'autoDeleteAutoCreatedReservations'
     type: Boolean
     description: |
       Setting for enabling or disabling automatic deletion for auto-created reservation. If set to true, auto-created reservations will be deleted at Future Reservation's end time (default) or at user's defined timestamp if any of the [autoCreatedReservationsDeleteTime, autoCreatedReservationsDuration] values is specified. For keeping auto-created reservation indefinitely, this value should be set to false.
-    output: true
   - name: 'specificReservationRequired'
     type: Boolean
     description: |
       Indicates whether the auto-created reservation can be consumed by VMs with affinity for "any" reservation. If the field is set, then only VMs that target the reservation by name can consume from the delivered reservation.
-    output: true
   - name: 'reservationName'
     type: String
     description: |
       Name of reservations where the capacity is provisioned at the time of delivery of future reservations. If the reservation with the given name does not exist already, it is created automatically at the time of Approval with INACTIVE state till specified start-time. Either provide the reservationName or a namePrefix.
-    output: true
   - name: 'deploymentType'
     type: Enum
     description: |
       Type of the deployment requested as part of future reservation.
-    output: true
   - name: 'commitmentInfo'
     type: NestedObject
     description: |
       If not present, then FR will not deliver a new commitment or update an existing commitment.
-    output: true
     properties:
       - name: 'commitmentPlan'
         type: Enum
         description: |
           Indicates if a Commitment needs to be created as part of FR delivery. If this field is not present, then no commitment needs to be created.
-        output: true
       - name: 'commitmentName'
         type: String
         description: |
           name of the commitment where capacity is being delivered to.
-        output: true
       - name: 'previousCommitmentTerms'
         type: Enum
         description: |
@@ -459,7 +425,6 @@ properties:
     type: Enum
     description: |
       Maintenance information for this reservation
-    output: true
   - name: 'specificSkuProperties'
     type: NestedObject
     description: |
@@ -538,12 +503,10 @@ properties:
     type: String
     description: |
       Future timestamp when the FR auto-created reservations will be deleted by Compute Engine.
-    output: true
   - name: 'autoCreatedReservationsDuration'
     type: NestedObject
     description: |
       Specifies the duration of auto-created reservations. It represents relative time to future reservation startTime when auto-created reservations will be automatically deleted by Compute Engine. Duration time unit is represented as a count of seconds and fractions of seconds at nanosecond resolution.
-    output: true
     properties:
       - name: 'seconds'
         type: String
