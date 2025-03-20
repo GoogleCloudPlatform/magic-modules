@@ -143,10 +143,9 @@ func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) erro
 		"sha":          commitSha,
 	})
 
-	// Check if the error is "Merge already in progress" (405)
 	if err != nil {
+		// Check if the error is "Merge already in progress" (405)
 		if strings.Contains(err.Error(), "Merge already in progress") {
-			// Consider this a success case
 			fmt.Printf("Pull request %s is already being merged\n", prNumber)
 			return nil
 		}

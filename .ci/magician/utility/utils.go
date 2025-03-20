@@ -87,16 +87,13 @@ func makeHTTPRequest(url, method, credentials string, body any) (*http.Response,
 
 // processResponse handles the response and unmarshals it to the result if provided
 func processResponse(resp *http.Response, respBodyBytes []byte, result any) error {
-	// Check for error status codes first
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		// Try to extract error message from response body
 		var errorResponse struct {
 			Message string `json:"message"`
 			Error   string `json:"error"`
 		}
 
 		if err := json.Unmarshal(respBodyBytes, &errorResponse); err == nil {
-			// Choose the first non-empty error message
 			errorMsg := errorResponse.Message
 			if errorMsg == "" {
 				errorMsg = errorResponse.Error
