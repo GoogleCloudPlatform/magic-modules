@@ -579,10 +579,7 @@ func (c *Config) getExternalAccountConfig(clientScopes []string) externalaccount
 	eaConfig := externalaccount.Config{
 		Audience:         c.ExternalCredentials.Audience,
 		SubjectTokenType: "urn:ietf:params:oauth:token-type:jwt",
-		// Is ServiceAccountImpersonationURL affected by Universe Domain?
 		ServiceAccountImpersonationURL: fmt.Sprintf("https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:generateAccessToken", c.ExternalCredentials.ServiceAccountEmail),
-		// ServiceAccountImpersonationLifetimeSeconds ??
-		// QuotaProjectID ??
 		Scopes:               clientScopes,
 		SubjectTokenSupplier: c.ExternalCredentials,
 	}

@@ -14,22 +14,21 @@ Apart from using `access_token` and `credential` fields in the provider configur
 
 A Terraform Stacks Project requires the following:
 
-- A Workload Identity Federation (WIF) provider
+- A Workload Identity Federation (WIF) provider to authenticate Terraform Stacks
 - Components - `components.tfstacks.hcl`
 - Deployment - `deployments.tfdeploy.hcl`
 
 ## Generating the Workload Identity Federation (WIF) credentials
 
-```hcl
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "6.25.0"
-    }
-  }
-}
+In the case of Stacks, we need to create the both the workload identity pool and the pool provider in order for Terraform Stacks to authenticate.
 
+Required variables:
+
+- `project_id` - The GCP project ID
+- `tfc_organization` - The Terraform Cloud organization
+- `tfc_stacks_project` - The Terraform Cloud project
+
+```hcl
 provider "google" {
   region = "global"
 }
@@ -39,6 +38,16 @@ variable "project_id" {
   description = "GCP Project ID"
 }
 
+variable "tfc_organization" {
+  type        = string
+  description = "Terraform Cloud Organization"
+}
+
+variable "tfc_stacks_project" {
+  type        = string
+  description = "Terraform Cloud Project"
+}
+
 # Create a service account for Terraform Stacks
 resource "google_service_account" "terraform_stacks_sa" {
   account_id   = "terraform-stacks-sa"
@@ -46,10 +55,28 @@ resource "google_service_account" "terraform_stacks_sa" {
   description  = "Service account used by Terraform Stacks for GCP resources"
 }
 
-# Create Workload Identity Pool
+# Enable required APIs for workload identity federation
+locals {
+  gcp_service_list = [
+    "sts.googleapis.com",
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com"
+  ]
+}
+
+resource "google_project_service" "services" {
+  for_each                   = toset(local.gcp_service_list)
+  project                    = var.project_id
+  service                    = each.key
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+# Create Workload Identity Pool (reference google_project_service to ensure APIs are enabled)
 resource "google_iam_workload_identity_pool" "terraform_stacks_pool" {
-  workload_identity_pool_id = "terraform-stacks-pool"
-  display_name              = "Terraform Stacks Pool"
+  depends_on = [google_project_service.services]
+  workload_identity_pool_id = "terraform-stacks-pool-3"
+  display_name              = "Terraform Stacks Pool-3"
   description               = "Identity pool for Terraform Stacks authentication"
 }
 
@@ -61,32 +88,43 @@ resource "google_iam_workload_identity_pool_provider" "terraform_stacks_provider
   description                        = "OIDC identity pool provider for Terraform Stacks"
   
   attribute_mapping = {
-    "google.subject"       = "assertion.sub"
-    "attribute.actor"      = "assertion.actor"
-    "attribute.repository" = "assertion.repository"
-    "attribute.aud"        = "assertion.aud"
+    "google.subject"                            = "assertion.sub", # WARNING - this value is has to be <=127 bytes, and is "organization:<ORG NAME>:project:<PROJ NAME>:stack:<STACK NAME>:deployment:development:operation:plan
+    "attribute.aud"                             = "assertion.aud",
+    "attribute.terraform_operation"             = "assertion.terraform_operation",
+    "attribute.terraform_project_id"            = "assertion.terraform_project_id",
+    "attribute.terraform_project_name"          = "assertion.terraform_project_name",
+    "attribute.terraform_stack_id"              = "assertion.terraform_stack_id",
+    "attribute.terraform_stack_name"            = "assertion.terraform_stack_name",
+    "attribute.terraform_stack_deployment_name" = "assertion.terraform_stack_deployment_name",
+    "attribute.terraform_organization_id"       = "assertion.terraform_organization_id",
+    "attribute.terraform_organization_name"     = "assertion.terraform_organization_name",
+    "attribute.terraform_run_id"                = "assertion.terraform_run_id",
   }
-
   oidc {
-    issuer_uri = "https://token.actions.githubusercontent.com"
-    allowed_audiences = ["https://iam.googleapis.com/${google_iam_workload_identity_pool.terraform_stacks_pool.name}"]
+    issuer_uri = "https://app.terraform.io"
+    allowed_audiences = ["hcp.workload.identity"]
   }
+  attribute_condition = "assertion.sub.startsWith(\"organization:${var.tfc_organization}:project:${var.tfc_stacks_project}:stack\")"
 }
 
-# Allow the Workload Identity Pool to impersonate the service account
-resource "google_service_account_iam_binding" "workload_identity_binding" {
+# Switch from binding to member for service account IAM
+resource "google_service_account_iam_member" "workload_identity_user" {
   service_account_id = google_service_account.terraform_stacks_sa.name
   role               = "roles/iam.workloadIdentityUser"
-  
-  members = [
-    "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.terraform_stacks_pool.name}/*"
-  ]
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.terraform_stacks_pool.name}/*"
 }
 
-# Grant Storage Admin role to the service account (for bucket operations)
-resource "google_project_iam_member" "sa_storage_admin" {
+# Grant additional permissions to the service account
+resource "google_project_iam_member" "sa_more_permissions" {
   project = var.project_id
-  role    = "roles/storage.admin"
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.terraform_stacks_sa.email}"
+}
+
+# Grant editor role to the service account (similar to reference implementation)
+resource "google_project_iam_member" "sa_editor" {
+  project = var.project_id
+  role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.terraform_stacks_sa.email}"
 }
 
@@ -97,12 +135,20 @@ output "service_account_email" {
 }
 
 output "audience" {
-  value       = "https://iam.googleapis.com/${google_iam_workload_identity_pool.terraform_stacks_pool.name}"
+  value       = "//iam.googleapis.com/${google_iam_workload_identity_pool_provider.terraform_stacks_provider.name}"
   description = "The audience value to use when generating OIDC tokens"
 }
 ```
 
+The both output values `service_account_email` and `audience` will be used to authenticate Terraform Stacks.
+
 ## Terraform Stacks Setup with External Credentials
+
+Initially you'll want to link your [Terraform Project to the desired Stack through VCS](https://developer.hashicorp.com/terraform/cloud-docs/stacks/create#requirements).
+
+Afterwards, you'll want to setup Terraform Stacks with the use of external credentials. A simple configuration is shown below. Check out the [Terraform Stacks Overview](https://developer.hashicorp.com/terraform/language/stacks) for more information.
+
+Upon setup, you'll now be able to provision GCP resources through Terraform Stacks.
 
 `deployments.tfdeploy.hcl`
 ```hcl
@@ -127,10 +173,12 @@ required_providers {
 }
 
 provider "google" "this" {
-  external_credentials {
-    audience = "//iam.googleapis.com/projects/871647908372/locations/global/workloadIdentityPools/stacks-oidc-myz3/providers/stacks-oidc-myz3"
-    service_account_email = "stacks-oidc-myz3@hc-terraform-testing.iam.gserviceaccount.com"
-    identity_token = var.jwt
+  config {
+    external_credentials {
+      audience = output.audience // audience from WIF
+      service_account_email = output.service_account_email // service account created from WIF
+      identity_token = var.jwt
+    }
   }
 }
 
