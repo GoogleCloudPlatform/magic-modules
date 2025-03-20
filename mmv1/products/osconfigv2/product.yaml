@@ -12,12 +12,13 @@
 # limitations under the License.
 
 ---
-name: FirebaseAppHosting
-display_name: Firebase App Hosting
-scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+name: 'OSConfigV2'
+display_name: 'OS Config v2'
 versions:
-  - base_url: https://firebaseapphosting.googleapis.com/v1beta/
-    name: beta
-  - base_url: https://firebaseapphosting.googleapis.com/v1/
-    name: ga
+  - name: 'ga'
+    base_url: 'https://osconfig.googleapis.com/v2/'
+  - name: 'beta'
+    base_url: 'https://osconfig.googleapis.com/v2beta/'
+scopes:
+  - 'https://www.googleapis.com/auth/cloud-platform'
+  - 'https://www.googleapis.com/auth/compute'
