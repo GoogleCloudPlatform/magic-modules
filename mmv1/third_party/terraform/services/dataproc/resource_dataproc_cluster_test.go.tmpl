@@ -370,9 +370,7 @@ func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
 				Config: testAccDataprocCluster_withResourceManagerTags(randString, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.name", "wrench"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.mass", "1.3kg"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.count", "3"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.tagKeys/281483279496796", "tagValues/281481166421903"),
 				),
 			},
 		},
@@ -1717,9 +1715,7 @@ func testAccDataprocCluster_withResourceManagerTags(randString, subnetworkName s
 		zone = "us-central1-a"
 
 		resource_manager_tags = {
-			name  = "wrench"
-			mass  = "1.3kg"
-			count = "3"
+			"tagKeys/281483279496796" = "tagValues/281481166421903"
 		}
 		}
 	}
