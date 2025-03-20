@@ -44,8 +44,6 @@
 		return err
 	}
 
-	url = strings.ReplaceAll(url, "storage/v1", "v2")
-
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "PATCH",
