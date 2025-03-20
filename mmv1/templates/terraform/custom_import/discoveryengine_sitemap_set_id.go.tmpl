@@ -1,20 +1,24 @@
 config := meta.(*transport_tpg.Config)
-if err := tpgresource.ParseImportId([]string{
-  "^projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/collections/default_collection/dataStores/(?P<data_store_id>[^/]+)/siteSearchEngine/sitemaps/(?P<sitemap_id>[^/]+)$",
-}, d, config); err != nil {
-  return nil, err
+// current import_formats can't import fields with forward slashes in their value
+if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	return nil, err
 }
-
-// Set name based on the components
-if err := d.Set("name", "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/collections/default_collection/dataStores/{{"{{"}}data_store_id{{"}}"}}/siteSearchEngine/sitemaps/{{"{{"}}sitemap_id{{"}}"}}"); err != nil {
-  return nil, fmt.Errorf("Error setting name: %s", err)
+re := regexp.MustCompile("^projects/([^/]+)/locations/([^/]+)/collections/default_collection/dataStores/([^/]+)/siteSearchEngine/sitemaps/([^/]+)$")
+match := re.FindStringSubmatch(d.Get("name").(string))
+if len(match) > 0 {
+	if err := d.Set("project", match[1]); err != nil {
+		return nil, fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("location", match[2]); err != nil {
+		return nil, fmt.Errorf("Error setting location: %s", err)
+	}
+	if err := d.Set("data_store_id", match[3]); err != nil {
+		return nil, fmt.Errorf("Error setting data_store_id: %s", err)
+	}
+} else {
+	return nil, fmt.Errorf("import did not match the regex ^projects/([^/]+)/locations/([^/]+)/collections/default_collection/dataStores/([^/]+)/siteSearchEngine/sitemaps/([^/]+)$")
 }
-
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, d.Get("name").(string))
-if err != nil {
-  return nil, fmt.Errorf("Error constructing id: %s", err)
-}
+id := d.Get("name").(string)
 d.SetId(id)
-
 return []*schema.ResourceData{d}, nil
