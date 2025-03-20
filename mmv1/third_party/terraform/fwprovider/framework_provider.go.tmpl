@@ -267,7 +267,7 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                                 fwvalidators.ServiceAccountEmailValidator{},
                             },
                         },
-                        "identity_token_file": schema.StringAttribute{
+                        "identity_token": schema.StringAttribute{
                             Required: true,
                             Validators: []validator.String{
                                 fwvalidators.JWTValidator(),

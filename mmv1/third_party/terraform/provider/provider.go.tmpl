@@ -64,7 +64,7 @@ func Provider() *schema.Provider {
 							Required: true,
 							ValidateFunc: ValidateServiceAccountEmail,
 						},
-						"identity_token_file": {
+						"identity_token": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: ValidateJWT,
@@ -286,11 +286,11 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	// Check for primary credentials in config. Note that if none of these values are set, ADCs
 	// will be used if available.
 	if v, ok := d.GetOk("external_credentials"); ok {
-		externalCredentials, err := transport_tpg.ExpandExternalCredentials(v)
+		external, err := transport_tpg.ExpandExternalCredentialsConfig(v)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		config.ExternalCredentials = externalCredentials
+		config.ExternalCredentials = external
 	} else {
 		if v, ok := d.GetOk("access_token"); ok {
 			config.AccessToken = v.(string)

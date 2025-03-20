@@ -130,7 +130,7 @@ provider "google" "this" {
   external_credentials {
     audience = "//iam.googleapis.com/projects/871647908372/locations/global/workloadIdentityPools/stacks-oidc-myz3/providers/stacks-oidc-myz3"
     service_account_email = "stacks-oidc-myz3@hc-terraform-testing.iam.gserviceaccount.com"
-    identity_token_file = "./identity_token"
+    identity_token = var.jwt
   }
 }
 

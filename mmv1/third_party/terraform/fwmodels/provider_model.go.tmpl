@@ -8,7 +8,7 @@ import (
 type ExternalCredentialsModel struct {
 	Audience            types.String `tfsdk:"audience"`
 	ServiceAccountEmail types.String `tfsdk:"service_account_email"`
-	IdentityTokenFile   types.String `tfsdk:"identity_token_file"`
+	IdentityToken       types.String `tfsdk:"identity_token"`
 }
 
 // ProviderModel maps provider schema data to a Go type.
