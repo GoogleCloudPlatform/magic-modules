@@ -172,6 +172,12 @@ func TestAccProviderEmptyStrings(t *testing.T) {
 func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
+	// Skip if not running in a acc test environment,
+	// as acc test environment variables needed to get accessToken 
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
+
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
 	credentials := envvar.GetTestCredsFromEnv()
 
