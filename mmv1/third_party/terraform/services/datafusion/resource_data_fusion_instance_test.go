@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package datafusion_test
 
 import (
@@ -238,7 +240,7 @@ func TestAccDatafusionInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccDatafusionInstanceTags(context map[string]interface{},tags map[string]string) string {
+func testAccDatafusionInstanceTags(context map[string]interface{}, tags map[string]string) string {
 
 	r := acctest.Nprintf(`
 	resource "google_data_fusion_instance" "instance" {
