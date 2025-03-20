@@ -36,7 +36,11 @@ examples:
 - name: 'contact_center_ai_insights_analysis_rule_basic'
   primary_resource_id: 'basic_analysis_rule'
   vars:
-    resource_name: 'basic-analysis-rule'
+    resource_name: 'basic_analysis_rule'
+- name: 'contact_center_ai_insights_analysis_rule_full'
+  primary_resource_id: 'basic_analysis_rule'
+  vars:
+    resource_name: 'basic_analysis_rule'
 parameters:
 - name: location
   type: String
