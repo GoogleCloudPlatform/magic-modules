@@ -102,6 +102,10 @@ examples:
     vars:
       source_connection_profile_id: 'source-profile'
     exclude_test: true
+  - name: 'datastream_connection_profile_postgres_secret_manager'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
 parameters:
   - name: 'connectionProfileId'
     type: String
