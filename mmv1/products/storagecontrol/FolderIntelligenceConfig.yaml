@@ -47,6 +47,14 @@ import_format:
 # the resource. If false, that code is not generated.
 autogen_async: false
 
+examples:
+  - name: storage_control_folder_intelligence_config_basic
+    primary_resource_id: example
+    vars:
+      folder_id: "12345678"
+    exclude_test: true
+    exclude_import_test: true
+
 properties:
   # Fields go here
   - name: 'name'
