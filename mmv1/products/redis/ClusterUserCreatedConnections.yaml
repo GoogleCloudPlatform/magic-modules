@@ -95,6 +95,7 @@ properties:
   - name: 'clusterEndpoints'
     type: Array
     description: "A list of cluster endpoints"
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_user_created_connections.go.tmpl'
     item_type:
       type: NestedObject
       description: |
