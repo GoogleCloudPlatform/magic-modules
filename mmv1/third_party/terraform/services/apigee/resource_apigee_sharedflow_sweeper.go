@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("ApigeeSharedFlow", testSweepApigeeSharedFlow)
+	sweeper.AddTestSweepersLegacy("ApigeeSharedFlow", testSweepApigeeSharedFlow)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

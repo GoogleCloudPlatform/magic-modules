@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("VmwareengineNetwork", testSweepVmwareengineNetwork)
+	sweeper.AddTestSweepersLegacy("VmwareengineNetwork", testSweepVmwareengineNetwork)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
