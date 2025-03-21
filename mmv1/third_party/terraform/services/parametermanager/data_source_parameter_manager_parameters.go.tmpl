@@ -152,6 +152,7 @@ func flattenParameterManagerParameterParameters(v interface{}, d *schema.Resourc
 			"update_time":      flattenParameterManagerParameterUpdateTime(original["updateTime"], d, config),
 			"policy_member":    flattenParameterManagerParameterPolicyMember(original["policyMember"], d, config),
 			"name":             flattenParameterManagerParameterName(original["name"], d, config),
+			"kms_key":          flattenParameterManagerParameterKmsKey(original["kmsKey"], d, config),
 			"project":          getDataFromName(original["name"], 1),
 			"parameter_id":     getDataFromName(original["name"], 5),
 		})

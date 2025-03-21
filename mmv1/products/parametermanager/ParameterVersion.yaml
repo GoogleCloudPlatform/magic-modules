@@ -44,6 +44,14 @@ examples:
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+  - name: 'parameter_version_with_kms_key'
+    primary_resource_id: 'parameter-version-with-kms-key'
+    vars:
+      parameter_id: 'parameter'
+      parameter_version_id: 'parameter_version'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
   - name: 'parameter_version_with_yaml_format'
     primary_resource_id: 'parameter-version-with-yaml-format'
     min_version: 'beta'
@@ -108,3 +116,9 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
+  - name: 'kmsKeyVersion'
+    type: String
+    output: true
+    description: |
+      The resource name of the Cloud KMS CryptoKeyVersion used to decrypt parameter version payload. Format
+      `projects/{{project}}/locations/global/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`
