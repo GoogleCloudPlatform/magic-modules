@@ -292,7 +292,7 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 				Config: testAccRedisCluster_automatedBackupConfig(context_enabled),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.cluster_abc",
+				ResourceName:      "google_redis_cluster.cluster_abc",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -300,7 +300,7 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 				Config: testAccRedisCluster_automatedBackupConfig(context_diabled),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.cluster_abc",
+				ResourceName:      "google_redis_cluster.cluster_abc",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
