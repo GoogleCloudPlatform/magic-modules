@@ -365,7 +365,7 @@ attributes – for a full reference, see
   Configuration files should reference this to avoid getting out of sync. For example:
   `resource "google_compute_address" ""{{$.PrimaryResourceId}}" {`
 - `bootstrap_iam`: specify member/role pairs that should always exist. `{project_number}` will be replaced with the
-  default project's project number. This avoids race conditions when modifying the IAM permissions for the default test project.
+  default project's project number, and `{organization_id}` will be replaced with the test organization's ID. This avoids race conditions when modifying the IAM permissions for the default test project.
   Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 - `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
   with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
@@ -397,6 +397,8 @@ examples:
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/osconfig.serviceAgent"
     vars:
       dataset_id: "my-dataset"
       network_name: "my-network"

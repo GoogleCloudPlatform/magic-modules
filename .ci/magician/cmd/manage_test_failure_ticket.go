@@ -87,6 +87,7 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client) error {
 		return err
 	}
 
+	// Remove review labels to forward test failure tickets
 	for _, issue := range issues {
 		_, err := gh.Issues.RemoveLabelForIssue(ctx, GithubOwner, GithubRepo, issue.GetNumber(), "forward/review")
 		if err != nil {
