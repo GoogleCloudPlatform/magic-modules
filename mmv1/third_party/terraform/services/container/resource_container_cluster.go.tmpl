@@ -2663,7 +2663,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
         if v, ok := d.GetOk("node_pool_defaults"); ok {
-                cluster.NodePoolDefaults = expandNodePoolDefaults(v)
+                cluster.NodePoolDefaults = expandNodePoolDefaults(v, d)
         }
 
 	if v, ok := d.GetOk("node_config"); ok {
@@ -6090,7 +6090,7 @@ func expandContainerClusterAuthenticatorGroupsConfig(configured interface{}) *co
 	return result
 }
 
-func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults {
+func expandNodePoolDefaults(configured interface{}, d *schema.ResourceData) *container.NodePoolDefaults {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
 		return nil
@@ -6098,7 +6098,7 @@ func expandNodePoolDefaults(configured interface{}) *container.NodePoolDefaults 
 	nodePoolDefaults := &container.NodePoolDefaults{}
 	config := l[0].(map[string]interface{})
 	if v, ok := config["node_config_defaults"]; ok && len(v.([]interface{})) > 0 {
-		nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v)
+		nodePoolDefaults.NodeConfigDefaults = expandNodeConfigDefaults(v, d)
 	}
 	return nodePoolDefaults
 }

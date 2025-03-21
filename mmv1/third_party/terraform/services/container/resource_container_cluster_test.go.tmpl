@@ -89,7 +89,7 @@ func TestAccContainerCluster_resourceManagerTags(t *testing.T) {
 
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-	
+
 	bootstrapGkeTagManagerServiceAgents(t)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -12090,6 +12090,13 @@ resource "google_container_cluster" "primary" {
   name             = "%s"
   location         = "us-central1"
   enable_autopilot = true
+
+  # node_config_defaults is NOT allowed on Autopilot clusters.
+	# However, empty values for such a field should not cause failures.
+	node_pool_defaults {
+		node_config_defaults {
+		}
+	}
 
 	node_pool_auto_config {
     node_kubelet_config {
