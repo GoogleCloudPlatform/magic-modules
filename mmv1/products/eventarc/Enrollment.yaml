@@ -15,6 +15,10 @@
 name: Enrollment
 description: |
   The Eventarc Enrollment resource
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment'
+  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.enrollments
 base_url: projects/{{project}}/locations/{{location}}/enrollments
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
