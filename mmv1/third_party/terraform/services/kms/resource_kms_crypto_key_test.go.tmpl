@@ -327,7 +327,7 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	projectBillingAccount := envvar.GetTestBillingAccountFromEnv(t)
 	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	allowedAccessReason := "CUSTOMER_INITIATED_SUPPORT"
+	allowedAccessReason := "THIRD_PARTY_DATA_REQUEST"
 	updatedAllowedAccessReason := "GOOGLE_INITIATED_SERVICE"
 
 	acctest.VcrTest(t, resource.TestCase{
