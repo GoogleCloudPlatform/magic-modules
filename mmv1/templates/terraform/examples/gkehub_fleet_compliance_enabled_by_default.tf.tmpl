@@ -1,0 +1,8 @@
+resource "google_gke_hub_fleet" "default" {
+  display_name = "my production fleet"
+  default_cluster_config {
+    compliance_config {
+      mode = "ENABLED"
+    }
+  }
+}
