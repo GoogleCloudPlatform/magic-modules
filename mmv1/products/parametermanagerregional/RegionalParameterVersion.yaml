@@ -51,6 +51,14 @@ examples:
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
+  - name: 'regional_parameter_version_with_kms_key'
+    primary_resource_id: 'regional-parameter-version-with-kms-key'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 custom_code:
   pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
   custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'
@@ -116,3 +124,9 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
+  - name: 'kmsKeyVersion'
+    type: String
+    output: true
+    description: |
+      The resource name of the Cloud KMS CryptoKeyVersion used to decrypt regional parameter version payload. Format
+      `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`
