@@ -79,86 +79,86 @@ properties:
     type: NestedObject
     description: Selector of all available annotators and phrase matchers to run.
     properties:
-    - name: runInterruptionAnnotator
-      type: Boolean
-      description: Whether to run the interruption annotator.
-    - name: phraseMatchers
-      type: Array
-      description: |-
-        The list of phrase matchers to run. If not provided, all active phrase
-        matchers will be used. If inactive phrase matchers are provided, they will
-        not be used. Phrase matchers will be run only if
-        run_phrase_matcher_annotator is set to true. Format:
-        projects/{project}/locations/{location}/phraseMatchers/{phrase_matcher}
-      item_type:
-        type: String
-    - name: runEntityAnnotator
-      type: Boolean
-      description: Whether to run the entity annotator.
-    - name: issueModels
-      type: Array
-      description: |-
-        The issue model to run. If not provided, the most recently deployed topic
-        model will be used. The provided issue model will only be used for
-        inference if the issue model is deployed and if run_issue_model_annotator
-        is set to true. If more than one issue model is provided, only the first
-        provided issue model will be used for inference.
-      item_type:
-        type: String
-    - name: runQaAnnotator
-      type: Boolean
-      description: Whether to run the QA annotator.
-    - name: runSilenceAnnotator
-      type: Boolean
-      description: Whether to run the silence annotator.
-    - name: runPhraseMatcherAnnotator
-      type: Boolean
-      description: Whether to run the active phrase matcher annotator(s).
-    - name: runSentimentAnnotator
-      type: Boolean
-      description: Whether to run the sentiment annotator.
-    - name: runIntentAnnotator
-      type: Boolean
-      description: Whether to run the intent annotator.
-    - name: runIssueModelAnnotator
-      type: Boolean
-      description: |-
-        Whether to run the issue model annotator. A model should have already been
-        deployed for this to take effect.
-    - name: runSummarizationAnnotator
-      type: Boolean
-      description: Whether to run the summarization annotator.
-    - name: summarizationConfig
-      type: NestedObject
-      description: Configuration for summarization.
-      properties:
-      - name: conversationProfile
-        type: String
+      - name: runInterruptionAnnotator
+        type: Boolean
+        description: Whether to run the interruption annotator.
+      - name: phraseMatchers
+        type: Array
         description: |-
-          Resource name of the Dialogflow conversation profile.
-          Format:
-          projects/{project}/locations/{location}/conversationProfiles/{conversation_profile}
-      - name: summarizationModel
-        type: String
+          The list of phrase matchers to run. If not provided, all active phrase
+          matchers will be used. If inactive phrase matchers are provided, they will
+          not be used. Phrase matchers will be run only if
+          run_phrase_matcher_annotator is set to true. Format:
+          projects/{project}/locations/{location}/phraseMatchers/{phrase_matcher}
+        item_type:
+          type: String
+      - name: runEntityAnnotator
+        type: Boolean
+        description: Whether to run the entity annotator.
+      - name: issueModels
+        type: Array
         description: |-
-          Default summarization model to be used.
-          Possible values:
-          SUMMARIZATION_MODEL_UNSPECIFIED
-          BASELINE_MODEL
-          BASELINE_MODEL_V2_0
-    - name: qaConfig
+          The issue model to run. If not provided, the most recently deployed topic
+          model will be used. The provided issue model will only be used for
+          inference if the issue model is deployed and if run_issue_model_annotator
+          is set to true. If more than one issue model is provided, only the first
+          provided issue model will be used for inference.
+        item_type:
+          type: String
+      - name: runQaAnnotator
+        type: Boolean
+        description: Whether to run the QA annotator.
+      - name: runSilenceAnnotator
+        type: Boolean
+        description: Whether to run the silence annotator.
+      - name: runPhraseMatcherAnnotator
+        type: Boolean
+        description: Whether to run the active phrase matcher annotator(s).
+      - name: runSentimentAnnotator
+        type: Boolean
+        description: Whether to run the sentiment annotator.
+      - name: runIntentAnnotator
+        type: Boolean
+        description: Whether to run the intent annotator.
+      - name: runIssueModelAnnotator
+        type: Boolean
+        description: |-
+          Whether to run the issue model annotator. A model should have already been
+          deployed for this to take effect.
+      - name: runSummarizationAnnotator
+        type: Boolean
+        description: Whether to run the summarization annotator.
+      - name: summarizationConfig
+        type: NestedObject
+        description: Configuration for summarization.
+        properties:
+          - name: conversationProfile
+            type: String
+            description: |-
+              Resource name of the Dialogflow conversation profile.
+              Format:
+              projects/{project}/locations/{location}/conversationProfiles/{conversation_profile}
+          - name: summarizationModel
+            type: String
+            description: |-
+              Default summarization model to be used.
+              Possible values:
+              SUMMARIZATION_MODEL_UNSPECIFIED
+              BASELINE_MODEL
+              BASELINE_MODEL_V2_0
+      - name: qaConfig
       type: NestedObject
       description: Configuration for the QA feature.
       properties:
-      - name: scorecardList
-        type: NestedObject
-        description: Container for a list of scorecards.
-        properties:
-        - name: qaScorecardRevisions
-          type: Array
-          description: List of QaScorecardRevisions.
-          item_type:
-            type: String
+        - name: scorecardList
+          type: NestedObject
+          description: Container for a list of scorecards.
+          properties:
+            - name: qaScorecardRevisions
+              type: Array
+              description: List of QaScorecardRevisions.
+              item_type:
+                type: String
   - name: analysisPercentage
     type: Double
     description: |-
