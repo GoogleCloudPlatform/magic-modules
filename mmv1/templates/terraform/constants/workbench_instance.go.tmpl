@@ -8,7 +8,7 @@ var WorkbenchInstanceProvidedLabels = []string{
 func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// Suppress diffs for the labels
 	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
+		if strings.Contains(k, label) {
 			return true
 		}
 	}
