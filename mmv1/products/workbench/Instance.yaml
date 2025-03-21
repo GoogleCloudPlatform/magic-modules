@@ -75,7 +75,6 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
-      reservation_name: 'wbi-reservation'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
   - name: 'workbench_instance_labels_stopped'
@@ -96,7 +95,6 @@ examples:
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
-      reservation_name: 'wbi-reservation'
       key_name: 'my-crypto-key'
     test_env_vars:
       project_id: 'PROJECT_NAME'
@@ -107,12 +105,6 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
-  - name: 'workbench_instance_confidential_compute'
-    primary_resource_id: 'instance'
-    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
-    region_override: 'us-west1-a'
-    vars:
-      instance_name: 'workbench-instance'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -449,58 +441,6 @@ properties:
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
         immutable: true
-      - name: 'confidentialInstanceConfig'
-        type: NestedObject
-        immutable: true
-        description: |
-          Confidential instance configuration.
-        properties:
-          - name: 'enableConfidentialCompute'
-            type: Boolean
-            description: |
-              Defines whether the instance should have confidential compute enabled.
-          - name: 'confidentialInstanceType'
-            type: Enum
-            description: |
-              Defines the type of technology used by the confidential instance.
-            enum_values:
-              - 'SEV'
-              - 'SEV_SNP'
-              - 'TDX'
-      - name: 'reservationAffinity'
-        type: NestedObject
-        immutable: true
-        default_from_api: true
-        description: |
-          Reservations that this instance can consume from.
-        properties:
-          - name: 'consumeReservationType'
-            type: Enum
-            immutable: true
-            default_from_api: true
-            description: |
-              Specifies the type of reservation from which this instance can consume resources:
-              RESERVATION_ANY (default), RESERVATION_SPECIFIC, or RESERVATION_NONE.
-            enum_values:
-              - 'RESERVATION_NONE'
-              - 'RESERVATION_ANY'
-              - 'RESERVATION_SPECIFIC'
-          - name: 'key'
-            immutable: true
-            description: |
-              Corresponds to the label key of a reservation resource. To target a
-              RESERVATION_SPECIFIC by name, use compute.googleapis.com/reservation-name
-              as the key and specify the name of your reservation as its value.
-          - name: 'values'
-            type: Array
-            immutable: true
-            item_type:
-              type: String
-            description: |
-              Corresponds to the label values of a reservation resource. This can be
-              either a name to a reservation in the same project or
-              "projects/different-project/reservations/some-reservation-name"
-              to target a shared reservation in the same zone but in a different project.
   - name: 'proxyUri'
     type: String
     description: |
