@@ -917,7 +917,7 @@ func schemaNodePoolAutoConfigLinuxNodeConfig() *schema.Schema {
 	}
 }
 
-func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefaults {
+func expandNodeConfigDefaults(configured interface{}, d *schema.ResourceData) *container.NodeConfigDefaults {
 	configs := configured.([]interface{})
 	if len(configs) == 0 || configs[0] == nil {
 		return nil
@@ -926,12 +926,17 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 
 	nodeConfigDefaults := &container.NodeConfigDefaults{}
 	nodeConfigDefaults.ContainerdConfig = expandContainerdConfig(config["containerd_config"])
-	if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
-		nodeConfigDefaults.NodeKubeletConfig = &container.NodeKubeletConfig{
-			InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(v),
-			ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+
+	// Set a value of insecure_kubelet_readonly_port_enabled only if set in the upstream config.
+ 	if d.HasChange("node_pool_defaults.node_config_defaults.node_kubelet_config.insecure_kubelet_readonly_port_enabled") {
+		if v, ok := config["insecure_kubelet_readonly_port_enabled"]; ok {
+			nodeConfigDefaults.NodeKubeletConfig = &container.NodeKubeletConfig{
+				InsecureKubeletReadonlyPortEnabled: expandInsecureKubeletReadonlyPortEnabled(v),
+				ForceSendFields:                    []string{"InsecureKubeletReadonlyPortEnabled"},
+			}
 		}
 	}
+
 	if variant, ok := config["logging_variant"]; ok {
 		nodeConfigDefaults.LoggingConfig = &container.NodePoolLoggingConfig{
 			VariantConfig: &container.LoggingVariantConfig{
