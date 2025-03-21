@@ -94,6 +94,23 @@ func TestAccComputeFirewall_localRanges(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{       
+				Config: testAccComputeFirewall_localRangesRemoveSource(networkName, firewallName),	
+			},
+			{       
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{      
+				Config: testAccComputeFirewall_localRangesRemoveDest(networkName, firewallName),
+			},
+			{       
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
 		},
 	})
 }
@@ -372,6 +389,50 @@ resource "google_compute_firewall" "foobar" {
 
   source_ranges      = ["192.168.1.0/24"]
   destination_ranges = ["10.0.0.0/8"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+`, network, firewall)
+}
+
+func testAccComputeFirewall_localRangesRemoveSource(network, firewall string) string {
+        return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+
+  destination_ranges = ["10.0.0.0/8"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+`, network, firewall)
+}
+
+func testAccComputeFirewall_localRangesRemoveDest(network, firewall string) string {
+        return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+        
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+  source_tags = ["foo"]
+  
+  source_ranges = ["10.0.0.0/8"]
 
   allow {
     protocol = "icmp"
