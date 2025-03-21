@@ -123,7 +123,6 @@ examples:
       health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_ilb_custom_metrics'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       region_backend_service_name: 'region-service'
       default_neg_name: 'network-endpoint'

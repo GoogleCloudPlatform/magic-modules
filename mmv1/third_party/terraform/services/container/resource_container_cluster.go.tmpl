@@ -192,6 +192,13 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 	return false
 }
 
+func suppressDiffForClusterDnsScope(k, o, n string, d *schema.ResourceData) bool {
+	if o == "" && n == "DNS_SCOPE_UNSPECIFIED" {
+		return true
+	}
+	return false
+}
+
 func ResourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
 		UseJSONNumber: true,
@@ -1052,10 +1059,10 @@ func ResourceContainerCluster() *schema.Resource {
 						"enable_components": {
 							Type:        schema.TypeList,
 							Required:    true,
-							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, SCHEDULER, and WORKLOADS.`,
+							Description: `GKE components exposing logs. Valid values include SYSTEM_COMPONENTS, APISERVER, CONTROLLER_MANAGER, KCP_CONNECTION, KCP_SSHD, KCP_HPA, SCHEDULER, and WORKLOADS.`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "SCHEDULER", "WORKLOADS"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SYSTEM_COMPONENTS", "APISERVER", "CONTROLLER_MANAGER", "KCP_CONNECTION", "KCP_SSHD", "KCP_HPA", "SCHEDULER", "WORKLOADS"}, false),
 							},
 						},
 					},
@@ -1582,6 +1589,29 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+
+			"pod_autoscaling": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `PodAutoscaling is used for configuration of parameters for workload autoscaling`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"hpa_profile": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"NONE", "PERFORMANCE"}, false),
+							Description:      `
+								HPA Profile is used to configure the Horizontal Pod Autoscaler (HPA) profile for the cluster.
+								Available options include:
+								- NONE: Customers explicitly opt-out of HPA profiles.
+								- PERFORMANCE: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
+							`,
+						},
+					},
+				},
+			},
 {{- end }}
 			"secret_manager_config": {
 				Type:        schema.TypeList,
@@ -1758,7 +1788,7 @@ func ResourceContainerCluster() *schema.Resource {
 				MaxItems:    1,
 				Computed:    true,
 				Optional:    true,
-				Description: `Configuration for all of the cluster's control plane endpoints. Currently supports only DNS endpoint configuration, IP endpoint configuration is available in private_cluster_config.`,
+				Description: `Configuration for all of the cluster's control plane endpoints. Currently supports only DNS endpoint configuration and disable IP endpoint. Other IP endpoint configurations are available in private_cluster_config.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"dns_endpoint_config": {
@@ -1779,6 +1809,22 @@ func ResourceContainerCluster() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Description: `Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.`,
+									},
+								},
+							},
+						},
+						"ip_endpoints_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							Computed:    true,
+							Description: `IP endpoint configuration.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Description: `Controls whether to allow direct IP access.`,
 									},
 								},
 							},
@@ -2205,10 +2251,11 @@ func ResourceContainerCluster() *schema.Resource {
 							Optional:     true,
 						},
 						"cluster_dns_scope": {
-							Type:         schema.TypeString,
-							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_SCOPE", "VPC_SCOPE"}, false),
-							Description:  `The scope of access to cluster DNS records.`,
-							Optional:     true,
+							Type:            schema.TypeString,
+							ValidateFunc:    validation.StringInSlice([]string{"DNS_SCOPE_UNSPECIFIED", "CLUSTER_SCOPE", "VPC_SCOPE"}, false),
+							Description:     `The scope of access to cluster DNS records.`,
+							Optional:         true,
+							DiffSuppressFunc: suppressDiffForClusterDnsScope,
 						},
 						"cluster_dns_domain": {
 							Type:        schema.TypeString,
@@ -2507,6 +2554,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
+		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 {{- end }}
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
@@ -3184,6 +3232,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
+		return err
+	}
+
+	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
 		return err
 	}
 {{- end }}
@@ -4148,6 +4200,34 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
+
+	if d.HasChange("pod_autoscaling") {
+		c := d.Get("pod_autoscaling")
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredPodAutoscaling: expandPodAutoscaling(c),
+			},
+		}
+
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+			// Wait until it's updated
+			return ContainerOperationWait(config, op, project, location, "updating Horizontal pod Autoscaling profile", userAgent, d.Timeout(schema.TimeoutUpdate))
+		}
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+		log.Printf("[INFO] GKE cluster %s horizontal pod autoscaling profile has been updated", d.Id())
+	}
+
 {{- end }}
 
 	if d.HasChange("secret_manager_config") {
@@ -5580,9 +5660,18 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 	}
 
 	ip := &container.IPEndpointsConfig{
-		// There isn't yet a config field to disable IP endpoints, so this is hardcoded to be enabled for the time being.
 		Enabled:         true,
 		ForceSendFields: []string{"Enabled"},
+	}
+	if v := d.Get("control_plane_endpoints_config.0.ip_endpoints_config.#"); v != 0 {
+		ip.Enabled = d.Get("control_plane_endpoints_config.0.ip_endpoints_config.0.enabled").(bool)
+
+		if !ip.Enabled {
+			return &container.ControlPlaneEndpointsConfig{
+				DnsEndpointConfig: dns,
+				IpEndpointsConfig: ip,
+			}
+		}
 	}
 	if v := d.Get("private_cluster_config.0.enable_private_endpoint"); v != nil {
 		ip.EnablePublicEndpoint = !v.(bool)
@@ -5727,6 +5816,28 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 		Enabled:         config["enabled"].(bool),
 		ForceSendFields: []string{"Enabled"},
 	}
+}
+
+func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
+	if configured == nil {
+		return nil
+	}
+
+	podAutoscaling := &container.PodAutoscaling{}
+
+	configs := configured.([]interface{})
+
+	if len(configs) == 0 || configs[0] == nil {
+		return nil
+	}
+
+	config := configs[0].(map[string]interface{})
+
+	if v, ok := config["hpa_profile"]; ok {
+		podAutoscaling.HpaProfile = v.(string)
+	}
+
+	return podAutoscaling
 }
 {{- end }}
 
@@ -6297,6 +6408,7 @@ func flattenControlPlaneEndpointsConfig(c *container.ControlPlaneEndpointsConfig
 	return []map[string]interface{}{
 		{
 			"dns_endpoint_config": flattenDnsEndpointConfig(c.DnsEndpointConfig),
+			"ip_endpoints_config": flattenIpEndpointsConfig(c.IpEndpointsConfig),
 		},
 	}
 }
@@ -6309,6 +6421,17 @@ func flattenDnsEndpointConfig(dns *container.DNSEndpointConfig) []map[string]int
 		{
 			"endpoint":               dns.Endpoint,
 			"allow_external_traffic": dns.AllowExternalTraffic,
+		},
+	}
+}
+
+func flattenIpEndpointsConfig(ip *container.IPEndpointsConfig) []map[string]interface{} {
+	if ip == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enabled": ip.Enabled,
 		},
 	}
 }
@@ -6689,6 +6812,19 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 			"enabled": c.Enabled,
 		},
 	}
+}
+
+func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
+	config := make([]map[string]interface{}, 0, 1)
+
+	if c == nil {
+		return config
+	}
+
+	config = append(config, map[string]interface{}{
+		"hpa_profile": c.HpaProfile,
+	})
+	return config
 }
 
 {{ end }}
