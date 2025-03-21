@@ -39,4 +39,16 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "{{$.Primary
     labels = {
         state = "active"
     }
+    orchestration_scope {
+        selectors {
+            resource_hierarchy_selector {
+                included_projects = ["projects/{{index $.TestEnvVars "project_number"}}"]
+            }
+        }
+        selectors {
+            location_selector {
+                included_locations = ["{{index $.TestEnvVars "zone"}}"]
+            }
+        }
+    }
 }
