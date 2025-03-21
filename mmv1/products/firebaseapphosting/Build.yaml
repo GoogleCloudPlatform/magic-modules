@@ -1,0 +1,296 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Build
+description: |-
+  A single build for a backend, at a specific point codebase reference tag
+  and point in time. Encapsulates several resources, including an Artifact Registry
+  container image, a Cloud Build invocation that built the image, and the
+  Cloud Run revision that uses that image.
+base_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
+create_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds?buildId={{build_id}}
+id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
+# A Build can't be deleted while serving traffic. Old Builds will be auto cleaned up in the background.
+exclude_delete: true
+exclude_sweeper: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/backends/{{backend}}/builds/{{build_id}}
+  - "{{project}}/{{location}}/{{backend}}/{{build_id}}"
+  - "{{location}}/{{backend}}/{{build_id}}"
+examples:
+  - name: firebase_app_hosting_build_minimal
+    primary_resource_id: example
+    vars:
+      backend_id: "mini"
+      build_id: "mini-build"
+      service_act_id: "firebase-app-hosting-compute"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-build-min"'
+  - name: firebase_app_hosting_build_full
+    primary_resource_id: example
+    vars:
+      backend_id: "full"
+      build_id: "full-build"
+      service_act_id: "firebase-app-hosting-compute"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    test_vars_overrides:
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-build-full"'
+  - name: firebase_app_hosting_build_github
+    primary_resource_id: example
+    vars:
+      backend_id: "mini"
+      build_id: "gh-build"
+    test_env_vars:
+      project_id: "PROJECT_NAME"
+    # Can't establish a Github connection in automated tests.
+    exclude_test: true
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+  # Build errors are surfaced in the resource itself
+  suppress_error: true
+autogen_status: QnVpbGQ=
+parameters:
+  - name: location
+    type: String
+    description: The location of the Backend that this Build applies to
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: backend
+    type: ResourceRef
+    description: The ID of the Backend that this Build applies to
+    immutable: true
+    url_param_only: true
+    required: true
+    resource: "Backend"
+    imports: "backendId"
+  - name: buildId
+    type: String
+    description: The user-specified ID of the build being created.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  # Standard uninteresting fields
+  - name: displayName
+    type: String
+    description: Human-readable name. 63 character limit.
+  - name: annotations
+    type: KeyValueAnnotations
+    description: |-
+      Unstructured key value map that may be set by external tools to
+      store and arbitrary metadata. They are not queryable and should be
+      preserved when modifying objects.
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      Unstructured key value map that can be used to organize and categorize
+      objects.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the build.
+
+      Format:
+
+      `projects/{project}/locations/{locationId}/backends/{backendId}/builds/{buildId}`.
+    output: true
+  - name: createTime
+    type: String
+    description: Time at which the build was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Time at which the build was last updated.
+    output: true
+  - name: etag
+    type: Fingerprint
+    description: |-
+      Server-computed checksum based on other values; may be sent
+      on update or delete to ensure operation is done on expected resource.
+    output: true
+  - name: uid
+    type: String
+    description: System-assigned, unique identifier.
+    output: true
+  # Intersting fields
+  - name: image
+    type: String
+    description: |-
+      The Artifact Registry
+      [container
+      image](https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages)
+      URI, used by the Cloud Run
+      [`revision`](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services.revisions)
+      for this build.
+    output: true
+  - name: buildLogsUri
+    type: String
+    description: |-
+      The location of the [Cloud Build
+      logs](https://cloud.google.com/build/docs/view-build-results) for the build
+      process.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The state of the build.
+      Possible values:
+      BUILDING
+      BUILT
+      DEPLOYING
+      READY
+      FAILED
+    output: true
+  - name: errorSource
+    type: String
+    description: |-
+      The source of the error for the build, if in a `FAILED` state.
+      Possible values:
+      CLOUD_BUILD
+      CLOUD_RUN
+    output: true
+  - name: environment
+    type: String
+    description: The environment name of the backend when this build was created.
+    output: true
+  - name: source
+    type: NestedObject
+    description: The source for the build.
+    required: true
+    properties:
+      - name: container
+        type: NestedObject
+        exactly_one_of:
+          - source.0.container
+          - source.0.codebase
+        description: |-
+          The URI of an Artifact Registry
+          [container
+          image](https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.dockerImages)
+          to use as the build source.
+        properties:
+          - name: image
+            type: String
+            description: A URI representing a container for the backend to use.
+            required: true
+      - name: codebase
+        type: NestedObject
+        exactly_one_of:
+          - source.0.container
+          - source.0.codebase
+        description: |-
+          A codebase source, representing the state of the codebase
+          that the build will be created at.
+        properties:
+          - name: displayName
+            type: String
+            description: |-
+              The human-friendly name to use for this Codebase when displaying a build.
+              We use the first eight characters of the SHA-1 hash for GitHub.com.
+            output: true
+          - name: hash
+            type: String
+            description: The full SHA-1 hash of a Git commit, if available.
+            output: true
+          - name: commitMessage
+            type: String
+            description: The message of a codebase change.
+            output: true
+          - name: uri
+            type: String
+            description: |-
+              A URI linking to the codebase on an hosting provider's website. May
+              not be valid if the commit has been rebased or force-pushed out of
+              existence in the linked repository.
+            output: true
+          - name: author
+            type: NestedObject
+            description: |-
+              Version control metadata for a user associated with a resolved codebase.
+              Currently assumes a Git user.
+            output: true
+            properties:
+              - name: displayName
+                type: String
+                description: The 'name' field in a Git user's git.config. Required by Git.
+                output: true
+              - name: email
+                type: String
+                description: The 'email' field in a Git user's git.config, if available.
+                output: true
+              - name: imageUri
+                type: String
+                description: |-
+                  The URI of an image file associated with the user's account in an
+                  external source control provider, if available.
+                output: true
+          - name: commitTime
+            type: String
+            description: The time the change was made.
+            output: true
+          - name: branch
+            type: String
+            description: The branch in the codebase to build from, using the latest commit.
+          - name: commit
+            type: String
+            description: The commit in the codebase to build from.
+  - name: error
+    type: NestedObject
+    output: true
+    description: |-
+      The `Status` type defines a logical error model that is suitable for
+      different programming environments, including REST APIs and RPC APIs. It is
+      used by [gRPC](https://github.com/grpc). Each `Status` message contains
+      three pieces of data: error code, error message, and error details.
+
+      You can find out more about this error model and how to work with it in the
+      [API Design Guide](https://cloud.google.com/apis/design/errors).
+    properties:
+      - name: code
+        type: Integer
+        output: true
+        description: The status code, which should be an enum value of google.rpc.Code.
+      - name: message
+        type: String
+        output: true
+        description: |-
+          A developer-facing error message, which should be in English. Any
+          user-facing error message should be localized and sent in the
+          google.rpc.Status.details field, or localized by the client.
+      - name: details
+        type: Array
+        output: true
+        description: |-
+          A list of messages that carry the error details. There is a common set of
+          message types for APIs to use.
+        item_type:
+          type: KeyValuePairs
