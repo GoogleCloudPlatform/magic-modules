@@ -8,7 +8,7 @@
    deletion_policy = "DELETE"
  }
 
- resource "time_sleep" "wait_60_seconds" {
+ resource "time_sleep" "wait_120_seconds" {
    create_duration = "120s"
    depends_on = [google_project.project]
  }
@@ -27,7 +27,7 @@ resource "google_project_service" "compute" {
   service = "compute.googleapis.com"
   depends_on = [
     google_project_service.container,
-    time_sleep.wait_60_seconds,
+    time_sleep.wait_120_seconds,
   ]
 }
 
@@ -61,13 +61,21 @@ resource "google_project_service_identity" "apigee_sa" {
   depends_on = [google_project_service.apigee]
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project_service_identity.apigee_sa]
+}
+
 resource "google_project_iam_member" "project" {
   provider = google-beta
 
   project = google_project.project.project_id
   role    = "roles/dns.peer"
   member  = google_project_service_identity.apigee_sa.member
-  depends_on = [google_project_service_identity.apigee_sa]
+  depends_on = [
+      google_project_service_identity.apigee_sa,
+      time_sleep.wait_60_seconds,
+  ]
 }
 
 resource "google_apigee_organization" "apigee_org" {
