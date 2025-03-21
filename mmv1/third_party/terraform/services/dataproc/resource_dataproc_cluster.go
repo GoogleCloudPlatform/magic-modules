@@ -63,6 +63,7 @@ var (
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
 		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 		"cluster_config.0.gce_cluster_config.0.confidential_instance_config",
+		"cluster_config.0.gce_cluster_config.0.resource_manager_tags",
 	}
 
 	schieldedInstanceConfigKeys = []string{
@@ -781,6 +782,15 @@ func ResourceDataprocCluster() *schema.Resource {
 												},
 											},
 										},
+									},
+									"resource_manager_tags": {
+										Type:         schema.TypeMap,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										ForceNew:     true,
+										Description:  `Define the map of resource manager tags i.e., secure tags on dataproc cluster's compute instances`,
+										Elem:         &schema.Schema{Type: schema.TypeString},
 									},
 								},
 							},
@@ -2238,6 +2248,9 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	if v, ok := cfg["metadata"]; ok {
 		conf.Metadata = tpgresource.ConvertStringMap(v.(map[string]interface{}))
 	}
+	if v, ok := cfg["resource_manager_tags"]; ok {
+		conf.ResourceManagerTags = tpgresource.ConvertStringMap(v.(map[string]interface{}))
+	}
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.shielded_instance_config"); ok {
 		cfgSic := v.([]interface{})[0].(map[string]interface{})
 		conf.ShieldedInstanceConfig = &dataproc.ShieldedInstanceConfig{}
@@ -3186,11 +3199,12 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 	}
 
 	gceConfig := map[string]interface{}{
-		"tags":             schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
-		"service_account":  gcc.ServiceAccount,
-		"zone":             tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
-		"internal_ip_only": gcc.InternalIpOnly,
-		"metadata":         gcc.Metadata,
+		"tags":                  schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(gcc.Tags)),
+		"service_account":       gcc.ServiceAccount,
+		"zone":                  tpgresource.GetResourceNameFromSelfLink(gcc.ZoneUri),
+		"internal_ip_only":      gcc.InternalIpOnly,
+		"metadata":              gcc.Metadata,
+		"resource_manager_tags": gcc.ResourceManagerTags,
 	}
 
 	if gcc.NetworkUri != "" {
