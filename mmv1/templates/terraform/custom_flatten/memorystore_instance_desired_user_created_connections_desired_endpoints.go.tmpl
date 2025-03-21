@@ -32,13 +32,13 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Connections(v interface{}, d *
 			// Do not include empty json objects coming back from the api
 			continue
 		}
-        pscConnections := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnection(original["pscConnection"], d, config)
-        if pscConnections == nil {
-            continue
-        }
-        transformed = append(transformed, map[string]interface{}{
-            "psc_connection": pscConnections,
-        })
+		pscConnections := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnection(original["pscConnection"], d, config)
+		if pscConnections == nil {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"psc_connection": pscConnections,
+		})
 
 	}
 	return transformed

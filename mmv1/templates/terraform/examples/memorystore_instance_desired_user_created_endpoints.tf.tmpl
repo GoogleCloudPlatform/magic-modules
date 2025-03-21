@@ -126,7 +126,7 @@ resource "google_compute_address" "ip2_network2" {
 //Valkey instance without endpoints
 resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
   instance_id                 =  "{{index $.Vars "instance_name"}}"
-  shard_count                 = 3
+  shard_count                 = 1
   location                    = "us-central1"
   deletion_protection_enabled = false
 }
