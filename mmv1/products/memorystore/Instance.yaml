@@ -157,8 +157,8 @@ properties:
             output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
-    default_from_api: true
     description: "The automated backup config for a instance."
+    default_from_api: true
     properties:
       - name: 'automatedBackupMode'
         type: Enum
