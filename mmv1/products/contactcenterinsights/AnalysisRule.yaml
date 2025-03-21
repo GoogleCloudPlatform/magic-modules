@@ -33,11 +33,11 @@ import_format:
   - projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
   - '{{analysis_rule}}'
 examples:
-  - name: 'contact_center_ai_insights_analysis_rule_basic'
+  - name: 'contact_center_insights_analysis_rule_basic'
     primary_resource_id: 'basic_analysis_rule'
     vars:
       resource_name: 'basic_analysis_rule'
-  - name: 'contact_center_ai_insights_analysis_rule_full'
+  - name: 'contact_center_insights_analysis_rule_full'
     primary_resource_id: 'basic_analysis_rule'
     vars:
       resource_name: 'basic_analysis_rule'
@@ -147,18 +147,18 @@ properties:
               BASELINE_MODEL
               BASELINE_MODEL_V2_0
       - name: qaConfig
-      type: NestedObject
-      description: Configuration for the QA feature.
-      properties:
-        - name: scorecardList
-          type: NestedObject
-          description: Container for a list of scorecards.
-          properties:
-            - name: qaScorecardRevisions
-              type: Array
-              description: List of QaScorecardRevisions.
-              item_type:
-                type: String
+        type: NestedObject
+        description: Configuration for the QA feature.
+        properties:
+          - name: scorecardList
+            type: NestedObject
+            description: Container for a list of scorecards.
+            properties:
+              - name: qaScorecardRevisions
+                type: Array
+                description: List of QaScorecardRevisions.
+                item_type:
+                  type: String
   - name: analysisPercentage
     type: Double
     description: |-
