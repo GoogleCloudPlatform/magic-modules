@@ -51,6 +51,21 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
+  - name: 'bigquery_analyticshub_listing_subscription_resource_tags'
+    primary_resource_id: 'subscription'
+    primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
+      ])'
+    vars:
+      tag_key1: 'tag_key1'
+      tag_value1: 'tag_value1'
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      destination_dataset_id: 'destination_dataset'
+      desc: 'example data exchange'
+    exclude_docs: true
 parameters:
   - name: 'dataExchangeId'
     type: String
@@ -112,6 +127,14 @@ properties:
         description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets.
+      - name: 'resourceTags'
+        type: KeyValuePairs
+        description: |
+          Tag keys are globally unique. Tag key is expected to bein the namespaced format,
+          for example "123456789012/environment" where 123456789012 is the ID of the parent organization
+          or project resource for this tag key. Tag value is expected to be the short name,
+          for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
+          for more details.
   - name: 'name'
     type: String
     description: |-
