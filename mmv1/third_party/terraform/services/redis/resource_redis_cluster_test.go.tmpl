@@ -319,7 +319,6 @@ resource "google_redis_cluster" "cluster_abc" {
   deletion_protection_enabled    = false
   automated_backup_config {
    automated_backup_mode         = "ENABLED"
-   retention                     = "259200s"
    fixed_frequency_schedule {
     start_time {
       hours                      = 20
