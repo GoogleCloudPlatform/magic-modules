@@ -157,13 +157,13 @@ properties:
             output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
-    default_from_api: true
     description: "The automated backup config for a instance."
+    default_from_api: true
     properties:
       - name: 'automatedBackupMode'
         type: Enum
         description: |
-          "Optional. The automated backup mode. If the mode is disabled, the other fields will be ignored."
+          "Optional. The automated backup mode. If the mode is DISABLED, the other fields will be ignored."
         default_value: "DISABLED"
         enum_values:
           - 'AUTOMATED_BACKUP_MODE_UNSPECIFIED'

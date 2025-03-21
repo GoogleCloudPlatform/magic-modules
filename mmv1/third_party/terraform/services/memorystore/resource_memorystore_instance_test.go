@@ -87,7 +87,7 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 func testAccMemorystoreInstance_automatedBackupConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 // Primary instance
-resource "google_memorystore_instance" "test-abc" {
+resource "google_memorystore_instance" "test_abc" {
   instance_id                    = "tf-test-instance-abc-%{random_suffix}"
   shard_count                    = 1
   location                       = "us-central1"
@@ -104,9 +104,9 @@ resource "google_memorystore_instance" "test-abc" {
    fixed_frequency_schedule {
     start_time {
       hours                      = 20
-      minutes                    = 30
-      seconds                    = 50
-      nanos                      = 2
+      minutes                    = 0
+      seconds                    = 0
+      nanos                      = 0
     }
    }
   }
