@@ -482,7 +482,6 @@ properties:
         type: String
         description: |
           SSH private key.
-        immutable: true
         sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.password
