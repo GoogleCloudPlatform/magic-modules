@@ -1,0 +1,7 @@
+resource "google_contact_center_insights_view" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "resource_name"}}"
+  display_name = "view-display-name"
+  create_time = "2025-01-01T00:00:00Z"
+  update_time = "2025-01-01T00:00:00Z"
+  value    = "medium=\"PHONE_CALL\""
+}
