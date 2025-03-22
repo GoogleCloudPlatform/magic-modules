@@ -70,8 +70,8 @@ func TestAccStorageObject_recreate(t *testing.T) {
 	}
 	testFile := getNewTmpTestFile(t, "tf-test")
 	dataMd5 := writeFile(testFile.Name(), []byte("data data data"))
-	updatedName := testFile.Name() + ".update"
-	updatedDataMd5 := writeFile(updatedName, []byte("datum"))
+	updatedName := getNewTmpTestFile(t, "tf-test")
+	updatedDataMd5 := writeFile(updatedName.Name(), []byte("datum"))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,13 +83,7 @@ func TestAccStorageObject_recreate(t *testing.T) {
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 			},
 			{
-				PreConfig: func() {
-					err := os.Rename(updatedName, testFile.Name())
-					if err != nil {
-						t.Errorf("Failed to rename %s to %s", updatedName, testFile.Name())
-					}
-				},
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, updatedName.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
@@ -662,6 +656,22 @@ resource "google_storage_bucket_object" "object" {
   source = "%s"
 }
 `, bucketName, objectName, sourceFilename)
+}
+
+func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "%s"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+  source_md5hash = filemd5("%s")
+}
+`, bucketName, objectName, sourceFilename, sourceFilename)
 }
 
 func testGoogleStorageBucketsObjectOptionalContentFields(
