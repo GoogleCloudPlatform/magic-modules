@@ -254,7 +254,7 @@ func testAccEventarcMessageBus_googleApiSource(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckEventarcGoogleApiSourceDestroyProducer(t),
+		CheckDestroy:             testAccCheckEventarcMessageBusDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcMessageBus_googleApiSourceCfg(context),
@@ -307,7 +307,7 @@ func testAccEventarcMessageBus_pipeline(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckEventarcPipelineDestroyProducer(t),
+		CheckDestroy:             testAccCheckEventarcMessageBusDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcMessageBus_pipelineCfg(context),
@@ -355,7 +355,7 @@ func testAccEventarcMessageBus_enrollment(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckEventarcEnrollmentDestroyProducer(t),
+		CheckDestroy:             testAccCheckEventarcMessageBusDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcMessageBus_enrollmentCfg(context),
@@ -422,7 +422,7 @@ func testAccEventarcMessageBus_updateEnrollment(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckEventarcEnrollmentDestroyProducer(t),
+		CheckDestroy:             testAccCheckEventarcMessageBusDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEventarcMessageBus_enrollmentCfg(context),
