@@ -539,6 +539,102 @@ func TestAccPubsubSubscription_filter(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+	functionName := "some_function_name"
+	code := "some_code_here"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Initial transform
+			{
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Bare transform
+			{
+				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", ""),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", ""),
+				),
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Remove non-required field
+				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName, code),
+				Check: resource.ComposeTestCheckFunc(
+					// Test schema
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName),
+					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code),
+				),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+  message_transforms {
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+    disabled = true
+  }
+}
+`, topic, subscription, functionName, code)
+}
+
+func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+	message_transforms {
+    javascript_udf {
+      function_name = "%s"
+      code = "%s"
+    }
+  }
+}
+`, topic, subscription, functionName, code)
+}
+
 func testAccPubsubSubscription_emptyTTL(topic, subscription string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
