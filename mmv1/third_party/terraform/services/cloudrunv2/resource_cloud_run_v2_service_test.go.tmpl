@@ -1269,7 +1269,6 @@ resource "google_network_services_mesh" "new_mesh" {
 }
 {{- end }}
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceWithResourcesRequirements(t *testing.T) {
   t.Parallel()
   context := map[string]interface{} {
@@ -1379,6 +1378,7 @@ resource "google_cloud_run_v2_service" "default" {
     node_selector {
       accelerator = "nvidia-l4"
     }
+    gpu_zonal_redundancy_disabled = true
     scaling {
       max_instance_count = 1
     }
@@ -1386,7 +1386,6 @@ resource "google_cloud_run_v2_service" "default" {
 }
 `, context)
 }
-{{- end }}
 
 func TestAccCloudRunV2Service_cloudrunv2ServiceFunctionExample_update(t *testing.T) {
         t.Parallel()
