@@ -4,5 +4,6 @@ resource "google_compute_resource_policy" "baz" {
   group_placement_policy {
     vm_count = 2
     collocation = "COLLOCATED"
+    tpu_topology = "4x4"
   }
 }
