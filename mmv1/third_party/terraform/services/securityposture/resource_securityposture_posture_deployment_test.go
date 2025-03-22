@@ -71,8 +71,9 @@ resource "google_securityposture_posture" "posture_one" {
 
 resource "google_project" "posture_project" {
   name       = "Posture Project"
-  project_id = "posture-project-id"
+  project_id = "tf-test-posture-project-%{random_suffix}"
   org_id     = "%{org_id}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_securityposture_posture_deployment" "postureDeployment_one" {
