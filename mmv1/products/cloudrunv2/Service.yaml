@@ -964,6 +964,7 @@ properties:
       - name: 'gpuZonalRedundancyDisabled'
         type: Boolean
         description: True if GPU zonal redundancy is disabled on this revision.
+        default_from_api: true
   - name: 'traffic'
     type: Array
     description: |-
