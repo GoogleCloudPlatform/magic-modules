@@ -197,6 +197,12 @@ examples:
     external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
+  - name: 'datastream_stream_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
