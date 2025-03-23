@@ -51,8 +51,10 @@
     - name: 'resource_manager_capability'
       primary_resource_id: 'capability'
       vars:
-        display_name: 'folder'
+        display_name: 'my-folder'
         capability_name: 'app-management'
+      test_env_vars:
+        org_id: "ORG_ID"
       min_version: beta
 
   parameters:

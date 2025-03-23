@@ -8,5 +8,5 @@ resource "google_resource_manager_capability" "{{$.PrimaryResourceId}}" {
 resource "google_folder" "folder" {
   provider         = google-beta
   display_name     = "{{index $.Vars "display_name"}}"
-  parent           = "organizations/1036545057225"
+  parent           = "{{index $.TestEnvVars "org_id"}}"
 }

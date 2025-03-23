@@ -18,6 +18,9 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context),
@@ -34,17 +37,22 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 
 func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_folder" "folder" {
+  provider         = google-beta
+  display_name     = "my-folder%{random_suffix}"
+  parent           = "%{org_id}"
+  deletion_protection = false
+}
+resource "time_sleep" "wait_30s" {
+  depends_on = [google_folder.folder]
+  create_duration = "30s"
+}
 resource "google_resource_manager_capability" "capability" {
   provider         = google-beta
   value            = true
   parent           = "${google_folder.folder.name}"
   capability_name  = "app-management"
-}
-resource "google_folder" "folder" {
-  provider         = google-beta
-  display_name     = "folder%{random_suffix}"
-  parent           = "organizations/1036545057225"
-  deletion_protection = false
+  depends_on = [time_sleep.wait_30s]
 }
 provider "google-beta" {
   user_project_override = true
