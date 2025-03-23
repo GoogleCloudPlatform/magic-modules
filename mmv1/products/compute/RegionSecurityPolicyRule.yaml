@@ -484,6 +484,7 @@ properties:
     description: |
       If set to true, the specified action is not enforced.
     min_version: 'beta'
+    send_empty_value: true
   - name: 'networkMatch'
     type: NestedObject
     description: |

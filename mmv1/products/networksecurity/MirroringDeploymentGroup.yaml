@@ -17,11 +17,10 @@ description: |-
   A deployment group aggregates many zonal mirroring backends (deployments)
   into a single global mirroring service. Consumers can connect this service
   using an endpoint group.
-min_version: 'beta'
 references:
   guides:
     'Mirroring deployment group overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployment-groups-overview'
-  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1beta1/projects.locations.mirroringDeploymentGroups'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringDeploymentGroups'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups'
@@ -56,7 +55,6 @@ parameters:
     type: String
     description: |-
       The cloud location of the deployment group, currently restricted to `global`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -65,7 +63,6 @@ parameters:
     description: |-
       The ID to use for the new deployment group, which will become the final
       component of the deployment group's resource name.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -76,7 +73,6 @@ properties:
       The resource name of this deployment group, for example:
       `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
       See https://google.aip.dev/122 for more details.
-    min_version: 'beta'
     immutable: true
     output: true
   - name: 'createTime'
@@ -84,34 +80,29 @@ properties:
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |-
       Labels are key/value pairs that help to organize and filter resources.
-    min_version: 'beta'
   - name: 'network'
     type: String
     description: |-
       The network that will be used for all child deployments, for example:
       `projects/{project}/global/networks/{network}`.
       See https://google.aip.dev/124.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'connectedEndpointGroups'
     type: Array
     description: |-
       The list of endpoint groups that are connected to this resource.
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -122,7 +113,6 @@ properties:
             The connected endpoint group's resource name, for example:
             `projects/123456789/locations/global/mirroringEndpointGroups/my-eg`.
             See https://google.aip.dev/124.
-          min_version: 'beta'
           output: true
   - name: 'state'
     type: String
@@ -134,7 +124,6 @@ properties:
       ACTIVE
       CREATING
       DELETING
-    min_version: 'beta'
     output: true
   - name: 'reconciling'
     type: Boolean
@@ -143,11 +132,32 @@ properties:
       and the system is working to reconcile them. This is part of the normal
       operation (e.g. adding a new deployment to the group)
       See https://google.aip.dev/128.
-    min_version: 'beta'
     output: true
   - name: description
     type: String
     description: |-
       User-provided description of the deployment group.
       Used as additional context for the deployment group.
-    min_version: 'beta'
+  - name: locations
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the deployment group is present.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: location
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true

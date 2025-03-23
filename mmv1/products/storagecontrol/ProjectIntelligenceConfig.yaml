@@ -1,0 +1,179 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'ProjectIntelligenceConfig'
+kind: 'storagecontrol#intelligenceconfig'
+# Resource description for the provider documentation.
+description: |
+  The Project Storage Intelligence Config resource represents GCS Storage Intelligence operating on individual GCP project. Storage Intelligence Config is a singleton resource and individual instance exists on each GCP project.
+
+  Storage Intelligence is for Storage Admins to manage GCP storage assets at scale for performance, cost, security & compliance.
+
+docs:
+  warning: |
+    Storage Intelligence Config is a singleton resource which cannot be created or deleted. A single instance of Storage Intelligence Config exist for each GCP Project. Terraform does not create or destroy this resource.
+    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
+
+# URL for the resource's standard Get method. https://google.aip.dev/131
+self_link: 'projects/{{name}}/locations/global/intelligenceConfig'
+
+custom_code:
+  custom_create: 'templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl'
+  constants: 'templates/terraform/constants/storage_control_intelligence.go.tmpl'
+
+# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+update_verb: 'PATCH'
+# If true, the resource sets an `updateMask` query parameter listing modified
+# fields when updating the resource. If false, it does not.
+update_mask: true
+
+exclude_delete: true
+
+import_format:
+  - 'projects/{{name}}/locations/global/intelligenceConfig'
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+autogen_async: false
+
+properties:
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      Identifier of the GCP project. For GCP project, this field can be project name or project number.
+  - name: 'editionConfig'
+    type: String
+    required: false
+    default_from_api: true
+    description: |
+      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, DISABLED and STANDARD.
+  - name: 'updateTime'
+    type: String
+    output: true
+    description: |
+      The time at which the Storage Intelligence Config resource is last updated.
+  - name: 'filter'
+    type: NestedObject
+    diff_suppress_func: 'intelligenceFilterDiffSuppress'
+    description: |
+      Filter over location and bucket using include or exclude semantics. Resources that match the include or exclude filter are exclusively included or excluded from the Storage Intelligence plan.
+    properties:
+      - name: excludedCloudStorageBuckets
+        type: NestedObject
+        required: false
+        description: |
+          Buckets to exclude from the Storage Intelligence plan.
+        conflicts:
+          - 'filter.0.included_cloud_storage_buckets'
+        at_least_one_of:
+          - 'filter.0.included_cloud_storage_buckets'
+          - 'filter.0.excluded_cloud_storage_buckets'
+          - 'filter.0.included_cloud_storage_locations'
+          - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterExcludedCloudStorageBucketsDiffSuppress'
+        properties:
+          - name: bucketIdRegexes
+            required: true
+            type: Array
+            send_empty_value: true
+            item_type:
+              type: String
+            description: |
+              List of bucket id regexes to exclude in the storage intelligence plan.
+      - name: includedCloudStorageBuckets
+        type: NestedObject
+        required: false
+        description: |
+          Buckets to include in the Storage Intelligence plan.
+        conflicts:
+          - 'filter.0.excluded_cloud_storage_buckets'
+        at_least_one_of:
+          - 'filter.0.included_cloud_storage_buckets'
+          - 'filter.0.excluded_cloud_storage_buckets'
+          - 'filter.0.included_cloud_storage_locations'
+          - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterincludedCloudStorageBucketsDiffSuppress'
+        properties:
+          - name: bucketIdRegexes
+            required: true
+            send_empty_value: true
+            type: Array
+            item_type:
+              type: String
+            description: |
+              List of bucket id regexes to exclude in the storage intelligence plan.
+      - name: excludedCloudStorageLocations
+        type: NestedObject
+        required: false
+        description: |
+          Locations to exclude from the Storage Intelligence plan.
+        conflicts:
+          - 'filter.0.included_cloud_storage_locations'
+        at_least_one_of:
+          - 'filter.0.included_cloud_storage_buckets'
+          - 'filter.0.excluded_cloud_storage_buckets'
+          - 'filter.0.included_cloud_storage_locations'
+          - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterExcludedCloudStorageLocationsDiffSuppress'
+        properties:
+          - name: locations
+            type: Array
+            required: true
+            send_empty_value: true
+            description: |
+              List of locations.
+            item_type:
+              type: String
+      - name: includedCloudStorageLocations
+        type: NestedObject
+        required: false
+        description: |
+          Locations to include in the Storage Intelligence plan.
+        conflicts:
+          - 'filter.0.excluded_cloud_storage_locations'
+        at_least_one_of:
+          - 'filter.0.included_cloud_storage_buckets'
+          - 'filter.0.excluded_cloud_storage_buckets'
+          - 'filter.0.included_cloud_storage_locations'
+          - 'filter.0.excluded_cloud_storage_locations'
+        diff_suppress_func: 'intelligenceFilterincludedCloudStorageLocationsDiffSuppress'
+        properties:
+          - name: locations
+            type: Array
+            required: true
+            send_empty_value: true
+            description: |
+              List of locations.
+            item_type:
+              type: String
+  - name: 'effectiveIntelligenceConfig'
+    output: true
+    description: |
+      The Intelligence config that is effective for the resource.
+    type: NestedObject
+    properties:
+      - name: intelligenceConfig
+        type: String
+        output: true
+        description: |
+          The Intelligence config resource that is applied for the target resource.
+      - name: effectiveEdition
+        type: String
+        output: true
+        description: |
+          The `StorageIntelligence` edition that is applicable for the resource.
