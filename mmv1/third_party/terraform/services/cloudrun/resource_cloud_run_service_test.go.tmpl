@@ -1564,10 +1564,6 @@ resource "google_cloud_run_service" "default" {
 
   metadata {
     namespace = "%s"
-    annotations = {
-      "run.googleapis.com/launch-stage" = "BETA"
-      "run.googleapis.com/gpu-zonal-redundancy-disabled" = "true"
-    }
   }
 
   template {
@@ -1575,6 +1571,7 @@ resource "google_cloud_run_service" "default" {
       annotations = {
         "autoscaling.knative.dev/maxScale": "1"
         "run.googleapis.com/cpu-throttling": "false"
+        "run.googleapis.com/gpu-zonal-redundancy-disabled" = "true"
       }
     }
     spec {
