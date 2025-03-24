@@ -1,6 +1,8 @@
 resource "google_compute_network" "mkc_network" {
   name                    = "{{index $.Vars "network_id"}}"
   auto_create_subnetworks = false
+
+  provider = google-beta
 }
 
 resource "google_compute_subnetwork" "mkc_subnet" {
@@ -8,6 +10,8 @@ resource "google_compute_subnetwork" "mkc_subnet" {
   ip_cidr_range = "10.4.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.mkc_network.id
+
+  provider = google-beta
 }
 
 resource "google_compute_subnetwork" "mkc_additional_subnet" {
@@ -15,12 +19,16 @@ resource "google_compute_subnetwork" "mkc_additional_subnet" {
   ip_cidr_range = "10.5.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.mkc_network.id
+
+  provider = google-beta
 }
 
 resource "google_pubsub_topic" "cps_topic" {
   name = "{{index $.Vars "cps_topic_name"}}"
   
   message_retention_duration = "86600s"
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_cluster" "gmk_cluster" {
@@ -37,6 +45,8 @@ resource "google_managed_kafka_cluster" "gmk_cluster" {
       }
     }
   }
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_topic" "gmk_topic" {
@@ -45,6 +55,8 @@ resource "google_managed_kafka_topic" "gmk_topic" {
   location = "us-central1"
   partition_count = 2
   replication_factor = 3
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_connect_cluster" "mkc_cluster" {
@@ -67,6 +79,8 @@ resource "google_managed_kafka_connect_cluster" "mkc_cluster" {
   labels = {
     key = "value"
   }
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_connector" "{{$.PrimaryResourceId}}" {
@@ -87,7 +101,10 @@ resource "google_managed_kafka_connector" "{{$.PrimaryResourceId}}" {
     minimum_backoff = "60s"
     maximum_backoff = "1800s"
   }
+
+  provider = google-beta
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
