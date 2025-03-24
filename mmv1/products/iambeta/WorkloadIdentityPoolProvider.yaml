@@ -36,14 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool_provider.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -55,6 +49,11 @@ examples:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_provider_id: 'example-prvdr'
   - name: 'iam_workload_identity_pool_provider_aws_full'
+    primary_resource_id: 'example'
+    vars:
+      workload_identity_pool_id: 'example-pool'
+      workload_identity_pool_provider_id: 'example-prvdr'
+  - name: 'iam_workload_identity_pool_provider_github_actions'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'

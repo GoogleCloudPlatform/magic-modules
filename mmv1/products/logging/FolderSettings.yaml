@@ -13,6 +13,7 @@
 
 ---
 name: 'FolderSettings'
+api_resource_type_kind: Settings
 description: |
   Default resource settings control whether CMEK is required for new log buckets. These settings also determine the storage location for the _Default and _Required log buckets, and whether the _Default sink is enabled or disabled.
 references:

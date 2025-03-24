@@ -182,7 +182,7 @@ func ResourceBigtableInstance() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: `      When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
+				Description: `When the field is set to true or unset in Terraform state, a terraform apply or terraform destroy that would delete the instance will fail. When the field is set to false, deleting the instance is allowed.`,
 			},
 
 			"labels": {
@@ -614,7 +614,6 @@ func expandBigtableClusters(clusters []interface{}, instanceID string, config *t
 			InstanceID:  instanceID,
 			Zone:        zone,
 			ClusterID:   cluster["cluster_id"].(string),
-			NumNodes:    int32(cluster["num_nodes"].(int)),
 			StorageType: storageType,
 			KMSKeyName:  cluster["kms_key_name"].(string),
 		}
@@ -627,6 +626,10 @@ func expandBigtableClusters(clusters []interface{}, instanceID string, config *t
 				CPUTargetPercent:          autoscaling_config["cpu_target"].(int),
 				StorageUtilizationPerNode: autoscaling_config["storage_target"].(int),
 			}
+		} else {
+			// We only set num_nodes if there is no auto-scaling config, since if
+			// auto-scaling is enabled the number of live nodes is dynamic
+			cluster_config.NumNodes = int32(cluster["num_nodes"].(int))
 		}
 		results = append(results, cluster_config)
 	}

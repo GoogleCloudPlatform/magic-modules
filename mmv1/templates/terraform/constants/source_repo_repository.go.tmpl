@@ -26,3 +26,47 @@ func resourceSourceRepoRepositoryPubSubConfigsHash(v interface{}) int {
 
         return tpgresource.Hashcode(buf.String())
 }
+
+func resourceSourceRepoRepositoryPollRead(d *schema.ResourceData, meta interface{}) transport_tpg.PollReadFunc {
+	return func() (map[string]interface{}, error) {
+		config := meta.(*transport_tpg.Config)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		if err != nil {
+			return nil, err
+		}
+
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{SourceRepoBasePath}}projects/{{project}}/repos"}}")
+		if err != nil {
+			return nil, err
+		}
+
+		billingProject := ""
+
+		project, err := tpgresource.GetProject(d, config)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching project for Repository: %s", err)
+		}
+		billingProject = project
+
+		// err == nil indicates that the billing_project value was found
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		// Confirm the source repository exists
+		headers := make(http.Header)
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+}

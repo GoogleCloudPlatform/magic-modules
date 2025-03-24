@@ -14,7 +14,6 @@
 ---
 name: 'Topic'
 description: A Managed Service for Apache Kafka topic. Apache Kafka is a trademark owned by the Apache Software Foundation.
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics/{{topic_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/topics'
@@ -28,12 +27,13 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_status: VG9waWM=
 custom_code:
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
 examples:
   - name: 'managedkafka_topic_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       cluster_id: 'my-cluster'
       topic_id: 'my-topic'
@@ -43,14 +43,12 @@ parameters:
     description: "ID of the location of the Kafka resource. See
       https://cloud.google.com/managed-kafka/docs/locations for a list of
       supported locations."
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
   - name: 'cluster'
     type: String
     description: "The cluster name."
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -58,7 +56,6 @@ parameters:
     type: String
     description: "The ID to use for the topic, which will become the final
       component of the topic's name. This value is structured like: `my-topic-name`."
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -67,19 +64,16 @@ properties:
     type: String
     description: "The name of the topic. The `topic` segment is used when
       connecting directly to the cluster. Must be in the format `projects/PROJECT_ID/locations/LOCATION/clusters/CLUSTER_ID/topics/TOPIC_ID`."
-    min_version: 'beta'
     output: true
   - name: 'partitionCount'
     type: Integer
     description: "The number of partitions in a topic. You can increase the partition
       count for a topic, but you cannot decrease it. Increasing partitions
       for a topic that uses a key might change how messages are distributed."
-    min_version: 'beta'
   - name: 'replicationFactor'
     type: Integer
     description: "The number of replicas of each partition. A replication factor of 3 is
       recommended for high availability."
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'configs'
@@ -87,4 +81,3 @@ properties:
     description: "Configuration for the topic that are overridden from the cluster
       defaults. The key of the map is a Kafka topic property name,
       for example: `cleanup.policy=compact`, `compression.type=producer`."
-    min_version: 'beta'

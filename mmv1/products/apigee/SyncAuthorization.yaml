@@ -13,6 +13,7 @@
 
 ---
 name: 'SyncAuthorization'
+api_resource_type_kind: Organization
 description: |
   Authorize the Synchronizer to download environment data from the control plane.
 references:

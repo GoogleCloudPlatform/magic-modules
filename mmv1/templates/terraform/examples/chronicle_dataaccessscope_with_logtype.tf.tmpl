@@ -1,0 +1,12 @@
+resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+  description = "{{index $.Vars "description"}}"
+  allowed_data_access_labels {
+    log_type = "GCP_CLOUDAUDIT"
+  }
+  allowed_data_access_labels {
+    log_type = "GITHUB"
+  }
+}

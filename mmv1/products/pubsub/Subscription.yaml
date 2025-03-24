@@ -72,6 +72,11 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.metadataViewer"
   - name: 'pubsub_subscription_push_bq_table_schema'
     primary_resource_id: 'example'
     vars:
@@ -79,6 +84,11 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.metadataViewer"
   - name: 'pubsub_subscription_push_bq_service_account'
     primary_resource_id: 'example'
     vars:
@@ -231,15 +241,19 @@ properties:
           - 'NOT_FOUND'
       - name: 'avroConfig'
         type: NestedObject
+        send_empty_value: true
+        allow_empty_object: true
         description: |
           If set, message data will be written to Cloud Storage in Avro format.
         properties:
           - name: 'writeMetadata'
             type: Boolean
+            send_empty_value: true
             description: |
               When true, write the subscription name, messageId, publishTime, attributes, and orderingKey as additional fields in the output.
           - name: 'useTopicSchema'
             type: Boolean
+            send_empty_value: true
             description: |
               When true, the output Cloud Storage file will be serialized using the topic schema, if it exists.
       - name: 'serviceAccountEmail'
@@ -471,6 +485,8 @@ properties:
           A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
         default_from_api: true
         diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+    send_empty_value: true
+    allow_empty_object: true
   - name: 'enableMessageOrdering'
     type: Boolean
     description: |

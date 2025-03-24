@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/magic-modules/tools/test-reader
 
-go 1.21
+go 1.23
 
 require (
 	github.com/hashicorp/hcl/v2 v2.20.1

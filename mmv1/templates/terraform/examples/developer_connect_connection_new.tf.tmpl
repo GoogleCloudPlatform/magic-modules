@@ -1,0 +1,24 @@
+resource "google_developer_connect_connection" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}"
+  github_config {
+    github_app = "FIREBASE"
+  }
+  depends_on = [google_project_iam_member.devconnect-secret]
+}
+output "next_steps" {
+  description = "Follow the action_uri if present to continue setup"
+  value = google_developer_connect_connection.{{$.PrimaryResourceId}}.installation_state
+}
+# Setup permissions. Only needed once per project
+resource "google_project_service_identity" "devconnect-p4sa" {
+  provider = google-beta
+  service = "developerconnect.googleapis.com"
+}
+resource "google_project_iam_member" "devconnect-secret" {
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project"}}"
+  role     = "roles/secretmanager.admin"
+  member   = google_project_service_identity.devconnect-p4sa.member
+}

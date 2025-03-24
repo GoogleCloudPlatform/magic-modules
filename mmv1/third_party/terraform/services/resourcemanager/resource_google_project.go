@@ -139,7 +139,7 @@ func ResourceGoogleProject() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty.`,
+				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty. This field is only set at create time and modifying this field after creation will trigger recreation. To apply tags to an existing resource, see the google_tags_tag_value resource.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -216,9 +216,9 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Sleep for 10s, letting the billing account settle before other resources
+	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -245,7 +245,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		// Retry if API is not yet enabled.
 		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
-			time.Sleep(10 * time.Second)
+			time.Sleep(15 * time.Second)
 			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		}
 		if err != nil {

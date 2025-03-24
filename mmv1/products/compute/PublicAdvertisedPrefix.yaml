@@ -32,21 +32,23 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 examples:
   - name: 'public_advertised_prefixes_basic'
     primary_resource_id: 'prefixes'
     vars:
       prefixes_name: 'my-prefix'
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
+  - name: 'public_advertised_prefixes_pdp_scope'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'my-pap'
     test_env_vars:
       desc: 'PAP_DESCRIPTION'
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
@@ -74,9 +76,21 @@ properties:
   - name: 'ipCidrRange'
     type: String
     description:
-      The IPv4 address range, in CIDR format, represented by this public
-      advertised prefix.
+      The address range, in CIDR format, represented by this public advertised
+      prefix.
     required: true
+  - name: 'pdpScope'
+    type: Enum
+    description: |
+      Specifies how child public delegated prefix will be scoped. pdpScope
+      must be one of: GLOBAL, REGIONAL
+      * REGIONAL: The public delegated prefix is regional only. The
+      provisioning will take a few minutes.
+      * GLOBAL: The public delegated prefix is global only. The provisioning
+      will take ~4 weeks.
+    enum_values:
+      - 'GLOBAL'
+      - 'REGIONAL'
   - name: 'sharedSecret'
     type: String
     description: |

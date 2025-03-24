@@ -8,7 +8,7 @@ resource "google_sql_database_instance" "primary" {
       enabled            = "true"
     }
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
@@ -26,5 +26,5 @@ resource "google_sql_database_instance" "{{$.PrimaryResourceId}}" {
     availability_type = "ZONAL"
     disk_size         = "100"
   }
-  deletion_protection =  "{{index $.Vars "deletion_protection"}}"
+  deletion_protection =  {{index $.Vars "deletion_protection"}}
 }

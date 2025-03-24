@@ -17,5 +17,6 @@ display_name: 'Site Verification'
 versions:
   - name: 'ga'
     base_url: 'https://www.googleapis.com/siteVerification/v1/'
+    cai_base_url: 'https://siteverification.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/siteverification'

@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionBackendService'
+api_resource_type_kind: BackendService
 kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
@@ -33,15 +34,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
@@ -58,6 +52,13 @@ custom_diff:
   - 'customDiffRegionBackendService'
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
@@ -96,6 +97,12 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ilb_stateful_session_affinity'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
   - name: 'region_backend_service_balancing_mode'
     primary_resource_id: 'default'
     vars:
@@ -109,6 +116,18 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ip_address_selection_policy'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ilb_custom_metrics'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      default_neg_name: 'network-endpoint'
+      health_check_name: 'rbs-health-check'
+      network_name: 'network'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -153,6 +172,7 @@ properties:
             - 'UTILIZATION'
             - 'RATE'
             - 'CONNECTION'
+            - 'CUSTOM_METRICS'
         - name: 'capacityScaler'
           type: Double
           description: |
@@ -268,6 +288,38 @@ properties:
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
             Cannot be set for INTERNAL backend services.
+        - name: 'customMetrics'
+          type: Array
+          description: |
+            The set of custom metrics that are used for <code>CUSTOM_METRICS</code> BalancingMode.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                required: true
+                description: |
+                  Name of a custom utilization signal. The name must be 1-64 characters
+                  long and match the regular expression [a-z]([-_.a-z0-9]*[a-z0-9])? which
+                  means the first character must be a lowercase letter, and all following
+                  characters must be a dash, period, underscore, lowercase letter, or
+                  digit, except the last character, which cannot be a dash, period, or
+                  underscore. For usage guidelines, see Custom Metrics balancing mode. This
+                  field can only be used for a global or regional backend service with the
+                  loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
+                  <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+              - name: 'dryRun'
+                type: Boolean
+                required: true
+                description: |
+                  If true, the metric data is collected and reported to Cloud
+                  Monitoring, but is not used for load balancing.
+              - name: 'maxUtilization'
+                type: Double
+                description: |
+                  Optional parameter to define a target utilization for the Custom Metrics
+                  balancing mode. The valid range is <code>[0.0, 1.0]</code>.
+                default_value: 0.8
   - name: 'circuitBreakers'
     type: NestedObject
     description: |
@@ -745,7 +797,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:
@@ -753,6 +807,7 @@ properties:
         type: Boolean
         description: Whether the serving infrastructure will authenticate and authorize all incoming requests.
         required: true
+        send_empty_value: true
       - name: 'oauth2ClientId'
         type: String
         description: |
@@ -770,6 +825,14 @@ properties:
           OAuth2 Client Secret SHA-256 for IAP
         sensitive: true
         output: true
+  - name: 'ipAddressSelectionPolicy'
+    type: Enum
+    description: |
+      Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
+    enum_values:
+      - 'IPV4_ONLY'
+      - 'PREFER_IPV6'
+      - 'IPV6_ONLY'
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
@@ -828,6 +891,13 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
+      * `WEIGHTED_ROUND_ROBIN`: Per-endpoint weighted round-robin Load Balancing using weights computed
+                                from Backend reported Custom Metrics. If set, the Backend Service
+                                responses are expected to contain non-standard HTTP response header field
+                                X-Endpoint-Load-Metrics. The reported metrics
+                                to use for computing the weights are specified via the
+                                backends[].customMetrics fields.
+
       locality_lb_policy is applicable to either:
 
       * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
@@ -851,6 +921,7 @@ properties:
       - 'ORIGINAL_DESTINATION'
       - 'MAGLEV'
       - 'WEIGHTED_MAGLEV'
+      - 'WEIGHTED_ROUND_ROBIN'
   - name: 'name'
     type: String
     description: |
@@ -863,6 +934,31 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+  - name: 'customMetrics'
+    type: Array
+    description: |
+      List of custom metrics that are used for the WEIGHTED_ROUND_ROBIN locality_lb_policy.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          required: true
+          description: |
+            Name of a custom utilization signal. The name must be 1-64 characters
+            long and match the regular expression [a-z]([-_.a-z0-9]*[a-z0-9])? which
+            means the first character must be a lowercase letter, and all following
+            characters must be a dash, period, underscore, lowercase letter, or
+            digit, except the last character, which cannot be a dash, period, or
+            underscore. For usage guidelines, see Custom Metrics balancing mode. This
+            field can only be used for a global or regional backend service with the
+            loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
+            <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+        - name: 'dryRun'
+          type: Boolean
+          required: true
+          description: |
+            If true, the metric data is not used for load balancing.
   - name: 'outlierDetection'
     type: NestedObject
     description: |
@@ -1151,6 +1247,50 @@ properties:
       - 'HEADER_FIELD'
       - 'HTTP_COOKIE'
       - 'CLIENT_IP_NO_DESTINATION'
+      - 'STRONG_COOKIE_AFFINITY'
+  - name: 'strongSessionAffinityCookie'
+    type: NestedObject
+    description: |
+      Describes the HTTP cookie used for stateful session affinity. This field is applicable and required if the sessionAffinity is set to STRONG_COOKIE_AFFINITY.
+    properties:
+      - name: 'ttl'
+        type: NestedObject
+        description: |
+          Lifetime of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Span of time at a resolution of a second.
+              Must be from 0 to 315,576,000,000 inclusive.
+            required: true
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond
+              resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must
+              be from 0 to 999,999,999 inclusive.
+      - name: 'name'
+        type: String
+        description: |
+          Name of the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
+      - name: 'path'
+        type: String
+        description: |
+          Path to set for the cookie.
+        at_least_one_of:
+          - 'strong_session_affinity_cookie.0.ttl'
+          - 'strong_session_affinity_cookie.0.name'
+          - 'strong_session_affinity_cookie.0.path'
   - name: 'connectionTrackingPolicy'
     type: NestedObject
     description: |
@@ -1232,6 +1372,7 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
       - name: 'sampleRate'
         type: Double
         description: |
@@ -1242,8 +1383,30 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+        default_from_api: true
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          Specifies the fields to include in logging. This field can only be specified if logging is enabled for this backend service.
+        item_type:
+          type: String
+        default_from_api: true
   - name: 'network'
     type: ResourceRef
     description: |

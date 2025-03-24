@@ -35,15 +35,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
-custom_code:
 exclude_sweeper: true
 error_abort_predicates:
 
@@ -106,6 +99,25 @@ examples:
       instance_name: 'my-instance'
       client_id: 'my-client-id'
       client_secret: 'my-client-secret'
+  - name: 'looker_instance_force_delete'
+    primary_resource_id: 'looker-instance'
+    vars:
+      instance_name: 'my-instance'
+      client_id: 'my-client-id'
+      client_secret: 'my-client-secret'
+    ignore_read_extra:
+      - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    default_value: "DEFAULT"
+    type: String
+    description: |
+      Policy to determine if the cluster should be deleted forcefully.
+      If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
+      of its nested resources. If set to "DEFAULT", Looker instances that still have
+      nested resources will return an error. Possible values: DEFAULT, FORCE
+custom_code:
+  pre_delete: templates/terraform/pre_delete/looker_instance.go.tmpl
 parameters:
   - name: 'region'
     type: String
@@ -372,6 +384,7 @@ properties:
     description: |
       Looker Instance OAuth login settings.
     ignore_read: true
+    required: true
     properties:
       - name: 'clientId'
         type: String
@@ -393,6 +406,9 @@ properties:
       - LOOKER_CORE_STANDARD_ANNUAL: subscription standard instance
       - LOOKER_CORE_ENTERPRISE_ANNUAL: subscription enterprise instance
       - LOOKER_CORE_EMBED_ANNUAL: subscription embed instance
+      - LOOKER_CORE_NONPROD_STANDARD_ANNUAL: nonprod subscription standard instance
+      - LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL: nonprod subscription enterprise instance
+      - LOOKER_CORE_NONPROD_EMBED_ANNUAL: nonprod subscription embed instance
     immutable: true
     default_value: "LOOKER_CORE_TRIAL"
     enum_values:
@@ -401,6 +417,9 @@ properties:
       - 'LOOKER_CORE_STANDARD_ANNUAL'
       - 'LOOKER_CORE_ENTERPRISE_ANNUAL'
       - 'LOOKER_CORE_EMBED_ANNUAL'
+      - 'LOOKER_CORE_NONPROD_STANDARD_ANNUAL'
+      - 'LOOKER_CORE_NONPROD_ENTERPRISE_ANNUAL'
+      - 'LOOKER_CORE_NONPROD_EMBED_ANNUAL'
   - name: 'privateIpEnabled'
     type: Boolean
     description: |

@@ -15,7 +15,6 @@ if d.Get("type").(string) == "SUBORDINATE" {
 
 // Enable the CA if `desired_state` is unspecified or specified as `ENABLED`.
 if p, ok := d.GetOk("desired_state"); !ok || p.(string) == "ENABLED" {
-	// Skip enablement on SUBORDINATE CA for backward compatible.
 	if staged {
 		if err := enableCA(config, d, project, billingProject, userAgent); err != nil {
 			return fmt.Errorf("Error enabling CertificateAuthority: %v", err)
