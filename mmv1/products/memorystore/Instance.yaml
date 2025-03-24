@@ -204,6 +204,7 @@ properties:
           Optional. How long to keep automated backups before the backups are deleted.
             The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
             A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+        default_value: "3024000s"
   - name: 'uid'
     type: String
     description: "Output only. System assigned, unique identifier for the instance. "
