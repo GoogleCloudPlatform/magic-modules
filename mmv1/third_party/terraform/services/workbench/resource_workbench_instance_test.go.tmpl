@@ -867,7 +867,7 @@ func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
 			{
 				// Invalid metadata keys should trigger an error
 				Config:      testAccWorkbenchInstance_invalidMetadata(context),
-				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[proxy-url image-url\]`),
+				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[image-url proxy-url\]`),
 			},
 		},
 	})
