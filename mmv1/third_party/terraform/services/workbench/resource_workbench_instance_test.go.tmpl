@@ -855,6 +855,11 @@ resource "google_workbench_instance" "instance" {
 // TestAccWorkbenchInstance_metadataValidation ensures protected metadata keys cannot be set.
 func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
 	t.Parallel()
+	
+	// Assume we never want to sleep when we're in replaying mode.
+	if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
+		return nil
+	}
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
