@@ -167,17 +167,21 @@ func TestAccStorageBatchOperationsJobs_createJobWithManifest(t *testing.T) {
 
 func TestAccStorageBatchOperationsJobs_batchOperationJobKmsKey(t *testing.T) {
 	t.Parallel()
-	bucketName := acctest.TestBucketName(t)
-	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
-	keyRing := fmt.Sprintf("tf-test-keyring-%d", acctest.RandInt(t))
-	cryptoKey := fmt.Sprintf("tf-test-cryptokey-%d", acctest.RandInt(t))
-	objectName := fmt.Sprintf("tf-test-object-%d", acctest.RandInt(t))
+
+	context := map[string]interface{}{
+		"kms_key":     acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
+		"job_id":      fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t)),
+		"crypto_key":  fmt.Sprintf("tf-test-cryptokey-%d", acctest.RandInt(t)),
+		"object_name": fmt.Sprintf("tf-test-object-%d", acctest.RandInt(t)),
+		"key_ring":    fmt.Sprintf("tf-test-keyring-%d", acctest.RandInt(t)),
+		"bucket_name": acctest.TestBucketName(t),
+	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(keyRing, cryptoKey, bucketName, objectName, jobID),
+				Config: testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(context),
 			},
 			{
 				ResourceName:            "google_storage_batch_operations_job.job",
@@ -447,32 +451,17 @@ resource "google_storage_batch_operations_job" "job" {
 `)
 }
 
-func testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(kmsKeyRing, kmsKeyName, bucketName, objectName, jobID string) string {
-	return fmt.Sprintf(`
-resource "google_kms_key_ring" "tf_keyring" {
-  name     = "%s"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "tf_crypto_key" {
-  name            = "%s"
-  key_ring        = google_kms_key_ring.tf_keyring.id
-  rotation_period = "7776000s"
-
-  lifecycle {
-    prevent_destroy = false
-  }
-}
-
+func testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name     = "%s"
+  name     = %{bucket_name}
   location = "us-central1"
   uniform_bucket_level_access = true
   force_destroy = true
 }
 
 resource "google_storage_bucket_object" "object" {
-  name          = "%s"
+  name          = %{object_name}
   bucket        = google_storage_bucket.bucket.name
   content       = "test-content"
 }
@@ -481,13 +470,13 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = google_kms_crypto_key.tf_crypto_key.id
+  crypto_key_id = %{kms_key}
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
 
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id     = %{job_id}
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -500,10 +489,10 @@ resource "google_storage_batch_operations_job" "job" {
 		}
 	}
 	rewrite_object {
-		kms_key = google_kms_crypto_key.tf_crypto_key.id
+		kms_key = %{kms_key}
 	}
 
 	delete_protection = false
 }
-`, kmsKeyRing, kmsKeyName, bucketName, objectName, jobID)
+`, context)
 }
