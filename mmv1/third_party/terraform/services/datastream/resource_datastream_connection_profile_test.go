@@ -1,7 +1,9 @@
 package datastream_test
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -159,7 +161,10 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key"},
 			},
 			{
-
+				PreConfig: func() {
+					fmt.Println("Waiting before proceeding to the next step...")
+					time.Sleep(1500 * time.Second) // Delay before the next step
+				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, true, randomPrivKey2, randomPubKey2),
 			},
 			{
@@ -169,6 +174,10 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key"},
 			},
 			{
+				PreConfig: func() {
+					fmt.Println("Waiting before proceeding to the next step...")
+					time.Sleep(1500 * time.Second) // Delay before the next step
+				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, false, randomPrivKey2, randomPubKey2),
 			},
 		},
@@ -366,46 +375,44 @@ resource "google_sql_database_instance" "instance" {
         settings {
             tier = "db-f1-micro"
             ip_configuration {
-    
-            // Datastream IPs will vary by region.
-            authorized_networks {
-                value = "34.71.242.81"
-            }
-    
-            authorized_networks {
-                value = "34.72.28.29"
-            }
-    
-            authorized_networks {
-                value = "34.67.6.157"
-            }
-    
-            authorized_networks {
-                value = "34.67.234.134"
-            }
-    
-            authorized_networks {
-                value = "34.72.239.218"
-            }
-        }
-    }
+				// Datastream IPs will vary by region.
+				authorized_networks {
+					value = "34.71.242.81"
+				}
+	
+				authorized_networks {
+					value = "34.72.28.29"
+				}
+	
+				authorized_networks {
+					value = "34.67.6.157"
+				}
+	
+				authorized_networks {
+					value = "34.67.234.134"
+				}
+	
+				authorized_networks {
+					value = "34.72.239.218"
+				}
+        	}
+    	}
     
         deletion_protection  = "false"
-    }
-    
+}
+   
 resource "google_sql_database" "db" {
-        instance = google_sql_database_instance.instance.name
-        name     = "db"
-    }
- 
+	instance = google_sql_database_instance.instance.name
+	name     = "db"
+}
 resource "google_sql_user" "user" {
-        name = "user"
-        instance = google_sql_database_instance.instance.name
-        password = "Ckrw75FbtmKrTKCtWPFJS54cTdbGC8D82rJwp3gV"
-    }
+	name = "user"
+	instance = google_sql_database_instance.instance.name
+	password = "Ckrw75FbtmKrTKCtWPFJS54cTdbGC8D82rJwp3gV"
+}
 
 resource "google_compute_instance" "default" {
-		name         = "test-bastion"
+		name         = "tf-test-instance-%{random_suffix}"
 		machine_type = "e2-small"
 		zone         = "us-central1-a"
 		boot_disk {
@@ -415,27 +422,32 @@ resource "google_compute_instance" "default" {
 		}
 
 		network_interface {
-		  network = "default"
-		  access_config {
-
+			network    = "default"
+			access_config {} 
 		  }
-		}
+
 		metadata = {
-		  "ssh-keys" = "${google_sql_user.user.name}:%{public_key}"
+		  "ssh-keys" = "user:%{public_key}"
 		}
-	  }
-  
+
+		timeouts {
+			create = "15m" 
+		  }
+	
+}
+
 resource "google_compute_firewall" "ssh" {
-		name = "tf-test-%{random_suffix}"
-		allow {
-		  ports    = ["22"]
-		  protocol = "tcp"
-		}
-		direction     = "INGRESS"
-		network       = "default"
-		priority      = 1000
-		source_ranges = ["0.0.0.0/0"]
-		target_tags   = ["ssh"]
+	name = "tf-test-%{random_suffix}"
+	network = "default"
+
+	allow {
+		protocol = "tcp"
+		ports    = ["22", "5432"]
+	}
+
+	direction     = "INGRESS"
+	priority      = 1000
+	source_ranges = ["0.0.0.0/0"] 
 }
 
 resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
@@ -444,20 +456,26 @@ resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
         connection_profile_id = "tf-test-mysql-profile%{random_suffix}"
 
     	postgresql_profile {
-        	hostname = google_sql_database_instance.instance.public_ip_address
-        	username = google_sql_user.user.name
-        	password = google_sql_user.user.password
-        	database = google_sql_database.db.name
+        	hostname 			= google_sql_database_instance.instance.public_ip_address
+        	username 			= google_sql_user.user.name
+        	password 			= google_sql_user.user.password
+        	database 			= google_sql_database.db.name
     	}
 
     	forward_ssh_connectivity {
-        	hostname 	= google_compute_instance.default.network_interface.0.access_config.0.nat_ip
+        	hostname 	= google_compute_instance.default.network_interface.0.network_ip 
         	username 	= google_sql_user.user.name
-		port    	= 5432
-		private_key 	= <<EOT
+			port    	= 22
+			private_key = <<EOT
 %{private_key}
 EOT
 	}
+
+		depends_on = [google_sql_database_instance.instance, google_compute_instance.default]
+		timeouts {
+			create = "20m" # Give Datastream extra time to establish the connection
+		  }
+
     	%{lifecycle_block}
 }
 `, context)
