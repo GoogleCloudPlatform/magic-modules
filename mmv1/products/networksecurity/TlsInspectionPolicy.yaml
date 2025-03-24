@@ -38,18 +38,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'network_security_tls_inspection_policy_basic'
@@ -113,6 +107,7 @@ properties:
       - 'TLS_1_1'
       - 'TLS_1_2'
       - 'TLS_1_3'
+    default_value: 'TLS_VERSION_UNSPECIFIED'
   - name: 'tlsFeatureProfile'
     type: Enum
     description: |
@@ -123,6 +118,7 @@ properties:
       - 'PROFILE_MODERN'
       - 'PROFILE_RESTRICTED'
       - 'PROFILE_CUSTOM'
+    default_value: 'PROFILE_UNSPECIFIED'
   - name: 'customTlsFeatures'
     type: Array
     description: |

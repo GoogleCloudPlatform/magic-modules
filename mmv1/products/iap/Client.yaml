@@ -13,6 +13,7 @@
 
 ---
 name: 'Client'
+api_resource_type_kind: IdentityAwareProxyClient
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 

@@ -13,6 +13,7 @@
 
 ---
 name: 'Trigger'
+api_resource_type_kind: BuildTrigger
 description: |
   Configuration for an automated build in response to source repository changes.
 references:
@@ -45,6 +46,10 @@ custom_diff:
   - 'stepTimeoutCustomizeDiff'
 schema_version: 2
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'cloudbuild_trigger_filename'
     primary_resource_id: 'filename-trigger'

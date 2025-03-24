@@ -6,9 +6,10 @@ const (
 	None Version = iota
 	GA
 	Beta
+	Private
 )
 
-const NumVersions = 2
+const NumVersions = 3
 
 func (v Version) String() string {
 	switch v {
@@ -16,6 +17,20 @@ func (v Version) String() string {
 		return "ga"
 	case Beta:
 		return "beta"
+	case Private:
+		return "private"
+	}
+	return "unknown"
+}
+
+func (v Version) ProviderName() string {
+	switch v {
+	case GA:
+		return "google"
+	case Beta:
+		return "google-beta"
+	case Private:
+		return "google-private"
 	}
 	return "unknown"
 }
@@ -33,6 +48,18 @@ func (v Version) RepoName() string {
 		return "terraform-provider-google"
 	case Beta:
 		return "terraform-provider-google-beta"
+	case Private:
+		return "terraform-next"
+	}
+	return "unknown"
+}
+
+func (v Version) TeamCityNightlyProjectName() string {
+	switch v {
+	case GA:
+		return "TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS"
+	case Beta:
+		return "TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS"
 	}
 	return "unknown"
 }

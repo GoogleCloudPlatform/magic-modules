@@ -1,0 +1,83 @@
+resource "google_secret_manager_secret" "bbdc-read-cred-secret" {
+  secret_id = "bbdc-read-cred"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "bbdc-read-cred-secret-version" {
+  secret = google_secret_manager_secret.bbdc-read-cred-secret.id
+  secret_data = file("my-bbdc-read-cred.txt")
+}
+
+resource "google_secret_manager_secret" "bbdc-auth-cred-secret" {
+  secret_id = "bbdc-auth-cred"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "bbdc-auth-cred-secret-version" {
+  secret = google_secret_manager_secret.bbdc-auth-cred-secret.id
+  secret_data = file("my-bbdc-auth-cred.txt")
+}
+
+resource "google_secret_manager_secret" "bbdc-webhook-secret-secret" {
+  secret_id = "bbdc-webhook-secret"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "bbdc-webhook-secret-secret-version" {
+  secret = google_secret_manager_secret.bbdc-webhook-secret-secret.id
+  secret_data = file("my-bbdc-webhook-secret.txt")
+
+data "google_iam_policy" "p4sa-secretAccessor" {
+  binding {
+    role = "roles/secretmanager.secretAccessor"
+    // Here, 123456789 is the Google Cloud project number for the project that contains the connection.
+    members = ["serviceAccount:service-123456789@gcp-sa-devconnect.iam.gserviceaccount.com"]
+  }
+}
+
+resource "google_secret_manager_secret_iam_policy" "policy-rc" {
+  secret_id = google_secret_manager_secret.bbdc-read-cred-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "policy-ac" {
+  secret_id = google_secret_manager_secret.bbdc-auth-cred-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "policy-wh" {
+  secret_id = google_secret_manager_secret.bbdc-webhook-secret-secret.secret_id
+  policy_data = data.google_iam_policy.p4sa-secretAccessor.policy_data
+}
+
+resource "google_developer_connect_connection" "my-connection" {
+
+  location = "us-central1"
+  connection_id = "my-connection"
+
+  bitbucket_data_center_config {
+    host_uri = "https://bitbucket-test-server.com"
+
+    webhook_secret_secret_version = google_secret_manager_secret_version.bbdc-webhook-secret-secret-version.id
+
+    read_authorizer_credential {
+      user_token_secret_version = google_secret_manager_secret_version.bbdc-read-cred-secret-version.id
+    }
+
+    authorizer_credential {
+      user_token_secret_version = google_secret_manager_secret_version.bbdc-auth-cred-secret-version.id
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_iam_policy.policy-rc,
+    google_secret_manager_secret_iam_policy.policy-ac,
+    google_secret_manager_secret_iam_policy.policy-wh
+  ]
+}

@@ -41,7 +41,7 @@ if err != nil {
 	return nil, fmt.Errorf("Error reading management cluster of PrivateCloud: %s", err)
 }
 
-// There can only be 1 management cluster and if the PC read is successfuly and
+// There can only be 1 management cluster and if the PC read is successfully and
 // we got response from cluster API then it should be present.
 mgmtClusterObj := clusterResponse["clusters"].([]interface{})[0].(map[string]interface{})
 clusterName := mgmtClusterObj["name"].(string)

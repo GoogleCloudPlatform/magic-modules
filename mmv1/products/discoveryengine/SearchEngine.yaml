@@ -13,6 +13,7 @@
 
 ---
 name: 'SearchEngine'
+api_resource_type_kind: Engine
 description: |
   Vertex AI Search and Conversation can be used to create a search engine or a chat application by connecting it with a datastore
 references:
@@ -32,7 +33,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -88,6 +89,7 @@ properties:
     enum_values:
       - 'GENERIC'
       - 'MEDIA'
+      - 'HEALTHCARE_FHIR'
   - name: 'displayName'
     type: String
     description: |
@@ -98,7 +100,6 @@ properties:
     description: |
       The data stores associated with this engine. For SOLUTION_TYPE_SEARCH type of engines, they can only associate with at most one data store.
     required: true
-    immutable: true
     item_type:
       type: String
   - name: 'createTime'

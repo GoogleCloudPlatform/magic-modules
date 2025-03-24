@@ -1,0 +1,16 @@
+resource "google_chronicle_watchlist" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  watchlist_id = "{{index $.Vars "watchlist_id"}}"
+  description = "{{index $.Vars "description"}}"
+  display_name = "{{index $.Vars "name"}}"
+  multiplying_factor = 1
+  entity_population_mechanism {
+    manual {
+
+    }
+  }
+  watchlist_user_preferences {
+    pinned = true
+  }
+}

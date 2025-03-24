@@ -40,18 +40,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_config_id'
@@ -117,6 +111,12 @@ examples:
     min_version: 'beta'
     vars:
       account_id: 'my-account'
+      workstation_cluster_name: 'workstation-cluster'
+      workstation_config_name: 'workstation-config'
+  - name: 'workstation_config_allowed_ports'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
       workstation_cluster_name: 'workstation-cluster'
       workstation_config_name: 'workstation-config'
 parameters:
@@ -469,7 +469,6 @@ properties:
               description: |
                 The type of the persistent disk for the home directory. Defaults to `pd-standard`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'sizeGb'
               type: Integer
@@ -477,7 +476,6 @@ properties:
                 The GB capacity of a persistent home directory for each workstation created with this configuration. Must be empty if `sourceSnapshot` is set.
                 Valid values are `10`, `50`, `100`, `200`, `500`, or `1000`. Defaults to `200`. If less than `200` GB, the `diskType` must be `pd-balanced` or `pd-ssd`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'reclaimPolicy'
               type: Enum
@@ -650,6 +648,30 @@ properties:
     description: |
       Disables support for plain TCP connections in the workstation. By default the service supports TCP connections via a websocket relay. Setting this option to true disables that relay, which prevents the usage of services that require plain tcp connections, such as ssh. When enabled, all communication must occur over https or wss.
     min_version: 'beta'
+  - name: 'maxUsableWorkstations'
+    type: Integer
+    description: |
+      Maximum number of workstations under this configuration a user can have workstations.workstation.use permission on. Only enforced on CreateWorkstation API calls on the user issuing the API request.
+    default_from_api: true
+  - name: 'allowedPorts'
+    type: Array
+    default_from_api: true
+    description: |
+      A list of port ranges specifying single ports or ranges of ports that are externally accessible in the workstation. Allowed ports must be one of 22, 80, or within range 1024-65535. If not specified defaults to ports 22, 80, and ports 1024-65535.
+    min_version: 'beta'
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'first'
+          type: Integer
+          description: |
+            Starting port number for the current range of ports. Valid ports are 22, 80, and ports within the range 1024-65535.
+          min_version: 'beta'
+        - name: 'last'
+          type: Integer
+          description: |
+            Ending port number for the current range of ports. Valid ports are 22, 80, and ports within the range 1024-65535.
+          min_version: 'beta'
   - name: 'conditions'
     type: Array
     description: |-

@@ -5,7 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ProviderModel describes the provider config data model.
+// ProviderModel maps provider schema data to a Go type.
+// When the plugin-framework provider is configured, the Configure function receives data about
+// the provider block in the configuration. That data is used to populate this struct.
 type ProviderModel struct {
 	Credentials                               types.String `tfsdk:"credentials"`
 	AccessToken                               types.String `tfsdk:"access_token"`
@@ -51,7 +53,6 @@ type ProviderModel struct {
 	AssuredWorkloadsCustomEndpoint     types.String `tfsdk:"assured_workloads_custom_endpoint"`
 	CloudBuildWorkerPoolCustomEndpoint types.String `tfsdk:"cloud_build_worker_pool_custom_endpoint"`
 	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
-	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
 	RecaptchaEnterpriseCustomEndpoint  types.String `tfsdk:"recaptcha_enterprise_custom_endpoint"`
 

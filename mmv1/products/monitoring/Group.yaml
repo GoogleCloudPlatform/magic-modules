@@ -28,6 +28,7 @@ base_url: 'v3/projects/{{project}}/groups'
 self_link: 'v3/{{name}}'
 mutex: 'stackdriver/groups/{{project}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

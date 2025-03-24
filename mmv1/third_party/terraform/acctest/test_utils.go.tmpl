@@ -81,9 +81,13 @@ func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 func MuxedProviders(testName string) (func() tfprotov5.ProviderServer, error) {
 	ctx := context.Background()
 
+	// primary is the SDKv2 implementation of the provider
+	// If tests are run in VCR mode, the provider will use a cached config specific to the test name
+	primary := GetSDKProvider(testName)
+
 	providers := []func() tfprotov5.ProviderServer{
-		providerserver.NewProtocol5(NewFrameworkTestProvider(testName)), // framework provider
-		GetSDKProvider(testName).GRPCProvider,                           // sdk provider
+		primary.GRPCProvider, // sdk provider
+		providerserver.NewProtocol5(NewFrameworkTestProvider(testName, primary)), // framework provider
 	}
 
 	muxServer, err := tf5muxserver.NewMuxServer(ctx, providers...)
@@ -129,6 +133,21 @@ func RandInt(t *testing.T) int {
 	}
 
 	return rand.New(s.source).Int()
+}
+
+func RandIntRange(t *testing.T, minInt int, maxInt int) int {
+	if !IsVcrEnabled() {
+		return acctest.RandIntRange(minInt, maxInt)
+	}
+	envPath := os.Getenv("VCR_PATH")
+	vcrMode := os.Getenv("VCR_MODE")
+	s, err := vcrSource(t, envPath, vcrMode)
+	if err != nil {
+		// At this point we haven't created any resources, so fail fast
+		t.Fatal(err)
+	}
+
+	return rand.New(s.source).Intn(maxInt-minInt) + minInt
 }
 
 // ProtoV5ProviderFactories returns a muxed ProviderServer that uses the provider code from this repo (SDK and plugin-framework).

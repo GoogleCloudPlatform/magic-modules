@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterResource'
+api_resource_type_kind: ServicePerimeter
 description: |
   Allows configuring a single GCP resource that should be inside the `status` block of a service perimeter.
   This resource is intended to be used in cases where it is not possible to compile a full list
@@ -42,7 +43,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter_name}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter_name}}/{{resource}}'
 timeouts:
@@ -55,14 +56,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - resource
 nested_query:
@@ -72,7 +67,11 @@ nested_query:
   is_list_of_ids: true
   modify_by_patch: true
 custom_code:
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_resource.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_resource.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
@@ -101,3 +100,14 @@ properties:
       Format: projects/{project_number}
     required: true
     immutable: true
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of perimeter resources on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of resources. The resource to add or remove is merged into that list and then this etag is sent with the PATCH call along with the updated resource list.

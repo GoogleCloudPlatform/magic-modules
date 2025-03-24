@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionUrlMap'
+api_resource_type_kind: UrlMap
 kind: 'compute#urlMap'
 description: |
   UrlMaps are used to route requests to a backend service based on rules
@@ -29,17 +30,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_url_map_basic'
     primary_resource_id: 'regionurlmap'

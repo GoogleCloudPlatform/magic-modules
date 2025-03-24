@@ -62,6 +62,8 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
         subProject(googleSubProjectBeta(allConfig))
         subProject(projectSweeperSubProject(allConfig))
 
+        // Feature branch-testing projects - these will be added and removed as needed
+
         params {
             readOnlySettings()
         }

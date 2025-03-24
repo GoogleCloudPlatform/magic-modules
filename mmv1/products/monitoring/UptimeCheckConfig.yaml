@@ -28,6 +28,7 @@ update_verb: 'PATCH'
 update_mask: true
 mutex: 'stackdriver/groups/{{project}}'
 import_format:
+  - '{{project}} {{name}}'
   - '{{name}}'
 timeouts:
   insert_minutes: 20

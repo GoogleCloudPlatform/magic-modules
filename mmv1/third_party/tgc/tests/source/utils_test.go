@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai"
 	"github.com/google/go-cmp/cmp"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"go.uber.org/zap/zaptest"
@@ -190,7 +190,9 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 
 // newTestConfig create a config using the http test server.
 func newTestConfig(server *httptest.Server) *transport_tpg.Config {
-	cfg := &transport_tpg.Config{}
+	cfg := &transport_tpg.Config{
+		Project: data.Provider["project"],
+	}
 	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
 	return cfg

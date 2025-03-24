@@ -1,0 +1,14 @@
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_security_mirroring_deployment_group" "{{$.PrimaryResourceId}}" {
+  mirroring_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
+  location                      = "global"
+  network                       = google_compute_network.network.id
+  description                   = "some description"
+  labels = {
+    foo = "bar"
+  }
+}

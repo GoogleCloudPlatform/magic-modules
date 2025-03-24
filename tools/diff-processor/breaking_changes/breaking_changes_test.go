@@ -94,7 +94,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
 				},
 			},
 		},
@@ -118,7 +118,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -143,7 +143,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 			},
 		},
@@ -167,11 +167,11 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 				{
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -200,15 +200,15 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-a` changed from optional to required on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-optional-to-required",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-optional-to-required",
 				},
 				{
 					Message:                "Field `field-b` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 				{
 					Message:                "Resource `google-y` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-map-resource-removal-or-rename",
 				},
 			},
 		},
@@ -254,7 +254,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-a.sub-field-2` within resource `google-x` was either removed or renamed",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#resource-schema-field-removal-or-rename",
 				},
 			},
 		},
@@ -298,8 +298,8 @@ func TestComputeBreakingChanges(t *testing.T) {
 			},
 			wantViolations: []BreakingChange{
 				{
-					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
+					Message:                "Field `field-a.sub-field-1` MaxItems went from 100 to 25 on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},
 		},
@@ -343,8 +343,8 @@ func TestComputeBreakingChanges(t *testing.T) {
 			},
 			wantViolations: []BreakingChange{
 				{
-					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-shrinking-max",
+					Message:                "Field `field-a.sub-field-1` MaxItems went from 100 to 25 on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},
 		},
@@ -375,7 +375,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			wantViolations: []BreakingChange{
 				{
 					Message:                "Field `field-a` MinItems went from 1 to 4 on `google-x`",
-					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/develop/breaking-changes/breaking-changes#field-growing-min",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-growing-min",
 				},
 			},
 		},
