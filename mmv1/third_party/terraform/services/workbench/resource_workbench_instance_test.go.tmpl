@@ -1,6 +1,7 @@
 package workbench_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -851,49 +852,40 @@ resource "google_workbench_instance" "instance" {
 `, context)
 }
 
-// TestAccWorkbenchInstance_metadataValidation ensures that protected metadata keys cannot be set.
+// TestAccWorkbenchInstance_metadataValidation ensures protected metadata keys cannot be set.
 func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    invalidConfig := fmt.Sprintf(`
-        resource "google_workbench_instance" "invalid" {
-            name     = "test-instance"
-            location = "us-central1-a"
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-            metadata = {
-                "proxy-url" = "https://custom.proxy"
-                "image-url" = "https://custom.image"
-				"custom-key" = "custom-value"
-            }
-        }
-    `)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Invalid metadata keys should trigger an error
+				Config:      testAccWorkbenchInstance_invalidMetadata(context),
+				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[proxy-url image-url\]`),
+			},
+		},
+	})
+}
 
-    validConfig := fmt.Sprintf(`
-        resource "google_workbench_instance" "valid" {
-            name     = "test-instance"
-            location = "us-central1-a"
-
-            metadata = {
-                "custom-key" = "custom-value"
-            }
-        }
-    `)
-
-    resource.Test(t, resource.TestCase{
-        PreCheck:          func() { testAccPreCheck(t) }, // Ensures required env vars are set
-        Providers:         testAccProviders,             // Uses the Terraform provider
-        CheckDestroy:      testAccCheckWorkbenchInstanceDestroy,
-        Steps: []resource.TestStep{
-            {
-                Config:      invalidConfig,
-                ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[proxy-url image-url\]`),
-            },
-            {
-                Config: validConfig,
-                Check: resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr("google_workbench_instance.valid", "metadata.custom-key", "custom-value"),
-                ),
-            },
-        },
-    })
+// Invalid metadata configuration (should fail)
+func testAccWorkbenchInstance_invalidMetadata(context map[string]interface{}) string {
+   return acctest.Nprintf(`
+resource "google_workbench_instance" "instance" {
+  name     = "tf-test-workbench-instance%{random_suffix}"
+  location = "us-central1-a"
+  gce_setup {
+	metadata = {
+        "proxy-url"  = "https://custom.proxy"
+        "image-url"  = "https://custom.image"
+        "custom-key" = "custom-value"
+	}
+  }
+}
+`, context)
 }
