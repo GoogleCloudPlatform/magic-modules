@@ -854,6 +854,7 @@ resource "google_workbench_instance" "instance" {
 
 // TestAccWorkbenchInstance_metadataValidation ensures protected metadata keys cannot be set.
 func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
+	acctest.SkipIfVcr(t) // Test doesn't interact with API
 	t.Parallel()
 
 	context := map[string]interface{}{
