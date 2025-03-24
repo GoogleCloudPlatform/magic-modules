@@ -46,8 +46,6 @@ examples:
       connect_cluster_id: 'my-connect-cluster'
       cluster_id: 'my-cluster'
       secondary_subnet_id: 'my-secondary-subnetwork'
-      subnetwork_id: 'my-subnetwork'
-      network_id: 'my-network'
 parameters:
   - name: 'location'
     type: String

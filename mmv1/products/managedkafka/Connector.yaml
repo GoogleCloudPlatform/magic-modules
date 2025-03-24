@@ -39,8 +39,6 @@ examples:
       cluster_id: 'my-cluster'
       cps_topic_name: 'my-cps-topic'
       secondary_subnet_id: 'my-secondary-subnetwork-00'
-      subnetwork_id: 'my-subnetwork-00'
-      network_id: 'my-network-00'
 parameters:
   - name: 'location'
     type: String
