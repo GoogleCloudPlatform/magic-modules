@@ -237,7 +237,7 @@ var ServicesListBeta = mapOf(
         "path" to "./google-beta/services/compute"
     ),
     "contactcenterinsights" to mapOf(
-        "name" to "contactcenterinsights"
+        "name" to "contactcenterinsights",
         "displayName" to "Contact Center Insights",
         "path" to "./google-beta/services/contactcenterinsights"
     ),
