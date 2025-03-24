@@ -666,7 +666,7 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
-* `auto_monitoring_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for GKE Auto-Monitoring.
+* `auto_monitoring_config` - (Optional) Configuration options for GKE Auto-Monitoring.
 
 <a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
 
@@ -1213,12 +1213,17 @@ notification_config {
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
 
 * `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+* `ip_endpoints_config` - (Optional) IP endpoint configuration.
 
 The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `endpoint` - (Output) The cluster's DNS endpoint.
 
 * `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+
+The `control_plane_endpoints_config.ip_endpoints_config` block supports:
+
+* `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
