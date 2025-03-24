@@ -47,5 +47,25 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
       ip_protocol = "udp"
       ports       = [22]
     }
+
+    src_secure_tags {
+      name = google_tags_tag_value.basic_value.id
+    }
   }
+
+  target_secure_tags {
+    name = google_tags_tag_value.basic_value.id
+  }
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.Vars "tag_key"}}"
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "{{index $.Vars "tag_value"}}"
 }
