@@ -451,7 +451,7 @@ resource "google_memorystore_instance" "test_secondary" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
-	location         = "europe-west4"
+	location         = "us-west2"
 	desired_psc_auto_connections  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
@@ -536,7 +536,7 @@ resource "google_memorystore_instance" "test" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
-	location         = "europe-west1"
+	location         = "us-west2"
 	desired_psc_auto_connections  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
@@ -559,7 +559,7 @@ resource "google_memorystore_instance" "test" {
 
 resource "google_network_connectivity_service_connection_policy" "default" {
 	name = "%s"
-	location = "europe-west1"
+	location = "us-west2"
 	service_class = "gcp-memorystore"
 	description   = "my basic service connection policy"
 	network = google_compute_network.producer_net.id
@@ -571,7 +571,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 resource "google_compute_subnetwork" "producer_subnet" {
 	name          = "%s"
 	ip_cidr_range = "10.0.0.248/29"
-	region        = "europe-west1"
+	region        = "us-west2"
 	network       = google_compute_network.producer_net.id
 }
 

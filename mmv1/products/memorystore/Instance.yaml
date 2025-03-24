@@ -83,7 +83,7 @@ examples:
       secondary_instance_deletion_protection_enabled: 'true'
       secondary_instance_prevent_destroy: 'true'
       secondary_instance_policy_name: 'my-policy-secondary-instance'
-      secondary_network_name: "my-network-primary-instance"
+      secondary_network_name: "my-network-secondary-instance"
       secondary_instance_subnet_name: 'my-subnet-secondary-instance'
     test_vars_overrides:
       'primary_instance_deletion_protection_enabled': 'false'
