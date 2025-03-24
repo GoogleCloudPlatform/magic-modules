@@ -45,7 +45,7 @@ examples:
     vars:
       connect_cluster_id: 'my-connect-cluster'
       cluster_id: 'my-cluster'
-      additional_subnet_id: 'my-additional-subnetwork-0'
+      additional_subnet_id: 'my-additional-subnetwork'
       subnetwork_id: 'my-subnetwork'
       network_id: 'my-network'
 parameters:
