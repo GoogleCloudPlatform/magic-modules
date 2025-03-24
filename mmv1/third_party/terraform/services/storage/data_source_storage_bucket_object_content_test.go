@@ -34,6 +34,7 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 }
 
 func TestAccDataSourceStorageBucketObjectContent_FileContentBase64(t *testing.T) {
+	acctest.SkipIfVcr(t)
 
 	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
 	folderName := "tf-folder-" + acctest.RandString(t, 10)
