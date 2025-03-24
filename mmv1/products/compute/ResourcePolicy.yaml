@@ -98,6 +98,11 @@ examples:
     min_version: 'beta'
     vars:
       name: 'gce-policy'
+  - name: 'resource_policy_placement_policy_tpu_topology'
+    primary_resource_id: 'baz'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
 parameters:
   - name: 'region'
     type: ResourceRef
