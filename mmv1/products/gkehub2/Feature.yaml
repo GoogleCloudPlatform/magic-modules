@@ -24,6 +24,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/features'
 self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}?return_partial_success=true'
 create_url: 'projects/{{project}}/locations/{{location}}/features?featureId={{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
