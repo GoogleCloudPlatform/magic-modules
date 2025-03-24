@@ -856,7 +856,7 @@ resource "google_workbench_instance" "instance" {
 func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
 	t.Parallel()
 	
-	// Assume we never want to sleep when we're in replaying mode.
+	// Skip validation test in replaying mode.
 	if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
 		return nil
 	}
