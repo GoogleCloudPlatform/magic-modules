@@ -14,8 +14,8 @@ resource "google_compute_subnetwork" "mkc_subnet" {
   provider = google-beta
 }
 
-resource "google_compute_subnetwork" "mkc_additional_subnet" {
-  name          = "{{index $.Vars "additional_subnet_id"}}"
+resource "google_compute_subnetwork" "mkc_secondary_subnet" {
+  name          = "{{index $.Vars "secondary_subnet_id"}}"
   ip_cidr_range = "10.3.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.mkc_network.id
@@ -53,7 +53,7 @@ resource "google_managed_kafka_connect_cluster" "{{$.PrimaryResourceId}}" {
     access_config {
       network_configs {
         primary_subnet = "${google_compute_subnetwork.mkc_subnet.id}"
-        additional_subnets = ["${google_compute_subnetwork.mkc_additional_subnet.id}"]
+        additional_subnets = ["${google_compute_subnetwork.mkc_secondary_subnet.id}"]
         dns_domain_names = ["${google_managed_kafka_cluster.gmk_cluster.cluster_id}.us-central1.managedkafka.${data.google_project.project.project_id}.cloud.goog"]
       }
     }
