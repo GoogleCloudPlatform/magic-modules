@@ -54,6 +54,9 @@ examples:
       kms_key: 'kms-key'
     test_vars_overrides:
       'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 parameters:
   - name: 'parameterId'
     type: String

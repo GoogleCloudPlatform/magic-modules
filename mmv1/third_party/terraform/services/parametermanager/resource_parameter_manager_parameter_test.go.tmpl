@@ -108,6 +108,12 @@ resource "google_parameter_manager_parameter" "parameter-with-labels" {
 
 func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 	t.Parallel()
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	context := map[string]interface{}{
 		"kms_key":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
@@ -166,20 +172,6 @@ data "google_project" "project" {
 	provider = google-beta
 }
 
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-1" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-2" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key_other}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
 resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
   provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
@@ -194,31 +186,12 @@ data "google_project" "project" {
   provider = google-beta
 }
 
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-1" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-2" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key_other}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
 resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
   provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
   format = "JSON"
 
   kms_key = "%{kms_key}"
-
-  depends_on = [
-    google_kms_crypto_key_iam_member.kms-parameter-binding-1,
-    google_kms_crypto_key_iam_member.kms-parameter-binding-2,
-  ]
 }
 `, context)
 }
@@ -229,31 +202,12 @@ data "google_project" "project" {
   provider = google-beta
 }
 
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-1" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-2" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key_other}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
-}
-
 resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
   provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
   format = "JSON"
 
   kms_key = "%{kms_key_other}"
-
-  depends_on = [
-    google_kms_crypto_key_iam_member.kms-parameter-binding-1,
-    google_kms_crypto_key_iam_member.kms-parameter-binding-2,
-  ]
 }
 `, context)
 }

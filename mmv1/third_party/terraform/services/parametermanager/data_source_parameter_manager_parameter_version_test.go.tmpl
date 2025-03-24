@@ -203,6 +203,13 @@ data "google_parameter_manager_parameter_version" "parameter-version-with-yaml-d
 func TestAccDataSourceParameterManagerParameterVersion_withKmsKey(t *testing.T) {
 	t.Parallel()
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
+
 	context := map[string]interface{}{
 		"kms_key":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
@@ -228,13 +235,6 @@ func testAccParameterManagerParameterVersion_withKmsKey(context map[string]inter
 	return acctest.Nprintf(`
 data "google_project" "project" {
   provider = google-beta
-}
-
-resource "google_kms_crypto_key_iam_member" "kms-parameter-binding-1" {
-  provider = google-beta
-  crypto_key_id = "%{kms_key}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pm.iam.gserviceaccount.com"
 }
 
 resource "google_parameter_manager_parameter" "parameter-basic" {
