@@ -17,6 +17,7 @@ import (
 
 func TestAccStorageBatchOperationsJobs_storageBatchOperationsError(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
