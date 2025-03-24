@@ -850,3 +850,50 @@ resource "google_workbench_instance" "instance" {
 }
 `, context)
 }
+
+// TestAccWorkbenchInstance_metadataValidation ensures that protected metadata keys cannot be set.
+func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
+    t.Parallel()
+
+    invalidConfig := fmt.Sprintf(`
+        resource "google_workbench_instance" "invalid" {
+            name     = "test-instance"
+            location = "us-central1-a"
+
+            metadata = {
+                "proxy-url" = "https://custom.proxy"
+                "image-url" = "https://custom.image"
+				"custom-key" = "custom-value"
+            }
+        }
+    `)
+
+    validConfig := fmt.Sprintf(`
+        resource "google_workbench_instance" "valid" {
+            name     = "test-instance"
+            location = "us-central1-a"
+
+            metadata = {
+                "custom-key" = "custom-value"
+            }
+        }
+    `)
+
+    resource.Test(t, resource.TestCase{
+        PreCheck:          func() { testAccPreCheck(t) }, // Ensures required env vars are set
+        Providers:         testAccProviders,             // Uses the Terraform provider
+        CheckDestroy:      testAccCheckWorkbenchInstanceDestroy,
+        Steps: []resource.TestStep{
+            {
+                Config:      invalidConfig,
+                ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[proxy-url image-url\]`),
+            },
+            {
+                Config: validConfig,
+                Check: resource.ComposeTestCheckFunc(
+                    resource.TestCheckResourceAttr("google_workbench_instance.valid", "metadata.custom-key", "custom-value"),
+                ),
+            },
+        },
+    })
+}
