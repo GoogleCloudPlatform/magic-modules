@@ -116,20 +116,7 @@ impersonated service account regardless of the primary identity in use.
 
 ## Authentication Configuration
 
-* `external_credentials` - (Optional) A block to configure external credentials for the provider, such as Workload Identity Federation credentials. See [External Credentials](/website/docs/guides/external_credentials_stacks.html.markdown) for more information.
-
-`external_credentials` takes precedence over `credentials` and `access_token` as well as `GOOGLE_CREDENTIALS` and `GOOGLE_OAUTH_ACCESS_TOKEN` environment variables. It includes the following fields:
-
-* `audience` - (Required) The audience for the external credentials.
-* `service_account_email` - (Required) The email of the service account to impersonate.
-* `identity_token` - (Required) The identity token to use for authentication.
-
-    -> Terraform cannot renew these access tokens, and they will eventually
-    expire (default `2 hour`). If Terraform needs access for longer than a token's
-    lifetime, use a service account key with `credentials` instead.
-
----
-
+* `credentials` - (Optional) Either the path to or the contents of a
 [service account key file] in JSON format. You can
 [manage key files using the Cloud Console]. Your service account key file is
 used to complete a two-legged OAuth 2.0 flow to obtain access tokens to
@@ -191,6 +178,20 @@ Alternatively, this can be specified using the `GOOGLE_IMPERSONATE_SERVICE_ACCOU
 variable.
 
 * `impersonate_service_account_delegates` - (Optional) The delegation chain for an impersonating a service account as described [here](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials#sa-credentials-delegated).
+
+---
+
+* `external_credentials` - (Optional) A block to configure external credentials for the provider, such as Workload Identity Federation credentials. See [External Credentials](/website/docs/guides/external_credentials_stacks.html.markdown) for more information.
+
+`external_credentials` takes precedence over `credentials` and `access_token` as well as `GOOGLE_CREDENTIALS` and `GOOGLE_OAUTH_ACCESS_TOKEN` environment variables. It includes the following fields:
+
+* `audience` - (Required) The audience for the external credentials.
+* `service_account_email` - (Required) The email of the service account to impersonate.
+* `identity_token` - (Required) The identity token to use for authentication.
+
+    -> Terraform cannot renew these access tokens, and they will eventually
+    expire (default `1 hour`). If Terraform needs access for longer than a token's
+    lifetime, use a service account key with `credentials` instead.
 
 ## Quota Management Configuration
 
