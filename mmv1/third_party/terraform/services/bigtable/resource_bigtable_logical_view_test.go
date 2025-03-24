@@ -26,7 +26,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col1"),
+				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col1", true),
 			},
 			{
 				ResourceName:      "google_bigtable_logical_view.logical_view",
@@ -34,7 +34,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col2"),
+				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col2", false),
 
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -51,7 +51,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 	})
 }
 
-func testAccBigtableLogicalView_update(instanceName, tableName, mvName, colName string) string {
+func testAccBigtableLogicalView_update(instanceName, tableName, mvName, colName string, dp bool) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name          = "%s"
@@ -75,6 +75,7 @@ resource "google_bigtable_table" "table" {
 resource "google_bigtable_logical_view" "logical_view" {
   logical_view_id = "%s"
   instance        = google_bigtable_instance.instance.name
+  deletion_protection = %v
   query = <<EOT
 SELECT _key, CF['%s'] 
 FROM %s
@@ -84,5 +85,5 @@ EOT
     google_bigtable_table.table
   ]
 }
-`, instanceName, instanceName, tableName, mvName, colName, fmt.Sprintf("`%s`", tableName))
+`, instanceName, instanceName, tableName, mvName, dp, colName, fmt.Sprintf("`%s`", tableName))
 }
