@@ -3,6 +3,8 @@ package storage_test
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -31,6 +33,40 @@ func TestAccDataSourceStorageBucketObjectContent_Basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceStorageBucketObjectContent_FileContentBase64(t *testing.T) {
+
+	bucket := "tf-bucket-object-content-" + acctest.RandString(t, 10)
+	folderName := "tf-folder-" + acctest.RandString(t, 10)
+
+	if err := os.Mkdir(folderName, 0777); err != nil {
+		t.Errorf("error creating directory: %v", err)
+	}
+
+	data := []byte("data data data")
+	testFile := getTmpTestFile(t, folderName, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"local": resource.ExternalProvider{
+				VersionConstraint: "> 2.5.0",
+			},
+			"archive": resource.ExternalProvider{
+				VersionConstraint: "> 2.5.0",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceStorageBucketObjectContent_FileContentBase64(bucket, folderName),
+			},
+		},
+	})
+}
+
 func testAccDataSourceStorageBucketObjectContent_Basic(content, bucket string) string {
 	return fmt.Sprintf(`
 data "google_storage_bucket_object_content" "default" {
@@ -49,6 +85,37 @@ resource "google_storage_bucket" "contenttest" {
 	location      = "US"
 	force_destroy = true
 }`, content, bucket)
+}
+
+func testAccDataSourceStorageBucketObjectContent_FileContentBase64(bucket, folderName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "this" {
+  name                        = "%s"
+  location                    = "us-east4"
+  uniform_bucket_level_access = true
+}
+
+data "archive_file" "this" {
+  type       = "zip"
+  source_dir = "${path.cwd}/%s"
+  output_path = "${path.cwd}/archive.zip"
+}
+
+resource "google_storage_bucket_object" "this" {
+  name   = "archive.zip"
+  bucket = google_storage_bucket.this.name
+  source = data.archive_file.this.output_path
+}
+
+data "google_storage_bucket_object_content" "this" {
+  name   = google_storage_bucket_object.this.name
+  bucket = google_storage_bucket.this.name
+}
+
+resource "local_file" "this" {
+  content_base64 = (data.google_storage_bucket_object_content.this.content_base64)
+  filename = "${path.cwd}/content.zip"
+}`, bucket, folderName)
 }
 
 func TestAccDataSourceStorageBucketObjectContent_Issue15717(t *testing.T) {
@@ -105,4 +172,12 @@ data "google_storage_bucket_object_content" "new" {
 			},
 		},
 	})
+}
+
+func getTmpTestFile(t *testing.T, folderName, prefix string) *os.File {
+	testFile, err := ioutil.TempFile(folderName, prefix)
+	if err != nil {
+		t.Fatalf("Cannot create temp file: %s", err)
+	}
+	return testFile
 }
