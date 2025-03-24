@@ -42,6 +42,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
+exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_policy_basic'
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719

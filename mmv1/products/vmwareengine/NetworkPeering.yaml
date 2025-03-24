@@ -38,6 +38,8 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+# There is a handwritten sweeper that provides a list of locations to sweep
+exclude_sweeper: true
 examples:
   - name: 'vmware_engine_network_peering_ven'
     primary_resource_id: 'vmw-engine-network-peering'
