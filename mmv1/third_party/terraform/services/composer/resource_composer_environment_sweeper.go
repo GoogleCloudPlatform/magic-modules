@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("gcp_composer_environment", testSweepComposerResources)
+	sweeper.AddTestSweepersLegacy("gcp_composer_environment", testSweepComposerResources)
 }
 
 /**
