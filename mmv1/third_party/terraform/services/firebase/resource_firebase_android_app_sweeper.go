@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("FirebaseAndroidApp", testSweepFirebaseAndroidApp)
+	sweeper.AddTestSweepersLegacy("FirebaseAndroidApp", testSweepFirebaseAndroidApp)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

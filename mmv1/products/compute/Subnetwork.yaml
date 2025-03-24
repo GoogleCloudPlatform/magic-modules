@@ -71,6 +71,8 @@ custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
 sweeper:
+  dependencies:
+    - "google_compute_forwarding_rule"
   url_substitutions:
     - region: "us-west2"
     - region: "us-central1"
