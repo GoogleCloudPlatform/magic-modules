@@ -171,9 +171,7 @@ func TestAccStorageBatchOperationsJobs_batchOperationJobKmsKey(t *testing.T) {
 	context := map[string]interface{}{
 		"kms_key":     acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 		"job_id":      fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t)),
-		"crypto_key":  fmt.Sprintf("tf-test-cryptokey-%d", acctest.RandInt(t)),
 		"object_name": fmt.Sprintf("tf-test-object-%d", acctest.RandInt(t)),
-		"key_ring":    fmt.Sprintf("tf-test-keyring-%d", acctest.RandInt(t)),
 		"bucket_name": acctest.TestBucketName(t),
 	}
 	acctest.VcrTest(t, resource.TestCase{
@@ -454,14 +452,14 @@ resource "google_storage_batch_operations_job" "job" {
 func testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name     = %{bucket_name}
+  name     = "%{bucket_name}"
   location = "us-central1"
   uniform_bucket_level_access = true
   force_destroy = true
 }
 
 resource "google_storage_bucket_object" "object" {
-  name          = %{object_name}
+  name          = "%{object_name}"
   bucket        = google_storage_bucket.bucket.name
   content       = "test-content"
 }
@@ -470,13 +468,13 @@ data "google_storage_project_service_account" "gcs_account" {
 }
 
 resource "google_kms_crypto_key_iam_member" "iam" {
-  crypto_key_id = %{kms_key}
+  crypto_key_id = "%{kms_key}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
 
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = %{job_id}
+	job_id     = "%{job_id}"
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -489,7 +487,7 @@ resource "google_storage_batch_operations_job" "job" {
 		}
 	}
 	rewrite_object {
-		kms_key = %{kms_key}
+		kms_key = "%{kms_key}"
 	}
 
 	delete_protection = false
