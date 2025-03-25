@@ -11,7 +11,7 @@ import (
 
 func DataSourceGoogleContainerImage() *schema.Resource {
 	return &schema.Resource{
-		DeprecationMessage: "Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable.",
+		DeprecationMessage: "Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable. Resource will be removed in future major release. Resource will be removed in future major release",
 		Read: containerRegistryImageRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
