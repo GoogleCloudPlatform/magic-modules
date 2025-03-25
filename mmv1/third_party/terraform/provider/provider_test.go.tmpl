@@ -197,11 +197,10 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 		preConfig func(*testing.T)
 	}{
 		"access_token still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(),
-			context: map[string]interface{}{
+			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(map[string]interface{}{
 				"access_token":  accessToken,
 				"random_suffix": acctest.RandString(t, 10),
-			},
+			}),
 			preConfig: func(t *testing.T) {
 				for _, env := range envvar.CredsEnvVars {
 					t.Setenv(env, "")
@@ -209,11 +208,10 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 			},
 		},
 		"credentials still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(),
-			context: map[string]interface{}{
+			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
 				"credentials":   credentials,
 				"random_suffix": acctest.RandString(t, 10),
-			},
+			}),
 			preConfig: func(t *testing.T) {
 				// Clear environment variables to ensure only config values are used
 				for _, env := range envvar.CredsEnvVars {
@@ -251,8 +249,8 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	}
 }
 
-func testAccProviderExternalCredentialsUpgrade_AccessTokenConfig() string {
-	return `
+func testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 provider "google" {
   access_token = "%{access_token}"
 }
@@ -261,11 +259,11 @@ resource "google_service_account" "default" {
   account_id   = "tf-test-%{random_suffix}"
   display_name = "Test Service Account"
 }
-`
+`, context)
 }
 
-func testAccProviderExternalCredentialsUpgrade_CredentialsConfig() string {
-	return `
+func testAccProviderExternalCredentialsUpgrade_CredentialsConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 provider "google" {
   credentials = "%{credentials}"
 }
@@ -274,7 +272,7 @@ resource "google_service_account" "default" {
   account_id   = "tf-test-%{random_suffix}"
   display_name = "Test Service Account"
 }
-`
+`, context)
 }
 
 func testAccProviderBasePath_setBasePath(endpoint, name string) string {
