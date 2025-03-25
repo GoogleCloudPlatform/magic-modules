@@ -69,6 +69,7 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 	resource "google_contact_center_insights_analysis_rule" "default" {
 	  	project = google_project.project.project_id
 		name = "test-analysis-rule"
+		location = "us-central1"
 		create_time = "2024-01-01T00:00:00Z"
 		update_time = "2024-01-01T00:00:00Z"
 		conversation_filter = "test-filter"
@@ -83,11 +84,31 @@ func testAccContactCenterInsightsAnalysisRule_full(context map[string]interface{
 resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
   name = "tf_test_basic_analysis_rule%{random_suffix}"
   display_name = "analysis-rule-display-name"
+  location = "us-central1"
   create_time = "2025-01-01T00:00:00Z"
   update_time = "2025-01-01T00:00:00Z"
   conversation_filter = "test-filter"
   annotator_selector {
     run_interruption_annotator = true
+	issue_models    = "some_issue_model_id"
+    phrase_matchers = "some_phrase_matcher_id"
+    qa_config {
+      scorecard_list {
+        qa_scorecard_revisions = "some_scorecard_revision_id"
+      }
+    }
+    run_entity_annotator         = true
+    run_intent_annotator         = true
+    run_issue_model_annotator    = true
+    run_phrase_matcher_annotator = true
+    run_qa_annotator             = true
+    run_sentiment_annotator      = true
+    run_silence_annotator        = true
+    run_summarization_annotator  = true
+    summarization_config {
+      conversation_profile = "some_conversation_profile"
+      summarization_model  = BASELINE_MODEL
+    }
   }
   analysis_percentage = 0.5
   active    = true
@@ -100,11 +121,31 @@ func testAccContactCenterInsightsAnalysisRule_update(context map[string]interfac
 resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
   name = "tf_test_basic_analysis_rule%{random_suffix}"
   display_name = "analysis-rule-display-name-updated"
+  location = "us-central1"
   create_time = "2025-01-02T00:00:00Z"
   update_time = "2025-01-02T00:00:00Z"
   conversation_filter = ""
   annotator_selector {
     run_interruption_annotator = false
+	issue_models    = "alt_issue_model_id"
+    phrase_matchers = "alt_phrase_matcher_id"
+    qa_config {
+      scorecard_list {
+        qa_scorecard_revisions = "alt_scorecard_revision_id"
+      }
+    }
+    run_entity_annotator         = false
+    run_intent_annotator         = false
+    run_issue_model_annotator    = false
+    run_phrase_matcher_annotator = false
+    run_qa_annotator             = false
+    run_sentiment_annotator      = false
+    run_silence_annotator        = false
+    run_summarization_annotator  = false
+    summarization_config {
+      conversation_profile = "alt_conversation_profile"
+      summarization_model  = BASELINE_MODEL_V2_0
+    }
   }
   analysis_percentage = 0.0
   active    = false
