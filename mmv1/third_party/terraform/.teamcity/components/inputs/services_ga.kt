@@ -46,6 +46,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Apigee",
         "path" to "./google/services/apigee"
     ),
+    "apihub" to mapOf(
+        "name" to "apihub",
+        "displayName" to "Apihub",
+        "path" to "./google/services/apihub"
+    ),
     "apikeys" to mapOf(
         "name" to "apikeys",
         "displayName" to "Apikeys",
@@ -141,6 +146,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
     ),
+    "chronicle" to mapOf(
+        "name" to "chronicle",
+        "displayName" to "Chronicle",
+        "path" to "./google/services/chronicle"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",
@@ -210,6 +220,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
         "path" to "./google/services/cloudtasks"
+    ),
+    "colab" to mapOf(
+        "name" to "colab",
+        "displayName" to "Colab",
+        "path" to "./google/services/colab"
     ),
     "composer" to mapOf(
         "name" to "composer",
@@ -386,10 +401,20 @@ var ServicesListGa = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
         "path" to "./google/services/firebasedatabase"
+    ),
+    "firebasedataconnect" to mapOf(
+        "name" to "firebasedataconnect",
+        "displayName" to "Firebasedataconnect",
+        "path" to "./google/services/firebasedataconnect"
     ),
     "firebaseextensions" to mapOf(
         "name" to "firebaseextensions",
@@ -496,6 +521,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Looker",
         "path" to "./google/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -571,6 +601,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Osconfig",
         "path" to "./google/services/osconfig"
     ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google/services/osconfigv2"
+    ),
     "oslogin" to mapOf(
         "name" to "oslogin",
         "displayName" to "Oslogin",
@@ -580,6 +615,16 @@ var ServicesListGa = mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
+    ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google/services/parametermanager"
+    ),
+    "parametermanagerregional" to mapOf(
+        "name" to "parametermanagerregional",
+        "displayName" to "Parametermanagerregional",
+        "path" to "./google/services/parametermanagerregional"
     ),
     "privateca" to mapOf(
         "name" to "privateca",
@@ -715,6 +760,11 @@ var ServicesListGa = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google/services/storage"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

@@ -37,16 +37,18 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-south1"
+    - region: "us-west2"
+    - region: "us-west1"
+    - region: "asia-southeast1"
+    - region: "europe-west1"
+    - region: "southamerica-west1"
+    - region: "us-central1"
 examples:
   - name: 'region_security_policy_basic'
     primary_resource_id: 'region-sec-policy-basic'

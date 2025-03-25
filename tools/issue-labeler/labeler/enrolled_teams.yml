@@ -9,7 +9,7 @@ service/accesscontextmanager:
   - google_access_context_manager_.*
 service/aiplatform-colab-enterprise:
   resources:
-  - google_vertex_ai_notebook_.*
+  - google_colab_.*
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
@@ -41,6 +41,9 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apihub:
+  resources:
+  - google_apihub_.*
 service/apikeys:
   resources:
   - google_apikeys_key
@@ -87,6 +90,10 @@ service/certificatemanager:
   - google_compute_managed_ssl_certificate
   - google_compute_region_ssl_certificate
   - google_compute_ssl_certificate
+service/chronicle:
+  team: chronicle-terraform
+  resources:
+  - google_chronicle_.*
 service/cloud-dns:
   resources:
   - google_dns_.*
@@ -211,6 +218,7 @@ service/compute-managed:
   - google_compute_per_instance_config.*
   - google_compute_region_per_instance_config.*
   - google_compute_resize_request.*
+  - google_compute_region_resize_request.*
 service/compute-nat:
   resources:
   - google_compute_router_nat.*
@@ -313,6 +321,9 @@ service/dataproc:
   - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
+service/dataprocgdc:
+  resources:
+  - google_dataproc_gdc_.*
 service/datastream:
   resources:
   - google_datastream_.*
@@ -360,8 +371,20 @@ service/filestore:
 service/firebase:
   team: firebase-terraform
   resources:
-  - google_firebase_.*
+  - google_firebase_android.*
+  - google_firebase_apple.*
+  - google_firebase_app_check.*
+  - google_firebase_database.*
+  - google_firebase_extensions.*
+  - google_firebase_hosting.*
+  - google_firebase_project
+  - google_firebase_storage.*
+  - google_firebase_web.*
   - google_firebaserules_.*
+  - google_firebase_app_hosting.*
+service/firebasedataconnect:
+  resources:
+  - google_firebase_data_connect_.*
 service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
@@ -373,6 +396,9 @@ service/firestore-dataplane:
   - google_firestore_field
   - google_firestore_index
   - google_firestore_ttl
+service/gemini:
+  resources:
+  - google_gemini_.*
 service/gkebackup:
   resources:
   - google_gke_backup_.*
@@ -397,6 +423,8 @@ service/iam-core:
   - google_iam_deny_policy
   - google_iam_policy
   - google_iam_role
+  - google_iam_.*_policy_binding
+  - google_iam_principal_access_boundary_policy
   - google_iam_testable_permissions
 service/iam-serviceaccount:
   resources:
@@ -411,6 +439,7 @@ service/iam-wlid:
 service/iam-workforce:
   resources:
   - google_iam_workforce_pool.*
+  - google_iam_oauth_client.*
 service/iap:
   resources:
   - google_iap_.*
@@ -432,6 +461,9 @@ service/logging:
 service/looker-core:
   resources:
   - google_looker_instance
+service/lustre:
+  resources:
+  - google_lustre_.*
 service/managedidentities:
   resources:
   - google_active_directory_.*
@@ -500,12 +532,19 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-mtls:
+  resources:
+  - google_network_security_backend_authentication_config
 service/networksecurity-swp:
   resources:
   - google_network_security_gateway_security_policy
   - google_network_security_gateway_security_policy_rule
   - google_network_security_url_lists
   - google_network_security_tls_inspection_policy
+service/networksecurityintegrations:
+  resources:
+  - google_network_security_mirroring.*
+  - google_network_security_intercept.*
 service/networkservices-media-cdn:
   resources:
   - google_network_services_edge_cache_.*

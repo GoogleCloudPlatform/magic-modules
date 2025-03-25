@@ -33,17 +33,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'certificate_manager_dns_authorization_basic'
     primary_resource_id: 'default'

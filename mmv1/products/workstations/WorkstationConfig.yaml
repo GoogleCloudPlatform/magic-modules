@@ -40,18 +40,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_config_id'
@@ -475,7 +469,6 @@ properties:
               description: |
                 The type of the persistent disk for the home directory. Defaults to `pd-standard`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'sizeGb'
               type: Integer
@@ -483,7 +476,6 @@ properties:
                 The GB capacity of a persistent home directory for each workstation created with this configuration. Must be empty if `sourceSnapshot` is set.
                 Valid values are `10`, `50`, `100`, `200`, `500`, or `1000`. Defaults to `200`. If less than `200` GB, the `diskType` must be `pd-balanced` or `pd-ssd`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'reclaimPolicy'
               type: Enum

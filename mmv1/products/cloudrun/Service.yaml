@@ -60,6 +60,11 @@ error_retry_predicates:
 schema_version: 2
 state_upgrade_base_schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "europe-north1"
 examples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
@@ -446,6 +451,10 @@ properties:
                             description: Name of the environment variable.
                           - name: 'value'
                             type: String
+                            # env is a set.
+                            # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                            # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                            default_value: ""
                             description: |-
                               Defaults to "".
                           - name: 'valueFrom'
@@ -470,7 +479,8 @@ properties:
                                     description: |-
                                       The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
                                       If the secret is in another project, you must define an alias.
-                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/.
+                                      An alias definition has the form:
+                                      {alias}:projects/{project-id|project-number}/secrets/{secret-name}.
                                       If multiple alias definitions are needed, they must be separated by commas.
                                       The alias definitions must be set on the run.googleapis.com/secrets annotation.
                                     required: true

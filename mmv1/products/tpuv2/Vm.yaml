@@ -38,18 +38,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/tpu_vm.go.tmpl'
 custom_diff:
   - 'acceleratorTypeCustomizeDiff'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-c"
 examples:
   - name: 'tpu_v2_vm_basic'
     primary_resource_id: 'tpu'
@@ -127,14 +124,14 @@ properties:
     min_version: 'beta'
     immutable: true
     default_from_api: true
+    conflicts:
+      - network_configs
     properties:
       - name: 'network'
         type: String
         description: |
           The name of the network for the TPU node. It must be a preexisting Google Compute Engine
-          network. If both network and subnetwork are specified, the given subnetwork must belong
-          to the given network. If network is not specified, it will be looked up from the
-          subnetwork if one is provided, or otherwise use "default".
+          network. If none is provided, "default" will be used.
         min_version: 'beta'
         immutable: true
         default_from_api: true
@@ -142,9 +139,7 @@ properties:
         type: String
         description: |
           The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
-          Engine subnetwork. If both network and subnetwork are specified, the given subnetwork
-          must belong to the given network. If subnetwork is not specified, the subnetwork with the
-          same name as the network will be used.
+          Engine subnetwork. If none is provided, "default" will be used.
         min_version: 'beta'
         immutable: true
         default_from_api: true
@@ -164,6 +159,64 @@ properties:
         min_version: 'beta'
         immutable: true
         send_empty_value: true
+      - name: 'queueCount'
+        type: Integer
+        description: |
+          Specifies networking queue count for TPU VM instance's network interface.
+        required: false
+        min_version: 'beta'
+        immutable: true
+  - name: 'networkConfigs'
+    type: Array
+    description: |
+      Repeated network configurations for the TPU node. This field is used to specify multiple
+      network configs for the TPU node.
+    min_version: 'beta'
+    immutable: true
+    conflicts:
+      - network_config
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: String
+          description: |
+            The name of the network for the TPU node. It must be a preexisting Google Compute Engine
+            network. If none is provided, "default" will be used.
+          min_version: 'beta'
+          immutable: true
+          default_from_api: true
+        - name: 'subnetwork'
+          type: String
+          description: |
+            The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
+            Engine subnetwork. If none is provided, "default" will be used.
+          min_version: 'beta'
+          immutable: true
+          default_from_api: true
+        - name: 'enableExternalIps'
+          type: Boolean
+          description: |
+            Indicates that external IP addresses would be associated with the TPU workers. If set to
+            false, the specified subnetwork or network should have Private Google Access enabled.
+          min_version: 'beta'
+          immutable: true
+          send_empty_value: true
+        - name: 'canIpForward'
+          type: Boolean
+          description: |
+            Allows the TPU node to send and receive packets with non-matching destination or source
+            IPs. This is required if you plan to use the TPU workers to forward routes.
+          min_version: 'beta'
+          immutable: true
+          send_empty_value: true
+        - name: 'queueCount'
+          type: Integer
+          description: |
+            Specifies networking queue count for TPU VM instance's network interface.
+          required: false
+          min_version: 'beta'
+          immutable: true
   - name: 'serviceAccount'
     type: NestedObject
     description: |
@@ -212,6 +265,12 @@ properties:
         min_version: 'beta'
         immutable: true
         send_empty_value: true
+      - name: 'spot'
+        type: Boolean
+        description: |
+          Optional. Defines whether the node is Spot VM.
+        min_version: 'beta'
+        immutable: true
   - name: 'dataDisks'
     type: Array
     description: |

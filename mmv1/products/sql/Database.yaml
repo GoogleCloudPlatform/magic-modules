@@ -36,15 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: 'projects/{{project}}/operations/{{op_id}}'
-    kind: 'sql#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/sql_database_deletion_policy.tmpl'

@@ -33,18 +33,17 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/compute_service_attachment.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_service_attachment.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "us-east1"
 examples:
   - name: 'service_attachment_basic'
     primary_resource_id: 'psc_ilb_service_attachment'
@@ -177,6 +176,7 @@ properties:
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    custom_expand: 'templates/terraform/custom_expand/service_attachment_target_service.go.tmpl'
   - name: 'natSubnets'
     type: Array
     description: |

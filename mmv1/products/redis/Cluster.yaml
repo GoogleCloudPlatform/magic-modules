@@ -21,6 +21,10 @@ references:
   api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
 docs:
   note: |
+    For [Multiple VPC Networking](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking) if you want to use
+    [User-registered PSC Connections](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking#psc_connection_types),
+    then please use `google_redis_cluster_user_created_connections` resource.
+
     For [Cross Region Replication](https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication), please follow the instructions below for performing certain update and failover (switchover and detach) operations
 
     **Cross Region Replication**
@@ -112,14 +116,19 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
     vars:
       cluster_name: 'ha-cluster'
-      policy_name: 'mypolicy'
-      subnet_name: 'mysubnet'
-      network_name: 'mynetwork'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -129,9 +138,9 @@ examples:
     primary_resource_id: 'cluster-ha-single-zone'
     vars:
       cluster_name: 'ha-cluster-single-zone'
-      policy_name: 'mypolicy'
-      subnet_name: 'mysubnet'
-      network_name: 'mynetwork'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -159,9 +168,9 @@ examples:
     primary_resource_id: "cluster-rdb"
     vars:
       cluster_name: "rdb-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -171,12 +180,30 @@ examples:
     primary_resource_id: "cluster-aof"
     vars:
       cluster_name: "aof-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_cmek"
+    primary_resource_id: "cluster-cmek"
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      cluster_name: "cmek-cluster"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      kms_key_name: "my-key"
+      kms_ring_name: "my-key-ring"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
 parameters:
@@ -252,7 +279,6 @@ properties:
       The nodeType for the Redis cluster.
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     required: false
-    immutable: true
     default_from_api: true
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
@@ -263,6 +289,7 @@ properties:
     type: NestedObject
     description: Immutable. Zone distribution config for Memorystore Redis cluster.
     immutable: true
+    default_from_api: true
     properties:
       - name: 'mode'
         type: Enum
@@ -283,7 +310,6 @@ properties:
       Required. Each PscConfig configures the consumer network where two
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
-    required: true
     ignore_read: true
     item_type:
       type: NestedObject
@@ -462,7 +488,7 @@ properties:
             description: |
               Optional. Available fsync modes.
 
-              - NO - Do not explicilty call fsync(). Rely on OS defaults.
+              - NO - Do not explicitly call fsync(). Rely on OS defaults.
               - EVERYSEC - Call fsync() once per second in a background thread. A balance between performance and durability.
               - ALWAYS - Call fsync() for earch write command.
             enum_values:
@@ -687,3 +713,28 @@ properties:
         description: |
           The last time cross cluster replication config was updated.
         output: true
+  - name: 'pscServiceAttachments'
+    type: Array
+    description: Service attachment details to configure Psc connections.
+    output: true
+    item_type:
+      type: NestedObject
+      description: |
+        Configuration of a service attachment of the cluster, for creating PSC connections.
+      properties:
+        - name: 'serviceAttachment'
+          type: String
+          output: true
+          description: |
+              Service attachment URI which your self-created PscConnection should use as
+        - name: 'connectionType'
+          type: Enum
+          output: true
+          enum_values:
+            - 'CONNECTION_TYPE_READER'
+            - 'CONNECTION_TYPE_PRIMARY'
+            - 'CONNECTION_TYPE_DISCOVERY'
+          description: Type of a PSC connection targeting this service attachment.
+  - name: 'kmsKey'
+    type: String
+    description: The KMS key used to encrypt the at-rest data of the cluster.

@@ -44,30 +44,43 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_diff:
   - 'tpgresource.DefaultProviderRegion'
 examples:
   - name: 'region_network_firewall_policy_rule'
     primary_resource_id: 'primary'
     vars:
-      tag_key: 'tagkey'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
       network: 'network'
-      fw_policy: 'policy'
-      address: 'address'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
-      project_name: 'PROJECT_NAME'
       org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
       region: 'REGION'
       service_acct: 'SERVICE_ACCT'
+  - name: 'region_network_firewall_policy_rule_network_scope_egress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
+    min_version: beta
+  - name: 'region_network_firewall_policy_rule_network_scope_ingress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
+      network: 'network'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
+      region: 'REGION'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -131,6 +144,33 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
+      - name: 'srcNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic source.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+      - name: 'srcNetworks'
+        type: Array
+        description: |
+          Networks of the traffic source. It can be either a full or partial url.
+        min_version: beta
+        item_type:
+          type: String
+      - name: 'destNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic destination.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true

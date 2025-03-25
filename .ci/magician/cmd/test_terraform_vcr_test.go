@@ -447,7 +447,7 @@ func TestWithReplayFailedTests(t *testing.T) {
 					"</blockquote>",
 					"</details>",
 					"",
-					"[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)",
+					"[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
 				},
 				"\n",
 			),

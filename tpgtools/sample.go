@@ -161,7 +161,7 @@ func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, erro
 
 	// Otherwise, just return an error.
 	var productOverrideKeys []Filepath
-	for k, _ := range productOverrides {
+	for k := range productOverrides {
 		productOverrideKeys = append(productOverrideKeys, k)
 	}
 	return DCLPackageName(""), fmt.Errorf("can't find %q in the overrides map, which contains %v", product, productOverrideKeys)

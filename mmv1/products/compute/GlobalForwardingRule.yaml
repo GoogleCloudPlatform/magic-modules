@@ -37,17 +37,11 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
 examples:
@@ -485,6 +479,25 @@ properties:
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'networkTier'
+    type: Enum
+    description: |
+      This signifies the networking tier used for configuring
+      this load balancer and can only take the following values:
+      `PREMIUM`, `STANDARD`.
+
+      For regional ForwardingRule, the valid values are `PREMIUM` and
+      `STANDARD`. For GlobalForwardingRule, the valid value is
+      `PREMIUM`.
+
+      If this field is not specified, it is assumed to be `PREMIUM`.
+      If `IPAddress` is specified, this value must be equal to the
+      networkTier of the Address.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'PREMIUM'
+      - 'STANDARD'
   - name: 'serviceDirectoryRegistrations'
     type: Array
     description: |

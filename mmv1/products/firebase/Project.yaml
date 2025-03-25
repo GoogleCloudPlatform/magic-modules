@@ -13,8 +13,9 @@
 
 ---
 name: 'Project'
+api_resource_type_kind: FirebaseProject
 description: |
-  A Google Cloud Firebase instance. This enables Firebase resources on a given google project.
+  A Google Cloud Firebase instance. This enables Firebase resources on a given Google Project.
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
   identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
   Once Firebase has been added to a Google Project it cannot be removed.
@@ -46,14 +47,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/firebase_project.go.tmpl'
   pre_create: 'templates/terraform/pre_create/firebase_project.go.tmpl'
@@ -74,7 +69,7 @@ properties:
   - name: 'projectNumber'
     type: String
     description: |
-      The number of the google project that firebase is enabled on.
+      The number of the Google Project that Firebase is enabled on.
     min_version: 'beta'
     output: true
   - name: 'displayName'

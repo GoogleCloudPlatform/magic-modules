@@ -28,19 +28,14 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 autogen_async: true
+autogen_status: Q2x1c3Rlcg==
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'managedkafka_cluster_basic'

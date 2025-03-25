@@ -30,20 +30,11 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  status:
-    path: 'done'
-    complete: true
-    allowed:
-      - true
-      - false
-  error:
-    path: 'error'
-    message: 'message'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-c"
 examples:
   - name: 'tpu_v2_queued_resource_basic'
     primary_resource_id: 'qr'
@@ -51,6 +42,17 @@ examples:
     vars:
       qr_name: 'test-qr'
       tpu_name: 'test-tpu'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    skip_vcr: true
+  - name: 'tpu_v2_queued_resource_full'
+    primary_resource_id: 'qr'
+    min_version: 'beta'
+    vars:
+      qr_name: 'test-qr'
+      tpu_name: 'test-tpu'
+      network_name: 'tpu-net'
+      subnet_name: 'tpu-subnet'
     test_env_vars:
       project: 'PROJECT_NAME'
     skip_vcr: true
@@ -107,3 +109,44 @@ properties:
                 - name: 'description'
                   description: |
                     Text description of the TPU.
+                - name: 'networkConfig'
+                  type: NestedObject
+                  description: |
+                    Network configurations for the TPU node.
+                  immutable: true
+                  default_from_api: true
+                  properties:
+                    - name: 'network'
+                      type: String
+                      description: |
+                        The name of the network for the TPU node. It must be a preexisting Google Compute Engine
+                        network. If none is provided, "default" will be used.
+                      immutable: true
+                      default_from_api: true
+                    - name: 'subnetwork'
+                      type: String
+                      description: |
+                        The name of the subnetwork for the TPU node. It must be a preexisting Google Compute
+                        Engine subnetwork. If none is provided, "default" will be used.
+                      immutable: true
+                      default_from_api: true
+                    - name: 'enableExternalIps'
+                      type: Boolean
+                      description: |
+                        Indicates that external IP addresses would be associated with the TPU workers. If set to
+                        false, the specified subnetwork or network should have Private Google Access enabled.
+                      immutable: true
+                      send_empty_value: true
+                    - name: 'canIpForward'
+                      type: Boolean
+                      description: |
+                        Allows the TPU node to send and receive packets with non-matching destination or source
+                        IPs. This is required if you plan to use the TPU workers to forward routes.
+                      immutable: true
+                      send_empty_value: true
+                    - name: 'queueCount'
+                      type: Integer
+                      description: |
+                        Specifies networking queue count for TPU VM instance's network interface.
+                      required: false
+                      immutable: true

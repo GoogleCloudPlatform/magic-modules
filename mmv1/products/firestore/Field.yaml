@@ -46,14 +46,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/firestore_field.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/firestore_field_delete.go.tmpl'
@@ -85,6 +79,15 @@ examples:
       'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
   - name: 'firestore_field_match_override'
     primary_resource_id: 'match_override'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_field_wildcard'
+    primary_resource_id: 'wildcard'
     vars:
       database_id: 'database-id'
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'

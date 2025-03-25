@@ -1,0 +1,16 @@
+resource "google_chronicle_data_access_label" "custom_data_access_label" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_label_id = "{{index $.Vars "data_access_label_id"}}"
+  udm_query = "principal.hostname=\"google.com\""
+}
+
+resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+  description = "{{index $.Vars "description"}}"
+  allowed_data_access_labels {
+    data_access_label = resource.google_chronicle_data_access_label.custom_data_access_label.data_access_label_id
+  }
+}

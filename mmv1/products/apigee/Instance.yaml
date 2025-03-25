@@ -20,9 +20,8 @@ references:
     'Creating a runtime instance': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-instance'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances/create'
 docs:
-base_url: 'instances'
+base_url: '{{org_id}}/instances'
 self_link: '{{org_id}}/instances/{{name}}'
-create_url: '{{org_id}}/instances'
 update_verb: 'PATCH'
 update_mask: true
 immutable: false
@@ -40,20 +39,14 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/apigee_instance.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_instance.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.IsApigeeRetryableError'
+exclude_sweeper: true
 examples:
   - name: 'apigee_instance_basic'
     vars:

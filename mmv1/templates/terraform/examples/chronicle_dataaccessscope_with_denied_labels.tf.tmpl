@@ -1,0 +1,29 @@
+resource "google_chronicle_data_access_label" "custom_data_access_label" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_label_id = "{{index $.Vars "data_access_label_id"}}"
+  udm_query = "principal.hostname=\"google.com\""
+}
+
+resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+  description = "{{index $.Vars "description"}}"
+  allow_all = true
+  denied_data_access_labels {
+    log_type = "GCP_CLOUDAUDIT"
+  }
+  denied_data_access_labels {
+    data_access_label = resource.google_chronicle_data_access_label.custom_data_access_label.data_access_label_id
+  }
+  denied_data_access_labels {
+    ingestion_label {
+	    ingestion_label_key = "ingestion_key"
+      ingestion_label_value = "ingestion_value"
+    }
+  }
+  denied_data_access_labels {
+    asset_namespace = "my-namespace"
+  }
+}

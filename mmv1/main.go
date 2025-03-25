@@ -132,9 +132,13 @@ func main() {
 	}
 
 	startTime := time.Now()
+	providerName := "default (terraform)"
+	if *forceProvider != "" {
+		providerName = *forceProvider
+	}
 	log.Printf("Generating MM output to '%s'", *outputPath)
-	log.Printf("Using %s version", *version)
-	log.Printf("Using %s provider", *forceProvider)
+	log.Printf("Building %s version", *version)
+	log.Printf("Building %s provider", providerName)
 
 	// Building compute takes a long time and can't be parallelized within the product
 	// so lets build it first
@@ -252,6 +256,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 
 		resource := &api.Resource{}
 		api.Compile(resourceYamlPath, resource, overrideDirectory)
+		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = *version
 		resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
@@ -323,6 +328,8 @@ func setProvider(forceProvider, version string, productApi *api.Product, startTi
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
 	case "tgc_cai2hcl":
 		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
+	case "tgc_next":
+		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
 	case "oics":
 		return provider.NewTerraformOiCS(productApi, version, startTime)
 	default:

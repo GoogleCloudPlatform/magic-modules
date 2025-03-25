@@ -1,6 +1,5 @@
 package iambeta_test
 
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -98,4 +97,3 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 }
 `, suffix)
 }
-{{- end }}

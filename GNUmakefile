@@ -59,10 +59,12 @@ terraform build provider:
 	make tpgtools
 
 mmv1:
+	# Chaining these with "&&" is critical so this will exit non-0 if the first
+	# command fails, since we're not forcing bash and errexit / pipefail here.
 	cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
-			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile); \
-			go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
+			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
 		else \
 			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
@@ -85,11 +87,14 @@ clean-tgc:
 		rm -rf ./tfplan2cai/converters/google/resources;\
 		rm -rf ./cai2hcl/*;\
 		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./pkg/cai2hcl/*;\
+		rm -rf ./pkg/tfplan2cai/*;\
 
 tgc:
 	cd mmv1;\
-		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile);\
-		go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile);\
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_next --output $(OUTPUT_PATH)/pkg $(mmv1_compile);\
 
 tf-oics:
 	cd mmv1;\

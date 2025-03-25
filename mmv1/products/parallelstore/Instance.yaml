@@ -33,16 +33,21 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
+autogen_status: SW5zdGFuY2U=
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
 examples:
+  - name: 'parallelstore_instance_basic_beta'
+    primary_resource_id: 'instance'
+    min_version: 'beta'
+    vars:
+      name: 'instance'
+      network_name: 'network'
+      address_name: 'address'
   - name: 'parallelstore_instance_basic'
     primary_resource_id: 'instance'
     vars:
@@ -190,3 +195,11 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MIN
         DIRECTORY_STRIPE_LEVEL_BALANCED
         DIRECTORY_STRIPE_LEVEL_MAX
+  - name: deploymentType
+    type: String
+    description: |
+      Parallelstore Instance deployment type.
+        Possible values:
+        DEPLOYMENT_TYPE_UNSPECIFIED
+        SCRATCH
+        PERSISTENT

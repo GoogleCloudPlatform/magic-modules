@@ -38,18 +38,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'workstation_id'
@@ -159,3 +153,9 @@ properties:
       - 'STATE_RUNNING'
       - 'STATE_STOPPING'
       - 'STATE_STOPPED'
+  - name: 'source_workstation'
+    type: String
+    description: |
+      Full resource name of the source workstation from which the workstation's persistent
+      directories will be cloned from during creation.
+    immutable: true

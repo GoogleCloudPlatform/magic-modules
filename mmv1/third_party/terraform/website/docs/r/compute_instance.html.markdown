@@ -265,6 +265,8 @@ is desired, you will need to modify your state file manually using
 * `mode` - (Optional) The mode in which to attach this disk, either `READ_WRITE`
   or `READ_ONLY`. If not specified, the default is to attach the disk in `READ_WRITE` mode.
 
+* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
     encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
@@ -303,9 +305,11 @@ is desired, you will need to modify your state file manually using
 * `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
     field is only applicable for persistent disks.
 
+* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
+
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
-* `resource_policies` - (Optional) A list of self_links of resource policies to attach to the instance's boot disk. Modifying this list will cause the instance to recreate. Currently a max of 1 resource policy is supported.
+* `resource_policies` - (Optional) A list of self_links of resource policies to attach to the instance's boot disk. Modifying this list will cause the instance to recreate, so any external values are not set until the user specifies this field. Currently a max of 1 resource policy is supported.
 
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
@@ -326,10 +330,12 @@ is desired, you will need to modify your state file manually using
 * `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
     Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
 
-* `storage_pool` - (Optional) The URL of the storage pool in which the new disk is created.
+* `storage_pool` - (Optional) The URL or the name of the storage pool in which the new disk is created.
     For example:
     * https://www.googleapis.com/compute/v1/projects/{project}/zones/{zone}/storagePools/{storagePool}
     * /projects/{project}/zones/{zone}/storagePools/{storagePool}
+    * /zones/{zone}/storagePools/{storagePool}
+    * /{storagePool}
 
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
@@ -395,11 +401,11 @@ is desired, you will need to modify your state file manually using
     array of alias IP ranges for this network interface. Can only be specified for network
     interfaces on subnet-mode networks. Structure [documented below](#nested_alias_ip_range).
 
-* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF. In the beta provider the additional values of MRDMA and IRDMA are supported.
+* `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF, MRDMA, IRDMA.
 
-* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+* `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
-* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6 or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
+* `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
 Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
@@ -491,6 +497,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
+* `termination_time` - (Optional) Specifies the timestamp, when the instance will be terminated, in RFC3339 text format. If specified, the instance termination action will be performed at the termination time.
+
+* `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
+
 * `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
 
 
@@ -501,6 +511,25 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+
+* `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+
+<a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
+
+* `enabled` - (Required) Opts-in for graceful shutdown.
+
+* `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
+    If the graceful shutdown isn't complete after this time, then the instance
+    transitions to the STOPPING state. Structure is documented below:
+
+    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+        resolution. Durations less than one second are represented with a 0
+        `seconds` field and a positive `nanos` field. Must be from 0 to
+        999,999,999 inclusive.
+
+    * `seconds` - (Required) Span of time at a resolution of a second.
+        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+
 <a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
@@ -574,6 +603,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `visible_core_count` - (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
+
+* `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 

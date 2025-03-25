@@ -1,6 +1,6 @@
 ---
 title: "Update dependencies"
-weight: 17
+weight: 90
 aliases:
   - /docs/update-dependencies
 ---

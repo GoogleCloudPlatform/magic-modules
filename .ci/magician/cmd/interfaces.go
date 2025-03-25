@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"magician/github"
+	"magician/teamcity"
 )
 
 type GithubClient interface {
@@ -41,6 +42,16 @@ type CloudbuildClient interface {
 	ApproveDownstreamGenAndTest(prNumber, commitSha string) error
 }
 
+type CloudstorageClient interface {
+	WriteToGCSBucket(bucketName, objectName, filePath string) error
+	DownloadFile(bucket, object, filePath string) error
+}
+
+type TeamcityClient interface {
+	GetBuilds(project, finishCut, startCut string) (teamcity.Builds, error)
+	GetTestResults(build teamcity.Build) (teamcity.TestResults, error)
+}
+
 type ExecRunner interface {
 	GetCWD() string
 	Copy(src, dest string) error
@@ -48,6 +59,7 @@ type ExecRunner interface {
 	RemoveAll(path string) error
 	PushDir(path string) error
 	PopDir() error
+	ReadFile(name string) (string, error)
 	WriteFile(name, data string) error
 	AppendFile(name, data string) error // Not used (yet).
 	Run(name string, args []string, env map[string]string) (string, error)

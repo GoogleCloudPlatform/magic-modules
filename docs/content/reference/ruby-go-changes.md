@@ -1,6 +1,6 @@
 ---
 title: "Ruby to Go Migration"
-weight: 10
+weight: 40
 ---
 # What has changed in the MMv1 Go migration
 

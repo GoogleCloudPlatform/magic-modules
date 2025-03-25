@@ -33,14 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_update: 'templates/terraform/custom_update/vertex_ai_index.go.tmpl'
 examples:
@@ -101,7 +95,6 @@ properties:
           Index field can be also updated as part of the same call.
           The expected structure and format of the files this URI points to is
           described at https://cloud.google.com/vertex-ai/docs/matching-engine/using-matching-engine#input-data-format
-        required: true
         custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_index_ignore_contents_delta_uri.go.tmpl'
       - name: 'isCompleteOverwrite'
         type: Boolean

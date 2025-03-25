@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_create: 'templates/terraform/pre_create/filestore_instance.go.tmpl'
 error_abort_predicates:
@@ -52,6 +46,13 @@ error_abort_predicates:
   - 'transport_tpg.Is429QuotaError'
 schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1-b"
+    - zone: "us-central1-b"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-west1"
 examples:
   - name: 'filestore_instance_basic'
     primary_resource_id: 'instance'
@@ -328,3 +329,80 @@ properties:
             description: |
               The number of IOPS to provision for the instance.
               max_iops must be in multiple of 1000.
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags. Resource manager tag keys
+      and values have the same definition as resource manager
+      tags. Keys must be in the format tagKeys/{tag_key_id},
+      and values are in the format tagValues/456. The field is
+      ignored when empty. The field is immutable and causes
+      resource replacement when mutated. This field is only set
+      at create time and modifying this field after creation
+      will trigger recreation. To apply tags to an existing
+      resource, see the `google_tags_tag_value` resource.
+    immutable: true
+    ignore_read: true
+  - name: 'initialReplication'
+    api_name: replication
+    type: NestedObject
+    description: |
+      Replication configuration, once set, this cannot be updated.
+      Addtionally this should be specified on the replica instance only, indicating the active as the peer_instance
+    url_param_only: true
+    immutable: true
+    properties:
+      - name: 'role'
+        type: Enum
+        description: |
+          The replication role.
+        default_value: "STANDBY"
+        enum_values:
+          - 'ROLE_UNSPECIFIED'
+          - 'ACTIVE'
+          - 'STANDBY'
+      - name: 'replicas'
+        type: Array
+        description: |
+          The replication role.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'peerInstance'
+              type: String
+              description: |
+                The peer instance.
+              required: true
+  - name: 'effectiveReplication'
+    api_name: replication
+    type: NestedObject
+    output: true
+    description: |
+       Output only fields for replication configuration.
+    properties:
+      - name: 'replicas'
+        type: Array
+        description: |
+          The replication role.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'state'
+              type: Enum
+              description: |
+                Output only. The replica state
+              output: true
+            - name: 'stateReasons'
+              type: Array
+              description: |
+                Output only. Additional information about the replication state, if available.
+              output: true
+              item_type:
+                type: Enum
+            - name: 'lastActiveSyncTime'
+              type: String
+              description: |
+                Output only. The timestamp of the latest replication snapshot taken on the active instance and is already replicated safely.
+                A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+                Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z"
+              output: true

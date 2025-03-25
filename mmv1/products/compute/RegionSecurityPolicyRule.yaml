@@ -42,15 +42,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   pre_create: 'templates/terraform/pre_create/region_security_policy_default_rule_update_on_create.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/security_policy_default_rule_delete.go.tmpl'
@@ -491,6 +484,7 @@ properties:
     description: |
       If set to true, the specified action is not enforced.
     min_version: 'beta'
+    send_empty_value: true
   - name: 'networkMatch'
     type: NestedObject
     description: |

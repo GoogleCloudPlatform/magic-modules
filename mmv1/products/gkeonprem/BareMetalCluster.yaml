@@ -34,17 +34,13 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkeonprem#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 taint_resource_on_failed_create: true
+sweeper:
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'gkeonprem_bare_metal_cluster_basic'
     primary_resource_id: 'cluster-basic'

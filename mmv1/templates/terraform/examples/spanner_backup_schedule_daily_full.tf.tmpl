@@ -37,4 +37,8 @@ resource "google_spanner_backup_schedule" "{{$.PrimaryResourceId}}" {
   }
   // The schedule creates only full backups.
   full_backup_spec {}
+
+  encryption_config {
+    encryption_type = "USE_DATABASE_ENCRYPTION"
+  }
 }
