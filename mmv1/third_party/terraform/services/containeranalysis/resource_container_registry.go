@@ -13,7 +13,7 @@ import (
 
 func ResourceContainerRegistry() *schema.Resource {
 	return &schema.Resource{
-		DeprecationMessage: "Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable."
+		DeprecationMessage: "Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable.",
 		Create: resourceContainerRegistryCreate,
 		Read:   resourceContainerRegistryRead,
 		Delete: resourceContainerRegistryDelete,
