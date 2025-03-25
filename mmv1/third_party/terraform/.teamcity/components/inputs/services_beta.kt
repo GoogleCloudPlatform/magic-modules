@@ -526,6 +526,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Looker",
         "path" to "./google-beta/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google-beta/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -600,6 +605,11 @@ var ServicesListBeta = mapOf(
         "name" to "osconfig",
         "displayName" to "Osconfig",
         "path" to "./google-beta/services/osconfig"
+    ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google-beta/services/osconfigv2"
     ),
     "oslogin" to mapOf(
         "name" to "oslogin",
@@ -755,6 +765,11 @@ var ServicesListBeta = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google-beta/services/storage"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google-beta/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

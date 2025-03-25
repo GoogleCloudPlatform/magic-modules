@@ -26,7 +26,7 @@ resource "google_service_account" "service_account" {
   project = "{{index $.TestEnvVars "project_id"}}"
 
   # Must be firebase-app-hosting-compute
-  account_id                   = "firebase-app-hosting-compute"
+  account_id                   = "{{index $.Vars "service_act_id"}}"
   display_name                 = "Firebase App Hosting compute service account"
 
   # Do not throw if already exists
