@@ -128,3 +128,77 @@ properties:
     description: |-
       User-provided description of the endpoint group.
       Used as additional context for the endpoint group.
+  - name: associations
+    type: Array
+    is_set: true
+    description: |-
+      List of associations to this endpoint group.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: name
+          type: String
+          description: |-
+            The connected association's resource name, for example:
+            `projects/123456789/locations/global/mirroringEndpointGroupAssociations/my-ega`.
+            See https://google.aip.dev/124.
+          output: true
+        - name: network
+          type: String
+          description: |-
+            The associated network, for example:
+            projects/123456789/global/networks/my-network.
+            See https://google.aip.dev/124.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            Most recent known state of the association.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            CREATING
+            DELETING
+            CLOSED
+            OUT_OF_SYNC
+            DELETE_FAILED
+          output: true
+  - name: connectedDeploymentGroups
+    type: Array
+    is_set: true
+    description: |-
+      List of details about the connected deployment groups to this endpoint
+      group.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: name
+          type: String
+          description: |-
+            The connected deployment group's resource name, for example:
+            `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
+            See https://google.aip.dev/124.
+          output: true
+        - name: locations
+          type: Array
+          is_set: true
+          description: The list of locations where the deployment group is present.
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: location
+                type: String
+                description: The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+                output: true
+              - name: state
+                type: String
+                description: |-
+                  The current state of the association in this location.
+                  Possible values:
+                  STATE_UNSPECIFIED
+                  ACTIVE
+                  OUT_OF_SYNC
+                output: true

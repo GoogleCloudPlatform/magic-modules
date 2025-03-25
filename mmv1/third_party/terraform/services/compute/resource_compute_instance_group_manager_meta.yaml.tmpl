@@ -19,6 +19,9 @@ fields:
   - field: 'instance_group'
   - field: 'instance_group_manager_id'
   - field: 'instance_lifecycle_policy.default_action_on_failure'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'instance_lifecycle_policy.on_failed_health_check'
+{{- end }}
   - field: 'instance_lifecycle_policy.force_update_on_repair'
   - field: 'list_managed_instances_results'
   - field: 'name'

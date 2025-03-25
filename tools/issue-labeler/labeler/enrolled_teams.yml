@@ -381,6 +381,7 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+  - google_firebase_app_hosting.*
 service/firebasedataconnect:
   resources:
   - google_firebase_data_connect_.*
@@ -460,6 +461,9 @@ service/logging:
 service/looker-core:
   resources:
   - google_looker_instance
+service/lustre:
+  resources:
+  - google_lustre_.*
 service/managedidentities:
   resources:
   - google_active_directory_.*
@@ -528,6 +532,9 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-mtls:
+  resources:
+  - google_network_security_backend_authentication_config
 service/networksecurity-swp:
   resources:
   - google_network_security_gateway_security_policy
