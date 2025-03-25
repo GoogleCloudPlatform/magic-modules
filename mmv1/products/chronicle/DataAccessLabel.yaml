@@ -14,7 +14,6 @@
 ---
 name: DataAccessLabel
 description: A DataAccessLabel is a label on events to define user access to data.
-min_version: 'beta'
 references:
   guides:
     'Introduction to data RBAC': 'https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac'
@@ -32,7 +31,6 @@ autogen_status: RGF0YUFjY2Vzc0xhYmVs
 examples:
   - name: 'chronicle_dataaccesslabel_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       data_access_label_id: label-id
       description: label-description

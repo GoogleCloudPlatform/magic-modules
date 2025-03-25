@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
@@ -1841,6 +1842,10 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
 	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
