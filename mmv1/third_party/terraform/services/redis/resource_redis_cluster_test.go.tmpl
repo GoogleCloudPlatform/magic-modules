@@ -273,14 +273,8 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 	t.Parallel()
 
-	context_enabled := map[string]interface{}{
+	context := map[string]interface{}{
 		"random_suffix":         acctest.RandString(t, 10),
-		"automated_backup_mode": "ENABLED",
-	}
-
-	context_diabled := map[string]interface{}{
-		"random_suffix":         context_enabled["random_suffix"],
-		"automated_backup_mode": "DISABLED",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -289,7 +283,7 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisCluster_automatedBackupConfig(context_enabled),
+				Config: testAccRedisCluster_automatedBackupConfig(context),
 			},
 			{
 				ResourceName:      "google_redis_cluster.cluster_abc",
@@ -297,12 +291,13 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRedisCluster_automatedBackupConfig(context_diabled),
+				Config: testAccRedisCluster_automatedBackupConfigWithout(context),
 			},
 			{
 				ResourceName:      "google_redis_cluster.cluster_abc",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"automated_backup_config"},
 			},
 		},
 	})
@@ -318,7 +313,6 @@ resource "google_redis_cluster" "cluster_abc" {
   region                         = "us-central1"
   deletion_protection_enabled    = false
   automated_backup_config {
-   automated_backup_mode         = "%{automated_backup_mode}"
    retention                     = "259200s"
    fixed_frequency_schedule {
     start_time {
@@ -330,6 +324,18 @@ resource "google_redis_cluster" "cluster_abc" {
    }
   }
 
+}	
+`, context)
+}
+
+func testAccRedisCluster_automatedBackupConfigWithout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_redis_cluster" "cluster_abc" {
+  name                           = "tf-test-redis-abc-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
 }	
 `, context)
 }

@@ -252,17 +252,10 @@ properties:
     output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
-    default_from_api: true
     description: "The automated backup config for a instance."
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/redis_cluster_automated_backup_config.go.tmpl'
     properties:
-      - name: 'automatedBackupMode'
-        type: Enum
-        description: |
-          "Optional. The automated backup mode. If the mode is DISABLED, the other fields will be ignored."
-        default_value: "DISABLED"
-        enum_values:
-          - 'DISABLED'
-          - 'ENABLED'
       - name: 'fixedFrequencySchedule'
         type: NestedObject
         description: "Optional. Trigger automated backups at a fixed frequency."
