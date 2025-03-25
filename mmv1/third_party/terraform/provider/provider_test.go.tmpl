@@ -174,13 +174,31 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	acctest.SkipIfVcr(t) // Test doesn't interact with API
 
 	// Skip if not running in a acc test environment,
-	// as acc test environment variables needed to get accessToken 
+	// as acc test environment variables needed to get accessToken
 	if v := os.Getenv("TF_ACC"); v == "" {
 		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
 	}
 
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
 	credentials := envvar.GetTestCredsFromEnv()
+
+	providerAccessTokenOnly := fmt.Sprintf(`
+	access_token = "%s"
+	`, accessToken)
+
+	providerCredentialsOnly := fmt.Sprintf(`
+	credentials = "%s"
+	`, credentials)
+
+	contextAccessTokenOnly := map[string]interface{}{
+		"fields":        providerAccessTokenOnly,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	contextCredentialsOnly := map[string]interface{}{
+		"fields":        providerCredentialsOnly,
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	// Define old version (without external_credentials)
 	oldVersion := map[string]resource.ExternalProvider{
@@ -197,10 +215,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 		preConfig func(*testing.T)
 	}{
 		"access_token still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(map[string]interface{}{
-				"access_token":  accessToken,
-				"random_suffix": acctest.RandString(t, 10),
-			}),
+			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(contextAccessTokenOnly),
 			preConfig: func(t *testing.T) {
 				for _, env := range envvar.CredsEnvVars {
 					t.Setenv(env, "")
@@ -208,10 +223,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 			},
 		},
 		"credentials still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
-				"credentials":   credentials,
-				"random_suffix": acctest.RandString(t, 10),
-			}),
+			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(contextCredentialsOnly),
 			preConfig: func(t *testing.T) {
 				// Clear environment variables to ensure only config values are used
 				for _, env := range envvar.CredsEnvVars {
@@ -252,7 +264,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 func testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  access_token = "%{access_token}"
+%{fields}
 }
 
 resource "google_service_account" "default" {
@@ -265,7 +277,7 @@ resource "google_service_account" "default" {
 func testAccProviderExternalCredentialsUpgrade_CredentialsConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-  credentials = "%{credentials}"
+%{fields}
 }
 
 resource "google_service_account" "default" {
