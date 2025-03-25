@@ -137,6 +137,11 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccParameterManagerParameter_kmsKeyUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_parameter.parameter-with-kms-key",
@@ -146,6 +151,11 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccParameterManagerParameter_kmsKeyUpdateOther(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_parameter.parameter-with-kms-key",
@@ -155,6 +165,11 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccParameterManagerParameter_withoutkmsKey(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_parameter.parameter-with-kms-key",
