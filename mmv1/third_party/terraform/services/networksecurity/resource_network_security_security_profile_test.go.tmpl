@@ -135,17 +135,17 @@ resource "google_network_security_security_profile" "foobar" {
     threat_prevention_profile {
         antivirus_overrides {
             action   = "ALLOW"
-            severity = "FTP"
+            protocol = "FTP"
         }
 
         antivirus_overrides {
             action   = "DENY"
-            severity = "HTTP"
+            protocol = "HTTP"
         }
 
 		antivirus_overrides {
             action   = "ALERT"
-            severity = "HTTP2"
+            protocol = "HTTP2"
         }
     }
 }
