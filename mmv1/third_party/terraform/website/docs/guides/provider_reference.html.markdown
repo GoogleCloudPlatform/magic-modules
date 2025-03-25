@@ -191,7 +191,7 @@ variable.
 
     -> Terraform cannot renew these access tokens, and they will eventually
     expire (default `1 hour`). If Terraform needs access for longer than a token's
-    lifetime, use a service account key with `credentials` instead.
+    lifetime, supply a [credential configuration](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers#create-credential-config) through the `credentials` field instead.
 
 ## Quota Management Configuration
 
