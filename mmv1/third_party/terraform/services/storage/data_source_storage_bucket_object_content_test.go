@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"archive/zip"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -63,9 +65,31 @@ func TestAccDataSourceStorageBucketObjectContent_FileContentBase64(t *testing.T)
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceStorageBucketObjectContent_FileContentBase64(bucket, folderName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_storage_bucket_object_content.this", "content_base64"),
+					verifyValidZip(),
+				),
 			},
 		},
 	})
+}
+
+func verifyValidZip() func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		var outputFilePath string
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "local_file" {
+				outputFilePath = rs.Primary.Attributes["filename"]
+				break
+			}
+		}
+		archive, err := zip.OpenReader(outputFilePath)
+		if err != nil {
+			return err
+		}
+		defer archive.Close()
+		return nil
+	}
 }
 
 func testAccDataSourceStorageBucketObjectContent_Basic(content, bucket string) string {
