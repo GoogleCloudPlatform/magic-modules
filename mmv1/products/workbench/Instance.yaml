@@ -453,18 +453,12 @@ properties:
         description: |
           Confidential instance configuration.
         properties:
-          - name: 'enableConfidentialCompute'
-            type: Boolean
-            description: |
-              Defines whether the instance should have confidential compute enabled.
           - name: 'confidentialInstanceType'
             type: Enum
             description: |
               Defines the type of technology used by the confidential instance.
             enum_values:
               - 'SEV'
-              - 'SEV_SNP'
-              - 'TDX'
   - name: 'proxyUri'
     type: String
     description: |

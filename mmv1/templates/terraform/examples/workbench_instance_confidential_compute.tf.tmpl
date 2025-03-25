@@ -16,7 +16,6 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     }
 
     confidential_instance_config {
-      enable_confidential_compute = true
       confidential_instance_type = "SEV"
     }
 
