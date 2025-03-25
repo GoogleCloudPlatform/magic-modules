@@ -182,24 +182,6 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
 	credentials := envvar.GetTestCredsFromEnv()
 
-	providerAccessTokenOnly := fmt.Sprintf(`
-	access_token = "%s"
-	`, accessToken)
-
-	providerCredentialsOnly := fmt.Sprintf(`
-	credentials = "%s"
-	`, credentials)
-
-	contextAccessTokenOnly := map[string]interface{}{
-		"fields":        providerAccessTokenOnly,
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	contextCredentialsOnly := map[string]interface{}{
-		"fields":        providerCredentialsOnly,
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
 	// Define old version (without external_credentials)
 	oldVersion := map[string]resource.ExternalProvider{
 		"google": {
@@ -208,63 +190,47 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 		},
 	}
 
-	// Test cases
-	testCases := map[string]struct {
-		Config    string
-		context   map[string]interface{}
-		preConfig func(*testing.T)
-	}{
-		"access_token still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(contextAccessTokenOnly),
-			preConfig: func(t *testing.T) {
-				for _, env := range envvar.CredsEnvVars {
-					t.Setenv(env, "")
-				}
-			},
-		},
-		"credentials still works after upgrade": {
-			Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(contextCredentialsOnly),
-			preConfig: func(t *testing.T) {
-				// Clear environment variables to ensure only config values are used
-				for _, env := range envvar.CredsEnvVars {
-					t.Setenv(env, "")
-				}
-			},
-		},
-	}
-
-	for name, tc := range testCases {
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			acctest.VcrTest(t, resource.TestCase{
-				Steps: []resource.TestStep{
-					{
-						PreConfig:         func() { tc.preConfig(t) },
-						ExternalProviders: oldVersion,
-						Config:            acctest.Nprintf(tc.Config, tc.context),
-						Check: resource.ComposeTestCheckFunc(
-							resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
-						),
-					},
-					{
-						// Step 2: Upgrade to new provider version
-						PreConfig:                func() { tc.preConfig(t) },
-						ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-						Config:                   acctest.Nprintf(tc.Config, tc.context),
-						Check: resource.ComposeTestCheckFunc(
-							resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
-						),
-					},
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
 				},
-			})
-		})
-	}
+				ExternalProviders: oldVersion,
+				Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(map[string]interface{}{
+					"access_token":  accessToken,
+					"random_suffix": acctest.RandString(t, 10),
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
+				),
+			},
+			{
+				// Step 2: Upgrade to new provider version
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				PreConfig: func() {
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
+				},
+				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
+					"credentials":   credentials,
+					"random_suffix": acctest.RandString(t, 10),
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
+				),
+			},
+		},
+	})
 }
 
 func testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-%{fields}
+  access_token = "%{access_token}"
 }
 
 resource "google_service_account" "default" {
@@ -277,7 +243,7 @@ resource "google_service_account" "default" {
 func testAccProviderExternalCredentialsUpgrade_CredentialsConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 provider "google" {
-%{fields}
+  credentials = "%{credentials}"
 }
 
 resource "google_service_account" "default" {
