@@ -64,6 +64,25 @@ func TestAccNetworkSecuritySecurityProfiles_antivirusOverrides(t *testing.T) {
 			},
 			{
 				Config: testAccNetworkSecuritySecurityProfiles_antivirusOverrides(orgId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_security_profile.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_network_security_security_profile.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkSecuritySecurityProfiles_basic(orgId, randomSuffix),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_security_security_profile.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_network_security_security_profile.foobar",
@@ -143,7 +162,7 @@ resource "google_network_security_security_profile" "foobar" {
             protocol = "HTTP"
         }
 
-		antivirus_overrides {
+        antivirus_overrides {
             action   = "ALERT"
             protocol = "HTTP2"
         }
