@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -331,12 +330,12 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	allowedAccessReason := "CUSTOMER_INITIATED_SUPPORT"
 	updatedAllowedAccessReason := "GOOGLE_INITIATED_SERVICE"
 
-	// Give time for CSS to pickup the newly created project
-	time.Sleep(60 * time.Second)
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleKmsCryptoKey_keyAccessJustificationsPolicy(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName, allowedAccessReason),
@@ -894,11 +893,20 @@ resource "google_project_service" "acceptance" {
   service  = "cloudkms.googleapis.com"
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project_service.acceptance]
+  create_duration = "60s"
+}
+
 resource "google_kms_key_ring" "key_ring" {
   provider = google-beta
   project  = google_project_service.acceptance.project
   name     = "%s"
   location = "us-central1"
+
+  # Wait 60 seconds after project creation to create KMS resources to ensure
+  # project is picked up by CSS.
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_kms_crypto_key" "crypto_key" {
