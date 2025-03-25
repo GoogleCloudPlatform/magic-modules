@@ -71,7 +71,7 @@ resource "google_securityposture_posture" "posture_one" {
 
 resource "google_project" "posture_project" {
   name       = "Posture Project"
-  project_id = "tf-test-posture-project-%{random_suffix}"
+  project_id = "tf-test-posture-%{random_suffix}"
   org_id     = "%{org_id}"
   deletion_policy = "DELETE"
 }
@@ -115,7 +115,7 @@ resource "google_securityposture_posture" "posture_one" {
 
 resource "google_project" "posture_project" {
   name       = "Posture Project"
-  project_id = "tf-test-posture-project-%{random_suffix}"
+  project_id = "tf-test-posture-%{random_suffix}"
   org_id     = "%{org_id}"
   deletion_policy = "DELETE"
 }
