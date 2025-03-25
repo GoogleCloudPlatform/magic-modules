@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -331,7 +332,11 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	updatedAllowedAccessReason := "GOOGLE_INITIATED_SERVICE"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		PreCheck: func() {
+			// Give time for CSS to pickup the newly created project
+			time.Sleep(60 * time.Second)
+			acctest.AccTestPreCheck(t)
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
