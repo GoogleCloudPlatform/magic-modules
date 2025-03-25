@@ -180,7 +180,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 	}
 
 	accessToken := acctest.GetAccessTokenFromTestCredsFromEnv(t)
-	credentials := envvar.GetTestCredsFromEnv()
+	credentials := transport_tpg.TestFakeCredentialsPath
 
 	// Define old version (without external_credentials)
 	oldVersion := map[string]resource.ExternalProvider{
