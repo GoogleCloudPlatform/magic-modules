@@ -10,25 +10,31 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expandMemorystoreInstanceAutomatedBackupConfig(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	l := v.([]interface{})
+
+	// The automated_backup_config block is not specified, so automatedBackupMode should be DISABLED
+	transformed := make(map[string]interface{})
+	if len(d.Get("automated_backup_config").([]interface{})) < 1 {
+		transformed["automatedBackupMode"] = "DISABLED"
+		return transformed, nil
+	}
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
 	raw := l[0]
 	original := raw.(map[string]interface{})
-	transformed := make(map[string]interface{})
 
-	// The automated_backup_config block is specified, so automatedBackupMode should be ENALBED
+	// The automated_backup_config block is specified, so automatedBackupMode should be ENABLED
 	transformed["automatedBackupMode"] = "ENABLED"
-	transformedFixedFrequencySchedule, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(original["fixed_frequency_schedule"], d, config)
+	transformedFixedFrequencySchedule, err := expandMemorystoreInstanceAutomatedBackupConfigFixedFrequencySchedule(original["fixed_frequency_schedule"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedFixedFrequencySchedule); val.IsValid() && !tpgresource.IsEmptyValue(val) {
 		transformed["fixedFrequencySchedule"] = transformedFixedFrequencySchedule
 	}
 
-	transformedRetention, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}Retention(original["retention"], d, config)
+	transformedRetention, err := expandMemorystoreInstanceAutomatedBackupConfigRetention(original["retention"], d, config)
 	if err != nil {
 		return nil, err
 	} else if val := reflect.ValueOf(transformedRetention); val.IsValid() && !tpgresource.IsEmptyValue(val) {
@@ -36,10 +42,6 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	}
 
 	return transformed, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}AutomatedBackupMode(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
 }
 
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
@@ -77,43 +79,10 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTime
 		transformed["hours"] = transformedHours
 	}
 
-	transformedMinutes, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(original["minutes"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedMinutes); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["minutes"] = transformedMinutes
-	}
-
-	transformedSeconds, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(original["seconds"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["seconds"] = transformedSeconds
-	}
-
-	transformedNanos, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(original["nanos"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["nanos"] = transformedNanos
-	}
-
 	return transformed, nil
 }
 
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 

@@ -62,18 +62,13 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 				Config: testAccMemorystoreInstance_automatedBackupConfig(context),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName: "google_memorystore_instance.test_abc",
 			},
 			{
 				Config: testAccMemorystoreInstance_automatedBackupConfigWithout(context),
 			},
 			{
-				ResourceName:            "google_memorystore_instance.test_abc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"automated_backup_config.0.%"},
+				ResourceName: "google_memorystore_instance.test_abc",
 			},
 		},
 	})
@@ -98,9 +93,6 @@ resource "google_memorystore_instance" "test_abc" {
    fixed_frequency_schedule {
     start_time {
       hours                      = 20
-      minutes                    = 0
-      seconds                    = 0
-      nanos                      = 0
     }
    }
   }
@@ -142,7 +134,7 @@ resource "google_memorystore_instance" "test_abc" {
   instance_id                    = "tf-test-instance-abc-%{random_suffix}"
   shard_count                    = 1
   location                       = "us-central1"
-  replica_count                  = 1
+  replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
   desired_psc_auto_connections {

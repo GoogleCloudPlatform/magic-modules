@@ -18,10 +18,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if len(original) == 0 {
 		return nil
 	}
+    transformed := make(map[string]interface{})
+
     if len(d.Get("automated_backup_config").([]interface{})) < 1 {
 		return nil
 	}
-	transformed := make(map[string]interface{})
+	
 	transformed["fixed_frequency_schedule"] =
 		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(original["fixedFrequencySchedule"], d, config)
 	transformed["retention"] =
@@ -52,66 +54,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTim
 	transformed := make(map[string]interface{})
 	transformed["hours"] =
 		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(original["hours"], d, config)
-	transformed["minutes"] =
-		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(original["minutes"], d, config)
-	transformed["seconds"] =
-		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(original["seconds"], d, config)
-	transformed["nanos"] =
-		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(original["nanos"], d, config)
 	return []interface{}{transformed}
 }
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// Handles the string fixed64 format
-	if strVal, ok := v.(string); ok {
-		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-			return intVal
-		}
-	}
-
-	// number values are represented as float64
-	if floatVal, ok := v.(float64); ok {
-		intVal := int(floatVal)
-		return intVal
-	}
-
-	return v // let terraform core handle it otherwise
-}
-
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// Handles the string fixed64 format
-	if strVal, ok := v.(string); ok {
-		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-			return intVal
-		}
-	}
-
-	// number values are represented as float64
-	if floatVal, ok := v.(float64); ok {
-		intVal := int(floatVal)
-		return intVal
-	}
-
-	return v // let terraform core handle it otherwise
-}
-
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// Handles the string fixed64 format
-	if strVal, ok := v.(string); ok {
-		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
-			return intVal
-		}
-	}
-
-	// number values are represented as float64
-	if floatVal, ok := v.(float64); ok {
-		intVal := int(floatVal)
-		return intVal
-	}
-
-	return v // let terraform core handle it otherwise
-}
-
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
 		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
