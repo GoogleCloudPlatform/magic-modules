@@ -181,13 +181,13 @@ variable.
 
 ---
 
-* `external_credentials` - (Optional) A block to configure external credentials for the provider, such as Workload Identity Federation credentials. See [External Credentials](/website/docs/guides/external_credentials_stacks.html.markdown) for more information.
+* `external_credentials` - (Optional) Configuration of external credentials for the provider, such as Workload Identity Federation credentials. Terraform constructs a function as a [user-defined function credentials source](https://pkg.go.dev/golang.org/x/oauth2/google/externalaccount#hdr-Workload_Identity_Federation) based on the fixed (per execution) `identity_token` value. To use this with HCP Terraform, see the [External Credentials in Terraform Stacks](/website/docs/guides/external_credentials_stacks.html.markdown) guide.
 
 `external_credentials` takes precedence over `credentials` and `access_token` as well as `GOOGLE_CREDENTIALS` and `GOOGLE_OAUTH_ACCESS_TOKEN` environment variables. It includes the following fields:
 
-* `audience` - (Required) The audience for the external credentials.
-* `service_account_email` - (Required) The email of the service account to impersonate.
-* `identity_token` - (Required) The identity token to use for authentication.
+* `audience` - (Required) The Secure Token Service (STS) audience for the external credentials.
+* `service_account_email` - (Required) The email of the service account to impersonate when retrieving a Google access token.
+* `identity_token` - (Required) An identity token from the external identity provider to use for authentication.
 
     -> Terraform cannot renew these access tokens, and they will eventually
     expire (default `1 hour`). If Terraform needs access for longer than a token's
