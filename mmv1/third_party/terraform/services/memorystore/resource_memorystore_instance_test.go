@@ -49,14 +49,8 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 	t.Parallel()
 
-	context_enabled := map[string]interface{}{
-		"random_suffix":         acctest.RandString(t, 10),
-		"automated_backup_mode": "ENABLED",
-	}
-
-	context_diabled := map[string]interface{}{
-		"random_suffix":         context_enabled["random_suffix"],
-		"automated_backup_mode": "DISABLED",
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -65,15 +59,7 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemorystoreInstance_automatedBackupConfig(context_enabled),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccMemorystoreInstance_automatedBackupConfig(context_diabled),
+				Config: testAccMemorystoreInstance_automatedBackupConfig(context),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test_abc",
@@ -99,7 +85,6 @@ resource "google_memorystore_instance" "test_abc" {
     project_id                   = data.google_project.project.project_id
   }
   automated_backup_config {
-   automated_backup_mode         = "%{automated_backup_mode}"
    retention                     = "259200s"
    fixed_frequency_schedule {
     start_time {

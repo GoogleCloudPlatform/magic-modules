@@ -158,17 +158,18 @@ properties:
   - name: 'automatedBackupConfig'
     type: NestedObject
     description: "The automated backup config for a instance."
-    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl'
     properties:
-      - name: 'automatedBackupMode'
-        type: Enum
-        description: |
-          "Optional. The automated backup mode. If the mode is DISABLED, the other fields will be ignored."
-        default_value: "DISABLED"
-        enum_values:
-          - 'AUTOMATED_BACKUP_MODE_UNSPECIFIED'
-          - 'DISABLED'
-          - 'ENABLED'
+      # - name: 'automatedBackupMode'
+      #   type: Enum
+      #   description: |
+      #     "Optional. The automated backup mode. If the mode is DISABLED, the other fields will be ignored."
+      #   default_value: "DISABLED"
+      #   enum_values:
+      #     - 'AUTOMATED_BACKUP_MODE_UNSPECIFIED'
+      #     - 'DISABLED'
+      #     - 'ENABLED'
       - name: 'fixedFrequencySchedule'
         type: NestedObject
         description: "Optional. Trigger automated backups at a fixed frequency."
