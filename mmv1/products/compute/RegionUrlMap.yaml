@@ -244,6 +244,7 @@ properties:
           # exactly_one_of:
           #   - path_matchers.0.default_service
           #   - path_matchers.0.default_url_redirect
+          required: true
           resource: 'RegionBackendService'
           imports: 'selfLink'
         - name: 'description'
