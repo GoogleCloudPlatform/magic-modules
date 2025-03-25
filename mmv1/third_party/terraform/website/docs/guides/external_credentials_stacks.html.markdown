@@ -25,8 +25,8 @@ In the case of Stacks, we need to create the both the workload identity pool and
 Required variables:
 
 - `project_id` - The GCP project ID
-- `tfc_organization` - The Terraform Cloud organization
-- `tfc_stacks_project` - The Terraform Cloud project
+- `hcp_tf_organization` - The HCP Terraform organization
+- `hcp_tf_stacks_project` - The HCP Terraform Stacks project
 
 ```hcl
 provider "google" {
@@ -38,14 +38,14 @@ variable "project_id" {
   description = "GCP Project ID"
 }
 
-variable "tfc_organization" {
+variable "hcp_tf_organization" {
   type        = string
-  description = "Terraform Cloud Organization"
+  description = "HCP Terraform Organization"
 }
 
-variable "tfc_stacks_project" {
+variable "hcp_tf_stacks_project" {
   type        = string
-  description = "Terraform Cloud Project"
+  description = "HCP Terraform Stacks Project"
 }
 
 # Create a service account for Terraform Stacks
@@ -104,7 +104,7 @@ resource "google_iam_workload_identity_pool_provider" "terraform_stacks_provider
     issuer_uri = "https://app.terraform.io"
     allowed_audiences = ["hcp.workload.identity"]
   }
-  attribute_condition = "assertion.sub.startsWith(\"organization:${var.tfc_organization}:project:${var.tfc_stacks_project}:stack\")"
+  attribute_condition = "assertion.sub.startsWith(\"organization:${var.hcp_tf_organization}:project:${var.hcp_tf_stacks_project}:stack\")"
 }
 
 # Switch from binding to member for service account IAM
