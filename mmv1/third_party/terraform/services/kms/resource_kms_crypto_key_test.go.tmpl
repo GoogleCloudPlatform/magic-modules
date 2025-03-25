@@ -331,12 +331,11 @@ func TestAccKmsCryptoKey_keyAccessJustificationsPolicy(t *testing.T) {
 	allowedAccessReason := "CUSTOMER_INITIATED_SUPPORT"
 	updatedAllowedAccessReason := "GOOGLE_INITIATED_SERVICE"
 
+	// Give time for CSS to pickup the newly created project
+	time.Sleep(60 * time.Second)
+
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck: func() {
-			// Give time for CSS to pickup the newly created project
-			time.Sleep(60 * time.Second)
-			acctest.AccTestPreCheck(t)
-		},
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
