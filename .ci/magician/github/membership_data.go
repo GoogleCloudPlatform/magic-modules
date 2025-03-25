@@ -96,7 +96,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"shuyama1": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 3, 26),
+					endDate:   newDate(2025, 4, 1),
+				},
+			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
