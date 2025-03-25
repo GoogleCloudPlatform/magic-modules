@@ -187,7 +187,7 @@ variable.
 
 * `audience` - (Required) The Secure Token Service (STS) audience for the external credentials.
 * `service_account_email` - (Required) The email of the service account to impersonate when retrieving a Google access token.
-* `identity_token` - (Required) An identity token from the external identity provider to use for authentication.
+* `identity_token` - (Required) An identity token from the external identity provider to use for authentication with the external provider.
 
     -> Terraform cannot renew these access tokens, and they will eventually
     expire (default `1 hour`). If Terraform needs access for longer than a token's
