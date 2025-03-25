@@ -4,19 +4,19 @@ resource "google_memorystore_instance_desired_user_created_endpoints" "{{$.Prima
   desired_user_created_endpoints {
     connections {
       psc_connection {
-        psc_connection_id     = google_compute_forwarding_rule.forwarding_rule1_network2.psc_connection_id
-        ip_address            = google_compute_address.ip1_network2.address
-        forwarding_rule       = google_compute_forwarding_rule.forwarding_rule1_network2.id
-        network               = google_compute_network.network2.id
+        psc_connection_id     = google_compute_forwarding_rule.forwarding_rule1_network1.psc_connection_id
+        ip_address            = google_compute_address.ip1_network1.address
+        forwarding_rule       = google_compute_forwarding_rule.forwarding_rule1_network1.id
+        network               = google_compute_network.network1.id
         service_attachment    = google_memorystore_instance.{{$.PrimaryResourceId}}.psc_attachment_details[0].service_attachment
       }
     }
     connections {
       psc_connection {
-        psc_connection_id     = google_compute_forwarding_rule.forwarding_rule2_network2.psc_connection_id
-        ip_address            = google_compute_address.ip2_network2.address
-        forwarding_rule       = google_compute_forwarding_rule.forwarding_rule2_network2.id
-        network               = google_compute_network.network2.id
+        psc_connection_id     = google_compute_forwarding_rule.forwarding_rule2_network1.psc_connection_id
+        ip_address            = google_compute_address.ip2_network1.address
+        forwarding_rule       = google_compute_forwarding_rule.forwarding_rule2_network1.id
+        network               = google_compute_network.network1.id
         service_attachment    = google_memorystore_instance.{{$.PrimaryResourceId}}.psc_attachment_details[1].service_attachment
       }
     }
