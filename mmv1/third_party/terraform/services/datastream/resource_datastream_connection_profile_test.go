@@ -498,16 +498,16 @@ resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
     forward_ssh_connectivity {
         hostname 	= google_compute_instance.default.network_interface.0.access_config.0.nat_ip
         username 	= google_sql_user.user.name
-		port    	= 22
-		private_key = <<EOT
+        port    	= 22
+        private_key 	= <<EOT
 %{private_key}
 EOT
 	}
 
 	depends_on = [time_sleep.ssh_host_wait]
 	timeouts {
-		create = "10m"
-		}
+         create = "10m"
+	}
     %{lifecycle_block}
 }
 `, context)
