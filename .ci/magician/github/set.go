@@ -157,9 +157,10 @@ func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) erro
 				return fmt.Errorf("failed to check if PR was already merged: %w", err)
 			}
 			if pr.Merged {
+				fmt.Printf("Pull request %s was already merged\n", prNumber)
 				return nil
 			}
-			fmt.Printf("Pull request %s was not already merged\n", prNumber)
+			fmt.Printf("Pull request %s wasn't already merged\n", prNumber)
 		}
 		return fmt.Errorf("failed to merge pull request: %w", err)
 	}
