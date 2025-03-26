@@ -115,8 +115,10 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
 sweeper:
+  ensure_value:
+    field: deletionProtectionEnabled
+    value: false
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"

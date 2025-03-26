@@ -40,6 +40,10 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - parent: "organizations/${ORG_ID}"
+      region: "global"
 examples:
   - name: 'network_security_security_profile_basic'
     primary_resource_id: 'default'
