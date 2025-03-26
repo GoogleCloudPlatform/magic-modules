@@ -3,15 +3,12 @@ package detector
 import (
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	newProvider "google/provider/new/google/provider"
 )
 
 func TestGetChangedFieldsFromSchemaDiff(t *testing.T) {
@@ -447,49 +444,5 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
 			}
 		})
-	}
-}
-
-func TestAllResources(t *testing.T) {
-	schemaDiff := diff.ComputeSchemaDiff(map[string]*schema.Resource{}, newProvider.ResourceMap())
-	got, err := DetectMissingDocs(schemaDiff, "/Users/ciris/gows/terraform-provider-google-beta")
-	if err != nil {
-		t.Fatalf("DetectMissingDocs = %v, want = nil", err)
-	}
-
-	var keys []string
-	for k := range got {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		v := got[k]
-		if strings.HasSuffix(k, "iam_policy") || strings.HasSuffix(k, "iam_binding") || strings.HasSuffix(k, "iam_member") {
-			t.Errorf("Resource: %s", k)
-			t.Errorf("Fields: %s", v.Fields)
-		}
-		// t.Errorf("Resource: %s", k)
-		// t.Errorf("Fields: %s", v.Fields)
-	}
-}
-
-func TestAllDatasources(t *testing.T) {
-	schemaDiff := diff.ComputeSchemaDiff(map[string]*schema.Resource{}, newProvider.DatasourceMap())
-	got, err := DetectMissingDocsForDatasource(schemaDiff, "/Users/ciris/gows/terraform-provider-google-beta")
-	if err != nil {
-		t.Fatalf("DetectMissingDocsForDatasource = %v, want = nil", err)
-	}
-
-	var keys []string
-	for k := range got {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		v := got[k]
-		if strings.HasSuffix(k, "iam_policy") || strings.HasSuffix(k, "iam_binding") || strings.HasSuffix(k, "iam_member") {
-			continue
-		}
-		t.Errorf("Datasource: %s, Filepath = %s", k, v.FilePath)
 	}
 }

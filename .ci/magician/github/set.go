@@ -91,6 +91,24 @@ func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []strin
 	return nil
 }
 
+func (gh *Client) RemovePullRequestReviewers(prNumber string, reviewers []string) error {
+	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
+
+	body := map[string][]string{
+		"reviewers":      reviewers,
+		"team_reviewers": {},
+	}
+
+	err := utils.RequestCall(url, "DELETE", gh.token, nil, body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully removed reviewers %v to pull request %s\n", reviewers, prNumber)
+
+	return nil
+}
+
 func (gh *Client) AddLabels(prNumber string, labels []string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
 
