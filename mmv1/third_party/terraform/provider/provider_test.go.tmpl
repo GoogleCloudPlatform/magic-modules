@@ -192,6 +192,7 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		Steps: []resource.TestStep{
+			// old provider - access_token
 			{
 				PreConfig: func() {
 					for _, env := range envvar.CredsEnvVars {
@@ -206,8 +207,38 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_client_config.default", "access_token", accessToken),
 				),
 			},
+			// old provider - credentials
 			{
-				// Step 2: Upgrade to new provider version
+				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+				ExternalProviders:        oldVersion,
+				PreConfig: func() {
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
+				},
+				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
+					"credentials": credentials,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "credentials", credentials),
+				),
+			},
+			{
+				// new provider - access_token
+				PreConfig: func() {
+					for _, env := range envvar.CredsEnvVars {
+						t.Setenv(env, "")
+					}
+				},
+				Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(map[string]interface{}{
+					"access_token": accessToken,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_client_config.default", "access_token", accessToken),
+				),
+			},
+			{
+				// new provider - credentials
 				ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 				PreConfig: func() {
 					for _, env := range envvar.CredsEnvVars {
