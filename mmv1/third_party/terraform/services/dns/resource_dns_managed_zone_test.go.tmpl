@@ -674,7 +674,7 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "172.16.1.10", "dns.infra.foo.com.", "private", "default"),
+				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "dns.infra.foo.com.", "private"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -682,7 +682,7 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "172.16.1.10", "dns.infra.goo.com.", "default", "private"),
+				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "dns.infra.goo.com.", "default"),
 			},
 			{
 				ResourceName:      "google_dns_managed_zone.private",
@@ -693,7 +693,7 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 	})
 }
 
-func testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(suffix, first_nameserver, domain_name, first_forwarding_path, second_forwarding_path string) string {
+func testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(suffix, domain_name, forwarding_path string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
   provider = google-beta
@@ -709,10 +709,6 @@ resource "google_dns_managed_zone" "private" {
 
   forwarding_config {
     target_name_servers {
-      ipv4_address = "%s"
-      forwarding_path = "%s"
-    }
-    target_name_servers {
       domain_name = "%s"
       forwarding_path = "%s"
     }
@@ -724,7 +720,7 @@ resource "google_compute_network" "network-1" {
   name                    = "tf-test-net-1-%s"
   auto_create_subnetworks = false
 }
-`, suffix, first_nameserver, first_forwarding_path, domain_name, second_forwarding_path, suffix)
+`, suffix, domain_name, forwarding_path, suffix)
 }
 
 func TestAccDNSManagedZone_dnsManagedZoneUpdateWithServiceDirectory(t *testing.T) {
