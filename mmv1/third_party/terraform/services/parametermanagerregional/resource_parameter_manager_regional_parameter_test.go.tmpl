@@ -4,6 +4,7 @@ package parametermanagerregional_test
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -185,6 +186,11 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 			},
 			{
 				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter.regional-parameter-with-kms-key",
@@ -194,6 +200,11 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 			},
 			{
 				Config: testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdateOther(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter.regional-parameter-with-kms-key",
@@ -203,6 +214,11 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 			},
 			{
 				Config: testAccParameterManagerRegionalRegionalParameter_withoutKmsKey(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_parameter_manager_regional_parameter.regional-parameter-with-kms-key", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_parameter_manager_regional_parameter.regional-parameter-with-kms-key",
