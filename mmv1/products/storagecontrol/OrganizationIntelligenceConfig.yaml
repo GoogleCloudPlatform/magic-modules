@@ -32,6 +32,7 @@ self_link: 'organizations/{{name}}/locations/global/intelligenceConfig'
 custom_code:
   pre_create: templates/terraform/pre_create/storage_control_intelligence_config.go.tmpl
 
+create_verb: 'PATCH'
 # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
