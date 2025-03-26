@@ -21,11 +21,10 @@ description: |-
   network to the endpoint group, but does not enable mirroring by itself.
   To enable mirroring, the user must also create a network firewall policy
   containing mirroring rules and associate it with the network.
-min_version: 'beta'
 references:
   guides:
     'Mirroring endpoint group association overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/endpoint-groups-overview#mirroring-endpoint-group-association'
-  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1beta1/projects.locations.mirroringEndpointGroupAssociations'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringEndpointGroupAssociations'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations/{{mirroring_endpoint_group_association_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/mirroringEndpointGroupAssociations'
@@ -62,7 +61,6 @@ parameters:
     type: String
     description: |-
       The cloud location of the association, currently restricted to `global`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -72,7 +70,6 @@ parameters:
       The ID to use for the new association, which will become the final
       component of the endpoint group's resource name. If not provided, the
       server will generate a unique ID.
-    min_version: 'beta'
     url_param_only: true
     immutable: true
 properties:
@@ -82,7 +79,6 @@ properties:
       The resource name of this endpoint group association, for example:
       `projects/123456789/locations/global/mirroringEndpointGroupAssociations/my-eg-association`.
       See https://google.aip.dev/122 for more details.
-    min_version: 'beta'
     immutable: true
     output: true
   - name: 'createTime'
@@ -90,27 +86,23 @@ properties:
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |-
       Labels are key/value pairs that help to organize and filter resources.
-    min_version: 'beta'
   - name: 'mirroringEndpointGroup'
     type: String
     description: |-
       The endpoint group that this association is connected to, for example:
       `projects/123456789/locations/global/mirroringEndpointGroups/my-eg`.
       See https://google.aip.dev/124.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'network'
@@ -119,7 +111,6 @@ properties:
       The VPC network that is associated. for example:
       `projects/123456789/global/networks/my-network`.
       See https://google.aip.dev/124.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'locationsDetails'
@@ -128,7 +119,8 @@ properties:
       The list of locations where the association is present. This information
       is retrieved from the linked endpoint group, and not configured as part
       of the association itself.
-    min_version: 'beta'
+    deprecation_message: |-
+      `locationsDetails` is deprecated and will be removed in a future major release. Use `locations` instead.
     output: true
     item_type:
       type: NestedObject
@@ -137,7 +129,6 @@ properties:
           type: String
           description: |-
             The cloud location, e.g. `us-central1-a` or `asia-south1`.
-          min_version: 'beta'
           output: true
         - name: 'state'
           type: String
@@ -147,7 +138,6 @@ properties:
             STATE_UNSPECIFIED
             ACTIVE
             OUT_OF_SYNC
-          min_version: 'beta'
           output: true
   - name: 'state'
     type: String
@@ -161,7 +151,6 @@ properties:
       CLOSED
       OUT_OF_SYNC
       DELETE_FAILED
-    min_version: 'beta'
     output: true
   - name: 'reconciling'
     type: Boolean
@@ -170,5 +159,27 @@ properties:
       and the system is working to reconcile them. This part of the normal
       operation (e.g. adding a new location to the target deployment group).
       See https://google.aip.dev/128.
-    min_version: 'beta'
     output: true
+  - name: locations
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the association is configured. This information
+      is retrieved from the linked endpoint group.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: location
+          type: String
+          description: The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true
