@@ -10,7 +10,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+func flattenMemorystoreInstanceAutomatedBackupConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return nil
 	}
@@ -18,16 +18,17 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if len(original) == 0 {
 		return nil
 	}
-    transformed := make(map[string]interface{})
-
-    if len(d.Get("automated_backup_config").([]interface{})) < 1 {
+	transformed := make(map[string]interface{})
+    // if automated_backup_config is not defined 
+	if len(d.Get("automated_backup_config").([]interface{})) < 1 {
 		return nil
 	}
-	
+
+
 	transformed["fixed_frequency_schedule"] =
-		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(original["fixedFrequencySchedule"], d, config)
+		flattenMemorystoreInstanceAutomatedBackupConfigFixedFrequencySchedule(original["fixedFrequencySchedule"], d, config)
 	transformed["retention"] =
-		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Retention(original["retention"], d, config)
+		flattenMemorystoreInstanceAutomatedBackupConfigRetention(original["retention"], d, config)
 	return []interface{}{transformed}
 }
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
@@ -36,6 +37,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(v inter
 	}
 	original := v.(map[string]interface{})
 	if len(original) == 0 {
+		return nil
+	}
+	if len(d.Get("fixed_frequency_schedule").([]interface{})) < 1 {
 		return nil
 	}
 	transformed := make(map[string]interface{})
@@ -49,6 +53,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTim
 	}
 	original := v.(map[string]interface{})
 	if len(original) == 0 {
+		return nil
+	}
+	if len(d.Get("hours").([]interface{})) == nil {
 		return nil
 	}
 	transformed := make(map[string]interface{})
@@ -74,5 +81,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTim
 }
 
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Retention(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+
 	return v
 }
