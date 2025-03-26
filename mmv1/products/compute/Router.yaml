@@ -45,6 +45,8 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
 sweeper:
+  prefixes:
+    - "swg-autogen-router" # Secure Web Proxy(SWP) auto-generated router prefix.
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"

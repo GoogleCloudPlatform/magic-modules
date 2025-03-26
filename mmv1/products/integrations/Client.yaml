@@ -45,7 +45,12 @@ examples:
     primary_resource_id: 'example'
     vars:
       key_ring_name: 'my-keyring'
+      crypto_key_name: 'my-crypto-key'
       service_account_id: 'service-acc'
+    test_vars_overrides:
+      key_ring_name: '"tftest-shared-keyring-1"'
+      crypto_key_name: '"tftest-shared-key-1"'
+      kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
     skip_vcr: true
 parameters:
   - name: 'location'

@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
@@ -561,10 +562,27 @@ func (r Resource) SensitiveProps() []*Type {
 	})
 }
 
+func (r Resource) WriteOnlyProps() []*Type {
+	props := r.AllNestedProperties(r.RootProperties())
+	return google.Select(props, func(p *Type) bool {
+		return p.WriteOnly
+	})
+}
+
 func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
+}
+
+func (r Resource) WriteOnlyPropsToString() string {
+	var props []string
+
+	for _, prop := range r.WriteOnlyProps() {
 		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
 	}
 
@@ -1824,6 +1842,10 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
 	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false

@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2024, 11, 1),
-					endDate:   newDate(2024, 11, 1),
+					startDate: newDate(2025, 3, 1),
+					endDate:   newDate(2025, 3, 10),
 				},
 			},
 		},
@@ -96,7 +96,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"shuyama1": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 3, 26),
+					endDate:   newDate(2025, 4, 1),
+				},
+			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
