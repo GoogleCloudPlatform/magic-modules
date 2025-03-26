@@ -304,18 +304,6 @@ func ResourceComputeInstance() *schema.Resource {
 							},
 						},
 
-						"guest_os_features": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							AtLeastOneOf: bootDiskKeys,
-							ForceNew:     true,
-							Computed:     true,
-							Description:  `A list of features to enable on the guest operating system. Applicable only for bootable images.`,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-
 						"initialize_params": {
 							Type:         schema.TypeList,
 							Optional:     true,

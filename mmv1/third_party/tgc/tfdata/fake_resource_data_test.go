@@ -319,12 +319,14 @@ func TestFakeResourceData_getOknsetTypeObject(t *testing.T) {
 	)
 	res, ok := d.GetOk("attached_disk.0")
 	assert.Equal(t, map[string]interface{}{
-		"device_name":                "",
-		"disk_encryption_key_raw":    "",
-		"disk_encryption_key_sha256": "",
-		"kms_key_self_link":          "",
-		"mode":                       "",
-		"source":                     "",
+		"device_name":                     "",
+		"disk_encryption_key_raw":         "",
+		"disk_encryption_key_sha256":      "",
+		"disk_encryption_key_rsa":         "",
+		"disk_encryption_service_account": "",
+		"kms_key_self_link":               "",
+		"mode":                            "",
+		"source":                          "",
 	}, res)
 	assert.False(t, ok)
 }
