@@ -15,6 +15,10 @@
 name: 'Instance'
 description: A Google Cloud Memorystore instance.
 docs:
+references:
+  guides:
+    'Official Documentation': https://cloud.google.com/memorystore/docs/valkey/create-instances
+  api: 'https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances'
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
 self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
@@ -72,11 +76,10 @@ examples:
       'prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "Required. Immutable. User inputs for the auto-created
+    description: "Immutable. User inputs for the auto-created
       PSC connections. "
     type: Array
     immutable: true
-    required: true
     item_type:
       type: NestedObject
       properties:
@@ -154,6 +157,16 @@ properties:
             description:
               "Output only. Target number of replica nodes per shard for the
               instance. "
+            output: true
+          - name: 'targetEngineVersion'
+            type: String
+            description:
+              "Output only. Target engine version for the instance."
+            output: true
+          - name: 'targetNodeType'
+            type: String
+            description:
+              "Output only. Target node type for the instance."
             output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
@@ -284,6 +297,125 @@ properties:
             type: String
             description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
             default_from_api: true
+  - name: 'maintenancePolicy'
+    type: NestedObject
+    description: Maintenance policy for a cluster
+    properties:
+      - name: 'createTime'
+        type: String
+        description: |
+          The time when the policy was created.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The time when the policy was last updated.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'weeklyMaintenanceWindow'
+        type: Array
+        description: |
+          Optional. Maintenance window that is applied to resources covered by this policy.
+          Minimum 1. For the current version, the maximum number
+          of weekly_window is expected to be one.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'day'
+              type: Enum
+              description: |
+                The day of week that maintenance updates occur.
+
+                - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
+                - MONDAY: Monday
+                - TUESDAY: Tuesday
+                - WEDNESDAY: Wednesday
+                - THURSDAY: Thursday
+                - FRIDAY: Friday
+                - SATURDAY: Saturday
+                - SUNDAY: Sunday
+              required: true
+              enum_values:
+                - 'DAY_OF_WEEK_UNSPECIFIED'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'duration'
+              type: String
+              description: |
+                Duration of the maintenance window.
+                The current window is fixed at 1 hour.
+                A duration in seconds with up to nine fractional digits,
+                terminated by 's'. Example: "3.5s".
+              output: true
+            - name: 'startTime'
+              type: NestedObject
+              description: |
+                Start time of the window in UTC time.
+              required: true
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                    An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation:
+                    function: 'validation.IntBetween(0,23)'
+                - name: 'minutes'
+                  type: Integer
+                  description: |
+                    Minutes of hour of day. Must be from 0 to 59.
+                  validation:
+                    function: 'validation.IntBetween(0,59)'
+                - name: 'seconds'
+                  type: Integer
+                  description: |
+                    Seconds of minutes of the time. Must normally be from 0 to 59.
+                    An API may allow the value 60 if it allows leap-seconds.
+                  validation:
+                    function: 'validation.IntBetween(0,60)'
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation:
+                    function: 'validation.IntBetween(0,999999999)'
+  - name: 'maintenanceSchedule'
+    type: NestedObject
+    description: Upcoming maintenance schedule.
+    output: true
+    properties:
+      - name: 'startTime'
+        type: String
+        description: |
+          The start time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'endTime'
+        type: String
+        description: |
+          The end time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'scheduleDeadlineTime'
+        type: String
+        description: |
+          The deadline that the maintenance schedule start time
+          can not go beyond, including reschedule.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
   - name: 'engineVersion'
     type: String
     description: "Optional. Engine version of the instance."
@@ -401,6 +533,24 @@ properties:
     enum_values:
       - 'CLUSTER'
       - 'CLUSTER_DISABLED'
+  - name: 'pscAttachmentDetails'
+    type: Array
+    description:
+      "Configuration of a service attachment of the cluster, for creating PSC connections."
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'serviceAttachment'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
+        - name: 'connectionType'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
   - name: 'pscAutoConnections'
     type: Array
     description:
