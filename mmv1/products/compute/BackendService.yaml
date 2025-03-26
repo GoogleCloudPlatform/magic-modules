@@ -1477,6 +1477,7 @@ properties:
     type: NestedObject
     description: |
       Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
+    min_version: beta
     properties:
       - name: 'sni'
         type: String
