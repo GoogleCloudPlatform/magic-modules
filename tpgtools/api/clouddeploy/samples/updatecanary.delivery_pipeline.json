@@ -56,7 +56,11 @@
                     "httpRoute": "example-http-route",
                     "service": "example-service",
                     "deployment": "example-deployment",
-                    "podSelectorLabel": "example.com/app-name"
+                    "podSelectorLabel": "example.com/app-name",
+                    "routeDestinations": {
+                      "destinationIds": ["example-destination-id"],
+                      "propagateService": true
+                    }
                   }
                 }
               },

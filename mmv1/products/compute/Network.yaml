@@ -33,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
@@ -60,6 +53,24 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_custom_firewall_enforcement_order'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode_standard'
+    primary_resource_id: 'vpc_network'
+    vars:
+      network_name: 'vpc-network'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
     primary_resource_id: 'vpc_network'
     vars:
       network_name: 'vpc-network'
@@ -102,10 +113,16 @@ properties:
     immutable: true
     validation:
       function: 'verify.ValidateGCEName'
+  - name: 'networkId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'numericId'
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
+    deprecation_message: '`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.'
     output: true
   - name: 'autoCreateSubnetworks'
     type: Boolean
@@ -144,6 +161,36 @@ properties:
         enum_values:
           - 'REGIONAL'
           - 'GLOBAL'
+      - name: 'bgpBestPathSelectionMode'
+        type: Enum
+        description: |
+         The BGP best selection algorithm to be employed. MODE can be LEGACY or STANDARD.
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+        enum_values:
+          - 'LEGACY'
+          - 'STANDARD'
+      - name: 'bgpAlwaysCompareMed'
+        type: Boolean
+        description: |
+         Enables/disables the comparison of MED across routes with different Neighbor ASNs.
+         This value can only be set if the --bgp-best-path-selection-mode is STANDARD
+        required: false
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+      - name: 'bgpInterRegionCost'
+        type: Enum
+        description: |
+         Choice of the behavior of inter-regional cost and MED in the BPS algorithm.
+        required: false
+        default_from_api: true
+        update_url: 'projects/{{project}}/global/networks/{{name}}'
+        update_verb: 'PATCH'
+        enum_values:
+          - 'DEFAULT'
+          - 'ADD_COST_TO_MED'
   - name: 'mtu'
     type: Integer
     description: |
@@ -180,3 +227,12 @@ properties:
     enum_values:
       - 'BEFORE_CLASSIC_FIREWALL'
       - 'AFTER_CLASSIC_FIREWALL'
+  - name: 'networkProfile'
+    type: String
+    immutable: true
+    description: |
+      A full or partial URL of the network profile to apply to this network.
+      This field can be set only at resource creation time. For example, the
+      following are valid URLs:
+      * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
+      * projects/{projectId}/global/networkProfiles/{network_profile_name}

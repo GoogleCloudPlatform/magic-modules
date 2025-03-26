@@ -16,6 +16,7 @@ package api
 import (
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -34,12 +35,12 @@ type Product struct {
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
-	ApiName string `yaml:"api_name"`
+	ApiName string `yaml:"api_name,omitempty"`
 
 	// Display Name: The full name of the GCP product; eg "Cloud Bigtable"
-	DisplayName string `yaml:"display_name"`
+	DisplayName string `yaml:"display_name,omitempty"`
 
-	Objects []*Resource
+	Objects []*Resource `yaml:"objects,omitempty"`
 
 	// The list of permission scopes available for the service
 	// For example: `https://www.googleapis.com/auth/compute`
@@ -50,19 +51,23 @@ type Product struct {
 
 	// The base URL for the service API endpoint
 	// For example: `https://www.googleapis.com/compute/v1/`
-	BaseUrl string `yaml:"base_url"`
+	BaseUrl string `yaml:"base_url,omitempty"`
+
+	// The validator "relative URI" of a resource, relative to the product
+	// base URL. Specific to defining the resource as a CAI asset.
+	CaiBaseUrl string
 
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
 	// failures on operation_get. see github.com/hashicorp/terraform-provider-google/issues/9489
-	OperationRetry string `yaml:"operation_retry"`
+	OperationRetry string `yaml:"operation_retry,omitempty"`
 
-	Async *Async
+	Async *Async `yaml:"async,omitempty"`
 
-	LegacyName string `yaml:"legacy_name"`
+	LegacyName string `yaml:"legacy_name,omitempty"`
 
-	ClientName string `yaml:"client_name"`
+	ClientName string `yaml:"client_name,omitempty"`
 }
 
 func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
@@ -213,6 +218,7 @@ func (p *Product) ExistsAtVersion(name string) bool {
 
 func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.BaseUrl = version.BaseUrl
+	p.CaiBaseUrl = version.CaiBaseUrl
 }
 
 func (p *Product) TerraformName() string {
@@ -220,6 +226,38 @@ func (p *Product) TerraformName() string {
 		return google.Underscore(p.LegacyName)
 	}
 	return google.Underscore(p.Name)
+}
+
+func (p *Product) ServiceBaseUrl() string {
+	if p.CaiBaseUrl != "" {
+		return p.CaiBaseUrl
+	}
+	return p.BaseUrl
+}
+
+func (p *Product) ServiceName() string {
+	parts := strings.Split(p.ServiceBaseUrl(), "/")
+	// remove location prefix if present
+	trimmed, _ := strings.CutPrefix(parts[2], "{{location}}-")
+	return trimmed
+}
+
+var versionRegexp = regexp.MustCompile(`^v[0-9]+|beta`)
+
+func (p *Product) ServiceVersion() string {
+	parts := strings.Split(p.ServiceBaseUrl(), "/")
+	for i := len(parts) - 1; i >= 0; i-- {
+		part := parts[i]
+		// stop when we get to the domain name
+		if strings.Contains(part, ".com") {
+			break
+		}
+		v := versionRegexp.FindString(part)
+		if v != "" {
+			return part
+		}
+	}
+	return ""
 }
 
 // ====================

@@ -1,0 +1,26 @@
+resource "google_secure_source_manager_instance" "instance" {
+    location = "us-central1"
+    instance_id = "{{index $.Vars "instance_id"}}"
+    # Prevent accidental deletions.
+    lifecycle {
+        prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
+    }
+}
+
+resource "google_secure_source_manager_repository" "repository" {
+    repository_id = "{{index $.Vars "repository_id"}}"
+    location = google_secure_source_manager_instance.instance.location
+    instance = google_secure_source_manager_instance.instance.name
+    # Prevent accidental deletions.
+    lifecycle {
+        prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
+    }
+}
+
+resource "google_secure_source_manager_branch_rule" "basic" {
+    branch_rule_id = "{{index $.Vars "branch_rule_id"}}"
+    repository_id = google_secure_source_manager_repository.repository.repository_id
+    location = google_secure_source_manager_repository.repository.location
+    # This field is required for BranchRule creation
+    include_pattern = "main"
+}

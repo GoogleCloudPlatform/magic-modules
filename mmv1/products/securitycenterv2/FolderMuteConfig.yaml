@@ -13,6 +13,7 @@
 
 ---
 name: 'FolderMuteConfig'
+api_resource_type_kind: MuteConfig
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,

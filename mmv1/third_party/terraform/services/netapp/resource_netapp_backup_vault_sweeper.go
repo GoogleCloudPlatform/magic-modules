@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("NetappBackupVault", testSweepNetappBackupVault)
+	sweeper.AddTestSweepersLegacy("NetappBackupVault", testSweepNetappBackupVault)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
@@ -36,7 +36,7 @@ func testSweepNetappBackupVault(region string) error {
 	t := &testing.T{}
 	billingId := envvar.GetTestBillingAccountFromEnv(t)
 
-	regions := []string{"us-central1", "us-west2", "us-east4"}
+	regions := []string{"us-central1", "us-west1", "us-west2", "us-east4"}
 	for _, r := range regions {
 		log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s in %s", resourceName, r)
 

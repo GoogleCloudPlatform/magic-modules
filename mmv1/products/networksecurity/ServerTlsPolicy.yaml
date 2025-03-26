@@ -14,7 +14,7 @@
 ---
 name: 'ServerTlsPolicy'
 description: |
-  ClientTlsPolicy is a resource that specifies how a client should authenticate connections to backends of a service. This resource itself does not affect configuration unless it is attached to a backend service resource.
+  ServerTlsPolicy is a resource that specifies how a server should authenticate incoming requests. This resource itself does not affect configuration unless it is attached to a target HTTPS proxy or endpoint config selector resource.
 references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-security/rest/v1beta1/projects.locations.serverTlsPolicies'
@@ -35,19 +35,17 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'network_security_server_tls_policy_basic'
     primary_resource_id: 'default'

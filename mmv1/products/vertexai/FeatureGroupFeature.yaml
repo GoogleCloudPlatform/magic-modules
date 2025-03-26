@@ -13,6 +13,7 @@
 
 ---
 name: 'FeatureGroupFeature'
+api_resource_type_kind: Feature
 description: Vertex AI Feature Group Feature is feature metadata information.
 references:
   guides:
@@ -35,14 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'vertex_ai_feature_group_feature'

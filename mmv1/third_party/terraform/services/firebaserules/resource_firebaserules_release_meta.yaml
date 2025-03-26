@@ -1,0 +1,12 @@
+resource: 'google_firebaserules_release'
+generation_type: 'dcl'
+api_service_name: 'firebaserules.googleapis.com'
+api_version: 'v1'
+api_resource_type_kind: 'Release'
+fields:
+  - field: 'create_time'
+  - field: 'disabled'
+  - field: 'name'
+  - field: 'project'
+  - field: 'ruleset_name'
+  - field: 'update_time'

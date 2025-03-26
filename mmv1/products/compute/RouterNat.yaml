@@ -13,6 +13,7 @@
 
 ---
 name: 'RouterNat'
+api_resource_type_kind: Router
 description: |
   A NAT service created in a router.
 
@@ -42,15 +43,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'nats'
 identity:
   - name

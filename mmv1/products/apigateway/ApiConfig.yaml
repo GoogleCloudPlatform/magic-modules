@@ -29,7 +29,6 @@ self_link: 'projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_con
 create_url: 'projects/{{project}}/locations/global/apis/{{api}}/configs?apiConfigId={{api_config_id}}'
 update_verb: 'PATCH'
 update_mask: true
-
 read_query_params: '?view=FULL'
 timeouts:
   insert_minutes: 20
@@ -41,14 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - apiConfigId
 iam_policy:
@@ -66,6 +59,12 @@ iam_policy:
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/api_config.tmpl'
   encoder: 'templates/terraform/encoders/api_config.go.tmpl'
+sweeper:
+  parent:
+    resource_type: "google_api_gateway_api"
+    parent_field: "name"
+    parent_field_extract_name: true
+    child_field: "api"
 examples:
   - name: 'apigateway_api_config_basic'
     primary_resource_id: 'api_cfg'

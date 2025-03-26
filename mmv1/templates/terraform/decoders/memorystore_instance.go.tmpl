@@ -1,7 +1,10 @@
 // Retrieve pscAutoConnections from API response
 v, ok := res["pscAutoConnections"]
 if !ok {
-	return nil, fmt.Errorf("pscAutoConnections field not found in API response")
+	if _, endpointsFound := res["endpoints"]; endpointsFound {
+		return res, nil // For Cluster Disabled instances, we would have 'endpoints' instead of 'pscAutoConnections'
+	}
+	return res, nil
 }
 
 connections, ok := v.([]interface{})

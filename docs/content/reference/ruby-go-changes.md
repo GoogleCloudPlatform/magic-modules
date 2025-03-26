@@ -1,6 +1,6 @@
 ---
 title: "Ruby to Go Migration"
-weight: 10
+weight: 40
 ---
 # What has changed in the MMv1 Go migration
 
@@ -83,7 +83,7 @@ resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
 
 ## Advanced: MMv1-specific generator command
 
-Most contributors should use the make commands referenced in [make-commands](https://googlecloudplatform.github.io/magic-modules/reference/make-commands/) reference page to generate the downstream `google` and `google-beta` providers. The input for these commands have not changed, and have already been correctly switched over to use the new Go engine.
+Most contributors should use the make commands referenced in [make-commands]({{< ref "reference/make-commands/" >}}) reference page to generate the downstream `google` and `google-beta` providers. The input for these commands have not changed, and have already been correctly switched over to use the new Go engine.
 
 Some advanced contributors may be used to running the MMv1 generator commands. These commands have changed from Ruby's `bundle exec` to `go run`.
 

@@ -6,10 +6,10 @@ resource "google_parallelstore_instance" "{{$.PrimaryResourceId}}" {
   network = google_compute_network.network.name
   file_stripe_level = "FILE_STRIPE_LEVEL_MIN"
   directory_stripe_level = "DIRECTORY_STRIPE_LEVEL_MIN"
+deployment_type = "SCRATCH"
   labels = {
     test = "value"
   }
-  provider = google-beta
   depends_on = [google_service_networking_connection.default]
 }
 
@@ -17,7 +17,6 @@ resource "google_compute_network" "network" {
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = true
   mtu = 8896
-  provider = google-beta
 }
 
 # Create an IP address
@@ -27,7 +26,6 @@ resource "google_compute_global_address" "private_ip_alloc" {
   address_type  = "INTERNAL"
   prefix_length = 24
   network       = google_compute_network.network.id
-  provider = google-beta
 }
 
 # Create a private connection
@@ -35,5 +33,4 @@ resource "google_service_networking_connection" "default" {
   network                 = google_compute_network.network.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-  provider = google-beta
 }

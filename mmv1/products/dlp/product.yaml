@@ -13,7 +13,7 @@
 
 ---
 name: 'DataLossPrevention'
-display_name: 'Data loss prevention'
+display_name: 'Data Loss Prevention'
 versions:
   - name: 'ga'
     base_url: 'https://dlp.googleapis.com/v2/'

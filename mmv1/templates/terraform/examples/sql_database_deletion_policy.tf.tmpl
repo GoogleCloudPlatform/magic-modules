@@ -13,5 +13,5 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-g1-small"
   }
 
-  deletion_protection  = "{{index $.Vars "deletion_protection"}}"
+  deletion_protection  = {{index $.Vars "deletion_protection"}}
 }

@@ -27,6 +27,7 @@ if fqdnProp != "" {
   toDelete["fqdn"] = fqdnProp
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 // Instance
 instanceProp, err := expandNestedComputeRegionNetworkEndpointInstance(d.Get("instance"), d, config)
 if err != nil {
@@ -44,6 +45,7 @@ if err != nil {
 if clientDestinationPortProp != "" && d.Get("client_destination_port").(int) > 0 {
   toDelete["clientDestinationPort"] = clientDestinationPortProp
 }
+{{- end }}
 
 obj = map[string]interface{}{
 	"networkEndpoints": []map[string]interface{}{toDelete},

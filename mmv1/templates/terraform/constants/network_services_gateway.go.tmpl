@@ -10,6 +10,11 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+
+import (
+	tpgcompute "{{ $.ImportPath }}/services/compute"
+)
+
 // Checks if there is another gateway under the same location.
 func gatewaysSameLocation(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) ([]interface{}, error) {
 	log.Print("[DEBUG] Looking for gateways under the same location.")
@@ -104,7 +109,7 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 		return err
 	}
 
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config: config,
 		Method: "DELETE",
 		Project: billingProject,
@@ -121,6 +126,10 @@ func deleteSWGAutoGenRouter(d *schema.ResourceData, config *transport_tpg.Config
 
 		return err
 	}
+
+	err = tpgcompute.ComputeOperationWaitTime(
+		config, res, billingProject, "Deleting autogen router", userAgent,
+		d.Timeout(schema.TimeoutDelete))
 
 	return nil
 }

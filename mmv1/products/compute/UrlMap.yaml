@@ -19,6 +19,7 @@ description: |
   that you define for the host and path of an incoming URL.
 references:
   guides:
+    'Official Documentation': 'https://cloud.google.com/load-balancing/docs/url-map-concepts'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/urlMaps'
 docs:
 base_url: 'projects/{{project}}/global/urlMaps'
@@ -32,15 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
 examples:
@@ -320,7 +314,7 @@ properties:
         - name: 'defaultCustomErrorResponsePolicy'
           type: NestedObject
           description: |
-            defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+            defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
 
             This policy takes effect at the PathMatcher level and applies only when no policy has been defined for the error code at lower levels like RouteRule and PathRule within this PathMatcher. If an error code does not have a policy defined in defaultCustomErrorResponsePolicy, then a policy defined for the error code in UrlMap.defaultCustomErrorResponsePolicy takes effect.
 
@@ -487,7 +481,7 @@ properties:
               - name: 'customErrorResponsePolicy'
                 type: NestedObject
                 description: |
-                  customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+                  customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
                   If a policy for an error code is not configured for the PathRule, a policy for the error code configured in pathMatcher.defaultCustomErrorResponsePolicy is applied. If one is not specified in pathMatcher.defaultCustomErrorResponsePolicy, the policy configured in UrlMap.defaultCustomErrorResponsePolicy takes effect.
                   For example, consider a UrlMap with the following configuration:
                   UrlMap.defaultCustomErrorResponsePolicy are configured with policies for 5xx and 4xx errors
@@ -747,6 +741,28 @@ properties:
                       the request is has been fully processed (i.e. end-of-stream) up until the
                       response has been completely processed. Timeout includes all retries. If not
                       specified, the default value is 15 seconds.
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
                     properties:
                       - name: 'nanos'
                         type: Integer
@@ -1493,6 +1509,28 @@ properties:
                           Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
                           inclusive.
                         required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
                   - name: 'urlRewrite'
                     type: NestedObject
                     description: |
@@ -1922,6 +1960,27 @@ properties:
                   description: |
                     Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
                     with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+            - name: 'maxStreamDuration'
+              type: NestedObject
+              description: |
+                Specifies the maximum duration (timeout) for streams on the selected route.
+                Unlike the `Timeout` field where the timeout duration starts from the time the request
+                has been fully processed (known as end-of-stream), the duration in this field
+                is computed from the beginning of the stream until the response has been processed,
+                including all retries. A stream that does not complete in this duration is closed.
+              default_from_api: true
+              properties:
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+                    with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+                - name: 'seconds'
+                  type: String
+                  description: |
+                    Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+                  required: true
             - name: 'retryPolicy'
               type: NestedObject
               description: |
@@ -2102,7 +2161,7 @@ properties:
   - name: 'defaultCustomErrorResponsePolicy'
     type: NestedObject
     description: |
-      defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendServiceor BackendBucket responds with an error.
+      defaultCustomErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
 
       This policy takes effect at the PathMatcher level and applies only when no policy has been defined for the error code at lower levels like RouteRule and PathRule within this PathMatcher. If an error code does not have a policy defined in defaultCustomErrorResponsePolicy, then a policy defined for the error code in UrlMap.defaultCustomErrorResponsePolicy takes effect.
 
@@ -2458,6 +2517,27 @@ properties:
             at_least_one_of:
               - 'default_route_action.0.timeout.0.seconds'
               - 'default_route_action.0.timeout.0.nanos'
+      - name: 'maxStreamDuration'
+        type: NestedObject
+        description: |
+          Specifies the maximum duration (timeout) for streams on the selected route.
+          Unlike the `Timeout` field where the timeout duration starts from the time the request
+          has been fully processed (known as end-of-stream), the duration in this field
+          is computed from the beginning of the stream until the response has been processed,
+          including all retries. A stream that does not complete in this duration is closed.
+        default_from_api: true
+        properties:
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+          - name: 'seconds'
+            type: String
+            description: |
+              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+            required: true
       - name: 'retryPolicy'
         type: NestedObject
         description: |

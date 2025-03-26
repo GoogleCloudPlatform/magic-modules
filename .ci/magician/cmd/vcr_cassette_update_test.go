@@ -49,7 +49,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"#################################",
 					"",
 					"#################################",
-					"Errors occurred during REPLAYING mode: some error.",
+					"Errors occurred during REPLAYING mode.",
 					"#################################",
 				},
 				"\n",

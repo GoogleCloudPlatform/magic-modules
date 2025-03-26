@@ -11,9 +11,14 @@
 	limitations under the License.
 */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	d.Set("row_affinity", nil)
 	if v == nil {
 		return false
 	}
+
+	if v.(map[string]interface{})["rowAffinity"] != nil {
+                d.Set("row_affinity", true)
+        }
 
 	if v.(map[string]interface{})["clusterIds"] == nil {
 		return true
