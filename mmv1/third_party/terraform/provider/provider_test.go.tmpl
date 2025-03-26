@@ -216,11 +216,10 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 					}
 				},
 				Config: testAccProviderExternalCredentialsUpgrade_CredentialsConfig(map[string]interface{}{
-					"credentials":   credentials,
-					"random_suffix": acctest.RandString(t, 10),
+					"credentials": credentials,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_service_account.default", "email"),
+					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "credentials", credentials),
 				),
 			},
 		},
@@ -246,10 +245,7 @@ provider "google" {
   credentials = "%{credentials}"
 }
 
-resource "google_service_account" "default" {
-  account_id   = "tf-test-%{random_suffix}"
-  display_name = "Test Service Account"
-}
+data "google_provider_config_sdk" "default" {}
 `, context)
 }
 
