@@ -38,8 +38,8 @@ async:
 collection_url_key: 'items'
 sweeper:
   dependencies:
-    - "google_network_security_intercept_endpoint_group"
-    - "google_network_security_intercept_deployment_group"
+    # - "google_network_security_intercept_endpoint_group" (beta only)
+    # - "google_network_security_intercept_deployment_group" (beta only)
     - "google_network_security_firewall_endpoint_association"
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
