@@ -200,10 +200,10 @@ func TestAccProvider_external_credentials_upgrade(t *testing.T) {
 				},
 				ExternalProviders: oldVersion,
 				Config: testAccProviderExternalCredentialsUpgrade_AccessTokenConfig(map[string]interface{}{
-					"access_token":  accessToken,
+					"access_token": accessToken,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_provider_config_sdk.default", "access_token", accessToken),
+					resource.TestCheckResourceAttr("data.google_client_config.default", "access_token", accessToken),
 				),
 			},
 			{
@@ -231,7 +231,7 @@ provider "google" {
   access_token = "%{access_token}"
 }
 
-data "google_provider_config_sdk" "default" {}
+data "google_client_config" "default" {}
 `, context)
 }
 
