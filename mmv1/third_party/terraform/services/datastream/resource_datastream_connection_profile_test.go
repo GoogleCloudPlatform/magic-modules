@@ -148,6 +148,10 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
+			"time": {
+				VersionConstraint: "0.13.0",
+				Source:            "registry.terraform.io/hashicorp/time",
+			},
 		},
 		CheckDestroy: testAccCheckDatastreamConnectionProfileDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -158,12 +162,12 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 				ResourceName:            "google_datastream_connection_profile.ssh_connectivity_profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key"},
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key", "postgresql_profile.0.password"},
 			},
 			{
 				PreConfig: func() {
 					fmt.Println("Waiting before proceeding to the next step...")
-					time.Sleep(1500 * time.Second) // Delay before the next step
+					time.Sleep(150 * time.Second) // Delay before the next step
 				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, true, randomPrivKey2, randomPubKey2),
 			},
@@ -171,12 +175,12 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 				ResourceName:            "google_datastream_connection_profile.ssh_connectivity_profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key"},
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "create_without_validation", "forward_ssh_connectivity.0.private_key", "postgresql_profile.0.password"},
 			},
 			{
 				PreConfig: func() {
 					fmt.Println("Waiting before proceeding to the next step...")
-					time.Sleep(1500 * time.Second) // Delay before the next step
+					time.Sleep(150 * time.Second) // Delay before the next step
 				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, false, randomPrivKey2, randomPubKey2),
 			},
@@ -368,115 +372,143 @@ func testAccDatastreamConnectionProfile_sshKey_update(context map[string]interfa
 	context["public_key"] = public_key
 
 	return acctest.Nprintf(`
-resource "google_sql_database_instance" "instance" {
-        name             = "tf-test-my-database-instance%{random_suffix}"
-        database_version = "POSTGRES_14"
-        region           = "us-central1"
-        settings {
-        	tier = "db-f1-micro"
-        	ip_configuration {
-			// Datastream IPs will vary by region.
-			    authorized_networks {
-				    value = "34.71.242.81"
-				}
-	
-			    authorized_networks {
-				    value = "34.72.28.29"
-				}
-	
-			    authorized_networks {
-				    value = "34.67.6.157"
-				}
-	
-			    authorized_networks {
-				    value = "34.67.234.134"
-				}
-	
-			    authorized_networks {
-				    value = "34.72.239.218"
-				}
-        	}
-    	}
-    
-        deletion_protection  = "false"
+resource "random_password" "pwd" {
+	length = 16
+	special = false
 }
-   
+
+resource "google_sql_database_instance" "instance" {
+    depends_on         = [google_compute_instance.default]
+    name            	= "tf-test-my-database-instance%{random_suffix}"
+    database_version	= "POSTGRES_14"
+    region           	= "us-central1"
+    settings {
+        tier = "db-f1-micro"
+        ip_configuration {
+			ipv4_enabled = true
+
+			authorized_networks {
+				value = google_compute_instance.default.network_interface.0.access_config.0.nat_ip
+			}
+        }
+    }
+    
+    deletion_protection  = "false"
+}
+
 resource "google_sql_database" "db" {
+	depends_on = [google_sql_database_instance.instance]
 	instance = google_sql_database_instance.instance.name
 	name     = "db"
 }
 resource "google_sql_user" "user" {
-	name = "user"
-	instance = google_sql_database_instance.instance.name
-	password = "Ckrw75FbtmKrTKCtWPFJS54cTdbGC8D82rJwp3gV"
+	depends_on	= [google_sql_database_instance.instance]
+	name		= "user"
+	instance	= google_sql_database_instance.instance.name
+	password	= random_password.pwd.result
 }
 
 resource "google_compute_instance" "default" {
-		name         = "tf-test-instance-%{random_suffix}"
-		machine_type = "e2-small"
-		zone         = "us-central1-a"
-		boot_disk {
-			initialize_params {
+	name         = "tf-test-instance-%{random_suffix}"
+	machine_type = "e2-small"
+	zone         = "us-central1-a"
+	boot_disk {
+		initialize_params {
 			image = "debian-11-bullseye-v20241009"
-		  }
+		}
+	}
+
+	network_interface {
+		network    = "default"
+		access_config {}
 		}
 
-		network_interface {
-			network    = "default"
-			access_config {} 
-		  }
+	metadata = {
+		"ssh-keys" = "user:%{public_key}"
+	}
 
-		metadata = {
-		  "ssh-keys" = "user:%{public_key}"
-		}
+	metadata_startup_script = <<-EOT
+	#!/bin/bash
+	echo "Updating SSHD config for SSH forwarding..."
 
-		timeouts {
-			create = "15m" 
-		  }
+	# Backup sshd_config
+	echo "AllowTcpForwarding yes" >> /etc/ssh/sshd_config
+	echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+	echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
+	echo "AuthorizedKeysFile .ssh/authorized_keys" >> /etc/ssh/sshd_config
+	
+	# Restart SSH service
+	systemctl restart sshd
+	EOT
+
+	tags = ["ssh-host"]
 	
 }
 
+resource "time_sleep" "ssh_host_wait" {
+	depends_on = [google_compute_instance.default]
+	create_duration = "15m"
+}
+
 resource "google_compute_firewall" "ssh" {
-	name = "tf-test-%{random_suffix}"
+	name 	= "tf-test-%{random_suffix}"
 	network = "default"
 
 	allow {
 		protocol = "tcp"
-		ports    = ["22", "5432"]
+		ports    = ["22"]
 	}
 
 	direction     = "INGRESS"
 	priority      = 1000
-	source_ranges = ["0.0.0.0/0"] 
+	source_ranges = ["34.71.242.81", "34.72.28.29", "34.67.6.157", "34.67.234.134", "34.72.239.218"]
+
+	target_tags = ["ssh-host"]
+}
+
+resource "google_compute_firewall" "datastream_sql_access" {
+    depends_on 	= [google_sql_database_instance.instance]
+    name    	= "datastream-to-cloudsql-%{random_suffix}"
+    network 	= "default"
+
+    allow {
+        protocol = "tcp"
+        ports    = ["5432"]
+    }
+
+    direction     = "INGRESS"
+    priority      = 1000
+    source_ranges = ["34.71.242.81", "34.72.28.29", "34.67.6.157", "34.67.234.134", "34.72.239.218"]  #Datastream IPs
+
 }
 
 resource "google_datastream_connection_profile" "ssh_connectivity_profile" {
-        display_name          = "Source connection profile"
-        location              = "us-central1"
-        connection_profile_id = "tf-test-mysql-profile%{random_suffix}"
+    display_name          = "Source connection profile"
+    location              = "us-central1"
+    connection_profile_id = "tf-test-pg-profile%{random_suffix}"
 
-    	postgresql_profile {
-        	hostname 			= google_sql_database_instance.instance.public_ip_address
-        	username 			= google_sql_user.user.name
-        	password 			= google_sql_user.user.password
-        	database 			= google_sql_database.db.name
-    	}
+    postgresql_profile {
+        hostname 			= google_sql_database_instance.instance.public_ip_address
+        username 			= google_sql_user.user.name
+        password 			= google_sql_user.user.password
+        database 			= google_sql_database.db.name
+        port 				= 5432
+    }
 
-    	forward_ssh_connectivity {
-        	hostname 	= google_compute_instance.default.network_interface.0.network_ip 
-        	username 	= google_sql_user.user.name
-			port    	= 22
-			private_key = <<EOT
+    forward_ssh_connectivity {
+        hostname 	= google_compute_instance.default.network_interface.0.access_config.0.nat_ip
+        username 	= google_sql_user.user.name
+		port    	= 22
+		private_key = <<EOT
 %{private_key}
 EOT
 	}
 
-		depends_on = [google_sql_database_instance.instance, google_compute_instance.default]
-		timeouts {
-		create = "20m" # Give Datastream extra time to establish the connection
-		  }
-
-    	%{lifecycle_block}
+	depends_on = [time_sleep.ssh_host_wait]
+	timeouts {
+		create = "10m"
+		}
+    %{lifecycle_block}
 }
 `, context)
 }
