@@ -208,3 +208,20 @@ properties:
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).
     immutable: true
+  - name: 'md5AuthenticationKeys'
+    ignore_read: true
+    type: NestedObject
+    description: |
+      Keys used for MD5 authentication.
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          Name used to identify the key. Must be unique within a router.
+          Must be referenced by exactly one bgpPeer. Must comply with RFC1035.
+        required: true
+      - name: 'key'
+        type: String
+        description: |
+          Value of the key used for MD5 authentication.
+        required: true
