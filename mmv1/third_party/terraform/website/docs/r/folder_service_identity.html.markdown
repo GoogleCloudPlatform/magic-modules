@@ -6,7 +6,7 @@ description: |-
 
 # google_folder_service_identity
 
-Generate service identity for a service.
+Generate folder service identity for a service.
 
 ~> **Note:** Once created, this resource cannot be updated or destroyed. These
 actions are a no-op.
