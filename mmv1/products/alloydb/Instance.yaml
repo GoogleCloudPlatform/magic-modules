@@ -285,6 +285,9 @@ properties:
       - name: 'cpuCount'
         type: Integer
         description: "The number of CPU's in the VM instance."
+      - name: 'machineType'
+        type: String
+        description: "The machine type of the VM instance."        
 
         default_from_api: true
   - name: 'clientConnectionConfig'
