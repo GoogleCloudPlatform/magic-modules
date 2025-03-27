@@ -74,6 +74,31 @@ examples:
       prevent_destroy: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+  - name: 'memorystore_instance_secondary_instance'
+    primary_resource_id: 'secondary_instance'
+    vars:
+      primary_instance_name: 'primary-instance'
+      primary_instance_deletion_protection_enabled: 'true'
+      primary_instance_prevent_destroy: 'true'
+      primary_instance_policy_name: 'my-policy-primary-instance'
+      primary_network_name: "my-network-primary-instance"
+      primary_instance_subnet_name: 'my-subnet-primary-instance'
+      secondary_instance_name: 'secondary-instance'
+      secondary_instance_deletion_protection_enabled: 'true'
+      secondary_instance_prevent_destroy: 'true'
+      secondary_instance_policy_name: 'my-policy-secondary-instance'
+      secondary_network_name: "my-network-secondary-instance"
+      secondary_instance_subnet_name: 'my-subnet-secondary-instance'
+    test_vars_overrides:
+      'primary_instance_deletion_protection_enabled': 'false'
+      'secondary_instance_deletion_protection_enabled': 'false'
+      'primary_instance_prevent_destroy': 'false'
+      'secondary_instance_prevent_destroy': 'false'
+    oics_vars_overrides:
+      'primary_instance_deletion_protection_enabled': 'false'
+      'secondary_instance_deletion_protection_enabled': 'false'
+      'primary_instance_prevent_destroy': 'false'
+      'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "Immutable. User inputs for the auto-created
@@ -525,6 +550,99 @@ properties:
                     description:
                       "Output only. Ports of the exposed endpoint."
                     output: true
+  - name: 'crossInstanceReplicationConfig'
+    type: NestedObject
+    description: Cross instance replication config
+    default_from_api: true
+    properties:
+      - name: 'instanceRole'
+        type: Enum
+        description: |
+          The instance role supports the following values:
+          1. `INSTANCE_ROLE_UNSPECIFIED`: This is an independent instance that has never participated in cross instance replication. It allows both reads and writes.
+          2. `NONE`: This is an independent instance that previously participated in cross instance replication(either as a `PRIMARY` or `SECONDARY` cluster). It allows both reads and writes.
+          3. `PRIMARY`: This instance serves as the replication source for secondary instance that are replicating from it. Any data written to it is automatically replicated to its secondary clusters. It allows both reads and writes.
+          4. `SECONDARY`: This instance replicates data from the primary instance. It allows only reads.
+        enum_values:
+          - 'INSTANCE_ROLE_UNSPECIFIED'
+          - 'NONE'
+          - 'PRIMARY'
+          - 'SECONDARY'
+      - name: 'primaryInstance'
+        type: NestedObject
+        description: |
+          This field is only set for a secondary instance. Details of the primary instance that is used as the replication source for this secondary instance. This is allowed to be set only for clusters whose cluster role is of type `SECONDARY`.
+        properties:
+          - name: 'instance'
+            type: String
+            description: |
+              The full resource path of the primary instance in the format: projects/{project}/locations/{region}/instances/{instance-id}
+          - name: 'uid'
+            type: String
+            description: |
+              The unique id of the primary instance.
+            output: true
+      - name: 'secondaryInstances'
+        type: Array
+        description: |
+          List of secondary instances that are replicating from this primary cluster. This is allowed to be set only for instances whose cluster role is of type `PRIMARY`.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'instance'
+              type: String
+              description: |
+                The full resource path of the Nth instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+            - name: 'uid'
+              type: String
+              description: |
+                The unique id of the Nth instance.
+              output: true
+      - name: 'membership'
+        type: NestedObject
+        description: |
+          An output only view of all the member instance participating in cross instance replication. This field is populated for all the member clusters irrespective of their cluster role.
+        output: true
+        properties:
+          - name: 'primaryInstance'
+            type: NestedObject
+            description: |
+              Details of the primary instance that is used as the replication source for all the secondary instances.
+            output: true
+            properties:
+              - name: 'instance'
+                type: String
+                description: |
+                  The full resource path of the primary instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+                output: true
+              - name: 'uid'
+                type: String
+                description: |
+                  The unique id of the primary instance.
+                output: true
+          - name: 'secondaryInstance'
+            type: Array
+            description: |
+              List of secondary instances that are replicating from the primary instance.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'instance'
+                  type: String
+                  description: |
+                    The full resource path of the secondary instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+                  output: true
+                - name: 'uid'
+                  type: String
+                  description: |
+                    The unique id of the secondary instance.
+                  output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The last time cross instance replication config was updated.
+        output: true
   - name: 'mode'
     type: Enum
     description:
