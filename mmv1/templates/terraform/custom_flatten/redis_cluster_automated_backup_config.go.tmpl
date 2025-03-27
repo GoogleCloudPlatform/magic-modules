@@ -6,6 +6,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if len(original) == 0 {
 		return nil
 	}
+	// if automated_backup_config is not defined 
     if len(d.Get("automated_backup_config").([]interface{})) < 1 {
 	    return nil
 	}

@@ -5,7 +5,12 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	}
 	raw := l[0]
 	original := raw.(map[string]interface{})
+	// The automated_backup_config block is not specified, so automatedBackupMode should be DISABLED
 	transformed := make(map[string]interface{})
+	if len(d.Get("automated_backup_config").([]interface{})) < 1 {
+		transformed["automatedBackupMode"] = "DISABLED"
+		return transformed, nil
+	}
 
     // The automated_backup_config block is specified, so automatedBackupMode should be ENALBED
 	transformed["automatedBackupMode"] = "ENABLED"
