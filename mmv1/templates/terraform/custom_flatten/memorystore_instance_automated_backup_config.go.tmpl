@@ -24,7 +24,6 @@ func flattenMemorystoreInstanceAutomatedBackupConfig(v interface{}, d *schema.Re
 		return nil
 	}
 
-
 	transformed["fixed_frequency_schedule"] =
 		flattenMemorystoreInstanceAutomatedBackupConfigFixedFrequencySchedule(original["fixedFrequencySchedule"], d, config)
 	transformed["retention"] =
@@ -39,9 +38,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(v inter
 	if len(original) == 0 {
 		return nil
 	}
-	if len(d.Get("fixed_frequency_schedule").([]interface{})) < 1 {
-		return nil
-	}
+
 	transformed := make(map[string]interface{})
 	transformed["start_time"] =
 		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTime(original["startTime"], d, config)
@@ -55,9 +52,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTim
 	if len(original) == 0 {
 		return nil
 	}
-	if len(d.Get("hours").([]interface{})) == nil {
-		return nil
-	}
+
 	transformed := make(map[string]interface{})
 	transformed["hours"] =
 		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(original["hours"], d, config)

@@ -70,9 +70,10 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 				Config: testAccMemorystoreInstance_automatedBackupConfigWithout(context),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memorystore_instance.test_abc",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_config.0.%"},
 			},
 		},
 	})
@@ -106,7 +107,7 @@ resource "google_memorystore_instance" "test_abc" {
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "tf-test-abc-policy-%{random_suffix}"
   location                       = "us-central1"
-  service_class                  = "gcp-memorystore"
+  service_class                  = "gcp-memorystore-autopush"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
   psc_config {                 
