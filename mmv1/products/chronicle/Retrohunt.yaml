@@ -14,7 +14,6 @@
 ---
 name: Retrohunt
 description: Retrohunt is an execution of a Rule over a time range in the past.
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
@@ -35,7 +34,6 @@ custom_code:
 examples:
   - name: 'chronicle_retrohunt_basic'
     primary_resource_id: example
-    min_version: 'beta'
     exclude_import_test: true
     skip_vcr: true
     vars:
@@ -51,7 +49,7 @@ async:
   actions: [create]
   type: OpAsync
   operation:
-    full_url: 'https://{{location}}-chronicle.googleapis.com/v1beta/{{op_id}}'
+    full_url: 'https://{{location}}-chronicle.googleapis.com/v1/{{op_id}}'
     timeouts:
       insert_minutes: 20
       update_minutes: 20
