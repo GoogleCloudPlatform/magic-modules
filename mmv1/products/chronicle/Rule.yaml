@@ -14,7 +14,6 @@
 ---
 name: Rule
 description: The Rule resource represents a user-created rule.
-min_version: beta
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
@@ -32,7 +31,6 @@ autogen_status: UnVsZQ==
 examples:
   - name: 'chronicle_rule_basic'
     primary_resource_id: example
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
@@ -40,7 +38,6 @@ examples:
     exclude_import_test: true
   - name: 'chronicle_rule_with_force_deletion'
     primary_resource_id: example
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
@@ -48,7 +45,6 @@ examples:
     exclude_import_test: true
   - name: 'chronicle_rule_with_data_access_scope'
     primary_resource_id: example
-    min_version: 'beta'
     vars:
       data_access_scope_id: scope-name
     test_env_vars:
@@ -265,9 +261,9 @@ properties:
           type: String
           description: Output only. Link to documentation that describes a diagnostic in more detail.
           output: true
-  - name: dataTables
-    type: Array
-    description: Output only. Resource names of the data tables used in this rule.
-    output: true
-    item_type:
-      type: String
+        - name: dataTables
+          type: Array
+          description: Output only. Resource names of the data tables used in this rule.
+          output: true
+          item_type:
+            type: String
