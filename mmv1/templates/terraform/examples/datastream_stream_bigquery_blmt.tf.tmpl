@@ -7,11 +7,6 @@ resource "google_sql_database_instance" "instance" {
     region           = "us-central1"
     settings {
         tier = "db-f1-micro"
-        backup_configuration {
-            enabled            = true
-            binary_log_enabled = true
-        }
-
         ip_configuration {
 
             // Datastream IPs will vary by region.
@@ -36,8 +31,7 @@ resource "google_sql_database_instance" "instance" {
             }
         }
     }
-
-    deletion_protection  = {{index $.Vars "deletion_protection"}}
+    deletion_protection = {{index $.Vars "deletion_protection"}}
 }
 
 resource "google_sql_database" "db" {
@@ -55,6 +49,29 @@ resource "google_sql_user" "user" {
     instance = google_sql_database_instance.instance.name
     host     = "%"
     password = random_password.pwd.result
+}
+
+resource "google_storage_bucket" "blmt_bucket" {
+  # Use variable from Stream.yaml for the name
+  name          = "{{index $.Vars "blmt_bucket_name"}}"
+  location      = "us-central1"
+  force_destroy = true
+}
+
+resource "google_bigquery_connection" "blmt_connection" {
+  project       = data.google_project.project.project_id
+  location      = "us-central1"
+  connection_id = "{{index $.Vars "blmt_connection_id"}}"
+  friendly_name = "Datastream BLMT Test Connection"
+  description   = "Connection for Datastream BLMT test"
+
+  cloud_resource {}
+}
+
+resource "google_storage_bucket_iam_member" "blmt_connection_bucket_admin" {
+  bucket = google_storage_bucket.blmt_bucket.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${google_bigquery_connection.blmt_connection.cloud_resource[0].service_account_id}"
 }
 
 resource "google_datastream_connection_profile" "source_connection_profile" {
@@ -80,7 +97,7 @@ resource "google_datastream_connection_profile" "destination_connection_profile"
 resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
     stream_id = "{{index $.Vars "stream_id"}}"
     location = "us-central1"
-    display_name = "my stream"
+    display_name = "My BLMT stream"
     source_config {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
         mysql_source_config {}
@@ -94,11 +111,11 @@ resource "google_datastream_stream" "{{$.PrimaryResourceId}}" {
                 }
             }
             blmt_config {
-                bucket          = "{{index $.Vars "blmt_bucket"}}"
-                connection_name = "{{index $.Vars "blmt_connection_name"}}"
-                file_format     = "{{index $.Vars "blmt_file_format"}}"
-                table_format    = "{{index $.Vars "blmt_table_format"}}"
-                root_path       = "{{index $.Vars "blmt_root_path"}}"
+                bucket          = google_storage_bucket.blmt_bucket.name
+                connection_name = "${google_bigquery_connection.blmt_connection.project}.${google_bigquery_connection.blmt_connection.location}.${google_bigquery_connection.blmt_connection.connection_id}"
+                file_format     = "PARQUET"
+                table_format    = "ICEBERG"
+                root_path       = "/"
             }
             append_only {}
         }
