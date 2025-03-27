@@ -17,7 +17,7 @@ description: The RuleDeployment resource represents the deployment state of a Ru
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/RuleDeployment'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/RuleDeployment'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rules}}/deployments
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
