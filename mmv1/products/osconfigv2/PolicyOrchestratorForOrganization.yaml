@@ -42,7 +42,6 @@ examples:
       os_policy_id: test-os-policy-org
     test_env_vars:
       org_id: ORG_TARGET
-      project_number: PROJECT_NUMBER
       zone: 'ZONE'
 autogen_async: true
 async:

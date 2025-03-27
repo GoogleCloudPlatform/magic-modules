@@ -28,8 +28,7 @@ func TestAccOSConfigV2PolicyOrchestratorForOrganization_basic(t *testing.T) {
 
 
 	context := map[string]interface{}{
-		"org_id":         envvar.GetTestOrgFromEnv(t),
-		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"org_id":         envvar.GetTestOrgTargetFromEnv(t),
 		"zone":           envvar.GetTestZoneFromEnv(),
 		"random_suffix":  acctest.RandString(t, 10),
 	}
@@ -97,11 +96,6 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orch
     }
     orchestration_scope {
         selectors {
-            resource_hierarchy_selector {
-                included_projects = ["projects/%{project_number}"]
-            }
-        }
-        selectors {
             location_selector {
                 included_locations = ["%{zone}"]
             }
@@ -156,11 +150,6 @@ resource "google_os_config_v2_policy_orchestrator_for_organization" "policy_orch
         state = "active"
     }
     orchestration_scope {
-        selectors {
-            resource_hierarchy_selector {
-                included_projects = ["projects/%{project_number}"]
-            }
-        }
         selectors {
             location_selector {
                 included_locations = ["%{zone}"]
