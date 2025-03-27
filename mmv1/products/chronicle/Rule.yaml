@@ -17,7 +17,7 @@ description: The Rule resource represents a user-created rule.
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
