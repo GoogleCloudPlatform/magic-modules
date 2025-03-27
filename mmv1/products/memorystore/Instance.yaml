@@ -178,6 +178,7 @@ properties:
       - name: 'fixedFrequencySchedule'
         type: NestedObject
         description: "Optional. Trigger automated backups at a fixed frequency."
+        required: true
         properties:
           - name: 'startTime'
             type: NestedObject
@@ -191,13 +192,14 @@ properties:
                 description: |
                   Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
                   An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                required: true
       - name: 'retention'
         type: String
         description: |
           Optional. How long to keep automated backups before the backups are deleted.
             The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
-            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-        default_value: "3024000s"
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s". The default_value is "3024000s"
+        required: true
   - name: 'uid'
     type: String
     description: "Output only. System assigned, unique identifier for the instance. "
