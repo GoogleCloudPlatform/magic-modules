@@ -116,7 +116,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -280,7 +280,6 @@ properties:
           Optional. How long to keep automated backups before the backups are deleted.
             The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
             A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
-        default_value: "3024000s"
         required: true
   - name: 'authorizationMode'
     type: Enum
