@@ -50,7 +50,7 @@ The following arguments are supported:
 
 - - -
 
-* `project` - (Required) The folder in which the resource belongs.
+* `folder` - (Required) The folder in which the resource belongs.
 
 ## Attributes Reference
 
