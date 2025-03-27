@@ -66,6 +66,14 @@ examples:
       network_name: 'test-network'
     ignore_read_extra:
       - 'advertisedIpRanges'
+  - name: 'compute_router_md5encrypted'
+    primary_resource_id: 'foobar'
+    vars:
+      router_name: 'test-router'
+      network_name: 'test-network'
+    exclude_docs: true
+    ignore_read_extra:
+      - 'advertisedIpRanges'
 parameters:
   - name: 'region'
     type: ResourceRef
