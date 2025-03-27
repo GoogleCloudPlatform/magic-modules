@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -126,7 +125,7 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.FullResourceName(object)))
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateResourceFile(targetFilePath, object)
 	}
 
@@ -169,47 +168,12 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.FullResourceName(object)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateTestFile(targetFilePath, object)
 }
 
-func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
-	// Create regex to match anything between {{ and }}
-	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
-
-	// Find all matches in the template URL
-	matches := re.FindAllStringSubmatch(templateURL, -1)
-
-	// Create a map of allowed keys for O(1) lookup
-	allowedKeysMap := make(map[string]bool)
-	for _, key := range allowedKeys {
-		allowedKeysMap[key] = true
-	}
-
-	// Check each found key against the allowed keys
-	for _, match := range matches {
-		if len(match) < 2 {
-			continue
-		}
-
-		// Trim spaces from the key
-		key := strings.TrimSpace(match[1])
-
-		// If the key isn't in our allowed list, return false
-		if !allowedKeysMap[key] {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {
-	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
-	if !urlContainsOnlyAllowedKeys(object.ListUrlTemplate(), allowedKeys) {
-		return
-	}
-	if object.ExcludeSweeper || object.CustomCode.CustomDelete != "" || object.CustomCode.PreDelete != "" || object.CustomCode.PostDelete != "" || object.ExcludeDelete {
+	if !object.ShouldGenerateSweepers() {
 		return
 	}
 
@@ -218,7 +182,7 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.FullResourceName(object)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
 
@@ -249,7 +213,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.FullResourceName(object)))
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s.go", t.ResourceGoFilename(object)))
 		templateData.GenerateIamPolicyFile(targetFilePath, object)
 
 		// Only generate test if testable examples exist.
@@ -257,7 +221,7 @@ func (t *Terraform) GenerateIamPolicy(object api.Resource, templateData Template
 			return e.ExcludeTest
 		})
 		if len(examples) != 0 {
-			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.FullResourceName(object)))
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("iam_%s_generated_test.go", t.ResourceGoFilename(object)))
 			templateData.GenerateIamPolicyTestFile(targetFilePath, object)
 		}
 	}
@@ -292,16 +256,30 @@ func (t *Terraform) FolderName() string {
 	return "google-private"
 }
 
-func (t *Terraform) FullResourceName(object api.Resource) string {
-	if object.LegacyName != "" {
-		return strings.Replace(object.LegacyName, "google_", "", 1)
+// Similar to FullResourceName, but override-aware to prevent things like ending in _test.
+// Non-Go files should just use FullResourceName.
+func (t *Terraform) ResourceGoFilename(object api.Resource) string {
+	// early exit if no override is set
+	if object.FilenameOverride == "" {
+		return t.FullResourceName(object)
 	}
 
-	var name string
-	if object.FilenameOverride != "" {
-		name = object.FilenameOverride
+	resName := object.FilenameOverride
+
+	var productName string
+	if t.Product.LegacyName != "" {
+		productName = t.Product.LegacyName
 	} else {
-		name = google.Underscore(object.Name)
+		productName = google.Underscore(t.Product.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", productName, resName)
+}
+
+func (t *Terraform) FullResourceName(object api.Resource) string {
+	// early exit- resource-level legacy names override the product too
+	if object.LegacyName != "" {
+		return strings.Replace(object.LegacyName, "google_", "", 1)
 	}
 
 	var productName string
@@ -311,7 +289,7 @@ func (t *Terraform) FullResourceName(object api.Resource) string {
 		productName = google.Underscore(t.Product.Name)
 	}
 
-	return fmt.Sprintf("%s_%s", productName, name)
+	return fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
 }
 
 func (t Terraform) CopyCommonFiles(outputFolder string, generateCode, generateDocs bool) {

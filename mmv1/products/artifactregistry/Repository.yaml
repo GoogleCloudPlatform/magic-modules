@@ -54,6 +54,10 @@ custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
   pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us"
 examples:
   - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'

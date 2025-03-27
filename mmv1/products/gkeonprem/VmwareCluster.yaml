@@ -38,6 +38,9 @@ async:
     resource_inside_response: true
 custom_code:
 taint_resource_on_failed_create: true
+sweeper:
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'gkeonprem_vmware_cluster_basic'
     primary_resource_id: 'cluster-basic'

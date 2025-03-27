@@ -34,7 +34,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -44,6 +44,12 @@ async:
     resource_inside_response: true
 custom_code:
   encoder: 'templates/terraform/encoders/discovery_engine_chat_engine_hardcode_solution_type.go.tmpl'
+sweeper:
+  url_substitutions:
+    - collection_id: default_collection
+      region: global
+    - collection_id: default_collection
+      region: eu
 examples:
   - name: 'discoveryengine_chat_engine_basic'
     primary_resource_id: 'primary'
@@ -103,7 +109,7 @@ properties:
   - name: 'dataStoreIds'
     type: Array
     description: |
-      The data stores associated with this engine. Multiple DataStores in the same Collection can be associated here. All listed DataStores must be `SOLUTION_TYPE_CHAT`. Adding or removing data stores will force recreation.
+      The data stores associated with this engine. Multiple DataStores in the same Collection can be associated here. All listed DataStores must be `SOLUTION_TYPE_CHAT`.
     required: true
     item_type:
       type: String

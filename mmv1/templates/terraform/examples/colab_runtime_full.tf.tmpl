@@ -53,6 +53,10 @@ resource "google_colab_runtime" "{{$.PrimaryResourceId}}" {
   runtime_user = "gterraformtestuser@gmail.com"
   description = "Full runtime"
 
+  desired_state = "ACTIVE"
+
+  auto_upgrade = true
+
   depends_on = [
     google_colab_runtime_template.my_template
   ]

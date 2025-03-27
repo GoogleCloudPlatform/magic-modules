@@ -35,6 +35,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'scc_management_organization_project_security_health_analytics_custom_module_basic'
     primary_resource_id: 'example'

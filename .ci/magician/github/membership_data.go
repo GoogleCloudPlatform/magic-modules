@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2024, 11, 1),
-					endDate:   newDate(2024, 11, 1),
+					startDate: newDate(2025, 3, 1),
+					endDate:   newDate(2025, 3, 10),
 				},
 			},
 		},
@@ -82,7 +82,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"rileykarson": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 2, 25),
+					endDate:   newDate(2025, 3, 10),
+				},
+			},
 		},
 		"roaks3": {
 			vacations: []Vacation{},
@@ -91,7 +96,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"shuyama1": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 3, 26),
+					endDate:   newDate(2025, 4, 1),
+				},
+			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
@@ -118,5 +128,7 @@ var (
 	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = map[string]struct{}{}
+	trustedContributors = map[string]struct{}{
+		"bbasata": struct{}{},
+	}
 )

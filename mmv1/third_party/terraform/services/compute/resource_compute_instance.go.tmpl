@@ -64,6 +64,7 @@ var (
 	}
 
 	bootDiskKeys = []string{
+		"boot_disk.0.guest_os_features",
 		"boot_disk.0.auto_delete",
 		"boot_disk.0.device_name",
 		"boot_disk.0.disk_encryption_key_raw",
@@ -84,6 +85,7 @@ var (
 		"boot_disk.0.initialize_params.0.enable_confidential_compute",
 		"boot_disk.0.initialize_params.0.storage_pool",
 		"boot_disk.0.initialize_params.0.resource_policies",
+		"boot_disk.0.initialize_params.0.architecture",
 	}
 
 	schedulingKeys = []string{
@@ -94,12 +96,14 @@ var (
 		"scheduling.0.min_node_cpus",
 		"scheduling.0.provisioning_model",
 		"scheduling.0.instance_termination_action",
+		"scheduling.0.termination_time",
 		"scheduling.0.availability_domain",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
 		"scheduling.0.host_error_timeout_seconds",
+		"scheduling.0.graceful_shutdown",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -265,6 +269,18 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The self_link of the encryption key that is stored in Google Cloud KMS to encrypt this disk. Only one of kms_key_self_link and disk_encryption_key_raw may be set.`,
 						},
 
+						"guest_os_features": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
+							ForceNew:     true,
+							Computed:     true,
+							Description:  `A list of features to enable on the guest operating system. Applicable only for bootable images.`,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+
 						"initialize_params": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -367,6 +383,16 @@ func ResourceComputeInstance() *schema.Resource {
 										DiffSuppressFunc: tpgresource.CompareResourceNames,
 										Description:      `The URL of the storage pool in which the new disk is created`,
 									},
+
+									"architecture": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Computed:     true,
+										ForceNew:     true,
+										AtLeastOneOf: initializeParamsKeys,
+										ValidateFunc: validation.StringInSlice([]string{"X86_64", "ARM64"}, false),
+										Description:  `The architecture of the disk. One of "X86_64" or "ARM64".`,
+									},
 								},
 							},
 						},
@@ -433,7 +459,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:      `The name or self_link of the subnetwork attached to this interface.`,
 						},
 
-						{{ if ne $.TargetVersionName `ga` -}}
 						"network_attachment": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -442,7 +467,6 @@ func ResourceComputeInstance() *schema.Resource {
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
-						{{- end }}
 
 						"subnetwork_project": {
 							Type:        schema.TypeString,
@@ -897,6 +921,15 @@ func ResourceComputeInstance() *schema.Resource {
 							AtLeastOneOf:  schedulingKeys,
 							Description:   `Specifies the action GCE should take when SPOT VM is preempted.`,
 						},
+						"termination_time": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description: `Specifies the timestamp, when the instance will be terminated,
+in RFC3339 text format. If specified, the instance termination action
+will be performed at the termination time.`,
+						},
 						"availability_domain": {
 							Type:          schema.TypeInt,
 							Optional:      true,
@@ -992,6 +1025,49 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+						{{ if ne $.TargetVersionName `ga` -}}
+						"graceful_shutdown": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: `Settings for the instance to perform a graceful shutdown.`,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Opts-in for graceful shutdown.`,
+									},
+									"max_duration": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Description: `The time allotted for the instance to gracefully shut down.
+										If the graceful shutdown isn't complete after this time, then the instance
+										transitions to the STOPPING state.`,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+													Description: `Span of time at a resolution of a second.
+													The value must be between 1 and 3600, which is 3,600 seconds (one hour).`,
+												},
+												"nanos": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Description: `Span of time that's a fraction of a second at nanosecond
+													resolution. Durations less than one second are represented
+													with a 0 seconds field and a positive nanos field. Must
+													be from 0 to 999,999,999 inclusive.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						{{- end }}
 					},
 				},
 			},
@@ -1863,9 +1939,28 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("scratch_disk", scratchDisks); err != nil {
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
+
+{{ if eq $.TargetVersionName `ga` -}}
 	if err := d.Set("scheduling", flattenScheduling(instance.Scheduling)); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
 	}
+{{ else -}}
+	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+	// To avoid diff, we need to set the value from the state not from API response.
+	scheduling := flattenScheduling(instance.Scheduling)
+	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(nanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+	}
+	if err := d.Set("scheduling", scheduling); err != nil {
+		return fmt.Errorf("Error setting scheduling: %s", err)
+	}
+{{- end }}
+
 	if err := d.Set("guest_accelerator", flattenGuestAccelerators(instance.GuestAccelerators)); err != nil {
 		return fmt.Errorf("Error setting guest_accelerator: %s", err)
 	}
@@ -3138,6 +3233,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 		disk.Interface = v.(string)
 	}
 
+	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
+		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+	}
+
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
 			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
@@ -3227,6 +3326,10 @@ func expandBootDisk(d *schema.ResourceData, config *transport_tpg.Config, projec
 			}
 			disk.InitializeParams.StoragePool = storagePoolUrl.(string)
 		}
+
+		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.architecture"); ok {
+			disk.InitializeParams.Architecture = v.(string)
+		}
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
@@ -3242,6 +3345,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 		"device_name": disk.DeviceName,
 		"mode":        disk.Mode,
 		"source":      tpgresource.ConvertSelfLinkToV1(disk.Source),
+		"guest_os_features":       flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures),
 		// disk_encryption_key_raw is not returned from the API, so copy it from what the user
 		// originally specified to avoid diffs.
 		"disk_encryption_key_raw": d.Get("boot_disk.0.disk_encryption_key_raw"),
@@ -3273,6 +3377,7 @@ func flattenBootDisk(d *schema.ResourceData, disk *compute.AttachedDisk, config 
 			// If the config specifies a family name that doesn't match the image name, then
 			// the diff won't be properly suppressed. See DiffSuppressFunc for this field.
 			"image":  diskDetails.SourceImage,
+			"architecture": diskDetails.Architecture,
 			"size":   diskDetails.SizeGb,
 			"labels": diskDetails.Labels,
 			"resource_manager_tags": d.Get("boot_disk.0.initialize_params.0.resource_manager_tags"),

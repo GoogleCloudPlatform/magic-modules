@@ -1,0 +1,10 @@
+// force delete resources
+if v, ok := d.GetOk("deletion_policy"); ok {
+    deletion_policy := v.(string)
+    if deletion_policy == "FORCE" {
+        url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
+        if err != nil {
+            return err
+        }
+    }
+}

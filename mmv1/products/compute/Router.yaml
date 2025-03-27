@@ -44,6 +44,13 @@ custom_code:
   constants: 'templates/terraform/constants/router.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
+sweeper:
+  prefixes:
+    - "swg-autogen-router" # Secure Web Proxy(SWP) auto-generated router prefix.
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-east4"
 examples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'
