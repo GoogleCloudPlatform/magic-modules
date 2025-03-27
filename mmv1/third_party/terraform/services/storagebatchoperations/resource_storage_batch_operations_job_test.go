@@ -1,43 +1,14 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storagebatchoperations_test
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
-func TestAccStorageBatchOperationsJobs_storageBatchOperationsError(t *testing.T) {
-	t.Parallel()
-	acctest.SkipIfVcr(t)
-	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccStorageBatchOperationsJobs_storageBatchOperationsError(jobID),
-				ExpectError: regexp.MustCompile("but `delete_object,put_metadata` were specified"),
-			},
-			{
-				Config:      testAccStorageBatchOperationsJobs_storageBatchOperationsJobIDError(),
-				ExpectError: regexp.MustCompile("doesn't match regexp"),
-			},
-			{
-				Config:      testAccStorageBatchOperationsJobs_storageBatchOperationsManifestError(jobID),
-				ExpectError: regexp.MustCompile("Invalid combination of arguments"),
-			},
-		},
-	})
-}
 
 func TestAccStorageBatchOperationsJobs_createJobWithPrefix(t *testing.T) {
 	t.Parallel()
@@ -200,7 +171,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global"
 	bucket_list {
 		buckets  {

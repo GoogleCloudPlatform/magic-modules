@@ -763,7 +763,7 @@ var ServicesListGa = mapOf(
     ),
     "storagebatchoperations" to mapOf(
         "name" to "storagebatchoperations",
-        "displayName" to "StorageBatchJobOperations",
+        "displayName" to "StorageBatchOperations",
         "path" to "./google/services/storagebatchoperations"
     ),
     "storagecontrol" to mapOf(
