@@ -11,15 +11,17 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
+// Hardcode the Terraform resource name -> API service name mapping temporarily.
+// TODO: [tgc] read the mapping from the resource metadata files.
 var CaiProductBackendNames = map[string]string{
-	"compute":         "compute",
-	"resourcemanager": "cloudresourcemanager",
+	"google_compute_instance": "compute",
+	"google_project":          "cloudresourcemanager",
 }
 
 // Gets the test metadata for tgc:
 //   - test config
 //   - cai asset name
-//     For example: //compute.googleapis.com/projects/terraform-dev-zhenhuali/zones/us-central1-a/instances/tf-test-mi3fqaucf8
+//     For example: //compute.googleapis.com/projects/ci-test-188019/zones/us-central1-a/instances/tf-test-mi3fqaucf8
 func GetTestMetadataForTgc(service, resourceType, resourceName, config string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		address := fmt.Sprintf("%s.%s", resourceType, resourceName)
@@ -30,8 +32,8 @@ func GetTestMetadataForTgc(service, resourceType, resourceName, config string) r
 
 		// Convert the resource ID into CAI asset name
 		// and then print out the CAI asset name in the logs
-		if productName, ok := CaiProductBackendNames[service]; !ok {
-			return fmt.Errorf("The Cai product backend name for service %s doesn't exist.", service)
+		if productName, ok := CaiProductBackendNames[resourceType]; !ok {
+			return fmt.Errorf("The Cai product backend name for resource %s doesn't exist.", resourceType)
 		} else {
 			var rName string
 			switch resourceType {
@@ -51,15 +53,15 @@ func GetTestMetadataForTgc(service, resourceType, resourceName, config string) r
 		re := regexp.MustCompile(`\"(tf[-_]?test[-_]?.*?)([a-z0-9]+)\"`)
 		config = re.ReplaceAllString(config, `"${1}tgc"`)
 
-		// Replace resource name with the resource's real name
+		// Replace resource name with the resource's real name,
+		// which is used to get the main resource object by checking the address after parsing raw config.
 		// For example, replace `"google_compute_instance" "foobar"` with `"google_compute_instance" "tf-test-mi3fqaucf8"`
 		n := tpgresource.GetResourceNameFromSelfLink(rState.Primary.ID)
 		old := fmt.Sprintf(`"%s" "%s"`, resourceType, resourceName)
 		new := fmt.Sprintf(`"%s" "%s"`, resourceType, n)
 		config = strings.Replace(config, old, new, 1)
 
-		log.Printf("[DEBUG]TGC raw_config starts %s", config)
-		log.Printf("[DEBUG]End of TGC raw_config")
+		log.Printf("[DEBUG]TGC raw_config starts %sEnd of TGC raw_config", config)
 		return nil
 	}
 }
