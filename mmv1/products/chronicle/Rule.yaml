@@ -266,4 +266,4 @@ properties:
     description: Output only. Resource names of the data tables used in this rule.
     output: true
     item_type:
-    type: String
+      type: String
