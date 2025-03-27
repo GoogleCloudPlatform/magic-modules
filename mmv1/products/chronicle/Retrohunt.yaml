@@ -17,7 +17,7 @@ description: Retrohunt is an execution of a Rule over a time range in the past.
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules.retrohunts'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules.retrohunts'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
