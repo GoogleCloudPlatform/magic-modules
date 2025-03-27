@@ -410,6 +410,14 @@ resource "google_project_service_identity" "progressiverollout_sa" {
   service = "progressiverollout.googleapis.com"
 }
 
+resource "google_project_service_identity" "parametermanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "parametermanager.googleapis.com"
+}
+
 # TestAccComposerEnvironment_fixPyPiPackages
 # TestAccComposerEnvironmentComposer2_private
 # TestAccComposerEnvironment_withEncryptionConfigComposer1

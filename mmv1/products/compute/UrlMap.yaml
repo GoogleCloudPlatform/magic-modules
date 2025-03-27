@@ -1729,6 +1729,60 @@ properties:
                       prior to redirecting the request. If set to false, the query portion of the
                       original URL is retained. Defaults to false.
                     default_value: false
+              - name: 'customErrorResponsePolicy'
+                type: NestedObject
+                description: |
+                  customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
+                min_version: 'beta'
+                properties:
+                  - name: 'errorResponseRule'
+                    type: Array
+                    description: |
+                      Specifies rules for returning error responses.
+                      In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                      For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
+                      If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
+                    api_name: errorResponseRules
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'matchResponseCodes'
+                          type: Array
+                          description: |
+                            Valid values include:
+
+                            - A number between 400 and 599: For example 401 or 503, in which case the load balancer applies the policy if the error code exactly matches this value.
+                            - 5xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 500 to 599.
+                            - 4xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 400 to 499.
+
+                            Values must be unique within matchResponseCodes and across all errorResponseRules of CustomErrorResponsePolicy.
+                          item_type:
+                            type: String
+                        - name: 'path'
+                          type: String
+                          description: |
+                            The full path to a file within backendBucket . For example: /errors/defaultError.html
+                            path must start with a leading slash. path cannot have trailing slashes.
+                            If the file is not available in backendBucket or the load balancer cannot reach the BackendBucket, a simple Not Found Error is returned to the client.
+                            The value must be from 1 to 1024 characters
+                        - name: 'overrideResponseCode'
+                          type: Integer
+                          description: |
+                            The HTTP status code returned with the response containing the custom error content.
+                            If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
+                  - name: 'errorService'
+                    type: ResourceRef
+                    description: |
+                      The full or partial URL to the BackendBucket resource that contains the custom error content. Examples are:
+
+                      https://www.googleapis.com/compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      global/backendBuckets/myBackendBucket
+
+                      If errorService is not specified at lower levels like pathMatcher, pathRule and routeRule, an errorService specified at a higher level in the UrlMap will be used. If UrlMap.defaultCustomErrorResponsePolicy contains one or more errorResponseRules[], it must specify errorService.
+                      If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
+                    resource: 'BackendBucket'
+                    imports: 'selfLink'
         - name: 'defaultUrlRedirect'
           type: NestedObject
           # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
