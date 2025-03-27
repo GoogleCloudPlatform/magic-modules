@@ -1,15 +1,16 @@
-{{- if ne $.TargetVersionName "ga" }}
 package redis_test
 
 import (
+{{- if ne $.TargetVersionName "ga" }}
 	"fmt"
 	"strings"
+{{ end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccRedisCluster_createUpdateClusterWithNodeType(t *testing.T) {
 
 	t.Parallel()
@@ -266,7 +267,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 		},
 	})
 }
-
+{{ end }}
 func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 	t.Parallel()
 
@@ -276,7 +277,7 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -302,9 +303,7 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 
 func testAccRedisCluster_automatedBackupConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_redis_cluster" "cluster_abc" {
-  provider                       = google-beta
   name                           = "tf-test-redis-abc-%{random_suffix}"
   shard_count                    = 1
   region                         = "us-central1"
@@ -324,9 +323,7 @@ resource "google_redis_cluster" "cluster_abc" {
 
 func testAccRedisCluster_automatedBackupConfigWithout(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
 resource "google_redis_cluster" "cluster_abc" {
-  provider                       = google-beta
   name                           = "tf-test-redis-abc-%{random_suffix}"
   shard_count                    = 1
   region                         = "us-central1"
@@ -336,6 +333,7 @@ resource "google_redis_cluster" "cluster_abc" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 // Validate that persistence is updated for the cluster
 func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 	t.Parallel()

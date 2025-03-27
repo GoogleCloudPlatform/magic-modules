@@ -66,43 +66,10 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTime
 		transformed["hours"] = transformedHours
 	}
 
-	transformedMinutes, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(original["minutes"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedMinutes); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["minutes"] = transformedMinutes
-	}
-
-	transformedSeconds, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(original["seconds"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["seconds"] = transformedSeconds
-	}
-
-	transformedNanos, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(original["nanos"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["nanos"] = transformedNanos
-	}
-
 	return transformed, nil
 }
 
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeMinutes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeSeconds(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeNanos(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
