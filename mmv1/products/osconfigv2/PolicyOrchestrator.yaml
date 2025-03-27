@@ -13,6 +13,8 @@
 
 ---
 name: PolicyOrchestrator
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/policyOrchestrators/{policyOrchestrator}'
 description: |
   PolicyOrchestrator helps managing project+zone level policy resources (e.g.
   OS Policy Assignments), by providing tools to create, update and delete them
