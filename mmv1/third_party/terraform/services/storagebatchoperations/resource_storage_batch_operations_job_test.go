@@ -204,7 +204,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -233,7 +233,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -262,7 +262,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -293,7 +293,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global"
 	bucket_list {
 		buckets  {
@@ -323,7 +323,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
+	job_id   = "%s"
 	location = "global" 
 	bucket_list {
 		buckets  {
@@ -347,77 +347,6 @@ resource "google_storage_batch_operations_job" "job" {
 	delete_protection = false
 }
 `, bucketName, jobID, bucketName)
-}
-
-func testAccStorageBatchOperationsJobs_storageBatchOperationsManifestError(jobID string) string {
-	return fmt.Sprintf(`
-resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
-	location = "us-central1"
-	bucket_list {
-		buckets  {
-			bucket = "test-bkt"
-			prefix_list {
-				included_object_prefixes = [
-					"bkt"
-				]
-			}
-			manifest {
-				manifest_location = "gs://bucket/file.csv"
-			}
-		}
-	}
-	delete_object  {
-		permanent_object_deletion_enabled = false
-	}
-}
-`, jobID)
-}
-
-func testAccStorageBatchOperationsJobs_storageBatchOperationsError(jobID string) string {
-	return fmt.Sprintf(`
-resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%s"
-	location = "us-central1"
-	bucket_list {
-		buckets  {
-			bucket = "test-bkt"
-			manifest {
-				manifest_location = "gs://bucket/file.csv"
-			}
-		}
-	}
-	delete_object  {
-		permanent_object_deletion_enabled = false
-	}
-	put_metadata {
-		content_type = "application/json"
-	}
-}
-`, jobID)
-}
-
-func testAccStorageBatchOperationsJobs_storageBatchOperationsJobIDError() string {
-	return fmt.Sprintf(`
-resource "google_storage_batch_operations_job" "job" {
-	job_id     = "tf-job@d-"
-	location = "global"
-	bucket_list {
-		buckets  {
-			bucket = "test-bkt"
-			manifest {
-				manifest_location = "gs://bucket/file.csv"
-			}
-		}
-	}
-	put_metadata {
-		custom_metadata = {
-			"key"="value"
-			"key1"="value1"
-		}
-	}
-}
-`)
 }
 
 func testAccStorageBatchOperationsJobs_storageBatchOerationsJobKmsKey(context map[string]interface{}) string {
