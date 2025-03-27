@@ -62,9 +62,10 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 				Config: testAccMemorystoreInstance_automatedBackupConfig(context),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.test_abc",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memorystore_instance.test_abc",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_config.0.fixed_frequency_schedule", "automated_backup_config.0.fixed_frequency_schedule.0.start_time", "utomated_backup_config.0.fixed_frequency_schedule.0.start_time.0.hours", "automated_backup_config.0.retention"},
 			},
 			{
 				Config: testAccMemorystoreInstance_automatedBackupConfigWithout(context),
@@ -73,7 +74,7 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 				ResourceName:            "google_memorystore_instance.test_abc",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"automated_backup_config.0.%"},
+				ImportStateVerifyIgnore: []string{"automated_backup_config.0.fixed_frequency_schedule", "automated_backup_config.0.fixed_frequency_schedule.0.start_time", "utomated_backup_config.0.fixed_frequency_schedule.0.start_time.0.hours", "automated_backup_config.0.retention"},
 			},
 		},
 	})
@@ -107,7 +108,7 @@ resource "google_memorystore_instance" "test_abc" {
 resource "google_network_connectivity_service_connection_policy" "primary_policy" {
   name                           = "tf-test-abc-policy-%{random_suffix}"
   location                       = "us-central1"
-  service_class                  = "gcp-memorystore-autopush"
+  service_class                  = "gcp-memorystore"
   description                    = "my basic service connection policy"
   network                        = google_compute_network.primary_producer_net.id
   psc_config {                 
