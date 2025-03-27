@@ -1,0 +1,398 @@
+{{/* The license inside this block applies to this file
+  Copyright 2025 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+{{/*{{$.CodeHeader TemplatePath}}*/}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "strings"
+{{- end }}
+    "time"
+
+{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*     # set of imports, which will never guess the major version correctly. */}}
+{{/*
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+     */}}
+    "github.com/hashicorp/go-cty/cty"
+
+    "github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+{{ if $.FlattenedProperties }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+{{if $.CustomCode.Constants -}} 
+    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+{{- end}}
+
+var (
+	_ resource.Resource              = &{{$.ResourceName}}FWResource{}
+	_ resource.ResourceWithConfigure = &{{$.ResourceName}}FWResource{}
+)
+
+func New{{$.ResourceName}}FWResource() resource.Resource {
+	return &{{$.ResourceName}}FWResource{}
+}
+
+type {{$.ResourceName}}FWResource struct {
+	{{/*client         *sqladmin.Service*/}}
+	providerConfig *transport_tpg.Config
+}
+
+type {{$.ResourceName}}FWModel struct {
+    {{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{camelize $prop.Name "upper"}}     types.{{$prop.GetFWType}} `tfsdk:"{{underscore $prop.Name}}"`
+    {{- end }}
+}
+
+// Metadata returns the resource type name.
+func (d *{{$.ResourceName}}FWResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_fw_{{ underscore $.ResourceName}}"
+}
+
+func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	p, ok := req.ProviderData.(*transport_tpg.Config)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+    {{/* TODO non-client equivalent? */}}
+    {{/* 
+	r.client = p.NewSqlAdminClient(p.UserAgent)
+	if resp.Diagnostics.HasError() {
+		return
+	}*/}}
+	r.providerConfig = p
+}
+
+func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "A resource to represent a SQL User object.",
+
+		Attributes: map[string]schema.Attribute{
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{template "SchemaFieldsFW" $prop -}}
+{{- end }}
+{{- range $prop := $.VirtualFields }}
+    {{template "SchemaFieldsFW" $prop -}}
+{{- end }}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
+			"project": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+{{- end}}
+{{- if $.HasSelfLink }}
+			"self_link": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+{{- end}}
+			// This is included for backwards compatibility with the original, SDK-implemented resource.
+			"id": schema.StringAttribute{
+				Description:         "Project identifier",
+				MarkdownDescription: "Project identifier",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+        },
+	}
+}
+
+func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+{{ if $.CustomCode.CustomCreate -}}
+    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+{{  else  -}}
+
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    obj := make(map[string]interface{})
+
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+    obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+{{- end }}
+
+
+    createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    if err != nil {
+        return err
+    }
+
+    log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
+
+    headers := make(http.Header)
+{{- if $.CustomCode.PreCreate }}
+    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+{{- end}}
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ upper $.CreateVerb -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: createTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
+        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+{{- end}}
+        resp.Diagnostics.AppendError(fmt.Sprintf("Error creating {{ $.Name -}}: %s", err))
+        return 
+    }
+
+	tflog.Trace(ctx, "created {{$.Name}} resource")
+
+    data.Id = types.StringValue("{{ $.IdFormat -}}")
+	data.Project = project
+
+
+	// read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+{{ end }} {{/* if CustomCreate */}}
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Use provider_meta to set User-Agent
+	r.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, r.client.UserAgent)
+
+	tflog.Trace(ctx, "read {{$.Name}} resource")
+
+    // read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var old, new {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+
+    resp.Diagnostics.Append(req.State.Get(ctx, &old)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &new)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    {{/* Update old/new checks */}}
+
+    // read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &new)...)
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data {{$.ResourceName}}FWModel
+
+{{- if $.ExcludeDelete }}
+    log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
+    " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
+    " state, but will still be present on Google Cloud.", d.Id())
+    d.SetId("")
+
+    return nil
+{{- else }}
+
+    // Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+    deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    if err != nil {
+        return err
+    }
+{{ if $.CustomCode.CustomDelete }} 
+{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{- else }}
+    headers := make(http.Header)
+    {{- if $.CustomCode.PreDelete }} 
+        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+    {{- end }}
+
+    log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config: config,
+        Method: "{{ camelize $.DeleteVerb "upper" -}}",
+        Project: billingProject,
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: deleteTimeout,
+        Headers: headers,
+        {{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorRetryPredicates "," -}}{{"}"}},
+        {{- end }}
+        {{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
+        {{- end }}
+    })
+    if err != nil {
+        resp.Diagnostics.AppendError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", err))
+        return 
+    }
+{{- if $.CustomCode.PostDelete }}
+    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+{{- end }}
+
+    log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id, res)
+
+
+{{- end }}{{/* if CustomCode.CustomDelete */}}
+{{- end }}{{/* if ExcludeDelete */}}
+}
+
+func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, diag *diag.Diagnostics) {
+    // TODO refresh
+}

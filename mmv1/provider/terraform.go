@@ -125,8 +125,13 @@ func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateD
 		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 		}
-		targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
-		templateData.GenerateResourceFile(targetFilePath, object)
+		if object.FrameworkResource {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_fw_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateFWResourceFile(targetFilePath, object)
+		} else {
+			targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s.go", t.ResourceGoFilename(object)))
+			templateData.GenerateResourceFile(targetFilePath, object)
+		}
 	}
 
 	if generateDocs {
