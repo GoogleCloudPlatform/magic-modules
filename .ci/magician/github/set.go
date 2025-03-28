@@ -149,7 +149,20 @@ func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) erro
 			fmt.Printf("Pull request %s is already being merged\n", prNumber)
 			return nil
 		}
-		return fmt.Errorf("failed to merge pull request: %s", err)
+		// Check if the PR is already merged (returns 405 Pull Request is not mergeable)
+		if strings.Contains(err.Error(), "Pull Request is not mergeable") {
+			fmt.Printf("Pull request %s is not mergeable; checking if it was already merged\n", prNumber)
+			pr, err := gh.GetPullRequest(prNumber)
+			if err != nil {
+				return fmt.Errorf("failed to check if PR was already merged: %w", err)
+			}
+			if pr.Merged {
+				fmt.Printf("Pull request %s was already merged\n", prNumber)
+				return nil
+			}
+			fmt.Printf("Pull request %s wasn't already merged\n", prNumber)
+		}
+		return fmt.Errorf("failed to merge pull request: %w", err)
 	}
 
 	fmt.Printf("Successfully merged pull request %s\n", prNumber)
