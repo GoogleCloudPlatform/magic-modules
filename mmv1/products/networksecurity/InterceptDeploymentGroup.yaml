@@ -41,6 +41,8 @@ async:
     resource_inside_response: true
 custom_code:
 sweeper:
+  dependencies:
+    - "google_network_security_intercept_endpoint_group"
   url_substitutions:
     - region: "global"
 examples:

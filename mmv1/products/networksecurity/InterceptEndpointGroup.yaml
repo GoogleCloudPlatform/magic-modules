@@ -43,8 +43,10 @@ async:
     resource_inside_response: true
 custom_code:
 sweeper:
+  dependencies:
+    - 'google_network_security_security_profile'
   url_substitutions:
-    - region: "global"
+    - region: 'global'
 examples:
   - name: 'network_security_intercept_endpoint_group_basic'
     config_path: 'templates/terraform/examples/network_security_intercept_endpoint_group_basic.tf.tmpl'
