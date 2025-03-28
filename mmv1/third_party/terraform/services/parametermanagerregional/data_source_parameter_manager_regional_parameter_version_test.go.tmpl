@@ -210,7 +210,7 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameterVersion_withKmsKe
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -226,19 +226,15 @@ func TestAccDataSourceParameterManagerRegionalRegionalParameterVersion_withKmsKe
 
 func testAccParameterManagerRegionalRegionalParameterVersion_withKmsKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-	provider = "google-beta"
-}
+data "google_project" "project" {}
 
 resource "google_parameter_manager_regional_parameter" "regional-parameter-basic" {
-  provider = google-beta
   parameter_id = "tf_test_regional_parameter%{random_suffix}"
   format = "YAML"
   location = "us-central1"
 }
 
 resource "google_parameter_manager_regional_parameter_version" "regional-parameter-version-with-kms-key" {
-  provider = google-beta
   parameter = google_parameter_manager_regional_parameter.regional-parameter-basic.id
   parameter_version_id = "tf_test_regional_parameter_version%{random_suffix}"
   parameter_data = yamlencode({
@@ -248,7 +244,6 @@ resource "google_parameter_manager_regional_parameter_version" "regional-paramet
 }
 
 data "google_parameter_manager_regional_parameter_version" "regional-parameter-version-with-kms-key" {
-  provider = google-beta
   parameter = google_parameter_manager_regional_parameter_version.regional-parameter-version-with-kms-key.parameter
   parameter_version_id = google_parameter_manager_regional_parameter_version.regional-parameter-version-with-kms-key.parameter_version_id
 }

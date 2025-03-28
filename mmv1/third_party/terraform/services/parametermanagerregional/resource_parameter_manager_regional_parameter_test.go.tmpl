@@ -167,7 +167,7 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalParameterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -227,12 +227,9 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 
 func testAccParameterManagerRegionalRegionalParameter_withoutKmsKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-	provider = "google-beta"
-}
+data "google_project" "project" {}
 
 resource "google_parameter_manager_regional_parameter" "regional-parameter-with-kms-key" {
-  provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
   location = "us-central1"
   format = "JSON"
@@ -242,12 +239,9 @@ resource "google_parameter_manager_regional_parameter" "regional-parameter-with-
 
 func testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-	provider = "google-beta"
-}
+data "google_project" "project" {}
 
 resource "google_parameter_manager_regional_parameter" "regional-parameter-with-kms-key" {
-  provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
   location = "us-central1"
   format = "JSON"
@@ -260,11 +254,9 @@ resource "google_parameter_manager_regional_parameter" "regional-parameter-with-
 func testAccParameterManagerRegionalRegionalParameter_kmsKeyUpdateOther(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-	provider = "google-beta"
 }
 
 resource "google_parameter_manager_regional_parameter" "regional-parameter-with-kms-key" {
-  provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
   location = "us-central1"
   format = "JSON"
@@ -273,5 +265,3 @@ resource "google_parameter_manager_regional_parameter" "regional-parameter-with-
 }
 `, context)
 }
-
-{{ end }}
