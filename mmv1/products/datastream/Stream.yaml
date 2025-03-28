@@ -211,6 +211,8 @@ examples:
       'deletion_protection': 'false'
     external_providers: ["random"]
     skip_vcr: true
+    # Involves complex dependency creation, which makes it impractical in this context
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
