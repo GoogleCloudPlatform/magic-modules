@@ -1,17 +1,19 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package dataprocmetastore_test
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
 	"regexp"
-        "fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccMetastoreFederation_deletionprotection(t *testing.T) {
 	t.Parallel()
-	
+
 	name := "tf-test-metastore-" + acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -28,9 +30,9 @@ func TestAccMetastoreFederation_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-                                Config: testAccMetastoreFederationDeletionProtection(name, "us-west2"),
-                                ExpectError: regexp.MustCompile("deletion_protection"),
-                        },
+				Config:      testAccMetastoreFederationDeletionProtection(name, "us-west2"),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
 			{
 				Config: testAccMetastoreFederationDeletionProtectionFalse(name, "us-central1"),
 			},
@@ -67,7 +69,7 @@ func testAccMetastoreFederationDeletionProtection(name string, location string) 
             metastore_type = "DATAPROC_METASTORE" 
          }
 }
-`,name, name, location)
+`, name, name, location)
 }
 
 func testAccMetastoreFederationDeletionProtectionFalse(name string, location string) string {
@@ -93,6 +95,5 @@ func testAccMetastoreFederationDeletionProtectionFalse(name string, location str
             metastore_type = "DATAPROC_METASTORE" 
          }
 }
-`,name, name, location)
+`, name, name, location)
 }
-	  
