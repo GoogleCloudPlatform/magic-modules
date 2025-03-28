@@ -118,6 +118,9 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
 sweeper:
+  ensure_value:
+    field: deletionProtectionEnabled
+    value: false
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"

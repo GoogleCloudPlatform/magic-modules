@@ -372,6 +372,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
+* `disable_l4_lb_firewall_reconciliation` - (Optional)
+    Disable L4 load balancer VPC firewalls to enable firewall policies.
+
 * `enable_multi_networking` - (Optional)
     Whether multi-networking is enabled for this cluster.
 
@@ -568,8 +571,8 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
-* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine 
-[zones](https://cloud.google.com/compute/docs/zones#available) in which the 
+* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine
+[zones](https://cloud.google.com/compute/docs/zones#available) in which the
 NodePool's nodes can be created by NAP.
 
 * `autoscaling_profile` - (Optional) Configuration
@@ -666,11 +669,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
-* `auto_monitoring_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for GKE Auto-Monitoring.
+* `auto_monitoring_config` - (Optional) Configuration options for GKE Auto-Monitoring.
 
 <a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
 
-* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.  
+* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
@@ -912,7 +915,7 @@ gvnic {
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure [documented below](#nested_guest_accelerator).
-    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) 
+    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments)
     is no longer supported for this field in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
     To dynamically set a list of guest accelerators, use [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks).
     To set an empty list, use a single `guest_accelerator` block with `count = 0`.
@@ -1213,12 +1216,17 @@ notification_config {
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
 
 * `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+* `ip_endpoints_config` - (Optional) IP endpoint configuration.
 
 The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `endpoint` - (Output) The cluster's DNS endpoint.
 
 * `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+
+The `control_plane_endpoints_config.ip_endpoints_config` block supports:
+
+* `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
@@ -1354,7 +1362,7 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 * `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
 One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
-Prior to the 6.4.0 this field was marked as required. The workaround for the required field 
+Prior to the 6.4.0 this field was marked as required. The workaround for the required field
 is setting the empty string `""`, which will function identically to not setting this field.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
@@ -1423,7 +1431,7 @@ linux_node_config {
 
   * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
 
-  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example: 
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example:
   ```hcl
   certificate_authority_domain_config {
     fqdns = [
@@ -1467,7 +1475,7 @@ linux_node_config {
 
 <a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
 
-**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.  
+**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.
 
 * `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED`, `BASIC`, and `ENTERPRISE`.
 

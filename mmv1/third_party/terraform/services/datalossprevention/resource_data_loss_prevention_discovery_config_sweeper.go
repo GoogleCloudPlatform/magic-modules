@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("DataLossPreventionDiscoveryConfig", testSweepDataLossPreventionDiscoveryConfig)
+	sweeper.AddTestSweepersLegacy("DataLossPreventionDiscoveryConfig", testSweepDataLossPreventionDiscoveryConfig)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
