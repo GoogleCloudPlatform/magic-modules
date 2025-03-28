@@ -147,10 +147,8 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"random": {},
 			"time": {
-				VersionConstraint: "0.13.0",
-				Source:            "registry.terraform.io/hashicorp/time",
+				Source: "registry.terraform.io/hashicorp/time",
 			},
 		},
 		CheckDestroy: testAccCheckDatastreamConnectionProfileDestroyProducer(t),
@@ -372,9 +370,8 @@ func testAccDatastreamConnectionProfile_sshKey_update(context map[string]interfa
 	context["public_key"] = public_key
 
 	return acctest.Nprintf(`
-resource "random_password" "pwd" {
-	length = 16
-	special = false
+resource "google_compute_network" "default" {
+		name = "tf-test-datastream-ssh%{random_suffix}"
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -401,11 +398,12 @@ resource "google_sql_database" "db" {
 	instance = google_sql_database_instance.instance.name
 	name     = "db"
 }
+
 resource "google_sql_user" "user" {
 	depends_on	= [google_sql_database_instance.instance]
 	name		= "user"
 	instance	= google_sql_database_instance.instance.name
-	password	= random_password.pwd.result
+	password	= "password%{random_suffix}"
 }
 
 resource "google_compute_instance" "default" {
@@ -419,7 +417,7 @@ resource "google_compute_instance" "default" {
 	}
 
 	network_interface {
-		network    = "default"
+		network    = google_compute_network.default.name
 		access_config {}
 		}
 
@@ -442,17 +440,19 @@ resource "google_compute_instance" "default" {
 	EOT
 
 	tags = ["ssh-host"]
-	
+
+	depends_on = [google_compute_firewall.ssh, google_compute_firewall.datastream_sql_access]
+
 }
 
 resource "time_sleep" "ssh_host_wait" {
 	depends_on = [google_compute_instance.default]
-	create_duration = "15m"
+	create_duration = "12m"
 }
 
 resource "google_compute_firewall" "ssh" {
 	name 	= "tf-test-%{random_suffix}"
-	network = "default"
+	network =  google_compute_network.default.name
 
 	allow {
 		protocol = "tcp"
@@ -467,9 +467,8 @@ resource "google_compute_firewall" "ssh" {
 }
 
 resource "google_compute_firewall" "datastream_sql_access" {
-    depends_on 	= [google_sql_database_instance.instance]
     name    	= "datastream-to-cloudsql-%{random_suffix}"
-    network 	= "default"
+    network 	=  google_compute_network.default.name
 
     allow {
         protocol = "tcp"
