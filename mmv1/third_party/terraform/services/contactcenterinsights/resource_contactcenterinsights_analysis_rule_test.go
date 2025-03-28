@@ -68,7 +68,6 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 	
 	resource "google_contact_center_insights_analysis_rule" "default" {
 	  	project = google_project.project.project_id
-		name = "test-analysis-rule"
 		location = "us-central1"
 		create_time = "2024-01-01T00:00:00Z"
 		update_time = "2024-01-01T00:00:00Z"
@@ -82,8 +81,7 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 func testAccContactCenterInsightsAnalysisRule_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
-  name = "tf_test_basic_analysis_rule%{random_suffix}"
-  display_name = "analysis-rule-display-name"
+  display_name = "analysis-rule-display-name-%{random_suffix}"
   location = "us-central1"
   create_time = "2025-01-01T00:00:00Z"
   update_time = "2025-01-01T00:00:00Z"
@@ -107,7 +105,7 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
     run_summarization_annotator  = true
     summarization_config {
       conversation_profile = "some_conversation_profile"
-      summarization_model  = BASELINE_MODEL
+      summarization_model  = "BASELINE_MODEL"
     }
   }
   analysis_percentage = 0.5
@@ -119,8 +117,7 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
 func testAccContactCenterInsightsAnalysisRule_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
-  name = "tf_test_basic_analysis_rule%{random_suffix}"
-  display_name = "analysis-rule-display-name-updated"
+  display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
   create_time = "2025-01-02T00:00:00Z"
   update_time = "2025-01-02T00:00:00Z"
@@ -144,7 +141,7 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
     run_summarization_annotator  = false
     summarization_config {
       conversation_profile = "alt_conversation_profile"
-      summarization_model  = BASELINE_MODEL_V2_0
+      summarization_model  = "BASELINE_MODEL_V2_0"
     }
   }
   analysis_percentage = 0.0
