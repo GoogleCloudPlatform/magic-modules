@@ -195,7 +195,6 @@ properties:
             output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
-    send_empty_value: true
     description: "The automated backup config for a instance."
     custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl'
     custom_expand: 'templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl'
