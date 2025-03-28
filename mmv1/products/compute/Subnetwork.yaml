@@ -514,7 +514,7 @@ properties:
       it will not appear in get listings. If not set the default behavior is determined by the
       org policy, if there is no org policy specified, then it will default to disabled.
       This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
-    ignore_read: true
+    default_from_api: true
     deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
   - name: 'state'
     type: Enum
