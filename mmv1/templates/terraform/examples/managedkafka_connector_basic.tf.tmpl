@@ -1,26 +1,17 @@
-resource "google_compute_network" "mkc_network" {
-  name                    = "{{index $.Vars "network_id"}}"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "mkc_subnet" {
-  name          = "{{index $.Vars "subnetwork_id"}}"
-  ip_cidr_range = "10.4.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.mkc_network.id
-}
-
-resource "google_compute_subnetwork" "mkc_additional_subnet" {
-  name          = "{{index $.Vars "additional_subnet_id"}}"
+resource "google_compute_subnetwork" "mkc_secondary_subnet" {
+  name          = "{{index $.Vars "secondary_subnet_id"}}"
   ip_cidr_range = "10.5.0.0/16"
   region        = "us-central1"
-  network       = google_compute_network.mkc_network.id
+  network       = "default"
+
+  provider = google-beta
 }
 
 resource "google_pubsub_topic" "cps_topic" {
   name = "{{index $.Vars "cps_topic_name"}}"
-  
   message_retention_duration = "86600s"
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_cluster" "gmk_cluster" {
@@ -33,10 +24,12 @@ resource "google_managed_kafka_cluster" "gmk_cluster" {
   gcp_config {
     access_config {
       network_configs {
-        subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/${google_compute_subnetwork.mkc_subnet.id}"
+        subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
       }
     }
   }
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_topic" "gmk_topic" {
@@ -45,6 +38,8 @@ resource "google_managed_kafka_topic" "gmk_topic" {
   location = "us-central1"
   partition_count = 2
   replication_factor = 3
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_connect_cluster" "mkc_cluster" {
@@ -58,15 +53,17 @@ resource "google_managed_kafka_connect_cluster" "mkc_cluster" {
   gcp_config {
     access_config {
       network_configs {
-        primary_subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/${google_compute_subnetwork.mkc_subnet.id}"
-        additional_subnets = ["${google_compute_subnetwork.mkc_additional_subnet.id}"]
-        dns_domain_names = ["${google_managed_kafka_cluster.gmk_cluster.cluster_id}.us-central1.managedkafka-staging.${data.google_project.project.project_id}.cloud-staging.goog"]
+        primary_subnet = "projects/${data.google_project.project.project_id}/regions/us-central1/subnetworks/default"
+        additional_subnets = ["${google_compute_subnetwork.mkc_secondary_subnet.id}"]
+        dns_domain_names = ["${google_managed_kafka_cluster.gmk_cluster.cluster_id}.us-central1.managedkafka.${data.google_project.project.project_id}.cloud.goog"]
       }
     }
   }
   labels = {
     key = "value"
   }
+
+  provider = google-beta
 }
 
 resource "google_managed_kafka_connector" "{{$.PrimaryResourceId}}" {
@@ -87,7 +84,10 @@ resource "google_managed_kafka_connector" "{{$.PrimaryResourceId}}" {
     minimum_backoff = "60s"
     maximum_backoff = "1800s"
   }
+
+  provider = google-beta
 }
 
 data "google_project" "project" {
+  provider = google-beta
 }
