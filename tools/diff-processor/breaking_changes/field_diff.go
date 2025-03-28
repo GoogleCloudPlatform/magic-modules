@@ -126,7 +126,6 @@ func FieldDefaultModificationMessages(resource, field string, fieldDiff diff.Fie
 		return nil
 	}
 
-	// Compare the defaults directly using reflect.DeepEqual for accurate comparison
 	if fieldDiff.Old.Default != fieldDiff.New.Default {
 		tmpl := "Field `%s` default value changed from `%s` to `%s` on `%s`"
 		oldDefault := formatDefaultValue(fieldDiff.Old.Default)
