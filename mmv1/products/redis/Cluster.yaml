@@ -262,7 +262,8 @@ properties:
     properties:
       - name: 'fixedFrequencySchedule'
         type: NestedObject
-        description: "Optional. Trigger automated backups at a fixed frequency."
+        description: "Trigger automated backups at a fixed frequency."
+        required: true
         properties:
           - name: 'startTime'
             type: NestedObject
