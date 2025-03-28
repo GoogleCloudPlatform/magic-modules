@@ -341,9 +341,6 @@ properties:
         description: |
           Specifies the shape of the TPU slice.
         immutable: true
-        required_with:
-          - 'group_placement_policy.0.vmCount'
-          - 'group_placement_policy.0.collocation'
         min_version: 'beta'
   - name: 'instanceSchedulePolicy'
     type: NestedObject
