@@ -9,6 +9,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
+
 */ -}}
 func flattenMemorystoreInstanceAutomatedBackupConfig(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
@@ -20,7 +21,8 @@ func flattenMemorystoreInstanceAutomatedBackupConfig(v interface{}, d *schema.Re
 	}
 	transformed := make(map[string]interface{})
     // if automated_backup_config is not defined 
-	if len(d.Get("automated_backup_config").([]interface{})) < 1 {
+	
+	if original["automatedBackupMode"] == "DISABLED" {
 		return nil
 	}
 

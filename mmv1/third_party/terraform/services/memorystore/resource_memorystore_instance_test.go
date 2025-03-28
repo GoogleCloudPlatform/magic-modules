@@ -62,10 +62,9 @@ func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
 				Config: testAccMemorystoreInstance_automatedBackupConfig(context),
 			},
 			{
-				ResourceName:            "google_memorystore_instance.test_abc",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"automated_backup_config", "automated_backup_config.0", "automated_backup_config.0.fixed_frequency_schedule", "automated_backup_config.0.fixed_frequency_schedule.0.start_time", "utomated_backup_config.0.fixed_frequency_schedule.0.start_time.0.hours", "automated_backup_config.0.retention"},
+				ResourceName:      "google_memorystore_instance.test_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccMemorystoreInstance_automatedBackupConfigWithout(context),
