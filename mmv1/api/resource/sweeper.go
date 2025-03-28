@@ -43,7 +43,7 @@ type Sweeper struct {
 	// When specified, the sweeper will first collect parent resources before listing child resources
 	Parent *ParentResource `yaml:"parent,omitempty"`
 
-	// QueryString allows appending additional query parameters to the resource's URL
+	// QueryString allows appending additional query parameters to the resource's delete URL
 	// when performing delete operations required before deletion.
 	// Format should include the starting character, e.g. "?force=true" or "&verbose=true"
 	QueryString string `yaml:"query_string,omitempty"`
