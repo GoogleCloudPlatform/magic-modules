@@ -264,7 +264,7 @@ properties:
           - name: 'startTime'
             type: NestedObject
             description: |
-              Required. The start time of every automated backup in UTC.
+              The start time of every automated backup in UTC.
               It must be set to the start of an hour. This field is required.
             required: true
             properties:
@@ -277,7 +277,7 @@ properties:
       - name: 'retention'
         type: String
         description: |
-          Optional. How long to keep automated backups before the backups are deleted.
+            How long to keep automated backups before the backups are deleted.
             The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
             A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
         required: true

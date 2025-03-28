@@ -7,8 +7,8 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return nil
 	}
 	// if automated_backup_config is not defined 
-    if len(d.Get("automated_backup_config").([]interface{})) < 1 {
-	    return nil
+	if original["automatedBackupMode"] == "DISABLED" {
+		return nil
 	}
 	transformed := make(map[string]interface{})
 	transformed["fixed_frequency_schedule"] =
