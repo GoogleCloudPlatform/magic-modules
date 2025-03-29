@@ -14,6 +14,7 @@
 ---
 # API resource name
 name: 'OrganizationIntelligenceConfig'
+api_resource_type_kind: 'IntelligenceConfig'
 kind: 'storagecontrol#intelligenceconfig'
 # Resource description for the provider documentation.
 description: |
