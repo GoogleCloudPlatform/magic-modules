@@ -33,6 +33,7 @@ type GithubClient interface {
 	PostComment(prNumber, comment string) error
 	UpdateComment(prNumber, comment string, id int) error
 	RequestPullRequestReviewers(prNumber string, reviewers []string) error
+	RemovePullRequestReviewers(prNumber string, reviewers []string) error
 	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
