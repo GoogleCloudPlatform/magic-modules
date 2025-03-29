@@ -293,6 +293,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
 {{- range $prop := $.GettableProperties }}
 {{-  if $.InIdFormat $prop }}
+{{-  if eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl" }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+    }
+{{-  end }}
 {{-    if and $prop.Output (not $prop.IgnoreRead) }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
