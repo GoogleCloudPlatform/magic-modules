@@ -288,13 +288,29 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
-{{- /* # Set resource properties from create API response (unless it returns an Operation) */}}
-{{- if not (and $.GetAsync ($.GetAsync.IsA "OpAsync")) }}
+{{- /* Set output-only resource properties from create API response (as long as Create doesn't use an async operation) */}}
+{{- /* This is necessary so that the ID is built correctly. */}}
+{{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
 {{- range $prop := $.GettableProperties }}
-{{-  if and ($.IsInIdentity $prop) $prop.Output }}
+{{-  if $.InIdFormat $prop }}
+{{-  if eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl" }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+    }
+{{-  end }}
+{{-    if and $prop.Output (not $prop.IgnoreRead) }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
     }
+{{-    else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    // {{ underscore $prop.Name }} is set by API when unset
+    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
+        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        }
+    }
+{{-    end }}
 {{- end}}
 {{- end}}
 {{- end}}
