@@ -32,8 +32,6 @@ resource "google_organization_policy" "shared_future_reservation_org_policy" {
 resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   project = google_project.owner_project.project_id
   name    = "{{index $.Vars "future_reservation_name"}}"
-  zone    = "us-central1-c"
-
   time_window {
     start_time = "2025-08-01T00:00:00Z"
     end_time   = "2025-08-02T00:00:00Z"
@@ -47,12 +45,6 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
     }
   }
 
-  specific_sku_properties {
-    total_count = "1"
-    instance_properties {
-      machine_type = "n2-standard-2"
-    }
-  }
 
   depends_on = [
     google_organization_policy.shared_future_reservation_org_policy,
