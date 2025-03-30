@@ -1,0 +1,28 @@
+resource "google_network_management_connectivity_test" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "primary_resource_name"}}"
+  source {
+    gke_master_cluster =  "projects/test-project/locations/us-central1/clusters/name"
+    cloud_sql_instance = "projects/test-project/instances/name"
+    app_engine_version {
+         uri = "apps/test-project/services/default/versions/name"
+    }
+    cloud_function {
+      uri = "projects/test-project/locations/us-central1/functions/name"
+    }
+    cloud_run_revision {
+        uri = "projects/test-project/locations/us-central1/revisions/name"
+    }
+    port = 80
+  }
+  destination {
+    port = 443
+    forwarding_rule = "projects/test-project/regions/us-central1/forwardingRules/name"
+    gke_master_cluster = "projects/test-project/locations/us-central1/clusters/name"
+    fqdn = "name.us-central1.gke.goog"
+    cloud_sql_instance = "projects/test-project/instances/name"
+    redis_instance = "projects/test-project/locations/us-central1/instances/name"
+    redis_cluster = "projects/test-project/locations/us-central1/clusters/name"
+  }
+  bypass_firewall_checks = true
+  round_trip = true
+}

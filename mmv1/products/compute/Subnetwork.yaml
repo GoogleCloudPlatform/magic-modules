@@ -71,6 +71,8 @@ custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
 sweeper:
+  dependencies:
+    - "google_compute_forwarding_rule"
   url_substitutions:
     - region: "us-west2"
     - region: "us-central1"
@@ -349,7 +351,6 @@ properties:
       isn't supported if the subnet `purpose` field is set to subnetwork is
       `REGIONAL_MANAGED_PROXY` or `GLOBAL_MANAGED_PROXY`.
     send_empty_value: true
-    default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     update_id: 'logConfig'
@@ -514,10 +515,7 @@ properties:
       org policy, if there is no org policy specified, then it will default to disabled.
       This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
     default_from_api: true
-    send_empty_value: true
-    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
-    update_verb: 'PATCH'
-    fingerprint_name: 'fingerprint'
+    deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
   - name: 'state'
     type: Enum
     description: |

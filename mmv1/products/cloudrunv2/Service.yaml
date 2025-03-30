@@ -98,7 +98,6 @@ examples:
   - name: 'cloudrunv2_service_gpu'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -960,13 +959,15 @@ properties:
       - name: 'nodeSelector'
         type: NestedObject
         description: Node Selector describes the hardware requirements of the resources.
-        min_version: 'beta'
         properties:
           - name: 'accelerator'
             type: String
             description:
               The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
             required: true
+      - name: 'gpuZonalRedundancyDisabled'
+        type: Boolean
+        description: True if GPU zonal redundancy is disabled on this revision.
   - name: 'traffic'
     type: Array
     description: |-
@@ -998,7 +999,7 @@ properties:
   - name: 'invokerIamDisabled'
     type: Boolean
     description: |
-      Disables IAM permission check for run.routes.invoke for callers of this service. This feature is available by invitation only. For more information, visit https://cloud.google.com/run/docs/securing/managing-access#invoker_check.
+      Disables IAM permission check for run.routes.invoke for callers of this service. For more information, visit https://cloud.google.com/run/docs/securing/managing-access#invoker_check.
   - name: 'observedGeneration'
     type: String
     description: |
