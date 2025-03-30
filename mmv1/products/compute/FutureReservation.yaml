@@ -48,6 +48,7 @@ collection_url_key: 'items'
 custom_code:
   # update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
   # pre_update: 'templates/terraform/pre_update/shared_future_reservation_update.go.tmpl'
+min_version: beta
 examples:
   - name: 'future_reservation_basic'
     primary_resource_id: 'gce_future_reservation'
@@ -81,19 +82,16 @@ properties:
     type: String
     description: |
       URL of the Zone where this future reservation resides.
-    #Good
     output: true
   - name: 'creationTimestamp'
     type: Time
     description: |
       The creation timestamp for this future reservation in RFC3339 text format.
-    #Good
     output: true
   - name: 'selfLinkWithId'
     type: String
     description: |
       Server-defined URL for this resource with the resource id.
-    #Good
     output: true
   - name: 'description'
     type: String
