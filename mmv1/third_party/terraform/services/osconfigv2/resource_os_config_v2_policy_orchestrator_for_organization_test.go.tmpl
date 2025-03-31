@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccOSConfigV2PolicyOrchestratorForOrganization_basic(t *testing.T) {
-	t.Parallel()
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
