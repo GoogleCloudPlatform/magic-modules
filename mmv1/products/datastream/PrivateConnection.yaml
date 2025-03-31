@@ -43,8 +43,6 @@ custom_code:
   post_create: 'templates/terraform/post_create/private_connection.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/private_connection.go.tmpl'
   post_import: 'templates/terraform/post_import/private_connection.go.tmpl'
-# Skipping the sweeper since the resource needs force-deletion
-exclude_sweeper: true
 schema_version: 1
 state_upgraders: true
 examples:
