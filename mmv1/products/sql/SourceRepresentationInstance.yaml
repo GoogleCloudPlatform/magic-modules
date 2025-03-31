@@ -38,6 +38,11 @@ async:
 custom_code:
   encoder: 'templates/terraform/encoders/sql_source_representation_instance.go.tmpl'
   decoder: 'templates/terraform/decoders/sql_source_representation_instance.go.tmpl'
+sweeper:
+  ensure_value:
+    field: 'settings.deletionProtectionEnabled'
+    value: 'false'
+    include_full_resource: true
 examples:
   - name: 'sql_source_representation_instance_basic'
     primary_resource_id: 'instance'

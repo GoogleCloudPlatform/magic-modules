@@ -16,7 +16,6 @@ name: 'RegionalParameterVersion'
 api_resource_type_kind: ParameterVersion
 description: |
   A Regional Parameter Version resource that stores the actual value of the regional parameter.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
@@ -35,19 +34,16 @@ timeouts:
 examples:
   - name: 'regional_parameter_version_basic'
     primary_resource_id: 'regional-parameter-version-basic'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
   - name: 'regional_parameter_version_with_json_format'
     primary_resource_id: 'regional-parameter-version-with-json-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
   - name: 'regional_parameter_version_with_yaml_format'
     primary_resource_id: 'regional-parameter-version-with-yaml-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'

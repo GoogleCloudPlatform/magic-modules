@@ -197,6 +197,22 @@ examples:
     external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
+  - name: 'datastream_stream_bigquery_blmt'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'blmt-stream'
+      database_instance_name: 'blmt-instance'
+      deletion_protection: 'true'
+      source_connection_profile_id: 'blmt-source-profile'
+      destination_connection_profile_id: 'blmt-destination-profile'
+      blmt_bucket_name: 'blmt-bucket'
+      blmt_connection_id: 'blmt-connection'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random"]
+    skip_vcr: true
+    # Involves complex dependency creation, which makes it impractical in this context
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -1224,6 +1240,40 @@ properties:
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
+          - name: 'blmtConfig'
+            type: NestedObject
+            description: 'BigLake Managed Tables configuration for BigQuery streams.'
+            properties:
+              - name: 'bucket'
+                type: String
+                description: |
+                      The Cloud Storage bucket name.
+                required: true
+              - name: 'connectionName'
+                type: String
+                description: |
+                      The bigquery connection. Format: `{project}.{location}.{name}`
+                required: true
+              - name: 'fileFormat'
+                type: String
+                description: |
+                      The file format.
+                required: true
+                enum_values:
+                  - FILE_FORMAT_UNSPECIFIED
+                  - PARQUET
+              - name: 'tableFormat'
+                type: String
+                description: |
+                      The table format.
+                required: true
+                enum_values:
+                  - TABLE_FORMAT_UNSPECIFIED
+                  - ICEBERG
+              - name: 'rootPath'
+                type: String
+                description: |
+                      The root path inside the Cloud Storage bucket.
           - name: 'merge'
             type: NestedObject
             description: |

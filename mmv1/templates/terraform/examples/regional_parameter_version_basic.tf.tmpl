@@ -1,11 +1,9 @@
 resource "google_parameter_manager_regional_parameter" "regional-parameter-basic" {
-  provider = google-beta
   parameter_id = "{{index $.Vars "parameter_id"}}"
   location = "us-central1"
 }
 
 resource "google_parameter_manager_regional_parameter_version" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   parameter = google_parameter_manager_regional_parameter.regional-parameter-basic.id
   parameter_version_id = "{{index $.Vars "parameter_version_id"}}"
   parameter_data = "regional-parameter-version-data"

@@ -44,6 +44,12 @@ async:
     resource_inside_response: true
 custom_code:
   encoder: 'templates/terraform/encoders/discovery_engine_chat_engine_hardcode_solution_type.go.tmpl'
+sweeper:
+  url_substitutions:
+    - collection_id: default_collection
+      region: global
+    - collection_id: default_collection
+      region: eu
 examples:
   - name: 'discoveryengine_chat_engine_basic'
     primary_resource_id: 'primary'

@@ -36,6 +36,11 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+sweeper:
+  dependencies:
+    # - "google_network_security_intercept_endpoint_group" (beta only)
+    # - "google_network_security_intercept_deployment_group" (beta only)
+    - "google_network_security_firewall_endpoint_association"
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'

@@ -18,7 +18,7 @@ if d.HasChange("num_nodes") {
 if d.HasChange("display_name") {
 	updateMask = append(updateMask, "displayName")
 }
-if d.HasChange("labels") {
+if d.HasChange("labels") || d.HasChange("terraform_labels") {
 	updateMask = append(updateMask, "labels")
 }
 if d.HasChange("processing_units") {
@@ -30,6 +30,9 @@ if d.HasChange("autoscaling_config") {
 	newSlice := new.([]interface{})
 	if len(oldSlice) == 0 || len(newSlice) == 0 {
 		updateMask = append(updateMask, "autoscalingConfig")
+		if len(newSlice) == 0 {
+			updateMask = append(updateMask, "processingUnits")
+		}
 	} else {
 		if d.HasChange("autoscaling_config.0.autoscaling_limits.0.max_processing_units") {
 			updateMask = append(updateMask, "autoscalingConfig.autoscalingLimits.maxProcessingUnits")

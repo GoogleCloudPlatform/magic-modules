@@ -71,6 +71,8 @@ custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
 sweeper:
+  dependencies:
+    - "google_compute_forwarding_rule"
   url_substitutions:
     - region: "us-west2"
     - region: "us-central1"
@@ -355,6 +357,7 @@ properties:
     fingerprint_name: 'fingerprint'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl'
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.tmpl'
+    diff_suppress_func: 'subnetworkLogConfigDiffSuppress'
     properties:
       - name: 'aggregationInterval'
         type: Enum
@@ -504,3 +507,20 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+  - name: 'enableFlowLogs'
+    type: Boolean
+    description: |
+      Whether to enable flow logging for this subnetwork. If this field is not explicitly set,
+      it will not appear in get listings. If not set the default behavior is determined by the
+      org policy, if there is no org policy specified, then it will default to disabled.
+      This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
+    default_from_api: true
+    deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
+  - name: 'state'
+    type: Enum
+    description: |
+     'The state of the subnetwork, which can be one of the following values:
+      READY: Subnetwork is created and ready to use DRAINING: only applicable to subnetworks that have the purpose
+      set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that connections to the load balancer are being drained.
+      A subnetwork that is draining cannot be used or modified until it reaches a status of READY'
+    output: true

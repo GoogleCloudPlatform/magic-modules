@@ -44,6 +44,8 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
+  dependencies:
+    - "google_network_services_gateway"
   url_substitutions:
     - region: "us-east1"
     - region: "us-central1"

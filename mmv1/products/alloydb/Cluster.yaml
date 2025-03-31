@@ -32,6 +32,7 @@ docs:
       3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+mutex: 'projects/{{project}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -285,6 +286,12 @@ properties:
       - name: 'pscEnabled'
         type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+      - name: 'serviceOwnedProjectNumber'
+        type: Integer
+        description: |
+          The project number that needs to be allowlisted on the network attachment to enable outbound connectivity, if the network attachment is configured to ACCEPT_MANUAL connections.
+          In case the network attachment is configured to ACCEPT_AUTOMATIC, this project number does not need to be allowlisted explicitly.
+        output: true
   - name: 'initialUser'
     type: NestedObject
     description: |

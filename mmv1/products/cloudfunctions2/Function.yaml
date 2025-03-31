@@ -653,6 +653,10 @@ properties:
                     description: |
                       Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
                     required: true
+      - name: 'binaryAuthorizationPolicy'
+        type: String
+        description: |
+          The binary authorization policy to be checked when deploying the Cloud Run service.
   - name: 'eventTrigger'
     type: NestedObject
     description: |

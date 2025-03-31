@@ -45,10 +45,13 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
-# There is a handwritten sweeper that provides a list of locations to sweep
-exclude_sweeper: true
+collection_url_key: "externalAddresses"
+sweeper:
+  parent:
+    resource_type: "google_vmwareengine_private_cloud"
+    parent_field: "name"
+    child_field: "parent"
 error_retry_predicates:
-
   - 'transport_tpg.ExternalIpServiceNotActive'
 examples:
   - name: 'vmware_engine_external_address_basic'

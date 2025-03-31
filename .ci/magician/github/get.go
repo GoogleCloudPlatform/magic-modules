@@ -37,6 +37,7 @@ type PullRequest struct {
 	Body           string  `json:"body"`
 	Labels         []Label `json:"labels"`
 	MergeCommitSha string  `json:"merge_commit_sha"`
+	Merged         bool    `json:"merged"`
 }
 
 type PullRequestComment struct {
@@ -51,7 +52,7 @@ func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 
 	var pullRequest PullRequest
 
-	err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequest, nil)
 
 	return pullRequest, err
 }
@@ -61,7 +62,7 @@ func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRe
 
 	var pullRequests []PullRequest
 
-	err := utils.RequestCall(url, "GET", gh.token, &pullRequests, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequests, nil)
 
 	return pullRequests, err
 }
@@ -73,7 +74,7 @@ func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, err
 		Users []User `json:"users"`
 	}
 
-	err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &requestedReviewers, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 		User User `json:"user"`
 	}
 
-	err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &reviews, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment,
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
 
 	var comments []PullRequestComment
-	err := utils.RequestCall(url, "GET", gh.token, &comments, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &comments, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
 
 	var members []User
-	err := utils.RequestCall(url, "GET", gh.token, &members, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &members, nil)
 	if err != nil {
 		return nil, err
 	}
