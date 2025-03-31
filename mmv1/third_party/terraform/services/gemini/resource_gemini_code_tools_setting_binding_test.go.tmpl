@@ -56,7 +56,7 @@ data "google_project" "project" {
     provider = google-beta
 }
 
-resource "google_gemini_code_tools_setting" "example" {
+resource "google_gemini_code_tools_setting" "basic" {
     provider = google-beta
     code_tools_setting_id = "%{code_tools_setting_id}"
     location = "global"
@@ -89,7 +89,7 @@ data "google_project" "project" {
     provider = google-beta
 }
 
-resource "google_gemini_code_tools_setting" "example" {
+resource "google_gemini_code_tools_setting" "basic" {
     provider = google-beta
     code_tools_setting_id = "%{code_tools_setting_id}"
     location = "global"
