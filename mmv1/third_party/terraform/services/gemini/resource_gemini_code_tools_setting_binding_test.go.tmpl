@@ -53,6 +53,7 @@ func TestAccGeminiCodeToolsSettingBinding_update(t *testing.T) {
 func testAccGeminiCodeToolsSettingBinding_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
+    provider = google-beta
 }
 
 resource "google_gemini_code_tools_setting" "example" {
@@ -85,6 +86,7 @@ resource "google_gemini_code_tools_setting_binding" "basic_binding" {
 func testAccGeminiCodeToolsSettingBinding_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
+    provider = google-beta
 }
 
 resource "google_gemini_code_tools_setting" "example" {
