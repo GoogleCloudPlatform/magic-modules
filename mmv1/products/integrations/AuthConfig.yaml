@@ -40,16 +40,9 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 sweeper:
   url_substitutions:
-    - region: "asia-east1"
+    - region: "us-east4"
     - region: "southamerica-west1"
     - region: "asia-east2"
-    - region: "us-south1"
-    - region: "northamerica-northeast2"
-    - region: "us-west4"
-    - region: "us-west2"
-    - region: "us-west3"
-    - region: "southamerica-east1"
-    - region: "northamerica-northeast1"
 examples:
   - name: 'integrations_auth_config_basic'
     primary_resource_id: 'basic_example'
