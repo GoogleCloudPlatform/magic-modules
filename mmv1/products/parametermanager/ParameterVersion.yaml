@@ -15,7 +15,6 @@
 name: 'ParameterVersion'
 description: |
   A Parameter Version resource that stores the actual value of the parameter.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
@@ -34,19 +33,27 @@ timeouts:
 examples:
   - name: 'parameter_version_basic'
     primary_resource_id: 'parameter-version-basic'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
   - name: 'parameter_version_with_json_format'
     primary_resource_id: 'parameter-version-with-json-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+  - name: 'parameter_version_with_kms_key'
+    primary_resource_id: 'parameter-version-with-kms-key'
+    vars:
+      parameter_id: 'parameter'
+      parameter_version_id: 'parameter_version'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   - name: 'parameter_version_with_yaml_format'
     primary_resource_id: 'parameter-version-with-yaml-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
@@ -108,3 +115,9 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
+  - name: 'kmsKeyVersion'
+    type: String
+    output: true
+    description: |
+      The resource name of the Cloud KMS CryptoKeyVersion used to decrypt parameter version payload. Format
+      `projects/{{project}}/locations/global/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`
