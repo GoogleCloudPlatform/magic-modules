@@ -32,6 +32,16 @@ timeouts:
   update_minutes: 75
   delete_minutes: 75
 autogen_async: true
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the service. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+    type: Boolean
+    default_value: false
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/metastore_service.go.tmpl'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -57,6 +67,8 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
