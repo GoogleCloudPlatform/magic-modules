@@ -119,7 +119,7 @@ properties:
     description: |
       An optional list of DDL statements to run inside the database. Statements can create
       tables, indexes, etc.
-      
+
       During creation these statements execute atomically with the creation of the database
       and if there is an error in any statement, the database is not created.
 
