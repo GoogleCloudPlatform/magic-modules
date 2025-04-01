@@ -15,13 +15,13 @@
 name: 'Findings'
 description: |
   Security Command Center finding.
-  
+
   A finding is a record of assessment data like security, risk, health, or privacy,
   that is ingested into Security Command Center for presentation, notification,
   analysis, policy testing, and enforcement.
-  
+
   For example, a cross-site scripting (XSS) vulnerability in an App Engine application is a finding.
-  
+
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-api-create-manage-findings'
@@ -45,14 +45,14 @@ parameters:
     type: String
     description: |
       The numeric ID of the parent organization.
-    url_param_only: true    
+    url_param_only: true
     required: true
     immutable: true
   - name: 'source_id'
     type: String
     description: |
       The numeric ID of the source for the finding.
-    url_param_only: true    
+    url_param_only: true
     required: true
     immutable: true
   - name: 'location_id'
@@ -60,7 +60,7 @@ parameters:
     description: |
       When data residency controls are enabled, this attribute specifies the location in which the resource is located and applicable.
       If not provided, Use global as default.
-    url_param_only: true    
+    url_param_only: true
     required: true
     immutable: true
     default_value: "global"
@@ -68,7 +68,7 @@ parameters:
     type: String
     description: |
       The numeric ID of the source for the finding.
-    url_param_only: true    
+    url_param_only: true
     required: true
     immutable: true
 
