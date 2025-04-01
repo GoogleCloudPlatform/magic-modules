@@ -35,9 +35,9 @@ autogen_async: true
 virtual_fields:
   - name: 'deletion_protection'
     description: |
-      Whether Terraform will be prevented from destroying the federation. Defaults to false.
+      Whether Terraform will be prevented from destroying the service. Defaults to false.
       When the field is set to true in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the federation will fail.
+      or `terraform destroy` that would delete the service will fail.
     type: Boolean
     default_value: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
