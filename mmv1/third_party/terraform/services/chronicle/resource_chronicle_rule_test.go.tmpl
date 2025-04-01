@@ -1,7 +1,5 @@
 package chronicle_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
 
@@ -21,7 +19,7 @@ func TestAccChronicleRule_chronicleRuleBasicExample_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckChronicleRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -37,7 +35,6 @@ func TestAccChronicleRule_chronicleRuleBasicExample_update(t *testing.T) {
 func testAccChronicleRule_chronicleRuleBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_access_scope" "data_access_scope_test" {
- provider = "google-beta"
  location = "us"
  instance = "%{chronicle_id}"
  data_access_scope_id = "tf-test-scope-name%{random_suffix}"
@@ -48,7 +45,6 @@ resource "google_chronicle_data_access_scope" "data_access_scope_test" {
 }
 
 resource "google_chronicle_rule" "example" {
- provider = "google-beta"
  location = "us"
  instance = "%{chronicle_id}"
  scope = resource.google_chronicle_data_access_scope.data_access_scope_test.name
@@ -62,7 +58,6 @@ resource "google_chronicle_rule" "example" {
 func testAccChronicleRule_chronicleRuleBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_chronicle_data_access_scope" "data_access_scope_test" {
- provider = "google-beta"
  location = "us"
  instance = "%{chronicle_id}"
  data_access_scope_id = "tf-test-scope-name%{random_suffix}"
@@ -73,7 +68,6 @@ resource "google_chronicle_data_access_scope" "data_access_scope_test" {
 }
 
 resource "google_chronicle_rule" "example" {
- provider = "google-beta"
  location = "us"
  instance = "%{chronicle_id}"
  text = <<-EOT
@@ -82,4 +76,3 @@ resource "google_chronicle_rule" "example" {
 }
 `, context)
 }
-{{- end }}

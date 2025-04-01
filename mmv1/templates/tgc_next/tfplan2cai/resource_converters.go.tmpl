@@ -29,9 +29,11 @@ package converters
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/compute"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/resourcemanager"
 )
 
 var ConverterMap = map[string]cai.ResourceConverter{
 	"google_project":          resourcemanager.ResourceConverterProject(),
+	"google_compute_instance": compute.ResourceConverterComputeInstance(),
 }

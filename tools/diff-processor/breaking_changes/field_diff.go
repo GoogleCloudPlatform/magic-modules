@@ -125,14 +125,29 @@ func FieldDefaultModificationMessages(resource, field string, fieldDiff diff.Fie
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
 	}
-	tmpl := "Field `%s` default value changed from %s to %s on `%s`"
+
 	if fieldDiff.Old.Default != fieldDiff.New.Default {
-		oldDefault := fmt.Sprintf("%v", fieldDiff.Old.Default)
-		newDefault := fmt.Sprintf("%v", fieldDiff.New.Default)
+		tmpl := "Field `%s` default value changed from `%s` to `%s` on `%s`"
+		oldDefault := formatDefaultValue(fieldDiff.Old.Default)
+		newDefault := formatDefaultValue(fieldDiff.New.Default)
 		return []string{fmt.Sprintf(tmpl, field, oldDefault, newDefault, resource)}
 	}
 
 	return nil
+}
+
+// formatDefaultValue properly formats default values to distinguish between nil, empty string, and other values
+func formatDefaultValue(value interface{}) string {
+	if value == nil {
+		return "<nil>"
+	}
+
+	// Special handling for empty strings
+	if s, ok := value.(string); ok && s == "" {
+		return `""`
+	}
+
+	return fmt.Sprintf("%v", value)
 }
 
 var FieldGrowingMin = FieldDiffRule{
