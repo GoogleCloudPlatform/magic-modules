@@ -49,6 +49,13 @@ custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-east1"
+    - region: "us-central1"
+    - region: "us-south1"
+    - region: "us-west1"
+    - region: "us-west2"
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'

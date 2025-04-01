@@ -76,7 +76,7 @@ func IsCoreReviewer(user string) bool {
 
 func isOrgMember(author, org, githubToken string) bool {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	err := utils.RequestCall(url, "GET", githubToken, nil, nil)
+	err := utils.RequestCallWithRetry(url, "GET", githubToken, nil, nil)
 
 	return err == nil
 }
