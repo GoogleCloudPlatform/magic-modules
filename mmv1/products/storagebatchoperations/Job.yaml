@@ -75,8 +75,8 @@ parameters:
     type: String
     description: 'The location of the job.'
     immutable: true
-    required: true
     url_param_only: true
+    default: global
   - name: 'scheduleTime'
     type: String
     description: |
@@ -239,7 +239,7 @@ properties:
           - 'put_metadata.0.custom_metadata'
   - name: 'rewriteObject'
     type: NestedObject
-    description: 'allows to update encryption key for objects in bucket'
+    description: 'allows to update encryption key for objects in bucket.'
     immutable: true
     exactly_one_of:
       - 'delete_object'
@@ -254,7 +254,7 @@ properties:
         required: true
   - name: 'putObjectHold'
     type: NestedObject
-    description: 'allows to update temporary hold or eventBased hold for objects in bucket'
+    description: 'allows to update temporary hold or eventBased hold for objects in bucket.'
     immutable: true
     exactly_one_of:
       - 'delete_object'
@@ -265,12 +265,12 @@ properties:
       - name: 'eventBasedHold'
         type: TypeString
         immutable: true
-        description: 'set/unset to update event based hold for objects'
+        description: 'set/unset to update event based hold for objects.'
         validation:
           function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
       - name: 'temporaryHold'
         type: TypeString
         immutable: true
-        description: 'set/unset to update temporary based hold for objects'
+        description: 'set/unset to update temporary based hold for objects.'
         validation:
           function: 'validation.StringInSlice([]string{"SET", "UNSET"}, false)'
