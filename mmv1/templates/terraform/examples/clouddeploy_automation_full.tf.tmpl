@@ -51,6 +51,7 @@ resource "google_clouddeploy_automation" "{{$.PrimaryResourceId}}" {
       repair_phases {
              rollback {
                          destination_phase = "stable"
+                         disable_rollback_if_rollout_pending = true
                       }
           }
     }
