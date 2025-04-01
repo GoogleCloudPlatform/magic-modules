@@ -63,7 +63,9 @@ parameters:
     required: false
     default_from_api: true
     custom_expand: "templates/terraform/custom_expand/resourceref_with_validation.go.tmpl"
+    custom_flatten: "templates/terraform/custom_flatten/name_from_self_link.tmpl"
     resource: "Zone"
+    imports: "name"
 properties:
   - name: "kind"
     type: String
@@ -185,11 +187,18 @@ properties:
           minus some amount that is allowed per disk that is not counted towards pool's throughput capacity.
         output: true
   - name: "storagePoolType"
-    type: String
+    type: ResourceRef
     description: |
-      Type of the storage pool. Format is `https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/storagePoolTypes/{type}`
+      Type of the storage pool. For example, the
+      following are valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/{project_id}/zones/{zone}/storagePoolTypes/hyperdisk-balanced`
+      * `hyperdisk-throughput`
     required: true
     immutable: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'StoragePoolType'
+    imports: 'selfLink'
   - name: "status"
     type: NestedObject
     description: |
