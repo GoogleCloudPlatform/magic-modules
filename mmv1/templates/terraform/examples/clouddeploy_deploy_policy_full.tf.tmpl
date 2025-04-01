@@ -1,11 +1,32 @@
 resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "policy"}}"
   location = "us-central1"
+  annotations = {
+    my_first_annotation = "example-annotation-1"
+    my_second_annotation = "example-annotation-2"
+  }
+  labels = {
+    my_first_label = "example-label-1"
+    my_second_label = "example-label-2"
+  }
+  description = "policy resource"
   selectors {
     delivery_pipeline {
       id = "{{index $.Vars "delivery_pipeline"}}"
+      labels = {
+      	foo = "bar"
+      }
+    }
+   }
+  selectors {
+    target {
+      id = "dev"
+      labels = {
+      	foo = "bar"
+      }
     }
   }
+  suspended = true
   rules {
     rollout_restriction {
       id = "rule"
@@ -15,10 +36,14 @@ resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
             start_time {
                 hours = "12"
                 minutes = "00"
+                seconds = "00"
+                nanos = "00"
             }
             end_time {
                 hours = "13"
                 minutes = "00"
+                seconds = "00"
+                nanos = "00"
             }
         }
       }
@@ -35,10 +60,14 @@ resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
             start_time {
                 hours = "13"
                 minutes = "00"
+                seconds = "00"
+                nanos = "00"
             }
             end_time {
                 hours = "14"
                 minutes = "00"
+                seconds = "00"
+                nanos = "00"
             }
             days_of_week = ["MONDAY"]
           }
