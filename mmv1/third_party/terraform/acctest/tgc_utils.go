@@ -22,7 +22,7 @@ var ApiServiceNames = map[string]string{
 //   - test config
 //   - cai asset name
 //     For example: //compute.googleapis.com/projects/ci-test-188019/zones/us-central1-a/instances/tf-test-mi3fqaucf8
-func GetTestMetadataForTgc(service, address, config string) resource.TestCheckFunc {
+func GetTestMetadataForTgc(service, address, config string, ignoredFields []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		splits := strings.Split(address, ".")
 		if splits == nil || len(splits) < 2 {
@@ -70,6 +70,11 @@ func GetTestMetadataForTgc(service, address, config string) resource.TestCheckFu
 		config = strings.Replace(config, old, new, 1)
 
 		log.Printf("[DEBUG]TGC raw_config starts %sEnd of TGC raw_config", config)
+
+		if ignoredFields != nil {
+			fields := strings.Join(ignoredFields, "\n")
+			log.Printf("[DEBUG]TGC ignored fields\n%s\nEnd of TGC ignored fields.", fields)
+		}
 		return nil
 	}
 }

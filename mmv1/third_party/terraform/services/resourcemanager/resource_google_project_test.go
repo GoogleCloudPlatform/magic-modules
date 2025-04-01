@@ -64,7 +64,7 @@ func TestAccProject_create(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
-						testAccProject(pid, org)),
+						testAccProject(pid, org), []string{"billing_account", "auto_create_network", "deletion_policy", "tags"}),
 				),
 			},
 		},
@@ -162,7 +162,7 @@ func TestAccProject_labels(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
 					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
-						testAccProject_labels(pid, org, map[string]string{"test": "that"})),
+						testAccProject_labels(pid, org, map[string]string{"test": "that"}), []string{"billing_account", "auto_create_network", "deletion_policy", "tags"}),
 				),
 			},
 		},
@@ -200,7 +200,7 @@ func TestAccProject_parentFolder(t *testing.T) {
 				Config: testAccProject_parentFolder(pid, folderDisplayName, org),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
-						testAccProject_parentFolder(pid, folderDisplayName, org)),
+						testAccProject_parentFolder(pid, folderDisplayName, org), []string{"billing_account", "auto_create_network", "deletion_policy", "tags"}),
 				),
 			},
 		},
