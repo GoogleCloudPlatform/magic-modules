@@ -1,0 +1,81 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Findings'
+description: |
+  Security Command Center finding.
+  
+  A finding is a record of assessment data like security, risk, health, or privacy,
+  that is ingested into Security Command Center for presentation, notification,
+  analysis, policy testing, and enforcement.
+  
+  For example, a cross-site scripting (XSS) vulnerability in an App Engine application is a finding.
+  
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs/how-to-api-create-manage-findings'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v1/organizations.sources.locations.findings'
+
+base_url: 'organizations/{{organization_id}}/sources/{{source_id}}/locations/{{location_id}}/findings'
+self_link: 'organizations/{{organization_id}}/sources/{{source_id}}/locations/{{location_id}}/findings'
+create_url: 'organizations/{{organization_id}}/sources/{{source_id}}/locations/{{location_id}}?findingId={{finding_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/scc_v2_source_self_link_as_name_set_organization.go.tmpl'
+
+parameters:
+  - name: 'organization_id'
+    type: String
+    description: |
+      The numeric ID of the parent organization.
+    url_param_only: true    
+    required: true
+    immutable: true
+  - name: 'source_id'
+    type: String
+    description: |
+      The numeric ID of the source for the finding.
+    url_param_only: true    
+    required: true
+    immutable: true
+  - name: 'location_id'
+    type: String
+    description: |
+      When data residency controls are enabled, this attribute specifies the location in which the resource is located and applicable.
+      If not provided, Use global as default.
+    url_param_only: true    
+    required: true
+    immutable: true
+    default_value: "global"
+  - name: 'finding_id'
+    type: String
+    description: |
+      The numeric ID of the source for the finding.
+    url_param_only: true    
+    required: true
+    immutable: true
+
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the organization source finding.
+      Format is "organizations/{organization_id}/sources/{{source_id}}/locations/{{location_id}}/findings"
+    output: true
