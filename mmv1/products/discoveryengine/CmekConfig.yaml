@@ -21,24 +21,36 @@ references:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/CmekConfig'
 base_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+# Update API is also used as create API for some reason.
+create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 timeouts:
+  insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
 autogen_async: false
 async:
-  actions: ['delete', 'update']
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
     timeouts:
+      insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
     resource_inside_response: true
+examples:
+- name: 'discoveryengine_cmekconfig_basic'
+  primary_resource_id: 'basic'
+  primary_resource_name: 'fmt.Sprintf("tf_test_cmek_config%s", context["random_suffix"])'
+  vars:
+    cmek_config_id: 'cmek-config-id'
 parameters:
   - name: 'location'
     type: String
