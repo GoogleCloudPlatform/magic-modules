@@ -332,6 +332,142 @@ resource "google_redis_cluster" "cluster_abc" {
 `, context)
 }
 
+
+func TestAccRedisCluster_gcsSource(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_gcsSource(context),
+			},
+			{
+				ResourceName:       "google_redis_cluster.cluster_gbs",
+				ImportState:        true,
+				ImportStateVerify:  true,
+			},
+			{
+				Config: testAccRedisCluster_gcsSourceWithout(context),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster_gbs",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func testAccRedisCluster_gcsSource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_gbs" {
+  name                           = "tf-test-redis-gbs-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+  gcs_source {
+    uirs = ["gs://bucket1/object1"]
+  }
+
+}	
+`, context)
+}
+
+func testAccRedisCluster_gcsSourceWithout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_gbs" {
+  name                           = "tf-test-redis-gbs-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+  gcs_backup_source {
+    uirs = [""]
+  }
+
+}	
+`, context)
+}
+
+func TestAccRedisCluster_managedBackupSource(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_managedBackupSource(context),
+			},
+			{
+				ResourceName:       "google_redis_cluster.cluster_mbs",
+				ImportState:        true,
+				ImportStateVerify:  true,
+			},
+			{
+				Config: testAccRedisCluster_managedBackupSourceWithout(context),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster_mbs",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+
+func testAccRedisCluster_managedBackupSource(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_mbs" {
+  name                           = "tf-test-redis-mbs-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+   managed_backup_source {
+    backup = "projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}"
+  }
+
+}
+
+resource "google_redis_cluster" "cluster_mbs_prime" {
+  name                           = "tf-test-redis-mbs-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+}
+
+
+`, context)
+}
+
+func testAccRedisCluster_managedBackupSourceWithout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_mbs" {
+  name                           = "tf-test-redis-mbs-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+   managed_backup_source {
+    backup = "projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}"
+  }
+
+}	
+`, context)
+}
+
 {{- if ne $.TargetVersionName "ga" }}
 // Validate that persistence is updated for the cluster
 func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
