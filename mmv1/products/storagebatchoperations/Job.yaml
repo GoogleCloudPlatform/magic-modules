@@ -76,7 +76,7 @@ parameters:
     description: 'The location of the job.'
     immutable: true
     url_param_only: true
-    default: global
+    default_value: global
   - name: 'scheduleTime'
     type: String
     description: |
@@ -171,6 +171,18 @@ properties:
       - 'rewrite_object'
       - 'put_object_hold'
     properties:
+      - name: 'customTime'
+        type: String
+        immutable: true
+        description: 'Updates the objects fixed custom time metadata.'
+        at_least_one_of:
+          - 'put_metadata.0.content_disposition'
+          - 'put_metadata.0.content_encoding'
+          - 'put_metadata.0.content_language'
+          - 'put_metadata.0.content_type'
+          - 'put_metadata.0.cache_control'
+          - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'contentDisposition'
         type: String
         description: 'Content-Disposition of the object data.'
@@ -182,6 +194,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'contentEncoding'
         type: String
         description: 'Content Encoding of the object data.'
@@ -193,6 +206,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'contentType'
         type: String
         description: 'Content-Type of the object data.'
@@ -204,6 +218,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'contentLanguage'
         type: String
         description: 'Content-Language of the object data.'
@@ -215,6 +230,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'cacheControl'
         type: String
         description: 'Cache-Control directive to specify caching behavior of object data. If omitted and object is accessible to all anonymous users, the default will be public, max-age=3600'
@@ -226,6 +242,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
       - name: 'customMetadata'
         type: KeyValuePairs
         description: 'User-provided metadata, in key/value pairs.'
@@ -237,6 +254,7 @@ properties:
           - 'put_metadata.0.content_type'
           - 'put_metadata.0.cache_control'
           - 'put_metadata.0.custom_metadata'
+          - 'put_metadata.0.custom_time'
   - name: 'rewriteObject'
     type: NestedObject
     description: 'allows to update encryption key for objects in bucket.'

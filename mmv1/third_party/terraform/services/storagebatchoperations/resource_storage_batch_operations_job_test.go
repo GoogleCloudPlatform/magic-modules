@@ -343,6 +343,7 @@ resource "google_storage_batch_operations_job" "job" {
 		content_encoding = "text"
 		content_language = "en-us"
 		content_type = "application/json"
+		custom_time  = "2025-04-30T00:00:00Z"
 	}
 	delete_protection = false
 }
