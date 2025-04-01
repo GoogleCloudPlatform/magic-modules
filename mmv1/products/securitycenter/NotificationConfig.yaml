@@ -13,6 +13,8 @@
 
 ---
 name: 'NotificationConfig'
+api_variant_patterns:
+  - 'organizations/{organization}/notificationConfigs/{notificationConfig}'
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the

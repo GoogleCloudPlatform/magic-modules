@@ -1,5 +1,4 @@
 package parametermanager
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -165,5 +164,3 @@ func getDataFromName(v interface{}, part int) string {
 	split := strings.Split(name, "/")
 	return split[part]
 }
-
-{{ end }}

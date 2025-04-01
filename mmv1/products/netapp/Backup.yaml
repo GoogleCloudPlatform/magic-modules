@@ -13,6 +13,8 @@
 
 ---
 name: 'Backup'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/backupVaults/{backupVault}/backups/{backup}'
 description: |
   NetApp Volumes supports volume backups, which are copies of your volumes
   stored independently from the volume. Backups are stored in backup vaults,
