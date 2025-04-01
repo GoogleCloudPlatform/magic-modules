@@ -397,6 +397,38 @@ func TestAccComputeUrlMap_urlMapCustomErrorResponsePolicyUpdate(t *testing.T) {
 }
 {{- end }}
 
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeUrlMap_routeRulesCustomErrorResponsePolicy(t *testing.T) {
+	t.Parallel()
+
+	randString := acctest.RandString(t, 10)
+	
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeUrlMap_routeRulesCustomErrorResponsePolicy(randString),
+			},
+			{
+				ResourceName:      "google_compute_url_map.url_map",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeUrlMap_routeRulesCustomErrorResponsePolicyUpdated(randString),
+			},
+			{
+				ResourceName:      "google_compute_url_map.url_map",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+{{- end }}
+
 func testAccComputeUrlMap_basic1(bsName, hcName, umName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1908,5 +1940,176 @@ resource "google_storage_bucket" "error" {
   location    = "US"
 }
 `, context)
+}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeUrlMap_routeRulesCustomErrorResponsePolicy(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_http_health_check" "http_hc_%s" {
+  provider           = google-beta
+  name               = "http-hc-%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_compute_backend_service" "backend_service_%s" {
+  provider    = google-beta
+  name        = "backend-service-%s"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  health_checks = [google_compute_http_health_check.http_hc_%s.id]
+}
+
+resource "google_storage_bucket" "sb_%s" {
+  provider    = google-beta
+  name        = "sb-%s"
+  location    = "US"
+  force_destroy = true
+}
+
+resource "google_compute_backend_bucket" "backend_bucket_%s" {
+  provider    = google-beta
+  name        = "backend-bucket-%s"
+  bucket_name = google_storage_bucket.sb_%s.name
+  enable_cdn  = true
+}
+
+resource "google_compute_url_map" "url_map" {
+  provider        = google-beta
+  name            = "url-map-%s"
+  default_service = google_compute_backend_service.backend_service_%s.id
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = google_compute_backend_bucket.backend_bucket_%s.id
+
+    route_rules {
+      match_rules {
+        path_template_match = "/xyzwebservices/v2/xyz/users/{username=*}/carts/{cartid=**}"
+      }
+      service = google_compute_backend_service.backend_service_%s.id
+      priority = 1
+      route_action {
+        url_rewrite {
+          path_template_rewrite = "/{username}-{cartid}/"
+        }
+      }
+    }
+
+    route_rules {
+      match_rules {
+        path_template_match = "/xyzwebservices/v2/xyz/users/*/accountinfo/*"
+      }
+      service = google_compute_backend_service.backend_service_%s.id
+      priority = 2
+
+      custom_error_response_policy {
+        error_response_rule {
+          match_response_codes = ["4xx"] # Catch all 4xx responses under /private/*
+          path = "/login.html" # Serve /login.html from the error service
+          override_response_code = 401
+        }
+        error_service = google_compute_backend_bucket.backend_bucket_%s.id
+      }
+    }
+  }
+}
+`, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix)
+}
+
+func testAccComputeUrlMap_routeRulesCustomErrorResponsePolicyUpdated(suffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_http_health_check" "http_hc_%s" {
+  provider           = google-beta
+  name               = "http-hc-%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_compute_backend_service" "backend_service_%s" {
+  provider    = google-beta
+  name        = "backend-service-%s"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  health_checks = [google_compute_http_health_check.http_hc_%s.id]
+}
+
+resource "google_storage_bucket" "sb_%s" {
+  provider    = google-beta
+  name        = "sb-%s"
+  location    = "US"
+  force_destroy = true
+}
+
+resource "google_compute_backend_bucket" "backend_bucket_%s" {
+  provider    = google-beta
+  name        = "backend-bucket-%s"
+  bucket_name = google_storage_bucket.sb_%s.name
+  enable_cdn  = true
+}
+
+resource "google_compute_url_map" "url_map" {
+  provider        = google-beta
+  name            = "url-map-%s"
+  default_service = google_compute_backend_service.backend_service_%s.id
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "mysite"
+  }
+
+  path_matcher {
+    name            = "mysite"
+    default_service = google_compute_backend_bucket.backend_bucket_%s.id
+
+    route_rules {
+      match_rules {
+        path_template_match = "/xyzwebservices/v2/xyz/users/{username=*}/carts/{cartid=**}"
+      }
+      service = google_compute_backend_service.backend_service_%s.id
+      priority = 1
+      route_action {
+        url_rewrite {
+          path_template_rewrite = "/{username}-{cartid}/"
+        }
+      }
+    }
+
+    route_rules {
+      match_rules {
+        path_template_match = "/xyzwebservices/v2/xyz/users/*/accountinfo/*"
+      }
+      service = google_compute_backend_service.backend_service_%s.id
+      priority = 2
+
+      custom_error_response_policy {
+        error_response_rule {
+          match_response_codes = ["4xx", "5xx"] # Updated to catch both 4xx and 5xx
+          path = "/error.html" # Updated path
+          override_response_code = 503 # Updated response code
+        }
+        error_response_rule {
+          match_response_codes = ["404"] # Added a specific rule for 404
+          path = "/not-found.html"
+          override_response_code = 404
+        }
+        error_service = google_compute_backend_bucket.backend_bucket_%s.id
+      }
+    }
+  }
+}
+`, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix, suffix)
 }
 {{- end }}
