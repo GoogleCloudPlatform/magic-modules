@@ -374,7 +374,7 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 }
 
 resource "google_storage_batch_operations_job" "job" {
-	job_id     = "%{job_id}"
+	job_id   = "%{job_id}"
 	location = "global"
 	bucket_list {
 		buckets  {

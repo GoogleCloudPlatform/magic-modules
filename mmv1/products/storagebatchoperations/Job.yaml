@@ -104,7 +104,8 @@ properties:
         type: Array
         min_size: 1
         max_size: 1
-        description: contains object_prefix and bucket
+        required: true
+        description: List of buckets and their objects to be transformed.
         immutable: true
         item_type:
           type: NestedObject
@@ -113,13 +114,13 @@ properties:
               type: string
               required: true
               immutable: true
-              description: 'bucket on which operations performed'
+              description: 'Bucket name for the objects to be transformed.'
             - name: 'prefixList'
               type: NestedObject
               immutable: true
               min_size: 1
               max_size: 1
-              description: 'bucket on which operations performed'
+              description: 'Specifies objects matching a prefix set.'
               exactly_one_of:
                 - 'bucket_list.0.buckets.0.prefix_list'
                 - 'bucket_list.0.buckets.0.manifest'
@@ -137,12 +138,12 @@ properties:
               exactly_one_of:
                 - 'bucket_list.0.buckets.0.prefix_list'
                 - 'bucket_list.0.buckets.0.manifest'
-              description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket'
+              description: 'contain the manifest source file that is a CSV file in a Google Cloud Storage bucket.'
               properties:
                 - name: 'manifestLocation'
                   type: String
                   immutable: true
-                  description: 'list of objects to perform operations in csv format on storage bucket'
+                  description: 'Specifies objects in a manifest file.'
   - name: 'deleteObject'
     type: NestedObject
     description: 'allows batch operations to delete objects in bucket'
@@ -150,7 +151,7 @@ properties:
     properties:
       - name: 'permanentObjectDeletionEnabled'
         type: Boolean
-        description: 'enable flag to permanently delete object and all object versions if versioning is enabled on bucket'
+        description: 'enable flag to permanently delete object and all object versions if versioning is enabled on bucket.'
         immutable: true
         required: true
     exactly_one_of:
