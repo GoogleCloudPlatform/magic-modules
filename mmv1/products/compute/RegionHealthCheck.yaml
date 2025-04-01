@@ -14,6 +14,8 @@
 ---
 name: 'RegionHealthCheck'
 api_resource_type_kind: HealthCheck
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/healthChecks/{healthCheck}'
 kind: 'compute#healthCheck'
 description: |
   Health Checks determine whether instances are responsive and able to do work.
