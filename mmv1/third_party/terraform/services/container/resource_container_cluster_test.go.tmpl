@@ -5624,7 +5624,7 @@ resource "google_container_cluster" "primary" {
 
   deletion_protection = false
 }
-`, name, projectID, networkName, subnetworkName)
+`, name, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withIncompatibleMasterVersionNodeVersion(name string) string {
