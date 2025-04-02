@@ -5506,7 +5506,7 @@ func TestSuppressDiffForPreRegisteredFleet(t *testing.T) {
 	}
 
 	for name, tc := range cases {
-		result := container.suppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
+		result := container.SuppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
 		if result != tc.ExpectSuppress {
 			t.Errorf("case %q: expected %v, got %v", name, tc.ExpectSuppress, result)
 		}
