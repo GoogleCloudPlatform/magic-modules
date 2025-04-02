@@ -26,7 +26,7 @@ func TestAccGKEBackupRestoreChannel_update(t *testing.T) {
 				Config: testAccGKEBackupRestoreChannel_basic(context),
 			},
 			{
-				ResourceName:            "google_gke_backup_restore_channel.basic",
+				ResourceName:            "google_gke_backup_restore_channel.restorechannel",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
@@ -37,7 +37,7 @@ func TestAccGKEBackupRestoreChannel_update(t *testing.T) {
 
 func testAccGKEBackupRestoreChannel_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_gke_backup_restore_channel" "basic" {
+resource "google_gke_backup_restore_channel" "restorechannel" {
   name = "tf-test-testrestorechannel%{random_suffix}"
   location = "us-central1"
   destination_project = "projects/24240755850"
