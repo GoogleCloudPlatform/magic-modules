@@ -2906,7 +2906,8 @@ func TestAccSqlDatabaseInstance_useCustomSan(t *testing.T) {
 
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	resourceName := "google_sql_database_instance.instance"
-
+	project := envvar.GetTestProjectFromEnv()
+	
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -2914,13 +2915,10 @@ func TestAccSqlDatabaseInstance_useCustomSan(t *testing.T) {
 
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleSqlDatabaseInstance_setCustomerManagedServerCa(context),
+				Config: testGoogleSqlDatabaseInstance_setCustomSan(project, databaseName, "test.example.com"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "CUSTOMER_MANAGED_CAS_CA"),
-				Config: testGoogleSqlDatabaseInstance_setCustomSan(databaseName, "test.example.com"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.serer_ca_mode", "CUSTOMER_MANAGED_CAS_CA"),
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.custom_subject_alternative_names", "test.example.com"),
+					resource.TestCheckTypeSetElemAttr(resourceName, "settings.0.ip_configuration.0.custom_subject_alternative_names.*", "test.example.com"),
 				),
 			},
 			{
@@ -3068,7 +3066,7 @@ resource "google_sql_database_instance" "instance" {
 `, databaseName, serverCaMode)
 }
 
-func testGoogleSqlDatabaseInstance_setCustomSan(databaseName, customSan string) string {
+func testGoogleSqlDatabaseInstance_setCustomSan(project, databaseName, customSan string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
@@ -3080,11 +3078,12 @@ resource "google_sql_database_instance" "instance" {
     ip_configuration {
       ipv4_enabled    = "true"
       server_ca_mode  = "CUSTOMER_MANAGED_CAS_CA"
+      server_ca_pool  = "projects/%s/locations/us-central1/caPools/default"
       custom_subject_alternative_names = ["%s"]
     }
   }
 }
-`, databaseName, customSan)
+`, databaseName, project, customSan)
 }
 
 func testGoogleSqlDatabaseInstance_setSslOptionsForPostgreSQL(databaseName string, databaseVersion string, sslMode string) string {
