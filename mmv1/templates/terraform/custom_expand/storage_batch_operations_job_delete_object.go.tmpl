@@ -22,7 +22,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	transformedPermanentObjectDeletionEnabled, err := expandStorageBatchOperationsJobsDeleteObjectPermanentObjectDeletionEnabled(original["permanent_object_deletion_enabled"], d, config)
 	if err != nil {
 		return nil, err
-	} else if val := reflect.ValueOf(transformedPermanentObjectDeletionEnabled); val.IsValid() && !tpgresource.IsEmptyValue(reflect.ValueOf(val)) {
+	} else if val := reflect.ValueOf(transformedPermanentObjectDeletionEnabled); val.IsValid() {
 		transformed["permanentObjectDeletionEnabled"] = transformedPermanentObjectDeletionEnabled
 	}
 	return transformed, nil
