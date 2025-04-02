@@ -127,11 +127,32 @@ var (
 	})
 
 	suppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		// Suppress if the cluster has been pre registered to fleet.		
 		if v, _ := d.Get("fleet.0.pre_registered").(bool); v {
 			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
 			return true
 		}
-		return false
+		// Suppress if both old and new project fields are empty		
+		var oldList, newList []map[string]interface{}
+		if err := json.Unmarshal([]byte(old), &oldList); err != nil {
+			return false
+		}
+		if err := json.Unmarshal([]byte(new), &newList); err != nil {
+			return false
+		}
+		
+		var oldProject, newProject string
+		if len(oldList) == 1 {
+			if p, ok := oldList[0]["project"].(string); ok {
+				oldProject = p
+			}
+		}
+		if len(newList) == 1 {
+			if p, ok := newList[0]["project"].(string); ok {
+				newProject = p
+			}
+		}
+		return oldProject == "" && newProject == ""
 	})
 )
 
