@@ -14,7 +14,10 @@
 ---
 name: 'BackupChannel'
 description: |
-  Represents a Backup Channel instance.
+  A BackupChannel imposes constraints on where clusters can be backed up.
+  The BackupChannel should be in the same project and region
+  as the cluster being backed up.
+  The backup can be created only in destination_project.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
