@@ -6,7 +6,6 @@ resource "google_storage_bucket" "bucket" {
 
 resource "google_storage_batch_operations_job" "{{$.PrimaryResourceId}}" {
 	job_id     = "{{index $.Vars "job_id"}}"
-	location = "global" 
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
