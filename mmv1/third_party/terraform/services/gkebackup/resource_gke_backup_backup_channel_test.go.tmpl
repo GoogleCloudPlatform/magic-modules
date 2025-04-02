@@ -41,6 +41,7 @@ resource "google_gke_backup_backup_channel" "basic" {
   name = "tf-test-testbackupchannel%{random_suffix}"
   location = "us-central1"
   destination_project = "projects/24240755850"
+  description = "some-description"
   labels = {
     "some-key-1": "some-value-1"
   }
