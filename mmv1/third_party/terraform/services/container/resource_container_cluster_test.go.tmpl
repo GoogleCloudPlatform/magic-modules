@@ -5506,7 +5506,7 @@ func TestSuppressDiffForPreRegisteredFleet(t *testing.T) {
 	}
 
 	for name, tc := range cases {
-		result := suppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
+		result := container.suppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
 		if result != tc.ExpectSuppress {
 			t.Errorf("case %q: expected %v, got %v", name, tc.ExpectSuppress, result)
 		}
@@ -5662,19 +5662,6 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
 }
 `, resource_name, networkName, subnetworkName)
-}
-
-func testAccContainerCluster_withIncompatibleMasterVersionNodeVersion(name string) string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "gke_cluster" {
-  name     = "%s"
-  location = "us-central1"
-
-  min_master_version = "1.10.9-gke.5"
-  node_version       = "1.10.6-gke.11"
-  initial_node_count = 1
-}
-	`, name)
 }
 
 func testAccContainerCluster_WithEmptyFleetProject(resource_name, networkName, subnetworkName string) string {
