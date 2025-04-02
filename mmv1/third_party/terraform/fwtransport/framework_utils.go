@@ -3,8 +3,11 @@ package fwtransport
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -49,8 +52,10 @@ func HandleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.
 	diags.AddError(fmt.Sprintf("Error when reading or editing %s", resource), err.Error())
 }
 
+var DefaultRequestTimeout = 5 * time.Minute
+
 type SendRequestOptions struct {
-	Config               *Config
+	Config               *transport_tpg.Config
 	Method               string
 	Project              string
 	RawURL               string
@@ -58,8 +63,8 @@ type SendRequestOptions struct {
 	Body                 map[string]any
 	Timeout              time.Duration
 	Headers              http.Header
-	ErrorRetryPredicates []RetryErrorPredicateFunc
-	ErrorAbortPredicates []RetryErrorPredicateFunc
+	ErrorRetryPredicates []transport_tpg.RetryErrorPredicateFunc
+	ErrorAbortPredicates []transport_tpg.RetryErrorPredicateFunc
 }
 
 func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]interface{}) {
@@ -87,7 +92,7 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 	}
 
 	var res *http.Response
-	err := Retry(RetryOptions{
+	err := transport_tpg.Retry(RetryOptions{
 		RetryFunc: func() error {
 			var buf bytes.Buffer
 			if opt.Body != nil {

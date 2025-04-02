@@ -62,7 +62,7 @@ func ParseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaFiel
 		}
 	}
 
-	project := getProjectFromFrameworkSchema(projectSchemaField, rVal, pVal, diags)
+	project := getProviderDefaultFromFrameworkSchema(projectSchemaField, rVal, pVal, diags)
 	if diags.HasError() {
 		return nil
 	}
