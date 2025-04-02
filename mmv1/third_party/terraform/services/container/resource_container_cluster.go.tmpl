@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"encoding/json"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-version"
@@ -132,15 +133,16 @@ var (
 			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
 			return true
 		}
-		// Suppress if both old and new project fields are empty		
+		// Suppress if both old and new project fields are empty
 		var oldList, newList []map[string]interface{}
-		if err := json.Unmarshal([]byte(old), &oldList); err != nil {
-			return false
-		}
-		if err := json.Unmarshal([]byte(new), &newList); err != nil {
-			return false
-		}
-		
+    		if err := json.Unmarshal([]byte(oldValue), &oldList); err != nil {
+			log.Printf("[DEBUG] fleet suppress error unmarshalling old value: %v", err)
+        		return false
+    		}
+		if err := json.Unmarshal([]byte(newValue), &newList); err != nil {
+			log.Printf("[DEBUG] fleet suppress error unmarshalling old value: %v", err)
+        		return false
+   		}
 		var oldProject, newProject string
 		if len(oldList) == 1 {
 			if p, ok := oldList[0]["project"].(string); ok {
