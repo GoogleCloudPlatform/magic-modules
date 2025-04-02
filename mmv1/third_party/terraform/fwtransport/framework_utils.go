@@ -1,7 +1,9 @@
 package fwtransport
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"google.golang.org/api/googleapi"
 )
 
 const uaEnvVar = "TF_APPEND_USER_AGENT"
@@ -92,7 +95,7 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 	}
 
 	var res *http.Response
-	err := transport_tpg.Retry(RetryOptions{
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			var buf bytes.Buffer
 			if opt.Body != nil {
@@ -103,7 +106,7 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 				}
 			}
 
-			u, err := AddQueryParams(opt.RawURL, map[string]string{"alt": "json"})
+			u, err := transport_tpg.AddQueryParams(opt.RawURL, map[string]string{"alt": "json"})
 			if err != nil {
 				diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
 				return nil
