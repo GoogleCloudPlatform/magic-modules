@@ -56,22 +56,23 @@ func TestAccStorageObject_recreate(t *testing.T) {
 
 	bucketName := acctest.TestBucketName(t)
 
-	writeFile := func(name string, data []byte) string {
+	writeFile := func(name string, data []byte) {
+		if err := ioutil.WriteFile(name, data, 0644); err != nil {
+			t.Errorf("error writing file: %v", err)
+		}
+	}
+	getMd5 := func(data []byte) string {
 		h := md5.New()
 		if _, err := h.Write(data); err != nil {
 			t.Errorf("error calculating md5: %v", err)
 		}
 		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-		if err := ioutil.WriteFile(name, data, 0644); err != nil {
-			t.Errorf("error writing file: %v", err)
-		}
 		return dataMd5
 	}
 	testFile := getNewTmpTestFile(t, "tf-test")
-	dataMd5 := writeFile(testFile.Name(), []byte("data data data"))
-	updatedName := getNewTmpTestFile(t, "tf-test")
-	updatedDataMd5 := writeFile(updatedName.Name(), []byte("datum"))
+	writeFile(testFile.Name(), []byte("data data data"))
+	dataMd5 := getMd5([]byte("data data data"))
+	updatedDataMd5 := getMd5([]byte("datum"))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -83,7 +84,10 @@ func TestAccStorageObject_recreate(t *testing.T) {
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, updatedName.Name()),
+				PreConfig: func() {
+					writeFile(testFile.Name(), []byte("datum"))
+				},
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), updatedDataMd5),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
@@ -658,7 +662,7 @@ resource "google_storage_bucket_object" "object" {
 `, bucketName, objectName, sourceFilename)
 }
 
-func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename string) string {
+func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename, md5hash string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
@@ -669,9 +673,9 @@ resource "google_storage_bucket_object" "object" {
   name   = "%s"
   bucket = google_storage_bucket.bucket.name
   source = "%s"
-  source_md5hash = filemd5("%s")
+  source_md5hash = "%s"
 }
-`, bucketName, objectName, sourceFilename, sourceFilename)
+`, bucketName, objectName, sourceFilename, md5hash)
 }
 
 func testGoogleStorageBucketsObjectOptionalContentFields(
