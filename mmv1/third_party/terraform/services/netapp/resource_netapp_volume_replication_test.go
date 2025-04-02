@@ -85,6 +85,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -144,6 +145,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -210,6 +212,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -276,6 +279,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
