@@ -112,6 +112,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   delete_destination_volume = true
   wait_for_mirror = true
@@ -172,6 +176,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true
@@ -234,6 +242,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = false
   delete_destination_volume = true
@@ -296,6 +308,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true

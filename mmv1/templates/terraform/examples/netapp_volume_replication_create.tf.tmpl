@@ -45,6 +45,10 @@ resource "google_netapp_volume_replication" "{{$.PrimaryResourceId}}" {
     # simplifies implementing client failover concepts
     share_name  = "{{index $.Vars "volume_name"}}"
     description = "This is a replicated volume"
+    tiering_policy {
+        cooling_threshold_days = 20
+        tier_action = "ENABLED"
+    }
   }
   # WARNING: Setting delete_destination_volume to true, will delete the
   # CURRENT destination volume if the replication is deleted. Omit the field 
