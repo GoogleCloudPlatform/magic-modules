@@ -14,7 +14,6 @@
 ---
 name: CodeToolsSetting
 description: The resource for managing CodeTools settings for Admin Control.
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/codeToolsSettings
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
@@ -29,7 +28,6 @@ sweeper:
     - region: "global"
 examples:
   - name: gemini_code_tools_setting_basic
-    min_version: 'beta'
     primary_resource_id: example
     exclude_test: true
     vars:
