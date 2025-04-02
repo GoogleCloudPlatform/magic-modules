@@ -127,7 +127,7 @@ var (
 		return false
 	})
 
-	suppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	SuppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		// Suppress if the cluster has been pre registered to fleet.		
 		if v, _ := d.Get("fleet.0.pre_registered").(bool); v {
 			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
