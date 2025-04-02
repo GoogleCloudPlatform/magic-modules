@@ -2314,7 +2314,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Fleet configuration of the cluster.`,
-				DiffSuppressFunc: suppressDiffForPreRegisteredFleet,
+				DiffSuppressFunc: SuppressDiffForPreRegisteredFleet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"project": {
