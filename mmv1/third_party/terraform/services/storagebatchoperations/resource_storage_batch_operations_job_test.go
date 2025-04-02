@@ -172,7 +172,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -205,7 +204,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -234,7 +232,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -263,7 +260,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -294,7 +290,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -324,7 +319,6 @@ resource "google_storage_bucket" "bucket" {
 }
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%s"
-	location = "global" 
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
@@ -376,7 +370,6 @@ resource "google_kms_crypto_key_iam_member" "iam" {
 
 resource "google_storage_batch_operations_job" "job" {
 	job_id   = "%{job_id}"
-	location = "global"
 	bucket_list {
 		buckets  {
 			bucket = google_storage_bucket.bucket.name
