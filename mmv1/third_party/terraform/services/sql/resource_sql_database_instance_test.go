@@ -2919,7 +2919,7 @@ func TestAccSqlDatabaseInstance_useCustomSan(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "CUSTOMER_MANAGED_CAS_CA"),
 				Config: testGoogleSqlDatabaseInstance_setCustomSan(databaseName, "test.example.com"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.serer_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
+					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.serer_ca_mode", "CUSTOMER_MANAGED_CAS_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.custom_subject_alternative_names", "test.example.com"),
 				),
 			},
