@@ -464,9 +464,6 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
 	}
-	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
-		return fmt.Errorf("Error setting detect_md5hash: %s", err)
-	}
 	if v, ok := d.GetOk("source_md5hash"); ok {
 		if err := d.Set("source_md5hash", v); err != nil {
 			return fmt.Errorf("Error setting source_md5hash: %s", err)
