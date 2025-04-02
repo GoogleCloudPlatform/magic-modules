@@ -140,7 +140,7 @@ var (
         		return false
     		}
 		if err := json.Unmarshal([]byte(newValue), &newList); err != nil {
-			log.Printf("[DEBUG] fleet suppress error unmarshalling old value: %v", err)
+			log.Printf("[DEBUG] fleet suppress error unmarshalling new value: %v", err)
         		return false
    		}
 		var oldProject, newProject string
