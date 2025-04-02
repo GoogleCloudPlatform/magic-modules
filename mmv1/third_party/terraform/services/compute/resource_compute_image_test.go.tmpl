@@ -900,7 +900,7 @@ resource "google_compute_image" "src-image-rsa" {
   name         = "tf-test-src-rsa-%{random_suffix}"
   source_disk  = google_compute_disk.src_disk.self_link
   image_encryption_key {
-	kms_key_self_link = "%{kms_key_self_link}"
+	rsa_encrypted_key = "%{rsa_encrypted_key}"
   }
 }
 
@@ -941,8 +941,8 @@ data "google_compute_image" "debian" {
   project = "debian-cloud"
 }
 
-resource "google_compute_disk" "src_disk" {
-  name  = "tf-test-src-disk-%{random_suffix}"
+resource "google_compute_disk" "src_disk-kms" {
+  name  = "tf-test-src-disk-kms-%{random_suffix}"
   image = data.google_compute_image.debian.self_link
   size  = 10
   type  = "pd-ssd"
@@ -953,9 +953,33 @@ resource "google_compute_disk" "src_disk" {
   }
 }
 
+resource "google_compute_disk" "src_disk-raw" {
+  name  = "tf-test-src-disk-raw-%{random_suffix}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+
+  disk_encryption_key {
+	raw_key = "%{raw_key}"
+  }
+}
+
+resource "google_compute_disk" "src_disk-rsa" {
+  name  = "tf-test-src-disk-rsa-%{random_suffix}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+
+  disk_encryption_key {
+	rsa_encrypted_key = "%{rsa_encrypted_key}"
+  }
+}
+
 resource "google_compute_snapshot" "src-snapshot-kms" {
   name  = "tf-test-src-snapshot-kms-%{random_suffix}"
-  disk  = google_compute_disk.src_disk.self_link
+  source_disk  = google_compute_disk.src_disk-kms.self_link
   zone  = "us-central1-a"
 
   snapshot_encryption_key {
@@ -965,20 +989,28 @@ resource "google_compute_snapshot" "src-snapshot-kms" {
 
 resource "google_compute_snapshot" "src-snapshot-raw" {
   name  = "tf-test-src-snapshot-raw-%{random_suffix}"
-  disk  = google_compute_disk.src_disk.self_link
+  source_disk  = google_compute_disk.src_disk-raw.self_link
   zone  = "us-central1-a"
 
   snapshot_encryption_key {
+	raw_key = "%{raw_key}"
+  }
+
+  source_disk_encryption_key {
 	raw_key = "%{raw_key}"
   }
 }
 
 resource "google_compute_snapshot" "src-snapshot-rsa" {
   name  = "tf-test-src-snapshot-rsa-%{random_suffix}"
-  disk  = google_compute_disk.src_disk.self_link
+  source_disk  = google_compute_disk.src_disk-rsa.self_link
   zone  = "us-central1-a"
 
   snapshot_encryption_key {
+	rsa_encrypted_key = "%{rsa_encrypted_key}"
+  }
+
+  source_disk_encryption_key {
 	rsa_encrypted_key = "%{rsa_encrypted_key}"
   }
 }
