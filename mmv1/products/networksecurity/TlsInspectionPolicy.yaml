@@ -107,6 +107,7 @@ properties:
       - 'TLS_1_1'
       - 'TLS_1_2'
       - 'TLS_1_3'
+    default_value: 'TLS_VERSION_UNSPECIFIED'
   - name: 'tlsFeatureProfile'
     type: Enum
     description: |
@@ -117,6 +118,7 @@ properties:
       - 'PROFILE_MODERN'
       - 'PROFILE_RESTRICTED'
       - 'PROFILE_CUSTOM'
+    default_value: 'PROFILE_UNSPECIFIED'
   - name: 'customTlsFeatures'
     type: Array
     description: |

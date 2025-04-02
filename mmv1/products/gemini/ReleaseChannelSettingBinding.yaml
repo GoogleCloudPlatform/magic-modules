@@ -13,6 +13,9 @@
 
 ---
 name: ReleaseChannelSettingBinding
+api_resource_type_kind: SettingBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/releaseChannelSettings/{releaseChannelSetting}/settingBindings/{settingBinding}'
 description: The resource for managing ReleaseChannel setting bindings for Admin Control.
 references:
   guides:

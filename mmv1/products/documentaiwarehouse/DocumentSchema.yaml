@@ -13,6 +13,8 @@
 
 ---
 name: 'DocumentSchema'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/documentSchemas/{documentSchema}'
 description: |
   A document schema is used to define document structure.
 references:

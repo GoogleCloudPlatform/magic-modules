@@ -13,11 +13,13 @@
 
 ---
 name: LoggingSettingBinding
+api_resource_type_kind: SettingBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/loggingSettings/{loggingSetting}/settingBindings/{settingBinding}'
 description: The resource for managing Logging setting bindings for Admin Control.
 references:
   guides:
     'Gemini Cloud Assist overview': 'https://cloud.google.com/gemini/docs/cloud-assist/overview'
-min_version: 'beta'
 base_url: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings
 self_link: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings/{{setting_binding_id}}
 create_url: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}/settingBindings?settingBindingId={{setting_binding_id}}
@@ -29,7 +31,6 @@ import_format:
 mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
 examples:
   - name: gemini_logging_setting_binding_basic
-    min_version: 'beta'
     primary_resource_id: example
     exclude_test: true
     vars:
@@ -89,7 +90,6 @@ properties:
     description: |-
       Product type of the setting binding.
     enum_values:
-      - 'GEMINI_CLOUD_ASSIST'
       - 'GEMINI_CODE_ASSIST'
   - name: name
     type: String
