@@ -5506,7 +5506,7 @@ func TestSuppressDiffForPreRegisteredFleet(t *testing.T) {
 	}
 
 	for name, tc := range cases {
-		result := suppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
+		result := container.suppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
 		if result != tc.ExpectSuppress {
 			t.Errorf("case %q: expected %v, got %v", name, tc.ExpectSuppress, result)
 		}
@@ -5544,7 +5544,7 @@ func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 				Config: testAccContainerCluster_DisableFleet(clusterName, networkName, subnetworkName),
 			},
 			{
-				Config: testAccContainerCluster_WithEmptyFleet(clusterName, networkName, subnetworkName),
+				Config: testAccContainerCluster_WithEmptyFleetConfig(clusterName, networkName, subnetworkName),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
