@@ -13,6 +13,8 @@
 
 ---
 name: 'Autoscaler'
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/autoscalers/{autoscaler}'
 kind: 'compute#autoscaler'
 description: |
   Represents an Autoscaler resource.
