@@ -101,7 +101,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `When deleting a bucket, this boolean option will delete all contained objects, or anywhereCaches (if any). If you try to delete a bucket that contains objects or anywhereCaches, Terraform will fail that run.`,
+				Description: `When deleting a bucket, this boolean option will delete all contained objects, or anywhereCaches (if any). If you try to delete a bucket that contains objects or anywhereCaches, Terraform will fail that run, deleting anywhereCaches may take 80 minutes to complete.`,
 			},
 
 			"labels": {
@@ -644,7 +644,7 @@ func deleteAnywhereCacheIfAny(config *transport_tpg.Config, bucket string) error
 		if !ok {
 			continue // If state is not a string, skip this item
 		}
-		if state != "running" && state != "paused" {
+		if !strings.EqualFold(state, "running") && !strings.EqualFold(state, "paused")  {
 			continue
 		}
 
@@ -679,7 +679,7 @@ func deleteAnywhereCacheIfAny(config *transport_tpg.Config, bucket string) error
 		return nil
 	}
 
-	return fmt.Errorf("error while deleting the cache!")
+	return fmt.Errorf("Error while deleting the cache: caches still exists post 80mins of their disable time")
 }
 
 func resourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -1129,6 +1129,13 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		// is it scheduled to be plumbed to individual providers.
 		wp := workerpool.New(runtime.NumCPU() - 1)
 
+		wp.Submit(func() {
+			err = deleteAnywhereCacheIfAny(config, bucket)
+			if err != nil {
+				deleteObjectError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
+			}
+		})
+
 		for _, object := range res.Items {
 			log.Printf("[DEBUG] Found %s", object.Name)
 			object := object
@@ -1142,12 +1149,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 					log.Printf("[TRACE] Successfully deleted %s", object.Name)
 				}
 			})
-		}
-
-		// While we wait our objects to be deleted in background, delete the cache if any!
-		err = deleteAnywhereCacheIfAny(config, bucket)
-		if err != nil {
-			return fmt.Errorf("Error deleting the caches on the bucket %s : %v", bucket, err)
 		}
 
 		// Wait for everything to finish.
