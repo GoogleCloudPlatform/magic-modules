@@ -1,3 +1,29 @@
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+
+  provider = google-beta
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+
+  depends_on = [google_project.project]
+
+  provider = google-beta
+}
+
+resource "google_project_service" "managedkafka" {
+  project = google_project.project.project_id
+  service = "managedkafka.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+
+  provider = google-beta
+}
+
 resource "google_compute_subnetwork" "mkc_secondary_subnet" {
   name          = "{{index $.Vars "secondary_subnet_id"}}"
   ip_cidr_range = "10.3.0.0/16"

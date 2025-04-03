@@ -46,6 +46,9 @@ examples:
       connect_cluster_id: 'my-connect-cluster'
       cluster_id: 'my-cluster'
       secondary_subnet_id: 'my-secondary-subnetwork'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
 parameters:
   - name: 'location'
     type: String
