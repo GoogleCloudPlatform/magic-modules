@@ -60,7 +60,6 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
-custom_code:
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
