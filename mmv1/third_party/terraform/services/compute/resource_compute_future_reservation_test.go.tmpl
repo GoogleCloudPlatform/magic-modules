@@ -1,3 +1,4 @@
+{{- if ne $.TargetVersionName "ga" -}}
 package compute_test
 
 import (
@@ -136,3 +137,4 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 }
 `, context)
 }
+{{- end }}
