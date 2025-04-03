@@ -46,8 +46,6 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
-  # update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
-  # pre_update: 'templates/terraform/pre_update/shared_future_reservation_update.go.tmpl'
 min_version: beta
 examples:
   - name: 'future_reservation_basic'
@@ -73,7 +71,7 @@ parameters:
       RFC1035. Specifically, the name must be 1-63 characters long and match
       the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
       first character must be a lowercase letter, and all following
-      characters must be a dash, lowercase letter, or digit, except the last
+      characters must be a dash, lowercase letter, or digit, except the las
       character, which cannot be a dash.
     required: true
     immutable: true
@@ -103,7 +101,7 @@ properties:
     description: |
       Time window for this Future Reservation.
     required: true
-    properties: 
+    properties:
       - name: 'startTime'
         type: String
         description: |
@@ -131,7 +129,7 @@ properties:
     type: NestedObject
     description: |
       Settings for sharing the future reservation
-    properties: 
+    properties:
       - name: 'shareType'
         type: Enum
         description: |
@@ -143,9 +141,9 @@ properties:
           - 'SPECIFIC_PROJECTS'
       - name: 'projects'
         type: Array
-        description: | 
+        description: |
           list of Project names to specify consumer projects for this shared-reservation. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-        item_type: 
+        item_type:
           type: String
       - name: 'projectMap'
         type: Map
@@ -166,10 +164,10 @@ properties:
     type: String
     description: |
       Name prefix for the reservations to be created at the time of delivery. The name prefix must comply with RFC1035. Maximum allowed length for name prefix is 20. Automatically created reservations name format will be -date-####.
-    #Look into maximum length
+    # Look into maximum length
   - name: 'status'
     type: NestedObject
-    description: | 
+    description: |
       [Output only] Status of the Future Reservation
     output: true
     properties:
@@ -185,25 +183,25 @@ properties:
         type: Array
         description: |
           Fully qualified urls of the automatically created reservations at startTime.
-        item_type: 
+        item_type:
           type: String
       - name: 'fulfilledCount'
         type: String
-        description: | 
+        description: |
           This count indicates the fulfilled capacity so far. This is set during "PROVISIONING" state. This count also includes capacity delivered as part of existing matching reservations.
       - name: 'specificSkuProperties'
         type: NestedObject
-        description: | 
+        description: |
           Instance properties related to the Future Reservation.
         properties:
           - name: 'sourceInstanceTemplateId'
             type: String
             description: |
               ID of the instance template used to populate the Future Reservation properties.
-      #Enum values are listed in docs, TODO
+      # Enum values are listed in docs, TODO
       - name: 'amendmentStatus'
         type: Enum
-        description: | 
+        description: |
           The current status of the requested amendment.
         output: true
       - name: 'lastKnownGoodState'
@@ -249,7 +247,7 @@ properties:
                                 The number of the guest accelerator cards exposed to this instance.
                       - name: 'minCpuPlatform'
                         type: String
-                        description: | 
+                        description: |
                           Minimum CPU platform for the reservation.
                       - name: 'localSsds'
                         type: Array
@@ -325,7 +323,7 @@ properties:
                   The previous share settings of the Future Reservation.
                 output: true
                 properties:
-                #Might need a enum value. TODO
+                # Might need a enum value. TODO
                   - name: 'shareType'
                     type: Enum
                     description: |
@@ -334,7 +332,7 @@ properties:
                     type: Array
                     description: |
                       A futureReservations.list of Project names to specify consumer projects for this shared-reservation. This is only valid when shareType's value is SPECIFIC_PROJECTS.
-                    item_type: 
+                    item_type:
                       type: String
                   - name: 'projectMap'
                     type: Map
@@ -351,7 +349,7 @@ properties:
                           type: String
                           description: |
                             The project ID, should be same as the key of this project config in the parent map.
-          - name: 'procurementStatus'    
+          - name: 'procurementStatus'
             type: Enum
             description: |
               The status of the last known good state for the Future Reservation
@@ -452,7 +450,7 @@ properties:
                   type: String
                   description: |
                     Full or partial URL of the accelerator type resource to attach to this instance.
-                - name: 'acceleratorCount' 
+                - name: 'acceleratorCount'
                   type: Integer
                   description: |
                     The number of the guest accelerator cards exposed to this instance.
