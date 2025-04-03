@@ -291,13 +291,25 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- /* Set output-only resource properties from create API response (as long as Create doesn't use an async operation) */}}
 {{- /* This is necessary so that the ID is built correctly. */}}
 {{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
+{{- $renderedIdFromName := "false" }}
+{{- $renderedDecoder := "false" }}
 {{- range $prop := $.GettableProperties }}
 {{-  if $.InIdFormat $prop }}
-{{-  if eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl" }}
+{{-  if and ($.CustomCode.Decoder) (eq $renderedDecoder "false") }}
+    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return nil, err
+    }
+    if res == nil {
+            return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
+    }
+{{-  end }}
+{{-  if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
         return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
     }
+    {{- $renderedIdFromName = "true" }}
 {{-  end }}
 {{-    if and $prop.Output (not $prop.IgnoreRead) }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
