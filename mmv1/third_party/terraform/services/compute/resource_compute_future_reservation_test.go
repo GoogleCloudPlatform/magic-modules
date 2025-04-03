@@ -48,6 +48,7 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 func testAccComputeFutureReservation_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_future_reservation" "gce_future_reservation" {
+  provider = google-beta
   name     = "tf_test_gce_future_reservation%{random_suffix}"
   project  = "%{project}"
   zone     = "%{zone}"
@@ -93,6 +94,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 func testAccComputeFutureReservation_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_future_reservation" "gce_future_reservation" {
+	provider = google-beta
 	name     = "tf-test-fr%{random_suffix}"
 	project  = "%{project}"
 	zone     = "%{zone}"
