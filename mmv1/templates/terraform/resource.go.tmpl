@@ -292,17 +292,19 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- /* This is necessary so that the ID is built correctly. */}}
 {{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
 {{- $renderedIdFromName := "false" }}
-{{- $renderedDecoder := "false" }}
+{{- $renderedInitial := "false" }}
 {{- range $prop := $.GettableProperties }}
 {{-  if $.InIdFormat $prop }}
-{{-  if and ($.CustomCode.Decoder) (eq $renderedDecoder "false") }}
+{{-  if and ($.CustomCode.Decoder) (eq $renderedInitial "false") }}
+    // Set output-only resource properties from create API response
     res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
     if err != nil {
-        return nil, err
+        return fmt.Errorf("Error decoding response: %s", err)
     }
     if res == nil {
-            return nil, tpgresource.Fake404("decoded", "{{ $.ResourceName }}")
+        return fmt.Errorf("Error decoding response, could not find object")
     }
+    {{- $renderedInitial = "true" }}
 {{-  end }}
 {{-  if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
