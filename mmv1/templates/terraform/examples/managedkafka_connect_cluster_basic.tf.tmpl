@@ -10,10 +10,7 @@ resource "google_project" "project" {
 
 resource "time_sleep" "wait_60_seconds" {
   create_duration = "60s"
-
   depends_on = [google_project.project]
-
-  provider = google-beta
 }
 
 resource "google_project_service" "managedkafka" {
