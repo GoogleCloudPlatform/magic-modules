@@ -61,9 +61,17 @@ parameters:
       When data residency controls are enabled, this attribute specifies the location in which the resource is located and applicable.
       If not provided, Use global as default.
     url_param_only: true
-    required: true
-    immutable: false
+    required: false
+    immutable: true
     default_value: "global"
+  - name: 'state'
+    type: String
+    description: |
+      State is one of: [ACTIVE, INACTIVE]. STATE must be one of: active, inactive, state-unspecified.
+    url_param_only: true
+    required: false
+    immutable: false
+    default_value: "state-unspecified"
   - name: 'finding_id'
     type: String
     description: |
