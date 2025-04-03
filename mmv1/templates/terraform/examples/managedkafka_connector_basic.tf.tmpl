@@ -13,6 +13,12 @@ resource "time_sleep" "wait_60_seconds" {
   depends_on = [google_project.project]
 }
 
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
 resource "google_project_service" "managedkafka" {
   project = google_project.project.project_id
   service = "managedkafka.googleapis.com"
