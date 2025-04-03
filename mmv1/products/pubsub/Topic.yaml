@@ -111,6 +111,7 @@ properties:
     properties:
       - !ruby/object:Api::Type::Array
         name: 'allowedPersistenceRegions'
+        is_set: True
         description: |
           A list of IDs of GCP regions where messages that are published to
           the topic may be persisted in storage. Messages published by
