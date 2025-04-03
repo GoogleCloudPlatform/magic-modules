@@ -248,9 +248,9 @@ properties:
             write_only: true
           - name: 'passwordWoVersion'
             type: String
+            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_password_wo_version_flatten.go.tmpl'
             description: Write-Only version of password for database.
             immutable: true
-            ignore_read: true
             required_with:
               - 'passwordWo'
 
