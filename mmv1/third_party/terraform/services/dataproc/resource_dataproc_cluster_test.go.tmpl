@@ -357,10 +357,10 @@ func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
 
 	var cluster dataproc.Cluster
 	randString := acctest.RandString(t, 10)
-	project_id := envvar.GetTestProjectFromEnv()
-	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
-	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
-	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+	projectId  := envvar.GetTestProjectFromEnv()
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster-rmtags")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster-rmtags", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster-rmtags", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -369,7 +369,7 @@ func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withResourceManagerTags(project_id,randString, subnetworkName),
+				Config: testAccDataprocCluster_withResourceManagerTags(projectId,randString, subnetworkName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.basic", &cluster),
 					resource.TestCheckResourceAttrSet("google_dataproc_cluster.basic", "cluster_config.0.gce_cluster_config.0.resource_manager_tags.%"),
@@ -1386,67 +1386,67 @@ func validateDataprocCluster_withConfigOverrides(n string, cluster *dataproc.Clu
 	}
 }
 
-func testAccDataprocCluster_withResourceManagerTags(project_id, randString, subnet string) string {
+func testAccDataprocCluster_withResourceManagerTags(projectId, randString, subnet string) string {
 	return fmt.Sprintf(`
 
-	data "google_project" "project" {
-		project_id = "%s"
-	}
+data "google_project" "project" {
+	project_id = "%s"
+}
 
-	resource "google_tags_tag_key" "key" {
+resource "google_tags_tag_key" "key" {
 	parent      = "projects/${data.google_project.project.number}"
-	short_name  = "keyname"
+	short_name  = "rmtagskey"
 	description = "For keyname resources."
-	}
+}
 
-	resource "google_tags_tag_value" "value" {
+resource "google_tags_tag_value" "value" {
 	parent      = google_tags_tag_key.key.id
-	short_name  = "keyvalue"
+	short_name  = "rmtagsvalue"
 	description = "For valuename resources."
-	}
+}
 
-	resource "google_tags_tag_binding" "binding" {
+resource "google_tags_tag_binding" "binding" {
 	parent    = "//cloudresourcemanager.googleapis.com/projects/${data.google_project.project.number}"
 	tag_value = google_tags_tag_value.value.id
-	}
+}
 
 
-	resource "google_dataproc_cluster" "basic" {
-		name     = "tf-test-dataproc-%s"
-		region   = "us-central1"
+resource "google_dataproc_cluster" "basic" {
+	name     = "tf-test-dataproc-%s"
+	region   = "us-central1"
 
-		cluster_config {
-
-			master_config {
+	cluster_config {
+		master_config {
 			num_instances = 1
 			machine_type  = "e2-medium"
-			}
+		}
 
-			worker_config {
-				num_instances    = 2
-				machine_type     = "e2-medium"
-			}
+		worker_config {
+			num_instances = 2
+			machine_type  = "e2-medium"
+		}
 
-			preemptible_worker_config {
-				num_instances = 0
-			}
+		preemptible_worker_config {
+			num_instances = 0
+		}
 
-			# Override or set some custom properties
-			software_config {
-				image_version = "2.0.35-debian10"
-				override_properties = {
-					"dataproc:dataproc.allow.zero.workers" = "true"
-				}
-			}
-			gce_cluster_config {
-				internal_ip_only = true
-				subnetwork	   = "%s"
-				resource_manager_tags = {
-					"tagKeys/${google_tags_tag_key.key.name}"="tagValues/${google_tags_tag_value.value.name}"
-				}
+		# Override or set some custom properties
+		software_config {
+			image_version = "2.0.35-debian10"
+			override_properties = {
+				"dataproc:dataproc.allow.zero.workers" = "true"
 			}
 		}
-	}`, project_id, randString, subnet)
+		gce_cluster_config {
+			internal_ip_only = true
+			subnetwork	   = "%s"
+			resource_manager_tags = {
+				"tagKeys/${google_tags_tag_key.key.name}"="tagValues/${google_tags_tag_value.value.name}"
+			}
+		}
+	}
+}
+`, projectId, randString, subnet)
 }
 
 

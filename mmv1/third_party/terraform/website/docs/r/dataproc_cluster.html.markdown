@@ -445,6 +445,8 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
     * `key` - (Optional) Corresponds to the label key of reservation resource.
     * `values` - (Optional) Corresponds to the label values of reservation resource.
 
+* `resource_manager_tags` - (Optional) A map of resource manager tags, Keys must be in the format tagKeys/{tag_key_id} and values are in the format tagValues/{tag_key_id} (see [Secure tags](https://cloud.google.com/dataproc/docs/guides/use-secure-tags)).
+
 * `node_group_affinity` - (Optional) Node Group Affinity for sole-tenant clusters.
     * `node_group_uri` - (Required) The URI of a sole-tenant node group resource that the cluster will be created on.
 

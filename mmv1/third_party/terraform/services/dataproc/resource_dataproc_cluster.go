@@ -674,6 +674,7 @@ func ResourceDataprocCluster() *schema.Resource {
 									"resource_manager_tags": {
 										Type:        schema.TypeMap,
 										Optional:    true,
+										ForceNew:    true,
 										Description: `A map of resource manager tags, Keys must be in the format tagKeys/{tag_key_id} and values are in the format tagValues/{tag_key_id}. The field is ignored (both PUT & PATCH) when empty.`,
 									},
 
