@@ -18,7 +18,7 @@ description:
 references:
   guides:
     'About Service Connection Policies': 'https://cloud.google.com/vpc/docs/about-service-connection-policies#service-policies'
-    'About service connectivity automation': 'https://cloud.google.com/vpc/docs/about-service-connectivity-automation'
+    'About Service Connectivity Automation': 'https://cloud.google.com/vpc/docs/about-service-connectivity-automation'
   api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.serviceConnectionPolicies'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies'
