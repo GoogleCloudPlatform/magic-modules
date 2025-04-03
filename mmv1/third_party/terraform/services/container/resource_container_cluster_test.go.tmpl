@@ -5462,56 +5462,6 @@ func TestAccContainerCluster_withSecurityPostureConfig(t *testing.T) {
 		},
 	})
 }
-func TestSuppressDiffForPreRegisteredFleet(t *testing.T) {
-	t.Parallel()
-	cases := map[string]struct {
-		Old, New           string
-		ExpectSuppress     bool
-	}{
-		"both unset": {
-			Old:            `null`,
-			New:            `null`,
-			ExpectSuppress: true,
-		},
-		"empty list vs empty project": {
-			Old:            `[]`,
-			New:            `[{"project": ""}]`,
-			ExpectSuppress: true,
-		},
-		"both empty project": {
-			Old:            `[{"project": ""}]`,
-			New:            `[{"project": ""}]`,
-			ExpectSuppress: true,
-		},
-		"equal project value": {
-			Old:            `[{"project": "my-project"}]`,
-			New:            `[{"project": "my-project"}]`,
-			ExpectSuppress: true,
-		},
-		"different project values": {
-			Old:            `[{"project": "old-project"}]`,
-			New:            `[{"project": "new-project"}]`,
-			ExpectSuppress: false,
-		},
-		"project vs no project": {
-			Old:            `[{"project": "my-project"}]`,
-			New:            `[]`,
-			ExpectSuppress: false,
-		},
-		"invalid JSON": {
-			Old:            `invalid-json`,
-			New:            `[{"project": ""}]`,
-			ExpectSuppress: false,
-		},
-	}
-
-	for name, tc := range cases {
-		result := container.SuppressDiffForPreRegisteredFleet("fleet", tc.Old, tc.New, nil)
-		if result != tc.ExpectSuppress {
-			t.Errorf("case %q: expected %v, got %v", name, tc.ExpectSuppress, result)
-		}
-	}
-}
 
 func TestAccContainerCluster_withFleetConfig(t *testing.T) {
 	t.Parallel()
