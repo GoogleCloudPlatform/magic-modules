@@ -13,6 +13,8 @@
 
 ---
 name: 'AuthConfig'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/authConfigs/{authConfig}'
 description: |
   The AuthConfig resource use to hold channels and connection config data.
 references:

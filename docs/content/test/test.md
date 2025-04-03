@@ -165,6 +165,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -225,6 +227,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
