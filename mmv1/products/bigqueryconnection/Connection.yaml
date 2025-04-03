@@ -247,7 +247,7 @@ properties:
               - 'password'
             write_only: true
           - name: 'passwordWoVersion'
-            type: Integer
+            type: String
             description: Write-Only version of password for database.
             immutable: true
             ignore_read: true
