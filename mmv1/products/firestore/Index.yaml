@@ -81,6 +81,12 @@ examples:
       database_id: 'database-id'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_mongodb_compatible_scope'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-mongodb-compatible'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'name'
@@ -119,6 +125,7 @@ properties:
     enum_values:
       - 'ANY_API'
       - 'DATASTORE_MODE_API'
+      - 'MONGODB_COMPATIBLE_API'
   - name: 'fields'
     type: Array
     description: |
