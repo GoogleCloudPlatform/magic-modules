@@ -126,7 +126,7 @@ var (
 		return false
 	})
 
-	SuppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	suppressDiffForPreRegisteredFleet = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		// Suppress if the cluster has been pre registered to fleet.		
 		if v, _ := d.Get("fleet.0.pre_registered").(bool); v {
 			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
@@ -2301,7 +2301,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: `Fleet configuration of the cluster.`,
-				DiffSuppressFunc: SuppressDiffForPreRegisteredFleet,
+				DiffSuppressFunc: suppressDiffForPreRegisteredFleet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"project": {
