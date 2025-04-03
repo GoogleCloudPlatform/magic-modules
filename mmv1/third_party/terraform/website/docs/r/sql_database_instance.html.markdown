@@ -575,6 +575,8 @@ connection strings. For example, when connecting with [Cloud SQL Proxy](https://
 
 * `dns_name` - The DNS name of the instance. See [Connect to an instance using Private Service Connect](https://cloud.google.com/sql/docs/mysql/configure-private-service-connect#view-summary-information-cloud-sql-instances-psc-enabled) for more details.
 
+* `dns_names` - The list of DNS names used by this instance.
+
 * `service_account_email_address` - The service account email address assigned to the
 instance.
 
