@@ -54,6 +54,7 @@ resource "google_managed_kafka_cluster" "gmk_cluster" {
       }
     }
   }
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }
@@ -65,6 +66,7 @@ resource "google_managed_kafka_topic" "gmk_topic" {
   location = "us-central1"
   partition_count = 2
   replication_factor = 3
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }
@@ -90,6 +92,7 @@ resource "google_managed_kafka_connect_cluster" "mkc_cluster" {
   labels = {
     key = "value"
   }
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }
@@ -113,6 +116,7 @@ resource "google_managed_kafka_connector" "{{$.PrimaryResourceId}}" {
     minimum_backoff = "60s"
     maximum_backoff = "1800s"
   }
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }

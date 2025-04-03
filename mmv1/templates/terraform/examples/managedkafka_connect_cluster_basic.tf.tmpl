@@ -46,6 +46,7 @@ resource "google_managed_kafka_cluster" "gmk_cluster" {
       }
     }
   }
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }
@@ -71,6 +72,7 @@ resource "google_managed_kafka_connect_cluster" "{{$.PrimaryResourceId}}" {
   labels = {
     key = "value"
   }
+  depends_on = [google_project_service.managedkafka]
 
   provider = google-beta
 }
