@@ -7,16 +7,21 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
+	"github.com/hashicorp/terraform-provider-google/google/fwresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/googleapi"
 )
@@ -101,33 +106,28 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 			if opt.Body != nil {
 				err := json.NewEncoder(&buf).Encode(opt.Body)
 				if err != nil {
-					diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
-					return nil
+					return err
 				}
 			}
 
 			u, err := transport_tpg.AddQueryParams(opt.RawURL, map[string]string{"alt": "json"})
 			if err != nil {
-				diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
-				return nil
+				return err
 			}
 			req, err := http.NewRequest(opt.Method, u, &buf)
 			if err != nil {
-				diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
-				return nil
+				return err
 			}
 
 			req.Header = reqHeaders
 			res, err = opt.Config.Client.Do(req)
 			if err != nil {
-				diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
-				return nil
+				return err
 			}
 
 			if err := googleapi.CheckResponse(res); err != nil {
 				googleapi.CloseBody(res)
-				diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
-				return nil
+				return err
 			}
 
 			return nil
@@ -137,12 +137,12 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 		ErrorAbortPredicates: opt.ErrorAbortPredicates,
 	})
 	if err != nil {
-		diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
+		diags.AddError("Error when sending HTTP request: ", err.Error())
 		return nil
 	}
 
 	if res == nil {
-		diags.AddError("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/hashicorp/terraform-provider-google/issues.")
+		diags.AddError("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/hashicorp/terraform-provider-google/issues.", "")
 		return nil
 	}
 
@@ -156,15 +156,22 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 	}
 	result := make(map[string]interface{})
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		diags.AddError(fmt.Sprintf("Error when sending HTTP request %s", resource), err.Error())
+		diags.AddError("Error when sending HTTP request: ", err.Error())
 		return nil
 	}
 
 	return result
 }
 
-func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, data interface{}, config *transport_tpg.Config, linkTmpl string) (string) {
-	return ReplaceVarsRecursive(ctx, req, resp, data, config, linkTmpl, false, 0)
+type DefaultVars struct {
+	BillingProject 		types.String
+	Project				types.String
+	Region				types.String
+	Zone				types.String
+}
+
+func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) (string) {
+	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, false, 0)
 }
 
 // relaceVarsForId shortens variables by running them through GetResourceNameFromSelfLink
@@ -175,23 +182,23 @@ func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, 
 // access_policy: accessPolicies/foo
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
-func ReplaceVarsForId(ctx context.Context, req interface{}, diags *diag.Diagnostics, data interface{}, config *transport_tpg.Config, linkTmpl string) (string) {
-	return ReplaceVarsRecursive(ctx, req, resp, data, config, linkTmpl, true, 0)
+func ReplaceVarsForId(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) (string) {
+	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, true, 0)
 }
 
 // ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
-func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data interface{}, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string) {
+func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string) {
 	if depth > 10 {
 		diags.AddError("url building error", "Recursive substitution detected.")
 	}
 
 	// https://github.com/google/re2/wiki/Syntax
 	re := regexp.MustCompile("{{([%[:word:]]+)}}")
-	f := BuildReplacementFunc(ctx, req, diags, data, config, linkTmpl, shorten)
-	if resp.Diagnostics.HasError() {
-		return
+	f := BuildReplacementFunc(ctx, re, req, diags, data, config, linkTmpl, shorten)
+	if diags.HasError() {
+		return ""
 	}
 	final := re.ReplaceAllStringFunc(linkTmpl, f)
 
@@ -205,14 +212,14 @@ func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diag
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
-func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{}, diags *diag.Diagnostics, data interface{}, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string, error) {
-	var project, projectID, region, zone string
-	var err error
+func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string) {
+	var project, region, zone string
+	var projectID types.String
 
 	if strings.Contains(linkTmpl, "{{project}}") {
-		project, err = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags)
+		project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
 		if diags.HasError() {
-			return
+			return nil
 		}
 		if shorten {
 			project = strings.TrimPrefix(project, "projects/")
@@ -221,45 +228,81 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
 		switch req.(type) {
-			case resource.CreateRequest || resource.UpdateRequest:
-		 		diagInfo := req.Plan.GetAttribute(ctx, path.Root("project_id"), projectID)
-			    diags.Append(diagsInfo...)
+			case resource.CreateRequest:
+				pReq := req.(resource.CreateRequest)
+		 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			    diags.Append(diagInfo...)
 			    if diags.HasError() {
-			        return
+			        return nil
 			    }
-			    if !pid {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags)
+			    if projectID.ValueString() != "" {
+	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
 					if diags.HasError() {
-						return
+						return nil
 					}
 			    }
 				if shorten {
 					project = strings.TrimPrefix(project, "projects/")
-					projectID = strings.TrimPrefix(projectID, "projects/")
+					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
 				}
-			case resource.ReadRequest || resource.DeleteRequest:
-		 		diagInfo := req.State.GetAttribute(ctx, path.Root("project_id"), projectID)
-			    diags.Append(diagsInfo...)
+			case resource.UpdateRequest:
+				pReq := req.(resource.UpdateRequest)
+		 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			    diags.Append(diagInfo...)
 			    if diags.HasError() {
-			        return
+			        return nil
 			    }
-			    if !pid {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags)
+			    if projectID.ValueString() != "" {
+	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
 					if diags.HasError() {
-						return
+						return nil
 					}
 			    }
 				if shorten {
 					project = strings.TrimPrefix(project, "projects/")
-					projectID = strings.TrimPrefix(projectID, "projects/")
+					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
+				}
+			case resource.ReadRequest:
+				sReq := req.(resource.ReadRequest)
+		 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			    diags.Append(diagInfo...)
+			    if diags.HasError() {
+			        return nil
+			    }
+			    if projectID.ValueString() != "" {
+	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
+					if diags.HasError() {
+						return nil
+					}
+			    }
+				if shorten {
+					project = strings.TrimPrefix(project, "projects/")
+					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
+				}
+			case resource.DeleteRequest:
+				sReq := req.(resource.DeleteRequest)
+		 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+			    diags.Append(diagInfo...)
+			    if diags.HasError() {
+			        return nil
+			    }
+			    if projectID.ValueString() != "" {
+	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
+					if diags.HasError() {
+						return nil
+					}
+			    }
+				if shorten {
+					project = strings.TrimPrefix(project, "projects/")
+					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
 				}
 		}
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
- 		region = fwresource.GetRegionFramework(data.Region, types.StringValue(config.Region), diags)
+ 		region = fwresource.GetRegionFramework(data.Region, types.StringValue(config.Region), diags).ValueString()
 		if diags.HasError() {
-			return
+			return nil
 	    }
 		if shorten {
 			region = strings.TrimPrefix(region, "regions/")
@@ -267,9 +310,9 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
- 		zone = fwresource.GetRegionFramework(data.Zone, types.StringValue(config.Zone), diags)
+ 		zone = fwresource.GetRegionFramework(data.Zone, types.StringValue(config.Zone), diags).ValueString()
 		if diags.HasError() {
-			return
+			return nil
 	    }
 		if shorten {
 			zone = strings.TrimPrefix(region, "zones/")
@@ -283,8 +326,8 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			return project
 		}
 		if m == "project_id_or_project" {
-			if projectID != "" {
-				return projectID
+			if projectID.ValueString() != "" {
+				return projectID.ValueString()
 			}
 			return project
 		}
@@ -295,18 +338,116 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			return zone
 		}
 		if string(m[0]) == "%" {
-			v, ok := d.GetOkExists(m[1:])
-			if ok {
-				return url.PathEscape(fmt.Sprintf("%v", v))
+			var v types.String
+			switch req.(type) {
+				case resource.CreateRequest:
+					pReq := req.(resource.CreateRequest)
+			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.UpdateRequest:
+					pReq := req.(resource.UpdateRequest)
+			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.ReadRequest:
+					sReq := req.(resource.ReadRequest)
+			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.DeleteRequest:
+					sReq := req.(resource.DeleteRequest)
+			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
 			}
 		} else {
-			v, ok := d.GetOkExists(m)
-			if ok {
-				if shorten {
-					return GetResourceNameFromSelfLink(fmt.Sprintf("%v", v))
-				} else {
-					return fmt.Sprintf("%v", v)
-				}
+			var v types.String
+			switch req.(type) {
+				case resource.CreateRequest:
+					pReq := req.(resource.CreateRequest)
+			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.UpdateRequest:
+					pReq := req.(resource.UpdateRequest)
+			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.ReadRequest:
+					sReq := req.(resource.ReadRequest)
+			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
+				case resource.DeleteRequest:
+					sReq := req.(resource.DeleteRequest)
+			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m"), &v)
+				    diags.Append(diagInfo...)
+				    if !diags.HasError() {
+					    if v.ValueString() != "" {
+							if shorten {
+								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+							} else {
+								return fmt.Sprintf("%v", v.ValueString())
+							}
+						}
+				    }
 			}
 		}
 
@@ -320,5 +461,5 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 		return ""
 	}
 
-	return f, nil
+	return f
 }
